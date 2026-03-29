@@ -22,7 +22,7 @@
     <PlanificadorGraficoCategoria v-if="showChart" />
 
     <!-- Expense List -->
-    <PlanificadorListaGastosPlaneados />
+    <PlanificadorListaGastosPlaneados @editar="editarGasto" />
 
     <!-- FAB - Floating Action Button -->
     <button
@@ -37,8 +37,9 @@
     <!-- Form Modal -->
     <PlanificadorFormGastoPlaneado
       v-if="showForm"
-      @close="showForm = false"
-      @saved="showForm = false"
+      :gasto-editar="gastoEditando"
+      @close="cerrarForm"
+      @saved="cerrarForm"
     />
   </div>
 </template>
@@ -48,6 +49,17 @@ const { fetchPlan, fetchCategorias } = usePlanificador()
 
 const showForm = ref(false)
 const showChart = ref(false)
+const gastoEditando = ref(null)
+
+function editarGasto(gasto) {
+  gastoEditando.value = gasto
+  showForm.value = true
+}
+
+function cerrarForm() {
+  showForm.value = false
+  gastoEditando.value = null
+}
 
 onMounted(async () => {
   await Promise.all([fetchPlan(), fetchCategorias()])

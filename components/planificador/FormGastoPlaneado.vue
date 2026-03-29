@@ -13,7 +13,7 @@
 
       <!-- Header -->
       <div class="flex items-center justify-between px-5 pb-4">
-        <h2 class="text-lg font-semibold text-white">Nuevo gasto planificado</h2>
+        <h2 class="text-lg font-semibold text-white">{{ modoEdicion ? 'Editar gasto planificado' : 'Nuevo gasto planificado' }}</h2>
         <button class="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center text-gray-400" @click="$emit('close')">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -147,7 +147,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
-          {{ saving ? 'Guardando...' : 'Agregar gasto planificado' }}
+          {{ saving ? 'Guardando...' : modoEdicion ? 'Guardar cambios' : 'Agregar gasto planificado' }}
         </button>
       </div>
     </div>
@@ -155,9 +155,15 @@
 </template>
 
 <script setup>
+const props = defineProps({
+  gastoEditar: { type: Object, default: null },
+})
+
 const emit = defineEmits(['close', 'saved'])
 
-const { categorias, createGastoPlaneado, mesActual, anioActual, nombreMes, diasEnMes } = usePlanificador()
+const { categorias, createGastoPlaneado, updateGastoPlaneado, mesActual, anioActual, nombreMes, diasEnMes } = usePlanificador()
+
+const modoEdicion = computed(() => !!props.gastoEditar)
 
 const totalDias = computed(() => diasEnMes())
 const primerDiaOffset = computed(() => {
@@ -166,13 +172,21 @@ const primerDiaOffset = computed(() => {
 })
 
 const hoy = new Date()
+
+function getDiaInicial() {
+  if (props.gastoEditar?.fechaProbablePago) {
+    return new Date(props.gastoEditar.fechaProbablePago + 'T00:00:00').getDate()
+  }
+  return (mesActual.value === hoy.getMonth() + 1 && anioActual.value === hoy.getFullYear()) ? hoy.getDate() : 1
+}
+
 const form = reactive({
-  concepto: '',
-  categoriaId: null,
-  montoEstimado: null,
-  diaSeleccionado: (mesActual.value === hoy.getMonth() + 1 && anioActual.value === hoy.getFullYear()) ? hoy.getDate() : 1,
-  esRecurrente: false,
-  notas: '',
+  concepto: props.gastoEditar?.concepto || '',
+  categoriaId: props.gastoEditar?.categoriaId || null,
+  montoEstimado: props.gastoEditar?.montoEstimado || null,
+  diaSeleccionado: getDiaInicial(),
+  esRecurrente: props.gastoEditar?.esRecurrente || false,
+  notas: props.gastoEditar?.notas || '',
 })
 
 const saving = ref(false)
@@ -224,14 +238,20 @@ async function guardar() {
 
   saving.value = true
   try {
-    await createGastoPlaneado({
+    const data = {
       categoriaId: form.categoriaId,
       concepto: form.concepto.trim(),
       montoEstimado: parseFloat(form.montoEstimado),
       fechaProbablePago: fecha,
       esRecurrente: form.esRecurrente,
       notas: form.notas.trim() || null,
-    })
+    }
+
+    if (modoEdicion.value) {
+      await updateGastoPlaneado(props.gastoEditar.id, data)
+    } else {
+      await createGastoPlaneado(data)
+    }
     emit('saved')
     emit('close')
   } catch (e) {

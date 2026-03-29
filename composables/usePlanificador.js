@@ -119,12 +119,11 @@ export function usePlanificador() {
 
   async function updateGastoPlaneado(id, data) {
     try {
-      const updated = await $fetch(`/api/planificador/gastos/${id}`, {
+      await $fetch(`/api/planificador/gastos/${id}`, {
         method: 'PUT',
         body: data
       })
-      const idx = gastosPlaneados.value.findIndex(g => g.id === id)
-      if (idx !== -1) gastosPlaneados.value[idx] = updated
+      await fetchPlan()
     } catch (e) {
       error.value = e.message || 'Error al actualizar gasto'
     }
