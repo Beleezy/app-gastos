@@ -51,6 +51,7 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
   montoEstimado: decimal('monto_estimado', { precision: 12, scale: 2 }).notNull(),
   fechaProbablePago: date('fecha_probable_pago').notNull(),
   esRecurrente: boolean('es_recurrente').default(false).notNull(),
+  recurrenteGrupoId: uuid('recurrente_grupo_id'),
   estado: estadoGastoPlanificado('estado').default('pendiente').notNull(),
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

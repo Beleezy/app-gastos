@@ -63,6 +63,7 @@ export default defineEventHandler(async (event) => {
       montoEstimado: gastosPlanificados.montoEstimado,
       fechaProbablePago: gastosPlanificados.fechaProbablePago,
       esRecurrente: gastosPlanificados.esRecurrente,
+      recurrenteGrupoId: gastosPlanificados.recurrenteGrupoId,
       estado: gastosPlanificados.estado,
       notas: gastosPlanificados.notas,
       createdAt: gastosPlanificados.createdAt,

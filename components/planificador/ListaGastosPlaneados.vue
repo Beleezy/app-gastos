@@ -107,6 +107,35 @@
       <!-- Bottom spacer for FAB -->
       <div class="h-16"></div>
     </div>
+
+    <!-- Confirmation modal for recurring delete -->
+    <div v-if="gastoParaEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="gastoParaEliminar = null"></div>
+      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
+        <h3 class="text-base font-semibold text-white mb-2">Eliminar gasto recurrente</h3>
+        <p class="text-sm text-gray-400 mb-5">Este gasto se repite en meses futuros. ¿Qué deseas hacer?</p>
+        <div class="space-y-2">
+          <button
+            class="w-full py-2.5 rounded-xl bg-red-500/15 text-red-400 text-sm font-medium hover:bg-red-500/25 transition-colors"
+            @click="confirmarEliminar(true)"
+          >
+            Eliminar este y todos los futuros
+          </button>
+          <button
+            class="w-full py-2.5 rounded-xl bg-primary-700 text-gray-300 text-sm font-medium hover:bg-primary-600 transition-colors"
+            @click="confirmarEliminar(false)"
+          >
+            Eliminar solo este mes
+          </button>
+          <button
+            class="w-full py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            @click="gastoParaEliminar = null"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -164,7 +193,20 @@ function formatFecha(fecha) {
   return `${dia} de ${meses[d.getMonth()]}, ${d.getFullYear()}`
 }
 
-async function eliminarGasto(gasto) {
-  await deleteGastoPlaneado(gasto.id)
+const gastoParaEliminar = ref(null)
+
+function eliminarGasto(gasto) {
+  if (gasto.esRecurrente && gasto.recurrenteGrupoId) {
+    gastoParaEliminar.value = gasto
+  } else {
+    deleteGastoPlaneado(gasto.id, false)
+  }
+}
+
+async function confirmarEliminar(incluirFuturos) {
+  const gasto = gastoParaEliminar.value
+  if (!gasto) return
+  gastoParaEliminar.value = null
+  await deleteGastoPlaneado(gasto.id, incluirFuturos)
 }
 </script>

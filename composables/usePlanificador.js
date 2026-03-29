@@ -129,9 +129,12 @@ export function usePlanificador() {
     }
   }
 
-  async function deleteGastoPlaneado(id) {
+  async function deleteGastoPlaneado(id, eliminarFuturos = false) {
     try {
-      await $fetch(`/api/planificador/gastos/${id}`, { method: 'DELETE' })
+      await $fetch(`/api/planificador/gastos/${id}`, {
+        method: 'DELETE',
+        query: eliminarFuturos ? { futuros: 'true' } : {}
+      })
       gastosPlaneados.value = gastosPlaneados.value.filter(g => g.id !== id)
     } catch (e) {
       error.value = e.message || 'Error al eliminar gasto'
