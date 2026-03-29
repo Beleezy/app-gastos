@@ -1,0 +1,36 @@
+{
+  "name": "gastos",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "node server/database/seed.js"
+  },
+  "dependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@vite-pwa/nuxt": "^1.1.1",
+    "dotenv": "^17.3.1",
+    "drizzle-orm": "^0.45.2",
+    "nuxt": "^3.21.2",
+    "postgres": "^3.4.8",
+    "vue": "^3.5.30",
+    "vue-router": "^5.0.4"
+  },
+  "version": "1.0.0",
+  "description": "Sistema de finanzas personales - PWA",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.11",
+    "drizzle-kit": "^0.31.10",
+    "tailwindcss": "^3.4.19"
+  }
+}

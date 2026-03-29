@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find C:/Users/bryan/OneDrive/Escritorio/sistemas/gastos -type f -name *)",
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(where node:*)",
+      "Bash(where npm:*)",
+      "Bash(cmd //c \"node --version\")",
+      "Bash(cmd //c \"npm --version\")",
+      "Bash(npx nuxi@latest init . --force --packageManager npm)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs:/c/Users/bryan/AppData/Roaming/npm\")",
+      "Bash(cmd.exe /c \"where node\" 2>&1)",
+      "Bash(cmd.exe /c \"node --version\")",
+      "Bash(cmd.exe /c \"npm --version\")",
+      "Bash(echo $PATH)",
+      "Bash(winget install:*)",
+      "Bash(export PATH=\"/c/Program Files/nodejs:$PATH\")",
+      "Bash(npx nuxi@latest init . --force --packageManager npm --template v3)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(cd:*)",
+      "Bash(timeout 30 npx nuxt dev --port 3000)",
+      "Bash(npx drizzle-kit:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
