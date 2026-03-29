@@ -27,7 +27,7 @@
     <!-- FAB - Floating Action Button -->
     <button
       class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 shadow-lg shadow-indigo-500/30 flex items-center justify-center transition-all active:scale-95"
-      @click="showForm = !showForm"
+      @click="showForm = true"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
@@ -35,11 +35,21 @@
     </button>
 
     <!-- Form Modal -->
-    <PlanificadorFormGastoPlaneado v-if="showForm" />
+    <PlanificadorFormGastoPlaneado
+      v-if="showForm"
+      @close="showForm = false"
+      @saved="showForm = false"
+    />
   </div>
 </template>
 
 <script setup>
+const { fetchPlan, fetchCategorias } = usePlanificador()
+
 const showForm = ref(false)
 const showChart = ref(false)
+
+onMounted(async () => {
+  await Promise.all([fetchPlan(), fetchCategorias()])
+})
 </script>
