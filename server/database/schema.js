@@ -51,6 +51,7 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
   montoEstimado: decimal('monto_estimado', { precision: 12, scale: 2 }).notNull(),
   fechaProbablePago: date('fecha_probable_pago').notNull(),
   esRecurrente: boolean('es_recurrente').default(false).notNull(),
+  recurrenteGrupoId: uuid('recurrente_grupo_id'),
   estado: estadoGastoPlanificado('estado').default('pendiente').notNull(),
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -101,7 +102,18 @@ export const deudas = pgTable('deudas', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-// ── Tabla 8: pagos_deuda ──
+// ── Tabla 8: configuraciones ──
+export const configuraciones = pgTable('configuraciones', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull().unique(),
+  presupuestoMensualDefault: decimal('presupuesto_mensual_default', { precision: 12, scale: 2 }).default('0').notNull(),
+  monedaPreferida: varchar('moneda_preferida', { length: 10 }).default('PEN').notNull(),
+  diaInicioCiclo: integer('dia_inicio_ciclo').default(1).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+// ── Tabla 9: pagos_deuda ──
 export const pagosDeuda = pgTable('pagos_deuda', {
   id: uuid('id').defaultRandom().primaryKey(),
   deudaId: uuid('deuda_id').references(() => deudas.id, { onDelete: 'cascade' }).notNull(),
