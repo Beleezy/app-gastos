@@ -22,7 +22,8 @@
       "Bash(cd:*)",
       "Bash(timeout 30 npx nuxt dev --port 3000)",
       "Bash(npx drizzle-kit:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(node -e \"const pkg = require\\(''./package.json''\\); console.log\\(JSON.stringify\\(pkg.scripts, null, 2\\)\\)\")"
     ]
   }
 }

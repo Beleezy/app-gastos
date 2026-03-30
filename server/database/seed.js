@@ -28,30 +28,31 @@ const predefinedCategories = [
 ]
 
 async function seed() {
+  console.log('Limpiando tablas...')
+  await db.delete(configuraciones)
+  await db.delete(categorias)
+  await db.delete(usuarios)
+
   console.log('Insertando categorias predefinidas...')
   for (const cat of predefinedCategories) {
-    await db.insert(categorias).values(cat).onConflictDoNothing()
+    await db.insert(categorias).values(cat)
   }
-  // Create default user and configuration
+
   console.log('Creando usuario por defecto...')
   const [user] = await db
     .insert(usuarios)
     .values({ nombre: 'Usuario', email: 'usuario@misfinanzas.app' })
-    .onConflictDoNothing()
     .returning({ id: usuarios.id })
 
-  if (user) {
-    console.log('Creando configuracion por defecto...')
-    await db
-      .insert(configuraciones)
-      .values({
-        usuarioId: user.id,
-        presupuestoMensualDefault: '3500.00',
-        monedaPreferida: 'PEN',
-        diaInicioCiclo: 1,
-      })
-      .onConflictDoNothing()
-  }
+  console.log('Creando configuracion por defecto...')
+  await db
+    .insert(configuraciones)
+    .values({
+      usuarioId: user.id,
+      presupuestoMensualDefault: '4500.00',
+      monedaPreferida: 'PEN',
+      diaInicioCiclo: 1,
+    })
 
   console.log('Seed completado.')
   await client.end()
