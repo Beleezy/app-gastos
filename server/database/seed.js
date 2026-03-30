@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import { categorias } from './schema.js'
+import { categorias, usuarios, configuraciones } from './schema.js'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -32,6 +32,27 @@ async function seed() {
   for (const cat of predefinedCategories) {
     await db.insert(categorias).values(cat).onConflictDoNothing()
   }
+  // Create default user and configuration
+  console.log('Creando usuario por defecto...')
+  const [user] = await db
+    .insert(usuarios)
+    .values({ nombre: 'Usuario', email: 'usuario@misfinanzas.app' })
+    .onConflictDoNothing()
+    .returning({ id: usuarios.id })
+
+  if (user) {
+    console.log('Creando configuracion por defecto...')
+    await db
+      .insert(configuraciones)
+      .values({
+        usuarioId: user.id,
+        presupuestoMensualDefault: '3500.00',
+        monedaPreferida: 'PEN',
+        diaInicioCiclo: 1,
+      })
+      .onConflictDoNothing()
+  }
+
   console.log('Seed completado.')
   await client.end()
   process.exit(0)
