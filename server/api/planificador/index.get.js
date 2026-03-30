@@ -22,7 +22,6 @@ export default defineEventHandler(async (event) => {
 
   // Auto-create plan if not found
   if (!plan) {
-    // Get default budget from configuraciones
     const [config] = await db
       .select()
       .from(configuraciones)
@@ -31,16 +30,18 @@ export default defineEventHandler(async (event) => {
 
     const presupuesto = config?.presupuestoMensualDefault || '0'
 
-    const [newPlan] = await db
-      .insert(planesMensuales)
-      .values({ usuarioId, mes, anio, montoPresupuesto: presupuesto })
-      .onConflictDoNothing()
-      .returning()
+    try {
+      const [newPlan] = await db
+        .insert(planesMensuales)
+        .values({ usuarioId, mes, anio, montoPresupuesto: presupuesto })
+        .returning()
 
-    // Handle race condition: if another request already inserted, fetch it
-    if (newPlan) {
-      plan = newPlan
-    } else {
+      if (newPlan) plan = newPlan
+    } catch {
+      // Unique constraint violation - created concurrently
+    }
+
+    if (!plan) {
       [plan] = await db
         .select()
         .from(planesMensuales)

@@ -9,7 +9,8 @@ const MESES_FUTUROS = 12
  * Gets or creates a monthly plan for a given user/month/year
  */
 async function obtenerOCrearPlan(usuarioId, mes, anio) {
-  let [plan] = await db
+  // Always try to find first
+  const buscar = () => db
     .select()
     .from(planesMensuales)
     .where(and(
@@ -19,8 +20,10 @@ async function obtenerOCrearPlan(usuarioId, mes, anio) {
     ))
     .limit(1)
 
+  let [plan] = await buscar()
   if (plan) return plan
 
+  // Get default budget
   const [config] = await db
     .select()
     .from(configuraciones)
@@ -29,26 +32,21 @@ async function obtenerOCrearPlan(usuarioId, mes, anio) {
 
   const presupuesto = config?.presupuestoMensualDefault || '0'
 
-  const [newPlan] = await db
-    .insert(planesMensuales)
-    .values({ usuarioId, mes, anio, montoPresupuesto: presupuesto })
-    .onConflictDoNothing()
-    .returning()
+  // Try to insert, catch unique constraint violation
+  try {
+    const [newPlan] = await db
+      .insert(planesMensuales)
+      .values({ usuarioId, mes, anio, montoPresupuesto: presupuesto })
+      .returning()
 
-  if (newPlan) return newPlan
+    if (newPlan) return newPlan
+  } catch {
+    // Unique constraint violation - plan was created concurrently
+  }
 
-  // Race condition fallback
-  [plan] = await db
-    .select()
-    .from(planesMensuales)
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      eq(planesMensuales.mes, mes),
-      eq(planesMensuales.anio, anio)
-    ))
-    .limit(1)
-
-  return plan
+  // Fallback: re-fetch the existing plan
+  const [existing] = await buscar()
+  return existing
 }
 
 /**
@@ -93,6 +91,8 @@ export async function replicarGastoRecurrente(usuarioId, gasto, grupoId) {
 
   for (const { mes, anio } of futuros) {
     const plan = await obtenerOCrearPlan(usuarioId, mes, anio)
+    if (!plan?.id) continue
+
     const diaAjustado = ajustarDia(diaOriginal, mes, anio)
     const fecha = `${anio}-${String(mes).padStart(2, '0')}-${String(diaAjustado).padStart(2, '0')}`
 
