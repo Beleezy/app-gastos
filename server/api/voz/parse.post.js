@@ -81,7 +81,8 @@ Reglas:
 - Los montos deben ser números decimales (ej: 2.50, no "dos soles con cincuenta").
 - Si no puedes interpretar algo, usa concepto "Gasto no especificado" y categoría "Otros".`
 
-  const geminiModel = runtimeConfig.geminiModel || 'gemini-2.5-flash-lite'
+  const geminiModelPrimary = runtimeConfig.geminiModel || 'gemini-2.5-flash-lite'
+  const geminiModelFallback = 'gemini-2.5-flash'
   const geminiTemperature = parseFloat(runtimeConfig.geminiTemperature) || 0.2
   const geminiMaxTokens = parseInt(runtimeConfig.geminiMaxTokens) || 1024
 
@@ -148,8 +149,10 @@ Reglas:
 
   const MAX_RETRIES = 3
   const RETRY_DELAYS = [0, 1000, 2000]
+  const modelsToTry = [geminiModelPrimary, geminiModelFallback]
   let lastError = null
 
+  for (const currentModel of modelsToTry) {
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
     if (attempt > 0) {
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]))
@@ -157,7 +160,7 @@ Reglas:
 
     try {
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${currentModel}:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -182,7 +185,7 @@ Reglas:
 
       if (!response.ok) {
         const error = await response.text()
-        console.error(`Error de Gemini API (intento ${attempt + 1}/${MAX_RETRIES}):`, error)
+        console.error(`Error de Gemini API [${currentModel}] (intento ${attempt + 1}/${MAX_RETRIES}):`, error)
         lastError = error
         continue
       }
@@ -199,7 +202,7 @@ Reglas:
       try {
         parsed = JSON.parse(text)
       } catch (jsonErr) {
-        console.error(`JSON inválido del LLM (intento ${attempt + 1}/${MAX_RETRIES}):`, text)
+        console.error(`JSON inválido del LLM [${currentModel}] (intento ${attempt + 1}/${MAX_RETRIES}):`, text)
         lastError = 'La respuesta del LLM no es JSON válido'
         continue
       }
@@ -208,7 +211,7 @@ Reglas:
       if (modo === 'deudas') {
         // Modo deudas: espera { deudas: [...], pagos: [...] }
         if (!parsed.deudas && !parsed.pagos) {
-          console.error(`Estructura inesperada del LLM en modo deudas (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
+          console.error(`Estructura inesperada del LLM [${currentModel}] en modo deudas (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
           lastError = 'La respuesta del LLM no tiene el formato esperado'
           continue
         }
@@ -240,7 +243,7 @@ Reglas:
 
       // Modo gastos: espera { gastos: [...] }
       if (!parsed.gastos || !Array.isArray(parsed.gastos)) {
-        console.error(`Estructura inesperada del LLM (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
+        console.error(`Estructura inesperada del LLM [${currentModel}] (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
         lastError = 'La respuesta del LLM no tiene el formato esperado'
         continue
       }
@@ -261,10 +264,12 @@ Reglas:
 
       return parsed
     } catch (e) {
-      console.error(`Error en intento ${attempt + 1}/${MAX_RETRIES}:`, e.message)
+      console.error(`Error [${currentModel}] en intento ${attempt + 1}/${MAX_RETRIES}:`, e.message)
       lastError = e.message
     }
   }
+  console.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos, probando siguiente modelo...`)
+  }
 
-  throw createError({ statusCode: 500, message: `Error tras ${MAX_RETRIES} intentos: ${lastError}` })
+  throw createError({ statusCode: 500, message: `Error tras agotar todos los modelos (${modelsToTry.join(', ')}): ${lastError}` })
 })
