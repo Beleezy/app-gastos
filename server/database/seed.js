@@ -1,7 +1,17 @@
 import 'dotenv/config'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import { categorias, usuarios, configuraciones } from './schema.js'
+import {
+  categorias,
+  usuarios,
+  configuraciones,
+  pagosDeuda,
+  deudas,
+  personasEntidades,
+  gastosPlanificados,
+  planesMensuales,
+  gastos,
+} from './schema.js'
 
 const connectionString = process.env.DATABASE_URL
 
@@ -29,6 +39,13 @@ const predefinedCategories = [
 
 async function seed() {
   console.log('Limpiando tablas...')
+  // Orden de eliminación respetando relaciones (dependencias primero)
+  await db.delete(pagosDeuda)
+  await db.delete(deudas)
+  await db.delete(personasEntidades)
+  await db.delete(gastosPlanificados)
+  await db.delete(planesMensuales)
+  await db.delete(gastos)
   await db.delete(configuraciones)
   await db.delete(categorias)
   await db.delete(usuarios)
