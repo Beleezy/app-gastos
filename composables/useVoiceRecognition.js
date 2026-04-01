@@ -39,26 +39,16 @@ export function useVoiceRecognition() {
     isSupported.value = true
     recognition = new SpeechRecognition()
     recognition.lang = currencyLocale.value
-    recognition.continuous = true
+    recognition.continuous = false
     recognition.interimResults = true
     recognition.maxAlternatives = 1
 
     recognition.onresult = (event) => {
-      let finalTranscript = ''
-      let lastInterim = ''
+      // Tomar solo el último resultado (el más completo)
+      const lastResult = event.results[event.results.length - 1]
+      const currentText = lastResult[0].transcript
 
-      for (let i = 0; i < event.results.length; i++) {
-        const result = event.results[i]
-        if (result.isFinal) {
-          finalTranscript += result[0].transcript
-        } else {
-          // Solo quedarse con el último resultado interim (el más completo)
-          lastInterim = result[0].transcript
-        }
-      }
-
-      const newText = (finalTranscript + (lastInterim ? ' ' + lastInterim : '')).trim()
-      transcript.value = baseTranscript ? (baseTranscript + ' ' + newText).trim() : newText
+      transcript.value = baseTranscript ? (baseTranscript + ' ' + currentText).trim() : currentText
 
       // Reset inactivity timer on every new speech result
       resetInactivityTimer()
