@@ -2,6 +2,7 @@ export function useDeudas() {
   const personas = useState('deudas-personas', () => [])
   const deudasList = useState('deudas-list', () => [])
   const pagos = useState('deudas-pagos', () => [])
+  const pagosPersona = useState('deudas-pagos-persona', () => [])
   const resumen = useState('deudas-resumen', () => ({
     totalMeDeben: 0,
     totalYoDebo: 0,
@@ -89,6 +90,14 @@ export function useDeudas() {
     }
   }
 
+  async function fetchPagosPersona(personaId) {
+    try {
+      pagosPersona.value = await $fetch(`/api/deudas/personas/${personaId}/pagos-historial`)
+    } catch (e) {
+      error.value = e.message || 'Error al cargar historial de pagos'
+    }
+  }
+
   async function createDeuda(data) {
     try {
       await $fetch('/api/deudas', {
@@ -145,6 +154,9 @@ export function useDeudas() {
         }
       }
       await Promise.all([fetchResumen(), fetchPersonas()])
+      if (personaSeleccionada.value) {
+        await fetchPagosPersona(personaSeleccionada.value.id)
+      }
       return result
     } catch (e) {
       error.value = e.message || 'Error al registrar pago'
@@ -191,6 +203,7 @@ export function useDeudas() {
     personaSeleccionada.value = null
     deudasList.value = []
     pagos.value = []
+    pagosPersona.value = []
   }
 
   function cambiarTab(tab) {
@@ -200,13 +213,13 @@ export function useDeudas() {
   }
 
   return {
-    personas, deudasList, pagos, resumen,
+    personas, deudasList, pagos, pagosPersona, resumen,
     isLoading, error,
     tabActual, personaSeleccionada,
     personasFiltradas, deudasPersona,
     deudasActivasPersona, deudasSaldadasPersona,
     totalPendientePersona,
-    fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos,
+    fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona,
     createDeuda, updateDeuda, deleteDeuda,
     registrarPago, archivarDeuda,
     createPersona, deletePersona,

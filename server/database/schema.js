@@ -96,6 +96,7 @@ export const deudas = pgTable('deudas', {
   montoOriginal: decimal('monto_original', { precision: 12, scale: 2 }).notNull(),
   montoPendiente: decimal('monto_pendiente', { precision: 12, scale: 2 }).notNull(),
   fechaCreacion: date('fecha_creacion').notNull(),
+  fechaPago: date('fecha_pago'),
   estado: estadoDeuda('estado').default('pendiente').notNull(),
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -106,9 +107,12 @@ export const deudas = pgTable('deudas', {
 export const configuraciones = pgTable('configuraciones', {
   id: uuid('id').defaultRandom().primaryKey(),
   usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull().unique(),
+  nombre: varchar('nombre', { length: 100 }).default('').notNull(),
   presupuestoMensualDefault: decimal('presupuesto_mensual_default', { precision: 12, scale: 2 }).default('0').notNull(),
   monedaPreferida: varchar('moneda_preferida', { length: 10 }).default('PEN').notNull(),
   diaInicioCiclo: integer('dia_inicio_ciclo').default(1).notNull(),
+  zonaHoraria: varchar('zona_horaria', { length: 50 }).default('America/Lima').notNull(),
+  locale: varchar('locale', { length: 10 }).default('es-PE').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

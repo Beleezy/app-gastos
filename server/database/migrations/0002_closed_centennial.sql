@@ -1,0 +1,2 @@
+ALTER TABLE "configuraciones" ADD COLUMN "zona_horaria" varchar(50) DEFAULT 'America/Lima' NOT NULL;--> statement-breakpoint
+ALTER TABLE "configuraciones" ADD COLUMN "locale" varchar(10) DEFAULT 'es-PE' NOT NULL;

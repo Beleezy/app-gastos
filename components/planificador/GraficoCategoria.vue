@@ -29,7 +29,7 @@
           <!-- Center text -->
           <div class="absolute inset-0 flex flex-col items-center justify-center">
             <span class="text-xs text-gray-500">Total</span>
-            <span class="text-sm font-bold text-white">S/ {{ formatMonto(resumen.totalPlanificado) }}</span>
+            <span class="text-sm font-bold text-white">{{ currencySymbol }} {{ formatMonto(resumen.totalPlanificado) }}</span>
           </div>
         </div>
 
@@ -50,8 +50,5 @@
 
 <script setup>
 const { datosGrafico, resumen } = usePlanificador()
-
-function formatMonto(valor) {
-  return Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
+const { currencySymbol, formatMonto } = useCurrency()
 </script>

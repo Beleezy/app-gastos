@@ -6,6 +6,7 @@ const MESES = [
 export function usePlanificador() {
   const plan = useState('planificador-plan', () => null)
   const gastosPlaneados = useState('planificador-gastos', () => [])
+  const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
   const categorias = useState('planificador-categorias', () => [])
   const isLoading = ref(false)
   const error = ref(null)
@@ -47,12 +48,17 @@ export function usePlanificador() {
           color: g.categoriaColor || '#6b7280',
           gastos: [],
           total: 0,
+          totalReal: gastosRealesPorCategoria.value[key] || 0,
         }
       }
       map[key].gastos.push(g)
       map[key].total += g.montoEstimado
     }
     return Object.values(map).sort((a, b) => b.total - a.total)
+  })
+
+  const totalGastoReal = computed(() => {
+    return Object.values(gastosRealesPorCategoria.value).reduce((s, v) => s + v, 0)
   })
 
   const datosGrafico = computed(() => {
@@ -83,6 +89,7 @@ export function usePlanificador() {
       })
       plan.value = data.plan
       gastosPlaneados.value = data.gastos
+      gastosRealesPorCategoria.value = data.gastosRealesPorCategoria || {}
     } catch (e) {
       error.value = e.message || 'Error al cargar el plan'
     } finally {
@@ -176,12 +183,32 @@ export function usePlanificador() {
     return new Date(anioActual.value, mesActual.value, 0).getDate()
   }
 
+  async function duplicarMes(mesOrigen, anioOrigen) {
+    try {
+      const result = await $fetch('/api/planificador/duplicar', {
+        method: 'POST',
+        body: {
+          mesOrigen,
+          anioOrigen,
+          mesDestino: mesActual.value,
+          anioDestino: anioActual.value,
+        }
+      })
+      await fetchPlan()
+      return result
+    } catch (e) {
+      error.value = e.data?.message || e.message || 'Error al duplicar mes'
+      throw e
+    }
+  }
+
   return {
-    plan, gastosPlaneados, categorias, isLoading, error,
+    plan, gastosPlaneados, gastosRealesPorCategoria, categorias, isLoading, error,
     mesActual, anioActual, nombreMes, esHoy,
-    resumen, gastosPorCategoria, datosGrafico,
+    resumen, gastosPorCategoria, datosGrafico, totalGastoReal,
     fetchPlan, updatePresupuesto,
     createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado,
     toggleEstado, fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,
+    duplicarMes,
   }
 }

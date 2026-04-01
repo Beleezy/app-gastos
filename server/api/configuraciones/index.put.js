@@ -8,9 +8,12 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioId()
 
   const updateData = {}
+  if (body.nombre !== undefined) updateData.nombre = String(body.nombre).slice(0, 100)
   if (body.presupuestoMensualDefault !== undefined) updateData.presupuestoMensualDefault = String(body.presupuestoMensualDefault)
   if (body.monedaPreferida !== undefined) updateData.monedaPreferida = body.monedaPreferida
   if (body.diaInicioCiclo !== undefined) updateData.diaInicioCiclo = body.diaInicioCiclo
+  if (body.zonaHoraria !== undefined) updateData.zonaHoraria = String(body.zonaHoraria).slice(0, 50)
+  if (body.locale !== undefined) updateData.locale = String(body.locale).slice(0, 10)
   updateData.updatedAt = new Date()
 
   const [updated] = await db

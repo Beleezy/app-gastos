@@ -18,7 +18,7 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#1a1a2e' },
       ],
       link: [
-        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
@@ -71,11 +71,13 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL || '',
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+    geminiApiKey: process.env.GEMINI_API_KEY || '',
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+    geminiTemperature: process.env.GEMINI_TEMPERATURE || '0.2',
+    geminiMaxTokens: process.env.GEMINI_MAX_TOKENS || '1024',
     public: {
       appName: 'Mis Finanzas',
-      defaultCurrency: 'PEN',
-      currencySymbol: 'S/',
+      appVersion: '0.3',
     },
   },
 })

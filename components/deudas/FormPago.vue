@@ -29,12 +29,12 @@
           <div class="flex items-center justify-between">
             <div>
               <p class="text-xs text-gray-500">Original</p>
-              <p class="text-sm font-medium text-gray-400">S/ {{ formatMonto(deuda.montoOriginal) }}</p>
+              <p class="text-sm font-medium text-gray-400">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
             </div>
             <div class="text-right">
               <p class="text-xs text-gray-500">Pendiente</p>
               <p class="text-sm font-semibold" :class="deuda.tipoDeuda === 'me_deben' ? 'text-emerald-400' : 'text-red-400'">
-                S/ {{ formatMonto(deuda.montoPendiente) }}
+                {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
               </p>
             </div>
           </div>
@@ -44,14 +44,14 @@
         <div>
           <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto del pago</label>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">S/</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
             <input
               v-model="form.monto"
               type="number"
               step="0.01"
               :max="deuda.montoPendiente"
               placeholder="0.00"
-              class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+              class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
           <!-- Quick amount buttons -->
@@ -60,7 +60,7 @@
               class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
               @click="form.monto = deuda.montoPendiente"
             >
-              Total (S/ {{ formatMonto(deuda.montoPendiente) }})
+              Total ({{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }})
             </button>
             <button
               v-if="deuda.montoPendiente > 1"
@@ -78,7 +78,7 @@
           <input
             v-model="form.fecha"
             type="date"
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           />
         </div>
 
@@ -90,7 +90,7 @@
               v-for="metodo in metodos"
               :key="metodo"
               class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              :class="form.metodoPago === metodo ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
+              :class="form.metodoPago === metodo ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
               @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
             >
               {{ metodo }}
@@ -105,7 +105,7 @@
             v-model="form.notas"
             rows="2"
             placeholder="Agregar notas del pago..."
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
           ></textarea>
         </div>
 
@@ -115,7 +115,7 @@
         <!-- Submit Button -->
         <button
           class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-          :class="saving ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700'"
+          :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
           :disabled="saving"
           @click="guardar"
         >
@@ -151,9 +151,7 @@ const form = reactive({
 const saving = ref(false)
 const errorMsg = ref('')
 
-function formatMonto(valor) {
-  return Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
+const { currencySymbol, formatMonto } = useCurrency()
 
 async function guardar() {
   errorMsg.value = ''

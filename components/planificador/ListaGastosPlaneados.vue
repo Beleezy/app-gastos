@@ -1,12 +1,36 @@
 <template>
   <div class="px-4 py-3">
+    <!-- Search + Sort -->
+    <div class="flex items-center gap-2 mb-3">
+      <div class="relative flex-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <input
+          v-model="busqueda"
+          type="text"
+          placeholder="Buscar concepto..."
+          class="w-full pl-9 pr-3 py-2 rounded-xl bg-primary-800 border border-primary-700/50 text-white placeholder-gray-600 text-xs focus:outline-none focus:border-blue-500 transition-colors"
+        />
+      </div>
+      <button
+        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-800 border border-primary-700/50 text-gray-400 text-xs hover:bg-primary-700 transition-colors"
+        @click="ciclarOrden"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
+        {{ ordenLabel }}
+      </button>
+    </div>
+
     <!-- Filters -->
     <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
       <button
         v-for="f in filtros"
         :key="f.value"
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="filtroActual === f.value ? 'bg-indigo-500 text-white' : 'bg-primary-800 text-gray-400'"
+        :class="filtroActual === f.value ? 'bg-blue-500 text-white' : 'bg-primary-800 text-gray-400'"
         @click="filtroActual = f.value"
       >
         {{ f.label }}
@@ -41,10 +65,25 @@
     <div v-else>
       <div v-for="cat in categoriasFiltered" :key="cat.categoriaId" class="mb-5">
         <!-- Category Header -->
-        <div class="flex items-center gap-2 mb-2.5">
-          <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: cat.color }"></span>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ cat.nombre }}</h3>
-          <span class="text-xs text-gray-500 ml-auto">S/ {{ formatMonto(cat.total) }}</span>
+        <div class="mb-2.5">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: cat.color }"></span>
+            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ cat.nombre }}</h3>
+            <span class="text-xs text-gray-500 ml-auto">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
+          </div>
+          <!-- Real vs Planned mini bar -->
+          <div v-if="cat.totalReal > 0" class="flex items-center gap-2 ml-3.5">
+            <div class="flex-1 h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                :class="cat.totalReal > cat.total ? 'bg-red-400' : 'bg-emerald-400'"
+                :style="{ width: Math.min((cat.totalReal / cat.total) * 100, 100) + '%' }"
+              ></div>
+            </div>
+            <span class="text-[10px] shrink-0" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
+              {{ currencySymbol }} {{ formatMonto(cat.totalReal) }} real
+            </span>
+          </div>
         </div>
 
         <!-- Expense Items -->
@@ -65,15 +104,15 @@
                 <p class="text-sm font-medium text-white">{{ gasto.concepto }}</p>
                 <p class="text-xs text-gray-500 mt-0.5">{{ formatFecha(gasto.fechaProbablePago) }}</p>
                 <div v-if="gasto.esRecurrente" class="flex items-center gap-1 mt-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  <span class="text-[10px] text-indigo-400">Recurrente</span>
+                  <span class="text-[10px] text-blue-400">Recurrente</span>
                 </div>
               </div>
             </div>
             <div class="text-right">
-              <p class="text-sm font-semibold text-white">S/ {{ formatMonto(gasto.montoEstimado) }}</p>
+              <p class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(gasto.montoEstimado) }}</p>
               <button
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"
                 :class="gasto.estado === 'pagado'
@@ -88,7 +127,7 @@
 
           <!-- Actions -->
           <div class="flex justify-end gap-4 mt-2 pt-2 border-t border-primary-700/20">
-            <button class="text-xs text-gray-600 hover:text-indigo-400 transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
+            <button class="text-xs text-gray-600 hover:text-blue-400 transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
@@ -145,6 +184,33 @@ const emit = defineEmits(['editar'])
 const { gastosPorCategoria, isLoading, toggleEstado, deleteGastoPlaneado } = usePlanificador()
 
 const filtroActual = ref('todos')
+const busqueda = ref('')
+const ordenActual = ref('fecha')
+
+const ordenes = [
+  { value: 'fecha', label: 'Fecha' },
+  { value: 'monto', label: 'Monto' },
+  { value: 'nombre', label: 'Nombre' },
+]
+
+const ordenLabel = computed(() => ordenes.find(o => o.value === ordenActual.value)?.label || 'Fecha')
+
+function ciclarOrden() {
+  const idx = ordenes.findIndex(o => o.value === ordenActual.value)
+  ordenActual.value = ordenes[(idx + 1) % ordenes.length].value
+}
+
+function ordenarGastos(gastos) {
+  const sorted = [...gastos]
+  if (ordenActual.value === 'monto') {
+    sorted.sort((a, b) => b.montoEstimado - a.montoEstimado)
+  } else if (ordenActual.value === 'nombre') {
+    sorted.sort((a, b) => a.concepto.localeCompare(b.concepto))
+  } else {
+    sorted.sort((a, b) => (a.fechaProbablePago || '').localeCompare(b.fechaProbablePago || ''))
+  }
+  return sorted
+}
 
 const filtros = [
   { value: 'todos', label: 'Todos' },
@@ -153,37 +219,34 @@ const filtros = [
 ]
 
 const categoriasFiltered = computed(() => {
-  if (filtroActual.value === 'todos') return gastosPorCategoria.value
+  const term = busqueda.value.trim().toLowerCase()
+
   return gastosPorCategoria.value
-    .map(cat => ({
-      ...cat,
-      gastos: cat.gastos.filter(g => g.estado === filtroActual.value),
-      total: cat.gastos.filter(g => g.estado === filtroActual.value).reduce((s, g) => s + g.montoEstimado, 0),
-    }))
+    .map(cat => {
+      let gastos = cat.gastos
+      if (filtroActual.value !== 'todos') {
+        gastos = gastos.filter(g => g.estado === filtroActual.value)
+      }
+      if (term) {
+        gastos = gastos.filter(g => g.concepto.toLowerCase().includes(term))
+      }
+      gastos = ordenarGastos(gastos)
+      return {
+        ...cat,
+        gastos,
+        total: gastos.reduce((s, g) => s + g.montoEstimado, 0),
+      }
+    })
     .filter(cat => cat.gastos.length > 0)
 })
 
-const emojiMap = {
-  'Alimentacion': '🛒',
-  'Transporte': '🚗',
-  'Vivienda': '🏠',
-  'Salud': '🏥',
-  'Educacion': '📚',
-  'Entretenimiento': '🎬',
-  'Vestimenta': '👕',
-  'Servicios': '📡',
-  'Ahorro': '🐷',
-  'Deudas': '💳',
-  'Otros': '📦',
-}
+const { getCategoriaIcono } = useCategorias()
 
 function getEmoji(nombre) {
-  return emojiMap[nombre] || '📋'
+  return getCategoriaIcono(nombre)
 }
 
-function formatMonto(valor) {
-  return Number(valor).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
+const { currencySymbol, formatMonto } = useCurrency()
 
 function formatFecha(fecha) {
   if (!fecha) return ''
