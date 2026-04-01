@@ -30,7 +30,7 @@
             v-model="form.concepto"
             type="text"
             placeholder="Ej: Recibo de luz, Cuota gimnasio..."
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           />
         </div>
 
@@ -43,7 +43,7 @@
               :key="cat.id"
               class="flex flex-col items-center gap-1 p-2 rounded-xl border transition-all"
               :class="form.categoriaId === cat.id
-                ? 'border-indigo-500 bg-indigo-500/10'
+                ? 'border-blue-500 bg-blue-500/10'
                 : 'border-primary-700/30 bg-primary-900/50'"
               @click="form.categoriaId = cat.id"
             >
@@ -62,13 +62,13 @@
         <div>
           <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto estimado</label>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">S/</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
             <input
               v-model="form.montoEstimado"
               type="number"
               step="0.01"
               placeholder="0.00"
-              class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+              class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -92,7 +92,7 @@
                 :key="dia"
                 class="w-9 h-9 rounded-lg text-xs font-medium flex items-center justify-center transition-all"
                 :class="form.diaSeleccionado === dia
-                  ? 'bg-indigo-500 text-white'
+                  ? 'bg-blue-500 text-white'
                   : esPasado(dia)
                     ? 'text-gray-700'
                     : 'text-gray-300 hover:bg-primary-700'"
@@ -112,7 +112,7 @@
           </div>
           <button
             class="w-11 h-6 rounded-full relative transition-colors"
-            :class="form.esRecurrente ? 'bg-indigo-500' : 'bg-primary-700'"
+            :class="form.esRecurrente ? 'bg-blue-500' : 'bg-primary-700'"
             @click="form.esRecurrente = !form.esRecurrente"
           >
             <div
@@ -129,7 +129,7 @@
             v-model="form.notas"
             rows="2"
             placeholder="Agregar notas o detalles..."
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
           ></textarea>
         </div>
 
@@ -139,7 +139,7 @@
         <!-- Submit Button -->
         <button
           class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-          :class="saving ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700'"
+          :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
           :disabled="saving"
           @click="guardar"
         >
@@ -192,22 +192,12 @@ const form = reactive({
 const saving = ref(false)
 const errorMsg = ref('')
 
-const emojiMap = {
-  'Alimentacion': '🛒',
-  'Transporte': '🚗',
-  'Vivienda': '🏠',
-  'Salud': '🏥',
-  'Educacion': '📚',
-  'Entretenimiento': '🎬',
-  'Vestimenta': '👕',
-  'Servicios': '📡',
-  'Ahorro': '🐷',
-  'Deudas': '💳',
-  'Otros': '📦',
-}
+const { currencySymbol } = useCurrency()
+
+const { getCategoriaIcono } = useCategorias()
 
 function getEmoji(nombre) {
-  return emojiMap[nombre] || '📋'
+  return getCategoriaIcono(nombre)
 }
 
 function esPasado(dia) {

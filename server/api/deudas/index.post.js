@@ -61,6 +61,7 @@ export default defineEventHandler(async (event) => {
       montoOriginal: String(monto),
       montoPendiente: String(monto),
       fechaCreacion: body.fecha || new Date().toISOString().split('T')[0],
+      fechaPago: body.fechaPago || null,
       notas: body.notas?.trim() || null,
     })
     .returning()

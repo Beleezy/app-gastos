@@ -8,7 +8,7 @@ const MESES_FUTUROS = 12
 /**
  * Gets or creates a monthly plan for a given user/month/year
  */
-async function obtenerOCrearPlan(usuarioId, mes, anio) {
+export async function obtenerOCrearPlan(usuarioId, mes, anio) {
   // Always try to find first
   const buscar = () => db
     .select()

@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
       montoOriginal: deudas.montoOriginal,
       montoPendiente: deudas.montoPendiente,
       fechaCreacion: deudas.fechaCreacion,
+      fechaPago: deudas.fechaPago,
       estado: deudas.estado,
       notas: deudas.notas,
       createdAt: deudas.createdAt,

@@ -1,112 +1,209 @@
 <template>
   <div class="px-4">
-    <!-- Day header with totals -->
-    <div class="flex items-center justify-between mb-3">
-      <h3 class="text-sm font-medium text-gray-400">
-        Gastos del día
-      </h3>
-      <span v-if="gastos.length > 0" class="text-xs text-gray-500">
-        {{ gastos.length }} {{ gastos.length === 1 ? 'registro' : 'registros' }}
-      </span>
+    <!-- View mode toggle: Semana / Día -->
+    <div class="flex items-center gap-2 mb-4">
+      <button
+        class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+        :class="vistaActiva === 'semana' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        @click="vistaActiva = 'semana'"
+      >
+        Por semana
+      </button>
+      <button
+        class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+        :class="vistaActiva === 'dia' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        @click="vistaActiva = 'dia'"
+      >
+        Por día
+      </button>
     </div>
 
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-3">
-      <div v-for="i in 3" :key="i" class="bg-primary-800/60 rounded-xl h-16 animate-pulse"></div>
+      <div v-for="i in 4" :key="i" class="bg-primary-800/60 rounded-xl h-14 shimmer"></div>
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="gastos.length === 0" class="flex flex-col items-center py-10">
-      <div class="w-16 h-16 rounded-full bg-primary-800/60 flex items-center justify-center mb-3">
-        <span class="text-2xl opacity-50">📝</span>
+    <div v-else-if="sinDatos" class="flex flex-col items-center py-12">
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-800/80 to-primary-800/40 flex items-center justify-center mb-4 border border-primary-700/20">
+        <span class="text-3xl opacity-40">📝</span>
       </div>
-      <p class="text-sm text-gray-500">No hay gastos registrados</p>
-      <p class="text-xs text-gray-600 mt-1">Usa el micrófono o el formulario manual</p>
+      <p class="text-sm text-gray-400 font-medium">No hay gastos este mes</p>
+      <p class="text-xs text-gray-600 mt-1.5">Usa el micrófono o el formulario manual</p>
     </div>
 
-    <!-- Expense list -->
-    <div v-else class="space-y-2">
-      <div
-        v-for="gasto in gastos"
-        :key="gasto.id"
-        class="bg-primary-800/60 rounded-xl border border-primary-700/30 overflow-hidden group"
-      >
-        <div class="flex items-center gap-3 px-4 py-3">
-          <!-- Category icon -->
-          <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-            :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '15' }"
-          >
-            <span class="text-base">{{ gasto.categoriaIcono || '📦' }}</span>
-          </div>
-
-          <!-- Info -->
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <p class="text-sm font-medium text-white truncate">{{ gasto.concepto }}</p>
-              <span v-if="gasto.metodoRegistro === 'voz'"
-                class="text-[9px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.5 rounded-full shrink-0"
-              >VOZ</span>
+    <!-- Vista por día -->
+    <div v-else-if="vistaActiva === 'dia'" class="space-y-2">
+      <div v-for="dia in gastosPorDia" :key="dia.fecha">
+        <!-- Day header -->
+        <button
+          class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
+          :class="diaExpandido === dia.fecha ? 'bg-blue-500/10 border border-blue-500/20 shadow-sm shadow-blue-500/5' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
+          @click="toggleDia(dia.fecha)"
+        >
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
+              :class="diaExpandido === dia.fecha ? 'bg-blue-500/15' : 'bg-primary-700/30'"
+            >
+              <span class="text-xs font-bold" :class="diaExpandido === dia.fecha ? 'text-blue-400' : 'text-gray-400'">{{ extraerDia(dia.fecha) }}</span>
             </div>
-            <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-xs px-1.5 py-0.5 rounded-md"
-                :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '15', color: gasto.categoriaColor || '#6b7280' }"
+            <div class="text-left">
+              <p class="text-sm font-medium text-white">{{ formatFechaDia(dia.fecha) }}</p>
+              <p class="text-xs text-gray-500">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 transition-transform"
+              :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </button>
+
+        <!-- Day detail (expanded) -->
+        <Transition name="expand">
+          <div v-if="diaExpandido === dia.fecha" class="ml-4 mt-1 space-y-1.5">
+            <RegistroGastoItem
+              v-for="gasto in dia.gastos"
+              :key="gasto.id"
+              :gasto="gasto"
+              @edit="$emit('edit', gasto)"
+              @delete="$emit('delete', gasto)"
+            />
+          </div>
+        </Transition>
+      </div>
+    </div>
+
+    <!-- Vista por semana -->
+    <div v-else class="space-y-3">
+      <div v-for="semana in gastosPorSemana" :key="semana.key">
+        <!-- Week header -->
+        <button
+          class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
+          :class="semanaExpandida === semana.key ? 'bg-blue-500/10 border border-blue-500/20 shadow-sm shadow-blue-500/5' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
+          @click="toggleSemana(semana.key)"
+        >
+          <div class="text-left">
+            <p class="text-sm font-medium text-white">{{ formatRangoSemana(semana.desde, semana.hasta) }}</p>
+            <p class="text-xs text-gray-500">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'día' : 'días' }} con gastos</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-blue-400">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 transition-transform"
+              :class="{ 'rotate-180': semanaExpandida === semana.key }"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </button>
+
+        <!-- Week detail (expanded) - shows days -->
+        <Transition name="expand">
+          <div v-if="semanaExpandida === semana.key" class="ml-2 mt-1 space-y-1.5">
+            <div v-for="dia in semana.dias" :key="dia.fecha">
+              <!-- Day within week -->
+              <button
+                class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors"
+                :class="diaExpandido === dia.fecha ? 'bg-primary-700/40 border border-primary-700/30' : 'bg-primary-800/40 hover:bg-primary-800/60'"
+                @click.stop="toggleDia(dia.fecha)"
               >
-                {{ gasto.categoriaNombre || 'Otros' }}
-              </span>
-              <span class="text-xs text-gray-600">{{ formatHora(gasto.hora) }}</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-gray-400 w-6 text-center">{{ extraerDia(dia.fecha) }}</span>
+                  <p class="text-sm text-gray-300">{{ formatFechaDia(dia.fecha) }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-white">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-600 transition-transform"
+                    :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </button>
+
+              <!-- Expenses of that day -->
+              <Transition name="expand">
+                <div v-if="diaExpandido === dia.fecha" class="ml-6 mt-1 space-y-1.5">
+                  <RegistroGastoItem
+                    v-for="gasto in dia.gastos"
+                    :key="gasto.id"
+                    :gasto="gasto"
+                    @edit="$emit('edit', gasto)"
+                    @delete="$emit('delete', gasto)"
+                  />
+                </div>
+              </Transition>
             </div>
           </div>
-
-          <!-- Amount -->
-          <div class="text-right shrink-0">
-            <p class="text-sm font-semibold text-white">S/ {{ formatMonto(gasto.monto) }}</p>
-          </div>
-        </div>
-
-        <!-- Action buttons (visible on hover/tap) -->
-        <div class="flex border-t border-primary-700/20 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity h-0 group-hover:h-auto overflow-hidden">
-          <button
-            class="flex-1 py-2 text-xs text-gray-500 hover:text-indigo-400 hover:bg-primary-700/20 transition-colors flex items-center justify-center gap-1"
-            @click="$emit('edit', gasto)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-            </svg>
-            Editar
-          </button>
-          <button
-            class="flex-1 py-2 text-xs text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-colors flex items-center justify-center gap-1 border-l border-primary-700/20"
-            @click="$emit('delete', gasto)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Eliminar
-          </button>
-        </div>
+        </Transition>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
-  gastos: { type: Array, default: () => [] },
+const props = defineProps({
+  gastosPorDia: { type: Array, default: () => [] },
+  gastosPorSemana: { type: Array, default: () => [] },
   isLoading: { type: Boolean, default: false },
+  formatFechaDia: { type: Function, required: true },
+  formatRangoSemana: { type: Function, required: true },
 })
 
 defineEmits(['edit', 'delete'])
 
-function formatMonto(monto) {
-  return (parseFloat(monto) || 0).toFixed(2)
+const vistaActiva = ref('semana')
+const diaExpandido = ref(null)
+const semanaExpandida = ref(null)
+
+const sinDatos = computed(() => props.gastosPorDia.length === 0 && props.gastosPorSemana.length === 0)
+
+function toggleDia(fecha) {
+  diaExpandido.value = diaExpandido.value === fecha ? null : fecha
 }
 
-function formatHora(hora) {
-  if (!hora) return ''
-  const [h, m] = hora.split(':')
-  const hour = parseInt(h)
-  const ampm = hour >= 12 ? 'pm' : 'am'
-  const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
-  return `${h12}:${m} ${ampm}`
+function toggleSemana(key) {
+  semanaExpandida.value = semanaExpandida.value === key ? null : key
+  if (semanaExpandida.value !== key) {
+    diaExpandido.value = null
+  }
 }
+
+function extraerDia(fechaStr) {
+  return parseInt(fechaStr.split('-')[2])
+}
+
+const { currencySymbol, formatMonto } = useCurrency()
 </script>
+
+<style scoped>
+.expand-enter-active {
+  transition: all 0.25s ease-out;
+  overflow: hidden;
+}
+.expand-leave-active {
+  transition: all 0.2s ease-in;
+  overflow: hidden;
+}
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-8px);
+}
+.expand-enter-to,
+.expand-leave-from {
+  opacity: 1;
+  max-height: 2000px;
+  transform: translateY(0);
+}
+</style>

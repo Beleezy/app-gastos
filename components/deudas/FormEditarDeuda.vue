@@ -13,7 +13,7 @@
 
       <!-- Header -->
       <div class="flex items-center justify-between px-5 pb-4">
-        <h2 class="text-lg font-semibold text-white">Registrar pago</h2>
+        <h2 class="text-lg font-semibold text-white">Editar deuda</h2>
         <button class="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center text-gray-400" @click="$emit('close')">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -23,79 +23,51 @@
 
       <!-- Form -->
       <div class="px-5 pb-8 space-y-4">
-        <!-- Debt info card -->
-        <div class="bg-primary-900/50 rounded-xl p-3 border border-primary-700/30">
-          <p class="text-xs text-gray-500 mb-1">Deuda: {{ deuda.concepto }}</p>
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-xs text-gray-500">Original</p>
-              <p class="text-sm font-medium text-gray-400">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-xs text-gray-500">Pendiente</p>
-              <p class="text-sm font-semibold" :class="deuda.tipoDeuda === 'me_deben' ? 'text-emerald-400' : 'text-red-400'">
-                {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
-              </p>
-            </div>
-          </div>
+        <!-- Concepto -->
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">Concepto</label>
+          <input
+            v-model="form.concepto"
+            type="text"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          />
         </div>
 
-        <!-- Monto del pago -->
+        <!-- Monto -->
         <div>
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto del pago</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto original</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
             <input
-              v-model="form.monto"
+              v-model="form.montoOriginal"
               type="number"
               step="0.01"
-              :max="deuda.montoPendiente"
-              placeholder="0.00"
               class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
-          <!-- Quick amount buttons -->
-          <div class="flex gap-2 mt-2">
-            <button
-              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
-              @click="form.monto = deuda.montoPendiente"
-            >
-              Total ({{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }})
-            </button>
-            <button
-              v-if="deuda.montoPendiente > 1"
-              class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
-              @click="form.monto = Math.round(deuda.montoPendiente / 2 * 100) / 100"
-            >
-              Mitad
-            </button>
-          </div>
+          <p v-if="totalPagado > 0" class="text-[10px] text-gray-600 mt-1">
+            Ya se han pagado {{ currencySymbol }} {{ formatMonto(totalPagado) }}. El pendiente se recalculara automaticamente.
+          </p>
         </div>
 
-        <!-- Fecha -->
+        <!-- Fecha de creacion -->
         <div>
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha del pago</label>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha del prestamo</label>
           <input
-            v-model="form.fecha"
+            v-model="form.fechaCreacion"
             type="date"
             class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           />
         </div>
 
-        <!-- Metodo de pago -->
+        <!-- Fecha de pago -->
         <div>
-          <label class="block text-sm font-medium text-gray-400 mb-1.5">Metodo de pago <span class="text-gray-600">(opcional)</span></label>
-          <div class="flex gap-2 flex-wrap">
-            <button
-              v-for="metodo in metodos"
-              :key="metodo"
-              class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              :class="form.metodoPago === metodo ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
-              @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
-            >
-              {{ metodo }}
-            </button>
-          </div>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha de pago <span class="text-gray-600">(opcional)</span></label>
+          <input
+            v-model="form.fechaPago"
+            type="date"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          />
         </div>
 
         <!-- Notas -->
@@ -104,7 +76,7 @@
           <textarea
             v-model="form.notas"
             rows="2"
-            placeholder="Agregar notas del pago..."
+            placeholder="Agregar notas o detalles..."
             class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
           ></textarea>
         </div>
@@ -123,7 +95,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
-          {{ saving ? 'Registrando...' : 'Registrar pago' }}
+          {{ saving ? 'Guardando...' : 'Guardar cambios' }}
         </button>
       </div>
     </div>
@@ -137,15 +109,18 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
-const { registrarPago } = useDeudas()
+const { updateDeuda } = useDeudas()
 
-const metodos = ['Efectivo', 'Yape', 'Plin', 'Transferencia', 'Tarjeta']
+const totalPagado = computed(() => {
+  return Math.max(0, props.deuda.montoOriginal - props.deuda.montoPendiente)
+})
 
 const form = reactive({
-  monto: null,
-  fecha: new Date().toISOString().split('T')[0],
-  metodoPago: null,
-  notas: '',
+  concepto: props.deuda.concepto,
+  montoOriginal: props.deuda.montoOriginal,
+  fechaCreacion: props.deuda.fechaCreacion,
+  fechaPago: props.deuda.fechaPago || '',
+  notas: props.deuda.notas || '',
 })
 
 const saving = ref(false)
@@ -156,27 +131,28 @@ const { currencySymbol, formatMonto } = useCurrency()
 async function guardar() {
   errorMsg.value = ''
 
-  if (!form.monto || form.monto <= 0) {
-    errorMsg.value = 'Ingresa un monto valido'
+  if (!form.concepto?.trim()) {
+    errorMsg.value = 'El concepto es obligatorio'
     return
   }
-  if (form.monto > props.deuda.montoPendiente) {
-    errorMsg.value = 'El monto no puede exceder la deuda pendiente'
+  if (!form.montoOriginal || form.montoOriginal <= 0) {
+    errorMsg.value = 'Ingresa un monto valido'
     return
   }
 
   saving.value = true
   try {
-    await registrarPago(props.deuda.id, {
-      monto: parseFloat(form.monto),
-      fecha: form.fecha,
-      metodoPago: form.metodoPago,
+    await updateDeuda(props.deuda.id, {
+      concepto: form.concepto.trim(),
+      montoOriginal: parseFloat(form.montoOriginal),
+      fechaCreacion: form.fechaCreacion,
+      fechaPago: form.fechaPago || null,
       notas: form.notas?.trim() || null,
     })
     emit('saved')
     emit('close')
   } catch (e) {
-    errorMsg.value = 'Error al registrar el pago'
+    errorMsg.value = 'Error al actualizar la deuda'
   } finally {
     saving.value = false
   }

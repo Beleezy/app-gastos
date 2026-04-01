@@ -52,7 +52,7 @@
               v-model="form.personaNombre"
               type="text"
               placeholder="Nombre de la persona u organizacion..."
-              class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+              class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
               @input="onPersonaInput"
               @focus="showSugerencias = true"
             />
@@ -79,14 +79,14 @@
           <div v-if="!form.personaEntidadId" class="flex items-center gap-3 mt-2">
             <button
               class="px-3 py-1 rounded-lg text-xs transition-colors"
-              :class="form.personaTipo === 'persona' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-primary-900/50 text-gray-500'"
+              :class="form.personaTipo === 'persona' ? 'bg-blue-500/20 text-blue-400' : 'bg-primary-900/50 text-gray-500'"
               @click="form.personaTipo = 'persona'"
             >
               Persona
             </button>
             <button
               class="px-3 py-1 rounded-lg text-xs transition-colors"
-              :class="form.personaTipo === 'organizacion' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-primary-900/50 text-gray-500'"
+              :class="form.personaTipo === 'organizacion' ? 'bg-blue-500/20 text-blue-400' : 'bg-primary-900/50 text-gray-500'"
               @click="form.personaTipo = 'organizacion'"
             >
               Organizacion
@@ -101,7 +101,7 @@
             v-model="form.concepto"
             type="text"
             placeholder="Ej: Almuerzo del martes, Prestamo..."
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           />
         </div>
 
@@ -109,13 +109,13 @@
         <div>
           <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto</label>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">S/</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
             <input
               v-model="form.monto"
               type="number"
               step="0.01"
               placeholder="0.00"
-              class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+              class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
             />
           </div>
         </div>
@@ -126,8 +126,19 @@
           <input
             v-model="form.fecha"
             type="date"
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
           />
+        </div>
+
+        <!-- Fecha de pago -->
+        <div>
+          <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha de pago <span class="text-gray-600">(opcional)</span></label>
+          <input
+            v-model="form.fechaPago"
+            type="date"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          />
+          <p class="text-[10px] text-gray-600 mt-1">Fecha acordada para el pago (si la hay)</p>
         </div>
 
         <!-- Notas -->
@@ -137,7 +148,7 @@
             v-model="form.notas"
             rows="2"
             placeholder="Agregar notas o detalles..."
-            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors resize-none"
+            class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
           ></textarea>
         </div>
 
@@ -147,7 +158,7 @@
         <!-- Submit Button -->
         <button
           class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-          :class="saving ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700'"
+          :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
           :disabled="saving"
           @click="guardar"
         >
@@ -169,6 +180,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
+const { currencySymbol } = useCurrency()
 const { createDeuda, personas, tabActual } = useDeudas()
 
 const form = reactive({
@@ -179,6 +191,7 @@ const form = reactive({
   concepto: '',
   monto: null,
   fecha: new Date().toISOString().split('T')[0],
+  fechaPago: '',
   notas: '',
 })
 
@@ -240,6 +253,7 @@ async function guardar() {
       concepto: form.concepto.trim(),
       monto: parseFloat(form.monto),
       fecha: form.fecha,
+      fechaPago: form.fechaPago || null,
       notas: form.notas?.trim() || null,
     })
     emit('saved')

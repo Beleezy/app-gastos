@@ -26,10 +26,13 @@ export default defineEventHandler(async (event) => {
     notas: g.notas || null,
   }))
 
-  const insertados = await db
-    .insert(gastos)
-    .values(valores)
-    .returning()
+  // Transacción atómica: si falla uno, se revierten todos
+  const insertados = await db.transaction(async (tx) => {
+    return await tx
+      .insert(gastos)
+      .values(valores)
+      .returning()
+  })
 
   // Get category info for all
   const catIds = [...new Set(insertados.map(g => g.categoriaId))]

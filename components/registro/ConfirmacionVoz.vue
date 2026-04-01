@@ -28,7 +28,7 @@
 
       <!-- Loading -->
       <div v-if="isParsing" class="flex flex-col items-center gap-3 py-8">
-        <svg class="animate-spin w-8 h-8 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin w-8 h-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
@@ -38,7 +38,7 @@
       <!-- Error -->
       <div v-else-if="parseError" class="mx-5 mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
         <p class="text-sm text-red-400">{{ parseError }}</p>
-        <button class="mt-2 text-xs text-indigo-400 underline" @click="$emit('retry')">Intentar de nuevo</button>
+        <button class="mt-2 text-xs text-blue-400 underline" @click="$emit('retry')">Intentar de nuevo</button>
       </div>
 
       <!-- Parsed expenses list -->
@@ -60,7 +60,7 @@
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span class="text-sm font-semibold text-white">S/ {{ formatMonto(gasto.monto) }}</span>
+              <span class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
               <button class="w-7 h-7 rounded-full bg-primary-700/60 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
                 @click="toggleEdit(idx)"
               >
@@ -83,35 +83,35 @@
             <div>
               <label class="block text-xs text-gray-500 mb-1">Concepto</label>
               <input v-model="gasto.concepto" type="text"
-                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
               />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs text-gray-500 mb-1">Monto</label>
                 <div class="relative">
-                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500">S/</span>
+                  <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500">{{ currencySymbol }}</span>
                   <input v-model.number="gasto.monto" type="number" step="0.01"
-                    class="w-full pl-8 pr-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                    class="w-full pl-8 pr-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                   />
                 </div>
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-1">Fecha</label>
                 <input v-model="gasto.fecha" type="date"
-                  class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                  class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
                 />
               </div>
             </div>
             <div>
               <label class="block text-xs text-gray-500 mb-1">Categoría</label>
               <select v-model="gasto.categoria"
-                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
               >
                 <option v-for="cat in categoriasDisponibles" :key="cat" :value="cat">{{ cat }}</option>
               </select>
             </div>
-            <button class="text-xs text-indigo-400 hover:text-indigo-300" @click="editingIdx = null">
+            <button class="text-xs text-blue-400 hover:text-blue-300" @click="editingIdx = null">
               Listo
             </button>
           </div>
@@ -125,7 +125,7 @@
         <!-- Total -->
         <div v-if="editableGastos.length > 0" class="flex items-center justify-between px-1 pt-2">
           <span class="text-sm text-gray-400">Total ({{ editableGastos.length }} gastos)</span>
-          <span class="text-lg font-bold text-white">S/ {{ formatMonto(totalGastos) }}</span>
+          <span class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalGastos) }}</span>
         </div>
 
         <!-- Action buttons -->
@@ -138,7 +138,7 @@
           </button>
           <button
             class="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-            :class="saving ? 'bg-indigo-400 cursor-not-allowed' : 'bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700'"
+            :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
             :disabled="saving"
             @click="confirmar"
           >
@@ -165,39 +165,15 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm', 'retry'])
 
+const { currencySymbol, formatMonto } = useCurrency()
+
 const editableGastos = ref([])
 const editingIdx = ref(null)
 const saving = ref(false)
 
-const CATEGORIAS_COLORS = {
-  'Alimentación': '#ef4444',
-  'Transporte': '#3b82f6',
-  'Vivienda': '#f59e0b',
-  'Salud': '#10b981',
-  'Educación': '#8b5cf6',
-  'Entretenimiento': '#ec4899',
-  'Vestimenta': '#f97316',
-  'Servicios': '#06b6d4',
-  'Ahorro': '#22c55e',
-  'Deudas': '#e11d48',
-  'Otros': '#6b7280',
-}
+const { getCategoriaColor, getCategoriaIcono, getCategoriaNames } = useCategorias()
 
-const CATEGORIAS_ICONOS = {
-  'Alimentación': '🍽️',
-  'Transporte': '🚌',
-  'Vivienda': '🏠',
-  'Salud': '🏥',
-  'Educación': '📚',
-  'Entretenimiento': '🎮',
-  'Vestimenta': '👕',
-  'Servicios': '⚡',
-  'Ahorro': '💰',
-  'Deudas': '💳',
-  'Otros': '📦',
-}
-
-const categoriasDisponibles = Object.keys(CATEGORIAS_COLORS)
+const categoriasDisponibles = computed(() => getCategoriaNames())
 
 const totalGastos = computed(() => {
   return editableGastos.value.reduce((sum, g) => sum + (parseFloat(g.monto) || 0), 0)
@@ -206,18 +182,6 @@ const totalGastos = computed(() => {
 watch(() => props.gastos, (newVal) => {
   editableGastos.value = newVal.map(g => ({ ...g }))
 }, { immediate: true, deep: true })
-
-function getCategoriaColor(nombre) {
-  return CATEGORIAS_COLORS[nombre] || '#6b7280'
-}
-
-function getCategoriaIcono(nombre) {
-  return CATEGORIAS_ICONOS[nombre] || '📦'
-}
-
-function formatMonto(monto) {
-  return (parseFloat(monto) || 0).toFixed(2)
-}
 
 function formatFecha(fecha) {
   if (!fecha) return ''

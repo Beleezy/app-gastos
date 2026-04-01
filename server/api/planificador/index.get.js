@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
-import { planesMensuales, gastosPlanificados, categorias, configuraciones } from '../../database/schema.js'
+import { planesMensuales, gastosPlanificados, categorias, configuraciones, gastos } from '../../database/schema.js'
 import { getUsuarioId } from '../../utils/getUsuario.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, between, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -77,6 +77,27 @@ export default defineEventHandler(async (event) => {
     .where(eq(gastosPlanificados.planMensualId, plan.id))
     .orderBy(gastosPlanificados.fechaProbablePago)
 
+  // Fetch real expenses for this month grouped by category
+  const primerDia = `${anio}-${String(mes).padStart(2, '0')}-01`
+  const ultimoDia = `${anio}-${String(mes).padStart(2, '0')}-${new Date(anio, mes, 0).getDate()}`
+
+  const gastosRealesRaw = await db
+    .select({
+      categoriaId: gastos.categoriaId,
+      totalReal: sql`COALESCE(SUM(${gastos.monto}), 0)`.as('totalReal'),
+    })
+    .from(gastos)
+    .where(and(
+      eq(gastos.usuarioId, usuarioId),
+      between(gastos.fecha, primerDia, ultimoDia),
+    ))
+    .groupBy(gastos.categoriaId)
+
+  const gastosRealesPorCategoria = {}
+  for (const g of gastosRealesRaw) {
+    gastosRealesPorCategoria[g.categoriaId] = parseFloat(g.totalReal)
+  }
+
   return {
     plan: {
       ...plan,
@@ -86,5 +107,6 @@ export default defineEventHandler(async (event) => {
       ...g,
       montoEstimado: parseFloat(g.montoEstimado),
     })),
+    gastosRealesPorCategoria,
   }
 })

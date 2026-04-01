@@ -1,10 +1,30 @@
 export function useVoiceRecognition() {
+  const { currencyLocale } = useCurrency()
+
   const isListening = ref(false)
   const transcript = ref('')
   const error = ref(null)
   const isSupported = ref(false)
 
   let recognition = null
+  let inactivityTimer = null
+  let baseTranscript = ''
+
+  function resetInactivityTimer() {
+    if (inactivityTimer) clearTimeout(inactivityTimer)
+    inactivityTimer = setTimeout(() => {
+      if (isListening.value) {
+        stopListening()
+      }
+    }, 5000)
+  }
+
+  function clearInactivityTimer() {
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer)
+      inactivityTimer = null
+    }
+  }
 
   function init() {
     if (typeof window === 'undefined') return
@@ -18,7 +38,7 @@ export function useVoiceRecognition() {
 
     isSupported.value = true
     recognition = new SpeechRecognition()
-    recognition.lang = 'es-PE'
+    recognition.lang = currencyLocale.value
     recognition.continuous = true
     recognition.interimResults = true
     recognition.maxAlternatives = 1
@@ -36,7 +56,11 @@ export function useVoiceRecognition() {
         }
       }
 
-      transcript.value = finalTranscript || interimTranscript
+      const newText = finalTranscript || interimTranscript
+      transcript.value = baseTranscript ? (baseTranscript + ' ' + newText).trim() : newText
+
+      // Reset inactivity timer on every new speech result
+      resetInactivityTimer()
     }
 
     recognition.onerror = (event) => {
@@ -45,27 +69,24 @@ export function useVoiceRecognition() {
       } else if (event.error === 'not-allowed') {
         error.value = 'Permiso de micrófono denegado'
       } else if (event.error === 'aborted') {
-        // User stopped, not an error
         return
       } else {
         error.value = `Error: ${event.error}`
       }
       isListening.value = false
+      clearInactivityTimer()
     }
 
     recognition.onend = () => {
       isListening.value = false
+      clearInactivityTimer()
     }
   }
 
-  function startListening() {
-    error.value = null
-    transcript.value = ''
-
+  function _beginRecognition() {
     if (!recognition) init()
     if (!isSupported.value) return
 
-    // Haptic feedback
     if (navigator.vibrate) {
       navigator.vibrate(50)
     }
@@ -73,17 +94,32 @@ export function useVoiceRecognition() {
     try {
       recognition.start()
       isListening.value = true
+      resetInactivityTimer()
     } catch (e) {
-      // Already started, restart
       recognition.stop()
       setTimeout(() => {
         recognition.start()
         isListening.value = true
+        resetInactivityTimer()
       }, 100)
     }
   }
 
+  function startListening() {
+    error.value = null
+    transcript.value = ''
+    baseTranscript = ''
+    _beginRecognition()
+  }
+
+  function continueListening() {
+    error.value = null
+    baseTranscript = transcript.value
+    _beginRecognition()
+  }
+
   function stopListening() {
+    clearInactivityTimer()
     if (recognition && isListening.value) {
       recognition.stop()
       isListening.value = false
@@ -96,6 +132,7 @@ export function useVoiceRecognition() {
 
   function resetTranscript() {
     transcript.value = ''
+    baseTranscript = ''
     error.value = null
   }
 
@@ -104,6 +141,7 @@ export function useVoiceRecognition() {
   })
 
   onUnmounted(() => {
+    clearInactivityTimer()
     if (recognition) {
       recognition.stop()
       recognition = null
@@ -116,6 +154,7 @@ export function useVoiceRecognition() {
     error,
     isSupported,
     startListening,
+    continueListening,
     stopListening,
     resetTranscript,
   }
