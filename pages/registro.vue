@@ -210,8 +210,8 @@
       :is-parsing="isParsing"
       :parse-error="parseError"
       :categorias="categorias"
+      :on-confirm="onConfirmGastos"
       @close="cerrarConfirmacion"
-      @confirm="onConfirmGastos"
       @retry="reintentarParse"
     />
 
@@ -452,17 +452,13 @@ async function onConfirmGastos(gastosEditados) {
     }
   })
 
-  try {
-    await createGastosBulk(gastosConIds, lastTranscript.value)
-    showConfirmacion.value = false
-    hasDraft.value = false
-    resetTranscript()
-    clearParsed()
-    showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
-    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
-  } catch {
-    // Error handled by composable
-  }
+  await createGastosBulk(gastosConIds, lastTranscript.value)
+  showConfirmacion.value = false
+  hasDraft.value = false
+  resetTranscript()
+  clearParsed()
+  showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
+  await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
 }
 
 function reintentarParse() {

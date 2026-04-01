@@ -22,7 +22,8 @@ export function useLLMParser() {
 
       return data.gastos || []
     } catch (e) {
-      error.value = e.data?.message || 'Error al procesar el texto'
+      const msg = e.data?.message || e.message || 'Error al procesar el texto'
+      error.value = msg.includes('intentos') ? 'No se pudo interpretar el texto. Intenta hablar más claro o usar frases simples como "gasté 10 soles en almuerzo".' : msg
       return []
     } finally {
       isParsing.value = false

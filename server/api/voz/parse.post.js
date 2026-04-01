@@ -195,7 +195,70 @@ Reglas:
         continue
       }
 
-      const parsed = JSON.parse(text)
+      let parsed
+      try {
+        parsed = JSON.parse(text)
+      } catch (jsonErr) {
+        console.error(`JSON inválido del LLM (intento ${attempt + 1}/${MAX_RETRIES}):`, text)
+        lastError = 'La respuesta del LLM no es JSON válido'
+        continue
+      }
+
+      // Validar estructura según el modo
+      if (modo === 'deudas') {
+        // Modo deudas: espera { deudas: [...], pagos: [...] }
+        if (!parsed.deudas && !parsed.pagos) {
+          console.error(`Estructura inesperada del LLM en modo deudas (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
+          lastError = 'La respuesta del LLM no tiene el formato esperado'
+          continue
+        }
+        // Asegurar que ambos arrays existan
+        parsed.deudas = Array.isArray(parsed.deudas) ? parsed.deudas.filter(d =>
+          d && d.persona && (parseFloat(d.monto) > 0)
+        ).map(d => ({
+          persona: String(d.persona).substring(0, 100),
+          concepto: String(d.concepto || 'Deuda no especificada').substring(0, 50),
+          monto: Math.round(parseFloat(d.monto) * 100) / 100,
+          tipo: d.tipo === 'yo_debo' ? 'yo_debo' : 'me_deben',
+          fecha: d.fecha || hoy,
+        })) : []
+        parsed.pagos = Array.isArray(parsed.pagos) ? parsed.pagos.filter(p =>
+          p && p.persona && (parseFloat(p.monto) > 0)
+        ).map(p => ({
+          persona: String(p.persona).substring(0, 100),
+          monto: Math.round(parseFloat(p.monto) * 100) / 100,
+          fecha: p.fecha || hoy,
+          notas: p.notas || null,
+        })) : []
+
+        if (parsed.deudas.length === 0 && parsed.pagos.length === 0) {
+          lastError = 'No se pudieron extraer deudas o pagos del texto'
+          continue
+        }
+        return parsed
+      }
+
+      // Modo gastos: espera { gastos: [...] }
+      if (!parsed.gastos || !Array.isArray(parsed.gastos)) {
+        console.error(`Estructura inesperada del LLM (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
+        lastError = 'La respuesta del LLM no tiene el formato esperado'
+        continue
+      }
+
+      parsed.gastos = parsed.gastos.filter(g => {
+        return g && (parseFloat(g.monto) > 0) && g.concepto
+      }).map(g => ({
+        concepto: String(g.concepto).substring(0, 50),
+        monto: Math.round(parseFloat(g.monto) * 100) / 100,
+        categoria: g.categoria || 'Otros',
+        fecha: g.fecha || hoy,
+      }))
+
+      if (parsed.gastos.length === 0) {
+        lastError = 'No se pudieron extraer gastos válidos del texto'
+        continue
+      }
+
       return parsed
     } catch (e) {
       console.error(`Error en intento ${attempt + 1}/${MAX_RETRIES}:`, e.message)

@@ -432,7 +432,7 @@ async function parsearDeudaVoz() {
     deudasParseadas.value = result.deudas || []
     pagosParseados.value = result.pagos || []
   } catch (e) {
-    vozError.value = 'Error al interpretar el audio'
+    vozError.value = e.data?.message || 'Error al interpretar el audio. Intenta de nuevo con frases claras como "Juan me debe 20 soles por almuerzo".'
   } finally {
     vozParsing.value = false
   }

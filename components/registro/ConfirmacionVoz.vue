@@ -128,6 +128,11 @@
           <span class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalGastos) }}</span>
         </div>
 
+        <!-- Save error -->
+        <div v-if="saveError" class="px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
+          <p class="text-sm text-red-400">{{ saveError }}</p>
+        </div>
+
         <!-- Action buttons -->
         <div v-if="editableGastos.length > 0" class="flex gap-3 pt-2">
           <button
@@ -161,9 +166,12 @@ const props = defineProps({
   isParsing: { type: Boolean, default: false },
   parseError: { type: String, default: null },
   categorias: { type: Array, default: () => [] },
+  onConfirm: { type: Function, default: null },
 })
 
 const emit = defineEmits(['close', 'confirm', 'retry'])
+
+const saveError = ref(null)
 
 const { currencySymbol, formatMonto } = useCurrency()
 
@@ -201,9 +209,13 @@ function removeGasto(idx) {
 
 async function confirmar() {
   if (editableGastos.value.length === 0) return
+  if (!props.onConfirm) return
   saving.value = true
+  saveError.value = null
   try {
-    emit('confirm', editableGastos.value)
+    await props.onConfirm(editableGastos.value)
+  } catch (e) {
+    saveError.value = e.message || 'Error al guardar los gastos'
   } finally {
     saving.value = false
   }
