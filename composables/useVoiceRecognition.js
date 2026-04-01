@@ -45,18 +45,19 @@ export function useVoiceRecognition() {
 
     recognition.onresult = (event) => {
       let finalTranscript = ''
-      let interimTranscript = ''
+      let lastInterim = ''
 
       for (let i = 0; i < event.results.length; i++) {
         const result = event.results[i]
         if (result.isFinal) {
           finalTranscript += result[0].transcript
         } else {
-          interimTranscript += result[0].transcript
+          // Solo quedarse con el último resultado interim (el más completo)
+          lastInterim = result[0].transcript
         }
       }
 
-      const newText = finalTranscript || interimTranscript
+      const newText = (finalTranscript + (lastInterim ? ' ' + lastInterim : '')).trim()
       transcript.value = baseTranscript ? (baseTranscript + ' ' + newText).trim() : newText
 
       // Reset inactivity timer on every new speech result
