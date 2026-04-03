@@ -28,7 +28,7 @@
             />
           </svg>
           <!-- Center text -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <template v-if="seleccionada">
               <p class="text-xs text-gray-500">{{ seleccionada }}</p>
               <p class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalSeleccionada) }}</p>
@@ -186,9 +186,10 @@ function toggleSeleccion(nombre) {
 
 function toggleExpansion(nombre) {
   expandida.value = expandida.value === nombre ? null : nombre
-  // Also select in donut when expanding
   if (expandida.value) {
     seleccionada.value = nombre
+  } else {
+    seleccionada.value = null
   }
   emitCategoriaChange(seleccionada.value)
 }

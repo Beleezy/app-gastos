@@ -27,9 +27,7 @@
       <div class="relative flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/25 to-indigo-500/15 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <span class="text-xs font-bold text-blue-400 leading-none">S/</span>
           </div>
           <span class="text-sm text-gray-400">Presupuesto</span>
         </div>
@@ -46,7 +44,7 @@
             @blur="guardarPresupuesto"
           />
         </div>
-        <button v-else class="text-lg font-bold text-white hover:text-blue-300 transition-colors" @click="iniciarEdicion">
+        <button v-else class="text-lg font-bold text-white hover:text-blue-300 transition-colors whitespace-nowrap" @click="iniciarEdicion">
           {{ currencySymbol }} {{ formatMonto(resumen.presupuesto) }}
         </button>
       </div>
@@ -58,18 +56,18 @@
       <div class="relative grid grid-cols-3 gap-2">
         <div class="bg-primary-900/40 rounded-xl p-3 border border-orange-500/5">
           <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Planificado</p>
-          <p class="text-sm font-bold text-orange-400">{{ currencySymbol }} {{ formatMonto(resumen.totalPlanificado) }}</p>
+          <p class="text-sm font-bold text-orange-400 whitespace-nowrap">{{ formatMonto(resumen.totalPlanificado) }}</p>
         </div>
         <div class="bg-primary-900/40 rounded-xl p-3 border" :class="totalGastoReal > resumen.totalPlanificado ? 'border-red-500/10' : 'border-emerald-500/5'">
           <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Gastado</p>
-          <p class="text-sm font-bold" :class="totalGastoReal > resumen.totalPlanificado ? 'text-red-400' : 'text-emerald-400'">
-            {{ currencySymbol }} {{ formatMonto(totalGastoReal) }}
+          <p class="text-sm font-bold whitespace-nowrap" :class="totalGastoReal > resumen.totalPlanificado ? 'text-red-400' : 'text-emerald-400'">
+            {{ formatMonto(totalGastoReal) }}
           </p>
         </div>
         <div class="bg-primary-900/40 rounded-xl p-3 border" :class="resumen.saldoRestante >= 0 ? 'border-emerald-500/5' : 'border-red-500/10'">
           <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Saldo</p>
-          <p class="text-sm font-bold" :class="resumen.saldoRestante >= 0 ? 'text-emerald-400' : 'text-red-400'">
-            {{ currencySymbol }} {{ formatMonto(resumen.saldoRestante) }}
+          <p class="text-sm font-bold whitespace-nowrap" :class="resumen.saldoRestante >= 0 ? 'text-emerald-400' : 'text-red-400'">
+            {{ formatMonto(resumen.saldoRestante) }}
           </p>
         </div>
       </div>

@@ -73,8 +73,6 @@ export default defineNuxtConfig({
     databaseUrl: process.env.DATABASE_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
-    geminiTemperature: process.env.GEMINI_TEMPERATURE || '0.2',
-    geminiMaxTokens: process.env.GEMINI_MAX_TOKENS || '1024',
     public: {
       appName: 'Mis Finanzas',
       appVersion: '0.3',

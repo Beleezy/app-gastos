@@ -459,8 +459,8 @@ async function confirmarDeudasVoz() {
         personaNombre: d.persona,
         tipoDeuda: d.tipo,
         concepto: d.concepto,
-        montoOriginal: d.monto,
-        fechaCreacion: d.fecha || new Date().toISOString().split('T')[0],
+        monto: d.monto,
+        fecha: d.fecha || new Date().toISOString().split('T')[0],
       })
     }
 
