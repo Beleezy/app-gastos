@@ -82,7 +82,7 @@ Reglas:
 - Si no puedes interpretar algo, usa concepto "Gasto no especificado" y categoría "Otros".`
 
   const geminiModelPrimary = runtimeConfig.geminiModel || 'gemini-3.1-flash-lite'
-  const geminiModelFallback = 'gemini-2.5-flash-lite'
+  const geminiModelFallback = 'gemini-2.5-flash'
 
   // Determinar si es parsing de deudas o gastos
   const modo = body.modo || 'gastos'
