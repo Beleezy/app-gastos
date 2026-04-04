@@ -81,8 +81,8 @@ Reglas:
 - Los montos deben ser números decimales (ej: 2.50, no "dos soles con cincuenta").
 - Si no puedes interpretar algo, usa concepto "Gasto no especificado" y categoría "Otros".`
 
-  const geminiModelPrimary = runtimeConfig.geminiModel || 'gemini-2.5-flash-lite'
-  const geminiModelFallback = 'gemini-2.5-flash'
+  const geminiModelPrimary = runtimeConfig.geminiModel || 'gemini-3.1-flash-lite'
+  const geminiModelFallback = 'gemini-2.5-flash-lite'
 
   // Determinar si es parsing de deudas o gastos
   const modo = body.modo || 'gastos'

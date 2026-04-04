@@ -72,10 +72,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
-    geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite',
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
     public: {
       appName: 'Mis Finanzas',
-      appVersion: '0.3',
+      appVersion: '0.8',
     },
   },
 })
