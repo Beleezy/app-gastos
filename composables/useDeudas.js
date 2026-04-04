@@ -168,6 +168,30 @@ export function useDeudas() {
     await updateDeuda(id, { estado: 'archivado' })
   }
 
+  async function revertirPago(pagoId) {
+    try {
+      const result = await $fetch(`/api/deudas/pagos/${pagoId}`, { method: 'DELETE' })
+      // Update pagosPersona to remove this pago from the groups
+      pagosPersona.value = pagosPersona.value
+        .map(g => {
+          if (!g.pagoIds?.includes(pagoId)) return g
+          const nuevosDetalles = g.detalles.filter(d => d.pagoId !== pagoId)
+          const nuevoTotal = nuevosDetalles.reduce((s, d) => s + d.montoPagado, 0)
+          return { ...g, detalles: nuevosDetalles, pagoIds: g.pagoIds.filter(id => id !== pagoId), montoTotal: nuevoTotal }
+        })
+        .filter(g => g.detalles.length > 0)
+      // Refresh deudas for this person
+      if (personaSeleccionada.value) {
+        await fetchDeudasPersona(personaSeleccionada.value.id)
+      }
+      await fetchResumen()
+      return result
+    } catch (e) {
+      error.value = e.message || 'Error al revertir pago'
+      throw e
+    }
+  }
+
   async function createPersona(data) {
     try {
       const persona = await $fetch('/api/deudas/personas', {
@@ -221,7 +245,7 @@ export function useDeudas() {
     totalPendientePersona,
     fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona,
     createDeuda, updateDeuda, deleteDeuda,
-    registrarPago, archivarDeuda,
+    registrarPago, archivarDeuda, revertirPago,
     createPersona, deletePersona,
     seleccionarPersona, volverALista, cambiarTab,
   }

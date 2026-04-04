@@ -58,6 +58,7 @@ export default defineEventHandler(async (event) => {
         timestamp: pagoTime,
         createdAt: pago.createdAt,
         montoTotal: 0,
+        pagoIds: [],
         detalles: [],
       }
       grupos.push(grupoActual)
@@ -65,7 +66,9 @@ export default defineEventHandler(async (event) => {
 
     const monto = parseFloat(pago.montoPagado)
     grupoActual.montoTotal += monto
+    grupoActual.pagoIds.push(pago.id)
     grupoActual.detalles.push({
+      pagoId: pago.id,
       deudaId: pago.deudaId,
       concepto: pago.deudaConcepto,
       montoPagado: monto,

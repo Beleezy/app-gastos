@@ -8,8 +8,12 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioId()
 
+  function capitalizarNombre(nombre) {
+    return nombre.trim().replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+  }
+
   const updateData = { updatedAt: new Date() }
-  if (body.nombre !== undefined) updateData.nombre = body.nombre.trim()
+  if (body.nombre !== undefined) updateData.nombre = capitalizarNombre(body.nombre)
   if (body.tipo !== undefined) updateData.tipo = body.tipo
   if (body.contacto !== undefined) updateData.contacto = body.contacto?.trim() || null
   if (body.notas !== undefined) updateData.notas = body.notas?.trim() || null

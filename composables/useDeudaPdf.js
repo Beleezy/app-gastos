@@ -205,10 +205,33 @@ export function useDeudaPdf() {
       }
     }
 
-    // Fallback: download and open WhatsApp with message
+    // Fallback: download PDF and open WhatsApp with detailed text summary
     doc.save(filename)
-    const mensaje = encodeURIComponent(`Hola ${persona.nombre}, te comparto el detalle de tus deudas pendientes.`)
-    window.open(`https://wa.me/?text=${mensaje}`, '_blank')
+    const totalPendiente = deudasActivas.reduce((sum, d) => sum + d.montoPendiente, 0)
+    const lineasDeudas = deudasActivas
+      .map(d => {
+        const pendiente = d.montoPendiente !== d.montoOriginal
+          ? ` (pendiente: ${currencySymbol.value} ${formatMonto(d.montoPendiente)})`
+          : ''
+        return `• ${d.concepto}: ${currencySymbol.value} ${formatMonto(d.montoOriginal)}${pendiente}`
+      })
+      .join('\n')
+
+    const mensaje = [
+      `Hola ${persona.nombre}, te paso el detalle de lo que me debes:`,
+      '',
+      lineasDeudas,
+      '',
+      `*Total pendiente: ${currencySymbol.value} ${formatMonto(totalPendiente)}*`,
+      '',
+      '_(El PDF fue descargado en tu dispositivo)_',
+    ].join('\n')
+
+    const phone = persona.contacto?.replace(/\D/g, '')
+    const waUrl = phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(mensaje)}`
+      : `https://wa.me/?text=${encodeURIComponent(mensaje)}`
+    window.open(waUrl, '_blank')
   }
 
   function formatFechaCorta(fecha) {

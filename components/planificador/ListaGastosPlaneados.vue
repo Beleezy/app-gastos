@@ -72,17 +72,31 @@
             <span class="text-xs text-gray-500 ml-auto">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
           </div>
           <!-- Real vs Planned mini bar -->
-          <div v-if="cat.totalReal > 0" class="flex items-center gap-2 ml-3.5">
-            <div class="flex-1 h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :class="cat.totalReal > cat.total ? 'bg-red-400' : 'bg-emerald-400'"
-                :style="{ width: Math.min((cat.totalReal / cat.total) * 100, 100) + '%' }"
-              ></div>
+          <div v-if="cat.totalReal > 0" class="ml-3.5 space-y-1">
+            <div class="flex items-center gap-2">
+              <div class="flex-1 h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :class="cat.totalReal > cat.total ? 'bg-red-400' : 'bg-emerald-400'"
+                  :style="{ width: Math.min((cat.totalReal / cat.total) * 100, 100) + '%' }"
+                ></div>
+              </div>
+              <span class="text-[10px] shrink-0 font-medium" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
+                {{ currencySymbol }} {{ formatMonto(cat.totalReal) }}
+              </span>
             </div>
-            <span class="text-[10px] shrink-0" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
-              {{ currencySymbol }} {{ formatMonto(cat.totalReal) }} real
-            </span>
+            <!-- Diferencia numérica -->
+            <div class="flex items-center gap-1">
+              <svg v-if="cat.totalReal > cat.total" xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+              </svg>
+              <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+              <span class="text-[10px]" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
+                {{ cat.totalReal > cat.total ? 'Excede' : 'Ahorra' }} {{ currencySymbol }} {{ formatMonto(Math.abs(cat.totalReal - cat.total)) }}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -118,7 +132,7 @@
                 :class="gasto.estado === 'pagado'
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-orange-500/15 text-orange-400'"
-                @click="toggleEstado(gasto)"
+                @click="onToggleEstado(gasto)"
               >
                 {{ gasto.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}
               </button>
@@ -182,6 +196,12 @@
 const emit = defineEmits(['editar'])
 
 const { gastosPorCategoria, isLoading, toggleEstado, deleteGastoPlaneado } = usePlanificador()
+const { vibrate } = useHaptic()
+
+async function onToggleEstado(gasto) {
+  vibrate(8)
+  await toggleEstado(gasto)
+}
 
 const filtroActual = ref('todos')
 const busqueda = ref('')

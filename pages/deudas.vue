@@ -15,6 +15,16 @@
       </template>
     </LayoutAppHeader>
 
+    <!-- Pull-to-refresh indicator -->
+    <Transition name="ptr">
+      <div v-if="isRefreshing" class="flex justify-center py-2">
+        <svg class="animate-spin w-5 h-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+      </div>
+    </Transition>
+
     <!-- Resumen (balance general + tabs) -->
     <DeudasResumenDeudas />
 
@@ -540,6 +550,10 @@ async function onDeudaCreated() {
 // Watch tab changes to re-fetch personas
 watch(tabActual, () => {
   fetchPersonas()
+})
+
+const { isRefreshing } = usePullToRefresh(async () => {
+  await Promise.all([fetchResumen(), fetchPersonas()])
 })
 
 onMounted(async () => {

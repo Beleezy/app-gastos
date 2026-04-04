@@ -66,7 +66,7 @@
 
         <!-- Day detail (expanded) -->
         <Transition name="expand">
-          <div v-if="diaExpandido === dia.fecha" class="ml-4 mt-1 space-y-1.5">
+          <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-4 mt-1 space-y-1.5">
             <RegistroGastoItem
               v-for="gasto in dia.gastos"
               :key="gasto.id"
@@ -74,7 +74,7 @@
               @edit="$emit('edit', gasto)"
               @delete="$emit('delete', gasto)"
             />
-          </div>
+          </TransitionGroup>
         </Transition>
       </div>
     </div>
@@ -132,7 +132,7 @@
 
               <!-- Expenses of that day -->
               <Transition name="expand">
-                <div v-if="diaExpandido === dia.fecha" class="ml-6 mt-1 space-y-1.5">
+                <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-6 mt-1 space-y-1.5">
                   <RegistroGastoItem
                     v-for="gasto in dia.gastos"
                     :key="gasto.id"
@@ -140,7 +140,7 @@
                     @edit="$emit('edit', gasto)"
                     @delete="$emit('delete', gasto)"
                   />
-                </div>
+                </TransitionGroup>
               </Transition>
             </div>
           </div>
@@ -205,5 +205,24 @@ const { currencySymbol, formatMonto } = useCurrency()
   opacity: 1;
   max-height: 2000px;
   transform: translateY(0);
+}
+
+/* Animación de entrada para nuevos gastos */
+.gasto-in-enter-active {
+  transition: all 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gasto-in-leave-active {
+  transition: all 0.18s ease-in;
+}
+.gasto-in-enter-from {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.97);
+}
+.gasto-in-leave-to {
+  opacity: 0;
+  transform: translateX(-12px) scale(0.97);
+}
+.gasto-in-move {
+  transition: transform 0.25s ease;
 }
 </style>

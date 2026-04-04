@@ -4,22 +4,33 @@
       <template #title>Planificador Mensual</template>
     </LayoutAppHeader>
 
-    <!-- Month Summary -->
-    <PlanificadorResumenMes />
-
-    <!-- Chart toggle + Export -->
-    <div class="px-4 mb-2 flex gap-2">
-      <button
-        class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors"
-        :class="showChart ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
-        @click="showChart = !showChart"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+    <!-- Pull-to-refresh indicator -->
+    <Transition name="ptr">
+      <div v-if="isRefreshing" class="flex justify-center py-2">
+        <svg class="animate-spin w-5 h-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
-        {{ showChart ? 'Ocultar' : 'Grafico' }}
-      </button>
+      </div>
+    </Transition>
+
+    <!-- Month Summary (swipeable) -->
+    <div ref="swipeZone">
+      <PlanificadorResumenMes />
+    </div>
+
+    <!-- Vista toggle + Export -->
+    <div class="px-4 mb-2 flex gap-2">
+      <!-- Vista: Lista / Calendario / Gráfico -->
+      <div class="flex-1 flex gap-1 bg-primary-800/40 border border-primary-700/20 rounded-xl p-1">
+        <button
+          v-for="v in vistas"
+          :key="v.value"
+          class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          :class="vistaActual === v.value ? 'bg-blue-500/20 text-blue-400' : 'text-gray-500'"
+          @click="vistaActual = v.value"
+        >{{ v.label }}</button>
+      </div>
       <button
         class="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary-800/40 text-gray-500 border border-primary-700/20 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
         @click="exportarPlanificador"
@@ -31,11 +42,10 @@
       </button>
     </div>
 
-    <!-- Chart (toggle) -->
-    <PlanificadorGraficoCategoria v-if="showChart" />
-
-    <!-- Expense List -->
-    <PlanificadorListaGastosPlaneados @editar="editarGasto" />
+    <!-- Vistas -->
+    <PlanificadorGraficoCategoria v-if="vistaActual === 'grafico'" />
+    <PlanificadorCalendarioMensual v-else-if="vistaActual === 'calendario'" />
+    <PlanificadorListaGastosPlaneados v-else @editar="editarGasto" />
 
     <!-- FAB - Floating Action Button -->
     <button
@@ -58,13 +68,19 @@
 </template>
 
 <script setup>
-const { fetchPlan, fetchCategorias, gastosPlaneados, nombreMes, anioActual } = usePlanificador()
+const { fetchPlan, fetchCategorias, gastosPlaneados, nombreMes, anioActual, mesAnterior, mesSiguiente } = usePlanificador()
 const { currencySymbol } = useCurrency()
 const { exportarExcel } = useExportExcel()
 
 const showForm = ref(false)
-const showChart = ref(false)
 const gastoEditando = ref(null)
+
+const vistas = [
+  { value: 'lista', label: 'Lista' },
+  { value: 'calendario', label: 'Calendario' },
+  { value: 'grafico', label: 'Gráfico' },
+]
+const vistaActual = ref('lista')
 
 function exportarPlanificador() {
   const columnas = [
@@ -89,7 +105,17 @@ function cerrarForm() {
   gastoEditando.value = null
 }
 
-onMounted(async () => {
+const { isRefreshing } = usePullToRefresh(async () => {
   await Promise.all([fetchPlan(), fetchCategorias()])
 })
+
+const swipeZone = ref(null)
+const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(mesAnterior, mesSiguiente)
+
+onMounted(async () => {
+  await Promise.all([fetchPlan(), fetchCategorias()])
+  attachSwipe(swipeZone.value)
+})
+
+onUnmounted(() => detachSwipe(swipeZone.value))
 </script>

@@ -1,22 +1,14 @@
 <template>
   <div class="px-4 pt-4 pb-2">
     <!-- Month Selector -->
-    <div class="flex items-center justify-between mb-4">
-      <button class="p-2.5 rounded-xl bg-primary-800/80 text-gray-400 active:bg-primary-700 active:scale-95 transition-all border border-primary-700/20" @click="mesAnterior">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-      </button>
-      <div class="text-center">
-        <h2 class="text-lg font-bold text-white">{{ nombreMes }} {{ anioActual }}</h2>
-        <p v-if="esHoy" class="text-[10px] text-blue-400/70 font-medium mt-0.5">Mes actual</p>
-      </div>
-      <button class="p-2.5 rounded-xl bg-primary-800/80 text-gray-400 active:bg-primary-700 active:scale-95 transition-all border border-primary-700/20" @click="mesSiguiente">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
-    </div>
+    <SharedMonthSelector
+      :label="`${nombreMes} ${anioActual}`"
+      :es-actual="esHoy"
+      class="mb-4"
+      @prev="mesAnterior"
+      @next="mesSiguiente"
+      @go-to-current="fetchPlan"
+    />
 
     <!-- Budget Summary Card -->
     <div class="relative bg-gradient-to-br from-primary-800 to-primary-800/90 rounded-2xl p-4 space-y-4 border border-primary-700/20 overflow-hidden">
@@ -104,17 +96,56 @@
             <span class="text-[11px] text-gray-400">Pendientes: <span class="text-orange-400 font-semibold">{{ resumen.countPendientes }}</span></span>
           </div>
         </div>
-        <!-- Duplicar mes anterior -->
+        <!-- Duplicar mes -->
         <button
           v-if="gastosPlaneados.length === 0"
           class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 text-[10px] font-medium hover:bg-blue-500/20 active:scale-95 transition-all border border-blue-500/10"
           :disabled="duplicando"
-          @click="duplicarMesAnterior"
+          @click="showSelectorMes = true"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
           </svg>
-          {{ duplicando ? 'Copiando...' : 'Copiar mes anterior' }}
+          {{ duplicando ? 'Copiando...' : 'Copiar mes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: selector de mes origen para duplicar -->
+  <div v-if="showSelectorMes" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSelectorMes = false"></div>
+    <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
+      <h3 class="text-base font-semibold text-white mb-1">Copiar mes</h3>
+      <p class="text-xs text-gray-500 mb-4">Elige el mes de origen para copiar los gastos planificados.</p>
+      <div class="flex gap-2 mb-4">
+        <select
+          v-model.number="origenMes"
+          class="flex-1 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50"
+        >
+          <option v-for="(m, i) in MESES" :key="i" :value="i + 1">{{ m }}</option>
+        </select>
+        <input
+          v-model.number="origenAnio"
+          type="number"
+          :min="anioActual - 5"
+          :max="anioActual"
+          class="w-24 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50"
+        />
+      </div>
+      <div class="space-y-2">
+        <button
+          class="w-full py-2.5 rounded-xl bg-blue-500/20 text-blue-400 text-sm font-medium hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+          :disabled="duplicando || (origenMes === mesActual && origenAnio === anioActual)"
+          @click="ejecutarDuplicar"
+        >
+          {{ duplicando ? 'Copiando...' : 'Copiar' }}
+        </button>
+        <button
+          class="w-full py-2.5 rounded-xl text-gray-500 text-sm hover:text-gray-300 transition-colors"
+          @click="showSelectorMes = false"
+        >
+          Cancelar
         </button>
       </div>
     </div>
@@ -122,25 +153,33 @@
 </template>
 
 <script setup>
+import { MESES } from '~/utils/constants'
+
 const {
   mesActual, anioActual, nombreMes, esHoy,
   resumen, gastosPlaneados, mesSiguiente, mesAnterior, updatePresupuesto, fetchPlan, duplicarMes, totalGastoReal
 } = usePlanificador()
 
 const duplicando = ref(false)
+const showSelectorMes = ref(false)
+const { success, error: toastError } = useToast()
 
-async function duplicarMesAnterior() {
-  let mesOrigen = mesActual.value - 1
-  let anioOrigen = anioActual.value
-  if (mesOrigen === 0) {
-    mesOrigen = 12
-    anioOrigen--
-  }
+// Inicializar origen en el mes anterior al actual
+const origenMes = ref(mesActual.value === 1 ? 12 : mesActual.value - 1)
+const origenAnio = ref(mesActual.value === 1 ? anioActual.value - 1 : anioActual.value)
+
+async function ejecutarDuplicar() {
   duplicando.value = true
   try {
-    await duplicarMes(mesOrigen, anioOrigen)
-  } catch { /* error handled in composable */ }
-  finally { duplicando.value = false }
+    const result = await duplicarMes(origenMes.value, origenAnio.value)
+    success(`${result.gastosCopied} gastos copiados correctamente`)
+    showSelectorMes.value = false
+  } catch (e) {
+    const msg = e?.data?.message || e?.message || 'Error al copiar el mes'
+    toastError(msg)
+  } finally {
+    duplicando.value = false
+  }
 }
 
 const editandoPresupuesto = ref(false)
@@ -166,6 +205,7 @@ async function guardarPresupuesto() {
   const monto = parseFloat(presupuestoTemp.value)
   if (!isNaN(monto) && monto >= 0) {
     await updatePresupuesto(monto)
+    success('Presupuesto actualizado')
   }
   editandoPresupuesto.value = false
 }

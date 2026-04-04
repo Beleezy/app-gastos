@@ -24,6 +24,21 @@
           {{ currencySymbol }} {{ formatMonto(tabActual === 'me_deben' ? resumen.totalMeDeben : resumen.totalYoDebo) }}
         </p>
 
+        <!-- Indicador de tendencia -->
+        <div v-if="tendencia !== null" class="flex items-center gap-1.5 mt-2 mb-1">
+          <svg v-if="tendencia > 0" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+          </svg>
+          <svg v-else-if="tendencia < 0" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+          </svg>
+          <span v-else class="w-3.5 h-3.5 flex items-center justify-center text-gray-500 text-xs">—</span>
+          <span class="text-[10px]" :class="tendencia > 0 ? 'text-emerald-400' : tendencia < 0 ? 'text-red-400' : 'text-gray-500'">
+            {{ tendencia > 0 ? 'Mejorando' : tendencia < 0 ? 'Empeorando' : 'Sin cambios' }} vs mes pasado
+            <span v-if="tendencia !== 0">({{ tendencia > 0 ? '+' : '' }}{{ currencySymbol }} {{ formatMonto(Math.abs(tendencia)) }})</span>
+          </span>
+        </div>
+
         <!-- Balance visual bar -->
         <div v-if="totalGeneral > 0" class="mt-4 mb-1">
           <div class="flex h-1.5 rounded-full overflow-hidden bg-primary-900/50 gap-0.5">
@@ -98,4 +113,33 @@ function toggleYoDebo() {
 }
 
 const { currencySymbol, formatMonto } = useCurrency()
+
+// Tendencia: compara balanceNeto actual vs snapshot del mes anterior
+const SNAPSHOT_KEY = 'deudas-balance-snapshot'
+const tendencia = ref(null)
+
+function actualizarTendencia() {
+  if (!process.client) return
+  const balance = resumen.value.balanceNeto
+  const hoy = new Date()
+  const mesActual = `${hoy.getFullYear()}-${hoy.getMonth() + 1}`
+
+  try {
+    const raw = localStorage.getItem(SNAPSHOT_KEY)
+    const snapshot = raw ? JSON.parse(raw) : null
+
+    if (snapshot && snapshot.mes !== mesActual) {
+      // Tenemos snapshot de un mes anterior — comparar
+      tendencia.value = balance - snapshot.balance
+    }
+
+    // Guardar snapshot del mes actual (sobreescribir o crear)
+    if (!snapshot || snapshot.mes !== mesActual) {
+      localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({ mes: mesActual, balance }))
+    }
+  } catch { /* sin soporte localStorage */ }
+}
+
+watch(() => resumen.value.balanceNeto, actualizarTendencia)
+onMounted(actualizarTendencia)
 </script>

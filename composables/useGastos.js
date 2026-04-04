@@ -1,5 +1,4 @@
-const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+import { DIAS_SEMANA, MESES } from '~/utils/constants'
 
 export function useGastos() {
   const gastos = useState('registro-gastos', () => [])
@@ -41,16 +40,22 @@ export function useGastos() {
     })
   })
 
+  let fetchGastosController = null
+  let fetchMensualController = null
+
   async function fetchGastos() {
+    if (fetchGastosController) fetchGastosController.abort()
+    fetchGastosController = new AbortController()
     isLoading.value = true
     error.value = null
     try {
       const data = await $fetch('/api/gastos', {
-        query: { fecha: fechaSeleccionada.value }
+        query: { fecha: fechaSeleccionada.value },
+        signal: fetchGastosController.signal,
       })
       gastos.value = data
     } catch (e) {
-      error.value = e.message || 'Error al cargar gastos'
+      if (e?.name !== 'AbortError') error.value = e.message || 'Error al cargar gastos'
     } finally {
       isLoading.value = false
     }
@@ -146,14 +151,17 @@ export function useGastos() {
   }
 
   async function fetchGastosMensuales() {
+    if (fetchMensualController) fetchMensualController.abort()
+    fetchMensualController = new AbortController()
     isLoadingMensual.value = true
     try {
       const data = await $fetch('/api/gastos', {
-        query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value }
+        query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value },
+        signal: fetchMensualController.signal,
       })
       gastosMensuales.value = data
     } catch (e) {
-      error.value = e.message || 'Error al cargar gastos mensuales'
+      if (e?.name !== 'AbortError') error.value = e.message || 'Error al cargar gastos mensuales'
     } finally {
       isLoadingMensual.value = false
     }

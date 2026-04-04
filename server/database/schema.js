@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique, index } from 'drizzle-orm/pg-core'
 
 // ── Enums ──
 export const estadoGastoPlanificado = pgEnum('estado_gasto_planificado', ['pendiente', 'pagado'])
@@ -56,7 +56,9 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('gastos_planificados_plan_idx').on(table.planMensualId),
+])
 
 // ── Tabla 5: gastos ──
 export const gastos = pgTable('gastos', {
@@ -72,7 +74,10 @@ export const gastos = pgTable('gastos', {
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('gastos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
+  index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
+])
 
 // ── Tabla 6: personas_entidades ──
 export const personasEntidades = pgTable('personas_entidades', {
@@ -84,7 +89,9 @@ export const personasEntidades = pgTable('personas_entidades', {
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('personas_entidades_usuario_idx').on(table.usuarioId),
+])
 
 // ── Tabla 7: deudas ──
 export const deudas = pgTable('deudas', {
@@ -101,7 +108,10 @@ export const deudas = pgTable('deudas', {
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('deudas_persona_estado_idx').on(table.personaEntidadId, table.estado),
+  index('deudas_usuario_tipo_idx').on(table.usuarioId, table.tipoDeuda),
+])
 
 // ── Tabla 8: configuraciones ──
 export const configuraciones = pgTable('configuraciones', {
@@ -126,4 +136,6 @@ export const pagosDeuda = pgTable('pagos_deuda', {
   metodoPago: varchar('metodo_pago', { length: 100 }),
   notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('pagos_deuda_deuda_idx').on(table.deudaId),
+])

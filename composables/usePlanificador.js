@@ -1,7 +1,4 @@
-const MESES = [
-  '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-]
+import { MESES } from '~/utils/constants'
 
 export function usePlanificador() {
   const plan = useState('planificador-plan', () => null)
@@ -14,7 +11,7 @@ export function usePlanificador() {
   const mesActual = useState('planificador-mes', () => new Date().getMonth() + 1)
   const anioActual = useState('planificador-anio', () => new Date().getFullYear())
 
-  const nombreMes = computed(() => MESES[mesActual.value] || '')
+  const nombreMes = computed(() => MESES[mesActual.value - 1] || '')
   const esHoy = computed(() => {
     const now = new Date()
     return mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()

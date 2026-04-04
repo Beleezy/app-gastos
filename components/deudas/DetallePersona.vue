@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-3">
+  <div ref="detalleRoot" class="px-4 py-3">
     <!-- Back button + Person header -->
     <div class="mb-4">
       <button class="flex items-center gap-1.5 text-gray-400 text-sm mb-3 active:text-white transition-colors" @click="volverALista">
@@ -44,6 +44,16 @@
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
             </svg>
           </button>
+          <!-- Edit persona -->
+          <button
+            class="w-8 h-8 rounded-lg bg-primary-700/50 flex items-center justify-center text-gray-500 hover:text-amber-400 transition-colors"
+            title="Editar persona"
+            @click="showEditarPersona = true"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
           <!-- Delete persona -->
           <button
             class="w-8 h-8 rounded-lg bg-primary-700/50 flex items-center justify-center text-gray-500 hover:text-red-400 transition-colors"
@@ -82,43 +92,12 @@
     </div>
 
     <!-- Stats: progress + breakdown -->
-    <div v-if="!isLoading && (deudasActivasPersona.length > 0 || deudasSaldadasPersona.length > 0)" class="bg-primary-800 rounded-2xl p-4 mb-4">
-      <!-- Overall collection progress -->
-      <div class="mb-3">
-        <div class="flex items-center justify-between mb-1.5">
-          <span class="text-xs text-gray-400">Progreso de {{ tabActual === 'me_deben' ? 'cobro' : 'pago' }}</span>
-          <span class="text-xs font-medium" :class="porcentajeCobrado > 70 ? 'text-emerald-400' : 'text-blue-400'">
-            {{ porcentajeCobrado.toFixed(0) }}%
-          </span>
-        </div>
-        <div class="w-full h-2 bg-primary-900/80 rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-500"
-            :style="{ width: porcentajeCobrado + '%' }"
-          ></div>
-        </div>
-        <div class="flex items-center justify-between mt-1">
-          <span class="text-[10px] text-gray-600">{{ currencySymbol }} {{ formatMonto(totalCobrado) }} cobrado</span>
-          <span class="text-[10px] text-gray-600">{{ currencySymbol }} {{ formatMonto(totalOriginal) }} total</span>
-        </div>
-      </div>
-
-      <!-- Mini breakdown bars per debt -->
-      <div v-if="deudasActivasPersona.length > 1" class="space-y-1.5">
-        <p class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1">Distribución</p>
-        <div v-for="deuda in deudasActivasPersona" :key="deuda.id" class="flex items-center gap-2">
-          <span class="text-[10px] text-gray-400 truncate w-24 shrink-0">{{ deuda.concepto }}</span>
-          <div class="flex-1 h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              :class="tabActual === 'me_deben' ? 'bg-emerald-500' : 'bg-red-500'"
-              :style="{ width: totalPendientePersona > 0 ? ((deuda.montoPendiente / totalPendientePersona) * 100) + '%' : '0%' }"
-            ></div>
-          </div>
-          <span class="text-[10px] text-gray-500 shrink-0">{{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}</span>
-        </div>
-      </div>
-    </div>
+    <DeudasStatsPersona
+      v-if="!isLoading"
+      :deudas-activas="deudasActivasPersona"
+      :deudas-saldadas="deudasSaldadasPersona"
+      :tab-actual="tabActual"
+    />
 
     <!-- Loading state -->
     <div v-if="isLoading" class="space-y-3">
@@ -144,11 +123,14 @@
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-white">{{ deuda.concepto }}</p>
               <p class="text-xs text-gray-500 mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
-              <div v-if="deuda.fechaPago" class="flex items-center gap-1 mt-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <div v-if="deuda.fechaPago" class="flex items-center gap-1.5 mt-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-blue-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p class="text-[10px] text-blue-400 font-medium">Pago: {{ formatFecha(deuda.fechaPago) }}</p>
+                <p class="text-[10px] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-blue-400'">
+                  {{ esVencida(deuda) ? 'Vencida:' : 'Pago:' }} {{ formatFecha(deuda.fechaPago) }}
+                </p>
+                <span v-if="esVencida(deuda)" class="text-[9px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
               </div>
               <div v-if="deuda.notas" class="mt-1">
                 <p class="text-[10px] text-gray-600 italic">{{ deuda.notas }}</p>
@@ -181,98 +163,57 @@
             </p>
           </div>
 
-          <!-- Actions -->
-          <div class="flex justify-end gap-3 mt-2 pt-2 border-t border-primary-700/20 flex-wrap">
+          <!-- Actions (44x44px targets) -->
+          <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-primary-700/20">
             <button
-              class="text-xs text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1"
+              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 active:bg-blue-500/30 transition-colors"
               @click="emit('registrarPago', deuda)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Pago
             </button>
             <button
-              class="text-xs text-gray-600 hover:text-amber-400 transition-colors flex items-center gap-1"
+              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:bg-amber-500/30 transition-colors"
               @click="emit('editarDeuda', deuda)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Editar
             </button>
             <button
-              class="text-xs text-gray-600 hover:text-emerald-400 transition-colors flex items-center gap-1"
-              @click="marcarSaldada(deuda)"
+              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition-colors"
+              @click="confirmarSaldar(deuda)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               Saldar
             </button>
             <button
-              class="text-xs text-gray-600 hover:text-red-400 transition-colors flex items-center gap-1"
-              @click="eliminar(deuda)"
+              class="min-w-[44px] h-11 px-3 flex items-center justify-center rounded-xl text-gray-600 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
+              @click="confirmarEliminarDeuda(deuda)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
-              Eliminar
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Payment history section -->
-      <div v-if="pagosPersona.length > 0" class="mb-5">
-        <button
-          class="flex items-center gap-2 mb-2.5 w-full"
-          @click="showPagos = !showPagos"
-        >
-          <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Historial de pagos</h3>
-          <span class="text-xs text-gray-500">{{ pagosPersona.length }}</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-3 h-3 text-gray-600 ml-auto transition-transform"
-            :class="showPagos ? 'rotate-180' : ''"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-          >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+      <!-- Mini gráfico de evolución del saldo -->
+      <DeudasGraficoEvolucionDeuda
+        :pagos="pagosPersona"
+        :monto-original-total="deudasPersona.reduce((s, d) => s + d.montoOriginal, 0)"
+        :monto-actual="totalPendientePersona"
+        :color="tabActual === 'me_deben' ? '#10b981' : '#ef4444'"
+      />
 
-        <div v-if="showPagos" class="space-y-2">
-          <div v-for="(pago, idx) in pagosPersona" :key="idx" class="bg-primary-800 rounded-xl p-3.5 border border-primary-700/30">
-            <!-- Payment header -->
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-                <div>
-                  <p class="text-xs text-gray-500">{{ formatFecha(pago.fechaPago) }}</p>
-                  <p v-if="pago.metodoPago" class="text-[10px] text-gray-600">{{ pago.metodoPago }}</p>
-                </div>
-              </div>
-              <span class="text-sm font-bold text-blue-400">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
-            </div>
-
-            <!-- Affected debts detail -->
-            <div class="bg-primary-900/40 rounded-lg p-2.5 space-y-1.5">
-              <div v-for="(detalle, dIdx) in pago.detalles" :key="dIdx" class="flex items-center justify-between">
-                <p class="text-xs text-gray-400 truncate flex-1 min-w-0 mr-2">{{ detalle.concepto }}</p>
-                <span class="text-xs text-gray-300 font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
-              </div>
-            </div>
-
-            <!-- Notes -->
-            <p v-if="pago.notas && !pago.notas.startsWith('Pago global')" class="text-[10px] text-gray-600 italic mt-1.5">{{ pago.notas }}</p>
-          </div>
-        </div>
-      </div>
+      <!-- Payment history section (timeline) -->
+      <DeudasHistorialPagosPersona :pagos="pagosPersona" />
 
       <!-- Settled debts section -->
       <div v-if="deudasSaldadasPersona.length > 0">
@@ -321,6 +262,36 @@
       <div class="h-16"></div>
     </template>
 
+    <!-- Editar persona -->
+    <DeudasFormEditarPersona
+      v-if="showEditarPersona"
+      :persona="personaSeleccionada"
+      @close="showEditarPersona = false"
+      @saved="onPersonaEditada"
+    />
+
+    <!-- Confirm saldar deuda -->
+    <SharedConfirmDialog
+      v-model="showSaldarConfirm"
+      title="Saldar deuda"
+      :message="`¿Registrar pago de ${currencySymbol} ${formatMonto(deudaParaAccion?.montoPendiente)} y marcar como pagada?`"
+      confirm-label="Saldar deuda"
+      variant="success"
+      :loading="procesandoAccion"
+      @confirm="ejecutarSaldar"
+    />
+
+    <!-- Confirm eliminar deuda -->
+    <SharedConfirmDialog
+      v-model="showEliminarDeudaConfirm"
+      title="Eliminar deuda"
+      :message="`¿Eliminar '${deudaParaAccion?.concepto}'? Esta acción no se puede deshacer.`"
+      confirm-label="Eliminar"
+      variant="danger"
+      :loading="procesandoAccion"
+      @confirm="ejecutarEliminarDeuda"
+    />
+
     <!-- Delete persona confirmation -->
     <div v-if="showDeletePersona" class="fixed inset-0 z-50 flex items-center justify-center px-6">
       <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDeletePersona = false"></div>
@@ -351,7 +322,7 @@ const emit = defineEmits(['registrarPago', 'agregarDeuda', 'editarDeuda', 'pagoG
 
 const {
   tabActual, personaSeleccionada,
-  deudasActivasPersona, deudasSaldadasPersona,
+  deudasPersona, deudasActivasPersona, deudasSaldadasPersona,
   totalPendientePersona, isLoading,
   volverALista, deleteDeuda, archivarDeuda, deletePersona,
   registrarPago, pagosPersona,
@@ -360,13 +331,17 @@ const {
 const { descargarPdf, compartirWhatsapp } = useDeudaPdf()
 
 const showSaldadas = ref(false)
-const showPagos = ref(false)
 const showDeletePersona = ref(false)
+const showEditarPersona = ref(false)
+const showSaldarConfirm = ref(false)
+const showEliminarDeudaConfirm = ref(false)
+const deudaParaAccion = ref(null)
+const procesandoAccion = ref(false)
 
-const allDeudas = computed(() => [...deudasActivasPersona.value, ...deudasSaldadasPersona.value])
-const totalOriginal = computed(() => allDeudas.value.reduce((s, d) => s + d.montoOriginal, 0))
-const totalCobrado = computed(() => allDeudas.value.reduce((s, d) => s + (d.montoOriginal - d.montoPendiente), 0))
-const porcentajeCobrado = computed(() => totalOriginal.value > 0 ? (totalCobrado.value / totalOriginal.value) * 100 : 0)
+const hoy = new Date().toISOString().split('T')[0]
+function esVencida(deuda) {
+  return !!deuda.fechaPago && deuda.fechaPago < hoy
+}
 
 async function exportarPdf() {
   await descargarPdf(personaSeleccionada.value, deudasActivasPersona.value, deudasSaldadasPersona.value)
@@ -376,14 +351,7 @@ async function enviarWhatsapp() {
   await compartirWhatsapp(personaSeleccionada.value, deudasActivasPersona.value, deudasSaldadasPersona.value)
 }
 
-function getInitials(nombre) {
-  return nombre
-    .split(' ')
-    .map(w => w[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase()
-}
+import { getInitials } from '~/utils/constants'
 
 const { currencySymbol, formatMonto } = useCurrency()
 
@@ -395,20 +363,56 @@ function formatFecha(fecha) {
   return `${dia} de ${meses[d.getMonth()]}, ${d.getFullYear()}`
 }
 
-async function marcarSaldada(deuda) {
-  // Register the remaining amount as a payment, then mark as paid
-  if (deuda.montoPendiente > 0) {
-    await registrarPago(deuda.id, {
-      monto: deuda.montoPendiente,
-      fecha: new Date().toISOString().split('T')[0],
-    })
-  } else {
-    await archivarDeuda(deuda.id)
+function confirmarSaldar(deuda) {
+  deudaParaAccion.value = deuda
+  showSaldarConfirm.value = true
+}
+
+async function ejecutarSaldar() {
+  if (!deudaParaAccion.value) return
+  procesandoAccion.value = true
+  try {
+    const deuda = deudaParaAccion.value
+    if (deuda.montoPendiente > 0) {
+      await registrarPago(deuda.id, {
+        monto: deuda.montoPendiente,
+        fecha: new Date().toISOString().split('T')[0],
+      })
+    } else {
+      await archivarDeuda(deuda.id)
+    }
+  } finally {
+    procesandoAccion.value = false
+    showSaldarConfirm.value = false
+    deudaParaAccion.value = null
   }
 }
 
-async function eliminar(deuda) {
-  await deleteDeuda(deuda.id)
+function confirmarEliminarDeuda(deuda) {
+  deudaParaAccion.value = deuda
+  showEliminarDeudaConfirm.value = true
+}
+
+async function ejecutarEliminarDeuda() {
+  if (!deudaParaAccion.value) return
+  procesandoAccion.value = true
+  try {
+    await deleteDeuda(deudaParaAccion.value.id)
+  } finally {
+    procesandoAccion.value = false
+    showEliminarDeudaConfirm.value = false
+    deudaParaAccion.value = null
+  }
+}
+
+function onPersonaEditada(updated) {
+  // Actualizar nombre en la persona seleccionada localmente
+  if (personaSeleccionada.value) {
+    personaSeleccionada.value.nombre = updated.nombre
+    personaSeleccionada.value.contacto = updated.contacto
+    personaSeleccionada.value.notas = updated.notas
+    personaSeleccionada.value.tipo = updated.tipo
+  }
 }
 
 function confirmarEliminarPersona() {
@@ -419,4 +423,11 @@ async function ejecutarEliminarPersona() {
   showDeletePersona.value = false
   await deletePersona(personaSeleccionada.value.id)
 }
+
+// Swipe right → go back
+const detalleRoot = ref(null)
+const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(volverALista, () => {}, { threshold: 80, verticalTolerance: 60 })
+
+onMounted(() => attachSwipe(detalleRoot.value))
+onUnmounted(() => detachSwipe(detalleRoot.value))
 </script>

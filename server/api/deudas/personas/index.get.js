@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioId()
   const query = getQuery(event)
   const tipo = query.tipo // 'me_deben' | 'yo_debo' | undefined (all)
+  const hoy = new Date().toISOString().split('T')[0]
 
   // Get personas with aggregated debt totals
   const personasRaw = await db
@@ -21,6 +22,8 @@ export default defineEventHandler(async (event) => {
       totalDeudas: sql`COUNT(${deudas.id})`.as('total_deudas'),
       deudasActivas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN 1 END)`.as('deudas_activas'),
       ultimoMovimiento: sql`MAX(${deudas.updatedAt})`.as('ultimo_movimiento'),
+      tieneVencidas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN 1 END)`.as('tiene_vencidas'),
+      fechaProximaVencer: sql`MIN(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} >= ${hoy} THEN ${deudas.fechaPago} END)`.as('fecha_proxima_vencer'),
     })
     .from(personasEntidades)
     .leftJoin(deudas, and(
@@ -36,5 +39,7 @@ export default defineEventHandler(async (event) => {
     totalPendiente: parseFloat(p.totalPendiente),
     totalDeudas: Number(p.totalDeudas),
     deudasActivas: Number(p.deudasActivas),
+    tieneVencidas: Number(p.tieneVencidas) > 0,
+    fechaProximaVencer: p.fechaProximaVencer || null,
   }))
 })

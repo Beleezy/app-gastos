@@ -63,60 +63,65 @@ export default defineEventHandler(async (event) => {
     return aFechaPago < bFechaPago ? -1 : aFechaPago > bFechaPago ? 1 : 0
   })
 
-  let montoRestante = montoTotal
-  const pagosRealizados = []
-  const deudasActualizadas = []
+  // Ejecutar en transacción para garantizar consistencia
+  const result = await db.transaction(async (tx) => {
+    let montoRestante = montoTotal
+    const pagosRealizados = []
+    const deudasActualizadas = []
 
-  for (const deuda of sorted) {
-    if (montoRestante <= 0) break
+    for (const deuda of sorted) {
+      if (montoRestante <= 0) break
 
-    const pendiente = parseFloat(deuda.montoPendiente)
-    const montoAplicar = Math.min(montoRestante, pendiente)
-    const nuevoPendiente = Math.round((pendiente - montoAplicar) * 100) / 100
-    const nuevoEstado = nuevoPendiente <= 0 ? 'pagado' : 'parcial'
+      const pendiente = parseFloat(deuda.montoPendiente)
+      const montoAplicar = Math.min(montoRestante, pendiente)
+      const nuevoPendiente = Math.round((pendiente - montoAplicar) * 100) / 100
+      const nuevoEstado = nuevoPendiente <= 0 ? 'pagado' : 'parcial'
 
-    // Create payment record
-    const [pago] = await db
-      .insert(pagosDeuda)
-      .values({
-        deudaId: deuda.id,
-        montoPagado: String(montoAplicar),
-        fechaPago,
-        metodoPago,
-        notas: notas ? `Pago global - ${notas}` : 'Pago global',
+      // Create payment record
+      const [pago] = await tx
+        .insert(pagosDeuda)
+        .values({
+          deudaId: deuda.id,
+          montoPagado: String(montoAplicar),
+          fechaPago,
+          metodoPago,
+          notas: notas ? `Pago global - ${notas}` : 'Pago global',
+        })
+        .returning()
+
+      // Update debt
+      const [deudaActualizada] = await tx
+        .update(deudas)
+        .set({
+          montoPendiente: String(Math.max(0, nuevoPendiente)),
+          estado: nuevoEstado,
+          updatedAt: new Date(),
+        })
+        .where(eq(deudas.id, deuda.id))
+        .returning()
+
+      pagosRealizados.push({
+        ...pago,
+        montoPagado: parseFloat(pago.montoPagado),
+        concepto: deuda.concepto,
       })
-      .returning()
 
-    // Update debt
-    const [deudaActualizada] = await db
-      .update(deudas)
-      .set({
-        montoPendiente: String(Math.max(0, nuevoPendiente)),
-        estado: nuevoEstado,
-        updatedAt: new Date(),
+      deudasActualizadas.push({
+        ...deudaActualizada,
+        montoOriginal: parseFloat(deudaActualizada.montoOriginal),
+        montoPendiente: parseFloat(deudaActualizada.montoPendiente),
       })
-      .where(eq(deudas.id, deuda.id))
-      .returning()
 
-    pagosRealizados.push({
-      ...pago,
-      montoPagado: parseFloat(pago.montoPagado),
-      concepto: deuda.concepto,
-    })
+      montoRestante = Math.round((montoRestante - montoAplicar) * 100) / 100
+    }
 
-    deudasActualizadas.push({
-      ...deudaActualizada,
-      montoOriginal: parseFloat(deudaActualizada.montoOriginal),
-      montoPendiente: parseFloat(deudaActualizada.montoPendiente),
-    })
+    return {
+      montoAplicado: montoTotal - montoRestante,
+      montoSobrante: montoRestante,
+      pagos: pagosRealizados,
+      deudas: deudasActualizadas,
+    }
+  })
 
-    montoRestante = Math.round((montoRestante - montoAplicar) * 100) / 100
-  }
-
-  return {
-    montoAplicado: montoTotal - montoRestante,
-    montoSobrante: montoRestante,
-    pagos: pagosRealizados,
-    deudas: deudasActualizadas,
-  }
+  return result
 })

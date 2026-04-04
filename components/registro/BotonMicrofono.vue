@@ -32,6 +32,9 @@
         ]"
         :disabled="!isSupported"
         @click="toggleListening"
+        @pointerdown="onPointerDown"
+        @pointerup="onPointerUp"
+        @pointerleave="onPointerUp"
       >
         <!-- Mic icon -->
         <svg v-if="!isListening" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -44,12 +47,12 @@
       </button>
     </div>
 
-    <!-- Audio wave visualization -->
+    <!-- Audio wave visualization (real AudioContext data) -->
     <div v-if="isListening" class="flex items-center gap-1.5 h-8">
-      <div v-for="i in 7" :key="i"
-        class="w-1 rounded-full animate-wave"
+      <div v-for="(level, i) in audioLevels" :key="i"
+        class="w-1 rounded-full transition-all duration-75"
         :class="i % 2 === 0 ? 'bg-blue-400' : 'bg-indigo-400'"
-        :style="{ animationDelay: `${i * 0.08}s`, height: `${10 + Math.random() * 22}px` }"
+        :style="{ height: `${level}px` }"
       ></div>
     </div>
 
@@ -164,6 +167,59 @@ const props = defineProps({
 const isEditing = ref(false)
 const editText = ref('')
 
+// Real audio level visualization
+const audioLevels = ref(Array(7).fill(8))
+let audioContext = null
+let analyser = null
+let audioSource = null
+let animationId = null
+
+async function startAudioAnalysis() {
+  if (!process.client) return
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext
+    audioContext = new AudioCtx()
+    analyser = audioContext.createAnalyser()
+    analyser.fftSize = 32
+    audioSource = audioContext.createMediaStreamSource(stream)
+    audioSource.connect(analyser)
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount)
+
+    function update() {
+      analyser.getByteFrequencyData(dataArray)
+      audioLevels.value = Array.from({ length: 7 }, (_, i) => {
+        const idx = Math.floor(i * dataArray.length / 7)
+        const raw = dataArray[idx] / 255
+        return Math.max(4, Math.round(raw * 28))
+      })
+      animationId = requestAnimationFrame(update)
+    }
+    update()
+  } catch {
+    // Fallback to animated bars if permission denied
+  }
+}
+
+function stopAudioAnalysis() {
+  if (animationId) cancelAnimationFrame(animationId)
+  if (audioSource) audioSource.disconnect()
+  if (audioContext) audioContext.close()
+  audioContext = null
+  analyser = null
+  audioSource = null
+  animationId = null
+  audioLevels.value = Array(7).fill(8)
+}
+
+watch(() => props.isListening, (val) => {
+  if (val) startAudioAnalysis()
+  else stopAudioAnalysis()
+})
+
+onUnmounted(stopAudioAnalysis)
+
 function startEdit() {
   editText.value = props.transcript
   isEditing.value = true
@@ -182,11 +238,32 @@ function cancelEdit() {
   isEditing.value = false
 }
 
+// Modo tap: toggle normal
 function toggleListening() {
   if (props.isListening) {
     emit('stop')
   } else {
     emit('start')
+  }
+}
+
+// Modo walkie-talkie: mantener presionado para grabar
+let holdTimer = null
+let isHoldMode = false
+
+function onPointerDown() {
+  if (props.isListening || props.hasDraft) return
+  holdTimer = setTimeout(() => {
+    isHoldMode = true
+    emit('start')
+  }, 350)
+}
+
+function onPointerUp() {
+  clearTimeout(holdTimer)
+  if (isHoldMode) {
+    isHoldMode = false
+    if (props.isListening) emit('stop')
   }
 }
 </script>

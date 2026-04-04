@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-primary-800/60 rounded-xl border border-primary-700/30 overflow-hidden group">
+  <div class="bg-primary-800/60 rounded-xl border border-primary-700/30 overflow-hidden">
     <div class="flex items-center gap-3 px-3 py-2.5">
       <!-- Category icon -->
       <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
@@ -32,25 +32,25 @@
       </div>
     </div>
 
-    <!-- Action buttons -->
-    <div class="flex border-t border-primary-700/20 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity h-0 group-hover:h-auto overflow-hidden">
+    <!-- Action buttons — always visible as compact icons -->
+    <div class="flex items-center gap-1 shrink-0 ml-2">
       <button
-        class="flex-1 py-2 text-xs text-gray-500 hover:text-blue-400 hover:bg-primary-700/20 transition-colors flex items-center justify-center gap-1"
-        @click="$emit('edit')"
+        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 active:bg-blue-500/20 transition-colors"
+        aria-label="Editar"
+        @click.stop="$emit('edit')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
         </svg>
-        Editar
       </button>
       <button
-        class="flex-1 py-2 text-xs text-gray-500 hover:text-red-400 hover:bg-red-500/5 transition-colors flex items-center justify-center gap-1 border-l border-primary-700/20"
-        @click="$emit('delete')"
+        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
+        aria-label="Eliminar"
+        @click.stop="onDelete"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
-        Eliminar
       </button>
     </div>
   </div>
@@ -61,7 +61,14 @@ defineProps({
   gasto: { type: Object, required: true },
 })
 
-defineEmits(['edit', 'delete'])
+const emit = defineEmits(['edit', 'delete'])
+
+const { vibrate } = useHaptic()
+
+function onDelete() {
+  vibrate([10, 30, 10])
+  emit('delete')
+}
 
 const ICON_MAP = {
   'utensils': '🍽️', 'bus': '🚌', 'home': '🏠', 'heart-pulse': '🏥',

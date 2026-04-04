@@ -5,40 +5,26 @@
     </LayoutAppHeader>
 
     <div class="max-w-lg mx-auto">
-      <!-- Month navigator -->
-      <div class="flex items-center justify-between px-4 py-3">
-        <button
-          class="w-9 h-9 rounded-xl bg-primary-800/60 flex items-center justify-center text-gray-400 hover:text-white hover:bg-primary-700/60 active:scale-95 transition-all border border-primary-700/20"
-          @click="mesAnterior"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      <!-- Pull-to-refresh indicator -->
+      <Transition name="ptr">
+        <div v-if="isRefreshing" class="flex justify-center py-2">
+          <svg class="animate-spin w-5 h-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
-        </button>
-
-        <div class="text-center">
-          <button
-            class="text-base font-bold text-white hover:text-blue-400 transition-colors"
-            @click="irAMesActual"
-          >
-            {{ mesFormateado }}
-          </button>
-          <p class="text-[10px] text-blue-400/60 font-medium mt-0.5" v-if="!esMesActual">
-            Toca para ir al mes actual
-          </p>
         </div>
+      </Transition>
 
-        <button
-          class="w-9 h-9 rounded-xl bg-primary-800/60 flex items-center justify-center transition-all border border-primary-700/20"
-          :class="esMesActual ? 'text-gray-700 cursor-not-allowed opacity-40' : 'text-gray-400 hover:text-white hover:bg-primary-700/60 active:scale-95'"
-          :disabled="esMesActual"
-          @click="mesSiguiente"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
+      <!-- Month navigator -->
+      <SharedMonthSelector
+        :label="mesFormateado"
+        :es-actual="esMesActual"
+        :disable-next="esMesActual"
+        container-class="px-4 py-3"
+        @prev="mesAnterior"
+        @next="mesSiguiente"
+        @go-to-current="irAMesActual"
+      />
 
       <!-- Summary card -->
       <div class="px-4 mb-5">
@@ -139,7 +125,7 @@
         </div>
       </div>
 
-      <!-- Tab toggle: Historial / Categorías + Export -->
+      <!-- Tab toggle: Historial / Categorías / Stats + Export -->
       <div class="flex items-center gap-2 px-4 mb-4">
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
@@ -156,6 +142,13 @@
           Categorías
         </button>
         <button
+          class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+          :class="vistaRegistro === 'stats' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          @click="vistaRegistro = 'stats'"
+        >
+          Comparar
+        </button>
+        <button
           class="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-medium bg-primary-800/40 text-gray-500 border border-primary-700/20 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
           @click="exportarGastos"
         >
@@ -166,16 +159,26 @@
         </button>
       </div>
 
-      <!-- Monthly history -->
-      <RegistroHistorialDiario
-        v-if="vistaRegistro === 'historial'"
-        :gastos-por-dia="gastosPorDiaFiltrados"
-        :gastos-por-semana="gastosPorSemanaFiltrados"
-        :is-loading="isLoadingMensual"
-        :format-fecha-dia="formatFechaDia"
-        :format-rango-semana="formatRangoSemana"
-        @edit="abrirEdicion"
-        @delete="confirmarEliminar"
+      <!-- Monthly history (swipeable) -->
+      <div ref="historialSwipeZone">
+        <RegistroHistorialDiario
+          v-if="vistaRegistro === 'historial'"
+          :gastos-por-dia="gastosPorDiaFiltrados"
+          :gastos-por-semana="gastosPorSemanaFiltrados"
+          :is-loading="isLoadingMensual"
+          :format-fecha-dia="formatFechaDia"
+          :format-rango-semana="formatRangoSemana"
+          @edit="abrirEdicion"
+          @delete="confirmarEliminar"
+        />
+      </div>
+
+      <!-- Comparative stats -->
+      <RegistroStatsComparativas
+        v-if="vistaRegistro === 'stats'"
+        :mes-actual="mesSeleccionado"
+        :anio-actual="anioSeleccionado"
+        :gastos-actuales="gastosMensuales"
       />
 
       <!-- Category chart -->
@@ -209,6 +212,7 @@
       :transcripcion="lastTranscript"
       :is-parsing="isParsing"
       :parse-error="parseError"
+      :retry-status="retryStatus"
       :categorias="categorias"
       :on-confirm="onConfirmGastos"
       @close="cerrarConfirmacion"
@@ -236,7 +240,7 @@
           </div>
           <div>
             <h3 class="text-base font-semibold text-white">Eliminar gasto</h3>
-            <p class="text-xs text-gray-500">Esta accion no se puede deshacer</p>
+            <p class="text-xs text-gray-500">Tendrás 5 segundos para deshacer</p>
           </div>
         </div>
         <div class="bg-primary-900/40 rounded-xl p-3 mb-5 border border-primary-700/20">
@@ -268,6 +272,24 @@
         {{ toastMsg }}
       </div>
     </Transition>
+
+    <!-- Undo delete toast -->
+    <Transition name="toast">
+      <div v-if="undoPendiente"
+        class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-primary-800/95 text-white text-sm px-4 py-3 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-sm border border-primary-700/40"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+        <span class="text-gray-300">Gasto eliminado</span>
+        <button
+          class="ml-1 px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 font-semibold text-xs border border-blue-500/30 hover:bg-blue-500/30 active:scale-95 transition-all"
+          @click="deshacerEliminar"
+        >
+          Deshacer ({{ undoCountdown }}s)
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -283,8 +305,13 @@ const {
   formatFechaDia, formatRangoSemana,
 } = useGastos()
 
-const { isListening, transcript, error: voiceError, isSupported, startListening, continueListening, stopListening, resetTranscript } = useVoiceRecognition()
-const { isParsing, parsedExpenses, error: parseError, parseVoiceText, clearParsed } = useLLMParser()
+const {
+  isListening, transcript, voiceError, isSupported, hasDraft,
+  showConfirmacion, lastTranscript, isParsing, parsedExpenses, parseError, retryStatus,
+  onStartListening, onStopListening, onContinueListening,
+  onSendDraft, onDiscardDraft, onOverwriteDraft, onUpdateTranscript,
+  reintentarParse, cerrarConfirmacion,
+} = useVoiceDraft()
 
 const presupuesto = ref(0)
 
@@ -356,19 +383,20 @@ const gastosPorSemanaFiltrados = computed(() => {
     .filter(semana => semana.dias.length > 0)
 })
 
-const showConfirmacion = ref(false)
 const showFormManual = ref(false)
 const gastoEditar = ref(null)
 const gastoEliminar = ref(null)
-const lastTranscript = ref('')
 const toastMsg = ref('')
-const hasDraft = ref(false)
+const undoPendiente = ref(null)
+const undoCountdown = ref(5)
+let undoTimer = null
+let undoCountdownTimer = null
 
 const { currencySymbol, formatMonto } = useCurrency()
 const { exportarExcel } = useExportExcel()
+const { vibrate } = useHaptic()
 
 function exportarGastos() {
-  const MESES = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
   const columnas = [
     { label: 'Fecha', getValue: g => g.fecha },
     { label: 'Hora', getValue: g => g.hora || '' },
@@ -378,7 +406,7 @@ function exportarGastos() {
     { label: 'Método', getValue: g => g.metodoRegistro || '' },
     { label: 'Notas', getValue: g => g.notas || '' },
   ]
-  exportarExcel(`gastos_${MESES[mesSeleccionado.value]}_${anioSeleccionado.value}`, columnas, gastosMensuales.value)
+  exportarExcel(`gastos_${mesFormateado.value.replace(' ', '_')}`, columnas, gastosMensuales.value)
 }
 
 function showToast(msg) {
@@ -386,61 +414,8 @@ function showToast(msg) {
   setTimeout(() => { toastMsg.value = '' }, 2500)
 }
 
-// Voice recording
-function onStartListening() {
-  resetTranscript()
-  clearParsed()
-  hasDraft.value = false
-  startListening()
-}
-
-function onStopListening() {
-  stopListening()
-}
-
-// Auto-show draft whenever recognition stops and there's text
-watch(isListening, (listening, wasListening) => {
-  if (wasListening && !listening) {
-    setTimeout(() => {
-      if (transcript.value?.trim()) {
-        hasDraft.value = true
-      }
-    }, 300)
-  }
-})
-
-function onContinueListening() {
-  continueListening()
-  hasDraft.value = false
-}
-
-function onSendDraft() {
-  if (transcript.value?.trim()) {
-    lastTranscript.value = transcript.value
-    hasDraft.value = false
-    showConfirmacion.value = true
-    parseVoiceText(transcript.value)
-  }
-}
-
-function onDiscardDraft() {
-  hasDraft.value = false
-  resetTranscript()
-  clearParsed()
-}
-
-function onOverwriteDraft() {
-  hasDraft.value = false
-  resetTranscript()
-  clearParsed()
-  startListening()
-}
-
-function onUpdateTranscript(newText) {
-  transcript.value = newText
-}
-
 async function onConfirmGastos(gastosEditados) {
+  vibrate([10, 50, 10])
   // Map category names to IDs
   const gastosConIds = gastosEditados.map(g => {
     const cat = getCategoriaPorNombre(g.categoria)
@@ -453,25 +428,9 @@ async function onConfirmGastos(gastosEditados) {
   })
 
   await createGastosBulk(gastosConIds, lastTranscript.value)
-  showConfirmacion.value = false
-  hasDraft.value = false
-  resetTranscript()
-  clearParsed()
+  cerrarConfirmacion()
   showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
-}
-
-function reintentarParse() {
-  if (lastTranscript.value) {
-    parseVoiceText(lastTranscript.value)
-  }
-}
-
-function cerrarConfirmacion() {
-  showConfirmacion.value = false
-  clearParsed()
-  resetTranscript()
-  hasDraft.value = false
 }
 
 // Manual form
@@ -496,16 +455,50 @@ function confirmarEliminar(gasto) {
   gastoEliminar.value = gasto
 }
 
-async function ejecutarEliminar() {
+function ejecutarEliminar() {
   if (!gastoEliminar.value) return
-  try {
-    await deleteGasto(gastoEliminar.value.id)
-    showToast('Gasto eliminado')
-    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
-  } catch {
-    // Error handled by composable
-  }
+  const gasto = gastoEliminar.value
   gastoEliminar.value = null
+
+  // Optimistic removal from monthly list
+  gastosMensuales.value = gastosMensuales.value.filter(g => g.id !== gasto.id)
+
+  // Start undo window
+  undoPendiente.value = gasto
+  undoCountdown.value = 5
+  clearTimeout(undoTimer)
+  clearInterval(undoCountdownTimer)
+
+  undoCountdownTimer = setInterval(() => {
+    undoCountdown.value--
+    if (undoCountdown.value <= 0) clearInterval(undoCountdownTimer)
+  }, 1000)
+
+  undoTimer = setTimeout(async () => {
+    clearInterval(undoCountdownTimer)
+    undoPendiente.value = null
+    try {
+      await deleteGasto(gasto.id)
+      await fetchResumenMensual()
+    } catch {
+      // Restore on error
+      await fetchGastosMensuales()
+    }
+  }, 5000)
+}
+
+function deshacerEliminar() {
+  clearTimeout(undoTimer)
+  clearInterval(undoCountdownTimer)
+  if (undoPendiente.value) {
+    // Restore to monthly list in sorted position
+    gastosMensuales.value = [...gastosMensuales.value, undoPendiente.value]
+      .sort((a, b) => {
+        if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
+        return (b.hora || '').localeCompare(a.hora || '')
+      })
+  }
+  undoPendiente.value = null
 }
 
 // Re-fetch when month changes
@@ -518,10 +511,20 @@ async function fetchResumenMensual() {
   await fetchResumen(hoy, mesSeleccionado.value, anioSeleccionado.value)
 }
 
+const { isRefreshing } = usePullToRefresh(async () => {
+  await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto()])
+})
+
+const historialSwipeZone = ref(null)
+const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(mesAnterior, mesSiguiente)
+
 // Initial load
 onMounted(async () => {
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto()])
+  attachSwipe(historialSwipeZone.value)
 })
+
+onUnmounted(() => detachSwipe(historialSwipeZone.value))
 </script>
 
 <style scoped>

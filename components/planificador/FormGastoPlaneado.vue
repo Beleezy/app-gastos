@@ -193,6 +193,7 @@ const saving = ref(false)
 const errorMsg = ref('')
 
 const { currencySymbol } = useCurrency()
+const { success: toastSuccess } = useToast()
 
 const { getCategoriaIcono } = useCategorias()
 
@@ -239,8 +240,10 @@ async function guardar() {
 
     if (modoEdicion.value) {
       await updateGastoPlaneado(props.gastoEditar.id, data)
+      toastSuccess('Gasto actualizado correctamente')
     } else {
       await createGastoPlaneado(data)
+      toastSuccess('Gasto planificado agregado')
     }
     emit('saved')
     emit('close')
