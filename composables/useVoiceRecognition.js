@@ -100,6 +100,11 @@ export function useVoiceRecognition() {
     error.value = null
     transcript.value = ''
     baseTranscript = ''
+    // En Android, la instancia no se puede reutilizar tras onend — siempre crear una nueva
+    if (recognition) {
+      try { recognition.abort() } catch {}
+      recognition = null
+    }
     _beginRecognition()
   }
 

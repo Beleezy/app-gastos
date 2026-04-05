@@ -176,8 +176,24 @@ let animationId = null
 
 async function startAudioAnalysis() {
   if (!process.client) return
+
+  // Iniciar animación CSS inmediatamente como fallback visual
+  startCssWaveAnimation()
+
+  // Esperar 600ms antes de pedir getUserMedia para no competir con SpeechRecognition por el micrófono (crítico en Android)
+  await new Promise(resolve => setTimeout(resolve, 600))
+
+  // Si ya dejó de escuchar mientras esperábamos, no continuar
+  if (!props.isListening) return
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    // Si aún está escuchando, usar AudioContext para visualización real
+    if (!props.isListening) {
+      stream.getTracks().forEach(t => t.stop())
+      return
+    }
+    stopCssWaveAnimation()
     const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext
     audioContext = new AudioCtx()
     analyser = audioContext.createAnalyser()
@@ -198,11 +214,31 @@ async function startAudioAnalysis() {
     }
     update()
   } catch {
-    // Fallback to animated bars if permission denied
+    // getUserMedia falló (móvil con mic ya ocupado) — la animación CSS ya está corriendo
+  }
+}
+
+let cssWaveTimer = null
+
+function startCssWaveAnimation() {
+  let tick = 0
+  cssWaveTimer = setInterval(() => {
+    tick++
+    audioLevels.value = Array.from({ length: 7 }, (_, i) => {
+      return Math.max(4, Math.round(8 + 14 * Math.abs(Math.sin((tick + i * 1.3) * 0.4))))
+    })
+  }, 80)
+}
+
+function stopCssWaveAnimation() {
+  if (cssWaveTimer) {
+    clearInterval(cssWaveTimer)
+    cssWaveTimer = null
   }
 }
 
 function stopAudioAnalysis() {
+  stopCssWaveAnimation()
   if (animationId) cancelAnimationFrame(animationId)
   if (audioSource) audioSource.disconnect()
   if (audioContext) audioContext.close()
