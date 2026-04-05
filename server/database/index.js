@@ -2,12 +2,25 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from './schema.js'
 
-const connectionString = useRuntimeConfig().databaseUrl
+let _db = null
 
-const client = postgres(connectionString, {
-  max: 10,
-  idle_timeout: 20,
-  ssl: 'require',
+export function getDb() {
+  if (!_db) {
+    const config = useRuntimeConfig()
+    const client = postgres(config.databaseUrl, {
+      max: 10,
+      idle_timeout: 20,
+      ssl: 'require',
+    })
+    _db = drizzle(client, { schema })
+  }
+  return _db
+}
+
+export const db = new Proxy({}, {
+  get(_, prop) {
+    const instance = getDb()
+    const value = instance[prop]
+    return typeof value === 'function' ? value.bind(instance) : value
+  }
 })
-
-export const db = drizzle(client, { schema })
