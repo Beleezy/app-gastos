@@ -167,60 +167,11 @@ const props = defineProps({
 const isEditing = ref(false)
 const editText = ref('')
 
-// Real audio level visualization
+// Audio wave visualization (CSS animation only — avoids getUserMedia conflicting with SpeechRecognition on mobile)
 const audioLevels = ref(Array(7).fill(8))
-let audioContext = null
-let analyser = null
-let audioSource = null
-let animationId = null
-
-async function startAudioAnalysis() {
-  if (!process.client) return
-
-  // Iniciar animación CSS inmediatamente como fallback visual
-  startCssWaveAnimation()
-
-  // Esperar 600ms antes de pedir getUserMedia para no competir con SpeechRecognition por el micrófono (crítico en Android)
-  await new Promise(resolve => setTimeout(resolve, 600))
-
-  // Si ya dejó de escuchar mientras esperábamos, no continuar
-  if (!props.isListening) return
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    // Si aún está escuchando, usar AudioContext para visualización real
-    if (!props.isListening) {
-      stream.getTracks().forEach(t => t.stop())
-      return
-    }
-    stopCssWaveAnimation()
-    const AudioCtx = window.AudioContext || /** @type {any} */ (window).webkitAudioContext
-    audioContext = new AudioCtx()
-    analyser = audioContext.createAnalyser()
-    analyser.fftSize = 32
-    audioSource = audioContext.createMediaStreamSource(stream)
-    audioSource.connect(analyser)
-
-    const dataArray = new Uint8Array(analyser.frequencyBinCount)
-
-    function update() {
-      analyser.getByteFrequencyData(dataArray)
-      audioLevels.value = Array.from({ length: 7 }, (_, i) => {
-        const idx = Math.floor(i * dataArray.length / 7)
-        const raw = dataArray[idx] / 255
-        return Math.max(4, Math.round(raw * 28))
-      })
-      animationId = requestAnimationFrame(update)
-    }
-    update()
-  } catch {
-    // getUserMedia falló (móvil con mic ya ocupado) — la animación CSS ya está corriendo
-  }
-}
-
 let cssWaveTimer = null
 
-function startCssWaveAnimation() {
+function startWaveAnimation() {
   let tick = 0
   cssWaveTimer = setInterval(() => {
     tick++
@@ -230,31 +181,20 @@ function startCssWaveAnimation() {
   }, 80)
 }
 
-function stopCssWaveAnimation() {
+function stopWaveAnimation() {
   if (cssWaveTimer) {
     clearInterval(cssWaveTimer)
     cssWaveTimer = null
   }
-}
-
-function stopAudioAnalysis() {
-  stopCssWaveAnimation()
-  if (animationId) cancelAnimationFrame(animationId)
-  if (audioSource) audioSource.disconnect()
-  if (audioContext) audioContext.close()
-  audioContext = null
-  analyser = null
-  audioSource = null
-  animationId = null
   audioLevels.value = Array(7).fill(8)
 }
 
 watch(() => props.isListening, (val) => {
-  if (val) startAudioAnalysis()
-  else stopAudioAnalysis()
+  if (val) startWaveAnimation()
+  else stopWaveAnimation()
 })
 
-onUnmounted(stopAudioAnalysis)
+onUnmounted(stopWaveAnimation)
 
 function startEdit() {
   editText.value = props.transcript
