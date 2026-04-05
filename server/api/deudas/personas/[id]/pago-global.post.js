@@ -1,7 +1,7 @@
 import { db } from '../../../../utils/db.js'
 import { deudas, pagosDeuda } from '../../../../database/schema.js'
 import { getUsuarioId } from '../../../../utils/getUsuario.js'
-import { eq, and, or, asc, isNull, isNotNull } from 'drizzle-orm'
+import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const personaId = getRouterParam(event, 'id')
