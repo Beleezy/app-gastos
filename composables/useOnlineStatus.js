@@ -1,11 +1,21 @@
-export function useOnlineStatus() {
-  const isOnline = useState('online-status', () => true)
+import { ref, onMounted, onUnmounted } from 'vue'
 
-  if (process.client) {
+export function useOnlineStatus() {
+  const isOnline = ref(true)
+
+  const handleOnline = () => { isOnline.value = true }
+  const handleOffline = () => { isOnline.value = false }
+
+  onMounted(() => {
     isOnline.value = navigator.onLine
-    useEventListener(window, 'online', () => { isOnline.value = true })
-    useEventListener(window, 'offline', () => { isOnline.value = false })
-  }
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+  })
+
+  onUnmounted(() => {
+    window.removeEventListener('online', handleOnline)
+    window.removeEventListener('offline', handleOffline)
+  })
 
   return { isOnline }
 }
