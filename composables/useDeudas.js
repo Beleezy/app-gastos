@@ -236,6 +236,24 @@ export function useDeudas() {
     deudasList.value = []
   }
 
+  async function mergePersonas(personaPrincipalId, personasSecundariasIds) {
+    try {
+      const result = await $fetch('/api/deudas/personas/merge', {
+        method: 'POST',
+        body: { personaPrincipalId, personasSecundariasIds },
+      })
+      await Promise.all([fetchResumen(), fetchPersonas()])
+      if (personaSeleccionada.value && personasSecundariasIds.includes(personaSeleccionada.value.id)) {
+        personaSeleccionada.value = null
+        deudasList.value = []
+      }
+      return result
+    } catch (e) {
+      error.value = e.message || 'Error al fusionar personas'
+      throw e
+    }
+  }
+
   return {
     personas, deudasList, pagos, pagosPersona, resumen,
     isLoading, error,
@@ -246,7 +264,7 @@ export function useDeudas() {
     fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona,
     createDeuda, updateDeuda, deleteDeuda,
     registrarPago, archivarDeuda, revertirPago,
-    createPersona, deletePersona,
+    createPersona, deletePersona, mergePersonas,
     seleccionarPersona, volverALista, cambiarTab,
   }
 }

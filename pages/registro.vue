@@ -28,40 +28,10 @@
 
       <!-- Summary card -->
       <div class="px-4 mb-5">
-        <div class="relative bg-gradient-to-br from-primary-800/80 to-primary-800/60 rounded-2xl border border-primary-700/20 px-4 py-4 overflow-hidden">
-          <!-- Decorative glow -->
-          <div class="absolute -top-8 -right-8 w-32 h-32 bg-blue-500/6 rounded-full blur-2xl"></div>
-
-          <!-- Budget + spent -->
-          <div class="relative flex items-end justify-between mb-3">
-            <div>
-              <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-medium">Gastado este mes</p>
-              <p class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(resumen.totalMes) }}</p>
-            </div>
-            <div v-if="presupuesto > 0" class="text-right">
-              <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-medium">Presupuesto</p>
-              <p class="text-base font-semibold text-gray-300">{{ currencySymbol }} {{ formatMonto(presupuesto) }}</p>
-            </div>
-          </div>
-          <!-- Progress bar + remaining -->
-          <div v-if="presupuesto > 0" class="relative">
-            <div class="w-full h-1.5 bg-primary-900/50 rounded-full overflow-hidden mb-2">
-              <div
-                class="h-full rounded-full transition-all duration-700 ease-out"
-                :class="porcentajeGastado > 90 ? 'bg-gradient-to-r from-red-500 to-red-400' : porcentajeGastado > 70 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'"
-                :style="{ width: Math.min(porcentajeGastado, 100) + '%' }"
-              ></div>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                :class="saldoRestante >= 0 ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'"
-              >
-                {{ saldoRestante >= 0 ? 'Disponible' : 'Excedido' }}: {{ currencySymbol }} {{ formatMonto(Math.abs(saldoRestante)) }}
-              </span>
-              <span class="text-[10px] text-gray-500 font-medium">{{ porcentajeGastado.toFixed(0) }}%</span>
-            </div>
-          </div>
-        </div>
+        <RegistroResumenMesRegistro
+          :total-mes="parseFloat(resumen.totalMes) || 0"
+          :presupuesto="presupuesto"
+        />
       </div>
 
       <!-- Microphone section -->
@@ -103,26 +73,11 @@
       </div>
 
       <!-- Filtros de categoría -->
-      <div class="px-4 mb-3 overflow-x-auto scrollbar-hide">
-        <div class="flex items-center gap-1.5 min-w-max">
-          <button
-            class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap"
-            :class="!categoriaFiltro ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
-            @click="categoriaFiltro = null"
-          >
-            Todas
-          </button>
-          <button
-            v-for="cat in categorias"
-            :key="cat.id"
-            class="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap"
-            :class="categoriaFiltro === cat.id ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
-            @click="categoriaFiltro = categoriaFiltro === cat.id ? null : cat.id"
-          >
-            <span>{{ cat.icono || '📦' }}</span>
-            <span>{{ cat.nombre }}</span>
-          </button>
-        </div>
+      <div class="px-4 mb-3">
+        <RegistroFiltrosCategoriaBar
+          v-model="categoriaFiltro"
+          :categorias="categorias"
+        />
       </div>
 
       <!-- Tab toggle: Historial / Categorías / Stats + Export -->
@@ -314,15 +269,6 @@ const {
 } = useVoiceDraft()
 
 const presupuesto = ref(0)
-
-const porcentajeGastado = computed(() => {
-  if (presupuesto.value <= 0) return 0
-  return ((parseFloat(resumen.value.totalMes) || 0) / presupuesto.value) * 100
-})
-
-const saldoRestante = computed(() => {
-  return presupuesto.value - (parseFloat(resumen.value.totalMes) || 0)
-})
 
 async function fetchPresupuesto() {
   try {
