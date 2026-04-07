@@ -187,6 +187,13 @@ async function guardar() {
     errorMsg.value = 'Selecciona una categoría'
     return
   }
+  const fechaIngresada = new Date(form.fecha + 'T00:00:00')
+  const limiteFuturo = new Date()
+  limiteFuturo.setDate(limiteFuturo.getDate() + 30)
+  if (fechaIngresada > limiteFuturo) {
+    errorMsg.value = 'La fecha no puede ser más de 30 días en el futuro'
+    return
+  }
 
   saving.value = true
   try {

@@ -89,6 +89,7 @@
           v-model="form.monto"
           type="number"
           step="0.01"
+          min="0"
           placeholder="0.00"
           class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
         />

@@ -136,6 +136,10 @@ async function guardar() {
     errorMsg.value = 'El monto no puede exceder la deuda pendiente'
     return
   }
+  if (props.deuda.fechaCreacion && form.fecha < props.deuda.fechaCreacion) {
+    errorMsg.value = `La fecha del pago no puede ser anterior a la fecha de la deuda (${props.deuda.fechaCreacion})`
+    return
+  }
 
   saving.value = true
   try {
