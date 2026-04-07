@@ -127,7 +127,7 @@ async function guardar() {
     emit('saved', updated)
     emit('close')
   } catch (e) {
-    error.value = e?.data?.message || 'Error al guardar'
+    error.value = handleApiError(e)
   } finally {
     saving.value = false
   }

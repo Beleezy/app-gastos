@@ -220,7 +220,7 @@ async function guardar() {
     emit('saved')
     emit('close')
   } catch (e) {
-    errorMsg.value = 'Error al guardar el gasto'
+    useToast().error(handleApiError(e))
   } finally {
     saving.value = false
   }

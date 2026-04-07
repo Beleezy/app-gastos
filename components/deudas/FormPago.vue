@@ -152,7 +152,7 @@ async function guardar() {
     emit('saved')
     emit('close')
   } catch (e) {
-    errorMsg.value = 'Error al registrar el pago'
+    useToast().error(handleApiError(e))
   } finally {
     saving.value = false
   }

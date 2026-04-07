@@ -125,7 +125,7 @@ async function guardar() {
     emit('saved')
     emit('close')
   } catch (e) {
-    errorMsg.value = 'Error al actualizar la deuda'
+    useToast().error(handleApiError(e))
   } finally {
     saving.value = false
   }

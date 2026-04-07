@@ -244,7 +244,7 @@ async function guardar() {
     toastMsg.value = 'Configuracion guardada'
     setTimeout(() => { toastMsg.value = '' }, 2500)
   } catch (e) {
-    console.error('Error al guardar:', e)
+    useToast().error(handleApiError(e))
   } finally {
     saving.value = false
   }

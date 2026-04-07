@@ -235,7 +235,7 @@ async function guardar() {
     ])
     emit('saved')
   } catch (e) {
-    errorMsg.value = e.data?.message || 'Error al procesar el pago'
+    errorMsg.value = handleApiError(e)
   } finally {
     saving.value = false
   }
