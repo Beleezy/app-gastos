@@ -93,9 +93,11 @@ async function generateTestData(existingUserId = null) {
     // 1. Obtener o crear usuario
     let userId
     if (existingUserId) {
-      const existingUser = await db.select().from(usuarios).where(eq(usuarios.id, existingUserId))
-      if (existingUser.length === 0) {
-        console.error(`Usuario con ID ${existingUserId} no encontrado`)
+      const existingUser = await db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.id, existingUserId)).limit(1)
+      if (!existingUser || existingUser.length === 0) {
+        console.error(`❌ Usuario con ID "${existingUserId}" no encontrado en la base de datos`)
+        console.error('Por favor verifica que el ID sea correcto y que el usuario exista.')
+        await client.end()
         process.exit(1)
       }
       userId = existingUserId
@@ -111,8 +113,10 @@ async function generateTestData(existingUserId = null) {
 
     // 2. Obtener o crear categorías
     let catMap = {}
-    const existingCats = await db.select().from(categorias)
+    const existingCats = await db.select({ id: categorias.id, nombre: categorias.nombre }).from(categorias)
+
     if (existingCats.length === 0) {
+      console.log('  Creando categorías predefinidas...')
       const insertedCats = await db
         .insert(categorias)
         .values(predefinedCategories)
@@ -126,6 +130,16 @@ async function generateTestData(existingUserId = null) {
         catMap[cat.nombre] = cat.id
       })
       console.log(`✅ Usando ${existingCats.length} categorías existentes`)
+    }
+
+    // Validar que todas las categorías necesarias existan
+    const categoriasNecesarias = ['Alimentacion', 'Transporte', 'Vivienda', 'Salud', 'Educacion', 'Entretenimiento', 'Vestimenta', 'Servicios']
+    for (const cat of categoriasNecesarias) {
+      if (!catMap[cat]) {
+        console.error(`❌ Categoría "${cat}" no encontrada. Asegúrate de ejecutar primero: npm run db:seed`)
+        await client.end()
+        process.exit(1)
+      }
     }
 
     // 3. Crear/actualizar configuración
@@ -458,8 +472,23 @@ async function generateTestData(existingUserId = null) {
     process.exit(0)
 
   } catch (err) {
-    console.error('❌ Error durante seed:', err)
-    await client.end()
+    console.error('\n' + '═'.repeat(70))
+    console.error('❌ ERROR DURANTE LA GENERACIÓN DE DATOS')
+    console.error('═'.repeat(70))
+    console.error('\nMensaje:', err.message)
+    if (err.detail) console.error('Detalle:', err.detail)
+    console.error('\n📝 Soluciones:')
+    console.error('  1. Ejecuta primero: npm run db:seed')
+    console.error('  2. Verifica que DATABASE_URL esté configurada correctamente')
+    console.error('  3. Si pasaste un USER_ID, asegúrate de que sea válido')
+    console.error('═'.repeat(70) + '\n')
+    console.error('Stack:', err)
+
+    try {
+      await client.end()
+    } catch (e) {
+      // Ignorar errores al cerrar
+    }
     process.exit(1)
   }
 }
@@ -471,10 +500,13 @@ async function generateTestData(existingUserId = null) {
 const args = process.argv.slice(2)
 const userId = args[0] || null
 
+console.log('\n' + '═'.repeat(70))
 if (userId) {
-  console.log(`\n🔄 Generando datos de prueba para usuario: ${userId}\n`)
+  console.log(`🔄 GENERANDO DATOS DE PRUEBA PARA USUARIO`)
+  console.log(`   ID: ${userId}`)
 } else {
-  console.log('\n🔄 Generando datos de prueba (usuario nuevo)\n')
+  console.log('🔄 GENERANDO DATOS DE PRUEBA (USUARIO NUEVO)')
 }
+console.log('═'.repeat(70) + '\n')
 
 generateTestData(userId)
