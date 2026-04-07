@@ -1,16 +1,20 @@
-import { db } from './db.js'
-import { usuarios } from '../database/schema.js'
+import { createClient } from '@supabase/supabase-js'
 
-let cachedUserId = null
+export async function getUsuarioFromEvent(event) {
+  const config = useRuntimeConfig()
+  const authHeader = getHeader(event, 'authorization')
 
-export async function getUsuarioId() {
-  if (cachedUserId) return cachedUserId
-  const [user] = await db.select({ id: usuarios.id }).from(usuarios).limit(1)
-  if (user) {
-    cachedUserId = user.id
-    return user.id
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw createError({ statusCode: 401, message: 'No autenticado' })
   }
-  const [newUser] = await db.insert(usuarios).values({ nombre: 'Usuario' }).returning({ id: usuarios.id })
-  cachedUserId = newUser.id
-  return newUser.id
+
+  const token = authHeader.slice(7)
+  const supabase = createClient(config.supabaseUrl, config.supabaseServiceRoleKey)
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+
+  if (error || !user) {
+    throw createError({ statusCode: 401, message: 'Token inválido o expirado' })
+  }
+
+  return user.id
 }
