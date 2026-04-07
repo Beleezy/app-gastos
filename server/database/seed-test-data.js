@@ -142,7 +142,17 @@ async function generateTestData(existingUserId = null) {
       }
     }
 
-    // 3. Crear/actualizar configuración
+    // 3. Limpiar datos de prueba existentes del usuario
+    console.log('\n🧹 Limpiando datos existentes del usuario...')
+    await db.delete(pagosDeuda)
+    await db.delete(deudas)
+    await db.delete(personasEntidades)
+    await db.delete(gastosPlanificados)
+    await db.delete(planesMensuales)
+    await db.delete(gastos)
+    console.log(`✅ Datos limpios`)
+
+    // 4. Crear/actualizar configuración
     const existingConfig = await db.select().from(configuraciones).where(eq(configuraciones.usuarioId, userId))
     if (existingConfig.length === 0) {
       await db
@@ -154,9 +164,11 @@ async function generateTestData(existingUserId = null) {
           diaInicioCiclo: 1,
         })
       console.log(`✅ Configuración creada`)
+    } else {
+      console.log(`✅ Configuración actualizada`)
     }
 
-    // 4. MÓDULO 1: GASTOS PLANIFICADOS (20 gastos para 3 meses)
+    // 5. MÓDULO 1: GASTOS PLANIFICADOS (20 gastos para 3 meses)
     console.log('\n📋 Generando gastos planificados (3 meses)...')
     const today = new Date('2026-04-07')
     const planes = []
@@ -165,18 +177,35 @@ async function generateTestData(existingUserId = null) {
     for (let monthOffset = -2; monthOffset <= 0; monthOffset++) {
       const planDate = new Date(today)
       planDate.setMonth(planDate.getMonth() + monthOffset)
+      const mes = planDate.getMonth() + 1
+      const anio = planDate.getFullYear()
 
-      const [plan] = await db
-        .insert(planesMensuales)
-        .values({
-          usuarioId: userId,
-          mes: planDate.getMonth() + 1,
-          anio: planDate.getFullYear(),
-          montoPresupuesto: '4500.00',
-        })
-        .returning({ id: planesMensuales.id })
+      // Verificar si el plan ya existe
+      const existingPlan = await db
+        .select({ id: planesMensuales.id })
+        .from(planesMensuales)
+        .where(eq(planesMensuales.usuarioId, userId))
+        .where(eq(planesMensuales.mes, mes))
+        .where(eq(planesMensuales.anio, anio))
+        .limit(1)
 
-      planes.push({ id: plan.id, mes: planDate.getMonth() + 1, anio: planDate.getFullYear() })
+      let planId
+      if (existingPlan.length > 0) {
+        planId = existingPlan[0].id
+      } else {
+        const [newPlan] = await db
+          .insert(planesMensuales)
+          .values({
+            usuarioId: userId,
+            mes,
+            anio,
+            montoPresupuesto: '4500.00',
+          })
+          .returning({ id: planesMensuales.id })
+        planId = newPlan.id
+      }
+
+      planes.push({ id: planId, mes, anio })
     }
 
     // Gastos planificados recurrentes y únicos
@@ -216,7 +245,7 @@ async function generateTestData(existingUserId = null) {
     }
     console.log(`✅ ${planes.length * gastosPlaneados.length} gastos planificados creados`)
 
-    // 5. MÓDULO 2: GASTOS REGISTRADOS (150 gastos en los últimos 3 meses)
+    // 6. MÓDULO 2: GASTOS REGISTRADOS (150 gastos en los últimos 3 meses)
     console.log('\n💰 Generando 150 gastos registrados (últimos 3 meses)...')
     const gastosRegistrados = []
     const startDate = addDays(today, -90) // 90 días atrás
@@ -249,7 +278,7 @@ async function generateTestData(existingUserId = null) {
     }
     console.log(`✅ 150 gastos registrados creados`)
 
-    // 6. MÓDULO 3: PERSONAS Y DEUDAS
+    // 7. MÓDULO 3: PERSONAS Y DEUDAS
     console.log('\n👥 Generando deudas y pagos...')
 
     // Crear 5 personas que le deben (1 org, 4 personas)
@@ -385,7 +414,7 @@ async function generateTestData(existingUserId = null) {
     }
     console.log(`✅ Deudas "yo debo" creadas (${deudaYoDeboIndex} detalles totales)`)
 
-    // 7. PAGOS DE DEUDAS (mínimo 10, con diferentes patrones)
+    // 8. PAGOS DE DEUDAS (mínimo 10, con diferentes patrones)
     console.log('\n💳 Generando pagos de deudas...')
     const pagos = []
     let contadorPagos = 0
