@@ -56,32 +56,13 @@ async function seed() {
     .values(predefinedCategories)
     .returning({ id: categorias.id, nombre: categorias.nombre })
 
-  // Mapear categorías por nombre para facilitar acceso
-  const catMap = {}
   insertedCats.forEach(cat => {
-    catMap[cat.nombre] = cat.id
+    console.log(`  ✓ ${cat.nombre}`)
   })
 
-  console.log('Creando usuario por defecto...')
-  const [user] = await db
-    .insert(usuarios)
-    .values({ nombre: 'Usuario Prueba', email: 'test@misfinanzas.app' })
-    .returning({ id: usuarios.id })
-
-  const userId = user.id
-
-  console.log('Creando configuracion por defecto...')
-  await db
-    .insert(configuraciones)
-    .values({
-      usuarioId: userId,
-      presupuestoMensualDefault: '4500.00',
-      monedaPreferida: 'PEN',
-      diaInicioCiclo: 1,
-    })
-
-  console.log('✅ Seed completado sin datos de prueba.')
-  console.log(`  📊 Usuario creado: ${userId}`)
+  console.log('\n✅ Seed completado exitosamente.')
+  console.log(`  📦 ${insertedCats.length} categorías predefinidas creadas`)
+  console.log('  👤 Base de datos lista para nuevos usuarios')
 
   await client.end()
   process.exit(0)
