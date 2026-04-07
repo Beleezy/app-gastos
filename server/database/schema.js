@@ -8,8 +8,9 @@ export const tipoDeuda = pgEnum('tipo_deuda', ['me_deben', 'yo_debo'])
 export const estadoDeuda = pgEnum('estado_deuda', ['pendiente', 'parcial', 'pagado', 'archivado'])
 
 // ── Tabla 1: usuarios ──
+// NOTA: el id lo provee Supabase Auth (mismo UUID que auth.users)
 export const usuarios = pgTable('usuarios', {
-  id: uuid('id').defaultRandom().primaryKey(),
+  id: uuid('id').primaryKey(),
   nombre: varchar('nombre', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).unique(),
   passwordHash: varchar('password_hash', { length: 255 }),
