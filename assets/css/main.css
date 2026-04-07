@@ -1,10 +1,45 @@
+/* ── Variables de tema ── */
+:root, html.dark {
+  --color-bg: #0a0a1a;
+  --color-card: #1a1a2e;
+  --color-card-hover: #242440;
+  --color-input: rgba(15, 15, 35, 0.8);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-md: rgba(255, 255, 255, 0.12);
+  --color-text: #f9fafb;
+  --color-text-sec: #9ca3af;
+  --color-text-muted: #4b5563;
+  --color-nav: rgba(26, 26, 46, 0.85);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.15);
+  --glass-bg: rgba(26, 26, 46, 0.6);
+}
+
+html.light {
+  --color-bg: #f0f2f5;
+  --color-card: #ffffff;
+  --color-card-hover: #f8fafc;
+  --color-input: rgba(248, 250, 252, 0.9);
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.16);
+  --color-text: #111827;
+  --color-text-sec: #374151;
+  --color-text-muted: #9ca3af;
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.12);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.20);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   body {
-    @apply bg-primary-950 text-gray-100 font-sans antialiased;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    @apply font-sans antialiased;
   }
 
   html, body {
@@ -21,11 +56,11 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--scrollbar-thumb);
     border-radius: 999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--scrollbar-thumb-hover);
   }
 
   /* Hide scrollbar utility */
@@ -68,7 +103,7 @@
 
   /* Glass card effect */
   .glass-card {
-    background: rgba(26, 26, 46, 0.6);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
     border: 1px solid rgba(255, 255, 255, 0.06);

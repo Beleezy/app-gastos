@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-primary-950">
+  <div class="min-h-screen flex flex-col bg-theme-bg">
     <LayoutOfflineBanner />
     <main class="flex-1 pb-20 overflow-hidden">
       <slot />

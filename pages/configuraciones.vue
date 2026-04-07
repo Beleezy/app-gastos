@@ -7,40 +7,40 @@
     <div class="max-w-lg mx-auto px-4 py-4 space-y-4">
       <!-- Loading -->
       <div v-if="isLoading" class="space-y-4">
-        <div v-for="i in 3" :key="i" class="bg-primary-800 rounded-xl p-5 animate-pulse">
-          <div class="h-4 bg-primary-700 rounded w-1/3 mb-3"></div>
-          <div class="h-10 bg-primary-700 rounded w-full"></div>
+        <div v-for="i in 3" :key="i" class="bg-theme-card rounded-xl p-5 animate-pulse">
+          <div class="h-4 bg-theme-border-md rounded w-1/3 mb-3"></div>
+          <div class="h-10 bg-theme-border-md rounded w-full"></div>
         </div>
       </div>
 
       <template v-else>
         <!-- Nombre de usuario -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <label class="text-sm font-medium text-white">Nombre</label>
+            <label class="text-sm font-medium text-theme-text">Nombre</label>
           </div>
-          <p class="text-xs text-gray-500 mb-3">Tu nombre aparecera en los reportes PDF generados.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Tu nombre aparecera en los reportes PDF generados.</p>
           <input
             v-model="form.nombre"
             type="text"
             maxlength="100"
-            class="w-full bg-primary-900 border border-primary-700/50 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+            class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
             placeholder="Ej: Bryan"
           />
         </div>
 
         <!-- Presupuesto mensual por defecto -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <label class="text-sm font-medium text-white">Presupuesto mensual por defecto</label>
+            <label class="text-sm font-medium text-theme-text">Presupuesto mensual por defecto</label>
           </div>
-          <p class="text-xs text-gray-500 mb-3">Este monto se usara como presupuesto base al crear un nuevo mes en el planificador.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Este monto se usara como presupuesto base al crear un nuevo mes en el planificador.</p>
           <div class="flex items-center gap-2">
             <span class="text-sm text-gray-400">{{ currencySymbol }}</span>
             <input
@@ -48,24 +48,24 @@
               type="number"
               step="0.01"
               min="0"
-              class="flex-1 bg-primary-900 border border-primary-700/50 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+              class="flex-1 bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
               placeholder="0.00"
             />
           </div>
         </div>
 
         <!-- Moneda preferida -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
-            <label class="text-sm font-medium text-white">Moneda</label>
+            <label class="text-sm font-medium text-theme-text">Moneda</label>
           </div>
-          <p class="text-xs text-gray-500 mb-3">Moneda principal para mostrar tus montos.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Moneda principal para mostrar tus montos.</p>
           <select
             v-model="form.monedaPreferida"
-            class="w-full bg-primary-900 border border-primary-700/50 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
+            class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
             <option value="PEN">Soles (S/)</option>
             <option value="USD">Dolares (US$)</option>
@@ -74,17 +74,17 @@
         </div>
 
         <!-- Zona horaria -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <label class="text-sm font-medium text-white">Zona horaria</label>
+            <label class="text-sm font-medium text-theme-text">Zona horaria</label>
           </div>
-          <p class="text-xs text-gray-500 mb-3">Afecta el calculo de fechas en el registro por voz.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Afecta el calculo de fechas en el registro por voz.</p>
           <select
             v-model="form.zonaHoraria"
-            class="w-full bg-primary-900 border border-primary-700/50 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
+            class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
             <option value="America/Lima">Lima (UTC-5)</option>
             <option value="America/Bogota">Bogota (UTC-5)</option>
@@ -97,17 +97,17 @@
         </div>
 
         <!-- Locale -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
             </svg>
-            <label class="text-sm font-medium text-white">Formato regional</label>
+            <label class="text-sm font-medium text-theme-text">Formato regional</label>
           </div>
-          <p class="text-xs text-gray-500 mb-3">Formato de numeros y reconocimiento de voz.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Formato de numeros y reconocimiento de voz.</p>
           <select
             v-model="form.locale"
-            class="w-full bg-primary-900 border border-primary-700/50 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
+            class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
             <option value="es-PE">Espanol (Peru)</option>
             <option value="es-CO">Espanol (Colombia)</option>
@@ -119,34 +119,34 @@
         </div>
 
         <!-- Día de inicio de ciclo -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <label class="text-sm font-medium text-white">Dia de inicio del ciclo</label>
+            <label class="text-sm font-medium text-theme-text">Dia de inicio del ciclo</label>
           </div>
-          <p class="text-xs text-gray-500 mb-3">El dia del mes en que comienza tu ciclo financiero.</p>
+          <p class="text-xs text-theme-text-sec mb-3">El dia del mes en que comienza tu ciclo financiero.</p>
           <input
             v-model.number="form.diaInicioCiclo"
             type="number"
             min="1"
             max="28"
-            class="w-full bg-primary-900 border border-primary-700/50 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+            class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
             placeholder="1"
           />
         </div>
 
         <!-- Tema -->
-        <div class="bg-primary-800 rounded-2xl p-5 border border-primary-700/30">
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 110 10A5 5 0 0112 7z" />
               </svg>
               <div>
-                <p class="text-sm font-medium text-white">Tema</p>
-                <p class="text-xs text-gray-500">{{ isDark ? 'Oscuro' : 'Claro' }}</p>
+                <p class="text-sm font-medium text-theme-text">Tema</p>
+                <p class="text-xs text-theme-text-sec">{{ isDark ? 'Oscuro' : 'Claro' }}</p>
               </div>
             </div>
             <button
@@ -184,8 +184,8 @@
 
       <!-- App info -->
       <div class="text-center pt-4 pb-8">
-        <p class="text-xs text-gray-600">Mis Finanzas v{{ useRuntimeConfig().public.appVersion }}</p>
-        <p class="text-xs text-gray-700 mt-1">Sistema de finanzas personales</p>
+        <p class="text-xs text-theme-text-muted">Mis Finanzas v{{ useRuntimeConfig().public.appVersion }}</p>
+        <p class="text-xs text-theme-text-muted mt-1">Sistema de finanzas personales</p>
       </div>
     </div>
   </div>

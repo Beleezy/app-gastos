@@ -10,7 +10,7 @@
         :class="[
           isActive(item.to)
             ? 'text-blue-400'
-            : 'text-gray-500 hover:text-gray-300'
+            : 'text-theme-text-muted hover:text-theme-text-sec'
         ]"
       >
         <!-- Active indicator pill -->
@@ -89,10 +89,10 @@ function isActive(path) {
 
 <style scoped>
 .nav-glass {
-  background: rgba(26, 26, 46, 0.85);
+  background: var(--color-nav);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid var(--color-border);
   box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.3);
 }
 </style>

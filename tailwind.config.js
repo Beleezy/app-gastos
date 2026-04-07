@@ -11,6 +11,18 @@ export default {
   theme: {
     extend: {
       colors: {
+        theme: {
+          bg: 'var(--color-bg)',
+          card: 'var(--color-card)',
+          'card-hover': 'var(--color-card-hover)',
+          input: 'var(--color-input)',
+          border: 'var(--color-border)',
+          'border-md': 'var(--color-border-md)',
+          text: 'var(--color-text)',
+          'text-sec': 'var(--color-text-sec)',
+          'text-muted': 'var(--color-text-muted)',
+          nav: 'var(--color-nav)',
+        },
         primary: {
           50: '#eff6ff',
           100: '#dbeafe',
