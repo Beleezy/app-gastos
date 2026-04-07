@@ -6,7 +6,13 @@ export default defineNuxtConfig({
   modules: [
     '@nuxtjs/tailwindcss',
     '@vite-pwa/nuxt',
+    '@nuxtjs/supabase',
   ],
+
+  // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
+  supabase: {
+    redirect: false, // el middleware propio lo manejará
+  },
 
   app: {
     head: {
@@ -73,9 +79,13 @@ export default defineNuxtConfig({
     databaseUrl: process.env.DATABASE_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+    supabaseUrl: process.env.SUPABASE_URL || '',
+    supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     public: {
       appName: 'Mis Finanzas',
       appVersion: '0.8',
+      supabaseUrl: process.env.SUPABASE_URL || '',
+      supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
     },
   },
 })
