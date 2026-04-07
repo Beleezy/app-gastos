@@ -1,12 +1,12 @@
 import { db } from '../../../utils/db.js'
 import { personasEntidades } from '../../../database/schema.js'
-import { getUsuarioId } from '../../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   const body = await readBody(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   function capitalizarNombre(nombre) {
     return nombre.trim().replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())

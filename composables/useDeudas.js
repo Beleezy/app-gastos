@@ -1,8 +1,13 @@
 export function useDeudas() {
+  const { apiFetch } = useApiFetch()
   const personas = useState('deudas-personas', () => [])
   const deudasList = useState('deudas-list', () => [])
   const pagos = useState('deudas-pagos', () => [])
   const pagosPersona = useState('deudas-pagos-persona', () => [])
+  const auditoriaPersona = useState('deudas-auditoria-persona', () => [])
+  const checkpoints = useState('deudas-checkpoints', () => [])
+  const guardando = ref(false)
+  const restaurando = ref(null)
   const resumen = useState('deudas-resumen', () => ({
     totalMeDeben: 0,
     totalYoDebo: 0,
@@ -17,11 +22,8 @@ export function useDeudas() {
   const tabActual = useState('deudas-tab', () => 'me_deben')
   const personaSeleccionada = useState('deudas-persona-sel', () => null)
 
-  // Personas filtered by current tab's debt type
   const personasFiltradas = computed(() => {
     return personas.value.filter(p => {
-      // Show persona if it has debts of the current type (check via deudasActivas or totalPendiente)
-      // We re-fetch personas with tipo filter, so all returned personas are relevant
       return p.deudasActivas > 0 || p.totalPendiente > 0
     })
   })
@@ -48,7 +50,7 @@ export function useDeudas() {
 
   async function fetchResumen() {
     try {
-      resumen.value = await $fetch('/api/deudas/resumen')
+      resumen.value = await apiFetch('/api/deudas/resumen')
     } catch (e) {
       error.value = e.message || 'Error al cargar resumen'
     }
@@ -58,7 +60,7 @@ export function useDeudas() {
     isLoading.value = true
     error.value = null
     try {
-      personas.value = await $fetch('/api/deudas/personas', {
+      personas.value = await apiFetch('/api/deudas/personas', {
         query: { tipo: tabActual.value }
       })
     } catch (e) {
@@ -72,7 +74,7 @@ export function useDeudas() {
     isLoading.value = true
     error.value = null
     try {
-      deudasList.value = await $fetch('/api/deudas', {
+      deudasList.value = await apiFetch('/api/deudas', {
         query: { personaId, tipo: tabActual.value }
       })
     } catch (e) {
@@ -84,7 +86,7 @@ export function useDeudas() {
 
   async function fetchPagos(deudaId) {
     try {
-      pagos.value = await $fetch(`/api/deudas/${deudaId}/pagos`)
+      pagos.value = await apiFetch(`/api/deudas/${deudaId}/pagos`)
     } catch (e) {
       error.value = e.message || 'Error al cargar pagos'
     }
@@ -92,15 +94,29 @@ export function useDeudas() {
 
   async function fetchPagosPersona(personaId) {
     try {
-      pagosPersona.value = await $fetch(`/api/deudas/personas/${personaId}/pagos-historial`)
+      pagosPersona.value = await apiFetch(`/api/deudas/personas/${personaId}/pagos-historial`)
     } catch (e) {
       error.value = e.message || 'Error al cargar historial de pagos'
     }
   }
 
+  async function fetchAuditoriaPersona(personaId) {
+    try {
+      auditoriaPersona.value = await apiFetch(`/api/deudas/personas/${personaId}/auditoria`)
+    } catch (e) {
+      error.value = e.message || 'Error al cargar auditoría'
+    }
+  }
+
+  async function refreshAuditoriaIfNeeded() {
+    if (personaSeleccionada.value?.vinculadoUsuarioId) {
+      await fetchAuditoriaPersona(personaSeleccionada.value.id)
+    }
+  }
+
   async function createDeuda(data) {
     try {
-      await $fetch('/api/deudas', {
+      await apiFetch('/api/deudas', {
         method: 'POST',
         body: data,
       })
@@ -108,6 +124,7 @@ export function useDeudas() {
       if (personaSeleccionada.value) {
         await fetchDeudasPersona(personaSeleccionada.value.id)
       }
+      await refreshAuditoriaIfNeeded()
     } catch (e) {
       error.value = e.message || 'Error al crear deuda'
       throw e
@@ -116,7 +133,7 @@ export function useDeudas() {
 
   async function updateDeuda(id, data) {
     try {
-      await $fetch(`/api/deudas/${id}`, {
+      await apiFetch(`/api/deudas/${id}`, {
         method: 'PUT',
         body: data,
       })
@@ -124,6 +141,7 @@ export function useDeudas() {
       if (personaSeleccionada.value) {
         await fetchDeudasPersona(personaSeleccionada.value.id)
       }
+      await refreshAuditoriaIfNeeded()
     } catch (e) {
       error.value = e.message || 'Error al actualizar deuda'
     }
@@ -131,9 +149,10 @@ export function useDeudas() {
 
   async function deleteDeuda(id) {
     try {
-      await $fetch(`/api/deudas/${id}`, { method: 'DELETE' })
+      await apiFetch(`/api/deudas/${id}`, { method: 'DELETE' })
       deudasList.value = deudasList.value.filter(d => d.id !== id)
       await Promise.all([fetchResumen(), fetchPersonas()])
+      await refreshAuditoriaIfNeeded()
     } catch (e) {
       error.value = e.message || 'Error al eliminar deuda'
     }
@@ -141,11 +160,10 @@ export function useDeudas() {
 
   async function registrarPago(deudaId, data) {
     try {
-      const result = await $fetch(`/api/deudas/${deudaId}/pagos`, {
+      const result = await apiFetch(`/api/deudas/${deudaId}/pagos`, {
         method: 'POST',
         body: data,
       })
-      // Update local deuda state
       const idx = deudasList.value.findIndex(d => d.id === deudaId)
       if (idx !== -1) {
         deudasList.value[idx] = {
@@ -157,9 +175,30 @@ export function useDeudas() {
       if (personaSeleccionada.value) {
         await fetchPagosPersona(personaSeleccionada.value.id)
       }
+      await refreshAuditoriaIfNeeded()
       return result
     } catch (e) {
       error.value = e.message || 'Error al registrar pago'
+      throw e
+    }
+  }
+
+  async function actualizarPago(pagoId, data) {
+    try {
+      const result = await apiFetch(`/api/deudas/pagos/${pagoId}`, {
+        method: 'PUT',
+        body: data,
+      })
+      if (personaSeleccionada.value) {
+        await Promise.all([
+          fetchPagosPersona(personaSeleccionada.value.id),
+          fetchDeudasPersona(personaSeleccionada.value.id),
+        ])
+      }
+      await refreshAuditoriaIfNeeded()
+      return result
+    } catch (e) {
+      error.value = e.message || 'Error al actualizar pago'
       throw e
     }
   }
@@ -170,8 +209,7 @@ export function useDeudas() {
 
   async function revertirPago(pagoId) {
     try {
-      const result = await $fetch(`/api/deudas/pagos/${pagoId}`, { method: 'DELETE' })
-      // Update pagosPersona to remove this pago from the groups
+      const result = await apiFetch(`/api/deudas/pagos/${pagoId}`, { method: 'DELETE' })
       pagosPersona.value = pagosPersona.value
         .map(g => {
           if (!g.pagoIds?.includes(pagoId)) return g
@@ -180,11 +218,11 @@ export function useDeudas() {
           return { ...g, detalles: nuevosDetalles, pagoIds: g.pagoIds.filter(id => id !== pagoId), montoTotal: nuevoTotal }
         })
         .filter(g => g.detalles.length > 0)
-      // Refresh deudas for this person
       if (personaSeleccionada.value) {
         await fetchDeudasPersona(personaSeleccionada.value.id)
       }
       await fetchResumen()
+      await refreshAuditoriaIfNeeded()
       return result
     } catch (e) {
       error.value = e.message || 'Error al revertir pago'
@@ -194,7 +232,7 @@ export function useDeudas() {
 
   async function createPersona(data) {
     try {
-      const persona = await $fetch('/api/deudas/personas', {
+      const persona = await apiFetch('/api/deudas/personas', {
         method: 'POST',
         body: data,
       })
@@ -208,7 +246,7 @@ export function useDeudas() {
 
   async function deletePersona(id) {
     try {
-      await $fetch(`/api/deudas/personas/${id}`, { method: 'DELETE' })
+      await apiFetch(`/api/deudas/personas/${id}`, { method: 'DELETE' })
       personas.value = personas.value.filter(p => p.id !== id)
       if (personaSeleccionada.value?.id === id) {
         personaSeleccionada.value = null
@@ -216,6 +254,30 @@ export function useDeudas() {
       await fetchResumen()
     } catch (e) {
       error.value = e.message || 'Error al eliminar persona'
+    }
+  }
+
+  async function desvincularPersona(personaId) {
+    try {
+      const result = await apiFetch('/api/deudas/vinculos/desvincular', {
+        method: 'POST',
+        body: { personaEntidadId: personaId },
+      })
+      // Actualizar persona localmente
+      if (personaSeleccionada.value?.id === personaId) {
+        personaSeleccionada.value = {
+          ...personaSeleccionada.value,
+          vinculadoUsuarioId: null,
+          vinculoParId: null,
+        }
+      }
+      personas.value = personas.value.map(p =>
+        p.id === personaId ? { ...p, vinculadoUsuarioId: null, vinculoParId: null } : p
+      )
+      return result
+    } catch (e) {
+      error.value = e.message || 'Error al desvincular'
+      throw e
     }
   }
 
@@ -228,6 +290,58 @@ export function useDeudas() {
     deudasList.value = []
     pagos.value = []
     pagosPersona.value = []
+    auditoriaPersona.value = []
+  }
+
+  async function fetchCheckpoints(personaId) {
+    try {
+      checkpoints.value = await apiFetch('/api/deudas/vinculos/checkpoints', {
+        query: { personaId },
+      })
+    } catch (e) {
+      // Si no hay vínculo activo simplemente no hay checkpoints
+      checkpoints.value = []
+    }
+  }
+
+  async function crearCheckpoint(personaId, descripcion = '') {
+    guardando.value = true
+    try {
+      await apiFetch('/api/deudas/vinculos/checkpoints', {
+        method: 'POST',
+        body: { personaId, descripcion },
+      })
+      await fetchCheckpoints(personaId)
+      await refreshAuditoriaIfNeeded()
+    } catch (e) {
+      error.value = e.message || 'Error al crear punto de guardado'
+      throw e
+    } finally {
+      guardando.value = false
+    }
+  }
+
+  async function restaurarCheckpoint(checkpointId, personaId) {
+    restaurando.value = checkpointId
+    try {
+      await apiFetch(`/api/deudas/vinculos/checkpoints/${checkpointId}/restaurar`, {
+        method: 'POST',
+      })
+      // Recargar todo: deudas, personas, checkpoints
+      await Promise.all([
+        fetchResumen(),
+        fetchPersonas(),
+        personaSeleccionada.value ? fetchDeudasPersona(personaSeleccionada.value.id) : Promise.resolve(),
+        fetchCheckpoints(personaId),
+        personaSeleccionada.value ? fetchPagosPersona(personaSeleccionada.value.id) : Promise.resolve(),
+        refreshAuditoriaIfNeeded(),
+      ])
+    } catch (e) {
+      error.value = e.message || 'Error al restaurar punto de guardado'
+      throw e
+    } finally {
+      restaurando.value = null
+    }
   }
 
   function cambiarTab(tab) {
@@ -238,7 +352,7 @@ export function useDeudas() {
 
   async function mergePersonas(personaPrincipalId, personasSecundariasIds) {
     try {
-      const result = await $fetch('/api/deudas/personas/merge', {
+      const result = await apiFetch('/api/deudas/personas/merge', {
         method: 'POST',
         body: { personaPrincipalId, personasSecundariasIds },
       })
@@ -255,16 +369,18 @@ export function useDeudas() {
   }
 
   return {
-    personas, deudasList, pagos, pagosPersona, resumen,
+    personas, deudasList, pagos, pagosPersona, auditoriaPersona, resumen,
+    checkpoints, guardando, restaurando,
     isLoading, error,
     tabActual, personaSeleccionada,
     personasFiltradas, deudasPersona,
     deudasActivasPersona, deudasSaldadasPersona,
     totalPendientePersona,
-    fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona,
+    fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona, fetchAuditoriaPersona,
+    fetchCheckpoints, crearCheckpoint, restaurarCheckpoint,
     createDeuda, updateDeuda, deleteDeuda,
-    registrarPago, archivarDeuda, revertirPago,
-    createPersona, deletePersona, mergePersonas,
+    registrarPago, actualizarPago, archivarDeuda, revertirPago,
+    createPersona, deletePersona, desvincularPersona, mergePersonas,
     seleccionarPersona, volverALista, cambiarTab,
   }
 }

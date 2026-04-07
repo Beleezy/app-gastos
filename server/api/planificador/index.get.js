@@ -1,13 +1,13 @@
 import { db } from '../../utils/db.js'
 import { planesMensuales, gastosPlanificados, categorias, configuraciones, gastos } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, between, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const mes = parseInt(query.mes) || (new Date().getMonth() + 1)
   const anio = parseInt(query.anio) || new Date().getFullYear()
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   // Find existing plan
   let [plan] = await db

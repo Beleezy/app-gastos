@@ -1,11 +1,12 @@
 export function useConfiguraciones() {
+  const { apiFetch } = useApiFetch()
   const config = useState('configuraciones', () => null)
   const isLoading = ref(false)
 
   async function fetchConfig() {
     isLoading.value = true
     try {
-      config.value = await $fetch('/api/configuraciones')
+      config.value = await apiFetch('/api/configuraciones')
     } catch (e) {
       console.error('Error al cargar configuraciones:', e)
     } finally {
@@ -15,7 +16,7 @@ export function useConfiguraciones() {
 
   async function updateConfig(data) {
     try {
-      config.value = await $fetch('/api/configuraciones', {
+      config.value = await apiFetch('/api/configuraciones', {
         method: 'PUT',
         body: data
       })

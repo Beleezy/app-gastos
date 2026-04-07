@@ -1,6 +1,7 @@
 import { MESES } from '~/utils/constants'
 
 export function usePlanificador() {
+  const { apiFetch } = useApiFetch()
   const plan = useState('planificador-plan', () => null)
   const gastosPlaneados = useState('planificador-gastos', () => [])
   const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
@@ -81,7 +82,7 @@ export function usePlanificador() {
     isLoading.value = true
     error.value = null
     try {
-      const data = await $fetch('/api/planificador', {
+      const data = await apiFetch('/api/planificador', {
         query: { mes: mesActual.value, anio: anioActual.value }
       })
       plan.value = data.plan
@@ -97,7 +98,7 @@ export function usePlanificador() {
   async function updatePresupuesto(monto) {
     if (!plan.value) return
     try {
-      const updated = await $fetch('/api/planificador', {
+      const updated = await apiFetch('/api/planificador', {
         method: 'PUT',
         body: { id: plan.value.id, montoPresupuesto: monto }
       })
@@ -110,7 +111,7 @@ export function usePlanificador() {
   async function createGastoPlaneado(data) {
     if (!plan.value) return
     try {
-      await $fetch('/api/planificador/gastos', {
+      await apiFetch('/api/planificador/gastos', {
         method: 'POST',
         body: { ...data, planMensualId: plan.value.id }
       })
@@ -123,7 +124,7 @@ export function usePlanificador() {
 
   async function updateGastoPlaneado(id, data) {
     try {
-      await $fetch(`/api/planificador/gastos/${id}`, {
+      await apiFetch(`/api/planificador/gastos/${id}`, {
         method: 'PUT',
         body: data
       })
@@ -135,7 +136,7 @@ export function usePlanificador() {
 
   async function deleteGastoPlaneado(id, eliminarFuturos = false) {
     try {
-      await $fetch(`/api/planificador/gastos/${id}`, {
+      await apiFetch(`/api/planificador/gastos/${id}`, {
         method: 'DELETE',
         query: eliminarFuturos ? { futuros: 'true' } : {}
       })
@@ -152,7 +153,7 @@ export function usePlanificador() {
 
   async function fetchCategorias() {
     try {
-      categorias.value = await $fetch('/api/categorias')
+      categorias.value = await apiFetch('/api/categorias')
     } catch (e) {
       error.value = e.message || 'Error al cargar categorías'
     }
@@ -182,7 +183,7 @@ export function usePlanificador() {
 
   async function duplicarMes(mesOrigen, anioOrigen) {
     try {
-      const result = await $fetch('/api/planificador/duplicar', {
+      const result = await apiFetch('/api/planificador/duplicar', {
         method: 'POST',
         body: {
           mesOrigen,

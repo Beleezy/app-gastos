@@ -20,18 +20,28 @@
       </div>
       <!-- Orden toggle -->
       <button
-        class="w-10 h-10 rounded-xl bg-primary-900/60 border border-primary-700/30 flex items-center justify-center text-gray-500 hover:text-blue-400 transition-colors shrink-0"
-        :title="'Ordenar por: ' + ordenLabels[ordenActual]"
+        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-800 border border-primary-700/50 text-gray-400 text-xs hover:bg-primary-700 transition-colors"
         @click="ciclarOrden"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
         </svg>
+        {{ ordenLabels[ordenActual] }}
       </button>
     </div>
-    <p v-if="ordenActual !== 'monto'" class="text-[10px] text-gray-600 mb-2 px-1">
-      Ordenando por: {{ ordenLabels[ordenActual] }}
-    </p>
+
+    <!-- Filtros de estado -->
+    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+      <button
+        v-for="f in filtrosEstado"
+        :key="f.value"
+        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+        :class="filtroEstado === f.value ? 'bg-blue-500 text-white' : 'bg-primary-800 text-gray-400'"
+        @click="filtroEstado = f.value"
+      >
+        {{ f.label }}
+      </button>
+    </div>
 
     <!-- Loading state -->
     <div v-if="isLoading" class="space-y-3">
@@ -47,7 +57,7 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="personasFiltradas.length === 0" class="text-center py-12">
+    <div v-else-if="personasActivas.length === 0 && personasInactivas.length === 0" class="text-center py-12">
       <div class="w-16 h-16 rounded-full bg-primary-800 flex items-center justify-center mx-auto mb-3">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -62,7 +72,7 @@
     <!-- Personas List -->
     <div v-else class="space-y-2.5">
       <div
-        v-for="persona in personasFiltradas"
+        v-for="persona in personasActivas"
         :key="persona.id"
         class="relative overflow-hidden rounded-xl"
       >
@@ -115,6 +125,11 @@
                   <p class="text-sm font-medium text-white truncate">{{ persona.nombre }}</p>
                   <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary-700 text-gray-400">
                     ORG
+                  </span>
+                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-500/15 text-blue-400" title="Vinculado con usuario">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
                   </span>
                 </div>
                 <p class="text-xs text-gray-500 mt-0.5">
@@ -190,6 +205,71 @@
         </div>
       </div>
 
+      <!-- Sección "Otros" para personas sin deudas activas -->
+      <template v-if="personasInactivas.length > 0">
+        <div class="mt-6 mb-2">
+          <p class="text-xs font-medium text-gray-500 uppercase tracking-wider px-1">Sin deudas activas</p>
+        </div>
+        <div
+          v-for="persona in personasInactivas"
+          :key="persona.id"
+          class="relative overflow-hidden rounded-xl opacity-60"
+        >
+          <!-- Quick actions revealed by swipe -->
+          <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-primary-800">
+            <button
+              class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-blue-400 bg-blue-500/10 rounded-lg"
+              @click.stop="emit('seleccionar', persona)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span class="text-[9px] font-medium">Ver</span>
+            </button>
+          </div>
+
+          <!-- Swipeable card -->
+          <div
+            class="relative bg-primary-800 rounded-xl border border-primary-700/30 transition-transform duration-200 cursor-pointer"
+            :style="{ transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '' }"
+            @click="handleCardClick(persona)"
+            @touchstart.passive="onTouchStart($event, persona.id)"
+            @touchmove.passive="onTouchMove($event, persona.id)"
+            @touchend.passive="onTouchEnd($event, persona.id)"
+          >
+            <div class="p-4">
+              <div class="flex items-center gap-3">
+                <!-- Avatar -->
+                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-lg font-semibold bg-gray-500/15 text-gray-400">
+                  {{ getInitials(persona.nombre) }}
+                </div>
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <p class="text-sm font-medium text-white truncate">{{ persona.nombre }}</p>
+                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary-700 text-gray-400">ORG</span>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-0.5">Sin deudas activas</p>
+                </div>
+                <!-- Amount -->
+                <div class="text-right shrink-0">
+                  <p class="text-sm font-semibold text-gray-500">{{ currencySymbol }} 0.00</p>
+                  <div class="flex items-center justify-end gap-1 mt-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                    <span class="text-[10px] text-gray-500">Saldado</span>
+                  </div>
+                </div>
+                <!-- Chevron -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+
       <!-- Bottom spacer for FAB -->
       <div class="h-16"></div>
     </div>
@@ -206,14 +286,27 @@ const busqueda = ref('')
 const ordenActual = ref('monto') // monto | nombre | antiguo
 const ordenOpciones = ['monto', 'nombre', 'antiguo']
 const ordenLabels = { monto: 'Mayor monto', nombre: 'Nombre A-Z', antiguo: 'Más antiguo' }
+const filtroEstado = ref('todos')
+const filtrosEstado = [
+  { value: 'todos', label: 'Todos' },
+  { value: 'pendiente', label: 'Pendientes' },
+  { value: 'saldado', label: 'Saldados' },
+]
 
 function ciclarOrden() {
   const idx = ordenOpciones.indexOf(ordenActual.value)
   ordenActual.value = ordenOpciones[(idx + 1) % ordenOpciones.length]
 }
 
-const personasFiltradas = computed(() => {
-  let result = [...personas.value]
+function aplicarFiltros(list) {
+  let result = [...list]
+
+  // Filtrar por estado
+  if (filtroEstado.value === 'pendiente') {
+    result = result.filter(p => p.totalPendiente > 0)
+  } else if (filtroEstado.value === 'saldado') {
+    result = result.filter(p => p.totalPendiente === 0)
+  }
 
   // Filtrar por búsqueda
   if (busqueda.value.trim()) {
@@ -231,6 +324,18 @@ const personasFiltradas = computed(() => {
   }
 
   return result
+}
+
+const personasActivas = computed(() => {
+  return aplicarFiltros(personas.value.filter(p => p.deudasActivas > 0))
+})
+
+const personasInactivas = computed(() => {
+  return aplicarFiltros(personas.value.filter(p => p.deudasActivas === 0))
+})
+
+const personasFiltradas = computed(() => {
+  return [...personasActivas.value, ...personasInactivas.value]
 })
 
 async function exportarPdf(persona) {

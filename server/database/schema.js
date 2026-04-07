@@ -6,6 +6,7 @@ export const metodoRegistro = pgEnum('metodo_registro', ['voz', 'manual'])
 export const tipoPersonaEntidad = pgEnum('tipo_persona_entidad', ['persona', 'organizacion'])
 export const tipoDeuda = pgEnum('tipo_deuda', ['me_deben', 'yo_debo'])
 export const estadoDeuda = pgEnum('estado_deuda', ['pendiente', 'parcial', 'pagado', 'archivado'])
+export const estadoSolicitudVinculo = pgEnum('estado_solicitud_vinculo', ['pendiente', 'aceptada', 'rechazada', 'expirada'])
 
 // ── Tabla 1: usuarios ──
 // NOTA: el id lo provee Supabase Auth (mismo UUID que auth.users)
@@ -88,6 +89,8 @@ export const personasEntidades = pgTable('personas_entidades', {
   tipo: tipoPersonaEntidad('tipo').default('persona').notNull(),
   contacto: varchar('contacto', { length: 255 }),
   notas: text('notas'),
+  vinculadoUsuarioId: uuid('vinculado_usuario_id').references(() => usuarios.id, { onDelete: 'set null' }),
+  vinculoParId: uuid('vinculo_par_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
@@ -107,6 +110,7 @@ export const deudas = pgTable('deudas', {
   fechaPago: date('fecha_pago'),
   estado: estadoDeuda('estado').default('pendiente').notNull(),
   notas: text('notas'),
+  vinculoDeudaId: uuid('vinculo_deuda_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
@@ -136,7 +140,54 @@ export const pagosDeuda = pgTable('pagos_deuda', {
   fechaPago: date('fecha_pago').notNull(),
   metodoPago: varchar('metodo_pago', { length: 100 }),
   notas: text('notas'),
+  vinculoPagoId: uuid('vinculo_pago_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   index('pagos_deuda_deuda_idx').on(table.deudaId),
+])
+
+// ── Tabla 10: auditoria_vinculos ──
+export const auditoriaVinculos = pgTable('auditoria_vinculos', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  personaAId: uuid('persona_a_id').references(() => personasEntidades.id, { onDelete: 'cascade' }).notNull(),
+  personaBId: uuid('persona_b_id'), // Sin FK: puede ser de otro usuario
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  accion: varchar('accion', { length: 30 }).notNull(),
+  descripcion: text('descripcion'),
+  datos: text('datos'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('auditoria_vinculos_persona_a_idx').on(table.personaAId),
+  index('auditoria_vinculos_persona_b_idx').on(table.personaBId),
+])
+
+// ── Tabla 11: vinculos_checkpoints ──
+export const vinculosCheckpoints = pgTable('vinculos_checkpoints', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  personaAId: uuid('persona_a_id').references(() => personasEntidades.id, { onDelete: 'cascade' }).notNull(),
+  personaBId: uuid('persona_b_id'), // Sin FK: puede ser de otro usuario
+  tipo: varchar('tipo', { length: 20 }).notNull(), // 'inicio_vinculo' | 'anterior' | 'actual'
+  creadoPorId: uuid('creado_por_id').references(() => usuarios.id, { onDelete: 'set null' }),
+  descripcion: text('descripcion'),
+  snapshotDatos: text('snapshot_datos').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('vinculos_checkpoints_persona_a_idx').on(table.personaAId),
+  index('vinculos_checkpoints_par_tipo_idx').on(table.personaAId, table.tipo),
+])
+
+// ── Tabla 12: solicitudes_vinculo ──
+export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  remitenteId: uuid('remitente_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  destinatarioEmail: varchar('destinatario_email', { length: 255 }).notNull(),
+  destinatarioId: uuid('destinatario_id').references(() => usuarios.id, { onDelete: 'set null' }),
+  personaEntidadId: uuid('persona_entidad_id').references(() => personasEntidades.id, { onDelete: 'cascade' }).notNull(),
+  estado: estadoSolicitudVinculo('estado').default('pendiente').notNull(),
+  mensaje: text('mensaje'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('solicitudes_vinculo_destinatario_idx').on(table.destinatarioEmail),
+  index('solicitudes_vinculo_remitente_idx').on(table.remitenteId),
 ])

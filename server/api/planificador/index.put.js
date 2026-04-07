@@ -1,11 +1,11 @@
 import { db } from '../../utils/db.js'
 import { planesMensuales } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   const [updated] = await db
     .update(planesMensuales)

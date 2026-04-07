@@ -36,9 +36,21 @@
             @blur="guardarPresupuesto"
           />
         </div>
-        <button v-else class="text-lg font-bold text-white hover:text-blue-300 transition-colors whitespace-nowrap" @click="iniciarEdicion">
-          {{ currencySymbol }} {{ formatMonto(resumen.presupuesto) }}
-        </button>
+        <div v-else class="flex items-center gap-1.5">
+          <button class="text-lg font-bold text-white hover:text-blue-300 transition-colors whitespace-nowrap" @click="iniciarEdicion">
+            {{ currencySymbol }} {{ formatMonto(resumen.presupuesto) }}
+          </button>
+          <button
+            v-if="presupuestoDefault > 0 && resumen.presupuesto !== presupuestoDefault"
+            class="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 transition-colors"
+            title="Sincronizar con presupuesto predeterminado"
+            @click="sincronizarPresupuesto"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Divider -->
@@ -163,6 +175,16 @@ const {
 const duplicando = ref(false)
 const showSelectorMes = ref(false)
 const { success, error: toastError } = useToast()
+
+const { config, fetchConfig: fetchConfigData } = useConfiguraciones()
+const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
+
+onMounted(() => { fetchConfigData() })
+
+async function sincronizarPresupuesto() {
+  await updatePresupuesto(presupuestoDefault.value)
+  success('Presupuesto sincronizado con configuracion')
+}
 
 // Inicializar origen en el mes anterior al actual
 const origenMes = ref(mesActual.value === 1 ? 12 : mesActual.value - 1)

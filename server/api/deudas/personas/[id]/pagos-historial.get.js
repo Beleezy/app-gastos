@@ -1,11 +1,11 @@
 import { db } from '../../../../utils/db.js'
 import { deudas, pagosDeuda, personasEntidades } from '../../../../database/schema.js'
-import { getUsuarioId } from '../../../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { eq, and, desc } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const personaId = getRouterParam(event, 'id')
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   // Verify persona belongs to user
   const [persona] = await db
@@ -72,6 +72,7 @@ export default defineEventHandler(async (event) => {
       deudaId: pago.deudaId,
       concepto: pago.deudaConcepto,
       montoPagado: monto,
+      metodoPago: pago.metodoPago,
     })
   }
 

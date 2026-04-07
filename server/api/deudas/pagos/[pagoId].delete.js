@@ -1,18 +1,20 @@
 import { db } from '../../../utils/db.js'
-import { deudas, pagosDeuda } from '../../../database/schema.js'
-import { getUsuarioId } from '../../../utils/getUsuario.js'
+import { deudas, pagosDeuda, personasEntidades } from '../../../database/schema.js'
+import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { registrarAuditoria } from '../../../utils/vinculos.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const pagoId = getRouterParam(event, 'pagoId')
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
-  // Get pago with its deuda (verify ownership via deuda.usuarioId)
   const [pago] = await db
     .select({
       id: pagosDeuda.id,
       montoPagado: pagosDeuda.montoPagado,
       deudaId: pagosDeuda.deudaId,
+      vinculoPagoId: pagosDeuda.vinculoPagoId,
+      metodoPago: pagosDeuda.metodoPago,
     })
     .from(pagosDeuda)
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
@@ -26,9 +28,14 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Pago no encontrado' })
   }
 
-  // Get current deuda state
   const [deuda] = await db
-    .select({ montoPendiente: deudas.montoPendiente, montoOriginal: deudas.montoOriginal })
+    .select({
+      montoPendiente: deudas.montoPendiente,
+      montoOriginal: deudas.montoOriginal,
+      vinculoDeudaId: deudas.vinculoDeudaId,
+      personaEntidadId: deudas.personaEntidadId,
+      concepto: deudas.concepto,
+    })
     .from(deudas)
     .where(eq(deudas.id, pago.deudaId))
     .limit(1)
@@ -40,7 +47,32 @@ export default defineEventHandler(async (event) => {
   )
   const nuevoEstado = nuevoPendiente >= parseFloat(deuda.montoOriginal) ? 'pendiente' : 'parcial'
 
+  // Obtener persona para auditoría
+  const [persona] = await db
+    .select({ vinculoParId: personasEntidades.vinculoParId })
+    .from(personasEntidades)
+    .where(eq(personasEntidades.id, deuda.personaEntidadId))
+    .limit(1)
+
   await db.transaction(async (tx) => {
+    if (pago.vinculoPagoId && deuda.vinculoDeudaId) {
+      // Desvincular ambos pagos primero
+      await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pago.vinculoPagoId))
+      await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pagoId))
+      // Eliminar pago espejo
+      await tx.delete(pagosDeuda).where(eq(pagosDeuda.id, pago.vinculoPagoId))
+      // Actualizar deuda espejo
+      await tx
+        .update(deudas)
+        .set({
+          montoPendiente: String(Math.round(nuevoPendiente * 100) / 100),
+          estado: nuevoEstado,
+          updatedAt: new Date(),
+        })
+        .where(eq(deudas.id, deuda.vinculoDeudaId))
+    }
+
+    // Eliminar pago original y actualizar deuda
     await tx.delete(pagosDeuda).where(eq(pagosDeuda.id, pagoId))
     await tx
       .update(deudas)
@@ -50,6 +82,18 @@ export default defineEventHandler(async (event) => {
         updatedAt: new Date(),
       })
       .where(eq(deudas.id, pago.deudaId))
+
+    // Registrar auditoría si hay vínculo
+    if (deuda.vinculoDeudaId && persona?.vinculoParId) {
+      await registrarAuditoria(tx, {
+        personaAId: deuda.personaEntidadId,
+        personaBId: persona.vinculoParId,
+        usuarioId,
+        accion: 'pago_revertido',
+        descripcion: `Pago revertido: S/ ${montoPagado} de "${deuda.concepto}"${pago.metodoPago ? ` (${pago.metodoPago})` : ''}`,
+        datos: { pagoId, deudaId: pago.deudaId, monto: montoPagado },
+      })
+    }
   })
 
   return { ok: true, deudaId: pago.deudaId, nuevoPendiente }

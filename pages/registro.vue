@@ -31,6 +31,8 @@
         <RegistroResumenMesRegistro
           :total-mes="parseFloat(resumen.totalMes) || 0"
           :presupuesto="presupuesto"
+          :presupuesto-default="presupuestoDefault"
+          @update:presupuesto="actualizarPresupuesto"
         />
       </div>
 
@@ -268,16 +270,38 @@ const {
   reintentarParse, cerrarConfirmacion,
 } = useVoiceDraft()
 
+const { config, fetchConfig } = useConfiguraciones()
+const { apiFetch } = useApiFetch()
+const { success: toastSuccess, error: toastError } = useToast()
+
 const presupuesto = ref(0)
+const planId = ref(null)
+const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
 
 async function fetchPresupuesto() {
   try {
     const data = await $fetch('/api/planificador', {
       query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value }
     })
-    presupuesto.value = data.plan?.montoPresupuesto || 0
+    presupuesto.value = parseFloat(data.plan?.montoPresupuesto) || 0
+    planId.value = data.plan?.id || null
   } catch {
     presupuesto.value = 0
+    planId.value = null
+  }
+}
+
+async function actualizarPresupuesto(monto) {
+  if (!planId.value) return
+  try {
+    await apiFetch('/api/planificador', {
+      method: 'PUT',
+      body: { id: planId.value, montoPresupuesto: monto }
+    })
+    presupuesto.value = monto
+    toastSuccess('Presupuesto actualizado')
+  } catch (e) {
+    toastError(handleApiError(e))
   }
 }
 
@@ -466,7 +490,7 @@ const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(mesAnterior, 
 
 // Initial load
 onMounted(async () => {
-  await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto()])
+  await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto(), fetchConfig()])
   attachSwipe(historialSwipeZone.value)
 })
 

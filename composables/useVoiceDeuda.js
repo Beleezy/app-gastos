@@ -1,6 +1,7 @@
 export function useVoiceDeuda() {
   const { isListening, transcript, startListening, continueListening, stopListening, resetTranscript } = useVoiceRecognition()
 
+  const { apiFetch } = useApiFetch()
   const { createDeuda, fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagosPersona, personaSeleccionada } = useDeudas()
 
   const showVozOverlay = ref(false)
@@ -104,7 +105,7 @@ export function useVoiceDeuda() {
     vozParsing.value = true
     vozError.value = ''
     try {
-      const result = await $fetch('/api/voz/parse', {
+      const result = await apiFetch('/api/voz/parse', {
         method: 'POST',
         body: { texto: vozTranscript.value, modo: 'deudas' }
       })
@@ -143,13 +144,13 @@ export function useVoiceDeuda() {
       }
 
       for (const p of pagosParseados.value) {
-        const todasPersonas = await $fetch('/api/deudas/personas')
+        const todasPersonas = await apiFetch('/api/deudas/personas')
         const nombreLower = p.persona.toLowerCase()
         const personaMatch = todasPersonas.find(pe =>
           pe.nombre.toLowerCase() === nombreLower
         )
         if (personaMatch && personaMatch.totalPendiente > 0) {
-          await $fetch(`/api/deudas/personas/${personaMatch.id}/pago-global`, {
+          await apiFetch(`/api/deudas/personas/${personaMatch.id}/pago-global`, {
             method: 'POST',
             body: {
               monto: p.monto,

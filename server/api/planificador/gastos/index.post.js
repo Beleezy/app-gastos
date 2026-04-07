@@ -1,12 +1,12 @@
 import { db } from '../../../utils/db.js'
 import { gastosPlanificados, planesMensuales, categorias } from '../../../database/schema.js'
-import { getUsuarioId } from '../../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { replicarGastoRecurrente, generarGrupoId } from '../../../utils/recurrente.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   // Verify plan belongs to user
   const [plan] = await db

@@ -1,10 +1,10 @@
 import { db } from '../../utils/db.js'
 import { deudas, personasEntidades, pagosDeuda } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
   const query = getQuery(event)
   const personaId = query.personaId
   const tipo = query.tipo // 'me_deben' | 'yo_debo'

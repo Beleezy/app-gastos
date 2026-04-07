@@ -44,6 +44,35 @@
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
             </svg>
           </button>
+          <!-- Vincular con usuario -->
+          <button
+            v-if="!personaSeleccionada.vinculadoUsuarioId"
+            class="w-8 h-8 rounded-lg bg-primary-700/50 flex items-center justify-center text-gray-500 hover:text-blue-400 transition-colors"
+            title="Vincular con usuario"
+            @click="showSolicitudVinculo = true"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </button>
+          <!-- Badge vinculado + botón desvincular -->
+          <div v-if="personaSeleccionada.vinculadoUsuarioId" class="flex items-center gap-1">
+            <span class="flex items-center gap-1 px-2 py-1 rounded-lg bg-blue-500/15 text-blue-400 text-[10px] font-medium">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+              Vinculado
+            </span>
+            <button
+              class="w-8 h-8 rounded-lg bg-primary-700/50 flex items-center justify-center text-gray-500 hover:text-orange-400 transition-colors"
+              title="Desvincular"
+              @click="showDesvincular = true"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3" />
+              </svg>
+            </button>
+          </div>
           <!-- Edit persona -->
           <button
             class="w-8 h-8 rounded-lg bg-primary-700/50 flex items-center justify-center text-gray-500 hover:text-amber-400 transition-colors"
@@ -215,6 +244,21 @@
       <!-- Payment history section (timeline) -->
       <DeudasHistorialPagosPersona :pagos="pagosPersona" />
 
+      <!-- Auditoría de vínculo -->
+      <DeudasAuditoriaVinculo
+        v-if="personaSeleccionada.vinculadoUsuarioId"
+        :persona-id="personaSeleccionada.id"
+        :auditoria="auditoriaPersona"
+      />
+
+      <!-- Puntos de guardado (solo personas vinculadas) -->
+      <DeudasCheckpointsVinculo
+        v-if="personaSeleccionada.vinculadoUsuarioId"
+        :persona-id="personaSeleccionada.id"
+        @restaurado="onCheckpointRestaurado"
+        @creado="onCheckpointCreado"
+      />
+
       <!-- Settled debts section -->
       <div v-if="deudasSaldadasPersona.length > 0">
         <button
@@ -262,6 +306,15 @@
       <div class="h-16"></div>
     </template>
 
+    <!-- Solicitud vinculo -->
+    <DeudasSolicitudVinculo
+      v-if="showSolicitudVinculo"
+      :persona-entidad-id="personaSeleccionada.id"
+      :persona-nombre="personaSeleccionada.nombre"
+      @close="showSolicitudVinculo = false"
+      @enviada="showSolicitudVinculo = false"
+    />
+
     <!-- Editar persona -->
     <DeudasFormEditarPersona
       v-if="showEditarPersona"
@@ -291,6 +344,35 @@
       :loading="procesandoAccion"
       @confirm="ejecutarEliminarDeuda"
     />
+
+    <!-- Desvincular confirmation -->
+    <div v-if="showDesvincular" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDesvincular = false"></div>
+      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
+        <h3 class="text-base font-semibold text-white mb-2">Desvincular usuario</h3>
+        <p class="text-sm text-gray-400 mb-2">El vínculo con <span class="text-white font-medium">{{ personaSeleccionada.nombre }}</span> se disolverá.</p>
+        <ul class="text-xs text-gray-500 space-y-1 mb-5 list-disc pl-4">
+          <li>Tus deudas y pagos se mantienen intactos</li>
+          <li>Los datos del otro usuario también se conservan</li>
+          <li>Podrás volver a vincular enviando una nueva solicitud</li>
+        </ul>
+        <div class="space-y-2">
+          <button
+            class="w-full py-2.5 rounded-xl bg-orange-500/15 text-orange-400 text-sm font-medium hover:bg-orange-500/25 transition-colors disabled:opacity-50"
+            :disabled="desvinculando"
+            @click="ejecutarDesvincular"
+          >
+            {{ desvinculando ? 'Desvinculando...' : 'Confirmar desvincular' }}
+          </button>
+          <button
+            class="w-full py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            @click="showDesvincular = false"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Delete persona confirmation -->
     <div v-if="showDeletePersona" class="fixed inset-0 z-50 flex items-center justify-center px-6">
@@ -325,7 +407,8 @@ const {
   deudasPersona, deudasActivasPersona, deudasSaldadasPersona,
   totalPendientePersona, isLoading,
   volverALista, deleteDeuda, archivarDeuda, deletePersona,
-  registrarPago, pagosPersona,
+  registrarPago, pagosPersona, auditoriaPersona,
+  desvincularPersona, fetchAuditoriaPersona,
 } = useDeudas()
 
 const { descargarPdf, compartirWhatsapp } = useDeudaPdf()
@@ -333,10 +416,20 @@ const { descargarPdf, compartirWhatsapp } = useDeudaPdf()
 const showSaldadas = ref(false)
 const showDeletePersona = ref(false)
 const showEditarPersona = ref(false)
+const showSolicitudVinculo = ref(false)
+const showDesvincular = ref(false)
 const showSaldarConfirm = ref(false)
 const showEliminarDeudaConfirm = ref(false)
 const deudaParaAccion = ref(null)
 const procesandoAccion = ref(false)
+const desvinculando = ref(false)
+
+// Cargar auditoría cuando la persona tiene vínculo
+watch(() => personaSeleccionada.value?.id, (newId) => {
+  if (newId && personaSeleccionada.value?.vinculadoUsuarioId) {
+    fetchAuditoriaPersona(newId)
+  }
+}, { immediate: true })
 
 const hoy = new Date().toISOString().split('T')[0]
 function esVencida(deuda) {
@@ -422,6 +515,28 @@ function confirmarEliminarPersona() {
 async function ejecutarEliminarPersona() {
   showDeletePersona.value = false
   await deletePersona(personaSeleccionada.value.id)
+}
+
+async function ejecutarDesvincular() {
+  desvinculando.value = true
+  try {
+    await desvincularPersona(personaSeleccionada.value.id)
+    showDesvincular.value = false
+  } finally {
+    desvinculando.value = false
+  }
+}
+
+async function onCheckpointRestaurado() {
+  if (personaSeleccionada.value?.vinculadoUsuarioId) {
+    await fetchAuditoriaPersona(personaSeleccionada.value.id)
+  }
+}
+
+async function onCheckpointCreado() {
+  if (personaSeleccionada.value?.vinculadoUsuarioId) {
+    await fetchAuditoriaPersona(personaSeleccionada.value.id)
+  }
 }
 
 // Swipe right → go back

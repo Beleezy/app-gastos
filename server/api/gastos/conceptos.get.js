@@ -1,11 +1,11 @@
 import { db } from '../../utils/db.js'
 import { gastos } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, sql, ilike } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   const { q } = query
 

@@ -35,6 +35,11 @@
       </div>
     </Transition>
 
+    <!-- Notificaciones de vínculos pendientes -->
+    <div class="px-4">
+      <DeudasNotificacionesVinculo @vinculo-aceptado="onVinculoAceptado" />
+    </div>
+
     <!-- Resumen (balance general + tabs) -->
     <DeudasResumenDeudas />
 
@@ -131,6 +136,12 @@ const { showVozOverlay, abrirVozOverlay } = useVoiceDeuda()
 
 const { exportarExcel } = useExportExcel()
 
+const { fetchPendientes: fetchVinculosPendientes } = useVinculos()
+
+async function onVinculoAceptado() {
+  await Promise.all([fetchResumen(), fetchPersonas()])
+}
+
 function exportarDeudas() {
   const columnas = [
     { label: 'Persona', getValue: p => p.nombre },
@@ -197,6 +208,6 @@ const { isRefreshing } = usePullToRefresh(async () => {
 })
 
 onMounted(async () => {
-  await Promise.all([fetchResumen(), fetchPersonas()])
+  await Promise.all([fetchResumen(), fetchPersonas(), fetchVinculosPendientes()])
 })
 </script>

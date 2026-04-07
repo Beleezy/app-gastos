@@ -1,11 +1,12 @@
 import { db } from '../../utils/db.js'
 import { deudas, personasEntidades } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { crearDeudaEspejo, registrarAuditoria } from '../../utils/vinculos.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   if (!body.concepto?.trim()) {
     throw createError({ statusCode: 400, message: 'El concepto es obligatorio' })
@@ -20,7 +21,6 @@ export default defineEventHandler(async (event) => {
   // Find or create persona
   let personaId = body.personaEntidadId
   if (!personaId && body.personaNombre?.trim()) {
-    // Check if persona already exists
     const [existing] = await db
       .select({ id: personasEntidades.id })
       .from(personasEntidades)
@@ -51,27 +51,44 @@ export default defineEventHandler(async (event) => {
 
   const monto = parseFloat(body.monto)
 
-  const [deuda] = await db
-    .insert(deudas)
-    .values({
-      usuarioId,
-      personaEntidadId: personaId,
-      tipoDeuda: body.tipoDeuda,
-      concepto: body.concepto.trim(),
-      montoOriginal: String(monto),
-      montoPendiente: String(monto),
-      fechaCreacion: body.fecha || new Date().toISOString().split('T')[0],
-      fechaPago: body.fechaPago || null,
-      notas: body.notas?.trim() || null,
-    })
-    .returning()
-
-  // Return with persona info
   const [persona] = await db
     .select()
     .from(personasEntidades)
     .where(eq(personasEntidades.id, personaId))
     .limit(1)
+
+  const deudaValues = {
+    usuarioId,
+    personaEntidadId: personaId,
+    tipoDeuda: body.tipoDeuda,
+    concepto: body.concepto.trim(),
+    montoOriginal: String(monto),
+    montoPendiente: String(monto),
+    fechaCreacion: body.fecha || new Date().toISOString().split('T')[0],
+    fechaPago: body.fechaPago || null,
+    notas: body.notas?.trim() || null,
+  }
+
+  let deuda
+  if (persona?.vinculoParId && persona?.vinculadoUsuarioId) {
+    deuda = await db.transaction(async (tx) => {
+      const [nuevaDeuda] = await tx.insert(deudas).values(deudaValues).returning()
+      const deudaEspejo = await crearDeudaEspejo(tx, nuevaDeuda, persona.vinculoParId, persona.vinculadoUsuarioId)
+
+      await registrarAuditoria(tx, {
+        personaAId: personaId,
+        personaBId: persona.vinculoParId,
+        usuarioId,
+        accion: 'deuda_creada',
+        descripcion: `Nueva deuda: "${nuevaDeuda.concepto}" por S/ ${monto}`,
+        datos: { deudaId: nuevaDeuda.id, concepto: nuevaDeuda.concepto, monto, tipoDeuda: body.tipoDeuda },
+      })
+
+      return nuevaDeuda
+    })
+  } else {
+    [deuda] = await db.insert(deudas).values(deudaValues).returning()
+  }
 
   return {
     ...deuda,

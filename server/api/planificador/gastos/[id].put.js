@@ -1,6 +1,6 @@
 import { db } from '../../../utils/db.js'
 import { gastosPlanificados, planesMensuales, categorias } from '../../../database/schema.js'
-import { getUsuarioId } from '../../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import {
   replicarGastoRecurrente,
   actualizarRecurrentesFuturos,
@@ -12,7 +12,7 @@ import { eq } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   const body = await readBody(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   // Get current state before update
   const [gastoAnterior] = await db

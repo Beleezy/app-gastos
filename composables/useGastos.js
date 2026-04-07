@@ -1,6 +1,7 @@
 import { DIAS_SEMANA, MESES } from '~/utils/constants'
 
 export function useGastos() {
+  const { apiFetch } = useApiFetch()
   const gastos = useState('registro-gastos', () => [])
   const gastosMensuales = useState('registro-gastos-mensuales', () => [])
   const categorias = useState('registro-categorias', () => [])
@@ -49,7 +50,7 @@ export function useGastos() {
     isLoading.value = true
     error.value = null
     try {
-      const data = await $fetch('/api/gastos', {
+      const data = await apiFetch('/api/gastos', {
         query: { fecha: fechaSeleccionada.value },
         signal: fetchGastosController.signal,
       })
@@ -67,7 +68,7 @@ export function useGastos() {
     const mesParam = mes || Number(m)
     const anioParam = anio || Number(a)
     try {
-      const data = await $fetch('/api/gastos/resumen', {
+      const data = await apiFetch('/api/gastos/resumen', {
         query: { fecha: f, mes: mesParam, anio: anioParam }
       })
       resumen.value = data
@@ -78,7 +79,7 @@ export function useGastos() {
 
   async function fetchCategorias() {
     try {
-      categorias.value = await $fetch('/api/categorias')
+      categorias.value = await apiFetch('/api/categorias')
     } catch (e) {
       error.value = e.message || 'Error al cargar categorías'
     }
@@ -86,7 +87,7 @@ export function useGastos() {
 
   async function createGasto(data) {
     try {
-      const nuevo = await $fetch('/api/gastos', {
+      const nuevo = await apiFetch('/api/gastos', {
         method: 'POST',
         body: data
       })
@@ -104,7 +105,7 @@ export function useGastos() {
 
   async function createGastosBulk(gastosData, transcripcionVoz) {
     try {
-      const nuevos = await $fetch('/api/gastos/bulk', {
+      const nuevos = await apiFetch('/api/gastos/bulk', {
         method: 'POST',
         body: { gastos: gastosData, transcripcionVoz }
       })
@@ -123,7 +124,7 @@ export function useGastos() {
 
   async function updateGasto(id, data) {
     try {
-      const updated = await $fetch(`/api/gastos/${id}`, {
+      const updated = await apiFetch(`/api/gastos/${id}`, {
         method: 'PUT',
         body: data
       })
@@ -141,7 +142,7 @@ export function useGastos() {
 
   async function deleteGasto(id) {
     try {
-      await $fetch(`/api/gastos/${id}`, { method: 'DELETE' })
+      await apiFetch(`/api/gastos/${id}`, { method: 'DELETE' })
       gastos.value = gastos.value.filter(g => g.id !== id)
       await fetchResumen()
     } catch (e) {
@@ -155,7 +156,7 @@ export function useGastos() {
     fetchMensualController = new AbortController()
     isLoadingMensual.value = true
     try {
-      const data = await $fetch('/api/gastos', {
+      const data = await apiFetch('/api/gastos', {
         query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value },
         signal: fetchMensualController.signal,
       })

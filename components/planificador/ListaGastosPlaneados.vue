@@ -110,13 +110,19 @@
             <div class="flex items-start gap-3">
               <div
                 class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-                :style="{ backgroundColor: cat.color + '26' }"
+                :style="{ backgroundColor: (gasto._catColor || cat.color) + '26' }"
               >
-                <span class="text-base">{{ getEmoji(cat.nombre) }}</span>
+                <span class="text-base">{{ getEmoji(gasto._catNombre || cat.nombre) }}</span>
               </div>
               <div>
                 <p class="text-sm font-medium text-white">{{ gasto.concepto }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">{{ formatFecha(gasto.fechaProbablePago) }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  <span v-if="gasto._catNombre" class="inline-flex items-center gap-1 mr-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full inline-block" :style="{ backgroundColor: gasto._catColor }"></span>
+                    {{ gasto._catNombre }} ·
+                  </span>
+                  {{ formatFecha(gasto.fechaProbablePago) }}
+                </p>
                 <div v-if="gasto.esRecurrente" class="flex items-center gap-1 mt-1">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -240,24 +246,50 @@ const filtros = [
 
 const categoriasFiltered = computed(() => {
   const term = busqueda.value.trim().toLowerCase()
+  const ordenaPorCategoria = ordenActual.value === 'fecha'
 
-  return gastosPorCategoria.value
-    .map(cat => {
-      let gastos = cat.gastos
-      if (filtroActual.value !== 'todos') {
-        gastos = gastos.filter(g => g.estado === filtroActual.value)
-      }
-      if (term) {
-        gastos = gastos.filter(g => g.concepto.toLowerCase().includes(term))
-      }
-      gastos = ordenarGastos(gastos)
-      return {
-        ...cat,
-        gastos,
-        total: gastos.reduce((s, g) => s + g.montoEstimado, 0),
-      }
-    })
-    .filter(cat => cat.gastos.length > 0)
+  if (ordenaPorCategoria) {
+    // Agrupado por categoría (vista por defecto)
+    return gastosPorCategoria.value
+      .map(cat => {
+        let gastos = cat.gastos
+        if (filtroActual.value !== 'todos') {
+          gastos = gastos.filter(g => g.estado === filtroActual.value)
+        }
+        if (term) {
+          gastos = gastos.filter(g => g.concepto.toLowerCase().includes(term))
+        }
+        gastos = ordenarGastos(gastos)
+        return {
+          ...cat,
+          gastos,
+          total: gastos.reduce((s, g) => s + g.montoEstimado, 0),
+        }
+      })
+      .filter(cat => cat.gastos.length > 0)
+  }
+
+  // Para monto/nombre: lista plana en un solo grupo virtual
+  let todosLosGastos = gastosPorCategoria.value.flatMap(cat =>
+    cat.gastos.map(g => ({ ...g, _catNombre: cat.nombre, _catColor: cat.color }))
+  )
+  if (filtroActual.value !== 'todos') {
+    todosLosGastos = todosLosGastos.filter(g => g.estado === filtroActual.value)
+  }
+  if (term) {
+    todosLosGastos = todosLosGastos.filter(g => g.concepto.toLowerCase().includes(term))
+  }
+  todosLosGastos = ordenarGastos(todosLosGastos)
+
+  if (todosLosGastos.length === 0) return []
+  return [{
+    categoriaId: '__all',
+    nombre: ordenActual.value === 'monto' ? 'Por monto' : 'Por nombre',
+    color: '#6b7280',
+    gastos: todosLosGastos,
+    total: todosLosGastos.reduce((s, g) => s + g.montoEstimado, 0),
+    totalReal: 0,
+  }]
 })
 
 const { getCategoriaIcono } = useCategorias()

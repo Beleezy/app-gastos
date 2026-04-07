@@ -1,12 +1,13 @@
 import { db } from '../../../../utils/db.js'
-import { deudas, pagosDeuda } from '../../../../database/schema.js'
-import { getUsuarioId } from '../../../../utils/getUsuario.js'
+import { deudas, pagosDeuda, personasEntidades } from '../../../../database/schema.js'
+import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
+import { crearPagoEspejo, registrarAuditoria } from '../../../../utils/vinculos.js'
 import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const personaId = getRouterParam(event, 'id')
   const body = await readBody(event)
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
 
   const montoTotal = parseFloat(body.monto)
   if (!montoTotal || montoTotal <= 0) {
@@ -18,7 +19,20 @@ export default defineEventHandler(async (event) => {
   const notas = body.notas?.trim() || null
   const hoy = new Date().toISOString().split('T')[0]
 
-  // Get all active debts for this person (pendiente or parcial)
+  // Verificar persona y si está vinculada
+  const [persona] = await db
+    .select({ id: personasEntidades.id, vinculoParId: personasEntidades.vinculoParId, vinculadoUsuarioId: personasEntidades.vinculadoUsuarioId })
+    .from(personasEntidades)
+    .where(and(
+      eq(personasEntidades.id, personaId),
+      eq(personasEntidades.usuarioId, usuarioId)
+    ))
+    .limit(1)
+
+  if (!persona) {
+    throw createError({ statusCode: 404, message: 'Persona no encontrada' })
+  }
+
   const deudasActivas = await db
     .select()
     .from(deudas)
@@ -32,38 +46,23 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'No hay deudas pendientes para esta persona' })
   }
 
-  // Sort debts by priority:
-  // 1. Debts with overdue fechaPago (past due date) - sorted by fechaPago ascending
-  // 2. Debts without fechaPago - sorted by fechaCreacion ascending (oldest first)
-  // 3. Debts with future fechaPago - sorted by fechaPago ascending
   const sorted = [...deudasActivas].sort((a, b) => {
     const aFechaPago = a.fechaPago
     const bFechaPago = b.fechaPago
-
     const aVencida = aFechaPago && aFechaPago <= hoy
     const bVencida = bFechaPago && bFechaPago <= hoy
     const aSinFecha = !aFechaPago
     const bSinFecha = !bFechaPago
 
-    // Priority 1: overdue debts first
     if (aVencida && !bVencida) return -1
     if (!aVencida && bVencida) return 1
-    if (aVencida && bVencida) {
-      return aFechaPago < bFechaPago ? -1 : aFechaPago > bFechaPago ? 1 : 0
-    }
-
-    // Priority 2: debts without fechaPago (sorted by fechaCreacion oldest first)
+    if (aVencida && bVencida) return aFechaPago < bFechaPago ? -1 : aFechaPago > bFechaPago ? 1 : 0
     if (aSinFecha && !bSinFecha) return -1
     if (!aSinFecha && bSinFecha) return 1
-    if (aSinFecha && bSinFecha) {
-      return a.fechaCreacion < b.fechaCreacion ? -1 : a.fechaCreacion > b.fechaCreacion ? 1 : 0
-    }
-
-    // Priority 3: future fechaPago (sorted ascending)
+    if (aSinFecha && bSinFecha) return a.fechaCreacion < b.fechaCreacion ? -1 : a.fechaCreacion > b.fechaCreacion ? 1 : 0
     return aFechaPago < bFechaPago ? -1 : aFechaPago > bFechaPago ? 1 : 0
   })
 
-  // Ejecutar en transacción para garantizar consistencia
   const result = await db.transaction(async (tx) => {
     let montoRestante = montoTotal
     const pagosRealizados = []
@@ -77,7 +76,6 @@ export default defineEventHandler(async (event) => {
       const nuevoPendiente = Math.round((pendiente - montoAplicar) * 100) / 100
       const nuevoEstado = nuevoPendiente <= 0 ? 'pagado' : 'parcial'
 
-      // Create payment record
       const [pago] = await tx
         .insert(pagosDeuda)
         .values({
@@ -89,7 +87,6 @@ export default defineEventHandler(async (event) => {
         })
         .returning()
 
-      // Update debt
       const [deudaActualizada] = await tx
         .update(deudas)
         .set({
@@ -99,6 +96,19 @@ export default defineEventHandler(async (event) => {
         })
         .where(eq(deudas.id, deuda.id))
         .returning()
+
+      // Sincronizar con espejo si la deuda está vinculada
+      if (deuda.vinculoDeudaId) {
+        await crearPagoEspejo(tx, pago, deuda.vinculoDeudaId)
+        await tx
+          .update(deudas)
+          .set({
+            montoPendiente: String(Math.max(0, nuevoPendiente)),
+            estado: nuevoEstado,
+            updatedAt: new Date(),
+          })
+          .where(eq(deudas.id, deuda.vinculoDeudaId))
+      }
 
       pagosRealizados.push({
         ...pago,
@@ -113,6 +123,19 @@ export default defineEventHandler(async (event) => {
       })
 
       montoRestante = Math.round((montoRestante - montoAplicar) * 100) / 100
+    }
+
+    // Registrar auditoría si persona está vinculada
+    if (persona.vinculoParId) {
+      const montoAplicado = montoTotal - montoRestante
+      await registrarAuditoria(tx, {
+        personaAId: personaId,
+        personaBId: persona.vinculoParId,
+        usuarioId,
+        accion: 'pago_creado',
+        descripcion: `Pago global de S/ ${montoAplicado}${metodoPago ? ` vía ${metodoPago}` : ''} (${pagosRealizados.length} deuda${pagosRealizados.length !== 1 ? 's' : ''})`,
+        datos: { montoAplicado, metodoPago, deudasPagadas: pagosRealizados.map(p => ({ deudaId: p.deudaId, concepto: p.concepto, monto: p.montoPagado })) },
+      })
     }
 
     return {

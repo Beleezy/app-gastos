@@ -75,10 +75,14 @@ export default defineNuxtConfig({
     },
   },
 
+  routeRules: {
+    '/auth/confirm': { ssr: false },
+  },
+
   runtimeConfig: {
     databaseUrl: process.env.DATABASE_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
-    geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite',
+    geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite-preview;gemini-2.5-flash',
     supabaseUrl: process.env.SUPABASE_URL || '',
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     public: {

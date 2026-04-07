@@ -1,10 +1,10 @@
 import { db } from '../../../utils/db.js'
 import { personasEntidades, deudas } from '../../../database/schema.js'
-import { getUsuarioId } from '../../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { eq, and, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
   const query = getQuery(event)
   const tipo = query.tipo // 'me_deben' | 'yo_debo' | undefined (all)
   const hoy = new Date().toISOString().split('T')[0]
@@ -17,6 +17,8 @@ export default defineEventHandler(async (event) => {
       tipo: personasEntidades.tipo,
       contacto: personasEntidades.contacto,
       notas: personasEntidades.notas,
+      vinculadoUsuarioId: personasEntidades.vinculadoUsuarioId,
+      vinculoParId: personasEntidades.vinculoParId,
       createdAt: personasEntidades.createdAt,
       totalPendiente: sql`COALESCE(SUM(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as('total_pendiente'),
       totalDeudas: sql`COUNT(${deudas.id})`.as('total_deudas'),

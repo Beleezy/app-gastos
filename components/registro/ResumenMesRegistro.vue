@@ -7,9 +7,40 @@
         <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-medium">Gastado este mes</p>
         <p class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(totalMes) }}</p>
       </div>
-      <div v-if="presupuesto > 0" class="text-right">
+      <div class="text-right">
         <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-medium">Presupuesto</p>
-        <p class="text-base font-semibold text-gray-300">{{ currencySymbol }} {{ formatMonto(presupuesto) }}</p>
+        <!-- Edit mode -->
+        <div v-if="editando" class="flex items-center gap-1 justify-end">
+          <span class="text-sm text-gray-400">{{ currencySymbol }}</span>
+          <input
+            ref="inputRef"
+            v-model="presupuestoTemp"
+            type="number"
+            step="0.01"
+            class="w-28 bg-primary-900 border border-blue-500 rounded-lg px-2 py-1 text-right text-white text-base font-bold focus:outline-none"
+            @keyup.enter="guardar"
+            @blur="guardar"
+          />
+        </div>
+        <!-- Display mode -->
+        <div v-else class="flex items-center gap-1.5 justify-end">
+          <button
+            class="text-base font-semibold text-gray-300 hover:text-blue-300 transition-colors whitespace-nowrap"
+            @click="iniciarEdicion"
+          >
+            {{ presupuesto > 0 ? `${currencySymbol} ${formatMonto(presupuesto)}` : 'Sin límite' }}
+          </button>
+          <button
+            v-if="presupuestoDefault > 0 && presupuesto !== presupuestoDefault"
+            class="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 transition-colors"
+            title="Sincronizar con presupuesto predeterminado"
+            @click="sincronizar"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -37,9 +68,16 @@
 const props = defineProps({
   totalMes: { type: Number, default: 0 },
   presupuesto: { type: Number, default: 0 },
+  presupuestoDefault: { type: Number, default: 0 },
 })
 
+const emit = defineEmits(['update:presupuesto'])
+
 const { currencySymbol, formatMonto } = useCurrency()
+
+const editando = ref(false)
+const presupuestoTemp = ref(0)
+const inputRef = ref(null)
 
 const porcentaje = computed(() => {
   if (props.presupuesto <= 0) return 0
@@ -47,4 +85,25 @@ const porcentaje = computed(() => {
 })
 
 const saldo = computed(() => props.presupuesto - props.totalMes)
+
+function iniciarEdicion() {
+  presupuestoTemp.value = props.presupuesto
+  editando.value = true
+  nextTick(() => {
+    inputRef.value?.focus()
+    inputRef.value?.select()
+  })
+}
+
+function guardar() {
+  const monto = parseFloat(presupuestoTemp.value)
+  if (!isNaN(monto) && monto >= 0) {
+    emit('update:presupuesto', monto)
+  }
+  editando.value = false
+}
+
+function sincronizar() {
+  emit('update:presupuesto', props.presupuestoDefault)
+}
 </script>

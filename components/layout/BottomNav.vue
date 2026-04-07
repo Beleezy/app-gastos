@@ -48,13 +48,14 @@ const route = useRoute()
 
 const { personas } = useDeudas()
 const { resumen: resumenPlan } = usePlanificador()
+const { countPendientes: vinculosPendientes } = useVinculos()
 
 const deudasVencidas = computed(() =>
   personas.value.filter(p => p.tieneVencidas).length
 )
 
 function getBadge(path) {
-  if (path === '/deudas') return deudasVencidas.value
+  if (path === '/deudas') return deudasVencidas.value + vinculosPendientes.value
   if (path === '/planificador') return resumenPlan.value.countPendientes
   return 0
 }

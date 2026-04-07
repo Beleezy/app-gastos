@@ -22,6 +22,20 @@
       "when": 1774976826616,
       "tag": "0002_closed_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775710800000,
+      "tag": "0003_vinculos_deuda",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744070400000,
+      "tag": "0004_vinculos_mejoras",
+      "breakpoints": true
     }
   ]
 }

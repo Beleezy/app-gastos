@@ -1,4 +1,5 @@
 export function useLLMParser() {
+  const { apiFetch } = useApiFetch()
   const isParsing = ref(false)
   const parsedExpenses = ref([])
   const error = ref(null)
@@ -14,7 +15,7 @@ export function useLLMParser() {
     retryStatus.value = 'Interpretando...'
 
     try {
-      const data = await $fetch('/api/voz/parse', {
+      const data = await apiFetch('/api/voz/parse', {
         method: 'POST',
         body: { texto },
         signal: parseController.signal,

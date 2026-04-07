@@ -1,6 +1,7 @@
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones, personasEntidades } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest } from '../../utils/geminiModels.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Fetch user config for timezone
-  const usuarioId = await getUsuarioId()
+  const usuarioId = await getUsuarioFromEvent(event)
   let zonaHoraria = 'America/Lima'
   try {
     const [userConfig] = await db
@@ -81,8 +82,16 @@ Reglas:
 - Los montos deben ser números decimales (ej: 2.50, no "dos soles con cincuenta").
 - Si no puedes interpretar algo, usa concepto "Gasto no especificado" y categoría "Otros".`
 
-  const geminiModelPrimary = runtimeConfig.geminiModel || 'gemini-3.1-flash-lite'
-  const geminiModelFallback = 'gemini-2.5-flash'
+  // Parsear lista de modelos configurados (separados por ";")
+  const configuredModels = parseModelList(runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview')
+
+  // Validar cuáles están disponibles para esta API key
+  const validModels = await getValidModels(configuredModels, apiKey)
+
+  // Seleccionar el modelo con menos peticiones en el minuto actual
+  const primaryModel = selectBestModel(validModels)
+  const fallbackModels = getFallbackModels(validModels, primaryModel)
+  const modelsToTry = [primaryModel, ...fallbackModels]
 
   // Determinar si es parsing de deudas o gastos
   const modo = body.modo || 'gastos'
@@ -147,7 +156,6 @@ Reglas:
 
   const MAX_RETRIES = 3
   const RETRY_DELAYS = [0, 2000, 5000]
-  const modelsToTry = [geminiModelPrimary, geminiModelFallback]
   let lastError = null
   let lastErrorUserFriendly = null
 
@@ -206,6 +214,9 @@ Reglas:
 
           continue
         }
+
+        // Registrar petición exitosa para el rate tracking
+        trackRequest(currentModel)
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()

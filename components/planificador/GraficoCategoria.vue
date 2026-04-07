@@ -9,7 +9,7 @@
       </div>
 
       <!-- Chart -->
-      <div v-else class="flex items-center gap-6">
+      <div v-else class="flex flex-col items-center gap-4">
         <!-- SVG donut -->
         <div class="relative w-32 h-32 shrink-0">
           <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
@@ -42,7 +42,7 @@
         </div>
 
         <!-- Legend -->
-        <div class="space-y-1.5 flex-1 min-w-0">
+        <div class="space-y-1.5 w-full">
           <button
             v-for="(seg, idx) in datosGrafico"
             :key="seg.nombre"

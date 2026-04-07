@@ -3,7 +3,7 @@
     <button class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
       <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Historial de pagos</h3>
-      <span class="text-xs text-gray-500">{{ pagos.length }}</span>
+      <span class="text-xs text-gray-500">{{ totalPagos }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="w-3 h-3 text-gray-600 ml-auto transition-transform"
@@ -13,6 +13,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
     </button>
+
     <!-- Revert confirmation inline -->
     <div v-if="pagoRevertiendo" class="mb-3 bg-orange-500/10 border border-orange-500/20 rounded-xl p-3 flex items-center gap-3">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-orange-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -29,6 +30,65 @@
       </button>
     </div>
 
+    <!-- Modal editar pago individual -->
+    <div v-if="pagoEditando" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="pagoEditando = null"></div>
+      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
+        <h3 class="text-base font-semibold text-white mb-4">Editar pago</h3>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Fecha</label>
+            <input
+              v-model="formEditar.fechaPago"
+              type="date"
+              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Método de pago</label>
+            <select
+              v-model="formEditar.metodoPago"
+              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500"
+            >
+              <option value="">Sin especificar</option>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="BCP">BCP</option>
+              <option value="Interbank">Interbank</option>
+              <option value="BBVA">BBVA</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-gray-400 mb-1">Notas</label>
+            <input
+              v-model="formEditar.notas"
+              type="text"
+              placeholder="Opcional"
+              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500"
+            />
+          </div>
+        </div>
+        <div class="flex gap-2 mt-5">
+          <button
+            class="flex-1 py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            @click="pagoEditando = null"
+          >
+            Cancelar
+          </button>
+          <button
+            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            :disabled="guardandoEdicion"
+            @click="guardarEdicion"
+          >
+            {{ guardandoEdicion ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <Transition name="collapse">
       <div v-if="show" class="relative pl-6">
         <!-- Vertical timeline line -->
@@ -40,19 +100,31 @@
 
           <!-- Payment card -->
           <div class="bg-primary-800 rounded-xl p-3.5 border border-primary-700/30">
-            <!-- Header: date + amount + revert -->
+            <!-- Header: date + amount + actions -->
             <div class="flex items-start justify-between mb-2.5">
               <div>
                 <p class="text-xs font-semibold text-white">{{ formatFecha(pago.fechaPago) }}</p>
-                <p v-if="pago.metodoPago" class="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div v-if="pago.metodoPago" class="flex items-center gap-1 mt-0.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  {{ pago.metodoPago }}
-                </p>
+                  <span class="text-[10px] text-blue-400 font-medium">{{ pago.metodoPago }}</span>
+                </div>
+                <p v-else class="text-[10px] text-gray-600 mt-0.5">Sin método registrado</p>
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1.5">
                 <span class="text-sm font-bold text-blue-400">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
+                <!-- Editar pago -->
+                <button
+                  class="w-6 h-6 flex items-center justify-center rounded-lg text-gray-600 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                  title="Editar pago"
+                  @click="abrirEditar(pago)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <!-- Revertir pago -->
                 <button
                   class="w-6 h-6 flex items-center justify-center rounded-lg text-gray-600 hover:text-orange-400 hover:bg-orange-500/10 transition-colors"
                   title="Revertir pago"
@@ -65,11 +137,16 @@
               </div>
             </div>
 
-            <!-- Debts breakdown -->
-            <div class="bg-primary-900/50 rounded-lg p-2.5 space-y-1.5">
-              <div v-for="(detalle, dIdx) in pago.detalles" :key="dIdx" class="flex items-center gap-2">
-                <span class="w-1 h-1 rounded-full bg-blue-400/60 shrink-0"></span>
-                <p class="text-[11px] text-gray-400 truncate flex-1 min-w-0">{{ detalle.concepto }}</p>
+            <!-- Debts breakdown — each pago individual with its own method -->
+            <div class="bg-primary-900/50 rounded-lg p-2.5 space-y-2">
+              <div v-for="(detalle, dIdx) in pago.detalles" :key="dIdx" class="flex items-start gap-2">
+                <span class="w-1 h-1 rounded-full bg-blue-400/60 shrink-0 mt-1.5"></span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[11px] text-gray-400 truncate">{{ detalle.concepto }}</p>
+                  <div v-if="detalle.metodoPago && detalle.metodoPago !== pago.metodoPago" class="text-[10px] text-blue-400/70">
+                    {{ detalle.metodoPago }}
+                  </div>
+                </div>
                 <span class="text-[11px] text-gray-300 font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
               </div>
             </div>
@@ -86,15 +163,52 @@
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   pagos: { type: Array, default: () => [] },
 })
 
-const { revertirPago } = useDeudas()
+const { revertirPago, actualizarPago } = useDeudas()
 const show = ref(false)
 const pagoRevertiendo = ref(null)
 const revirtiendo = ref(false)
+const pagoEditando = ref(null)
+const guardandoEdicion = ref(false)
 const { currencySymbol, formatMonto } = useCurrency()
+
+const totalPagos = computed(() =>
+  props.pagos.reduce((s, g) => s + (g.pagoIds?.length || 1), 0)
+)
+
+const formEditar = reactive({
+  fechaPago: '',
+  metodoPago: '',
+  notas: '',
+})
+
+function abrirEditar(pago) {
+  pagoEditando.value = pago
+  formEditar.fechaPago = pago.fechaPago || ''
+  formEditar.metodoPago = pago.metodoPago || ''
+  formEditar.notas = (pago.notas && !pago.notas.startsWith('Pago global')) ? pago.notas : ''
+}
+
+async function guardarEdicion() {
+  if (!pagoEditando.value?.pagoIds?.length) return
+  guardandoEdicion.value = true
+  try {
+    // Actualizar cada pago individual del grupo
+    for (const pagoId of pagoEditando.value.pagoIds) {
+      await actualizarPago(pagoId, {
+        fechaPago: formEditar.fechaPago || undefined,
+        metodoPago: formEditar.metodoPago || null,
+        notas: formEditar.notas || null,
+      })
+    }
+    pagoEditando.value = null
+  } finally {
+    guardandoEdicion.value = false
+  }
+}
 
 async function confirmarRevertir() {
   if (!pagoRevertiendo.value?.pagoIds?.length) return

@@ -180,6 +180,19 @@
             {{ toastMsg }}
           </div>
         </Transition>
+
+        <!-- Cerrar sesión -->
+        <button
+          class="w-full py-3 rounded-xl text-sm font-semibold bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-all active:scale-[0.98] border border-red-500/20"
+          @click="cerrarSesion"
+        >
+          <span class="flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Cerrar sesion
+          </span>
+        </button>
       </template>
 
       <!-- App info -->
@@ -195,6 +208,11 @@
 const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
 const { isDark, toggleTheme } = useTheme()
+const { logout } = useAuth()
+
+async function cerrarSesion() {
+  await logout()
+}
 
 const form = reactive({
   nombre: '',
@@ -250,10 +268,9 @@ async function guardar() {
   }
 }
 
-watch(config, loadFromConfig)
-
 onMounted(async () => {
   await fetchConfig()
+  loadFromConfig()
 })
 </script>
 

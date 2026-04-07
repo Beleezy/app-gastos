@@ -1,10 +1,10 @@
 import { db } from '../../utils/db.js'
 import { categorias } from '../../database/schema.js'
-import { getUsuarioId } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
-export default defineEventHandler(async () => {
-  const usuarioId = await getUsuarioId()
+export default defineEventHandler(async (event) => {
+  const usuarioId = await getUsuarioFromEvent(event)
   const result = await db
     .select()
     .from(categorias)
