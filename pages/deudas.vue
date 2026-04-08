@@ -59,7 +59,7 @@
     <!-- FABs: Voz + Manual (hidden when voice overlay is active) -->
     <div v-if="!showVozOverlay" class="fixed right-4 bottom-24 z-40 flex flex-col gap-3 items-center">
       <button
-        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-gradient-to-br from-purple-500/75 to-violet-600/75 hover:from-purple-400/85 hover:to-violet-500/85 shadow-purple-500/25 backdrop-blur-md"
+        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-gradient-to-br from-purple-500/50 to-violet-600/50 hover:from-purple-400/65 hover:to-violet-500/65 shadow-purple-500/25 backdrop-blur-md"
         @click="abrirVozOverlay"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -67,7 +67,7 @@
         </svg>
       </button>
       <button
-        class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500/75 to-indigo-600/75 hover:from-blue-400/85 hover:to-indigo-500/85 active:scale-90 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
+        class="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500/50 to-indigo-600/50 hover:from-blue-400/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
         @click="showFormDeuda = true"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

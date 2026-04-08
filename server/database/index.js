@@ -8,9 +8,10 @@ export function getDb() {
   if (!_db) {
     const config = useRuntimeConfig()
     const client = postgres(config.databaseUrl, {
-      max: 10,
+      max: 1,
       idle_timeout: 20,
       ssl: 'require',
+      prepare: false,
     })
     _db = drizzle(client, { schema })
   }
