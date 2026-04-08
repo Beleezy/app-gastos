@@ -112,6 +112,7 @@ export default defineEventHandler(async (event) => {
         inArray(deudas.estado, ['pendiente', 'parcial'])
       ))
 
+    let pagosSincronizados = 0
     for (const deuda of deudasActivas) {
       const deudaEspejo = await crearDeudaEspejo(tx, deuda, personaEspejo.id, usuarioId)
 
@@ -123,6 +124,7 @@ export default defineEventHandler(async (event) => {
 
       for (const pago of pagos) {
         await crearPagoEspejo(tx, pago, deudaEspejo.id)
+        pagosSincronizados++
       }
     }
 
@@ -146,6 +148,7 @@ export default defineEventHandler(async (event) => {
       datos: {
         solicitudId,
         deudasSincronizadas: deudasActivas.length,
+        pagosSincronizados,
       },
     })
 
@@ -162,6 +165,7 @@ export default defineEventHandler(async (event) => {
     return {
       personaEspejo,
       deudasEspejadas: deudasActivas.length,
+      pagosEspejados: pagosSincronizados,
       nombreRemitente,
     }
   })
@@ -170,5 +174,6 @@ export default defineEventHandler(async (event) => {
     mensaje: 'Vínculo aceptado exitosamente',
     personaCreada: resultado.nombreRemitente,
     deudasSincronizadas: resultado.deudasEspejadas,
+    pagosSincronizados: resultado.pagosEspejados,
   }
 })

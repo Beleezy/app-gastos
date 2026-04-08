@@ -296,6 +296,7 @@ export function useDeudas() {
           fetchDeudasPersona(personaId),
           fetchPagosPersona(personaId),
           fetchAuditoriaPersona(personaId),
+          fetchCheckpoints(personaId),
           fetchResumen(),
         ])
       } catch {
@@ -331,6 +332,7 @@ export function useDeudas() {
 
   async function fetchCheckpoints(personaId) {
     cargandoCheckpoints.value = true
+    checkpoints.value = []
     try {
       checkpoints.value = await apiFetch('/api/deudas/vinculos/checkpoints', {
         query: { personaId },

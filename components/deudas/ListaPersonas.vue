@@ -280,7 +280,7 @@
 const emit = defineEmits(['seleccionar'])
 
 const { personas, isLoading, tabActual } = useDeudas()
-const { generarPdfDeuda } = useDeudaPdf()
+const { descargarPdf } = useDeudaPdf()
 
 const busqueda = ref('')
 const ordenActual = ref('monto') // monto | nombre | antiguo
@@ -345,7 +345,7 @@ async function exportarPdf(persona) {
     })
     const activas = deudas.filter(d => d.estado === 'pendiente' || d.estado === 'parcial')
     const saldadas = deudas.filter(d => d.estado === 'pagado' || d.estado === 'archivado')
-    await generarPdfDeuda(persona, activas, saldadas)
+    await descargarPdf(persona, activas, saldadas)
   } catch (e) {
     console.error('Error al generar PDF:', e)
   }

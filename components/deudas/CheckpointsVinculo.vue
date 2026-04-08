@@ -55,7 +55,7 @@
 
           <!-- Info -->
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-medium text-white truncate">
+            <p class="text-xs font-medium text-white break-words">
               {{ cp.descripcion || 'Punto de guardado' }}
             </p>
             <p class="text-[10px] text-gray-500 mt-0.5">
@@ -66,7 +66,7 @@
           <!-- Resumen numérico -->
           <div v-if="cp.snapshotResumen" class="text-right shrink-0">
             <p class="text-[10px] text-gray-400">
-              {{ cp.snapshotResumen.totalDeudasA + cp.snapshotResumen.totalDeudasB }} deudas
+              {{ cp.snapshotResumen.totalDeudasA }}D / {{ cp.snapshotResumen.totalDeudasB }}D
             </p>
             <p class="text-[10px] text-violet-400">
               {{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}
@@ -94,12 +94,18 @@
               <div>
                 <p class="text-[10px] text-gray-500">{{ cp.snapshotResumen.personaANombre }}</p>
                 <p class="text-xs font-medium text-white">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
-                <p class="text-[10px] text-gray-600">{{ cp.snapshotResumen.totalDeudasA }} deuda(s)</p>
+                <p class="text-[10px] text-gray-600">
+                  {{ cp.snapshotResumen.totalDeudasA }} deuda(s)
+                  <span v-if="cp.snapshotResumen.totalPagosA > 0"> y {{ cp.snapshotResumen.totalPagosA }} pago(s)</span>
+                </p>
               </div>
               <div>
                 <p class="text-[10px] text-gray-500">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
                 <p class="text-xs font-medium text-white">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
-                <p class="text-[10px] text-gray-600">{{ cp.snapshotResumen.totalDeudasB }} deuda(s)</p>
+                <p class="text-[10px] text-gray-600">
+                  {{ cp.snapshotResumen.totalDeudasB }} deuda(s)
+                  <span v-if="cp.snapshotResumen.totalPagosB > 0"> y {{ cp.snapshotResumen.totalPagosB }} pago(s)</span>
+                </p>
               </div>
             </div>
           </div>

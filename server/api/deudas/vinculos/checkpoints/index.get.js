@@ -140,6 +140,7 @@ function calcularResumenSnapshot(snapshotDatosStr) {
     const totalA = deudasA.reduce((s, d) => s + parseFloat(d.montoPendiente || 0), 0)
     const totalB = deudasB.reduce((s, d) => s + parseFloat(d.montoPendiente || 0), 0)
     const totalPagosA = deudasA.reduce((s, d) => s + (d.pagos?.length || 0), 0)
+    const totalPagosB = deudasB.reduce((s, d) => s + (d.pagos?.length || 0), 0)
 
     return {
       personaANombre: data.personaA?.nombre || null,
@@ -148,7 +149,8 @@ function calcularResumenSnapshot(snapshotDatosStr) {
       totalDeudasB: deudasB.length,
       totalPendienteA: Math.round(totalA * 100) / 100,
       totalPendienteB: Math.round(totalB * 100) / 100,
-      totalPagos: totalPagosA,
+      totalPagosA,
+      totalPagosB,
       fechaSnapshot: data.fechaSnapshot || null,
     }
   } catch {

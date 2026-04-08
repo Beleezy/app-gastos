@@ -26,38 +26,34 @@
           ></div>
 
           <div class="bg-primary-800/60 rounded-xl p-3 border border-primary-700/20">
-            <div class="flex items-start justify-between gap-2">
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 mb-0.5">
-                  <span
-                    class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
-                    :class="getAccionBadgeClass(entrada.accion)"
-                  >
-                    {{ getAccionLabel(entrada.accion) }}
-                  </span>
-                  <span class="text-[10px] text-gray-500">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
-                </div>
-                <p class="text-xs text-gray-300">{{ entrada.descripcion }}</p>
-                <!-- Detailed changes for edits -->
-                <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1.5 space-y-0.5">
-                  <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[10px] text-gray-500 flex items-center gap-1">
-                    <span class="text-gray-400 font-medium">{{ cambio.label || campo }}:</span>
-                    <span class="text-red-400/70 line-through">{{ cambio.antes || '(vacío)' }}</span>
-                    <span class="text-gray-600">&rarr;</span>
-                    <span class="text-emerald-400/70">{{ cambio.despues || '(vacío)' }}</span>
-                  </div>
-                </div>
-                <!-- Detailed debts for global payments -->
-                <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1.5 space-y-0.5">
-                  <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[10px] text-gray-500 flex items-center gap-1">
-                    <span class="text-teal-400/70">S/ {{ dp.monto }}</span>
-                    <span class="text-gray-600">&rarr;</span>
-                    <span class="text-gray-400">{{ dp.concepto }}</span>
-                  </div>
-                </div>
-              </div>
-              <p class="text-[10px] text-gray-600 shrink-0">{{ formatFecha(entrada.createdAt) }}</p>
+            <div class="flex items-center gap-1.5 mb-1">
+              <span
+                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
+                :class="getAccionBadgeClass(entrada.accion)"
+              >
+                {{ getAccionLabel(entrada.accion) }}
+              </span>
+              <span class="text-[10px] text-gray-500">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
             </div>
+            <p class="text-xs text-gray-300">{{ entrada.descripcion }}</p>
+            <!-- Detailed changes for edits -->
+            <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1.5 space-y-0.5">
+              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[10px] text-gray-500 flex items-center gap-1">
+                <span class="text-gray-400 font-medium">{{ cambio.label || campo }}:</span>
+                <span class="text-red-400/70 line-through">{{ cambio.antes || '(vacío)' }}</span>
+                <span class="text-gray-600">&rarr;</span>
+                <span class="text-emerald-400/70">{{ cambio.despues || '(vacío)' }}</span>
+              </div>
+            </div>
+            <!-- Detailed debts for global payments -->
+            <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1.5 space-y-0.5">
+              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[10px] text-gray-500 flex items-center gap-1">
+                <span class="text-teal-400/70">S/ {{ dp.monto }}</span>
+                <span class="text-gray-600">&rarr;</span>
+                <span class="text-gray-400">{{ dp.concepto }}</span>
+              </div>
+            </div>
+            <p class="text-[10px] text-gray-600 mt-1">{{ formatFecha(entrada.createdAt) }}</p>
           </div>
         </div>
       </div>
