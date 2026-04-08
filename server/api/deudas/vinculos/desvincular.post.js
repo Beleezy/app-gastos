@@ -1,7 +1,7 @@
 import { db } from '../../../utils/db.js'
-import { personasEntidades, solicitudesVinculo } from '../../../database/schema.js'
+import { personasEntidades, solicitudesVinculo, vinculosCheckpoints, auditoriaVinculos } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
-import { desvincularPersonas, registrarAuditoria, getNombreDisplay } from '../../../utils/vinculos.js'
+import { desvincularPersonas, registrarAuditoria, getNombreDisplay, normalizarParPersonas } from '../../../utils/vinculos.js'
 import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -41,19 +41,24 @@ export default defineEventHandler(async (event) => {
 
   const nombreDisplay = await getNombreDisplay(usuarioId)
 
-  await db.transaction(async (tx) => {
-    // Registrar auditoría ANTES de desvincular (para que los IDs aún sean válidos)
-    await registrarAuditoria(tx, {
-      personaAId: persona.id,
-      personaBId: personaParId,
-      usuarioId,
-      accion: 'vinculo_disuelto',
-      descripcion: `${nombreDisplay} disolvió el vínculo con ${personaPar?.nombre || 'el otro usuario'}`,
-      datos: { motivo: body.motivo || null },
-    })
+  const { personaAId: normalizedAId } = normalizarParPersonas(persona.id, personaParId)
 
+  await db.transaction(async (tx) => {
     // Desvincular: quitar referencias en personas, deudas y pagos
     await desvincularPersonas(tx, persona.id, personaParId)
+
+    // Eliminar checkpoints del par (evitar acumulación al revincular)
+    await tx
+      .delete(vinculosCheckpoints)
+      .where(eq(vinculosCheckpoints.personaAId, normalizedAId))
+
+    // Eliminar auditoría del par (evitar datos sin sentido al revincular)
+    await tx
+      .delete(auditoriaVinculos)
+      .where(or(
+        and(eq(auditoriaVinculos.personaAId, persona.id), eq(auditoriaVinculos.personaBId, personaParId)),
+        and(eq(auditoriaVinculos.personaAId, personaParId), eq(auditoriaVinculos.personaBId, persona.id))
+      ))
 
     // Marcar solicitudes aceptadas entre estos usuarios como 'expirada'
     if (personaPar?.usuarioId) {

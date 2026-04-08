@@ -23,9 +23,9 @@
       <!-- Selector de mes a comparar -->
       <div class="mb-4">
         <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Comparar con:</p>
-        <div class="flex flex-wrap gap-1.5">
+        <div class="flex items-center gap-1.5">
           <button
-            v-for="m in mesesDisponibles"
+            v-for="m in mesesRecientes"
             :key="m.key"
             class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
             :class="m.key === mesComparar ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
@@ -33,6 +33,22 @@
           >
             {{ m.label }}
           </button>
+          <!-- Select para meses anteriores -->
+          <select
+            class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-primary-800/50 text-gray-400 border-primary-700/20 outline-none cursor-pointer appearance-none"
+            :class="mesComparEsAntiguo ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : ''"
+            :value="mesComparEsAntiguo ? mesComparar : ''"
+            @change="onSelectMesAntiguo($event)"
+          >
+            <option value="" disabled>Más...</option>
+            <option
+              v-for="m in mesesAntiguos"
+              :key="m.key"
+              :value="m.key"
+            >
+              {{ m.label }}
+            </option>
+          </select>
         </div>
       </div>
 
@@ -242,14 +258,31 @@ const mesesDisponibles = computed(() => {
   return lista
 })
 
+// Últimos 3 meses como botones rápidos
+const mesesRecientes = computed(() => mesesDisponibles.value.slice(0, 3))
+// El resto como opciones del select
+const mesesAntiguos = computed(() => mesesDisponibles.value.slice(3))
+
 // Mes comparar seleccionado (por defecto: mes anterior)
 const mesComparar = ref('')
 const mesCompararObj = ref(null)
+
+// Indica si el mes seleccionado está en la lista de antiguos (select)
+const mesComparEsAntiguo = computed(() =>
+  mesesAntiguos.value.some(m => m.key === mesComparar.value)
+)
 
 function seleccionarMes(m) {
   mesComparar.value = m.key
   mesCompararObj.value = m
   fetchGastosComparar(m.mes, m.anio)
+}
+
+function onSelectMesAntiguo(event) {
+  const key = event.target.value
+  if (!key) return
+  const m = mesesAntiguos.value.find(x => x.key === key)
+  if (m) seleccionarMes(m)
 }
 
 // ─── VISTA COMPARAR ─────────────────────────────────────────

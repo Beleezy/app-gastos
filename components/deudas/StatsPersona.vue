@@ -8,7 +8,7 @@
           {{ porcentajeCobrado.toFixed(0) }}%
         </span>
       </div>
-      <div class="w-full h-2 bg-primary-900/80 rounded-full overflow-hidden">
+      <div class="w-full h-2.5 bg-primary-900/80 rounded-full overflow-hidden">
         <div
           class="h-full rounded-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-500"
           :style="{ width: porcentajeCobrado + '%' }"
@@ -20,19 +20,30 @@
       </div>
     </div>
 
-    <!-- Mini breakdown bars per debt -->
-    <div v-if="deudasActivas.length > 1" class="space-y-1.5">
-      <p class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1">Distribución</p>
-      <div v-for="deuda in deudasActivas" :key="deuda.id" class="flex items-center gap-2">
-        <span class="text-[10px] text-gray-400 truncate w-24 shrink-0">{{ deuda.concepto }}</span>
-        <div class="flex-1 h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all duration-500"
-            :class="tabActual === 'me_deben' ? 'bg-emerald-500' : 'bg-red-500'"
-            :style="{ width: totalPendiente > 0 ? ((deuda.montoPendiente / totalPendiente) * 100) + '%' : '0%' }"
-          ></div>
+    <!-- Per-debt breakdown (vertical list for better readability) -->
+    <div v-if="deudasActivas.length > 1" class="pt-2 border-t border-primary-700/30">
+      <p class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-2">Detalle por deuda</p>
+      <div class="space-y-2.5">
+        <div v-for="deuda in deudasActivas" :key="deuda.id">
+          <!-- Concept and amounts on first line -->
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs text-gray-300 flex-1 min-w-0 mr-2">{{ deuda.concepto }}</span>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="text-[10px] text-gray-500">{{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}</span>
+              <span class="text-[10px] font-medium w-8 text-right" :class="porcentajeDeuda(deuda) >= 70 ? 'text-emerald-400' : porcentajeDeuda(deuda) > 0 ? 'text-blue-400' : 'text-gray-600'">
+                {{ porcentajeDeuda(deuda).toFixed(0) }}%
+              </span>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div class="w-full h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              :class="tabActual === 'me_deben' ? 'bg-emerald-500' : 'bg-red-500'"
+              :style="{ width: porcentajeDeuda(deuda) + '%' }"
+            ></div>
+          </div>
         </div>
-        <span class="text-[10px] text-gray-500 shrink-0">{{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}</span>
       </div>
     </div>
   </div>
@@ -47,9 +58,13 @@ const props = defineProps({
 
 const { currencySymbol, formatMonto } = useCurrency()
 
-const totalPendiente = computed(() => props.deudasActivas.reduce((s, d) => s + d.montoPendiente, 0))
 const allDeudas = computed(() => [...props.deudasActivas, ...props.deudasSaldadas])
 const totalOriginal = computed(() => allDeudas.value.reduce((s, d) => s + d.montoOriginal, 0))
 const totalCobrado = computed(() => allDeudas.value.reduce((s, d) => s + (d.montoOriginal - d.montoPendiente), 0))
 const porcentajeCobrado = computed(() => totalOriginal.value > 0 ? (totalCobrado.value / totalOriginal.value) * 100 : 0)
+
+function porcentajeDeuda(deuda) {
+  if (deuda.montoOriginal <= 0) return 0
+  return ((deuda.montoOriginal - deuda.montoPendiente) / deuda.montoOriginal) * 100
+}
 </script>

@@ -281,11 +281,45 @@ export function useDeudas() {
     }
   }
 
+  // Polling for real-time sync with linked users
+  const pollingInterval = ref(null)
+
+  function iniciarPolling(personaId) {
+    detenerPolling()
+    pollingInterval.value = setInterval(async () => {
+      if (!personaSeleccionada.value || personaSeleccionada.value.id !== personaId) {
+        detenerPolling()
+        return
+      }
+      try {
+        await Promise.all([
+          fetchDeudasPersona(personaId),
+          fetchPagosPersona(personaId),
+          fetchAuditoriaPersona(personaId),
+          fetchResumen(),
+        ])
+      } catch {
+        // Silent fail on polling
+      }
+    }, 10000) // Poll every 10 seconds
+  }
+
+  function detenerPolling() {
+    if (pollingInterval.value) {
+      clearInterval(pollingInterval.value)
+      pollingInterval.value = null
+    }
+  }
+
   function seleccionarPersona(persona) {
     personaSeleccionada.value = persona
+    if (persona.vinculadoUsuarioId) {
+      iniciarPolling(persona.id)
+    }
   }
 
   function volverALista() {
+    detenerPolling()
     personaSeleccionada.value = null
     deudasList.value = []
     pagos.value = []
@@ -293,14 +327,18 @@ export function useDeudas() {
     auditoriaPersona.value = []
   }
 
+  const cargandoCheckpoints = ref(false)
+
   async function fetchCheckpoints(personaId) {
+    cargandoCheckpoints.value = true
     try {
       checkpoints.value = await apiFetch('/api/deudas/vinculos/checkpoints', {
         query: { personaId },
       })
     } catch (e) {
-      // Si no hay vínculo activo simplemente no hay checkpoints
       checkpoints.value = []
+    } finally {
+      cargandoCheckpoints.value = false
     }
   }
 
@@ -345,6 +383,7 @@ export function useDeudas() {
   }
 
   function cambiarTab(tab) {
+    detenerPolling()
     tabActual.value = tab
     personaSeleccionada.value = null
     deudasList.value = []
@@ -370,7 +409,7 @@ export function useDeudas() {
 
   return {
     personas, deudasList, pagos, pagosPersona, auditoriaPersona, resumen,
-    checkpoints, guardando, restaurando,
+    checkpoints, guardando, restaurando, cargando: cargandoCheckpoints,
     isLoading, error,
     tabActual, personaSeleccionada,
     personasFiltradas, deudasPersona,

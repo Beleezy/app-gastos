@@ -1,22 +1,21 @@
 <template>
   <div class="bg-primary-800/60 rounded-xl border border-primary-700/30 overflow-hidden">
-    <div class="flex items-center gap-3 px-3 py-2.5">
-      <!-- Category icon -->
-      <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-        :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '15' }"
-      >
-        <span class="text-sm">{{ resolveIcono(gasto.categoriaIcono) }}</span>
-      </div>
-
-      <!-- Info -->
-      <div class="flex-1 min-w-0">
-        <div class="flex items-center gap-2">
-          <p class="text-sm font-medium text-white truncate">{{ gasto.concepto }}</p>
-          <span v-if="gasto.metodoRegistro === 'voz'"
-            class="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full shrink-0"
-          >VOZ</span>
+    <div class="px-3 py-2.5">
+      <!-- Title row: concept spans full width -->
+      <div class="flex items-center gap-2 mb-1.5">
+        <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+          :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '15' }"
+        >
+          <span class="text-xs">{{ resolveIcono(gasto.categoriaIcono) }}</span>
         </div>
-        <div class="flex items-center gap-2 mt-0.5">
+        <p class="text-sm font-medium text-white flex-1 min-w-0 break-words">{{ gasto.concepto }}</p>
+        <span v-if="gasto.metodoRegistro === 'voz'"
+          class="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full shrink-0"
+        >VOZ</span>
+      </div>
+      <!-- Details row: category, time, amount -->
+      <div class="flex items-center justify-between ml-9">
+        <div class="flex items-center gap-2">
           <span class="text-xs px-1.5 py-0.5 rounded-md"
             :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '15', color: gasto.categoriaColor || '#6b7280' }"
           >
@@ -24,11 +23,7 @@
           </span>
           <span class="text-xs text-gray-600">{{ formatHora(gasto.hora) }}</span>
         </div>
-      </div>
-
-      <!-- Amount -->
-      <div class="text-right shrink-0">
-        <p class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</p>
+        <p class="text-sm font-semibold text-white shrink-0">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</p>
       </div>
     </div>
 

@@ -4,19 +4,19 @@ export function useVoiceDeuda() {
   const { apiFetch } = useApiFetch()
   const { createDeuda, fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagosPersona, personaSeleccionada } = useDeudas()
 
-  const showVozOverlay = ref(false)
-  const hasDraft = ref(false)
-  const isEditing = ref(false)
-  const editText = ref('')
+  const showVozOverlay = useState('voz-deuda-overlay', () => false)
+  const hasDraft = useState('voz-deuda-draft', () => false)
+  const isEditing = useState('voz-deuda-editing', () => false)
+  const editText = useState('voz-deuda-editText', () => '')
   const editTextareaRef = ref(null)
 
-  const showConfirmVoz = ref(false)
-  const vozTranscript = ref('')
-  const vozParsing = ref(false)
-  const vozError = ref('')
-  const deudasParseadas = ref([])
-  const pagosParseados = ref([])
-  const guardando = ref(false)
+  const showConfirmVoz = useState('voz-deuda-confirm', () => false)
+  const vozTranscript = useState('voz-deuda-transcript', () => '')
+  const vozParsing = useState('voz-deuda-parsing', () => false)
+  const vozError = useState('voz-deuda-error', () => '')
+  const deudasParseadas = useState('voz-deuda-parseadas', () => [])
+  const pagosParseados = useState('voz-deuda-pagos', () => [])
+  const guardando = useState('voz-deuda-guardando', () => false)
 
   function abrirVozOverlay() {
     showVozOverlay.value = true

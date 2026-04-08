@@ -27,8 +27,8 @@
         class="relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 mic-btn"
         :class="[
           isListening
-            ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-xl shadow-red-500/30'
-            : 'bg-gradient-to-br from-blue-500 to-indigo-600 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40'
+            ? 'bg-gradient-to-br from-red-500/80 to-rose-600/80 shadow-xl shadow-red-500/30 backdrop-blur-md'
+            : 'bg-gradient-to-br from-blue-500/80 to-indigo-600/80 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 backdrop-blur-md'
         ]"
         :disabled="!isSupported"
         @click="toggleListening"

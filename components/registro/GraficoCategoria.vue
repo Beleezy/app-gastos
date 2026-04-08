@@ -1,6 +1,44 @@
 <template>
   <div class="px-4">
-    <div v-if="datos.length === 0" class="flex flex-col items-center py-8">
+    <!-- Filtro de mes -->
+    <div class="mb-4">
+      <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Mes:</p>
+      <div class="flex items-center gap-1.5">
+        <button
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+          :class="mesSeleccionado === 'actual' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
+          @click="seleccionarMesGrafico('actual')"
+        >
+          Actual
+        </button>
+        <button
+          v-for="m in mesesRecientesGrafico"
+          :key="m.key"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+          :class="m.key === mesSeleccionado ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
+          @click="seleccionarMesGrafico(m.key)"
+        >
+          {{ m.label }}
+        </button>
+        <select
+          class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-primary-800/50 text-gray-400 border-primary-700/20 outline-none cursor-pointer appearance-none"
+          :class="mesGraficoEsAntiguo ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : ''"
+          :value="mesGraficoEsAntiguo ? mesSeleccionado : ''"
+          @change="onSelectMesGraficoAntiguo($event)"
+        >
+          <option value="" disabled>Más...</option>
+          <option v-for="m in mesesAntiguosGrafico" :key="m.key" :value="m.key">{{ m.label }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="isLoadingMes" class="flex flex-col items-center py-8">
+      <div class="w-44 h-44 rounded-full bg-primary-800 animate-pulse mx-auto mb-5"></div>
+      <div v-for="i in 3" :key="i" class="w-full h-12 bg-primary-800 rounded-xl animate-pulse mb-2"></div>
+    </div>
+
+    <div v-else-if="datosEfectivos.length === 0" class="flex flex-col items-center py-8">
       <div class="w-14 h-14 rounded-full bg-primary-800/60 flex items-center justify-center mb-3">
         <span class="text-xl opacity-50">📊</span>
       </div>
@@ -11,7 +49,7 @@
       <!-- Donut chart -->
       <div class="flex justify-center mb-5">
         <div class="relative w-44 h-44">
-          <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90">
+          <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90" v-if="datosEfectivos.length > 0">
             <circle
               v-for="(seg, i) in segmentos"
               :key="i"
@@ -53,7 +91,7 @@
       <!-- Category breakdown -->
       <div class="space-y-2">
         <div
-          v-for="cat in datos"
+          v-for="cat in datosEfectivos"
           :key="cat.nombre"
           class="rounded-xl border overflow-hidden transition-all duration-300"
           :class="[
@@ -133,28 +171,108 @@ const props = defineProps({
   presupuesto: { type: Number, default: 0 },
   categoriaSeleccionadaId: { type: [String, Number, null], default: null },
   categorias: { type: Array, default: () => [] },
+  mesActual: { type: Number, default: () => new Date().getMonth() + 1 },
+  anioActual: { type: Number, default: () => new Date().getFullYear() },
 })
 
 const emit = defineEmits(['update:categoriaSeleccionada'])
 
 const { currencySymbol, formatMonto } = useCurrency()
 
+// ─── Filtro de mes ──────────────────────────────────────────
+import { MESES } from '~/utils/constants'
+
+const mesSeleccionado = ref('actual') // 'actual' o 'YYYY-M'
+const isLoadingMes = ref(false)
+const gastosOtroMes = ref([])
+
+const mesesDisponiblesGrafico = computed(() => {
+  const lista = []
+  let m = props.mesActual
+  let a = props.anioActual
+  for (let i = 0; i < 24; i++) {
+    m--
+    if (m === 0) { m = 12; a-- }
+    lista.push({
+      key: `${a}-${m}`,
+      mes: m,
+      anio: a,
+      label: `${MESES[m - 1].slice(0, 3)} ${a}`,
+    })
+  }
+  return lista
+})
+
+const mesesRecientesGrafico = computed(() => mesesDisponiblesGrafico.value.slice(0, 3))
+const mesesAntiguosGrafico = computed(() => mesesDisponiblesGrafico.value.slice(3))
+
+const mesGraficoEsAntiguo = computed(() =>
+  mesesAntiguosGrafico.value.some(m => m.key === mesSeleccionado.value)
+)
+
+async function seleccionarMesGrafico(key) {
+  mesSeleccionado.value = key
+  if (key === 'actual') {
+    gastosOtroMes.value = []
+    return
+  }
+  const obj = mesesDisponiblesGrafico.value.find(m => m.key === key)
+  if (!obj) return
+  isLoadingMes.value = true
+  try {
+    gastosOtroMes.value = await $fetch('/api/gastos', { query: { mes: obj.mes, anio: obj.anio } })
+  } catch { gastosOtroMes.value = [] }
+  finally { isLoadingMes.value = false }
+}
+
+function onSelectMesGraficoAntiguo(event) {
+  const key = event.target.value
+  if (key) seleccionarMesGrafico(key)
+}
+
+// Gastos efectivos según mes seleccionado
+const gastosEfectivos = computed(() =>
+  mesSeleccionado.value === 'actual' ? props.gastos : gastosOtroMes.value
+)
+
+// Datos de categoría recalculados
+const datosEfectivos = computed(() => {
+  if (mesSeleccionado.value === 'actual') return props.datos
+  // Agrupar gastosOtroMes por categoría
+  const map = {}
+  for (const g of gastosOtroMes.value) {
+    const nombre = g.categoriaNombre || 'Otros'
+    if (!map[nombre]) map[nombre] = { nombre, color: g.categoriaColor || '#6b7280', total: 0, cantidad: 0 }
+    map[nombre].total += g.monto
+    map[nombre].cantidad++
+  }
+  const lista = Object.values(map).sort((a, b) => b.total - a.total)
+  const totalG = lista.reduce((s, c) => s + c.total, 0) || 1
+  return lista.map(c => ({ ...c, porcentaje: (c.total / totalG) * 100 }))
+})
+
+const mesSeleccionadoLabel = computed(() => {
+  if (mesSeleccionado.value === 'actual') return `${MESES[props.mesActual - 1]} ${props.anioActual}`
+  const obj = mesesDisponiblesGrafico.value.find(m => m.key === mesSeleccionado.value)
+  return obj ? `${MESES[obj.mes - 1]} ${obj.anio}` : ''
+})
+
 const DIAS_SEMANA_CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 const seleccionada = ref(null)
 const expandida = ref(null)
 
-const totalGeneral = computed(() => props.datos.reduce((sum, c) => sum + c.total, 0))
+const totalGeneral = computed(() => datosEfectivos.value.reduce((sum, c) => sum + c.total, 0))
 
 const totalSeleccionada = computed(() => {
   if (!seleccionada.value) return totalGeneral.value
-  const cat = props.datos.find(c => c.nombre === seleccionada.value)
+  const cat = datosEfectivos.value.find(c => c.nombre === seleccionada.value)
   return cat ? cat.total : 0
 })
 
 const porcentajeSeleccionada = computed(() => {
   if (!seleccionada.value) return 100
-  const cat = props.datos.find(c => c.nombre === seleccionada.value)
+  const cat = datosEfectivos.value.find(c => c.nombre === seleccionada.value)
   return cat ? cat.porcentaje : 0
 })
 
@@ -195,7 +313,7 @@ function toggleExpansion(nombre) {
 }
 
 function gastosDeCategoria(categoriaNombre) {
-  return props.gastos
+  return gastosEfectivos.value
     .filter(g => (g.categoriaNombre || 'Otros') === categoriaNombre)
     .sort((a, b) => {
       const cmpFecha = b.fecha.localeCompare(a.fecha)
@@ -209,9 +327,9 @@ const CIRCUNFERENCIA = 2 * Math.PI * 38
 const segmentos = computed(() => {
   const segs = []
   let acumulado = 0
-  const gap = props.datos.length > 1 ? 1.5 : 0
+  const gap = datosEfectivos.value.length > 1 ? 1.5 : 0
 
-  for (const cat of props.datos) {
+  for (const cat of datosEfectivos.value) {
     const porcion = (cat.porcentaje / 100) * CIRCUNFERENCIA
     const porcionConGap = Math.max(porcion - gap, 0.5)
     segs.push({

@@ -82,13 +82,46 @@ export default defineEventHandler(async (event) => {
       .limit(1)
 
     if (persona?.vinculoParId) {
+      // Build detailed changes: old value → new value
+      const cambiosDetallados = {}
+      const camposLegibles = {
+        concepto: 'Concepto',
+        montoOriginal: 'Monto',
+        fechaCreacion: 'Fecha creación',
+        fechaPago: 'Fecha de pago',
+        notas: 'Notas',
+        estado: 'Estado',
+        montoPendiente: 'Monto pendiente',
+      }
+      for (const campo of Object.keys(updateData)) {
+        if (campo === 'updatedAt') continue
+        const valorAnterior = deudaActual[campo]
+        const valorNuevo = updateData[campo]
+        if (String(valorAnterior) !== String(valorNuevo)) {
+          cambiosDetallados[campo] = {
+            label: camposLegibles[campo] || campo,
+            antes: valorAnterior,
+            despues: valorNuevo,
+          }
+        }
+      }
+
+      // Build human-readable description
+      const partes = Object.values(cambiosDetallados).map(c => {
+        if (c.label === 'Monto') return `${c.label}: S/ ${c.antes} → S/ ${c.despues}`
+        return `${c.label}: "${c.antes || '(vacío)'}" → "${c.despues || '(vacío)'}"`
+      })
+      const descripcionDetallada = partes.length > 0
+        ? `Deuda editada: "${updated.concepto}" — ${partes.join(', ')}`
+        : `Deuda editada: "${updated.concepto}"`
+
       await registrarAuditoria(db, {
         personaAId: deudaActual.personaEntidadId,
         personaBId: persona.vinculoParId,
         usuarioId,
         accion: 'deuda_editada',
-        descripcion: `Deuda editada: "${updated.concepto}"`,
-        datos: { deudaId: id, cambios: Object.keys(updateData).filter(k => k !== 'updatedAt') },
+        descripcion: descripcionDetallada,
+        datos: { deudaId: id, cambios: cambiosDetallados },
       })
     }
   }

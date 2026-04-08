@@ -26,23 +26,30 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Persona no encontrada' })
   }
 
-  if (!persona.vinculadoUsuarioId) {
-    throw createError({ statusCode: 400, message: 'Esta persona no tiene un vínculo activo' })
+  if (!persona.vinculadoUsuarioId || !persona.vinculoParId) {
+    // No link active - return empty instead of error so UI doesn't break
+    return []
   }
 
   const parPersonaId = persona.vinculoParId
-  if (!parPersonaId) {
-    throw createError({ statusCode: 400, message: 'Vínculo incompleto: persona par no encontrada' })
-  }
 
   const { personaAId } = normalizarParPersonas(personaId, parPersonaId)
 
-  // Obtener todos los checkpoints del par
-  const checkpoints = await db
+  // Obtener todos los checkpoints del par (also try with personaId directly as fallback)
+  let checkpoints = await db
     .select()
     .from(vinculosCheckpoints)
     .where(eq(vinculosCheckpoints.personaAId, personaAId))
     .orderBy(asc(vinculosCheckpoints.createdAt))
+
+  // Fallback: try searching with personaId directly (in case normalization was different at creation time)
+  if (checkpoints.length === 0 && personaAId !== personaId) {
+    checkpoints = await db
+      .select()
+      .from(vinculosCheckpoints)
+      .where(eq(vinculosCheckpoints.personaAId, personaId))
+      .orderBy(asc(vinculosCheckpoints.createdAt))
+  }
 
   // Para cada checkpoint, obtener auditoría del período que cubre
   // El período es: desde checkpoint.createdAt hasta el siguiente checkpoint (o ahora si es el último)

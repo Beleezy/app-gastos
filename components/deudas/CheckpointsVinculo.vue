@@ -135,6 +135,23 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <p class="text-[10px] text-gray-300 leading-relaxed">{{ entrada.descripcion }}</p>
+                  <!-- Detailed changes for edits -->
+                  <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1 space-y-0.5">
+                    <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[9px] text-gray-500 flex items-center gap-1">
+                      <span class="text-gray-400">{{ cambio.label || campo }}:</span>
+                      <span class="text-red-400/60 line-through">{{ cambio.antes || '(vacío)' }}</span>
+                      <span class="text-gray-600">&rarr;</span>
+                      <span class="text-emerald-400/60">{{ cambio.despues || '(vacío)' }}</span>
+                    </div>
+                  </div>
+                  <!-- Detailed debts for global payments -->
+                  <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1 space-y-0.5">
+                    <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[9px] text-gray-500 flex items-center gap-1">
+                      <span class="text-teal-400/60">S/ {{ dp.monto }}</span>
+                      <span class="text-gray-600">&rarr;</span>
+                      <span class="text-gray-400">{{ dp.concepto }}</span>
+                    </div>
+                  </div>
                   <div class="flex items-center gap-1.5 mt-0.5">
                     <span
                       class="text-[9px] font-medium px-1.5 py-0.5 rounded-full"

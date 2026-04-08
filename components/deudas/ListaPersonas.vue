@@ -121,8 +121,8 @@
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2">
-                  <p class="text-sm font-medium text-white truncate">{{ persona.nombre }}</p>
+                <p class="text-sm font-medium text-white leading-snug break-words">{{ persona.nombre }}</p>
+                <div class="flex items-center gap-1.5 mt-0.5">
                   <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary-700 text-gray-400">
                     ORG
                   </span>
@@ -131,10 +131,10 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
                   </span>
+                  <span class="text-xs text-gray-500">
+                    {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }}
+                  </span>
                 </div>
-                <p class="text-xs text-gray-500 mt-0.5">
-                  {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }} activa{{ persona.deudasActivas !== 1 ? 's' : '' }}
-                </p>
                 <!-- Due date indicator -->
                 <div v-if="persona.tieneVencidas" class="flex items-center gap-1 mt-1">
                   <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-red-500/20 text-red-400">
