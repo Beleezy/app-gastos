@@ -101,11 +101,12 @@ function onFileSelected(event) {
   const file = event.target.files?.[0]
   if (!file) return
 
-  // Resize image to reduce payload size for the API
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const img = new Image()
-    img.onload = () => {
+  // Use createObjectURL instead of readAsDataURL to avoid memory issues on mobile
+  const objectUrl = URL.createObjectURL(file)
+
+  const img = new Image()
+  img.onload = () => {
+    try {
       const canvas = document.createElement('canvas')
       const MAX_SIZE = 1024
       let { width, height } = img
@@ -125,12 +126,26 @@ function onFileSelected(event) {
       const ctx = canvas.getContext('2d')
       ctx.drawImage(img, 0, 0, width, height)
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
+
+      // Clean up resources before emitting
+      URL.revokeObjectURL(objectUrl)
+      canvas.width = 0
+      canvas.height = 0
+
       emit('capture', dataUrl)
+    } catch (e) {
+      URL.revokeObjectURL(objectUrl)
+      console.error('Error processing image:', e)
     }
-    img.src = e.target.result
   }
-  reader.readAsDataURL(file)
+
+  img.onerror = () => {
+    URL.revokeObjectURL(objectUrl)
+    console.error('Error loading image')
+  }
+
+  img.src = objectUrl
 
   // Reset input so the same file can be selected again
   event.target.value = ''
