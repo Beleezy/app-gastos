@@ -123,9 +123,36 @@
         </div>
 
         <!-- Total -->
-        <div v-if="editableGastos.length > 0" class="flex items-center justify-between px-1 pt-2">
-          <span class="text-sm text-gray-400">Total ({{ editableGastos.length }} gastos)</span>
-          <span class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalGastos) }}</span>
+        <div v-if="editableGastos.length > 0" class="pt-2 space-y-2">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-sm text-gray-400">Total ({{ editableGastos.length }} gastos)</span>
+            <span class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalGastos) }}</span>
+          </div>
+
+          <!-- Validación contra total del comprobante -->
+          <div v-if="totalComprobante != null" class="px-3 py-2.5 rounded-xl border"
+            :class="totalCoincide ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <svg v-if="totalCoincide" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <span class="text-xs" :class="totalCoincide ? 'text-emerald-400' : 'text-amber-400'">
+                  Total comprobante
+                </span>
+              </div>
+              <span class="text-sm font-semibold" :class="totalCoincide ? 'text-emerald-400' : 'text-amber-400'">
+                {{ currencySymbol }} {{ formatMonto(totalComprobante) }}
+              </span>
+            </div>
+            <p v-if="!totalCoincide" class="text-[11px] text-amber-400/80 mt-1.5">
+              Diferencia de {{ currencySymbol }} {{ formatMonto(Math.abs(diferenciaTotal)) }}. Revisa los montos o descuentos.
+            </p>
+          </div>
         </div>
 
         <!-- Save error -->
@@ -168,6 +195,7 @@ const props = defineProps({
   retryStatus: { type: String, default: '' },
   categorias: { type: Array, default: () => [] },
   onConfirm: { type: Function, default: null },
+  totalComprobante: { type: Number, default: null },
 })
 
 const emit = defineEmits(['close', 'confirm', 'retry'])
@@ -186,6 +214,16 @@ const categoriasDisponibles = computed(() => getCategoriaNames())
 
 const totalGastos = computed(() => {
   return editableGastos.value.reduce((sum, g) => sum + (parseFloat(g.monto) || 0), 0)
+})
+
+const totalCoincide = computed(() => {
+  if (props.totalComprobante == null) return null
+  return Math.abs(totalGastos.value - props.totalComprobante) < 0.02
+})
+
+const diferenciaTotal = computed(() => {
+  if (props.totalComprobante == null) return 0
+  return Math.round((totalGastos.value - props.totalComprobante) * 100) / 100
 })
 
 watch(() => props.gastos, (newVal) => {

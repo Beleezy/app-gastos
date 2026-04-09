@@ -14,6 +14,7 @@ export function usePhotoDraft() {
   const parsedExpenses = ref([])
   const parseError = ref(null)
   const retryStatus = ref('')
+  const totalComprobante = ref(null)
 
   let parseController = null
 
@@ -48,6 +49,7 @@ export function usePhotoDraft() {
 
       if (data.gastos && Array.isArray(data.gastos)) {
         parsedExpenses.value = data.gastos
+        totalComprobante.value = data.totalComprobante ?? null
         retryStatus.value = ''
       } else {
         parseError.value = 'No se pudieron interpretar los gastos de la imagen'
@@ -74,6 +76,7 @@ export function usePhotoDraft() {
     parsedExpenses.value = []
     parseError.value = null
     retryStatus.value = ''
+    totalComprobante.value = null
   }
 
   function onCancelPhoto() {
@@ -84,6 +87,7 @@ export function usePhotoDraft() {
     parsedExpenses.value = []
     parseError.value = null
     retryStatus.value = ''
+    totalComprobante.value = null
   }
 
   function reintentarParseImage() {
@@ -99,6 +103,7 @@ export function usePhotoDraft() {
     retryStatus.value = ''
     photoPreview.value = null
     photoBase64.value = null
+    totalComprobante.value = null
   }
 
   return {
@@ -109,6 +114,7 @@ export function usePhotoDraft() {
     parsedExpenses,
     parseError,
     retryStatus,
+    totalComprobante,
     onPhotoCapture,
     onSendPhoto,
     onRetakePhoto,

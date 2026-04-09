@@ -48,6 +48,7 @@ export default defineEventHandler(async (event) => {
 
 Responde ÚNICAMENTE con un JSON válido (sin markdown, sin explicaciones) con esta estructura:
 {
+  "total_comprobante": número decimal o null,
   "gastos": [
     {
       "concepto": "descripción corta del gasto",
@@ -59,18 +60,18 @@ Responde ÚNICAMENTE con un JSON válido (sin markdown, sin explicaciones) con e
 }
 
 Reglas:
+- "total_comprobante" es el TOTAL FINAL que aparece en el comprobante (el monto que realmente se pagó). Si no es visible, usa null.
 - Si la imagen muestra un recibo con múltiples ítems, crea un objeto por cada ítem individual.
 - Si la imagen muestra solo un total general sin desglose, crea un solo objeto con ese total.
 - Si hay una fecha visible en el recibo/voucher, úsala. Si no, usa la fecha de hoy: ${hoy} (${diaSemana}).
 - Clasifica cada gasto en la categoría más apropiada de la lista proporcionada.
 - El concepto debe ser breve y descriptivo (máx 50 caracteres).
 - Los montos deben ser números decimales (ej: 2.50).
-- DESCUENTOS Y PROMOCIONES: Si un ítem tiene un descuento, promoción, oferta o precio rebajado, usa el precio FINAL (después del descuento) como monto, NO el precio original. Por ejemplo, si un producto cuesta 10.00 pero tiene un descuento de 2.00, el monto debe ser 8.00. Incluye "(desc.)" en el concepto para indicar que se aplicó descuento.
-- Si hay un descuento global aplicado al total (no a un ítem específico), agrégalo como un ítem separado con monto negativo y concepto "Descuento" o la descripción que aparezca.
-- VALIDACIÓN DE TOTAL: La suma de todos los montos que devuelvas DEBE coincidir con el TOTAL que aparece en el comprobante. Si no coincide, ajusta los montos para que cuadren con el total real del comprobante.
-- Ignora datos como IGV o subtotales intermedios, pero SÍ usa el TOTAL FINAL como referencia para validar.
-- Si la imagen no es un recibo o no puedes extraer gastos, devuelve: {"gastos": []}
-- Si hay un campo "TOTAL" y además ítems individuales, usa los ítems individuales pero asegúrate de que su suma coincida con el TOTAL.
+- DESCUENTOS Y PROMOCIONES: Si un ítem tiene descuento, promoción u oferta, usa el PRECIO FINAL (después del descuento) como monto. Ejemplo: precio 10.00, descuento 2.00 → monto = 8.00. Agrega "(desc.)" al concepto.
+- Si hay un descuento global (no asociado a un ítem), agrégalo como ítem con monto NEGATIVO y concepto "Descuento [descripción]".
+- VALIDACIÓN OBLIGATORIA: La suma de todos los montos DEBE ser igual a "total_comprobante". Si no coincide, revisa los descuentos y ajusta antes de responder.
+- Ignora IGV y subtotales intermedios. Usa solo el TOTAL FINAL como referencia.
+- Si la imagen no es un recibo o no puedes extraer gastos, devuelve: {"total_comprobante": null, "gastos": []}
 - Si solo ves el total sin desglose, usa el nombre del establecimiento o "Compra" como concepto.`
 
   // Parse image data - accept "data:image/...;base64,XXXX" or raw base64
@@ -188,8 +189,12 @@ Reglas:
           continue
         }
 
+        const totalComprobante = parsed.total_comprobante != null
+          ? Math.round(parseFloat(parsed.total_comprobante) * 100) / 100
+          : null
+
         parsed.gastos = parsed.gastos.filter(g => {
-          return g && (parseFloat(g.monto) > 0) && g.concepto
+          return g && parseFloat(g.monto) !== 0 && g.concepto
         }).map(g => ({
           concepto: String(g.concepto).substring(0, 50),
           monto: Math.round(parseFloat(g.monto) * 100) / 100,
@@ -202,7 +207,10 @@ Reglas:
           continue
         }
 
-        return parsed
+        return {
+          gastos: parsed.gastos,
+          totalComprobante,
+        }
       } catch (e) {
         console.error(`Error [${currentModel}] en intento ${attempt + 1}/${MAX_RETRIES}:`, e.message)
         lastError = e.message

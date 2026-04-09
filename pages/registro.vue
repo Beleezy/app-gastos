@@ -207,6 +207,7 @@
       :parse-error="photoParseError"
       :retry-status="photoRetryStatus"
       :categorias="categorias"
+      :total-comprobante="photoTotalComprobante"
       :on-confirm="onConfirmPhotoGastos"
       @close="cerrarPhotoConfirmacion"
       @retry="reintentarParseImage"
@@ -310,6 +311,7 @@ const {
   photoPreview, showPhotoPreview, showPhotoConfirmacion,
   isParsing: isParsingPhoto, parsedExpenses: parsedPhotoExpenses,
   parseError: photoParseError, retryStatus: photoRetryStatus,
+  totalComprobante: photoTotalComprobante,
   onPhotoCapture, onSendPhoto, onRetakePhoto, onCancelPhoto,
   reintentarParseImage, cerrarPhotoConfirmacion,
 } = usePhotoDraft()
