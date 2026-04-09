@@ -36,22 +36,42 @@
         />
       </div>
 
-      <!-- Microphone section -->
+      <!-- Microphone + Camera section -->
       <div class="py-4 mb-4">
-        <RegistroBotonMicrofono
-          :is-listening="isListening"
-          :transcript="transcript"
-          :error="voiceError"
-          :is-supported="isSupported"
-          :has-draft="hasDraft"
-          @start="onStartListening"
-          @stop="onStopListening"
-          @continue="onContinueListening"
-          @send="onSendDraft"
-          @discard="onDiscardDraft"
-          @overwrite="onOverwriteDraft"
-          @update:transcript="onUpdateTranscript"
-        />
+        <div class="flex items-start justify-center gap-6">
+          <!-- Camera button (left) -->
+          <div class="pt-5">
+            <RegistroBotonCamara
+              :show-preview="showPhotoPreview"
+              :photo-preview="photoPreview"
+              @capture="onPhotoCapture"
+              @send="onSendPhoto"
+              @cancel="onCancelPhoto"
+              @retake="onRetakePhoto"
+            />
+          </div>
+
+          <!-- Microphone (center, main) -->
+          <div class="flex-shrink-0">
+            <RegistroBotonMicrofono
+              :is-listening="isListening"
+              :transcript="transcript"
+              :error="voiceError"
+              :is-supported="isSupported"
+              :has-draft="hasDraft"
+              @start="onStartListening"
+              @stop="onStopListening"
+              @continue="onContinueListening"
+              @send="onSendDraft"
+              @discard="onDiscardDraft"
+              @overwrite="onOverwriteDraft"
+              @update:transcript="onUpdateTranscript"
+            />
+          </div>
+
+          <!-- Spacer (right, for symmetry) -->
+          <div class="pt-5 w-12"></div>
+        </div>
       </div>
 
       <!-- Barra de búsqueda -->
@@ -178,6 +198,20 @@
       @retry="reintentarParse"
     />
 
+    <!-- Photo confirmation modal -->
+    <RegistroConfirmacionVoz
+      v-if="showPhotoConfirmacion"
+      :gastos="parsedPhotoExpenses"
+      :transcripcion="'Escaneado desde foto de voucher'"
+      :is-parsing="isParsingPhoto"
+      :parse-error="photoParseError"
+      :retry-status="photoRetryStatus"
+      :categorias="categorias"
+      :on-confirm="onConfirmPhotoGastos"
+      @close="cerrarPhotoConfirmacion"
+      @retry="reintentarParseImage"
+    />
+
     <!-- Manual form modal -->
     <RegistroFormGastoManual
       v-if="showFormManual"
@@ -271,6 +305,14 @@ const {
   onSendDraft, onDiscardDraft, onOverwriteDraft, onUpdateTranscript,
   reintentarParse, cerrarConfirmacion,
 } = useVoiceDraft()
+
+const {
+  photoPreview, showPhotoPreview, showPhotoConfirmacion,
+  isParsing: isParsingPhoto, parsedExpenses: parsedPhotoExpenses,
+  parseError: photoParseError, retryStatus: photoRetryStatus,
+  onPhotoCapture, onSendPhoto, onRetakePhoto, onCancelPhoto,
+  reintentarParseImage, cerrarPhotoConfirmacion,
+} = usePhotoDraft()
 
 const { config, fetchConfig } = useConfiguraciones()
 const { apiFetch } = useApiFetch()
@@ -401,6 +443,24 @@ async function onConfirmGastos(gastosEditados) {
 
   await createGastosBulk(gastosConIds, lastTranscript.value)
   cerrarConfirmacion()
+  showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
+  await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
+}
+
+async function onConfirmPhotoGastos(gastosEditados) {
+  vibrate([10, 50, 10])
+  const gastosConIds = gastosEditados.map(g => {
+    const cat = getCategoriaPorNombre(g.categoria)
+    return {
+      concepto: g.concepto,
+      monto: parseFloat(g.monto),
+      categoriaId: cat?.id || categorias.value[0]?.id,
+      fecha: g.fecha,
+    }
+  })
+
+  await createGastosBulk(gastosConIds, 'Escaneado desde foto de voucher')
+  cerrarPhotoConfirmacion()
   showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
 }
