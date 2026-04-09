@@ -65,9 +65,12 @@ Reglas:
 - Clasifica cada gasto en la categoría más apropiada de la lista proporcionada.
 - El concepto debe ser breve y descriptivo (máx 50 caracteres).
 - Los montos deben ser números decimales (ej: 2.50).
-- Ignora datos como IGV, subtotales o totales si ya tienes los ítems individuales.
+- DESCUENTOS Y PROMOCIONES: Si un ítem tiene un descuento, promoción, oferta o precio rebajado, usa el precio FINAL (después del descuento) como monto, NO el precio original. Por ejemplo, si un producto cuesta 10.00 pero tiene un descuento de 2.00, el monto debe ser 8.00. Incluye "(desc.)" en el concepto para indicar que se aplicó descuento.
+- Si hay un descuento global aplicado al total (no a un ítem específico), agrégalo como un ítem separado con monto negativo y concepto "Descuento" o la descripción que aparezca.
+- VALIDACIÓN DE TOTAL: La suma de todos los montos que devuelvas DEBE coincidir con el TOTAL que aparece en el comprobante. Si no coincide, ajusta los montos para que cuadren con el total real del comprobante.
+- Ignora datos como IGV o subtotales intermedios, pero SÍ usa el TOTAL FINAL como referencia para validar.
 - Si la imagen no es un recibo o no puedes extraer gastos, devuelve: {"gastos": []}
-- Si hay un campo "TOTAL" y además ítems individuales, usa SOLO los ítems individuales (no dupliques el total).
+- Si hay un campo "TOTAL" y además ítems individuales, usa los ítems individuales pero asegúrate de que su suma coincida con el TOTAL.
 - Si solo ves el total sin desglose, usa el nombre del establecimiento o "Compra" como concepto.`
 
   // Parse image data - accept "data:image/...;base64,XXXX" or raw base64
