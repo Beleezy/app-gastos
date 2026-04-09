@@ -12,15 +12,57 @@
     </button>
     <span class="text-[10px] text-gray-500 font-medium">Voucher</span>
 
-    <!-- Hidden file input for camera -->
+    <!-- Hidden file input (fallback for desktop) -->
     <input
       ref="fileInput"
       type="file"
       accept="image/*"
-      capture="environment"
       class="hidden"
       @change="onFileSelected"
     />
+
+    <!-- Inline camera view (mobile) -->
+    <Teleport to="body">
+      <div v-if="showCamera" class="fixed inset-0 z-[60] bg-black flex flex-col">
+        <video
+          ref="videoEl"
+          autoplay
+          playsinline
+          muted
+          class="flex-1 w-full object-cover"
+        />
+
+        <!-- Top bar -->
+        <div class="absolute top-0 inset-x-0 pt-12 pb-4 px-5 bg-gradient-to-b from-black/70 to-transparent">
+          <div class="flex items-center justify-between">
+            <button
+              class="w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center text-white active:scale-90 transition-transform"
+              @click="closeCamera"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <span class="text-white/80 text-sm font-medium">Escanear voucher</span>
+            <div class="w-10"></div>
+          </div>
+        </div>
+
+        <!-- Bottom controls -->
+        <div class="absolute bottom-0 inset-x-0 pb-10 pt-8 bg-gradient-to-t from-black/80 to-transparent">
+          <div class="flex items-center justify-center">
+            <!-- Shutter button -->
+            <button
+              class="w-[72px] h-[72px] rounded-full border-[4px] border-white p-[3px] active:scale-90 transition-transform"
+              @click="captureFrame"
+            >
+              <div class="w-full h-full rounded-full bg-white"></div>
+            </button>
+          </div>
+          <p class="text-center text-white/50 text-xs mt-3">Apunta al voucher o recibo</p>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Photo preview modal -->
     <Teleport to="body">
@@ -92,18 +134,87 @@ const props = defineProps({
 const emit = defineEmits(['capture', 'send', 'cancel', 'retake'])
 
 const fileInput = ref(null)
+const videoEl = ref(null)
+const showCamera = ref(false)
+let stream = null
 
 function openCamera() {
-  fileInput.value?.click()
+  // On mobile (touch devices), use inline camera to avoid the OS killing the PWA
+  const isMobile = navigator.maxTouchPoints > 0
+  if (isMobile && navigator.mediaDevices?.getUserMedia) {
+    startInlineCamera()
+  } else {
+    fileInput.value?.click()
+  }
+}
+
+async function startInlineCamera() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 960 } },
+      audio: false,
+    })
+    showCamera.value = true
+    await nextTick()
+    if (videoEl.value) {
+      videoEl.value.srcObject = stream
+    }
+  } catch (e) {
+    console.warn('getUserMedia failed, falling back to file input:', e)
+    fileInput.value?.click()
+  }
+}
+
+function captureFrame() {
+  const video = videoEl.value
+  if (!video || !video.videoWidth) return
+
+  try {
+    const canvas = document.createElement('canvas')
+    const MAX_SIZE = 1024
+    let width = video.videoWidth
+    let height = video.videoHeight
+
+    if (width > MAX_SIZE || height > MAX_SIZE) {
+      if (width > height) {
+        height = Math.round((height * MAX_SIZE) / width)
+        width = MAX_SIZE
+      } else {
+        width = Math.round((width * MAX_SIZE) / height)
+        height = MAX_SIZE
+      }
+    }
+
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(video, 0, 0, width, height)
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
+    canvas.width = 0
+    canvas.height = 0
+
+    closeCamera()
+    emit('capture', dataUrl)
+  } catch (e) {
+    console.error('Error capturing frame:', e)
+    closeCamera()
+  }
+}
+
+function closeCamera() {
+  showCamera.value = false
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop())
+    stream = null
+  }
 }
 
 function onFileSelected(event) {
   const file = event.target.files?.[0]
   if (!file) return
 
-  // Use createObjectURL instead of readAsDataURL to avoid memory issues on mobile
   const objectUrl = URL.createObjectURL(file)
-
   const img = new Image()
   img.onload = () => {
     try {
@@ -127,8 +238,6 @@ function onFileSelected(event) {
       ctx.drawImage(img, 0, 0, width, height)
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.7)
-
-      // Clean up resources before emitting
       URL.revokeObjectURL(objectUrl)
       canvas.width = 0
       canvas.height = 0
@@ -139,24 +248,24 @@ function onFileSelected(event) {
       console.error('Error processing image:', e)
     }
   }
-
   img.onerror = () => {
     URL.revokeObjectURL(objectUrl)
     console.error('Error loading image')
   }
-
   img.src = objectUrl
-
-  // Reset input so the same file can be selected again
   event.target.value = ''
 }
 
 function retake() {
   emit('retake')
   nextTick(() => {
-    fileInput.value?.click()
+    openCamera()
   })
 }
+
+onUnmounted(() => {
+  closeCamera()
+})
 </script>
 
 <style scoped>
