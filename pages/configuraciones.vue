@@ -448,6 +448,7 @@ const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
 const { isDark, toggleTheme } = useTheme()
 const { logout } = useAuth()
+const { apiFetch } = useApiFetch()
 
 async function cerrarSesion() {
   await logout()
@@ -553,7 +554,7 @@ const puedeCrearCategoria = computed(() => {
 
 async function fetchCategorias() {
   try {
-    const data = await $fetch('/api/categorias')
+    const data = await apiFetch('/api/categorias')
     misCategorias.value = data
   } catch (e) {
     console.error('Error cargando categorías:', e)
@@ -564,7 +565,7 @@ async function agregarPreseleccionada(cat) {
   if (categoriasExistentes.value.has(cat.nombre)) return
   guardandoCategoria.value = true
   try {
-    await $fetch('/api/categorias', {
+    await apiFetch('/api/categorias', {
       method: 'POST',
       body: { nombre: cat.nombre, icono: cat.icono, color: cat.color },
     })
@@ -582,13 +583,13 @@ async function crearCategoriaPersonalizada() {
   guardandoCategoria.value = true
   try {
     if (editandoCategoria.value) {
-      await $fetch(`/api/categorias/${editandoCategoria.value.id}`, {
+      await apiFetch(`/api/categorias/${editandoCategoria.value.id}`, {
         method: 'PUT',
         body: { nombre: nuevaCategoria.nombre.trim(), icono: nuevaCategoria.icono, color: nuevaCategoria.color },
       })
       showCatToast('Categoria actualizada')
     } else {
-      await $fetch('/api/categorias', {
+      await apiFetch('/api/categorias', {
         method: 'POST',
         body: { nombre: nuevaCategoria.nombre.trim(), icono: nuevaCategoria.icono, color: nuevaCategoria.color },
       })
@@ -620,7 +621,7 @@ async function confirmarEliminar() {
   if (!categoriaAEliminar.value) return
   eliminandoCategoria.value = true
   try {
-    await $fetch(`/api/categorias/${categoriaAEliminar.value.id}`, { method: 'DELETE' })
+    await apiFetch(`/api/categorias/${categoriaAEliminar.value.id}`, { method: 'DELETE' })
     await fetchCategorias()
     showCatToast('Categoria eliminada')
   } catch (e) {
