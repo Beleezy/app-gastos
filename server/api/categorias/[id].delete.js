@@ -1,0 +1,46 @@
+import { db } from '../../utils/db.js'
+import { categorias, gastos, gastosPlanificados } from '../../database/schema.js'
+import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { eq, and } from 'drizzle-orm'
+
+export default defineEventHandler(async (event) => {
+  const usuarioId = await getUsuarioFromEvent(event)
+  const id = getRouterParam(event, 'id')
+
+  // Solo puede eliminar sus propias categorías (no predefinidas)
+  const [cat] = await db
+    .select()
+    .from(categorias)
+    .where(and(eq(categorias.id, id), eq(categorias.usuarioId, usuarioId)))
+    .limit(1)
+
+  if (!cat) {
+    throw createError({ statusCode: 404, message: 'Categoría no encontrada o es predefinida' })
+  }
+
+  // Verificar que no tenga gastos asociados
+  const gastosAsociados = await db
+    .select({ id: gastos.id })
+    .from(gastos)
+    .where(eq(gastos.categoriaId, id))
+    .limit(1)
+
+  if (gastosAsociados.length > 0) {
+    throw createError({ statusCode: 409, message: 'No se puede eliminar: tiene gastos asociados' })
+  }
+
+  // Verificar que no tenga gastos planificados asociados
+  const planificadosAsociados = await db
+    .select({ id: gastosPlanificados.id })
+    .from(gastosPlanificados)
+    .where(eq(gastosPlanificados.categoriaId, id))
+    .limit(1)
+
+  if (planificadosAsociados.length > 0) {
+    throw createError({ statusCode: 409, message: 'No se puede eliminar: tiene gastos planificados asociados' })
+  }
+
+  await db.delete(categorias).where(eq(categorias.id, id))
+
+  return { ok: true }
+})

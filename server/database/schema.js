@@ -128,6 +128,7 @@ export const configuraciones = pgTable('configuraciones', {
   diaInicioCiclo: integer('dia_inicio_ciclo').default(1).notNull(),
   zonaHoraria: varchar('zona_horaria', { length: 50 }).default('America/Lima').notNull(),
   locale: varchar('locale', { length: 10 }).default('es-PE').notNull(),
+  diasPdfSaldadas: integer('dias_pdf_saldadas').default(7).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

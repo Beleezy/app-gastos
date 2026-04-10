@@ -57,8 +57,10 @@ export function useDeudas() {
   }
 
   async function fetchPersonas() {
-    isLoading.value = true
-    error.value = null
+    if (!pollingActivo.value) {
+      isLoading.value = true
+      error.value = null
+    }
     try {
       personas.value = await apiFetch('/api/deudas/personas', {
         query: { tipo: tabActual.value }
@@ -66,13 +68,15 @@ export function useDeudas() {
     } catch (e) {
       error.value = e.message || 'Error al cargar personas'
     } finally {
-      isLoading.value = false
+      if (!pollingActivo.value) isLoading.value = false
     }
   }
 
   async function fetchDeudasPersona(personaId) {
-    isLoading.value = true
-    error.value = null
+    if (!pollingActivo.value) {
+      isLoading.value = true
+      error.value = null
+    }
     try {
       deudasList.value = await apiFetch('/api/deudas', {
         query: { personaId, tipo: tabActual.value }
@@ -80,7 +84,7 @@ export function useDeudas() {
     } catch (e) {
       error.value = e.message || 'Error al cargar deudas'
     } finally {
-      isLoading.value = false
+      if (!pollingActivo.value) isLoading.value = false
     }
   }
 
@@ -283,6 +287,7 @@ export function useDeudas() {
 
   // Polling for real-time sync with linked users
   const pollingInterval = ref(null)
+  const pollingActivo = ref(false)
 
   function iniciarPolling(personaId) {
     detenerPolling()
@@ -292,6 +297,7 @@ export function useDeudas() {
         return
       }
       try {
+        pollingActivo.value = true
         await Promise.all([
           fetchDeudasPersona(personaId),
           fetchPagosPersona(personaId),
@@ -301,6 +307,8 @@ export function useDeudas() {
         ])
       } catch {
         // Silent fail on polling
+      } finally {
+        pollingActivo.value = false
       }
     }, 10000) // Poll every 10 seconds
   }
@@ -331,14 +339,14 @@ export function useDeudas() {
   const cargandoCheckpoints = ref(false)
 
   async function fetchCheckpoints(personaId) {
-    cargandoCheckpoints.value = true
-    checkpoints.value = []
+    const esRecarga = checkpoints.value.length > 0
+    if (!esRecarga) cargandoCheckpoints.value = true
     try {
       checkpoints.value = await apiFetch('/api/deudas/vinculos/checkpoints', {
         query: { personaId },
       })
     } catch (e) {
-      checkpoints.value = []
+      if (!esRecarga) checkpoints.value = []
     } finally {
       cargandoCheckpoints.value = false
     }

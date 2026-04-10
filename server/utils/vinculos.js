@@ -278,13 +278,23 @@ export async function crearCheckpoint(tx, { personaAId, personaBId, tipo, creado
       .limit(1)
 
     if (actualExistente) {
-      // Eliminar el 'anterior' previo (hacemos hueco)
-      await tx
-        .delete(vinculosCheckpoints)
+      // Contar los 'anterior' existentes y eliminar los más antiguos si ya hay 3
+      // (máximo 5 total: 1 inicio + 1 actual + 3 anterior)
+      const anteriores = await tx
+        .select({ id: vinculosCheckpoints.id, createdAt: vinculosCheckpoints.createdAt })
+        .from(vinculosCheckpoints)
         .where(and(
           eq(vinculosCheckpoints.personaAId, personaAId),
           eq(vinculosCheckpoints.tipo, 'anterior')
         ))
+        .orderBy(vinculosCheckpoints.createdAt)
+
+      // Si ya hay 3 anteriores, eliminar el más antiguo para hacer hueco
+      if (anteriores.length >= 3) {
+        await tx
+          .delete(vinculosCheckpoints)
+          .where(eq(vinculosCheckpoints.id, anteriores[0].id))
+      }
 
       // Rotar: actual → anterior
       await tx

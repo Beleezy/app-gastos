@@ -162,8 +162,24 @@ const props = defineProps({
 defineEmits(['edit', 'delete'])
 
 const vistaActiva = ref('semana')
-const diaExpandido = ref(null)
+
+// Fecha de hoy como string YYYY-MM-DD
+const hoy = (() => {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+})()
+
+const diaExpandido = ref(hoy) // hoy abierto por defecto
 const semanaExpandida = ref(null)
+
+// Auto-expandir la semana actual al cargar datos (solo la primera vez)
+const semanaInicializada = ref(false)
+watch(() => props.gastosPorSemana, (semanas) => {
+  if (semanaInicializada.value || !semanas.length) return
+  const semanaHoy = semanas.find(s => s.desde <= hoy && hoy <= s.hasta)
+  if (semanaHoy) semanaExpandida.value = semanaHoy.key
+  semanaInicializada.value = true
+}, { immediate: true })
 
 const sinDatos = computed(() => props.gastosPorDia.length === 0 && props.gastosPorSemana.length === 0)
 

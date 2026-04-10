@@ -119,14 +119,15 @@ export function useDeudaPdf() {
       y += 5
     }
 
-    // Settled debts (last 7 days only)
-    const hace7Dias = new Date()
-    hace7Dias.setDate(hace7Dias.getDate() - 7)
-    const hace7DiasStr = hace7Dias.toISOString().split('T')[0]
+    // Settled debts (configurable days)
+    const diasPdf = config.value?.diasPdfSaldadas || 7
+    const haceDias = new Date()
+    haceDias.setDate(haceDias.getDate() - diasPdf)
+    const haceDiasStr = haceDias.toISOString().split('T')[0]
 
     const saldadasRecientes = deudasSaldadas.filter(d => {
       const fechaUpdate = d.updatedAt ? new Date(d.updatedAt).toISOString().split('T')[0] : null
-      return fechaUpdate && fechaUpdate >= hace7DiasStr
+      return fechaUpdate && fechaUpdate >= haceDiasStr
     })
 
     if (saldadasRecientes.length > 0) {
@@ -137,7 +138,7 @@ export function useDeudaPdf() {
 
       doc.setFontSize(11)
       doc.setFont('helvetica', 'bold')
-      doc.text('Deudas saldadas (ultimos 7 dias)', 20, y)
+      doc.text(`Deudas saldadas (ultimos ${diasPdf} dias)`, 20, y)
       y += 8
 
       doc.setFontSize(9)

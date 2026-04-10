@@ -67,9 +67,11 @@ Reglas:
 - Clasifica cada gasto en la categoría más apropiada de la lista proporcionada.
 - El concepto debe ser breve y descriptivo (máx 50 caracteres).
 - Los montos deben ser números decimales (ej: 2.50).
-- DESCUENTOS Y PROMOCIONES: Si un ítem tiene descuento, promoción u oferta, usa el PRECIO FINAL (después del descuento) como monto. Ejemplo: precio 10.00, descuento 2.00 → monto = 8.00. Agrega "(desc.)" al concepto.
-- Si hay un descuento global (no asociado a un ítem), agrégalo como ítem con monto NEGATIVO y concepto "Descuento [descripción]".
-- VALIDACIÓN OBLIGATORIA: La suma de todos los montos DEBE ser igual a "total_comprobante". Si no coincide, revisa los descuentos y ajusta antes de responder.
+- DESCUENTOS Y PROMOCIONES:
+  * Si una línea de descuento aparece INMEDIATAMENTE DEBAJO de un ítem específico (está asociada a ese ítem), réstala del precio bruto de ese ítem: monto_neto = precio_item - descuento. Agrega "(desc.)" al concepto del ítem. NO incluyas el descuento como ítem separado.
+    Ejemplo: "Leche 5.00 / Descuento -1.00" → un solo ítem con monto 4.00 y concepto "Leche (desc.)"
+  * Si hay un descuento global al final del comprobante que NO está asociado a ningún ítem en particular, agrégalo como ítem con monto NEGATIVO y concepto "Descuento [descripción]".
+- VALIDACIÓN OBLIGATORIA: La suma de TODOS los montos (incluyendo negativos) DEBE ser igual a "total_comprobante". Si no coincide, revisa los descuentos y ajusta los montos antes de responder. El total final siempre manda.
 - Ignora IGV y subtotales intermedios. Usa solo el TOTAL FINAL como referencia.
 - Si la imagen no es un recibo o no puedes extraer gastos, devuelve: {"total_comprobante": null, "gastos": []}
 - Si solo ves el total sin desglose, usa el nombre del establecimiento o "Compra" como concepto.`

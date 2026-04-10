@@ -19,10 +19,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Punto de guardado no encontrado' })
   }
 
-  if (checkpoint.tipo === 'actual') {
-    throw createError({ statusCode: 400, message: 'No se puede restaurar al punto de guardado actual (ya es el estado vigente)' })
-  }
-
   // Verificar que el usuario tiene acceso a este checkpoint (su persona es A o B)
   const [miPersona] = await db
     .select()

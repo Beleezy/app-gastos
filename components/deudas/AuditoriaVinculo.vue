@@ -35,14 +35,14 @@
               </span>
               <span class="text-[10px] text-gray-500">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
             </div>
-            <p class="text-xs text-gray-300">{{ entrada.descripcion }}</p>
+            <p v-if="!tieneDetallesColoreados(entrada)" class="text-xs text-gray-300">{{ entrada.descripcion }}</p>
             <!-- Detailed changes for edits -->
-            <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1.5 space-y-0.5">
-              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[10px] text-gray-500 flex items-center gap-1">
-                <span class="text-gray-400 font-medium">{{ cambio.label || campo }}:</span>
-                <span class="text-red-400/70 line-through">{{ cambio.antes || '(vacío)' }}</span>
-                <span class="text-gray-600">&rarr;</span>
-                <span class="text-emerald-400/70">{{ cambio.despues || '(vacío)' }}</span>
+            <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1 space-y-1">
+              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-xs text-gray-500 flex items-center gap-1.5">
+                <span class="text-gray-400 font-semibold">{{ cambio.label || campo }}:</span>
+                <span class="text-red-400/80 line-through">{{ cambio.antes || '(vacío)' }}</span>
+                <span class="text-gray-500">&rarr;</span>
+                <span class="text-emerald-400/80 font-medium">{{ cambio.despues || '(vacío)' }}</span>
               </div>
             </div>
             <!-- Detailed debts for global payments -->
@@ -77,6 +77,11 @@ defineProps({
 })
 
 const show = ref(false)
+
+function tieneDetallesColoreados(entrada) {
+  return (entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios))
+    || (entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas) && entrada.datos.deudasPagadas.length > 0)
+}
 
 function getAccionColor(accion) {
   const map = {

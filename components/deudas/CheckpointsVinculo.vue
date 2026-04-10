@@ -5,7 +5,7 @@
       <div class="flex items-center gap-2">
         <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Puntos de guardado</h3>
-        <span class="text-xs text-gray-600">{{ checkpoints.length }}/3</span>
+        <span class="text-xs text-gray-600">{{ checkpoints.length }}/5</span>
       </div>
       <button
         class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-violet-500/15 text-violet-400 text-xs font-medium hover:bg-violet-500/25 transition-colors disabled:opacity-40"
@@ -140,14 +140,14 @@
                   </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-[10px] text-gray-300 leading-relaxed">{{ entrada.descripcion }}</p>
+                  <p v-if="!tieneDetallesColoreados(entrada)" class="text-[10px] text-gray-300 leading-relaxed">{{ entrada.descripcion }}</p>
                   <!-- Detailed changes for edits -->
-                  <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1 space-y-0.5">
-                    <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[9px] text-gray-500 flex items-center gap-1">
-                      <span class="text-gray-400">{{ cambio.label || campo }}:</span>
-                      <span class="text-red-400/60 line-through">{{ cambio.antes || '(vacío)' }}</span>
-                      <span class="text-gray-600">&rarr;</span>
-                      <span class="text-emerald-400/60">{{ cambio.despues || '(vacío)' }}</span>
+                  <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-0.5 space-y-0.5">
+                    <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[10px] text-gray-500 flex items-center gap-1">
+                      <span class="text-gray-400 font-semibold">{{ cambio.label || campo }}:</span>
+                      <span class="text-red-400/70 line-through">{{ cambio.antes || '(vacío)' }}</span>
+                      <span class="text-gray-500">&rarr;</span>
+                      <span class="text-emerald-400/70 font-medium">{{ cambio.despues || '(vacío)' }}</span>
                     </div>
                   </div>
                   <!-- Detailed debts for global payments -->
@@ -176,9 +176,8 @@
             <p class="text-[10px] text-gray-600">Sin cambios registrados en este período</p>
           </div>
 
-          <!-- Botón restaurar (solo para inicio_vinculo y anterior) -->
+          <!-- Botón restaurar -->
           <button
-            v-if="cp.tipo !== 'actual'"
             class="w-full py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
             :class="restaurando === cp.id
               ? 'bg-primary-700 text-gray-400 cursor-not-allowed'
@@ -206,7 +205,7 @@
         <h3 class="text-base font-semibold text-white mb-1">Guardar punto de guardado</h3>
         <p class="text-xs text-gray-400 mb-4">
           Se guardará el estado actual de todas las deudas con esta persona.
-          <span v-if="checkpoints.length >= 2" class="text-amber-400"> El punto anterior será reemplazado.</span>
+          <span v-if="checkpoints.length >= 5" class="text-amber-400"> El punto más antiguo será reemplazado.</span>
         </p>
         <div class="mb-4">
           <label class="text-xs text-gray-400 block mb-1.5">Descripción (opcional)</label>
@@ -295,6 +294,11 @@ const checkpointsOrdenados = computed(() => {
 
 function toggleExpand(id) {
   expandido.value = expandido.value === id ? null : id
+}
+
+function tieneDetallesColoreados(entrada) {
+  return (entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios))
+    || (entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas) && entrada.datos.deudasPagadas.length > 0)
 }
 
 function tipoLabel(tipo) {

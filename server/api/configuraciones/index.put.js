@@ -14,6 +14,7 @@ export default defineEventHandler(async (event) => {
   if (body.diaInicioCiclo !== undefined) updateData.diaInicioCiclo = body.diaInicioCiclo
   if (body.zonaHoraria !== undefined) updateData.zonaHoraria = String(body.zonaHoraria).slice(0, 50)
   if (body.locale !== undefined) updateData.locale = String(body.locale).slice(0, 10)
+  if (body.diasPdfSaldadas !== undefined) updateData.diasPdfSaldadas = Math.max(1, Math.min(90, parseInt(body.diasPdfSaldadas) || 7))
   updateData.updatedAt = new Date()
 
   const [updated] = await db
