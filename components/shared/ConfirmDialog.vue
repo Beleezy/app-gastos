@@ -1,7 +1,7 @@
 <template>
   <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('update:modelValue', false)"></div>
-    <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50 animate-slide-up">
+    <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('update:modelValue', false)"></div>
+    <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border animate-slide-up">
       <div v-if="icon" class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
         :class="iconBg"
       >
@@ -9,8 +9,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" :d="iconPath" />
         </svg>
       </div>
-      <h3 class="text-base font-semibold text-white mb-1.5" :class="icon ? 'text-center' : ''">{{ title }}</h3>
-      <p class="text-sm text-gray-400 mb-5" :class="icon ? 'text-center' : ''">{{ message }}</p>
+      <h3 class="text-base font-semibold text-theme-text mb-1.5" :class="icon ? 'text-center' : ''">{{ title }}</h3>
+      <p class="text-sm text-theme-text-muted mb-5" :class="icon ? 'text-center' : ''">{{ message }}</p>
       <div class="space-y-2">
         <button
           class="w-full py-2.5 rounded-xl text-sm font-medium transition-colors"
@@ -28,7 +28,7 @@
           <span v-else>{{ confirmLabel || 'Confirmar' }}</span>
         </button>
         <button
-          class="w-full py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+          class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
           @click="$emit('update:modelValue', false)"
         >
           Cancelar

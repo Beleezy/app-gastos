@@ -1,28 +1,28 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-end justify-center">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')"></div>
-    <div class="relative w-full max-w-lg bg-primary-900 rounded-t-3xl px-4 pt-5 pb-8 animate-slide-up">
+    <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('close')"></div>
+    <div class="relative w-full max-w-lg bg-theme-input rounded-t-3xl px-4 pt-5 pb-8 animate-slide-up">
       <!-- Handle -->
-      <div class="w-10 h-1 bg-primary-700 rounded-full mx-auto mb-5"></div>
+      <div class="w-10 h-1 bg-theme-border-md rounded-full mx-auto mb-5"></div>
 
-      <h3 class="text-base font-semibold text-white mb-4">Editar persona</h3>
+      <h3 class="text-base font-semibold text-theme-text mb-4">Editar persona</h3>
 
       <form class="space-y-3" @submit.prevent="guardar">
         <!-- Nombre -->
         <div>
-          <label class="block text-xs text-gray-500 mb-1.5">Nombre *</label>
+          <label class="block text-xs text-theme-text-sec mb-1.5">Nombre *</label>
           <input
             v-model="form.nombre"
             type="text"
             placeholder="Nombre o empresa"
-            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-theme-accent"
+            class="w-full bg-theme-card border border-theme-border rounded-xl px-3 py-2.5 text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent"
             required
           />
         </div>
 
         <!-- Tipo -->
         <div>
-          <label class="block text-xs text-gray-500 mb-1.5">Tipo</label>
+          <label class="block text-xs text-theme-text-sec mb-1.5">Tipo</label>
           <div class="flex gap-2">
             <button
               v-for="opt in tipoOpts" :key="opt.value"
@@ -30,7 +30,7 @@
               class="flex-1 py-2.5 rounded-xl text-xs font-medium transition-colors border"
               :class="form.tipo === opt.value
                 ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
-                : 'bg-primary-800 text-gray-500 border-primary-700/30 hover:border-primary-600/50'"
+                : 'bg-theme-card text-theme-text-sec border-theme-border hover:border-primary-600/50'"
               @click="form.tipo = opt.value"
             >
               {{ opt.label }}
@@ -40,23 +40,23 @@
 
         <!-- Contacto -->
         <div>
-          <label class="block text-xs text-gray-500 mb-1.5">Contacto (teléfono, email…)</label>
+          <label class="block text-xs text-theme-text-sec mb-1.5">Contacto (teléfono, email…)</label>
           <input
             v-model="form.contacto"
             type="text"
             placeholder="Opcional"
-            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-theme-accent"
+            class="w-full bg-theme-card border border-theme-border rounded-xl px-3 py-2.5 text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent"
           />
         </div>
 
         <!-- Notas -->
         <div>
-          <label class="block text-xs text-gray-500 mb-1.5">Notas</label>
+          <label class="block text-xs text-theme-text-sec mb-1.5">Notas</label>
           <textarea
             v-model="form.notas"
             rows="2"
             placeholder="Opcional"
-            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-theme-accent resize-none"
+            class="w-full bg-theme-card border border-theme-border rounded-xl px-3 py-2.5 text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent resize-none"
           ></textarea>
         </div>
 
@@ -67,7 +67,7 @@
         <div class="flex gap-2 pt-1">
           <button
             type="button"
-            class="flex-1 py-3 rounded-xl bg-primary-800 text-gray-400 text-sm font-medium hover:bg-primary-700 transition-colors"
+            class="flex-1 py-3 rounded-xl bg-theme-card text-theme-text-muted text-sm font-medium hover:bg-theme-border-md transition-colors"
             @click="$emit('close')"
           >
             Cancelar
@@ -90,10 +90,14 @@
 </template>
 
 <script setup>
+import { useModalBack } from '~/composables/useModalBack'
+
 const props = defineProps({
-  persona: { type: Object, required: true },
+  persona: { type: Object, required: true }
 })
 const emit = defineEmits(['close', 'saved'])
+
+useModalBack(() => emit('close'))
 
 const tipoOpts = [
   { value: 'persona', label: 'Persona' },

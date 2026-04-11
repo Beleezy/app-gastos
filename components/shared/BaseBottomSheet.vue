@@ -1,6 +1,6 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-end justify-center">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="$emit('close')"></div>
+    <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('close')"></div>
     <div class="relative w-full max-w-lg bg-theme-card rounded-t-3xl border-t border-theme-border max-h-[90vh] overflow-y-auto animate-slide-up">
       <div class="flex justify-center pt-3 pb-1">
         <div class="w-10 h-1 rounded-full bg-theme-border-md"></div>
@@ -21,8 +21,12 @@
 </template>
 
 <script setup>
-defineProps({ title: { type: String, required: true } })
-defineEmits(['close'])
+import { useModalBack } from '~/composables/useModalBack'
+
+const props = defineProps({ title: { type: String, required: true } })
+const emit = defineEmits(['close'])
+
+useModalBack(() => emit('close'))
 </script>
 
 <style scoped>

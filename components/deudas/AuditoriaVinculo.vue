@@ -2,11 +2,11 @@
   <div v-if="auditoria.length > 0" class="mb-5">
     <button class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
       <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Auditoría del vínculo</h3>
-      <span class="text-xs text-gray-500">{{ auditoria.length }}</span>
+      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Auditoría del vínculo</h3>
+      <span class="text-xs text-theme-text-sec">{{ auditoria.length }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-3 h-3 text-gray-600 ml-auto transition-transform"
+        class="w-3 h-3 text-theme-text-muted ml-auto transition-transform"
         :class="show ? 'rotate-180' : ''"
         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
       >
@@ -16,7 +16,7 @@
 
     <Transition name="collapse">
       <div v-if="show" class="relative pl-6">
-        <div class="absolute left-2 top-2 bottom-2 w-px bg-primary-700/50"></div>
+        <div class="absolute left-2 top-2 bottom-2 w-px bg-theme-border-md"></div>
 
         <div v-for="entrada in auditoria" :key="entrada.id" class="relative mb-3 last:mb-0">
           <!-- Timeline dot -->
@@ -25,7 +25,7 @@
             :class="getAccionColor(entrada.accion)"
           ></div>
 
-          <div class="bg-primary-800/60 rounded-xl p-3 border border-primary-700/20">
+          <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
             <div class="flex items-center gap-1.5 mb-1">
               <span
                 class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
@@ -33,27 +33,27 @@
               >
                 {{ getAccionLabel(entrada.accion) }}
               </span>
-              <span class="text-[10px] text-gray-500">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
+              <span class="text-[10px] text-theme-text-sec">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
             </div>
-            <p v-if="!tieneDetallesColoreados(entrada)" class="text-xs text-gray-300">{{ entrada.descripcion }}</p>
+            <p v-if="!tieneDetallesColoreados(entrada)" class="text-xs text-theme-text-sec">{{ entrada.descripcion }}</p>
             <!-- Detailed changes for edits -->
             <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1 space-y-1">
-              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-xs text-gray-500 flex items-center gap-1.5">
-                <span class="text-gray-400 font-semibold">{{ cambio.label || campo }}:</span>
+              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-xs text-theme-text-sec flex items-center gap-1.5">
+                <span class="text-theme-text-muted font-semibold">{{ cambio.label || campo }}:</span>
                 <span class="text-red-400/80 line-through">{{ cambio.antes || '(vacío)' }}</span>
-                <span class="text-gray-500">&rarr;</span>
+                <span class="text-theme-text-sec">&rarr;</span>
                 <span class="text-emerald-400/80 font-medium">{{ cambio.despues || '(vacío)' }}</span>
               </div>
             </div>
             <!-- Detailed debts for global payments -->
             <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1.5 space-y-0.5">
-              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[10px] text-gray-500 flex items-center gap-1">
+              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[10px] text-theme-text-sec flex items-center gap-1">
                 <span class="text-teal-400/70">S/ {{ dp.monto }}</span>
-                <span class="text-gray-600">&rarr;</span>
-                <span class="text-gray-400">{{ dp.concepto }}</span>
+                <span class="text-theme-text-muted">&rarr;</span>
+                <span class="text-theme-text-muted">{{ dp.concepto }}</span>
               </div>
             </div>
-            <p class="text-[10px] text-gray-600 mt-1">{{ formatFecha(entrada.createdAt) }}</p>
+            <p class="text-[10px] text-theme-text-muted mt-1">{{ formatFecha(entrada.createdAt) }}</p>
           </div>
         </div>
       </div>
@@ -64,9 +64,9 @@
   <div v-else-if="auditoria.length === 0 && personaId" class="mb-5">
     <div class="flex items-center gap-2 mb-2">
       <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Auditoría del vínculo</h3>
+      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Auditoría del vínculo</h3>
     </div>
-    <p class="text-xs text-gray-600 pl-3">Sin actividad registrada aún.</p>
+    <p class="text-xs text-theme-text-muted pl-3">Sin actividad registrada aún.</p>
   </div>
 </template>
 
@@ -94,7 +94,7 @@ function getAccionColor(accion) {
     pago_editado: 'bg-yellow-500',
     pago_revertido: 'bg-red-400',
   }
-  return map[accion] || 'bg-gray-500'
+  return map[accion] || 'bg-theme-card-hover0'
 }
 
 function getAccionBadgeClass(accion) {
@@ -108,7 +108,7 @@ function getAccionBadgeClass(accion) {
     pago_editado: 'bg-yellow-500/15 text-yellow-400',
     pago_revertido: 'bg-red-500/15 text-red-400',
   }
-  return map[accion] || 'bg-gray-500/15 text-gray-400'
+  return map[accion] || 'bg-theme-card-hover0/15 text-theme-text-muted'
 }
 
 function getAccionLabel(accion) {

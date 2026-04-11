@@ -2,66 +2,66 @@
   <SharedBaseBottomSheet title="Editar deuda" @close="$emit('close')">
     <!-- Concepto -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Concepto</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
       <input
         v-model="form.concepto"
         type="text"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Monto -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto original</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto original</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
           v-model="form.montoOriginal"
           type="number"
           step="0.01"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
-      <p v-if="totalPagado > 0" class="text-[10px] text-gray-600 mt-1">
+      <p v-if="totalPagado > 0" class="text-[10px] text-theme-text-muted mt-1">
         Ya se han pagado {{ currencySymbol }} {{ formatMonto(totalPagado) }}. El pendiente se recalculara automaticamente.
       </p>
     </div>
 
     <!-- Fecha de creacion -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha del prestamo</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha del prestamo</label>
       <input
         v-model="form.fechaCreacion"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Fecha de pago -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha de pago <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha de pago <span class="text-theme-text-muted">(opcional)</span></label>
       <input
         v-model="form.fechaPago"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Notas <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"

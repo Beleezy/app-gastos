@@ -1,14 +1,14 @@
 <template>
   <Transition name="voz-overlay">
     <div v-if="showVozOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="cerrarVozOverlaySiInactivo"></div>
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cerrarVozOverlaySiInactivo"></div>
 
       <div class="relative z-10 flex flex-col items-center gap-4 px-6 w-full max-w-sm">
         <!-- Status text -->
         <p class="text-sm h-5">
           <span v-if="isListening" class="text-purple-400">Escuchando...</span>
           <span v-else-if="hasDraft" class="text-amber-400">Borrador guardado</span>
-          <span v-else class="text-gray-400">Toca para dictar una deuda</span>
+          <span v-else class="text-theme-text-muted">Toca para dictar una deuda</span>
         </p>
 
         <!-- Mic button -->
@@ -24,10 +24,10 @@
               : 'bg-purple-500 hover:bg-purple-600 shadow-purple-500/40'"
             @click="toggleVoz"
           >
-            <svg v-if="!isListening" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <svg v-if="!isListening" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-theme-text" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-theme-text" fill="currentColor" viewBox="0 0 24 24">
               <rect x="6" y="6" width="12" height="12" rx="2" />
             </svg>
           </button>
@@ -43,21 +43,21 @@
 
         <!-- Live transcript while recording -->
         <div v-if="isListening && transcript" class="w-full">
-          <div class="bg-primary-800/90 rounded-xl px-4 py-3 border border-primary-700/50">
-            <p class="text-sm text-gray-300 italic">"{{ transcript }}"</p>
+          <div class="bg-theme-card rounded-xl px-4 py-3 border border-theme-border">
+            <p class="text-sm text-theme-text-sec italic">"{{ transcript }}"</p>
           </div>
         </div>
 
         <!-- Draft card (after recording stops) -->
         <div v-if="hasDraft && !isListening" class="w-full">
-          <div class="bg-primary-800/90 rounded-xl px-4 py-3 border border-amber-500/30">
+          <div class="bg-theme-card rounded-xl px-4 py-3 border border-amber-500/30">
             <p class="text-xs text-amber-400/70 mb-1.5">Borrador</p>
 
             <div v-if="isEditing">
               <textarea
                 ref="editTextareaRef"
                 v-model="editText"
-                class="w-full bg-primary-900/60 border border-primary-600/40 rounded-lg px-3 py-2 text-sm text-gray-200 resize-none focus:outline-none focus:border-purple-500/50"
+                class="w-full bg-theme-input border border-primary-600/40 rounded-lg px-3 py-2 text-sm text-theme-text resize-none focus:outline-none focus:border-purple-500/50"
                 rows="3"
                 @keydown.enter.ctrl="saveEdit"
               ></textarea>
@@ -65,15 +65,15 @@
                 <button class="flex-1 py-1.5 rounded-lg bg-purple-500/15 text-purple-400 text-xs font-medium hover:bg-purple-500/25" @click="saveEdit">
                   Guardar
                 </button>
-                <button class="flex-1 py-1.5 rounded-lg bg-primary-700/30 text-gray-400 text-xs font-medium hover:bg-primary-700/50" @click="cancelEdit">
+                <button class="flex-1 py-1.5 rounded-lg bg-theme-border-md text-theme-text-muted text-xs font-medium hover:bg-theme-border-md" @click="cancelEdit">
                   Cancelar
                 </button>
               </div>
             </div>
 
-            <p v-else class="text-sm text-gray-300 italic">"{{ transcript }}"</p>
+            <p v-else class="text-sm text-theme-text-sec italic">"{{ transcript }}"</p>
 
-            <div v-if="!isEditing" class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-primary-700/40">
+            <div v-if="!isEditing" class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-theme-border">
               <button class="flex flex-col items-center gap-1 py-2 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25" @click="enviarDraft">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
                 Enviar
@@ -97,7 +97,7 @@
         <!-- Close button (when not recording and no draft) -->
         <button
           v-if="!isListening && !hasDraft"
-          class="mt-2 px-6 py-2 rounded-xl text-sm text-gray-400 border border-primary-700/50 hover:bg-primary-700/30 transition-colors"
+          class="mt-2 px-6 py-2 rounded-xl text-sm text-theme-text-muted border border-theme-border hover:bg-theme-border-md transition-colors"
           @click="cerrarVozOverlay"
         >
           Cerrar

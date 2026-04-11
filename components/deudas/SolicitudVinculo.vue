@@ -1,28 +1,28 @@
 <template>
   <SharedBaseBottomSheet title="Vincular con usuario" @close="$emit('close')">
-    <p class="text-sm text-gray-400 mb-4">
-      Envía una solicitud para vincular las deudas de <strong class="text-white">{{ personaNombre }}</strong> con su cuenta en la app. Al aceptar, las deudas se sincronizarán automáticamente.
+    <p class="text-sm text-theme-text-muted mb-4">
+      Envía una solicitud para vincular las deudas de <strong class="text-theme-text">{{ personaNombre }}</strong> con su cuenta en la app. Al aceptar, las deudas se sincronizarán automáticamente.
     </p>
 
     <!-- Email -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Email del usuario</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Email del usuario</label>
       <input
         v-model="form.email"
         type="email"
         placeholder="correo@ejemplo.com"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Mensaje opcional -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Mensaje (opcional)</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Mensaje (opcional)</label>
       <textarea
         v-model="form.mensaje"
         rows="2"
         placeholder="Ej: Hola, estas son las deudas que tenemos pendientes..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       />
     </div>
 
@@ -33,15 +33,15 @@
 
     <!-- Solicitudes enviadas para esta persona -->
     <div v-if="solicitudesPersona.length > 0" class="mt-2">
-      <p class="text-xs font-medium text-gray-500 mb-2">Solicitudes enviadas</p>
+      <p class="text-xs font-medium text-theme-text-sec mb-2">Solicitudes enviadas</p>
       <div
         v-for="s in solicitudesPersona"
         :key="s.id"
-        class="flex items-center justify-between py-2 px-3 rounded-lg bg-primary-900/50 mb-1.5"
+        class="flex items-center justify-between py-2 px-3 rounded-lg bg-theme-input mb-1.5"
       >
         <div class="flex-1 min-w-0">
-          <p class="text-sm text-gray-300 truncate">{{ s.destinatarioEmail }}</p>
-          <p class="text-[10px] text-gray-500">
+          <p class="text-sm text-theme-text-sec truncate">{{ s.destinatarioEmail }}</p>
+          <p class="text-[10px] text-theme-text-sec">
             {{ s.estado === 'pendiente' ? 'Esperando respuesta' : s.estado }}
           </p>
         </div>
@@ -68,7 +68,7 @@
     <!-- Botón enviar -->
     <button
       class="w-full py-3 rounded-xl font-medium text-sm transition-all mt-2"
-      :class="isValid ? 'bg-theme-accent-dark text-white active:bg-theme-accent-dark' : 'bg-primary-800 text-gray-600 cursor-not-allowed'"
+      :class="isValid ? 'bg-theme-accent-dark text-theme-text active:bg-theme-accent-dark' : 'bg-theme-card text-theme-text-muted cursor-not-allowed'"
       :disabled="!isValid || vinculos.isLoading.value"
       @click="enviar"
     >

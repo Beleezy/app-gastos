@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-between" :class="containerClass">
     <button
-      class="p-2.5 rounded-xl bg-primary-800/80 text-gray-400 active:bg-primary-700 active:scale-95 transition-all border border-primary-700/20"
+      class="p-2.5 rounded-xl bg-theme-card text-theme-text-muted active:bg-theme-border-md active:scale-95 transition-all border border-theme-border"
       @click="$emit('prev')"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -11,7 +11,7 @@
 
     <div class="text-center">
       <button
-        class="text-lg font-bold text-white hover:text-theme-accent transition-colors"
+        class="text-lg font-bold text-theme-text hover:text-theme-accent transition-colors"
         :disabled="esActual"
         @click="$emit('goToCurrent')"
       >
@@ -22,8 +22,8 @@
     </div>
 
     <button
-      class="p-2.5 rounded-xl transition-all border border-primary-700/20"
-      :class="disableNext ? 'bg-primary-800/40 text-gray-700 opacity-40 cursor-not-allowed' : 'bg-primary-800/80 text-gray-400 active:bg-primary-700 active:scale-95'"
+      class="p-2.5 rounded-xl transition-all border border-theme-border"
+      :class="disableNext ? 'bg-theme-card text-theme-text-muted opacity-40 cursor-not-allowed' : 'bg-theme-card text-theme-text-muted active:bg-theme-border-md active:scale-95'"
       :disabled="disableNext"
       @click="$emit('next')"
     >

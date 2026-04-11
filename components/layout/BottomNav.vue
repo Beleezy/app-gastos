@@ -24,7 +24,7 @@
         <div class="relative">
           <div
             class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 mb-0.5"
-            :class="isActive(item.to) ? 'bg-theme-accent-bg scale-105' : 'group-hover:bg-primary-700/30'"
+            :class="isActive(item.to) ? 'bg-theme-accent-bg scale-105' : 'group-hover:bg-theme-border-md'"
           >
             <component :is="item.icon" class="w-6 h-6 transition-transform duration-300" :class="isActive(item.to) ? 'scale-110' : ''" />
           </div>

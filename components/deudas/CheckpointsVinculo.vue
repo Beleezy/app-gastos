@@ -4,8 +4,8 @@
     <div class="flex items-center justify-between mb-3">
       <div class="flex items-center gap-2">
         <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
-        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Puntos de guardado</h3>
-        <span class="text-xs text-gray-600">{{ checkpoints.length }}/5</span>
+        <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Puntos de guardado</h3>
+        <span class="text-xs text-theme-text-muted">{{ checkpoints.length }}/5</span>
       </div>
       <button
         class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-violet-500/15 text-violet-400 text-xs font-medium hover:bg-violet-500/25 transition-colors disabled:opacity-40"
@@ -21,16 +21,16 @@
 
     <!-- Loading -->
     <div v-if="cargando" class="space-y-2">
-      <div v-for="i in 2" :key="i" class="bg-primary-800 rounded-xl p-3 animate-pulse">
-        <div class="h-3 bg-primary-700 rounded w-1/3 mb-2"></div>
-        <div class="h-2 bg-primary-700 rounded w-2/3"></div>
+      <div v-for="i in 2" :key="i" class="bg-theme-card rounded-xl p-3 animate-pulse">
+        <div class="h-3 bg-theme-border-md rounded w-1/3 mb-2"></div>
+        <div class="h-2 bg-theme-border-md rounded w-2/3"></div>
       </div>
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="checkpoints.length === 0" class="bg-primary-800/50 rounded-xl p-4 text-center border border-primary-700/20">
-      <p class="text-xs text-gray-500">No hay puntos de guardado todavía</p>
-      <p class="text-[10px] text-gray-600 mt-0.5">Se creará uno automáticamente al vincular</p>
+    <div v-else-if="checkpoints.length === 0" class="bg-theme-card rounded-xl p-4 text-center border border-theme-border">
+      <p class="text-xs text-theme-text-sec">No hay puntos de guardado todavía</p>
+      <p class="text-[10px] text-theme-text-muted mt-0.5">Se creará uno automáticamente al vincular</p>
     </div>
 
     <!-- Lista de checkpoints (orden: actual → anterior → inicio) -->
@@ -38,7 +38,7 @@
       <div
         v-for="cp in checkpointsOrdenados"
         :key="cp.id"
-        class="bg-primary-800 rounded-xl border border-primary-700/30 overflow-hidden"
+        class="bg-theme-card rounded-xl border border-theme-border overflow-hidden"
       >
         <!-- Header del checkpoint -->
         <div
@@ -55,17 +55,17 @@
 
           <!-- Info -->
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-medium text-white break-words">
+            <p class="text-xs font-medium text-theme-text break-words">
               {{ cp.descripcion || 'Punto de guardado' }}
             </p>
-            <p class="text-[10px] text-gray-500 mt-0.5">
+            <p class="text-[10px] text-theme-text-sec mt-0.5">
               {{ formatFechaHora(cp.createdAt) }}
             </p>
           </div>
 
           <!-- Resumen numérico -->
           <div v-if="cp.snapshotResumen" class="text-right shrink-0">
-            <p class="text-[10px] text-gray-400">
+            <p class="text-[10px] text-theme-text-muted">
               {{ cp.snapshotResumen.totalDeudasA }}D / {{ cp.snapshotResumen.totalDeudasB }}D
             </p>
             <p class="text-[10px] text-violet-400">
@@ -76,7 +76,7 @@
           <!-- Flecha expand -->
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="w-3.5 h-3.5 text-gray-600 transition-transform flex-shrink-0"
+            class="w-3.5 h-3.5 text-theme-text-muted transition-transform flex-shrink-0"
             :class="expandido === cp.id ? 'rotate-180' : ''"
             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
           >
@@ -85,24 +85,24 @@
         </div>
 
         <!-- Detalle expandido -->
-        <div v-if="expandido === cp.id" class="border-t border-primary-700/30 p-3 space-y-3">
+        <div v-if="expandido === cp.id" class="border-t border-theme-border p-3 space-y-3">
 
           <!-- Resumen del estado guardado -->
-          <div v-if="cp.snapshotResumen" class="bg-primary-900/50 rounded-lg p-2.5">
-            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Estado guardado</p>
+          <div v-if="cp.snapshotResumen" class="bg-theme-input rounded-lg p-2.5">
+            <p class="text-[10px] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">Estado guardado</p>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <p class="text-[10px] text-gray-500">{{ cp.snapshotResumen.personaANombre }}</p>
-                <p class="text-xs font-medium text-white">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
-                <p class="text-[10px] text-gray-600">
+                <p class="text-[10px] text-theme-text-sec">{{ cp.snapshotResumen.personaANombre }}</p>
+                <p class="text-xs font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
+                <p class="text-[10px] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasA }} deuda(s)
                   <span v-if="cp.snapshotResumen.totalPagosA > 0"> y {{ cp.snapshotResumen.totalPagosA }} pago(s)</span>
                 </p>
               </div>
               <div>
-                <p class="text-[10px] text-gray-500">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
-                <p class="text-xs font-medium text-white">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
-                <p class="text-[10px] text-gray-600">
+                <p class="text-[10px] text-theme-text-sec">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
+                <p class="text-xs font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
+                <p class="text-[10px] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasB }} deuda(s)
                   <span v-if="cp.snapshotResumen.totalPagosB > 0"> y {{ cp.snapshotResumen.totalPagosB }} pago(s)</span>
                 </p>
@@ -112,14 +112,14 @@
 
           <!-- Auditoría de cambios en este período -->
           <div v-if="cp.auditoria && cp.auditoria.length > 0">
-            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+            <p class="text-[10px] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">
               Cambios en este período ({{ cp.auditoria.length }})
             </p>
             <div class="space-y-1.5 max-h-48 overflow-y-auto">
               <div
                 v-for="entrada in cp.auditoria"
                 :key="entrada.id"
-                class="flex items-start gap-2 bg-primary-900/30 rounded-lg p-2"
+                class="flex items-start gap-2 bg-theme-input rounded-lg p-2"
               >
                 <!-- Ícono de acción -->
                 <div
@@ -140,32 +140,32 @@
                   </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p v-if="!tieneDetallesColoreados(entrada)" class="text-[10px] text-gray-300 leading-relaxed">{{ entrada.descripcion }}</p>
+                  <p v-if="!tieneDetallesColoreados(entrada)" class="text-[10px] text-theme-text-sec leading-relaxed">{{ entrada.descripcion }}</p>
                   <!-- Detailed changes for edits -->
                   <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-0.5 space-y-0.5">
-                    <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[10px] text-gray-500 flex items-center gap-1">
-                      <span class="text-gray-400 font-semibold">{{ cambio.label || campo }}:</span>
+                    <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[10px] text-theme-text-sec flex items-center gap-1">
+                      <span class="text-theme-text-muted font-semibold">{{ cambio.label || campo }}:</span>
                       <span class="text-red-400/70 line-through">{{ cambio.antes || '(vacío)' }}</span>
-                      <span class="text-gray-500">&rarr;</span>
+                      <span class="text-theme-text-sec">&rarr;</span>
                       <span class="text-emerald-400/70 font-medium">{{ cambio.despues || '(vacío)' }}</span>
                     </div>
                   </div>
                   <!-- Detailed debts for global payments -->
                   <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1 space-y-0.5">
-                    <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[9px] text-gray-500 flex items-center gap-1">
+                    <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[9px] text-theme-text-sec flex items-center gap-1">
                       <span class="text-teal-400/60">S/ {{ dp.monto }}</span>
-                      <span class="text-gray-600">&rarr;</span>
-                      <span class="text-gray-400">{{ dp.concepto }}</span>
+                      <span class="text-theme-text-muted">&rarr;</span>
+                      <span class="text-theme-text-muted">{{ dp.concepto }}</span>
                     </div>
                   </div>
                   <div class="flex items-center gap-1.5 mt-0.5">
                     <span
                       class="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
-                      :class="entrada.esTuyo ? 'bg-theme-accent-bg text-theme-accent' : 'bg-gray-500/20 text-gray-400'"
+                      :class="entrada.esTuyo ? 'bg-theme-accent-bg text-theme-accent' : 'bg-theme-card-hover0/20 text-theme-text-muted'"
                     >
                       {{ entrada.nombreActor }}
                     </span>
-                    <span class="text-[9px] text-gray-600">{{ formatHora(entrada.createdAt) }}</span>
+                    <span class="text-[9px] text-theme-text-muted">{{ formatHora(entrada.createdAt) }}</span>
                   </div>
                 </div>
               </div>
@@ -173,14 +173,14 @@
           </div>
 
           <div v-else class="text-center py-2">
-            <p class="text-[10px] text-gray-600">Sin cambios registrados en este período</p>
+            <p class="text-[10px] text-theme-text-muted">Sin cambios registrados en este período</p>
           </div>
 
           <!-- Botón restaurar -->
           <button
             class="w-full py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
             :class="restaurando === cp.id
-              ? 'bg-primary-700 text-gray-400 cursor-not-allowed'
+              ? 'bg-theme-border-md text-theme-text-muted cursor-not-allowed'
               : 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'"
             :disabled="restaurando !== null"
             @click="confirmarRestaurar(cp)"
@@ -200,20 +200,20 @@
 
     <!-- Modal: crear checkpoint -->
     <div v-if="showCrearCheckpoint" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showCrearCheckpoint = false"></div>
-      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-        <h3 class="text-base font-semibold text-white mb-1">Guardar punto de guardado</h3>
-        <p class="text-xs text-gray-400 mb-4">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showCrearCheckpoint = false"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-1">Guardar punto de guardado</h3>
+        <p class="text-xs text-theme-text-muted mb-4">
           Se guardará el estado actual de todas las deudas con esta persona.
           <span v-if="checkpoints.length >= 5" class="text-amber-400"> El punto más antiguo será reemplazado.</span>
         </p>
         <div class="mb-4">
-          <label class="text-xs text-gray-400 block mb-1.5">Descripción (opcional)</label>
+          <label class="text-xs text-theme-text-muted block mb-1.5">Descripción (opcional)</label>
           <input
             v-model="descripcionNuevoCheckpoint"
             type="text"
             placeholder="Ej: Cierre de mes, Liquidación parcial..."
-            class="w-full bg-primary-900/50 border border-primary-700/50 rounded-xl px-3 py-2.5 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50"
+            class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500/50"
             maxlength="100"
           />
         </div>
@@ -226,7 +226,7 @@
             {{ guardando ? 'Guardando...' : 'Guardar punto' }}
           </button>
           <button
-            class="w-full py-2 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            class="w-full py-2 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
             @click="showCrearCheckpoint = false"
           >
             Cancelar
@@ -237,17 +237,17 @@
 
     <!-- Modal: confirmar restaurar -->
     <div v-if="showConfirmRestaurar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showConfirmRestaurar = false"></div>
-      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-        <h3 class="text-base font-semibold text-white mb-2">Restaurar punto de guardado</h3>
-        <p class="text-sm text-gray-400 mb-2">
-          Se restaurarán los datos de <span class="text-white font-medium">ambos usuarios</span> al estado guardado el
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showConfirmRestaurar = false"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-2">Restaurar punto de guardado</h3>
+        <p class="text-sm text-theme-text-muted mb-2">
+          Se restaurarán los datos de <span class="text-theme-text font-medium">ambos usuarios</span> al estado guardado el
           <span class="text-violet-400">{{ checkpointARestaurar ? formatFechaHora(checkpointARestaurar.createdAt) : '' }}</span>.
         </p>
-        <ul class="text-xs text-gray-500 space-y-1 mb-4 list-disc pl-4">
+        <ul class="text-xs text-theme-text-sec space-y-1 mb-4 list-disc pl-4">
           <li>Las deudas y pagos actuales serán reemplazados</li>
           <li>El estado actual se guarda automáticamente antes de restaurar</li>
-          <li>Esta acción aplica para <span class="text-white">ambos lados del vínculo</span></li>
+          <li>Esta acción aplica para <span class="text-theme-text">ambos lados del vínculo</span></li>
         </ul>
         <div class="space-y-2">
           <button
@@ -258,7 +258,7 @@
             {{ restaurando ? 'Restaurando...' : 'Confirmar restauración' }}
           </button>
           <button
-            class="w-full py-2 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            class="w-full py-2 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
             @click="showConfirmRestaurar = false"
           >
             Cancelar
@@ -310,7 +310,7 @@ function tipoBadgeClass(tipo) {
     actual: 'bg-emerald-500/20 text-emerald-400',
     anterior: 'bg-theme-accent-bg text-theme-accent',
     inicio_vinculo: 'bg-violet-500/20 text-violet-400',
-  }[tipo] || 'bg-gray-500/20 text-gray-400'
+  }[tipo] || 'bg-theme-card-hover0/20 text-theme-text-muted'
 }
 
 function accionIconClass(accion) {
@@ -318,7 +318,7 @@ function accionIconClass(accion) {
   if (accion.includes('creada') || accion.includes('creado')) return 'bg-emerald-500/20 text-emerald-400'
   if (accion.includes('editada') || accion.includes('editado')) return 'bg-amber-500/20 text-amber-400'
   if (accion.includes('restaurado')) return 'bg-violet-500/20 text-violet-400'
-  return 'bg-gray-500/20 text-gray-400'
+  return 'bg-theme-card-hover0/20 text-theme-text-muted'
 }
 
 function formatFechaHora(fechaStr) {

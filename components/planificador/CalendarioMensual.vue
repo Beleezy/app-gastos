@@ -2,7 +2,7 @@
   <div class="px-4 py-2">
     <!-- Cabecera días de la semana -->
     <div class="grid grid-cols-7 mb-1">
-      <div v-for="d in DIAS" :key="d" class="text-center text-[10px] font-semibold text-gray-500 py-1">
+      <div v-for="d in DIAS" :key="d" class="text-center text-[10px] font-semibold text-theme-text-sec py-1">
         {{ d }}
       </div>
     </div>
@@ -21,14 +21,14 @@
           esHoy(dia)
             ? 'bg-theme-accent-bg border-theme-accent'
             : gastosDelDia(dia).length > 0
-              ? 'bg-primary-800/80 border-primary-700/30'
+              ? 'bg-theme-card border-theme-border'
               : 'bg-transparent border-transparent',
         ]"
       >
         <!-- Número de día -->
         <span
           class="text-[10px] font-semibold leading-none mb-0.5"
-          :class="esHoy(dia) ? 'text-theme-accent' : 'text-gray-500'"
+          :class="esHoy(dia) ? 'text-theme-accent' : 'text-theme-text-sec'"
         >{{ dia }}</span>
 
         <!-- Puntos de gastos (máx 2 visibles + overflow) -->
@@ -40,7 +40,7 @@
               :title="g.concepto + ' S/' + g.montoEstimado"
             >{{ g.concepto }}</div>
           </template>
-          <div v-if="gastosDelDia(dia).length > 2" class="text-[7px] text-gray-600 leading-none pl-0.5">
+          <div v-if="gastosDelDia(dia).length > 2" class="text-[7px] text-theme-text-muted leading-none pl-0.5">
             +{{ gastosDelDia(dia).length - 2 }} más
           </div>
         </div>
@@ -49,26 +49,26 @@
 
     <!-- Leyenda: total de gastos con fecha -->
     <div v-if="gastosConFecha.length > 0" class="mt-4 space-y-1">
-      <p class="text-[10px] text-gray-600 uppercase tracking-wider font-semibold mb-2">Gastos con fecha programada</p>
+      <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-semibold mb-2">Gastos con fecha programada</p>
       <div
         v-for="g in gastosConFecha"
         :key="g.id"
-        class="flex items-center justify-between px-3 py-2 rounded-lg bg-primary-800/60 border border-primary-700/20"
+        class="flex items-center justify-between px-3 py-2 rounded-lg bg-theme-card border border-theme-border"
       >
         <div class="flex items-center gap-2 min-w-0">
           <span
             class="w-1.5 h-1.5 rounded-full shrink-0"
             :style="{ backgroundColor: g.categoriaColor || '#6b7280' }"
           ></span>
-          <p class="text-xs text-gray-300 truncate">{{ g.concepto }}</p>
+          <p class="text-xs text-theme-text-sec truncate">{{ g.concepto }}</p>
           <span
             class="text-[9px] px-1 py-0.5 rounded shrink-0"
             :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"
           >{{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}</span>
         </div>
         <div class="text-right shrink-0 ml-2">
-          <p class="text-xs font-semibold text-white">{{ currencySymbol }} {{ formatMonto(g.montoEstimado) }}</p>
-          <p class="text-[10px] text-gray-500">día {{ extraerDia(g.fechaProbablePago) }}</p>
+          <p class="text-xs font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(g.montoEstimado) }}</p>
+          <p class="text-[10px] text-theme-text-sec">día {{ extraerDia(g.fechaProbablePago) }}</p>
         </div>
       </div>
     </div>

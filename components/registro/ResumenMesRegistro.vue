@@ -1,23 +1,23 @@
 <template>
-  <div class="relative bg-gradient-to-br from-primary-800/80 to-primary-800/60 rounded-2xl border border-primary-700/20 px-4 py-4 overflow-hidden">
+  <div class="relative bg-gradient-to-br from-theme-card/80 to-theme-card/60 rounded-2xl border border-theme-border px-4 py-4 overflow-hidden">
     <div class="absolute -top-8 -right-8 w-32 h-32 bg-theme-accent-bg rounded-full blur-2xl"></div>
 
     <div class="relative flex items-end justify-between mb-3">
       <div>
-        <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-medium">Gastado este mes</p>
+        <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Gastado este mes</p>
         <p class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(totalMes) }}</p>
       </div>
       <div class="text-right">
-        <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider font-medium">Presupuesto</p>
+        <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Presupuesto</p>
         <!-- Edit mode -->
         <div v-if="editando" class="flex items-center gap-1 justify-end">
-          <span class="text-sm text-gray-400">{{ currencySymbol }}</span>
+          <span class="text-sm text-theme-text-muted">{{ currencySymbol }}</span>
           <input
             ref="inputRef"
             v-model="presupuestoTemp"
             type="number"
             step="0.01"
-            class="w-28 bg-primary-900 border border-theme-accent rounded-lg px-2 py-1 text-right text-white text-base font-bold focus:outline-none"
+            class="w-28 bg-theme-input border border-theme-accent rounded-lg px-2 py-1 text-right text-theme-text text-base font-bold focus:outline-none"
             @keyup.enter="guardar"
             @blur="guardar"
           />
@@ -25,7 +25,7 @@
         <!-- Display mode -->
         <div v-else class="flex items-center gap-1.5 justify-end">
           <button
-            class="text-base font-semibold text-gray-300 hover:text-theme-accent transition-colors whitespace-nowrap"
+            class="text-base font-semibold text-theme-text-sec hover:text-theme-accent transition-colors whitespace-nowrap"
             @click="iniciarEdicion"
           >
             {{ presupuesto > 0 ? `${currencySymbol} ${formatMonto(presupuesto)}` : 'Sin límite' }}
@@ -45,7 +45,7 @@
     </div>
 
     <div v-if="presupuesto > 0" class="relative">
-      <div class="w-full h-1.5 bg-primary-900/50 rounded-full overflow-hidden mb-2">
+      <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden mb-2">
         <div
           class="h-full rounded-full transition-all duration-700 ease-out"
           :class="porcentaje > 90 ? 'bg-gradient-to-r from-red-500 to-red-400' : porcentaje > 70 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'"
@@ -58,7 +58,7 @@
         >
           {{ saldo >= 0 ? 'Disponible' : 'Excedido' }}: {{ currencySymbol }} {{ formatMonto(Math.abs(saldo)) }}
         </span>
-        <span class="text-[10px] text-gray-500 font-medium">{{ porcentaje.toFixed(0) }}%</span>
+        <span class="text-[10px] text-theme-text-sec font-medium">{{ porcentaje.toFixed(0) }}%</span>
       </div>
     </div>
   </div>

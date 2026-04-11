@@ -3,16 +3,16 @@
     <!-- Barra de búsqueda y ordenamiento -->
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
           v-model="busqueda"
           type="text"
           placeholder="Buscar persona..."
-          class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-primary-900/60 border border-primary-700/30 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent transition-colors"
         />
-        <button v-if="busqueda" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300" @click="busqueda = ''">
+        <button v-if="busqueda" class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-sec hover:text-theme-text-sec" @click="busqueda = ''">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -20,7 +20,7 @@
       </div>
       <!-- Orden toggle -->
       <button
-        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-800 border border-primary-700/50 text-gray-400 text-xs hover:bg-primary-700 transition-colors"
+        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text-muted text-xs hover:bg-theme-border-md transition-colors"
         @click="ciclarOrden"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -36,7 +36,7 @@
         v-for="f in filtrosEstado"
         :key="f.value"
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="filtroEstado === f.value ? 'bg-theme-accent text-white' : 'bg-primary-800 text-gray-400'"
+        :class="filtroEstado === f.value ? 'bg-theme-accent text-theme-text' : 'bg-theme-card text-theme-text-muted'"
         @click="filtroEstado = f.value"
       >
         {{ f.label }}
@@ -45,12 +45,12 @@
 
     <!-- Loading state -->
     <div v-if="isLoading" class="space-y-3">
-      <div v-for="i in 3" :key="i" class="bg-primary-800 rounded-xl p-4 animate-pulse">
+      <div v-for="i in 3" :key="i" class="bg-theme-card rounded-xl p-4 animate-pulse">
         <div class="flex gap-3">
-          <div class="w-12 h-12 rounded-full bg-primary-700"></div>
+          <div class="w-12 h-12 rounded-full bg-theme-border-md"></div>
           <div class="flex-1 space-y-2">
-            <div class="h-4 bg-primary-700 rounded w-3/4"></div>
-            <div class="h-3 bg-primary-700 rounded w-1/2"></div>
+            <div class="h-4 bg-theme-border-md rounded w-3/4"></div>
+            <div class="h-3 bg-theme-border-md rounded w-1/2"></div>
           </div>
         </div>
       </div>
@@ -58,15 +58,15 @@
 
     <!-- Empty state -->
     <div v-else-if="personasActivas.length === 0 && personasInactivas.length === 0" class="text-center py-12">
-      <div class="w-16 h-16 rounded-full bg-primary-800 flex items-center justify-center mx-auto mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <div class="w-16 h-16 rounded-full bg-theme-card flex items-center justify-center mx-auto mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
       </div>
-      <p class="text-gray-500 text-sm">
+      <p class="text-theme-text-sec text-sm">
         {{ tabActual === 'me_deben' ? 'Nadie te debe por ahora' : 'No tienes deudas pendientes' }}
       </p>
-      <p class="text-gray-600 text-xs mt-1">Agrega una nueva deuda con el boton +</p>
+      <p class="text-theme-text-muted text-xs mt-1">Agrega una nueva deuda con el boton +</p>
     </div>
 
     <!-- Personas List -->
@@ -77,7 +77,7 @@
         class="relative overflow-hidden rounded-xl"
       >
         <!-- Quick actions revealed by swipe -->
-        <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-primary-800">
+        <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-theme-card">
           <button
             class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-theme-accent bg-theme-accent-bg rounded-lg"
             @click.stop="emit('seleccionar', persona)"
@@ -102,7 +102,7 @@
 
         <!-- Swipeable card -->
         <div
-          class="relative bg-primary-800 rounded-xl border border-primary-700/30 transition-transform duration-200 cursor-pointer"
+          class="relative bg-theme-card rounded-xl border border-theme-border transition-transform duration-200 cursor-pointer"
           :style="{ transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '' }"
           @click="handleCardClick(persona)"
           @touchstart.passive="onTouchStart($event, persona.id)"
@@ -121,9 +121,9 @@
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-white leading-snug break-words">{{ persona.nombre }}</p>
+                <p class="text-sm font-medium text-theme-text leading-snug break-words">{{ persona.nombre }}</p>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary-700 text-gray-400">
+                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-border-md text-theme-text-muted">
                     ORG
                   </span>
                   <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
@@ -131,7 +131,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
                   </span>
-                  <span class="text-xs text-gray-500">
+                  <span class="text-xs text-theme-text-sec">
                     {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }}
                   </span>
                 </div>
@@ -166,7 +166,7 @@
                     class="w-1.5 h-1.5 rounded-full"
                     :class="persona.totalPendiente > 0 ? (tabActual === 'me_deben' ? 'bg-emerald-400' : 'bg-red-400') : 'bg-gray-600'"
                   ></span>
-                  <span class="text-[10px] text-gray-500">
+                  <span class="text-[10px] text-theme-text-sec">
                     {{ persona.totalPendiente > 0 ? 'Pendiente' : 'Saldado' }}
                   </span>
                 </div>
@@ -197,7 +197,7 @@
               </div>
 
               <!-- Chevron -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
@@ -208,7 +208,7 @@
       <!-- Sección "Otros" para personas sin deudas activas -->
       <template v-if="personasInactivas.length > 0">
         <div class="mt-6 mb-2">
-          <p class="text-xs font-medium text-gray-500 uppercase tracking-wider px-1">Sin deudas activas</p>
+          <p class="text-xs font-medium text-theme-text-sec uppercase tracking-wider px-1">Sin deudas activas</p>
         </div>
         <div
           v-for="persona in personasInactivas"
@@ -216,7 +216,7 @@
           class="relative overflow-hidden rounded-xl opacity-60"
         >
           <!-- Quick actions revealed by swipe -->
-          <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-primary-800">
+          <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-theme-card">
             <button
               class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-theme-accent bg-theme-accent-bg rounded-lg"
               @click.stop="emit('seleccionar', persona)"
@@ -231,7 +231,7 @@
 
           <!-- Swipeable card -->
           <div
-            class="relative bg-primary-800 rounded-xl border border-primary-700/30 transition-transform duration-200 cursor-pointer"
+            class="relative bg-theme-card rounded-xl border border-theme-border transition-transform duration-200 cursor-pointer"
             :style="{ transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '' }"
             @click="handleCardClick(persona)"
             @touchstart.passive="onTouchStart($event, persona.id)"
@@ -241,27 +241,27 @@
             <div class="p-4">
               <div class="flex items-center gap-3">
                 <!-- Avatar -->
-                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-lg font-semibold bg-gray-500/15 text-gray-400">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-lg font-semibold bg-theme-card-hover0/15 text-theme-text-muted">
                   {{ getInitials(persona.nombre) }}
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <p class="text-sm font-medium text-white truncate">{{ persona.nombre }}</p>
-                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary-700 text-gray-400">ORG</span>
+                    <p class="text-sm font-medium text-theme-text truncate">{{ persona.nombre }}</p>
+                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
                   </div>
-                  <p class="text-xs text-gray-500 mt-0.5">Sin deudas activas</p>
+                  <p class="text-xs text-theme-text-sec mt-0.5">Sin deudas activas</p>
                 </div>
                 <!-- Amount -->
                 <div class="text-right shrink-0">
-                  <p class="text-sm font-semibold text-gray-500">{{ currencySymbol }} 0.00</p>
+                  <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} 0.00</p>
                   <div class="flex items-center justify-end gap-1 mt-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                    <span class="text-[10px] text-gray-500">Saldado</span>
+                    <span class="text-[10px] text-theme-text-sec">Saldado</span>
                   </div>
                 </div>
                 <!-- Chevron -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>

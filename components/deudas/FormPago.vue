@@ -1,15 +1,15 @@
 <template>
   <SharedBaseBottomSheet title="Registrar pago" @close="$emit('close')">
     <!-- Debt info card -->
-    <div class="bg-primary-900/50 rounded-xl p-3 border border-primary-700/30">
-      <p class="text-xs text-gray-500 mb-1">Deuda: {{ deuda.concepto }}</p>
+    <div class="bg-theme-input rounded-xl p-3 border border-theme-border">
+      <p class="text-xs text-theme-text-sec mb-1">Deuda: {{ deuda.concepto }}</p>
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-xs text-gray-500">Original</p>
-          <p class="text-sm font-medium text-gray-400">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
+          <p class="text-xs text-theme-text-sec">Original</p>
+          <p class="text-sm font-medium text-theme-text-muted">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
         </div>
         <div class="text-right">
-          <p class="text-xs text-gray-500">Pendiente</p>
+          <p class="text-xs text-theme-text-sec">Pendiente</p>
           <p class="text-sm font-semibold" :class="deuda.tipoDeuda === 'me_deben' ? 'text-emerald-400' : 'text-red-400'">
             {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
           </p>
@@ -19,28 +19,28 @@
 
     <!-- Monto del pago -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto del pago</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto del pago</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
           v-model="form.monto"
           type="number"
           step="0.01"
           :max="deuda.montoPendiente"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
       <div class="flex gap-2 mt-2">
         <button
-          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
           @click="form.monto = deuda.montoPendiente"
         >
           Total ({{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }})
         </button>
         <button
           v-if="deuda.montoPendiente > 1"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
           @click="form.monto = Math.round(deuda.montoPendiente / 2 * 100) / 100"
         >
           Mitad
@@ -50,23 +50,23 @@
 
     <!-- Fecha -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha del pago</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha del pago</label>
       <input
         v-model="form.fecha"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Metodo de pago -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Metodo de pago <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Metodo de pago <span class="text-theme-text-muted">(opcional)</span></label>
       <div class="flex gap-2 flex-wrap">
         <button
           v-for="metodo in metodos"
           :key="metodo"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
+          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-input text-theme-text-sec border border-transparent'"
           @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
         >
           {{ metodo }}
@@ -76,19 +76,19 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Notas <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas del pago..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"

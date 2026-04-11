@@ -4,7 +4,7 @@
       <template #title>Deudas y Pagos</template>
       <template #actions>
         <button
-          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-amber-400 transition-colors"
+          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-theme-text-sec hover:text-amber-400 transition-colors"
           title="Fusionar duplicados"
           @click="showMerge = true"
         >
@@ -14,7 +14,7 @@
           Merge
         </button>
         <button
-          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-emerald-400 transition-colors"
+          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-theme-text-sec hover:text-emerald-400 transition-colors"
           @click="exportarDeudas"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -44,22 +44,26 @@
     <DeudasResumenDeudas />
 
     <!-- Vista: Lista de personas o Detalle de persona -->
-    <DeudasDetallePersona
-      v-if="personaSeleccionada"
-      @registrar-pago="abrirFormPago"
-      @agregar-deuda="showFormDeuda = true"
-      @editar-deuda="abrirFormEditar"
-      @pago-global="showFormPagoGlobal = true"
-    />
-    <DeudasListaPersonas
-      v-else
-      @seleccionar="onSeleccionarPersona"
-    />
+    <Transition name="page" mode="out-in">
+      <div :key="personaSeleccionada ? 'detalle' : 'lista'">
+        <DeudasDetallePersona
+          v-if="personaSeleccionada"
+          @registrar-pago="abrirFormPago"
+          @agregar-deuda="showFormDeuda = true"
+          @editar-deuda="abrirFormEditar"
+          @pago-global="showFormPagoGlobal = true"
+        />
+        <DeudasListaPersonas
+          v-else
+          @seleccionar="onSeleccionarPersona"
+        />
+      </div>
+    </Transition>
 
     <!-- FABs: Voz + Manual (hidden when voice overlay is active) -->
     <div v-if="!showVozOverlay" class="fixed right-4 bottom-24 z-40 flex flex-col gap-3 items-center">
       <button
-        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-gradient-to-br from-purple-500/50 to-violet-600/50 hover:from-purple-400/65 hover:to-violet-500/65 shadow-purple-500/25 backdrop-blur-md"
+        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-purple-600 opacity-85 hover:opacity-100 shadow-purple-500/25 backdrop-blur-md"
         @click="abrirVozOverlay"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -67,7 +71,7 @@
         </svg>
       </button>
       <button
-        class="w-14 h-14 rounded-full bg-gradient-to-br from-[var(--color-accent)]/50 to-indigo-600/50 hover:from-[var(--color-accent)]/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-[var(--color-accent)]/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
+        class="w-14 h-14 rounded-full bg-theme-accent opacity-85 hover:opacity-100 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
         @click="showFormDeuda = true"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

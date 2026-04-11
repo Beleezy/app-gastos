@@ -4,14 +4,14 @@
     <div class="flex items-center gap-2 mb-4">
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vistaActiva === 'semana' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        :class="vistaActiva === 'semana' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
         @click="vistaActiva = 'semana'"
       >
         Por semana
       </button>
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vistaActiva === 'dia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        :class="vistaActiva === 'dia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
         @click="vistaActiva = 'dia'"
       >
         Por día
@@ -20,16 +20,16 @@
 
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-3">
-      <div v-for="i in 4" :key="i" class="bg-primary-800/60 rounded-xl h-14 shimmer"></div>
+      <div v-for="i in 4" :key="i" class="bg-theme-card rounded-xl h-14 shimmer"></div>
     </div>
 
     <!-- Empty state -->
     <div v-else-if="sinDatos" class="flex flex-col items-center py-12">
-      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary-800/80 to-primary-800/40 flex items-center justify-center mb-4 border border-primary-700/20">
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-theme-card/80 to-theme-card/40 flex items-center justify-center mb-4 border border-theme-border">
         <span class="text-3xl opacity-40">📝</span>
       </div>
-      <p class="text-sm text-gray-400 font-medium">No hay gastos este mes</p>
-      <p class="text-xs text-gray-600 mt-1.5">Usa el micrófono o el formulario manual</p>
+      <p class="text-sm text-theme-text-muted font-medium">No hay gastos este mes</p>
+      <p class="text-xs text-theme-text-muted mt-1.5">Usa el micrófono o el formulario manual</p>
     </div>
 
     <!-- Vista por día -->
@@ -38,24 +38,24 @@
         <!-- Day header -->
         <button
           class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
-          :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
+          :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
           @click="toggleDia(dia.fecha)"
         >
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
-              :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg' : 'bg-primary-700/30'"
+              :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg' : 'bg-theme-border-md'"
             >
-              <span class="text-xs font-bold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-gray-400'">{{ extraerDia(dia.fecha) }}</span>
+              <span class="text-xs font-bold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text-muted'">{{ extraerDia(dia.fecha) }}</span>
             </div>
             <div class="text-left">
-              <p class="text-sm font-medium text-white">{{ formatFechaDia(dia.fecha) }}</p>
-              <p class="text-xs text-gray-500">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</p>
+              <p class="text-sm font-medium text-theme-text">{{ formatFechaDia(dia.fecha) }}</p>
+              <p class="text-xs text-theme-text-sec">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</p>
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+            <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
             <svg
-              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 transition-transform"
+              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
               :class="{ 'rotate-180': diaExpandido === dia.fecha }"
               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
             >
@@ -85,17 +85,17 @@
         <!-- Week header -->
         <button
           class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
-          :class="semanaExpandida === semana.key ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
+          :class="semanaExpandida === semana.key ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
           @click="toggleSemana(semana.key)"
         >
           <div class="text-left">
-            <p class="text-sm font-medium text-white">{{ formatRangoSemana(semana.desde, semana.hasta) }}</p>
-            <p class="text-xs text-gray-500">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'día' : 'días' }} con gastos</p>
+            <p class="text-sm font-medium text-theme-text">{{ formatRangoSemana(semana.desde, semana.hasta) }}</p>
+            <p class="text-xs text-theme-text-sec">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'día' : 'días' }} con gastos</p>
           </div>
           <div class="flex items-center gap-2">
             <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
             <svg
-              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 transition-transform"
+              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
               :class="{ 'rotate-180': semanaExpandida === semana.key }"
               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
             >
@@ -111,17 +111,17 @@
               <!-- Day within week -->
               <button
                 class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors"
-                :class="diaExpandido === dia.fecha ? 'bg-primary-700/40 border border-primary-700/30' : 'bg-primary-800/40 hover:bg-primary-800/60'"
+                :class="diaExpandido === dia.fecha ? 'bg-theme-border-md border border-theme-border' : 'bg-theme-card hover:bg-theme-card'"
                 @click.stop="toggleDia(dia.fecha)"
               >
                 <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-gray-400 w-6 text-center">{{ extraerDia(dia.fecha) }}</span>
-                  <p class="text-sm text-gray-300">{{ formatFechaDia(dia.fecha) }}</p>
+                  <span class="text-xs font-bold text-theme-text-muted w-6 text-center">{{ extraerDia(dia.fecha) }}</span>
+                  <p class="text-sm text-theme-text-sec">{{ formatFechaDia(dia.fecha) }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-sm font-medium text-white">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                  <span class="text-sm font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
                   <svg
-                    xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-600 transition-transform"
+                    xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform"
                     :class="{ 'rotate-180': diaExpandido === dia.fecha }"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                   >

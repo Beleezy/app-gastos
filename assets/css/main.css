@@ -22,7 +22,7 @@
   --color-accent-ring: rgba(59, 130, 246, 0.5);
 }
 
-/* ── Temas de color (acento) ── */
+/* ── Temas de color (acento) y Adaptacion de tema completo ── */
 html.accent-negro {
   --color-accent: #6b7280;
   --color-accent-light: #9ca3af;
@@ -31,6 +31,45 @@ html.accent-negro {
   --color-accent-bg-hover: rgba(107, 114, 128, 0.2);
   --color-accent-ring: rgba(107, 114, 128, 0.5);
 }
+html.dark.accent-negro {
+  --color-bg: #000000;
+  --color-card: #121212;
+  --color-card-hover: #1c1c1c;
+  --color-input: rgba(18, 18, 18, 0.8);
+  --color-nav: rgba(0, 0, 0, 0.85);
+  --glass-bg: rgba(0, 0, 0, 0.6);
+  --color-text: #f9fafb;
+  --color-text-sec: #9ca3af;
+  --color-text-muted: #6b7280;
+  --color-border: rgba(255, 255, 255, 0.12);
+  --color-border-md: rgba(255, 255, 255, 0.2);
+  --color-accent: #ffffff;
+  --color-accent-light: #f3f4f6;
+  --color-accent-dark: #d1d5db;
+  --color-accent-bg: rgba(255, 255, 255, 0.1);
+  --color-accent-bg-hover: rgba(255, 255, 255, 0.2);
+  --color-accent-ring: rgba(255, 255, 255, 0.5);
+}
+html.light.accent-negro {
+  --color-bg: #e5e5e5;
+  --color-card: #ffffff;
+  --color-card-hover: #f3f4f6;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #111827;
+  --color-text-sec: #4b5563;
+  --color-text-muted: #9ca3af;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-md: rgba(0, 0, 0, 0.16);
+  --color-accent: #111827;
+  --color-accent-light: #374151;
+  --color-accent-dark: #000000;
+  --color-accent-bg: rgba(17, 24, 39, 0.08);
+  --color-accent-bg-hover: rgba(17, 24, 39, 0.15);
+  --color-accent-ring: rgba(17, 24, 39, 0.4);
+}
+
 html.accent-azul {
   --color-accent: #3b82f6;
   --color-accent-light: #60a5fa;
@@ -39,6 +78,35 @@ html.accent-azul {
   --color-accent-bg-hover: rgba(59, 130, 246, 0.2);
   --color-accent-ring: rgba(59, 130, 246, 0.5);
 }
+html.dark.accent-azul {
+  --color-bg: #070d1e;
+  --color-card: #131c36;
+  --color-card-hover: #1c274b;
+  --color-input: rgba(19, 28, 54, 0.8);
+  --color-nav: rgba(7, 13, 30, 0.85);
+  --glass-bg: rgba(7, 13, 30, 0.6);
+  --color-text: #f8fafc;
+  --color-text-sec: #94a3b8;
+  --color-text-muted: #64748b;
+  --color-border: rgba(96, 165, 250, 0.15);
+  --color-border-md: rgba(96, 165, 250, 0.25);
+  --color-accent: #3b82f6;
+}
+html.light.accent-azul {
+  --color-bg: #e0f2fe;
+  --color-card: #ffffff;
+  --color-card-hover: #f0f9ff;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #0f172a;
+  --color-text-sec: #1e3a8a;
+  --color-text-muted: #64748b;
+  --color-border: rgba(59, 130, 246, 0.15);
+  --color-border-md: rgba(59, 130, 246, 0.25);
+  --color-accent: #2563eb;
+}
+
 html.accent-celeste {
   --color-accent: #06b6d4;
   --color-accent-light: #22d3ee;
@@ -47,6 +115,33 @@ html.accent-celeste {
   --color-accent-bg-hover: rgba(6, 182, 212, 0.2);
   --color-accent-ring: rgba(6, 182, 212, 0.5);
 }
+html.dark.accent-celeste {
+  --color-bg: #082f49;
+  --color-card: #0c4a6e;
+  --color-card-hover: #075985;
+  --color-input: rgba(8, 47, 73, 0.8);
+  --color-nav: rgba(12, 74, 110, 0.85);
+  --glass-bg: rgba(12, 74, 110, 0.6);
+  --color-text: #f0f9ff;
+  --color-text-sec: #bae6fd;
+  --color-text-muted: #38bdf8;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-md: rgba(255, 255, 255, 0.2);
+}
+html.light.accent-celeste {
+  --color-bg: #ecfeff;
+  --color-card: #ffffff;
+  --color-card-hover: #f0f9ff;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #083344;
+  --color-text-sec: #0369a1;
+  --color-text-muted: #0284c7;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.15);
+}
+
 html.accent-morado {
   --color-accent: #8b5cf6;
   --color-accent-light: #a78bfa;
@@ -55,6 +150,33 @@ html.accent-morado {
   --color-accent-bg-hover: rgba(139, 92, 246, 0.2);
   --color-accent-ring: rgba(139, 92, 246, 0.5);
 }
+html.dark.accent-morado {
+  --color-bg: #2e1065;
+  --color-card: #4c1d95;
+  --color-card-hover: #5b21b6;
+  --color-input: rgba(46, 16, 101, 0.8);
+  --color-nav: rgba(76, 29, 149, 0.85);
+  --glass-bg: rgba(76, 29, 149, 0.6);
+  --color-text: #f5f3ff;
+  --color-text-sec: #c4b5fd;
+  --color-text-muted: #a78bfa;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-md: rgba(255, 255, 255, 0.2);
+}
+html.light.accent-morado {
+  --color-bg: #faf5ff;
+  --color-card: #ffffff;
+  --color-card-hover: #f5f3ff;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #3b0764;
+  --color-text-sec: #6b21a8;
+  --color-text-muted: #9333ea;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.15);
+}
+
 html.accent-rosado {
   --color-accent: #ec4899;
   --color-accent-light: #f472b6;
@@ -63,6 +185,33 @@ html.accent-rosado {
   --color-accent-bg-hover: rgba(236, 72, 153, 0.2);
   --color-accent-ring: rgba(236, 72, 153, 0.5);
 }
+html.dark.accent-rosado {
+  --color-bg: #500724;
+  --color-card: #831843;
+  --color-card-hover: #9d174d;
+  --color-input: rgba(80, 7, 36, 0.8);
+  --color-nav: rgba(131, 24, 67, 0.85);
+  --glass-bg: rgba(131, 24, 67, 0.6);
+  --color-text: #fdf2f8;
+  --color-text-sec: #fbcfe8;
+  --color-text-muted: #f472b6;
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-border-md: rgba(255, 255, 255, 0.25);
+}
+html.light.accent-rosado {
+  --color-bg: #fdf2f8;
+  --color-card: #ffffff;
+  --color-card-hover: #fce7f3;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #831843;
+  --color-text-sec: #be185d;
+  --color-text-muted: #db2777;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.15);
+}
+
 html.accent-naranja {
   --color-accent: #f97316;
   --color-accent-light: #fb923c;
@@ -71,6 +220,33 @@ html.accent-naranja {
   --color-accent-bg-hover: rgba(249, 115, 22, 0.2);
   --color-accent-ring: rgba(249, 115, 22, 0.5);
 }
+html.dark.accent-naranja {
+  --color-bg: #431407;
+  --color-card: #7c2d12;
+  --color-card-hover: #9a3412;
+  --color-input: rgba(67, 20, 7, 0.8);
+  --color-nav: rgba(124, 45, 18, 0.85);
+  --glass-bg: rgba(124, 45, 18, 0.6);
+  --color-text: #fff7ed;
+  --color-text-sec: #fed7aa;
+  --color-text-muted: #fb923c;
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-border-md: rgba(255, 255, 255, 0.25);
+}
+html.light.accent-naranja {
+  --color-bg: #fff7ed;
+  --color-card: #ffffff;
+  --color-card-hover: #ffedd5;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #7c2d12;
+  --color-text-sec: #c2410c;
+  --color-text-muted: #ea580c;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.15);
+}
+
 html.accent-verde {
   --color-accent: #10b981;
   --color-accent-light: #34d399;
@@ -79,20 +255,62 @@ html.accent-verde {
   --color-accent-bg-hover: rgba(16, 185, 129, 0.2);
   --color-accent-ring: rgba(16, 185, 129, 0.5);
 }
-html.accent-blanco {
-  --color-accent: #e2e8f0;
-  --color-accent-light: #f1f5f9;
-  --color-accent-dark: #cbd5e1;
-  --color-accent-bg: rgba(226, 232, 240, 0.1);
-  --color-accent-bg-hover: rgba(226, 232, 240, 0.2);
-  --color-accent-ring: rgba(226, 232, 240, 0.5);
+html.dark.accent-verde {
+  --color-bg: #022c22;
+  --color-card: #064e3b;
+  --color-card-hover: #065f46;
+  --color-input: rgba(2, 44, 34, 0.8);
+  --color-nav: rgba(6, 78, 59, 0.85);
+  --glass-bg: rgba(6, 78, 59, 0.6);
+  --color-text: #ecfdf5;
+  --color-text-sec: #a7f3d0;
+  --color-text-muted: #34d399;
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-border-md: rgba(255, 255, 255, 0.2);
+}
+html.light.accent-verde {
+  --color-bg: #ecfdf5;
+  --color-card: #ffffff;
+  --color-card-hover: #d1fae5;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.92);
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-text: #022c22;
+  --color-text-sec: #047857;
+  --color-text-muted: #059669;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.15);
 }
 
+html.accent-blanco {
+  --color-accent: #111827;
+  --color-accent-light: #374151;
+  --color-accent-dark: #000000;
+  --color-accent-bg: rgba(17, 24, 39, 0.05);
+  --color-accent-bg-hover: rgba(17, 24, 39, 0.1);
+  --color-accent-ring: rgba(17, 24, 39, 0.4);
+}
+html.dark.accent-blanco,
+html.light.accent-blanco {
+  --color-bg: #f4f4f5;
+  --color-card: #ffffff;
+  --color-card-hover: #f1f5f9;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(255, 255, 255, 0.95);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --color-text: #0f172a;
+  --color-text-sec: #475569;
+  --color-text-muted: #94a3b8;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-md: rgba(0, 0, 0, 0.15);
+}
+
+/* Light Mode Core Generics (to ensure proper fallback) */
 html.light {
   --color-bg: #f0f2f5;
   --color-card: #ffffff;
   --color-card-hover: #f8fafc;
-  --color-input: rgba(248, 250, 252, 0.9);
+  --color-input: rgba(0, 0, 0, 0.04);
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-md: rgba(0, 0, 0, 0.16);
   --color-text: #111827;
@@ -163,22 +381,23 @@ html.light {
   }
 }
 
+/* Page transition — smooth fade + slide (moved out of @layer to prevent purge) */
+.page-enter-active {
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+.page-leave-active {
+  transition: opacity 0.15s ease-in, transform 0.15s ease-in;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateX(10px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
 @layer components {
-  /* Page transition — smooth fade + slide */
-  .page-enter-active {
-    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
-  }
-  .page-leave-active {
-    transition: opacity 0.15s ease-in, transform 0.15s ease-in;
-  }
-  .page-enter-from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  .page-leave-to {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
 
   /* Glass card effect */
   .glass-card {

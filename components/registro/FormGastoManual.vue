@@ -2,12 +2,12 @@
   <SharedBaseBottomSheet :title="editando ? 'Editar gasto' : 'Nuevo gasto'" @close="$emit('close')">
     <!-- Concepto con autocompletado -->
     <div class="relative">
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Concepto</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
       <input
         v-model="form.concepto"
         type="text"
         placeholder="Ej: Almuerzo, Pasaje, Recibo de luz..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         @input="buscarConceptos"
         @focus="mostrarSugerencias = true"
         @blur="ocultarSugerencias"
@@ -15,39 +15,39 @@
       />
       <div
         v-if="mostrarSugerencias && sugerencias.length > 0 && form.concepto.length >= 2"
-        class="absolute z-10 w-full mt-1 bg-primary-800 border border-primary-700/50 rounded-xl overflow-hidden shadow-lg"
+        class="absolute z-10 w-full mt-1 bg-theme-card border border-theme-border rounded-xl overflow-hidden shadow-lg"
       >
         <button
           v-for="(s, i) in sugerencias"
           :key="i"
-          class="w-full px-4 py-2.5 text-left text-sm text-gray-300 hover:bg-primary-700/50 flex items-center justify-between transition-colors"
+          class="w-full px-4 py-2.5 text-left text-sm text-theme-text-sec hover:bg-theme-border-md flex items-center justify-between transition-colors"
           @mousedown.prevent="seleccionarSugerencia(s)"
         >
           <span>{{ s.concepto }}</span>
-          <span class="text-xs text-gray-500">{{ s.count }}x</span>
+          <span class="text-xs text-theme-text-sec">{{ s.count }}x</span>
         </button>
       </div>
     </div>
 
     <!-- Monto -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
           v-model="form.monto"
           type="number"
           step="0.01"
           min="0"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
 
     <!-- Categoría -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Categoría</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Categoría</label>
       <div class="grid grid-cols-3 gap-2">
         <button
           v-for="cat in categorias"
@@ -55,12 +55,12 @@
           class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border text-xs transition-all"
           :class="form.categoriaId === cat.id
             ? 'border-theme-accent bg-theme-accent-bg'
-            : 'border-primary-700/50 bg-primary-900/50 hover:border-primary-600'"
+            : 'border-theme-border bg-theme-input hover:border-primary-600'"
           @click="form.categoriaId = cat.id"
         >
           <span class="text-base">{{ cat.icono || '📦' }}</span>
           <span class="truncate w-full text-center"
-            :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-gray-400'"
+            :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
           >{{ cat.nombre }}</span>
         </button>
       </div>
@@ -69,38 +69,38 @@
     <!-- Fecha y Hora -->
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha</label>
+        <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha</label>
         <input
           v-model="form.fecha"
           type="date"
-          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-400 mb-1.5">Hora</label>
+        <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Hora</label>
         <input
           v-model="form.hora"
           type="time"
-          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Notas <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"

@@ -14,16 +14,16 @@
         </div>
 
         <div class="flex-1 min-w-0">
-          <p class="text-sm text-white font-medium">
+          <p class="text-sm text-theme-text font-medium">
             {{ s.remitenteNombre }}
           </p>
-          <p class="text-xs text-gray-400 mt-0.5">
+          <p class="text-xs text-theme-text-muted mt-0.5">
             Quiere vincular la persona <strong class="text-theme-accent">"{{ s.personaNombre }}"</strong> contigo
           </p>
-          <p v-if="s.mensaje" class="text-xs text-gray-500 mt-1 italic">
+          <p v-if="s.mensaje" class="text-xs text-theme-text-sec mt-1 italic">
             "{{ s.mensaje }}"
           </p>
-          <p class="text-[10px] text-gray-600 mt-1">
+          <p class="text-[10px] text-theme-text-muted mt-1">
             {{ formatFecha(s.createdAt) }}
           </p>
 

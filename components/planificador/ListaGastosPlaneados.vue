@@ -3,18 +3,18 @@
     <!-- Search + Sort -->
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input
           v-model="busqueda"
           type="text"
           placeholder="Buscar concepto..."
-          class="w-full pl-9 pr-3 py-2 rounded-xl bg-primary-800 border border-primary-700/50 text-white placeholder-gray-600 text-xs focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full pl-9 pr-3 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text placeholder-gray-600 text-xs focus:outline-none focus:border-theme-accent transition-colors"
         />
       </div>
       <button
-        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-800 border border-primary-700/50 text-gray-400 text-xs hover:bg-primary-700 transition-colors"
+        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text-muted text-xs hover:bg-theme-border-md transition-colors"
         @click="ciclarOrden"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -30,7 +30,7 @@
         v-for="f in filtros"
         :key="f.value"
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="filtroActual === f.value ? 'bg-theme-accent text-white' : 'bg-primary-800 text-gray-400'"
+        :class="filtroActual === f.value ? 'bg-theme-accent text-theme-text' : 'bg-theme-card text-theme-text-muted'"
         @click="filtroActual = f.value"
       >
         {{ f.label }}
@@ -39,12 +39,12 @@
 
     <!-- Loading state -->
     <div v-if="isLoading" class="space-y-3">
-      <div v-for="i in 3" :key="i" class="bg-primary-800 rounded-xl p-4 animate-pulse">
+      <div v-for="i in 3" :key="i" class="bg-theme-card rounded-xl p-4 animate-pulse">
         <div class="flex gap-3">
-          <div class="w-10 h-10 rounded-xl bg-primary-700"></div>
+          <div class="w-10 h-10 rounded-xl bg-theme-border-md"></div>
           <div class="flex-1 space-y-2">
-            <div class="h-4 bg-primary-700 rounded w-3/4"></div>
-            <div class="h-3 bg-primary-700 rounded w-1/2"></div>
+            <div class="h-4 bg-theme-border-md rounded w-3/4"></div>
+            <div class="h-3 bg-theme-border-md rounded w-1/2"></div>
           </div>
         </div>
       </div>
@@ -52,13 +52,13 @@
 
     <!-- Empty state -->
     <div v-else-if="categoriasFiltered.length === 0" class="text-center py-12">
-      <div class="w-16 h-16 rounded-full bg-primary-800 flex items-center justify-center mx-auto mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <div class="w-16 h-16 rounded-full bg-theme-card flex items-center justify-center mx-auto mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       </div>
-      <p class="text-gray-500 text-sm">No hay gastos planificados</p>
-      <p class="text-gray-600 text-xs mt-1">Agrega tu primer gasto con el botón +</p>
+      <p class="text-theme-text-sec text-sm">No hay gastos planificados</p>
+      <p class="text-theme-text-muted text-xs mt-1">Agrega tu primer gasto con el botón +</p>
     </div>
 
     <!-- Category Groups -->
@@ -68,13 +68,13 @@
         <div class="mb-2.5">
           <div class="flex items-center gap-2 mb-1">
             <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: cat.color }"></span>
-            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">{{ cat.nombre }}</h3>
-            <span class="text-xs text-gray-500 ml-auto">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
+            <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">{{ cat.nombre }}</h3>
+            <span class="text-xs text-theme-text-sec ml-auto">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
           </div>
           <!-- Real vs Planned mini bar -->
           <div v-if="cat.totalReal > 0" class="ml-3.5 space-y-1">
             <div class="flex items-center gap-2">
-              <div class="flex-1 h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
+              <div class="flex-1 h-1.5 bg-theme-input rounded-full overflow-hidden">
                 <div
                   class="h-full rounded-full transition-all duration-500"
                   :class="cat.totalReal > cat.total ? 'bg-red-400' : 'bg-emerald-400'"
@@ -104,7 +104,7 @@
         <div
           v-for="gasto in cat.gastos"
           :key="gasto.id"
-          class="bg-primary-800 rounded-xl p-3.5 mb-2 border border-primary-700/30 transition-all"
+          class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border transition-all"
         >
           <div class="flex items-start justify-between">
             <div class="flex items-start gap-3">
@@ -115,8 +115,8 @@
                 <span class="text-base">{{ getEmoji(gasto._catNombre || cat.nombre) }}</span>
               </div>
               <div>
-                <p class="text-sm font-medium text-white">{{ gasto.concepto }}</p>
-                <p class="text-xs text-gray-500 mt-0.5">
+                <p class="text-sm font-medium text-theme-text">{{ gasto.concepto }}</p>
+                <p class="text-xs text-theme-text-sec mt-0.5">
                   <span v-if="gasto._catNombre" class="inline-flex items-center gap-1 mr-1.5">
                     <span class="w-1.5 h-1.5 rounded-full inline-block" :style="{ backgroundColor: gasto._catColor }"></span>
                     {{ gasto._catNombre }} ·
@@ -132,7 +132,7 @@
               </div>
             </div>
             <div class="text-right">
-              <p class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(gasto.montoEstimado) }}</p>
+              <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(gasto.montoEstimado) }}</p>
               <button
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"
                 :class="gasto.estado === 'pagado'
@@ -146,14 +146,14 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex justify-end gap-4 mt-2 pt-2 border-t border-primary-700/20">
-            <button class="text-xs text-gray-600 hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
+          <div class="flex justify-end gap-4 mt-2 pt-2 border-t border-theme-border">
+            <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Editar
             </button>
-            <button class="text-xs text-gray-600 hover:text-red-400 transition-colors flex items-center gap-1" @click="eliminarGasto(gasto)">
+            <button class="text-xs text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1" @click="eliminarGasto(gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -169,10 +169,10 @@
 
     <!-- Confirmation modal for recurring delete -->
     <div v-if="gastoParaEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="gastoParaEliminar = null"></div>
-      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-        <h3 class="text-base font-semibold text-white mb-2">Eliminar gasto recurrente</h3>
-        <p class="text-sm text-gray-400 mb-5">Este gasto se repite en meses futuros. ¿Qué deseas hacer?</p>
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="gastoParaEliminar = null"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
+        <p class="text-sm text-theme-text-muted mb-5">Este gasto se repite en meses futuros. ¿Qué deseas hacer?</p>
         <div class="space-y-2">
           <button
             class="w-full py-2.5 rounded-xl bg-red-500/15 text-red-400 text-sm font-medium hover:bg-red-500/25 transition-colors"
@@ -181,13 +181,13 @@
             Eliminar este y todos los futuros
           </button>
           <button
-            class="w-full py-2.5 rounded-xl bg-primary-700 text-gray-300 text-sm font-medium hover:bg-primary-600 transition-colors"
+            class="w-full py-2.5 rounded-xl bg-theme-border-md text-theme-text-sec text-sm font-medium hover:bg-primary-600 transition-colors"
             @click="confirmarEliminar(false)"
           >
             Eliminar solo este mes
           </button>
           <button
-            class="w-full py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
             @click="gastoParaEliminar = null"
           >
             Cancelar

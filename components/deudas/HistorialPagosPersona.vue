@@ -2,11 +2,11 @@
   <div v-if="pagos.length > 0" class="mb-5">
     <button class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
       <span class="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
-      <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Historial de pagos</h3>
-      <span class="text-xs text-gray-500">{{ totalPagos }}</span>
+      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Historial de pagos</h3>
+      <span class="text-xs text-theme-text-sec">{{ totalPagos }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        class="w-3 h-3 text-gray-600 ml-auto transition-transform"
+        class="w-3 h-3 text-theme-text-muted ml-auto transition-transform"
         :class="show ? 'rotate-180' : ''"
         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
       >
@@ -19,8 +19,8 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-orange-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
       </svg>
-      <span class="text-xs text-gray-300 flex-1">¿Revertir este pago? Se restaurará la deuda.</span>
-      <button class="text-xs text-gray-500 px-2 py-1 hover:text-gray-300" @click="pagoRevertiendo = null">No</button>
+      <span class="text-xs text-theme-text-sec flex-1">¿Revertir este pago? Se restaurará la deuda.</span>
+      <button class="text-xs text-theme-text-sec px-2 py-1 hover:text-theme-text-sec" @click="pagoRevertiendo = null">No</button>
       <button
         class="text-xs text-orange-400 font-semibold px-2 py-1 bg-orange-500/15 rounded-lg hover:bg-orange-500/25 active:scale-95 transition-all"
         :disabled="revirtiendo"
@@ -32,23 +32,23 @@
 
     <!-- Modal editar pago individual -->
     <div v-if="pagoEditando" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="pagoEditando = null"></div>
-      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-        <h3 class="text-base font-semibold text-white mb-4">Editar pago</h3>
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="pagoEditando = null"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-4">Editar pago</h3>
         <div class="space-y-3">
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Fecha</label>
+            <label class="block text-xs font-medium text-theme-text-muted mb-1">Fecha</label>
             <input
               v-model="formEditar.fechaPago"
               type="date"
-              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent"
+              class="w-full px-3 py-2.5 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent"
             />
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Método de pago</label>
+            <label class="block text-xs font-medium text-theme-text-muted mb-1">Método de pago</label>
             <select
               v-model="formEditar.metodoPago"
-              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent"
+              class="w-full px-3 py-2.5 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent"
             >
               <option value="">Sin especificar</option>
               <option value="Efectivo">Efectivo</option>
@@ -62,24 +62,24 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-gray-400 mb-1">Notas</label>
+            <label class="block text-xs font-medium text-theme-text-muted mb-1">Notas</label>
             <input
               v-model="formEditar.notas"
               type="text"
               placeholder="Opcional"
-              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent"
+              class="w-full px-3 py-2.5 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent"
             />
           </div>
         </div>
         <div class="flex gap-2 mt-5">
           <button
-            class="flex-1 py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            class="flex-1 py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
             @click="pagoEditando = null"
           >
             Cancelar
           </button>
           <button
-            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-white text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
+            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-theme-text text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
             :disabled="guardandoEdicion"
             @click="guardarEdicion"
           >
@@ -92,31 +92,31 @@
     <Transition name="collapse">
       <div v-if="show" class="relative pl-6">
         <!-- Vertical timeline line -->
-        <div class="absolute left-2 top-2 bottom-2 w-px bg-primary-700/50"></div>
+        <div class="absolute left-2 top-2 bottom-2 w-px bg-theme-border-md"></div>
 
         <div v-for="(pago, idx) in pagos" :key="idx" class="relative mb-4 last:mb-0">
           <!-- Timeline dot -->
           <div class="absolute -left-4 top-3 w-2.5 h-2.5 rounded-full bg-theme-accent border-2 border-primary-900 z-10"></div>
 
           <!-- Payment card -->
-          <div class="bg-primary-800 rounded-xl p-3.5 border border-primary-700/30">
+          <div class="bg-theme-card rounded-xl p-3.5 border border-theme-border">
             <!-- Header: date + amount + actions -->
             <div class="flex items-start justify-between mb-2.5">
               <div>
-                <p class="text-xs font-semibold text-white">{{ formatFecha(pago.fechaPago) }}</p>
+                <p class="text-xs font-semibold text-theme-text">{{ formatFecha(pago.fechaPago) }}</p>
                 <div v-if="pago.metodoPago" class="flex items-center gap-1 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
                   <span class="text-[10px] text-theme-accent font-medium">{{ pago.metodoPago }}</span>
                 </div>
-                <p v-else class="text-[10px] text-gray-600 mt-0.5">Sin método registrado</p>
+                <p v-else class="text-[10px] text-theme-text-muted mt-0.5">Sin método registrado</p>
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="text-sm font-bold text-theme-accent">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
                 <!-- Editar pago -->
                 <button
-                  class="w-6 h-6 flex items-center justify-center rounded-lg text-gray-600 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                  class="w-6 h-6 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
                   title="Editar pago"
                   @click="abrirEditar(pago)"
                 >
@@ -126,7 +126,7 @@
                 </button>
                 <!-- Revertir pago -->
                 <button
-                  class="w-6 h-6 flex items-center justify-center rounded-lg text-gray-600 hover:text-orange-400 hover:bg-orange-500/10 transition-colors"
+                  class="w-6 h-6 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-orange-400 hover:bg-orange-500/10 transition-colors"
                   title="Revertir pago"
                   @click="pagoRevertiendo = pago"
                 >
@@ -138,21 +138,21 @@
             </div>
 
             <!-- Debts breakdown — each pago individual with its own method -->
-            <div class="bg-primary-900/50 rounded-lg p-2.5 space-y-2">
+            <div class="bg-theme-input rounded-lg p-2.5 space-y-2">
               <div v-for="(detalle, dIdx) in pago.detalles" :key="dIdx" class="flex items-start gap-2">
                 <span class="w-1 h-1 rounded-full bg-theme-accent/60 shrink-0 mt-1.5"></span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-[11px] text-gray-400 truncate">{{ detalle.concepto }}</p>
+                  <p class="text-[11px] text-theme-text-muted truncate">{{ detalle.concepto }}</p>
                   <div v-if="detalle.metodoPago && detalle.metodoPago !== pago.metodoPago" class="text-[10px] text-theme-accent/70">
                     {{ detalle.metodoPago }}
                   </div>
                 </div>
-                <span class="text-[11px] text-gray-300 font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
+                <span class="text-[11px] text-theme-text-sec font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
               </div>
             </div>
 
             <!-- Notes -->
-            <p v-if="pago.notas && !pago.notas.startsWith('Pago global')" class="text-[10px] text-gray-600 italic mt-1.5">
+            <p v-if="pago.notas && !pago.notas.startsWith('Pago global')" class="text-[10px] text-theme-text-muted italic mt-1.5">
               {{ pago.notas }}
             </p>
           </div>

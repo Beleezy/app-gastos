@@ -4,7 +4,7 @@
     <p class="text-sm h-5 font-medium">
       <span v-if="isListening" class="text-theme-accent animate-pulse">Escuchando...</span>
       <span v-else-if="hasDraft" class="text-amber-400">Borrador guardado</span>
-      <span v-else class="text-gray-500">Toca para registrar un gasto</span>
+      <span v-else class="text-theme-text-sec">Toca para registrar un gasto</span>
     </p>
 
     <!-- Mic button -->
@@ -58,7 +58,7 @@
 
     <!-- Draft card -->
     <div v-if="hasDraft && !isListening" class="w-full max-w-sm">
-      <div class="bg-primary-800/90 rounded-2xl px-4 py-3 border border-amber-500/20 shadow-lg shadow-amber-500/5">
+      <div class="bg-theme-card rounded-2xl px-4 py-3 border border-amber-500/20 shadow-lg shadow-amber-500/5">
         <div class="flex items-center gap-1.5 mb-2">
           <div class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></div>
           <p class="text-xs text-amber-400/80 font-medium">Borrador</p>
@@ -68,7 +68,7 @@
         <div v-if="isEditing">
           <textarea
             v-model="editText"
-            class="draft-textarea w-full bg-primary-900/60 border border-primary-600/40 rounded-lg px-3 py-2 text-sm text-gray-200 resize-none focus:outline-none focus:border-theme-accent/50"
+            class="draft-textarea w-full bg-theme-input border border-primary-600/40 rounded-lg px-3 py-2 text-sm text-theme-text resize-none focus:outline-none focus:border-theme-accent/50"
             rows="3"
             @keydown.enter.ctrl="saveEdit"
           ></textarea>
@@ -80,7 +80,7 @@
               Guardar
             </button>
             <button
-              class="flex-1 py-1.5 rounded-lg bg-primary-700/30 text-gray-400 text-xs font-medium hover:bg-primary-700/50 transition-colors"
+              class="flex-1 py-1.5 rounded-lg bg-theme-border-md text-theme-text-muted text-xs font-medium hover:bg-theme-border-md transition-colors"
               @click="cancelEdit"
             >
               Cancelar
@@ -89,10 +89,10 @@
         </div>
 
         <!-- Read-only text -->
-        <p v-else class="text-sm text-gray-300 italic">"{{ transcript }}"</p>
+        <p v-else class="text-sm text-theme-text-sec italic">"{{ transcript }}"</p>
 
         <!-- Draft actions -->
-        <div v-if="!isEditing" class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-primary-700/40">
+        <div v-if="!isEditing" class="grid grid-cols-4 gap-2 mt-3 pt-3 border-t border-theme-border">
           <!-- Send -->
           <button
             class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:bg-emerald-500/35 transition-colors"
@@ -139,8 +139,8 @@
 
     <!-- Live transcript while recording (no draft yet) -->
     <div v-if="isListening && transcript" class="w-full max-w-sm">
-      <div class="bg-primary-800/80 rounded-xl px-4 py-3 border border-primary-700/50">
-        <p class="text-sm text-gray-300 italic">"{{ transcript }}"</p>
+      <div class="bg-theme-card rounded-xl px-4 py-3 border border-theme-border">
+        <p class="text-sm text-theme-text-sec italic">"{{ transcript }}"</p>
       </div>
     </div>
 

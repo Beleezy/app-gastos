@@ -9,7 +9,7 @@
           'bg-emerald-500/90 text-white': toast.type === 'success',
           'bg-red-500/90 text-white': toast.type === 'error',
           'bg-amber-500/90 text-white': toast.type === 'warning',
-          'bg-primary-700/95 text-gray-100 border border-primary-600/50': toast.type === 'info',
+          'bg-theme-border-md text-theme-text border border-primary-600/50': toast.type === 'info',
         }"
       >
         <!-- Icon -->

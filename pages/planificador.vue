@@ -22,17 +22,17 @@
     <!-- Vista toggle + Export -->
     <div class="px-4 mb-2 flex gap-2">
       <!-- Vista: Lista / Calendario / Gráfico -->
-      <div class="flex-1 flex gap-1 bg-primary-800/40 border border-primary-700/20 rounded-xl p-1">
+      <div class="flex-1 flex gap-1 bg-theme-card border border-theme-border rounded-xl p-1">
         <button
           v-for="v in vistas"
           :key="v.value"
           class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="vistaActual === v.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-gray-500'"
+          :class="vistaActual === v.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
           @click="vistaActual = v.value"
         >{{ v.label }}</button>
       </div>
       <button
-        class="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium bg-primary-800/40 text-gray-500 border border-primary-700/20 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
+        class="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium bg-theme-card text-theme-text-sec border border-theme-border hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
         @click="exportarPlanificador"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -43,13 +43,17 @@
     </div>
 
     <!-- Vistas -->
-    <PlanificadorGraficoCategoria v-if="vistaActual === 'grafico'" />
-    <PlanificadorCalendarioMensual v-else-if="vistaActual === 'calendario'" />
-    <PlanificadorListaGastosPlaneados v-else @editar="editarGasto" />
+    <Transition name="page" mode="out-in">
+      <div :key="vistaActual">
+        <PlanificadorGraficoCategoria v-if="vistaActual === 'grafico'" />
+        <PlanificadorCalendarioMensual v-else-if="vistaActual === 'calendario'" />
+        <PlanificadorListaGastosPlaneados v-else @editar="editarGasto" />
+      </div>
+    </Transition>
 
     <!-- FAB - Floating Action Button -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[var(--color-accent)]/50 to-indigo-600/50 hover:from-[var(--color-accent)]/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-[var(--color-accent)]/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-85 hover:opacity-100 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
       @click="showForm = true"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

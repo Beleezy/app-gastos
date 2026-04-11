@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-primary-950">
+  <div class="min-h-screen flex items-center justify-center bg-theme-bg">
     <div class="text-center">
       <div class="w-10 h-10 border-4 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin mx-auto mb-4"></div>
-      <p class="text-sm text-gray-400">Iniciando sesión...</p>
+      <p class="text-sm text-theme-text-muted">Iniciando sesión...</p>
     </div>
   </div>
 </template>

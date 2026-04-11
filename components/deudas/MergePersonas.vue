@@ -10,12 +10,12 @@
     <!-- Cargando -->
     <div v-if="cargando" class="flex items-center justify-center py-8">
       <div class="w-6 h-6 border-2 border-theme-accent border-t-transparent rounded-full animate-spin"></div>
-      <span class="ml-3 text-sm text-gray-400">Buscando duplicados...</span>
+      <span class="ml-3 text-sm text-theme-text-muted">Buscando duplicados...</span>
     </div>
 
     <!-- Sin duplicados -->
     <div v-else-if="grupos.length === 0" class="text-center py-8">
-      <p class="text-sm text-gray-400">No se detectaron personas con nombres similares.</p>
+      <p class="text-sm text-theme-text-muted">No se detectaron personas con nombres similares.</p>
     </div>
 
     <!-- Grupos de duplicados -->
@@ -23,9 +23,9 @@
       <div
         v-for="(grupo, gi) in grupos"
         :key="gi"
-        class="bg-primary-900/50 rounded-xl p-3 border border-primary-700/30"
+        class="bg-theme-input rounded-xl p-3 border border-theme-border"
       >
-        <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Posibles duplicados</p>
+        <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-2">Posibles duplicados</p>
 
         <div class="space-y-2">
           <div
@@ -36,15 +36,15 @@
               ? 'bg-theme-accent-bg border border-theme-accent'
               : selecciones[gi]?.secundarias?.includes(persona.id)
                 ? 'bg-red-500/10 border border-red-500/20'
-                : 'bg-primary-800/50 border border-primary-700/20'"
+                : 'bg-theme-card border border-theme-border'"
             @click="toggleSeleccion(gi, persona.id)"
           >
-            <div class="w-8 h-8 rounded-full bg-primary-700 flex items-center justify-center text-xs font-semibold text-gray-300 shrink-0">
+            <div class="w-8 h-8 rounded-full bg-theme-border-md flex items-center justify-center text-xs font-semibold text-theme-text-sec shrink-0">
               {{ persona.nombre.charAt(0).toUpperCase() }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm text-white font-medium truncate">{{ persona.nombre }}</p>
-              <p class="text-[10px] text-gray-500">
+              <p class="text-sm text-theme-text font-medium truncate">{{ persona.nombre }}</p>
+              <p class="text-[10px] text-theme-text-sec">
                 {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }} activa{{ persona.deudasActivas !== 1 ? 's' : '' }}
                 · S/ {{ formatMonto(persona.totalPendiente) }} pendiente
               </p>
@@ -62,7 +62,7 @@
           </div>
         </div>
 
-        <p class="text-[10px] text-gray-600 mt-2">
+        <p class="text-[10px] text-theme-text-muted mt-2">
           Toca una vez para marcar como Principal, dos veces para marcar como Fusionar, tres para deseleccionar.
         </p>
 
@@ -70,7 +70,7 @@
         <button
           v-if="selecciones[gi]?.principal && selecciones[gi]?.secundarias?.length > 0"
           class="w-full mt-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-          :class="fusionando[gi] ? 'bg-theme-accent cursor-not-allowed text-white' : 'bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg'"
+          :class="fusionando[gi] ? 'bg-theme-accent cursor-not-allowed text-theme-text' : 'bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg'"
           :disabled="fusionando[gi]"
           @click="fusionarGrupo(gi)"
         >

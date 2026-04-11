@@ -2,11 +2,11 @@
   <div class="px-4">
     <!-- Filtro de mes -->
     <div class="mb-4">
-      <p class="text-[10px] text-gray-500 uppercase tracking-wider mb-2">Mes:</p>
+      <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-2">Mes:</p>
       <div class="flex items-center gap-1.5">
         <button
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-          :class="mesSeleccionado === 'actual' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
+          :class="mesSeleccionado === 'actual' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'"
           @click="seleccionarMesGrafico('actual')"
         >
           Actual
@@ -15,13 +15,13 @@
           v-for="m in mesesRecientesGrafico"
           :key="m.key"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-          :class="m.key === mesSeleccionado ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
+          :class="m.key === mesSeleccionado ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'"
           @click="seleccionarMesGrafico(m.key)"
         >
           {{ m.label }}
         </button>
         <select
-          class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-primary-800/50 text-gray-400 border-primary-700/20 outline-none cursor-pointer appearance-none"
+          class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-theme-card text-theme-text-muted border-theme-border outline-none cursor-pointer appearance-none"
           :class="mesGraficoEsAntiguo ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : ''"
           :value="mesGraficoEsAntiguo ? mesSeleccionado : ''"
           @change="onSelectMesGraficoAntiguo($event)"
@@ -34,15 +34,15 @@
 
     <!-- Loading -->
     <div v-if="isLoadingMes" class="flex flex-col items-center py-8">
-      <div class="w-44 h-44 rounded-full bg-primary-800 animate-pulse mx-auto mb-5"></div>
-      <div v-for="i in 3" :key="i" class="w-full h-12 bg-primary-800 rounded-xl animate-pulse mb-2"></div>
+      <div class="w-44 h-44 rounded-full bg-theme-card animate-pulse mx-auto mb-5"></div>
+      <div v-for="i in 3" :key="i" class="w-full h-12 bg-theme-card rounded-xl animate-pulse mb-2"></div>
     </div>
 
     <div v-else-if="datosEfectivos.length === 0" class="flex flex-col items-center py-8">
-      <div class="w-14 h-14 rounded-full bg-primary-800/60 flex items-center justify-center mb-3">
+      <div class="w-14 h-14 rounded-full bg-theme-card flex items-center justify-center mb-3">
         <span class="text-xl opacity-50">📊</span>
       </div>
-      <p class="text-sm text-gray-500">No hay datos para graficar</p>
+      <p class="text-sm text-theme-text-sec">No hay datos para graficar</p>
     </div>
 
     <div v-else>
@@ -68,13 +68,13 @@
           <!-- Center text -->
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <template v-if="seleccionada">
-              <p class="text-xs text-gray-500">{{ seleccionada }}</p>
-              <p class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalSeleccionada) }}</p>
-              <p class="text-[10px] text-gray-500">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
+              <p class="text-xs text-theme-text-sec">{{ seleccionada }}</p>
+              <p class="text-lg font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(totalSeleccionada) }}</p>
+              <p class="text-[10px] text-theme-text-sec">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
             </template>
             <template v-else>
-              <p class="text-xs text-gray-500">Gastado</p>
-              <p class="text-lg font-bold text-white">{{ currencySymbol }} {{ formatMonto(totalGeneral) }}</p>
+              <p class="text-xs text-theme-text-sec">Gastado</p>
+              <p class="text-lg font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(totalGeneral) }}</p>
               <p v-if="presupuesto > 0" class="text-[10px]" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
                 de {{ currencySymbol }} {{ formatMonto(presupuesto) }}
               </p>
@@ -84,7 +84,7 @@
       </div>
 
       <!-- Hint -->
-      <p v-if="seleccionada" class="text-center text-[10px] text-gray-600 -mt-3 mb-4">
+      <p v-if="seleccionada" class="text-center text-[10px] text-theme-text-muted -mt-3 mb-4">
         Toca de nuevo para quitar el filtro
       </p>
 
@@ -96,14 +96,14 @@
           class="rounded-xl border overflow-hidden transition-all duration-300"
           :class="[
             seleccionada && seleccionada !== cat.nombre
-              ? 'bg-primary-800/30 border-primary-700/15 opacity-40'
-              : 'bg-primary-800/60 border-primary-700/30 opacity-100',
+              ? 'bg-theme-card border-theme-border opacity-40'
+              : 'bg-theme-card border-theme-border opacity-100',
           ]"
         >
           <!-- Category header (clickable) -->
           <button
             class="w-full px-3 py-2.5 text-left transition-colors"
-            :class="expandida === cat.nombre ? 'bg-primary-700/20' : 'hover:bg-primary-700/10'"
+            :class="expandida === cat.nombre ? 'bg-theme-border-md' : 'hover:bg-theme-border-md'"
             @click="toggleExpansion(cat.nombre)"
           >
             <div class="flex items-center justify-between mb-1.5">
@@ -112,13 +112,13 @@
                   class="w-3 h-3 rounded-full shrink-0"
                   :style="{ backgroundColor: cat.color }"
                 ></div>
-                <span class="text-sm text-white font-medium">{{ cat.nombre }}</span>
-                <span class="text-xs text-gray-600">{{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}</span>
+                <span class="text-sm text-theme-text font-medium">{{ cat.nombre }}</span>
+                <span class="text-xs text-theme-text-muted">{{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
+                <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-600 transition-transform duration-200"
+                  xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200"
                   :class="{ 'rotate-180': expandida === cat.nombre }"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                 >
@@ -127,34 +127,34 @@
               </div>
             </div>
             <!-- Progress bar -->
-            <div class="w-full h-1.5 bg-primary-700/40 rounded-full overflow-hidden">
+            <div class="w-full h-1.5 bg-theme-border-md rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full transition-all duration-500"
                 :style="{ width: cat.porcentaje + '%', backgroundColor: cat.color }"
               ></div>
             </div>
-            <p class="text-[10px] text-gray-600 mt-1 text-right">{{ cat.porcentaje.toFixed(1) }}%</p>
+            <p class="text-[10px] text-theme-text-muted mt-1 text-right">{{ cat.porcentaje.toFixed(1) }}%</p>
           </button>
 
           <!-- Expanded: expense detail list -->
           <Transition name="expand">
-            <div v-if="expandida === cat.nombre" class="border-t border-primary-700/20">
+            <div v-if="expandida === cat.nombre" class="border-t border-theme-border">
               <div
                 v-for="gasto in gastosDeCategoria(cat.nombre)"
                 :key="gasto.id"
-                class="flex items-center justify-between px-3 py-2 border-b border-primary-700/10 last:border-b-0"
+                class="flex items-center justify-between px-3 py-2 border-b border-theme-border last:border-b-0"
               >
                 <div class="flex-1 min-w-0">
-                  <p class="text-sm text-gray-300 truncate">{{ gasto.concepto }}</p>
+                  <p class="text-sm text-theme-text-sec truncate">{{ gasto.concepto }}</p>
                   <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-[10px] text-gray-600">{{ formatFechaCorta(gasto.fecha) }}</span>
-                    <span v-if="gasto.hora" class="text-[10px] text-gray-600">{{ formatHora(gasto.hora) }}</span>
+                    <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(gasto.fecha) }}</span>
+                    <span v-if="gasto.hora" class="text-[10px] text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
                     <span v-if="gasto.metodoRegistro === 'voz'"
                       class="text-[8px] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
                     >VOZ</span>
                   </div>
                 </div>
-                <span class="text-sm font-medium text-white shrink-0 ml-3">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
+                <span class="text-sm font-medium text-theme-text shrink-0 ml-3">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
               </div>
             </div>
           </Transition>

@@ -72,16 +72,16 @@
       <!-- Barra de búsqueda -->
       <div class="px-4 mb-3">
         <div class="relative group">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-theme-text-sec transition-colors group-focus-within:text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="busquedaGasto"
             type="text"
             placeholder="Buscar gasto..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-primary-800/50 border border-primary-700/20 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:bg-primary-800/70 transition-all duration-200"
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-theme-card border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:bg-theme-card transition-all duration-200"
           />
-          <button v-if="busquedaGasto" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors" @click="busquedaGasto = ''">
+          <button v-if="busquedaGasto" class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-sec hover:text-theme-text-sec transition-colors" @click="busquedaGasto = ''">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -101,27 +101,27 @@
       <div class="flex items-center gap-2 px-4 mb-4">
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaRegistro === 'historial' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          :class="vistaRegistro === 'historial' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
           @click="vistaRegistro = 'historial'"
         >
           Historial
         </button>
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaRegistro === 'categorias' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          :class="vistaRegistro === 'categorias' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
           @click="vistaRegistro = 'categorias'"
         >
           Categorías
         </button>
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaRegistro === 'stats' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          :class="vistaRegistro === 'stats' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
           @click="vistaRegistro = 'stats'"
         >
           Comparar
         </button>
         <button
-          class="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-medium bg-primary-800/40 text-gray-500 border border-primary-700/20 hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
+          class="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-medium bg-theme-card text-theme-text-sec border border-theme-border hover:text-emerald-400 hover:border-emerald-500/30 transition-colors"
           @click="exportarGastos"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -131,47 +131,48 @@
         </button>
       </div>
 
-      <!-- Monthly history (swipeable) -->
+      <!-- Views (swipeable across all views) -->
       <div ref="historialSwipeZone">
-        <RegistroHistorialDiario
-          v-if="vistaRegistro === 'historial'"
-          :gastos-por-dia="gastosPorDiaFiltrados"
-          :gastos-por-semana="gastosPorSemanaFiltrados"
-          :is-loading="isLoadingMensual"
-          :format-fecha-dia="formatFechaDia"
-          :format-rango-semana="formatRangoSemana"
-          @edit="abrirEdicion"
-          @delete="confirmarEliminar"
-        />
+        <Transition name="page" mode="out-in">
+          <div :key="vistaRegistro">
+            <RegistroHistorialDiario
+              v-if="vistaRegistro === 'historial'"
+              :gastos-por-dia="gastosPorDiaFiltrados"
+              :gastos-por-semana="gastosPorSemanaFiltrados"
+              :is-loading="isLoadingMensual"
+              :format-fecha-dia="formatFechaDia"
+              :format-rango-semana="formatRangoSemana"
+              @edit="abrirEdicion"
+              @delete="confirmarEliminar"
+            />
+
+            <RegistroStatsComparativas
+              v-else-if="vistaRegistro === 'stats'"
+              :mes-actual="mesSeleccionado"
+              :anio-actual="anioSeleccionado"
+              :gastos-actuales="gastosMensuales"
+            />
+
+            <RegistroGraficoCategoria
+              v-else-if="vistaRegistro === 'categorias'"
+              :datos="gastosPorCategoria"
+              :gastos="gastosMensuales"
+              :presupuesto="presupuesto"
+              :categoria-seleccionada-id="categoriaFiltro"
+              :categorias="categorias"
+              :mes-actual="mesSeleccionado"
+              :anio-actual="anioSeleccionado"
+              @update:categoria-seleccionada="categoriaFiltro = $event"
+            />
+          </div>
+        </Transition>
       </div>
-
-      <!-- Comparative stats -->
-      <RegistroStatsComparativas
-        v-if="vistaRegistro === 'stats'"
-        :mes-actual="mesSeleccionado"
-        :anio-actual="anioSeleccionado"
-        :gastos-actuales="gastosMensuales"
-      />
-
-      <!-- Category chart -->
-      <RegistroGraficoCategoria
-        v-if="vistaRegistro === 'categorias'"
-        :datos="gastosPorCategoria"
-        :gastos="gastosMensuales"
-        :presupuesto="presupuesto"
-        :categoria-seleccionada-id="categoriaFiltro"
-        :categorias="categorias"
-        :mes-actual="mesSeleccionado"
-        :anio-actual="anioSeleccionado"
-        @update:categoria-seleccionada="categoriaFiltro = $event"
-      />
-
       <div class="h-8"></div>
     </div>
 
     <!-- FAB: Agregar gasto manual -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[var(--color-accent)]/50 to-indigo-600/50 hover:from-[var(--color-accent)]/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-[var(--color-accent)]/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-85 hover:opacity-100 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
       @click="showFormManual = true"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -219,8 +220,8 @@
 
     <!-- Delete confirmation -->
     <div v-if="gastoEliminar" class="fixed inset-0 z-50 flex items-center justify-center">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="gastoEliminar = null"></div>
-      <div class="relative bg-gradient-to-b from-primary-800 to-primary-800/95 rounded-2xl border border-red-500/10 p-6 mx-4 max-w-sm w-full shadow-xl shadow-black/20">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="gastoEliminar = null"></div>
+      <div class="relative bg-gradient-to-b from-theme-card to-theme-card/95 rounded-2xl border border-red-500/10 p-6 mx-4 max-w-sm w-full shadow-xl shadow-black/20">
         <div class="flex items-center gap-3 mb-4">
           <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -228,17 +229,17 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-base font-semibold text-white">Eliminar gasto</h3>
-            <p class="text-xs text-gray-500">Tendrás 5 segundos para deshacer</p>
+            <h3 class="text-base font-semibold text-theme-text">Eliminar gasto</h3>
+            <p class="text-xs text-theme-text-sec">Tendrás 5 segundos para deshacer</p>
           </div>
         </div>
-        <div class="bg-primary-900/40 rounded-xl p-3 mb-5 border border-primary-700/20">
-          <p class="text-sm text-gray-300 font-medium">{{ gastoEliminar.concepto }}</p>
+        <div class="bg-theme-input rounded-xl p-3 mb-5 border border-theme-border">
+          <p class="text-sm text-theme-text-sec font-medium">{{ gastoEliminar.concepto }}</p>
           <p class="text-sm text-red-400 font-semibold mt-0.5">{{ currencySymbol }} {{ formatMonto(gastoEliminar.monto) }}</p>
         </div>
         <div class="flex gap-3">
           <button
-            class="flex-1 py-2.5 rounded-xl text-sm text-gray-400 font-medium border border-primary-700/30 hover:bg-primary-700/30 active:scale-95 transition-all"
+            class="flex-1 py-2.5 rounded-xl text-sm text-theme-text-muted font-medium border border-theme-border hover:bg-theme-border-md active:scale-95 transition-all"
             @click="gastoEliminar = null"
           >
             Cancelar
@@ -265,12 +266,12 @@
     <!-- Undo delete toast -->
     <Transition name="toast">
       <div v-if="undoPendiente"
-        class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-primary-800/95 text-white text-sm px-4 py-3 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-sm border border-primary-700/40"
+        class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-theme-card text-theme-text text-sm px-4 py-3 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-sm border border-theme-border"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
         </svg>
-        <span class="text-gray-300">Gasto eliminado</span>
+        <span class="text-theme-text-sec">Gasto eliminado</span>
         <button
           class="ml-1 px-3 py-1 rounded-lg bg-theme-accent-bg text-theme-accent font-semibold text-xs border border-theme-accent hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
           @click="deshacerEliminar"

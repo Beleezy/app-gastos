@@ -10,7 +10,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
       </svg>
     </button>
-    <span class="text-[10px] text-gray-500 font-medium">Voucher</span>
+    <span class="text-[10px] text-theme-text-sec font-medium">Voucher</span>
 
     <!-- Hidden file input (fallback for desktop) -->
     <input
@@ -22,106 +22,110 @@
     />
 
     <!-- Inline camera view (mobile) -->
-    <Teleport to="body">
-      <div v-if="showCamera" class="fixed inset-0 z-[60] bg-black flex flex-col">
-        <video
-          ref="videoEl"
-          autoplay
-          playsinline
-          muted
-          class="flex-1 w-full object-cover"
-        />
+    <ClientOnly>
+      <Teleport to="body">
+        <div v-if="showCamera" class="fixed inset-0 z-[60] bg-black flex flex-col">
+          <video
+            ref="videoEl"
+            autoplay
+            playsinline
+            muted
+            class="flex-1 w-full object-cover"
+          />
 
-        <!-- Top bar -->
-        <div class="absolute top-0 inset-x-0 pt-12 pb-4 px-5 bg-gradient-to-b from-black/70 to-transparent">
-          <div class="flex items-center justify-between">
-            <button
-              class="w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center text-white active:scale-90 transition-transform"
-              @click="closeCamera"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <span class="text-white/80 text-sm font-medium">Escanear voucher</span>
-            <div class="w-10"></div>
-          </div>
-        </div>
-
-        <!-- Bottom controls -->
-        <div class="absolute bottom-0 inset-x-0 pb-10 pt-8 bg-gradient-to-t from-black/80 to-transparent">
-          <div class="flex items-center justify-center">
-            <!-- Shutter button -->
-            <button
-              class="w-[72px] h-[72px] rounded-full border-[4px] border-white p-[3px] active:scale-90 transition-transform"
-              @click="captureFrame"
-            >
-              <div class="w-full h-full rounded-full bg-white"></div>
-            </button>
-          </div>
-          <p class="text-center text-white/50 text-xs mt-3">Apunta al voucher o recibo</p>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Photo preview modal -->
-    <Teleport to="body">
-      <div v-if="showPreview" class="fixed inset-0 z-50 flex items-center justify-center">
-        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="$emit('cancel')"></div>
-
-        <div class="relative w-full max-w-lg mx-4 animate-scale-in">
-          <!-- Preview image -->
-          <div class="bg-primary-900 rounded-2xl overflow-hidden border border-primary-700/40 shadow-2xl">
-            <div class="relative">
-              <img
-                :src="photoPreview"
-                alt="Vista previa del voucher"
-                class="w-full max-h-[60vh] object-contain bg-black"
-              />
-              <!-- Overlay badge -->
-              <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1.5">
-                <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
-                <span class="text-xs text-white font-medium">Vista previa</span>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="grid grid-cols-3 gap-3 p-4">
-              <!-- Cancel -->
+          <!-- Top bar -->
+          <div class="absolute top-0 inset-x-0 pt-12 pb-4 px-5 bg-gradient-to-b from-black/70 to-transparent">
+            <div class="flex items-center justify-between">
               <button
-                class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-red-500/10 text-red-400 text-xs font-medium hover:bg-red-500/20 active:scale-95 transition-all"
-                @click="$emit('cancel')"
+                class="w-10 h-10 rounded-full bg-theme-card/15 backdrop-blur-sm flex items-center justify-center text-theme-text active:scale-90 transition-transform"
+                @click="closeCamera"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-                Cancelar
               </button>
-              <!-- Retake -->
+              <span class="text-theme-text/80 text-sm font-medium">Escanear voucher</span>
+              <div class="w-10"></div>
+            </div>
+          </div>
+
+          <!-- Bottom controls -->
+          <div class="absolute bottom-0 inset-x-0 pb-10 pt-8 bg-gradient-to-t from-black/80 to-transparent">
+            <div class="flex items-center justify-center">
+              <!-- Shutter button -->
               <button
-                class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg active:scale-95 transition-all"
-                @click="retake"
+                class="w-[72px] h-[72px] rounded-full border-[4px] border-white p-[3px] active:scale-90 transition-transform"
+                @click="captureFrame"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Tomar otra
+                <div class="w-full h-full rounded-full bg-theme-card"></div>
               </button>
-              <!-- Send -->
-              <button
-                class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:scale-95 transition-all"
-                @click="$emit('send')"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Escanear
-              </button>
+            </div>
+            <p class="text-center text-theme-text/50 text-xs mt-3">Apunta al voucher o recibo</p>
+          </div>
+        </div>
+      </Teleport>
+    </ClientOnly>
+
+    <!-- Photo preview modal -->
+    <ClientOnly>
+      <Teleport to="body">
+        <div v-if="showPreview" class="fixed inset-0 z-50 flex items-center justify-center">
+          <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('cancel')"></div>
+
+          <div class="relative w-full max-w-lg mx-4 animate-scale-in">
+            <!-- Preview image -->
+            <div class="bg-theme-input rounded-2xl overflow-hidden border border-theme-border shadow-2xl">
+              <div class="relative">
+                <img
+                  :src="photoPreview"
+                  alt="Vista previa del voucher"
+                  class="w-full max-h-[60vh] object-contain bg-black"
+                />
+                <!-- Overlay badge -->
+                <div class="absolute top-3 left-3 flex items-center gap-1.5 bg-theme-bg/80 backdrop-blur-sm rounded-full px-3 py-1.5">
+                  <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+                  <span class="text-xs text-theme-text font-medium">Vista previa</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="grid grid-cols-3 gap-3 p-4">
+                <!-- Cancel -->
+                <button
+                  class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-red-500/10 text-red-400 text-xs font-medium hover:bg-red-500/20 active:scale-95 transition-all"
+                  @click="$emit('cancel')"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Cancelar
+                </button>
+                <!-- Retake -->
+                <button
+                  class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg active:scale-95 transition-all"
+                  @click="retake"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Tomar otra
+                </button>
+                <!-- Send -->
+                <button
+                  class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:scale-95 transition-all"
+                  @click="$emit('send')"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Escanear
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Teleport>
+      </Teleport>
+    </ClientOnly>
   </div>
 </template>
 

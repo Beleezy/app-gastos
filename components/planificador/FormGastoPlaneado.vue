@@ -2,18 +2,18 @@
   <SharedBaseBottomSheet :title="modoEdicion ? 'Editar gasto planificado' : 'Nuevo gasto planificado'" @close="$emit('close')">
     <!-- Concepto -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Concepto</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
       <input
         v-model="form.concepto"
         type="text"
         placeholder="Ej: Recibo de luz, Cuota gimnasio..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Categoría -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Categoría</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Categoría</label>
       <div class="grid grid-cols-4 gap-2">
         <button
           v-for="cat in categorias"
@@ -21,7 +21,7 @@
           class="flex flex-col items-center gap-1 p-2 rounded-xl border transition-all"
           :class="form.categoriaId === cat.id
             ? 'border-theme-accent bg-theme-accent-bg'
-            : 'border-primary-700/30 bg-primary-900/50'"
+            : 'border-theme-border bg-theme-input'"
           @click="form.categoriaId = cat.id"
         >
           <div
@@ -30,34 +30,34 @@
           >
             <span class="text-sm">{{ getEmoji(cat.nombre) }}</span>
           </div>
-          <span class="text-[10px] text-gray-400 text-center leading-tight truncate w-full">{{ cat.nombre }}</span>
+          <span class="text-[10px] text-theme-text-muted text-center leading-tight truncate w-full">{{ cat.nombre }}</span>
         </button>
       </div>
     </div>
 
     <!-- Monto -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto estimado</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto estimado</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
           v-model="form.montoEstimado"
           type="number"
           step="0.01"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
 
     <!-- Fecha de pago - Day picker -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">
-        Fecha de pago <span class="text-gray-600">({{ nombreMes }} {{ anioActual }})</span>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">
+        Fecha de pago <span class="text-theme-text-muted">({{ nombreMes }} {{ anioActual }})</span>
       </label>
-      <div class="bg-primary-900/50 rounded-xl p-3 border border-primary-700/30">
+      <div class="bg-theme-input rounded-xl p-3 border border-theme-border">
         <div class="grid grid-cols-7 gap-1.5">
-          <span v-for="d in ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']" :key="d" class="text-center text-[10px] text-gray-600 font-medium pb-1">
+          <span v-for="d in ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']" :key="d" class="text-center text-[10px] text-theme-text-muted font-medium pb-1">
             {{ d }}
           </span>
           <span v-for="i in primerDiaOffset" :key="'empty-' + i"></span>
@@ -66,10 +66,10 @@
             :key="dia"
             class="w-9 h-9 rounded-lg text-xs font-medium flex items-center justify-center transition-all"
             :class="form.diaSeleccionado === dia
-              ? 'bg-theme-accent text-white'
+              ? 'bg-theme-accent text-theme-text'
               : esPasado(dia)
-                ? 'text-gray-700'
-                : 'text-gray-300 hover:bg-primary-700'"
+                ? 'text-theme-text-muted'
+                : 'text-theme-text-sec hover:bg-theme-border-md'"
             @click="form.diaSeleccionado = dia"
           >
             {{ dia }}
@@ -81,36 +81,36 @@
     <!-- Recurrente toggle -->
     <div class="flex items-center justify-between py-2">
       <div>
-        <p class="text-sm font-medium text-white">Gasto recurrente</p>
-        <p class="text-xs text-gray-500">Se repetirá cada mes automáticamente</p>
+        <p class="text-sm font-medium text-theme-text">Gasto recurrente</p>
+        <p class="text-xs text-theme-text-sec">Se repetirá cada mes automáticamente</p>
       </div>
       <button
         class="w-11 h-6 rounded-full relative transition-colors"
-        :class="form.esRecurrente ? 'bg-theme-accent' : 'bg-primary-700'"
+        :class="form.esRecurrente ? 'bg-theme-accent' : 'bg-theme-border-md'"
         @click="form.esRecurrente = !form.esRecurrente"
       >
         <div
           class="absolute top-0.5 w-5 h-5 rounded-full transition-transform"
-          :class="form.esRecurrente ? 'translate-x-[22px] bg-white' : 'translate-x-0.5 bg-gray-400'"
+          :class="form.esRecurrente ? 'translate-x-[22px] bg-theme-card' : 'translate-x-0.5 bg-gray-400'"
         ></div>
       </button>
     </div>
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Notas <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-[var(--color-accent)]/70 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"

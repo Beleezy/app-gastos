@@ -2,7 +2,7 @@
   <div ref="detalleRoot" class="px-4 py-3">
     <!-- Back button + Person header -->
     <div class="mb-4">
-      <button class="flex items-center gap-1.5 text-gray-400 text-sm mb-3 active:text-white transition-colors" @click="volverALista">
+      <button class="flex items-center gap-1.5 text-theme-text-muted text-sm mb-3 active:text-theme-text transition-colors" @click="volverALista">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
@@ -10,7 +10,7 @@
       </button>
 
       <!-- Person card -->
-      <div class="bg-primary-800 rounded-2xl p-4">
+      <div class="bg-theme-card rounded-2xl p-4">
         <!-- Name row -->
         <div class="flex items-center gap-3 mb-2">
           <div
@@ -20,8 +20,8 @@
             {{ getInitials(personaSeleccionada.nombre) }}
           </div>
           <div class="flex-1 min-w-0">
-            <h2 class="text-lg font-semibold text-white break-words">{{ personaSeleccionada.nombre }}</h2>
-            <p v-if="personaSeleccionada.contacto" class="text-xs text-gray-500 truncate">{{ personaSeleccionada.contacto }}</p>
+            <h2 class="text-lg font-semibold text-theme-text break-words">{{ personaSeleccionada.nombre }}</h2>
+            <p v-if="personaSeleccionada.contacto" class="text-xs text-theme-text-sec truncate">{{ personaSeleccionada.contacto }}</p>
             <!-- Badge vinculado inline -->
             <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[10px] font-medium mt-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -37,7 +37,7 @@
           <!-- Export PDF (only me_deben) -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-theme-accent transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[10px] font-medium"
             title="Exportar PDF"
             @click="exportarPdf"
           >
@@ -49,7 +49,7 @@
           <!-- Share WhatsApp -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-emerald-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-emerald-400 transition-colors text-[10px] font-medium"
             title="Enviar por WhatsApp"
             @click="enviarWhatsapp"
           >
@@ -61,7 +61,7 @@
           <!-- Vincular con usuario -->
           <button
             v-if="!personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-theme-accent transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[10px] font-medium"
             title="Vincular con usuario"
             @click="showSolicitudVinculo = true"
           >
@@ -73,7 +73,7 @@
           <!-- Desvincular -->
           <button
             v-if="personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-orange-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-orange-400 transition-colors text-[10px] font-medium"
             title="Desvincular"
             @click="showDesvincular = true"
           >
@@ -84,7 +84,7 @@
           </button>
           <!-- Edit persona -->
           <button
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-amber-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-amber-400 transition-colors text-[10px] font-medium"
             title="Editar persona"
             @click="showEditarPersona = true"
           >
@@ -95,7 +95,7 @@
           </button>
           <!-- Delete persona -->
           <button
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-red-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-red-400 transition-colors text-[10px] font-medium"
             @click="confirmarEliminarPersona"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -106,9 +106,9 @@
         </div>
 
         <!-- Total pendiente -->
-        <div class="bg-primary-900/50 rounded-xl p-3">
+        <div class="bg-theme-input rounded-xl p-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs text-gray-500">Total pendiente</span>
+            <span class="text-xs text-theme-text-sec">Total pendiente</span>
             <span
               class="text-lg font-bold"
               :class="tabActual === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
@@ -141,10 +141,10 @@
 
     <!-- Loading state -->
     <div v-if="isLoading" class="space-y-3">
-      <div v-for="i in 2" :key="i" class="bg-primary-800 rounded-xl p-4 animate-pulse">
+      <div v-for="i in 2" :key="i" class="bg-theme-card rounded-xl p-4 animate-pulse">
         <div class="space-y-2">
-          <div class="h-4 bg-primary-700 rounded w-3/4"></div>
-          <div class="h-3 bg-primary-700 rounded w-1/2"></div>
+          <div class="h-4 bg-theme-border-md rounded w-3/4"></div>
+          <div class="h-3 bg-theme-border-md rounded w-1/2"></div>
         </div>
       </div>
     </div>
@@ -154,15 +154,15 @@
       <div v-if="deudasActivasPersona.length > 0" class="mb-5">
         <div class="flex items-center gap-2 mb-2.5">
           <span class="w-1.5 h-1.5 rounded-full" :class="tabActual === 'me_deben' ? 'bg-emerald-400' : 'bg-red-400'"></span>
-          <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Pendientes</h3>
-          <span class="text-xs text-gray-500 ml-auto">{{ deudasActivasPersona.length }}</span>
+          <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Pendientes</h3>
+          <span class="text-xs text-theme-text-sec ml-auto">{{ deudasActivasPersona.length }}</span>
         </div>
 
-        <div v-for="deuda in deudasActivasPersona" :key="deuda.id" class="bg-primary-800 rounded-xl p-3.5 mb-2 border border-primary-700/30">
+        <div v-for="deuda in deudasActivasPersona" :key="deuda.id" class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border">
           <div class="flex items-start justify-between">
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-white">{{ deuda.concepto }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
+              <p class="text-sm font-medium text-theme-text">{{ deuda.concepto }}</p>
+              <p class="text-xs text-theme-text-sec mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
               <div v-if="deuda.fechaPago" class="flex items-center gap-1.5 mt-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -173,11 +173,11 @@
                 <span v-if="esVencida(deuda)" class="text-[9px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
               </div>
               <div v-if="deuda.notas" class="mt-1">
-                <p class="text-[10px] text-gray-600 italic">{{ deuda.notas }}</p>
+                <p class="text-[10px] text-theme-text-muted italic">{{ deuda.notas }}</p>
               </div>
             </div>
             <div class="text-right shrink-0 ml-3">
-              <p class="text-sm font-semibold text-white">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
+              <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
               <p v-if="deuda.estado === 'parcial'" class="text-[10px] text-orange-400 mt-0.5">
                 Pendiente: {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
               </p>
@@ -192,19 +192,19 @@
 
           <!-- Progress bar for partial payments -->
           <div v-if="deuda.montoOriginal !== deuda.montoPendiente" class="mt-2.5">
-            <div class="w-full h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
+            <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full bg-gradient-to-r from-theme-accent to-theme-accent transition-all duration-500"
                 :style="{ width: ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100) + '%' }"
               ></div>
             </div>
-            <p class="text-[10px] text-gray-600 mt-0.5">
+            <p class="text-[10px] text-theme-text-muted mt-0.5">
               {{ ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100).toFixed(0) }}% pagado
             </p>
           </div>
 
           <!-- Actions (44x44px targets) -->
-          <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-primary-700/20">
+          <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-theme-border">
             <button
               class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
               @click="emit('registrarPago', deuda)"
@@ -233,7 +233,7 @@
               Saldar
             </button>
             <button
-              class="min-w-[44px] h-11 px-3 flex items-center justify-center rounded-xl text-gray-600 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
+              class="min-w-[44px] h-11 px-3 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
               @click="confirmarEliminarDeuda(deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -277,11 +277,11 @@
           @click="showSaldadas = !showSaldadas"
         >
           <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Saldadas</h3>
-          <span class="text-xs text-gray-600">{{ deudasSaldadasPersona.length }}</span>
+          <h3 class="text-xs font-semibold text-theme-text-sec uppercase tracking-wider">Saldadas</h3>
+          <span class="text-xs text-theme-text-muted">{{ deudasSaldadasPersona.length }}</span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            class="w-3 h-3 text-gray-600 ml-auto transition-transform"
+            class="w-3 h-3 text-theme-text-muted ml-auto transition-transform"
             :class="showSaldadas ? 'rotate-180' : ''"
             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
           >
@@ -290,14 +290,14 @@
         </button>
 
         <div v-if="showSaldadas">
-          <div v-for="deuda in deudasSaldadasPersona" :key="deuda.id" class="bg-primary-800/50 rounded-xl p-3.5 mb-2 border border-primary-700/20 opacity-60">
+          <div v-for="deuda in deudasSaldadasPersona" :key="deuda.id" class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border opacity-60">
             <div class="flex items-start justify-between">
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-400 line-through">{{ deuda.concepto }}</p>
-                <p class="text-xs text-gray-600 mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
+                <p class="text-sm font-medium text-theme-text-muted line-through">{{ deuda.concepto }}</p>
+                <p class="text-xs text-theme-text-muted mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
               </div>
               <div class="text-right shrink-0 ml-3">
-                <p class="text-sm font-semibold text-gray-500">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
+                <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
                 <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 bg-emerald-500/15 text-emerald-400">
                   {{ deuda.estado === 'archivado' ? 'Archivada' : 'Pagada' }}
                 </span>
@@ -309,8 +309,8 @@
 
       <!-- Empty debts state -->
       <div v-if="deudasActivasPersona.length === 0 && deudasSaldadasPersona.length === 0" class="text-center py-8">
-        <p class="text-gray-500 text-sm">No hay deudas registradas</p>
-        <p class="text-gray-600 text-xs mt-1">Agrega un concepto de deuda con el boton +</p>
+        <p class="text-theme-text-sec text-sm">No hay deudas registradas</p>
+        <p class="text-theme-text-muted text-xs mt-1">Agrega un concepto de deuda con el boton +</p>
       </div>
 
       <!-- Bottom spacer -->
@@ -358,11 +358,11 @@
 
     <!-- Desvincular confirmation -->
     <div v-if="showDesvincular" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDesvincular = false"></div>
-      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-        <h3 class="text-base font-semibold text-white mb-2">Desvincular usuario</h3>
-        <p class="text-sm text-gray-400 mb-2">El vínculo con <span class="text-white font-medium">{{ personaSeleccionada.nombre }}</span> se disolverá.</p>
-        <ul class="text-xs text-gray-500 space-y-1 mb-5 list-disc pl-4">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showDesvincular = false"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-2">Desvincular usuario</h3>
+        <p class="text-sm text-theme-text-muted mb-2">El vínculo con <span class="text-theme-text font-medium">{{ personaSeleccionada.nombre }}</span> se disolverá.</p>
+        <ul class="text-xs text-theme-text-sec space-y-1 mb-5 list-disc pl-4">
           <li>Tus deudas y pagos se mantienen intactos</li>
           <li>Los datos del otro usuario también se conservan</li>
           <li>Podrás volver a vincular enviando una nueva solicitud</li>
@@ -376,7 +376,7 @@
             {{ desvinculando ? 'Desvinculando...' : 'Confirmar desvincular' }}
           </button>
           <button
-            class="w-full py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
             @click="showDesvincular = false"
           >
             Cancelar
@@ -387,10 +387,10 @@
 
     <!-- Delete persona confirmation -->
     <div v-if="showDeletePersona" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showDeletePersona = false"></div>
-      <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-        <h3 class="text-base font-semibold text-white mb-2">Eliminar persona</h3>
-        <p class="text-sm text-gray-400 mb-5">Se eliminaran todas las deudas y pagos asociados a <span class="text-white font-medium">{{ personaSeleccionada.nombre }}</span>.</p>
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showDeletePersona = false"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar persona</h3>
+        <p class="text-sm text-theme-text-muted mb-5">Se eliminaran todas las deudas y pagos asociados a <span class="text-theme-text font-medium">{{ personaSeleccionada.nombre }}</span>.</p>
         <div class="space-y-2">
           <button
             class="w-full py-2.5 rounded-xl bg-red-500/15 text-red-400 text-sm font-medium hover:bg-red-500/25 transition-colors"
@@ -399,7 +399,7 @@
             Eliminar todo
           </button>
           <button
-            class="w-full py-2.5 rounded-xl text-gray-500 text-sm font-medium hover:text-gray-300 transition-colors"
+            class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
             @click="showDeletePersona = false"
           >
             Cancelar

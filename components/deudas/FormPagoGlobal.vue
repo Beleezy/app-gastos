@@ -1,15 +1,15 @@
 <template>
   <SharedBaseBottomSheet title="Pago global" @close="$emit('close')">
     <!-- Person info -->
-    <div class="bg-primary-900/50 rounded-xl p-3 border border-primary-700/30">
-      <p class="text-xs text-gray-500 mb-1">{{ persona.nombre }}</p>
+    <div class="bg-theme-input rounded-xl p-3 border border-theme-border">
+      <p class="text-xs text-theme-text-sec mb-1">{{ persona.nombre }}</p>
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-xs text-gray-500">Deudas activas</p>
-          <p class="text-sm font-medium text-gray-400">{{ deudasActivas }} concepto{{ deudasActivas !== 1 ? 's' : '' }}</p>
+          <p class="text-xs text-theme-text-sec">Deudas activas</p>
+          <p class="text-sm font-medium text-theme-text-muted">{{ deudasActivas }} concepto{{ deudasActivas !== 1 ? 's' : '' }}</p>
         </div>
         <div class="text-right">
-          <p class="text-xs text-gray-500">Total pendiente</p>
+          <p class="text-xs text-theme-text-sec">Total pendiente</p>
           <p class="text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(totalPendiente) }}</p>
         </div>
       </div>
@@ -24,27 +24,27 @@
 
     <!-- Monto del pago -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Monto recibido</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto recibido</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
           v-model="form.monto"
           type="number"
           step="0.01"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
       <div class="flex gap-2 mt-2 flex-wrap">
         <button
-          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
           @click="form.monto = totalPendiente"
         >
           Todo ({{ currencySymbol }} {{ formatMonto(totalPendiente) }})
         </button>
         <button
           v-if="totalPendiente > 1"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-primary-900/50 text-gray-400 hover:bg-primary-700 transition-colors"
+          class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
           @click="form.monto = Math.round(totalPendiente / 2 * 100) / 100"
         >
           Mitad
@@ -54,23 +54,23 @@
 
     <!-- Fecha -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Fecha del pago</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha del pago</label>
       <input
         v-model="form.fecha"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
     <!-- Metodo de pago -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Metodo de pago <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Metodo de pago <span class="text-theme-text-muted">(opcional)</span></label>
       <div class="flex gap-2 flex-wrap">
         <button
           v-for="metodo in metodos"
           :key="metodo"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
+          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-input text-theme-text-sec border border-transparent'"
           @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
         >
           {{ metodo }}
@@ -80,31 +80,31 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-gray-400 mb-1.5">Notas <span class="text-gray-600">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas del pago..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
     <!-- Simulación en tiempo real -->
-    <div v-if="simulacion.length > 0 && !resultado" class="bg-primary-900/50 rounded-xl p-3 border border-primary-700/30 space-y-1.5">
-      <p class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1">Vista previa de distribución</p>
+    <div v-if="simulacion.length > 0 && !resultado" class="bg-theme-input rounded-xl p-3 border border-theme-border space-y-1.5">
+      <p class="text-[10px] font-medium text-theme-text-sec uppercase tracking-wider mb-1">Vista previa de distribución</p>
       <div v-for="s in simulacion" :key="s.concepto" class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-1.5 h-1.5 rounded-full shrink-0"
             :class="s.saldado ? 'bg-emerald-400' : 'bg-amber-400'"></span>
-          <span class="text-gray-400 truncate">{{ s.concepto }}</span>
+          <span class="text-theme-text-muted truncate">{{ s.concepto }}</span>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <span class="text-white font-medium">{{ currencySymbol }} {{ formatMonto(s.pagado) }}</span>
+          <span class="text-theme-text font-medium">{{ currencySymbol }} {{ formatMonto(s.pagado) }}</span>
           <span v-if="s.saldado" class="text-[9px] text-emerald-400">saldado</span>
-          <span v-else class="text-[9px] text-gray-600">resta {{ currencySymbol }} {{ formatMonto(s.restante) }}</span>
+          <span v-else class="text-[9px] text-theme-text-muted">resta {{ currencySymbol }} {{ formatMonto(s.restante) }}</span>
         </div>
       </div>
-      <div v-if="sobrante > 0" class="border-t border-primary-700/30 pt-1.5 mt-1.5">
+      <div v-if="sobrante > 0" class="border-t border-theme-border pt-1.5 mt-1.5">
         <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }} {{ formatMonto(sobrante) }}</p>
       </div>
     </div>
@@ -115,7 +115,7 @@
     <div v-if="resultado" class="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 space-y-2">
       <p class="text-xs font-medium text-emerald-400">Pago distribuido exitosamente</p>
       <div v-for="pago in resultado.pagos" :key="pago.id" class="flex items-center justify-between text-xs">
-        <span class="text-gray-400">{{ pago.concepto }}</span>
+        <span class="text-theme-text-muted">{{ pago.concepto }}</span>
         <span class="text-emerald-400 font-medium">{{ currencySymbol }} {{ formatMonto(pago.montoPagado) }}</span>
       </div>
       <div v-if="resultado.montoSobrante > 0" class="border-t border-emerald-500/20 pt-2">
@@ -125,7 +125,7 @@
 
     <button
       v-if="!resultado"
-      class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
@@ -139,7 +139,7 @@
 
     <button
       v-if="resultado"
-      class="w-full py-3.5 rounded-xl bg-primary-700 text-white font-semibold text-sm transition-colors hover:bg-primary-600"
+      class="w-full py-3.5 rounded-xl bg-theme-border-md text-theme-text font-semibold text-sm transition-colors hover:bg-primary-600"
       @click="$emit('close')"
     >
       Cerrar

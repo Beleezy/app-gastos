@@ -11,7 +11,7 @@
     />
 
     <!-- Budget Summary Card -->
-    <div class="relative bg-gradient-to-br from-primary-800 to-primary-800/90 rounded-2xl p-4 space-y-4 border border-primary-700/20 overflow-hidden">
+    <div class="relative bg-gradient-to-br from-theme-card to-theme-card/90 rounded-2xl p-4 space-y-4 border border-theme-border overflow-hidden">
       <!-- Decorative accent -->
       <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
 
@@ -21,23 +21,23 @@
           <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--color-accent)]/25 to-indigo-500/15 flex items-center justify-center">
             <span class="text-xs font-bold text-theme-accent leading-none">S/</span>
           </div>
-          <span class="text-sm text-gray-400">Presupuesto</span>
+          <span class="text-sm text-theme-text-muted">Presupuesto</span>
         </div>
         <!-- Editable budget -->
         <div v-if="editandoPresupuesto" class="flex items-center gap-1">
-          <span class="text-sm text-gray-400">{{ currencySymbol }}</span>
+          <span class="text-sm text-theme-text-muted">{{ currencySymbol }}</span>
           <input
             ref="inputPresupuesto"
             v-model="presupuestoTemp"
             type="number"
             step="0.01"
-            class="w-28 bg-primary-900 border border-theme-accent rounded-lg px-2 py-1 text-right text-white text-lg font-bold focus:outline-none"
+            class="w-28 bg-theme-input border border-theme-accent rounded-lg px-2 py-1 text-right text-theme-text text-lg font-bold focus:outline-none"
             @keyup.enter="guardarPresupuesto"
             @blur="guardarPresupuesto"
           />
         </div>
         <div v-else class="flex items-center gap-1.5">
-          <button class="text-lg font-bold text-white hover:text-theme-accent-light transition-colors whitespace-nowrap" @click="iniciarEdicion">
+          <button class="text-lg font-bold text-theme-text hover:text-theme-accent-light transition-colors whitespace-nowrap" @click="iniciarEdicion">
             {{ currencySymbol }} {{ formatMonto(resumen.presupuesto) }}
           </button>
           <button
@@ -54,22 +54,22 @@
       </div>
 
       <!-- Divider -->
-      <div class="border-t border-primary-700/30"></div>
+      <div class="border-t border-theme-border"></div>
 
       <!-- Stats Row -->
       <div class="relative grid grid-cols-3 gap-2">
-        <div class="bg-primary-900/40 rounded-xl p-3 border border-orange-500/5">
-          <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Planificado</p>
+        <div class="bg-theme-input rounded-xl p-3 border border-orange-500/5">
+          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider">Planificado</p>
           <p class="text-sm font-bold text-orange-400 whitespace-nowrap">{{ formatMonto(resumen.totalPlanificado) }}</p>
         </div>
-        <div class="bg-primary-900/40 rounded-xl p-3 border" :class="totalGastoReal > resumen.totalPlanificado ? 'border-red-500/10' : 'border-emerald-500/5'">
-          <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Gastado</p>
+        <div class="bg-theme-input rounded-xl p-3 border" :class="totalGastoReal > resumen.totalPlanificado ? 'border-red-500/10' : 'border-emerald-500/5'">
+          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider">Gastado</p>
           <p class="text-sm font-bold whitespace-nowrap" :class="totalGastoReal > resumen.totalPlanificado ? 'text-red-400' : 'text-emerald-400'">
             {{ formatMonto(totalGastoReal) }}
           </p>
         </div>
-        <div class="bg-primary-900/40 rounded-xl p-3 border" :class="resumen.saldoRestante >= 0 ? 'border-emerald-500/5' : 'border-red-500/10'">
-          <p class="text-[10px] text-gray-500 mb-1 uppercase tracking-wider">Saldo</p>
+        <div class="bg-theme-input rounded-xl p-3 border" :class="resumen.saldoRestante >= 0 ? 'border-emerald-500/5' : 'border-red-500/10'">
+          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider">Saldo</p>
           <p class="text-sm font-bold whitespace-nowrap" :class="resumen.saldoRestante >= 0 ? 'text-emerald-400' : 'text-red-400'">
             {{ formatMonto(resumen.saldoRestante) }}
           </p>
@@ -79,7 +79,7 @@
       <!-- Progress Bar -->
       <div>
         <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-gray-400">Presupuesto asignado</span>
+          <span class="text-xs text-theme-text-muted">Presupuesto asignado</span>
           <span
             class="text-xs font-semibold px-2 py-0.5 rounded-full"
             :class="resumen.porcentajeAsignado > 90 ? 'text-red-400 bg-red-500/10' : 'text-theme-accent bg-theme-accent-bg'"
@@ -87,7 +87,7 @@
             {{ resumen.porcentajeAsignado.toFixed(1) }}%
           </span>
         </div>
-        <div class="w-full h-2 bg-primary-900/60 rounded-full overflow-hidden">
+        <div class="w-full h-2 bg-theme-input rounded-full overflow-hidden">
           <div
             class="h-full rounded-full transition-all duration-700 ease-out"
             :class="resumen.porcentajeAsignado > 90 ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-[var(--color-accent-dark)] via-[var(--color-accent)] to-indigo-400'"
@@ -101,11 +101,11 @@
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5 bg-emerald-500/8 px-2 py-1 rounded-lg">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[11px] text-gray-400">Pagados: <span class="text-emerald-400 font-semibold">{{ resumen.countPagados }}</span></span>
+            <span class="text-[11px] text-theme-text-muted">Pagados: <span class="text-emerald-400 font-semibold">{{ resumen.countPagados }}</span></span>
           </div>
           <div class="flex items-center gap-1.5 bg-orange-500/8 px-2 py-1 rounded-lg">
             <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
-            <span class="text-[11px] text-gray-400">Pendientes: <span class="text-orange-400 font-semibold">{{ resumen.countPendientes }}</span></span>
+            <span class="text-[11px] text-theme-text-muted">Pendientes: <span class="text-orange-400 font-semibold">{{ resumen.countPendientes }}</span></span>
           </div>
         </div>
         <!-- Duplicar mes -->
@@ -126,14 +126,14 @@
 
   <!-- Modal: selector de mes origen para duplicar -->
   <div v-if="showSelectorMes" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSelectorMes = false"></div>
-    <div class="relative bg-primary-800 rounded-2xl p-5 w-full max-w-sm border border-primary-700/50">
-      <h3 class="text-base font-semibold text-white mb-1">Copiar mes</h3>
-      <p class="text-xs text-gray-500 mb-4">Elige el mes de origen para copiar los gastos planificados.</p>
+    <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showSelectorMes = false"></div>
+    <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+      <h3 class="text-base font-semibold text-theme-text mb-1">Copiar mes</h3>
+      <p class="text-xs text-theme-text-sec mb-4">Elige el mes de origen para copiar los gastos planificados.</p>
       <div class="flex gap-2 mb-4">
         <select
           v-model.number="origenMes"
-          class="flex-1 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-theme-accent"
+          class="flex-1 bg-theme-input border border-theme-border rounded-xl px-3 py-2 text-theme-text text-sm focus:outline-none focus:border-theme-accent"
         >
           <option v-for="(m, i) in MESES" :key="i" :value="i + 1">{{ m }}</option>
         </select>
@@ -142,7 +142,7 @@
           type="number"
           :min="anioActual - 5"
           :max="anioActual"
-          class="w-24 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-theme-accent"
+          class="w-24 bg-theme-input border border-theme-border rounded-xl px-3 py-2 text-theme-text text-sm focus:outline-none focus:border-theme-accent"
         />
       </div>
       <div class="space-y-2">
@@ -154,7 +154,7 @@
           {{ duplicando ? 'Copiando...' : 'Copiar' }}
         </button>
         <button
-          class="w-full py-2.5 rounded-xl text-gray-500 text-sm hover:text-gray-300 transition-colors"
+          class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm hover:text-theme-text-sec transition-colors"
           @click="showSelectorMes = false"
         >
           Cancelar

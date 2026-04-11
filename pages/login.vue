@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-primary-950 px-6">
+  <div class="min-h-screen flex flex-col items-center justify-center bg-theme-bg px-6">
     <!-- Logo / branding -->
     <div class="flex flex-col items-center mb-10">
       <div class="w-16 h-16 rounded-2xl bg-theme-accent-bg border border-theme-accent flex items-center justify-center mb-4">
@@ -7,18 +7,18 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.172-.879-1.172-2.303 0-3.182.553-.44 1.278-.659 2.003-.659.727 0 1.45.219 2.003.659m-5.5 7.5A10.5 10.5 0 1 1 12 1.5a10.5 10.5 0 0 1 0 21Z" />
         </svg>
       </div>
-      <h1 class="text-2xl font-bold text-white">Mis Finanzas</h1>
-      <p class="text-sm text-gray-500 mt-1">Gestiona tu economía personal</p>
+      <h1 class="text-2xl font-bold text-theme-text">Mis Finanzas</h1>
+      <p class="text-sm text-theme-text-sec mt-1">Gestiona tu economía personal</p>
     </div>
 
     <!-- Card de login -->
-    <div class="w-full max-w-sm bg-primary-800 rounded-2xl border border-primary-700/50 p-6">
-      <h2 class="text-base font-semibold text-white mb-1">Iniciar sesión</h2>
-      <p class="text-xs text-gray-500 mb-6">Usa tu cuenta de Google para continuar</p>
+    <div class="w-full max-w-sm bg-theme-card rounded-2xl border border-theme-border p-6">
+      <h2 class="text-base font-semibold text-theme-text mb-1">Iniciar sesión</h2>
+      <p class="text-xs text-theme-text-sec mb-6">Usa tu cuenta de Google para continuar</p>
 
       <!-- Botón Google -->
       <button
-        class="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 active:bg-gray-100 text-gray-800 font-medium text-sm rounded-xl px-4 py-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+        class="w-full flex items-center justify-center gap-3 bg-theme-card hover:bg-theme-card-hover active:bg-theme-border-md text-theme-text font-medium text-sm rounded-xl px-4 py-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
         :disabled="loading"
         @click="handleLogin"
       >
@@ -29,7 +29,7 @@
           <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           <path fill="none" d="M0 0h48v48H0z"/>
         </svg>
-        <svg v-else class="animate-spin w-5 h-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg v-else class="animate-spin w-5 h-5 text-theme-text-sec" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
         </svg>
@@ -40,7 +40,7 @@
       <p v-if="errorMsg" class="mt-3 text-xs text-red-400 text-center">{{ errorMsg }}</p>
     </div>
 
-    <p class="text-xs text-gray-700 mt-8 text-center max-w-xs">
+    <p class="text-xs text-theme-text-muted mt-8 text-center max-w-xs">
       Al iniciar sesión aceptas que tus datos se almacenen de forma segura en tu cuenta personal.
     </p>
   </div>

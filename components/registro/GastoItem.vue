@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-primary-800/60 rounded-xl border border-primary-700/30 overflow-hidden">
+  <div class="bg-theme-card rounded-xl border border-theme-border overflow-hidden">
     <div class="px-3 py-2.5">
       <!-- Title row: concept spans full width -->
       <div class="flex items-center gap-2 mb-1.5">
@@ -8,7 +8,7 @@
         >
           <span class="text-xs">{{ resolveIcono(gasto.categoriaIcono) }}</span>
         </div>
-        <p class="text-sm font-medium text-white flex-1 min-w-0 break-words">{{ gasto.concepto }}</p>
+        <p class="text-sm font-medium text-theme-text flex-1 min-w-0 break-words">{{ gasto.concepto }}</p>
         <span v-if="gasto.metodoRegistro === 'voz'"
           class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full shrink-0"
         >VOZ</span>
@@ -21,16 +21,16 @@
           >
             {{ gasto.categoriaNombre || 'Otros' }}
           </span>
-          <span class="text-xs text-gray-600">{{ formatHora(gasto.hora) }}</span>
+          <span class="text-xs text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
         </div>
-        <p class="text-sm font-semibold text-white shrink-0">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</p>
+        <p class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</p>
       </div>
     </div>
 
     <!-- Action buttons — always visible as compact icons -->
     <div class="flex items-center gap-1 shrink-0 ml-2">
       <button
-        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-theme-accent hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
+        class="w-8 h-8 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
         aria-label="Editar"
         @click.stop="$emit('edit')"
       >
@@ -39,7 +39,7 @@
         </svg>
       </button>
       <button
-        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
+        class="w-8 h-8 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
         aria-label="Eliminar"
         @click.stop="onDelete"
       >
