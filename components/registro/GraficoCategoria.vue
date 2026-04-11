@@ -6,7 +6,7 @@
       <div class="flex items-center gap-1.5">
         <button
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-          :class="mesSeleccionado === 'actual' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
+          :class="mesSeleccionado === 'actual' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
           @click="seleccionarMesGrafico('actual')"
         >
           Actual
@@ -15,14 +15,14 @@
           v-for="m in mesesRecientesGrafico"
           :key="m.key"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-          :class="m.key === mesSeleccionado ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
+          :class="m.key === mesSeleccionado ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-primary-800/50 text-gray-500 border-primary-700/20 hover:text-gray-300'"
           @click="seleccionarMesGrafico(m.key)"
         >
           {{ m.label }}
         </button>
         <select
           class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-primary-800/50 text-gray-400 border-primary-700/20 outline-none cursor-pointer appearance-none"
-          :class="mesGraficoEsAntiguo ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : ''"
+          :class="mesGraficoEsAntiguo ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : ''"
           :value="mesGraficoEsAntiguo ? mesSeleccionado : ''"
           @change="onSelectMesGraficoAntiguo($event)"
         >
@@ -150,7 +150,7 @@
                     <span class="text-[10px] text-gray-600">{{ formatFechaCorta(gasto.fecha) }}</span>
                     <span v-if="gasto.hora" class="text-[10px] text-gray-600">{{ formatHora(gasto.hora) }}</span>
                     <span v-if="gasto.metodoRegistro === 'voz'"
-                      class="text-[8px] bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded-full"
+                      class="text-[8px] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
                     >VOZ</span>
                   </div>
                 </div>

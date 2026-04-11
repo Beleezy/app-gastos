@@ -22,6 +22,11 @@ export default {
           'text-sec': 'var(--color-text-sec)',
           'text-muted': 'var(--color-text-muted)',
           nav: 'var(--color-nav)',
+          accent: 'var(--color-accent)',
+          'accent-light': 'var(--color-accent-light)',
+          'accent-dark': 'var(--color-accent-dark)',
+          'accent-bg': 'var(--color-accent-bg)',
+          'accent-bg-hover': 'var(--color-accent-bg-hover)',
         },
         primary: {
           50: '#eff6ff',

@@ -9,7 +9,7 @@
 
     <!-- Cargando -->
     <div v-if="cargando" class="flex items-center justify-center py-8">
-      <div class="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div class="w-6 h-6 border-2 border-theme-accent border-t-transparent rounded-full animate-spin"></div>
       <span class="ml-3 text-sm text-gray-400">Buscando duplicados...</span>
     </div>
 
@@ -33,7 +33,7 @@
             :key="persona.id"
             class="flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors"
             :class="selecciones[gi]?.principal === persona.id
-              ? 'bg-blue-500/15 border border-blue-500/30'
+              ? 'bg-theme-accent-bg border border-theme-accent'
               : selecciones[gi]?.secundarias?.includes(persona.id)
                 ? 'bg-red-500/10 border border-red-500/20'
                 : 'bg-primary-800/50 border border-primary-700/20'"
@@ -51,7 +51,7 @@
             </div>
             <div class="shrink-0">
               <span v-if="selecciones[gi]?.principal === persona.id"
-                class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 font-medium">
+                class="text-[10px] px-2 py-0.5 rounded-full bg-theme-accent-bg text-theme-accent font-medium">
                 Principal
               </span>
               <span v-else-if="selecciones[gi]?.secundarias?.includes(persona.id)"
@@ -70,7 +70,7 @@
         <button
           v-if="selecciones[gi]?.principal && selecciones[gi]?.secundarias?.length > 0"
           class="w-full mt-3 py-2 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-          :class="fusionando[gi] ? 'bg-blue-400 cursor-not-allowed text-white' : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'"
+          :class="fusionando[gi] ? 'bg-theme-accent cursor-not-allowed text-white' : 'bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg'"
           :disabled="fusionando[gi]"
           @click="fusionarGrupo(gi)"
         >

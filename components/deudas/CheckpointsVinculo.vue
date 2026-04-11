@@ -161,7 +161,7 @@
                   <div class="flex items-center gap-1.5 mt-0.5">
                     <span
                       class="text-[9px] font-medium px-1.5 py-0.5 rounded-full"
-                      :class="entrada.esTuyo ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400'"
+                      :class="entrada.esTuyo ? 'bg-theme-accent-bg text-theme-accent' : 'bg-gray-500/20 text-gray-400'"
                     >
                       {{ entrada.nombreActor }}
                     </span>
@@ -308,7 +308,7 @@ function tipoLabel(tipo) {
 function tipoBadgeClass(tipo) {
   return {
     actual: 'bg-emerald-500/20 text-emerald-400',
-    anterior: 'bg-blue-500/20 text-blue-400',
+    anterior: 'bg-theme-accent-bg text-theme-accent',
     inicio_vinculo: 'bg-violet-500/20 text-violet-400',
   }[tipo] || 'bg-gray-500/20 text-gray-400'
 }

@@ -2,7 +2,7 @@
   <div class="flex flex-col items-center gap-4">
     <!-- Status text -->
     <p class="text-sm h-5 font-medium">
-      <span v-if="isListening" class="text-blue-400 animate-pulse">Escuchando...</span>
+      <span v-if="isListening" class="text-theme-accent animate-pulse">Escuchando...</span>
       <span v-else-if="hasDraft" class="text-amber-400">Borrador guardado</span>
       <span v-else class="text-gray-500">Toca para registrar un gasto</span>
     </p>
@@ -14,13 +14,13 @@
         class="absolute inset-0 flex items-center justify-center transition-opacity duration-500"
         :class="isListening ? 'opacity-100' : 'opacity-0'"
       >
-        <div class="absolute w-28 h-28 rounded-full bg-blue-500/10 animate-ping-slow"></div>
-        <div class="absolute w-36 h-36 rounded-full bg-blue-500/5 animate-ping-slower"></div>
+        <div class="absolute w-28 h-28 rounded-full bg-[var(--color-accent)]/10 animate-ping-slow"></div>
+        <div class="absolute w-36 h-36 rounded-full bg-[var(--color-accent)]/5 animate-ping-slower"></div>
       </div>
 
       <!-- Idle ambient glow -->
       <div v-if="!isListening && !hasDraft" class="absolute inset-0 flex items-center justify-center">
-        <div class="w-24 h-24 rounded-full bg-blue-500/8 blur-xl"></div>
+        <div class="w-24 h-24 rounded-full bg-[var(--color-accent)]/8 blur-xl"></div>
       </div>
 
       <button
@@ -28,7 +28,7 @@
         :class="[
           isListening
             ? 'bg-gradient-to-br from-red-500/55 to-rose-600/55 shadow-xl shadow-red-500/30 backdrop-blur-md'
-            : 'bg-gradient-to-br from-blue-500/55 to-indigo-600/55 shadow-xl shadow-blue-500/30 hover:shadow-blue-500/40 backdrop-blur-md'
+            : 'bg-gradient-to-br from-[var(--color-accent)]/55 to-indigo-600/55 shadow-xl shadow-[var(--color-accent)]/30 hover:shadow-[var(--color-accent)]/40 backdrop-blur-md'
         ]"
         :disabled="!isSupported"
         @click="toggleListening"
@@ -51,7 +51,7 @@
     <div v-if="isListening" class="flex items-center gap-1.5 h-8">
       <div v-for="(level, i) in audioLevels" :key="i"
         class="w-1 rounded-full transition-all duration-75"
-        :class="i % 2 === 0 ? 'bg-blue-400' : 'bg-indigo-400'"
+        :class="i % 2 === 0 ? 'bg-theme-accent' : 'bg-indigo-400'"
         :style="{ height: `${level}px` }"
       ></div>
     </div>
@@ -68,13 +68,13 @@
         <div v-if="isEditing">
           <textarea
             v-model="editText"
-            class="draft-textarea w-full bg-primary-900/60 border border-primary-600/40 rounded-lg px-3 py-2 text-sm text-gray-200 resize-none focus:outline-none focus:border-blue-500/50"
+            class="draft-textarea w-full bg-primary-900/60 border border-primary-600/40 rounded-lg px-3 py-2 text-sm text-gray-200 resize-none focus:outline-none focus:border-theme-accent/50"
             rows="3"
             @keydown.enter.ctrl="saveEdit"
           ></textarea>
           <div class="flex items-center gap-2 mt-2">
             <button
-              class="flex-1 py-1.5 rounded-lg bg-blue-500/15 text-blue-400 text-xs font-medium hover:bg-blue-500/25 transition-colors"
+              class="flex-1 py-1.5 rounded-lg bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg-hover transition-colors"
               @click="saveEdit"
             >
               Guardar
@@ -115,7 +115,7 @@
           </button>
           <!-- Overwrite (re-record) -->
           <button
-            class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-blue-500/15 text-blue-400 text-xs font-medium hover:bg-blue-500/25 active:bg-blue-500/35 transition-colors"
+            class="flex flex-col items-center justify-center gap-1 py-2 rounded-lg bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg-hover active:bg-[var(--color-accent)]/35 transition-colors"
             @click="$emit('overwrite')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

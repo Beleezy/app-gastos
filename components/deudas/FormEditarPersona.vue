@@ -15,7 +15,7 @@
             v-model="form.nombre"
             type="text"
             placeholder="Nombre o empresa"
-            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50"
+            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-theme-accent"
             required
           />
         </div>
@@ -29,7 +29,7 @@
               type="button"
               class="flex-1 py-2.5 rounded-xl text-xs font-medium transition-colors border"
               :class="form.tipo === opt.value
-                ? 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+                ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
                 : 'bg-primary-800 text-gray-500 border-primary-700/30 hover:border-primary-600/50'"
               @click="form.tipo = opt.value"
             >
@@ -45,7 +45,7 @@
             v-model="form.contacto"
             type="text"
             placeholder="Opcional"
-            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50"
+            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-theme-accent"
           />
         </div>
 
@@ -56,7 +56,7 @@
             v-model="form.notas"
             rows="2"
             placeholder="Opcional"
-            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500/50 resize-none"
+            class="w-full bg-primary-800 border border-primary-700/50 rounded-xl px-3 py-2.5 text-white placeholder-gray-600 focus:outline-none focus:border-theme-accent resize-none"
           ></textarea>
         </div>
 
@@ -74,7 +74,7 @@
           </button>
           <button
             type="submit"
-            class="flex-1 py-3 rounded-xl bg-blue-500/20 text-blue-400 text-sm font-medium hover:bg-blue-500/30 transition-colors flex items-center justify-center gap-2"
+            class="flex-1 py-3 rounded-xl bg-theme-accent-bg text-theme-accent text-sm font-medium hover:bg-theme-accent-bg transition-colors flex items-center justify-center gap-2"
             :disabled="saving"
           >
             <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">

@@ -23,7 +23,7 @@
             <h2 class="text-lg font-semibold text-white break-words">{{ personaSeleccionada.nombre }}</h2>
             <p v-if="personaSeleccionada.contacto" class="text-xs text-gray-500 truncate">{{ personaSeleccionada.contacto }}</p>
             <!-- Badge vinculado inline -->
-            <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-500/15 text-blue-400 text-[10px] font-medium mt-1">
+            <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[10px] font-medium mt-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
@@ -37,7 +37,7 @@
           <!-- Export PDF (only me_deben) -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-blue-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-theme-accent transition-colors text-[10px] font-medium"
             title="Exportar PDF"
             @click="exportarPdf"
           >
@@ -61,7 +61,7 @@
           <!-- Vincular con usuario -->
           <button
             v-if="!personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-blue-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-primary-700/50 flex items-center gap-1.5 text-gray-500 hover:text-theme-accent transition-colors text-[10px] font-medium"
             title="Vincular con usuario"
             @click="showSolicitudVinculo = true"
           >
@@ -119,7 +119,7 @@
           <!-- Pago global button -->
           <button
             v-if="deudasActivasPersona.length > 1 && totalPendientePersona > 0"
-            class="w-full mt-2 py-2 rounded-lg bg-blue-500/15 text-blue-400 text-xs font-medium hover:bg-blue-500/25 transition-colors flex items-center justify-center gap-1.5"
+            class="w-full mt-2 py-2 rounded-lg bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg transition-colors flex items-center justify-center gap-1.5"
             @click="emit('pagoGlobal')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -164,10 +164,10 @@
               <p class="text-sm font-medium text-white">{{ deuda.concepto }}</p>
               <p class="text-xs text-gray-500 mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
               <div v-if="deuda.fechaPago" class="flex items-center gap-1.5 mt-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-blue-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p class="text-[10px] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-blue-400'">
+                <p class="text-[10px] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'">
                   {{ esVencida(deuda) ? 'Vencida:' : 'Pago:' }} {{ formatFecha(deuda.fechaPago) }}
                 </p>
                 <span v-if="esVencida(deuda)" class="text-[9px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
@@ -194,7 +194,7 @@
           <div v-if="deuda.montoOriginal !== deuda.montoPendiente" class="mt-2.5">
             <div class="w-full h-1.5 bg-primary-900/80 rounded-full overflow-hidden">
               <div
-                class="h-full rounded-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-500"
+                class="h-full rounded-full bg-gradient-to-r from-theme-accent to-theme-accent transition-all duration-500"
                 :style="{ width: ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100) + '%' }"
               ></div>
             </div>
@@ -206,7 +206,7 @@
           <!-- Actions (44x44px targets) -->
           <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-primary-700/20">
             <button
-              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 active:bg-blue-500/30 transition-colors"
+              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
               @click="emit('registrarPago', deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

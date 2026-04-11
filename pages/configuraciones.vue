@@ -181,6 +181,38 @@
           </div>
         </div>
 
+        <!-- Color de acento -->
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
+          <div class="flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-theme-text">Color del tema</p>
+              <p class="text-xs text-theme-text-sec">Elige el color de acento de la interfaz</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-3 mt-3">
+            <button
+              v-for="c in ACCENT_COLORS"
+              :key="c.id"
+              class="flex flex-col items-center gap-1.5 group"
+              @click="setAccentColor(c.id)"
+            >
+              <span
+                class="w-10 h-10 rounded-full border-2 transition-all duration-200 flex items-center justify-center"
+                :style="{ backgroundColor: c.color }"
+                :class="accentColor === c.id ? 'border-theme-text scale-110 shadow-lg' : 'border-transparent opacity-70 group-hover:opacity-100 group-hover:scale-105'"
+              >
+                <svg v-if="accentColor === c.id" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" :class="c.id === 'blanco' ? 'text-gray-700' : 'text-white'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+              <span class="text-[10px] text-theme-text-sec">{{ c.label }}</span>
+            </button>
+          </div>
+        </div>
+
         <!-- Categorías personalizadas -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center justify-between mb-1">
@@ -206,12 +238,10 @@
                 >{{ cat.icono }}</span>
                 <div class="min-w-0">
                   <p class="text-sm text-theme-text truncate">{{ cat.nombre }}</p>
-                  <p v-if="cat.esPredefinida" class="text-[10px] text-theme-text-muted">Predefinida</p>
                 </div>
               </div>
               <div class="flex items-center gap-1 shrink-0">
                 <button
-                  v-if="!cat.esPredefinida"
                   class="p-1.5 rounded-lg text-theme-text-sec hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
                   @click="editarCategoria(cat)"
                 >
@@ -220,7 +250,6 @@
                   </svg>
                 </button>
                 <button
-                  v-if="!cat.esPredefinida"
                   class="p-1.5 rounded-lg text-theme-text-sec hover:text-red-400 hover:bg-red-500/10 transition-colors"
                   @click="eliminarCategoria(cat)"
                 >
@@ -446,7 +475,7 @@
 <script setup>
 const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
-const { isDark, toggleTheme } = useTheme()
+const { isDark, toggleTheme, accentColor, setAccentColor, ACCENT_COLORS } = useTheme()
 const { logout } = useAuth()
 const { apiFetch } = useApiFetch()
 
@@ -554,6 +583,7 @@ const puedeCrearCategoria = computed(() => {
 
 async function fetchCategorias() {
   try {
+    await apiFetch('/api/categorias/provision', { method: 'POST' })
     const data = await apiFetch('/api/categorias')
     misCategorias.value = data
   } catch (e) {

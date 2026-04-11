@@ -4,14 +4,14 @@
     <div class="flex items-center gap-2 mb-4">
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vistaActiva === 'semana' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        :class="vistaActiva === 'semana' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
         @click="vistaActiva = 'semana'"
       >
         Por semana
       </button>
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vistaActiva === 'dia' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        :class="vistaActiva === 'dia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
         @click="vistaActiva = 'dia'"
       >
         Por día
@@ -38,14 +38,14 @@
         <!-- Day header -->
         <button
           class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
-          :class="diaExpandido === dia.fecha ? 'bg-blue-500/10 border border-blue-500/20 shadow-sm shadow-blue-500/5' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
+          :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
           @click="toggleDia(dia.fecha)"
         >
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
-              :class="diaExpandido === dia.fecha ? 'bg-blue-500/15' : 'bg-primary-700/30'"
+              :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg' : 'bg-primary-700/30'"
             >
-              <span class="text-xs font-bold" :class="diaExpandido === dia.fecha ? 'text-blue-400' : 'text-gray-400'">{{ extraerDia(dia.fecha) }}</span>
+              <span class="text-xs font-bold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-gray-400'">{{ extraerDia(dia.fecha) }}</span>
             </div>
             <div class="text-left">
               <p class="text-sm font-medium text-white">{{ formatFechaDia(dia.fecha) }}</p>
@@ -85,7 +85,7 @@
         <!-- Week header -->
         <button
           class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
-          :class="semanaExpandida === semana.key ? 'bg-blue-500/10 border border-blue-500/20 shadow-sm shadow-blue-500/5' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
+          :class="semanaExpandida === semana.key ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-primary-800/50 border border-primary-700/20 hover:bg-primary-800/70'"
           @click="toggleSemana(semana.key)"
         >
           <div class="text-left">
@@ -93,7 +93,7 @@
             <p class="text-xs text-gray-500">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'día' : 'días' }} con gastos</p>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-blue-400">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
+            <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500 transition-transform"
               :class="{ 'rotate-180': semanaExpandida === semana.key }"

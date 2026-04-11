@@ -10,7 +10,7 @@
         </div>
         <p class="text-sm font-medium text-white flex-1 min-w-0 break-words">{{ gasto.concepto }}</p>
         <span v-if="gasto.metodoRegistro === 'voz'"
-          class="text-[9px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full shrink-0"
+          class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full shrink-0"
         >VOZ</span>
       </div>
       <!-- Details row: category, time, amount -->
@@ -30,7 +30,7 @@
     <!-- Action buttons — always visible as compact icons -->
     <div class="flex items-center gap-1 shrink-0 ml-2">
       <button
-        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-blue-400 hover:bg-blue-500/10 active:bg-blue-500/20 transition-colors"
+        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-600 hover:text-theme-accent hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
         aria-label="Editar"
         @click.stop="$emit('edit')"
       >

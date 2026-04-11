@@ -4,14 +4,14 @@
     <div class="flex gap-2 mb-4">
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vista === 'comparar' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        :class="vista === 'comparar' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
         @click="vista = 'comparar'"
       >
         Comparar
       </button>
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vista === 'tendencia' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+        :class="vista === 'tendencia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
         @click="vista = 'tendencia'"
       >
         Tendencia
@@ -157,7 +157,7 @@
             v-for="n in [3, 6, 12]"
             :key="n"
             class="px-2.5 py-1 rounded-lg text-xs font-medium transition-colors border"
-            :class="cantidadMeses === n ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : 'bg-primary-800/50 text-gray-500 border-primary-700/20'"
+            :class="cantidadMeses === n ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-primary-800/50 text-gray-500 border-primary-700/20'"
             @click="cantidadMeses = n"
           >
             {{ n }}m
@@ -177,14 +177,14 @@
             v-for="m in tendenciaOrdenada"
             :key="m.key"
             class="bg-primary-800/60 rounded-xl px-3 py-2.5 border border-primary-700/20"
-            :class="m.esActual ? 'border-blue-500/30 bg-blue-500/5' : ''"
+            :class="m.esActual ? 'border-theme-accent bg-theme-accent-bg' : ''"
           >
             <div class="flex items-center justify-between mb-1.5">
               <div class="flex items-center gap-2">
-                <span class="text-xs font-medium" :class="m.esActual ? 'text-blue-300' : 'text-gray-400'">
+                <span class="text-xs font-medium" :class="m.esActual ? 'text-theme-accent' : 'text-gray-400'">
                   {{ m.label }}
                 </span>
-                <span v-if="m.esActual" class="text-[9px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded-full">actual</span>
+                <span v-if="m.esActual" class="text-[9px] bg-theme-accent-bg text-theme-accent border border-theme-accent px-1.5 py-0.5 rounded-full">actual</span>
               </div>
               <div class="flex items-center gap-2">
                 <!-- Variación vs mes anterior -->
@@ -197,7 +197,7 @@
             <div class="flex-1 h-2 bg-primary-900/60 rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full transition-all duration-700"
-                :class="m.esActual ? 'bg-blue-500' : 'bg-gray-600'"
+                :class="m.esActual ? 'bg-theme-accent' : 'bg-gray-600'"
                 :style="{ width: m.barPct + '%' }"
               ></div>
             </div>

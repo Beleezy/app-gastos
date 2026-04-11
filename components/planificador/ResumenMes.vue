@@ -13,13 +13,13 @@
     <!-- Budget Summary Card -->
     <div class="relative bg-gradient-to-br from-primary-800 to-primary-800/90 rounded-2xl p-4 space-y-4 border border-primary-700/20 overflow-hidden">
       <!-- Decorative accent -->
-      <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+      <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
 
       <!-- Income / Budget -->
       <div class="relative flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/25 to-indigo-500/15 flex items-center justify-center">
-            <span class="text-xs font-bold text-blue-400 leading-none">S/</span>
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--color-accent)]/25 to-indigo-500/15 flex items-center justify-center">
+            <span class="text-xs font-bold text-theme-accent leading-none">S/</span>
           </div>
           <span class="text-sm text-gray-400">Presupuesto</span>
         </div>
@@ -31,18 +31,18 @@
             v-model="presupuestoTemp"
             type="number"
             step="0.01"
-            class="w-28 bg-primary-900 border border-blue-500 rounded-lg px-2 py-1 text-right text-white text-lg font-bold focus:outline-none"
+            class="w-28 bg-primary-900 border border-theme-accent rounded-lg px-2 py-1 text-right text-white text-lg font-bold focus:outline-none"
             @keyup.enter="guardarPresupuesto"
             @blur="guardarPresupuesto"
           />
         </div>
         <div v-else class="flex items-center gap-1.5">
-          <button class="text-lg font-bold text-white hover:text-blue-300 transition-colors whitespace-nowrap" @click="iniciarEdicion">
+          <button class="text-lg font-bold text-white hover:text-theme-accent-light transition-colors whitespace-nowrap" @click="iniciarEdicion">
             {{ currencySymbol }} {{ formatMonto(resumen.presupuesto) }}
           </button>
           <button
             v-if="presupuestoDefault > 0 && resumen.presupuesto !== presupuestoDefault"
-            class="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 transition-colors"
+            class="w-6 h-6 flex items-center justify-center rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg-hover transition-colors"
             title="Sincronizar con presupuesto predeterminado"
             @click="sincronizarPresupuesto"
           >
@@ -82,7 +82,7 @@
           <span class="text-xs text-gray-400">Presupuesto asignado</span>
           <span
             class="text-xs font-semibold px-2 py-0.5 rounded-full"
-            :class="resumen.porcentajeAsignado > 90 ? 'text-red-400 bg-red-500/10' : 'text-blue-400 bg-blue-500/10'"
+            :class="resumen.porcentajeAsignado > 90 ? 'text-red-400 bg-red-500/10' : 'text-theme-accent bg-theme-accent-bg'"
           >
             {{ resumen.porcentajeAsignado.toFixed(1) }}%
           </span>
@@ -90,7 +90,7 @@
         <div class="w-full h-2 bg-primary-900/60 rounded-full overflow-hidden">
           <div
             class="h-full rounded-full transition-all duration-700 ease-out"
-            :class="resumen.porcentajeAsignado > 90 ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-400'"
+            :class="resumen.porcentajeAsignado > 90 ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-[var(--color-accent-dark)] via-[var(--color-accent)] to-indigo-400'"
             :style="{ width: Math.min(resumen.porcentajeAsignado, 100) + '%' }"
           ></div>
         </div>
@@ -111,7 +111,7 @@
         <!-- Duplicar mes -->
         <button
           v-if="gastosPlaneados.length === 0"
-          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 text-[10px] font-medium hover:bg-blue-500/20 active:scale-95 transition-all border border-blue-500/10"
+          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[10px] font-medium hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
           :disabled="duplicando"
           @click="showSelectorMes = true"
         >
@@ -133,7 +133,7 @@
       <div class="flex gap-2 mb-4">
         <select
           v-model.number="origenMes"
-          class="flex-1 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50"
+          class="flex-1 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-theme-accent"
         >
           <option v-for="(m, i) in MESES" :key="i" :value="i + 1">{{ m }}</option>
         </select>
@@ -142,12 +142,12 @@
           type="number"
           :min="anioActual - 5"
           :max="anioActual"
-          class="w-24 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50"
+          class="w-24 bg-primary-900 border border-primary-700/50 rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-theme-accent"
         />
       </div>
       <div class="space-y-2">
         <button
-          class="w-full py-2.5 rounded-xl bg-blue-500/20 text-blue-400 text-sm font-medium hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+          class="w-full py-2.5 rounded-xl bg-theme-accent-bg text-theme-accent text-sm font-medium hover:bg-theme-accent-bg-hover transition-colors disabled:opacity-50"
           :disabled="duplicando || (origenMes === mesActual && origenAnio === anioActual)"
           @click="ejecutarDuplicar"
         >

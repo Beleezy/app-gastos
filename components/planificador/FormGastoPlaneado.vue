@@ -7,7 +7,7 @@
         v-model="form.concepto"
         type="text"
         placeholder="Ej: Recibo de luz, Cuota gimnasio..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
@@ -20,7 +20,7 @@
           :key="cat.id"
           class="flex flex-col items-center gap-1 p-2 rounded-xl border transition-all"
           :class="form.categoriaId === cat.id
-            ? 'border-blue-500 bg-blue-500/10'
+            ? 'border-theme-accent bg-theme-accent-bg'
             : 'border-primary-700/30 bg-primary-900/50'"
           @click="form.categoriaId = cat.id"
         >
@@ -45,7 +45,7 @@
           type="number"
           step="0.01"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
@@ -66,7 +66,7 @@
             :key="dia"
             class="w-9 h-9 rounded-lg text-xs font-medium flex items-center justify-center transition-all"
             :class="form.diaSeleccionado === dia
-              ? 'bg-blue-500 text-white'
+              ? 'bg-theme-accent text-white'
               : esPasado(dia)
                 ? 'text-gray-700'
                 : 'text-gray-300 hover:bg-primary-700'"
@@ -86,7 +86,7 @@
       </div>
       <button
         class="w-11 h-6 rounded-full relative transition-colors"
-        :class="form.esRecurrente ? 'bg-blue-500' : 'bg-primary-700'"
+        :class="form.esRecurrente ? 'bg-theme-accent' : 'bg-primary-700'"
         @click="form.esRecurrente = !form.esRecurrente"
       >
         <div
@@ -103,7 +103,7 @@
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
@@ -111,7 +111,7 @@
 
     <button
       class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-      :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
+      :class="saving ? 'bg-[var(--color-accent)]/70 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
     >

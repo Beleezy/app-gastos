@@ -3,12 +3,12 @@
     <div
       v-for="s in vinculos.solicitudesPendientes.value"
       :key="s.id"
-      class="bg-blue-500/10 border border-blue-500/20 rounded-2xl p-4 mb-2"
+      class="bg-theme-accent-bg border border-theme-accent rounded-2xl p-4 mb-2"
     >
       <div class="flex items-start gap-3">
         <!-- Avatar -->
-        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-          <span class="text-blue-400 text-sm font-bold">
+        <div class="w-10 h-10 rounded-full bg-theme-accent-bg flex items-center justify-center flex-shrink-0">
+          <span class="text-theme-accent text-sm font-bold">
             {{ (s.remitenteNombre || '?').charAt(0).toUpperCase() }}
           </span>
         </div>
@@ -18,7 +18,7 @@
             {{ s.remitenteNombre }}
           </p>
           <p class="text-xs text-gray-400 mt-0.5">
-            Quiere vincular la persona <strong class="text-blue-400">"{{ s.personaNombre }}"</strong> contigo
+            Quiere vincular la persona <strong class="text-theme-accent">"{{ s.personaNombre }}"</strong> contigo
           </p>
           <p v-if="s.mensaje" class="text-xs text-gray-500 mt-1 italic">
             "{{ s.mensaje }}"

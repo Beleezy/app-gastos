@@ -60,9 +60,9 @@
           <template v-if="pagosParseados.length > 0">
             <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Pagos</p>
             <div v-for="(p, i) in pagosParseados" :key="'p-'+i"
-              class="bg-primary-900/60 rounded-xl p-3 border border-blue-500/30">
+              class="bg-primary-900/60 rounded-xl p-3 border border-theme-accent">
               <div class="flex items-center gap-2 mb-2">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/20 text-blue-400">Pago</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-theme-accent-bg text-theme-accent">Pago</span>
               </div>
               <div class="grid grid-cols-2 gap-2 text-sm">
                 <div>

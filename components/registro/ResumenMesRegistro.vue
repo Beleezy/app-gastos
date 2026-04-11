@@ -1,6 +1,6 @@
 <template>
   <div class="relative bg-gradient-to-br from-primary-800/80 to-primary-800/60 rounded-2xl border border-primary-700/20 px-4 py-4 overflow-hidden">
-    <div class="absolute -top-8 -right-8 w-32 h-32 bg-blue-500/6 rounded-full blur-2xl"></div>
+    <div class="absolute -top-8 -right-8 w-32 h-32 bg-theme-accent-bg rounded-full blur-2xl"></div>
 
     <div class="relative flex items-end justify-between mb-3">
       <div>
@@ -17,7 +17,7 @@
             v-model="presupuestoTemp"
             type="number"
             step="0.01"
-            class="w-28 bg-primary-900 border border-blue-500 rounded-lg px-2 py-1 text-right text-white text-base font-bold focus:outline-none"
+            class="w-28 bg-primary-900 border border-theme-accent rounded-lg px-2 py-1 text-right text-white text-base font-bold focus:outline-none"
             @keyup.enter="guardar"
             @blur="guardar"
           />
@@ -25,14 +25,14 @@
         <!-- Display mode -->
         <div v-else class="flex items-center gap-1.5 justify-end">
           <button
-            class="text-base font-semibold text-gray-300 hover:text-blue-300 transition-colors whitespace-nowrap"
+            class="text-base font-semibold text-gray-300 hover:text-theme-accent transition-colors whitespace-nowrap"
             @click="iniciarEdicion"
           >
             {{ presupuesto > 0 ? `${currencySymbol} ${formatMonto(presupuesto)}` : 'Sin límite' }}
           </button>
           <button
             v-if="presupuestoDefault > 0 && presupuesto !== presupuestoDefault"
-            class="w-6 h-6 flex items-center justify-center rounded-lg bg-blue-500/15 text-blue-400 hover:bg-blue-500/25 transition-colors"
+            class="w-6 h-6 flex items-center justify-center rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg transition-colors"
             title="Sincronizar con presupuesto predeterminado"
             @click="sincronizar"
           >

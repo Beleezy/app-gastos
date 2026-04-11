@@ -1,7 +1,7 @@
 <template>
   <div v-if="pagos.length > 0" class="mb-5">
     <button class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
-      <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-theme-accent"></span>
       <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Historial de pagos</h3>
       <span class="text-xs text-gray-500">{{ totalPagos }}</span>
       <svg
@@ -41,14 +41,14 @@
             <input
               v-model="formEditar.fechaPago"
               type="date"
-              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500"
+              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent"
             />
           </div>
           <div>
             <label class="block text-xs font-medium text-gray-400 mb-1">Método de pago</label>
             <select
               v-model="formEditar.metodoPago"
-              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500"
+              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent"
             >
               <option value="">Sin especificar</option>
               <option value="Efectivo">Efectivo</option>
@@ -67,7 +67,7 @@
               v-model="formEditar.notas"
               type="text"
               placeholder="Opcional"
-              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500"
+              class="w-full px-3 py-2.5 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent"
             />
           </div>
         </div>
@@ -79,7 +79,7 @@
             Cancelar
           </button>
           <button
-            class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-white text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
             :disabled="guardandoEdicion"
             @click="guardarEdicion"
           >
@@ -96,7 +96,7 @@
 
         <div v-for="(pago, idx) in pagos" :key="idx" class="relative mb-4 last:mb-0">
           <!-- Timeline dot -->
-          <div class="absolute -left-4 top-3 w-2.5 h-2.5 rounded-full bg-blue-500 border-2 border-primary-900 z-10"></div>
+          <div class="absolute -left-4 top-3 w-2.5 h-2.5 rounded-full bg-theme-accent border-2 border-primary-900 z-10"></div>
 
           <!-- Payment card -->
           <div class="bg-primary-800 rounded-xl p-3.5 border border-primary-700/30">
@@ -108,12 +108,12 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  <span class="text-[10px] text-blue-400 font-medium">{{ pago.metodoPago }}</span>
+                  <span class="text-[10px] text-theme-accent font-medium">{{ pago.metodoPago }}</span>
                 </div>
                 <p v-else class="text-[10px] text-gray-600 mt-0.5">Sin método registrado</p>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="text-sm font-bold text-blue-400">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
+                <span class="text-sm font-bold text-theme-accent">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
                 <!-- Editar pago -->
                 <button
                   class="w-6 h-6 flex items-center justify-center rounded-lg text-gray-600 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
@@ -140,10 +140,10 @@
             <!-- Debts breakdown — each pago individual with its own method -->
             <div class="bg-primary-900/50 rounded-lg p-2.5 space-y-2">
               <div v-for="(detalle, dIdx) in pago.detalles" :key="dIdx" class="flex items-start gap-2">
-                <span class="w-1 h-1 rounded-full bg-blue-400/60 shrink-0 mt-1.5"></span>
+                <span class="w-1 h-1 rounded-full bg-theme-accent/60 shrink-0 mt-1.5"></span>
                 <div class="flex-1 min-w-0">
                   <p class="text-[11px] text-gray-400 truncate">{{ detalle.concepto }}</p>
-                  <div v-if="detalle.metodoPago && detalle.metodoPago !== pago.metodoPago" class="text-[10px] text-blue-400/70">
+                  <div v-if="detalle.metodoPago && detalle.metodoPago !== pago.metodoPago" class="text-[10px] text-theme-accent/70">
                     {{ detalle.metodoPago }}
                   </div>
                 </div>

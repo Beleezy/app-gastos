@@ -2,11 +2,11 @@
   <div class="min-h-screen flex flex-col">
     <!-- Header with gradient accent -->
     <div class="relative px-5 pt-8 pb-4 overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-blue-500/8 rounded-full blur-3xl"></div>
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-theme-accent-bg rounded-full blur-3xl"></div>
 
       <div class="relative flex items-center gap-3 mb-1">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-500/25 to-indigo-500/15 flex items-center justify-center border border-blue-500/10">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[var(--color-accent)]/25 to-indigo-500/15 flex items-center justify-center border border-[var(--color-accent)]/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
@@ -23,7 +23,7 @@
       <div class="bg-gradient-to-br from-primary-800 to-primary-800/80 rounded-2xl p-4 border border-primary-700/20">
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs text-gray-400 font-medium">Gasto de {{ mesActual }}</span>
-          <NuxtLink to="/registro" class="text-[10px] text-blue-400 hover:text-blue-300 transition-colors">Ver detalle →</NuxtLink>
+          <NuxtLink to="/registro" class="text-[10px] text-theme-accent hover:text-theme-accent-light transition-colors">Ver detalle →</NuxtLink>
         </div>
         <div class="flex items-end justify-between mb-2">
           <p class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(totalMes) }}</p>
@@ -68,14 +68,14 @@
         <!-- Plan del mes -->
         <NuxtLink to="/planificador" class="bg-primary-800 rounded-2xl p-3.5 border border-primary-700/20 block active:bg-primary-700/50 transition-colors">
           <div class="flex items-center gap-2 mb-2">
-            <div class="w-7 h-7 rounded-lg bg-blue-500/15 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <div class="w-7 h-7 rounded-lg bg-theme-accent-bg flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
               </svg>
             </div>
             <span class="text-[10px] text-gray-400 font-medium">Plan</span>
           </div>
-          <p class="text-lg font-bold" :class="porcentajePlanPagado > 70 ? 'text-emerald-400' : 'text-blue-400'">
+          <p class="text-lg font-bold" :class="porcentajePlanPagado > 70 ? 'text-emerald-400' : 'text-theme-accent'">
             {{ porcentajePlanPagado.toFixed(0) }}%
           </p>
           <p class="text-[10px] text-gray-600 mt-0.5">{{ countPagados }}/{{ countTotal }} pagados</p>
@@ -180,8 +180,8 @@ const modulos = [
   {
     to: '/planificador',
     icon: IconClipboard,
-    iconBg: 'bg-blue-500/15',
-    iconColor: 'text-blue-400',
+    iconBg: 'bg-theme-accent-bg',
+    iconColor: 'text-theme-accent',
     titulo: 'Planificador',
     descripcion: 'Organiza tu presupuesto mensual por categoría',
   },

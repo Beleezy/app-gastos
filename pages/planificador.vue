@@ -7,7 +7,7 @@
     <!-- Pull-to-refresh indicator -->
     <Transition name="ptr">
       <div v-if="isRefreshing" class="flex justify-center py-2">
-        <svg class="animate-spin w-5 h-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin w-5 h-5 text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
@@ -27,7 +27,7 @@
           v-for="v in vistas"
           :key="v.value"
           class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="vistaActual === v.value ? 'bg-blue-500/20 text-blue-400' : 'text-gray-500'"
+          :class="vistaActual === v.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-gray-500'"
           @click="vistaActual = v.value"
         >{{ v.label }}</button>
       </div>
@@ -49,7 +49,7 @@
 
     <!-- FAB - Floating Action Button -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500/50 to-indigo-600/50 hover:from-blue-400/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[var(--color-accent)]/50 to-indigo-600/50 hover:from-[var(--color-accent)]/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-[var(--color-accent)]/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
       @click="showForm = true"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

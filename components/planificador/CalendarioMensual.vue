@@ -19,7 +19,7 @@
         class="h-14 rounded-xl p-1 flex flex-col border transition-colors"
         :class="[
           esHoy(dia)
-            ? 'bg-blue-500/10 border-blue-500/30'
+            ? 'bg-theme-accent-bg border-theme-accent'
             : gastosDelDia(dia).length > 0
               ? 'bg-primary-800/80 border-primary-700/30'
               : 'bg-transparent border-transparent',
@@ -28,7 +28,7 @@
         <!-- Número de día -->
         <span
           class="text-[10px] font-semibold leading-none mb-0.5"
-          :class="esHoy(dia) ? 'text-blue-400' : 'text-gray-500'"
+          :class="esHoy(dia) ? 'text-theme-accent' : 'text-gray-500'"
         >{{ dia }}</span>
 
         <!-- Puntos de gastos (máx 2 visibles + overflow) -->

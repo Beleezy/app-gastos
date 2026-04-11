@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-primary-950">
     <div class="text-center">
-      <div class="w-10 h-10 border-4 border-blue-400/30 border-t-blue-400 rounded-full animate-spin mx-auto mb-4"></div>
+      <div class="w-10 h-10 border-4 border-theme-accent/30 border-t-theme-accent rounded-full animate-spin mx-auto mb-4"></div>
       <p class="text-sm text-gray-400">Iniciando sesión...</p>
     </div>
   </div>

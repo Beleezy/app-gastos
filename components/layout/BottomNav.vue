@@ -9,21 +9,22 @@
         class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group"
         :class="[
           isActive(item.to)
-            ? 'text-blue-400'
+            ? 'text-theme-accent'
             : 'text-theme-text-muted hover:text-theme-text-sec'
         ]"
       >
         <!-- Active indicator pill -->
         <div
           class="absolute -top-0.5 w-8 h-1 rounded-full transition-all duration-300"
-          :class="isActive(item.to) ? 'bg-blue-400 shadow-sm shadow-blue-400/50' : 'bg-transparent'"
+          :class="isActive(item.to) ? 'bg-theme-accent shadow-sm' : 'bg-transparent'"
+          :style="isActive(item.to) ? { boxShadow: '0 1px 2px var(--color-accent-ring)' } : {}"
         ></div>
 
         <!-- Icon container -->
         <div class="relative">
           <div
             class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 mb-0.5"
-            :class="isActive(item.to) ? 'bg-blue-500/15 scale-105' : 'group-hover:bg-primary-700/30'"
+            :class="isActive(item.to) ? 'bg-theme-accent-bg scale-105' : 'group-hover:bg-primary-700/30'"
           >
             <component :is="item.icon" class="w-6 h-6 transition-transform duration-300" :class="isActive(item.to) ? 'scale-110' : ''" />
           </div>
@@ -36,7 +37,7 @@
 
         <span
           class="text-[10px] font-semibold transition-all duration-300 leading-none"
-          :class="isActive(item.to) ? 'text-blue-400 opacity-100' : 'opacity-70'"
+          :class="isActive(item.to) ? 'text-theme-accent opacity-100' : 'opacity-70'"
         >{{ item.label }}</span>
       </NuxtLink>
     </div>

@@ -99,7 +99,7 @@
               </button>
               <!-- Retake -->
               <button
-                class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-blue-500/10 text-blue-400 text-xs font-medium hover:bg-blue-500/20 active:scale-95 transition-all"
+                class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg active:scale-95 transition-all"
                 @click="retake"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

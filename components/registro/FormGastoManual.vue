@@ -7,7 +7,7 @@
         v-model="form.concepto"
         type="text"
         placeholder="Ej: Almuerzo, Pasaje, Recibo de luz..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         @input="buscarConceptos"
         @focus="mostrarSugerencias = true"
         @blur="ocultarSugerencias"
@@ -40,7 +40,7 @@
           step="0.01"
           min="0"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
@@ -54,13 +54,13 @@
           :key="cat.id"
           class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border text-xs transition-all"
           :class="form.categoriaId === cat.id
-            ? 'border-blue-500 bg-blue-500/10'
+            ? 'border-theme-accent bg-theme-accent-bg'
             : 'border-primary-700/50 bg-primary-900/50 hover:border-primary-600'"
           @click="form.categoriaId = cat.id"
         >
           <span class="text-base">{{ cat.icono || '📦' }}</span>
           <span class="truncate w-full text-center"
-            :class="form.categoriaId === cat.id ? 'text-blue-400' : 'text-gray-400'"
+            :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-gray-400'"
           >{{ cat.nombre }}</span>
         </button>
       </div>
@@ -73,7 +73,7 @@
         <input
           v-model="form.fecha"
           type="date"
-          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
       <div>
@@ -81,7 +81,7 @@
         <input
           v-model="form.hora"
           type="time"
-          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
@@ -93,7 +93,7 @@
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
@@ -101,7 +101,7 @@
 
     <button
       class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-      :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
+      :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
     >

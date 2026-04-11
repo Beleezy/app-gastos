@@ -29,7 +29,7 @@
           v-model="form.personaNombre"
           type="text"
           placeholder="Nombre de la persona u organizacion..."
-          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
           @input="onPersonaInput"
           @focus="showSugerencias = true"
         />
@@ -54,14 +54,14 @@
       <div v-if="!form.personaEntidadId" class="flex items-center gap-3 mt-2">
         <button
           class="px-3 py-1 rounded-lg text-xs transition-colors"
-          :class="form.personaTipo === 'persona' ? 'bg-blue-500/20 text-blue-400' : 'bg-primary-900/50 text-gray-500'"
+          :class="form.personaTipo === 'persona' ? 'bg-theme-accent-bg text-theme-accent' : 'bg-primary-900/50 text-gray-500'"
           @click="form.personaTipo = 'persona'"
         >
           Persona
         </button>
         <button
           class="px-3 py-1 rounded-lg text-xs transition-colors"
-          :class="form.personaTipo === 'organizacion' ? 'bg-blue-500/20 text-blue-400' : 'bg-primary-900/50 text-gray-500'"
+          :class="form.personaTipo === 'organizacion' ? 'bg-theme-accent-bg text-theme-accent' : 'bg-primary-900/50 text-gray-500'"
           @click="form.personaTipo = 'organizacion'"
         >
           Organizacion
@@ -76,7 +76,7 @@
         v-model="form.concepto"
         type="text"
         placeholder="Ej: Almuerzo del martes, Prestamo..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
@@ -91,7 +91,7 @@
           step="0.01"
           min="0"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
     </div>
@@ -102,7 +102,7 @@
       <input
         v-model="form.fecha"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
@@ -112,7 +112,7 @@
       <input
         v-model="form.fechaPago"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
       <p class="text-[10px] text-gray-600 mt-1">Fecha acordada para el pago (si la hay)</p>
     </div>
@@ -124,7 +124,7 @@
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
@@ -132,7 +132,7 @@
 
     <button
       class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-      :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
+      :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
     >

@@ -8,7 +8,7 @@
       <!-- Pull-to-refresh indicator -->
       <Transition name="ptr">
         <div v-if="isRefreshing" class="flex justify-center py-2">
-          <svg class="animate-spin w-5 h-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <svg class="animate-spin w-5 h-5 text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
@@ -72,14 +72,14 @@
       <!-- Barra de búsqueda -->
       <div class="px-4 mb-3">
         <div class="relative group">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 transition-colors group-focus-within:text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="busquedaGasto"
             type="text"
             placeholder="Buscar gasto..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-primary-800/50 border border-primary-700/20 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500/40 focus:bg-primary-800/70 transition-all duration-200"
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-primary-800/50 border border-primary-700/20 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:bg-primary-800/70 transition-all duration-200"
           />
           <button v-if="busquedaGasto" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors" @click="busquedaGasto = ''">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -101,21 +101,21 @@
       <div class="flex items-center gap-2 px-4 mb-4">
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaRegistro === 'historial' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          :class="vistaRegistro === 'historial' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
           @click="vistaRegistro = 'historial'"
         >
           Historial
         </button>
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaRegistro === 'categorias' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          :class="vistaRegistro === 'categorias' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
           @click="vistaRegistro = 'categorias'"
         >
           Categorías
         </button>
         <button
           class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaRegistro === 'stats' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
+          :class="vistaRegistro === 'stats' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-800/40 text-gray-500 border border-primary-700/20'"
           @click="vistaRegistro = 'stats'"
         >
           Comparar
@@ -171,7 +171,7 @@
 
     <!-- FAB: Agregar gasto manual -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-blue-500/50 to-indigo-600/50 hover:from-blue-400/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-[var(--color-accent)]/50 to-indigo-600/50 hover:from-[var(--color-accent)]/65 hover:to-indigo-500/65 active:scale-90 shadow-lg shadow-[var(--color-accent)]/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md"
       @click="showFormManual = true"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -272,7 +272,7 @@
         </svg>
         <span class="text-gray-300">Gasto eliminado</span>
         <button
-          class="ml-1 px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 font-semibold text-xs border border-blue-500/30 hover:bg-blue-500/30 active:scale-95 transition-all"
+          class="ml-1 px-3 py-1 rounded-lg bg-theme-accent-bg text-theme-accent font-semibold text-xs border border-theme-accent hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
           @click="deshacerEliminar"
         >
           Deshacer ({{ undoCountdown }}s)

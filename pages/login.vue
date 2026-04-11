@@ -2,8 +2,8 @@
   <div class="min-h-screen flex flex-col items-center justify-center bg-primary-950 px-6">
     <!-- Logo / branding -->
     <div class="flex flex-col items-center mb-10">
-      <div class="w-16 h-16 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+      <div class="w-16 h-16 rounded-2xl bg-theme-accent-bg border border-theme-accent flex items-center justify-center mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.172-.879-1.172-2.303 0-3.182.553-.44 1.278-.659 2.003-.659.727 0 1.45.219 2.003.659m-5.5 7.5A10.5 10.5 0 1 1 12 1.5a10.5 10.5 0 0 1 0 21Z" />
         </svg>
       </div>

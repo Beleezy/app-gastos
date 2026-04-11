@@ -11,7 +11,7 @@
         v-model="form.email"
         type="email"
         placeholder="correo@ejemplo.com"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
@@ -22,7 +22,7 @@
         v-model="form.mensaje"
         rows="2"
         placeholder="Ej: Hola, estas son las deudas que tenemos pendientes..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       />
     </div>
 
@@ -68,7 +68,7 @@
     <!-- Botón enviar -->
     <button
       class="w-full py-3 rounded-xl font-medium text-sm transition-all mt-2"
-      :class="isValid ? 'bg-blue-600 text-white active:bg-blue-700' : 'bg-primary-800 text-gray-600 cursor-not-allowed'"
+      :class="isValid ? 'bg-theme-accent-dark text-white active:bg-theme-accent-dark' : 'bg-primary-800 text-gray-600 cursor-not-allowed'"
       :disabled="!isValid || vinculos.isLoading.value"
       @click="enviar"
     >

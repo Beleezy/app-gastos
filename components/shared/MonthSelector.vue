@@ -11,14 +11,14 @@
 
     <div class="text-center">
       <button
-        class="text-lg font-bold text-white hover:text-blue-400 transition-colors"
+        class="text-lg font-bold text-white hover:text-theme-accent transition-colors"
         :disabled="esActual"
         @click="$emit('goToCurrent')"
       >
         {{ label }}
       </button>
-      <p v-if="esActual && showCurrentLabel" class="text-[10px] text-blue-400/70 font-medium mt-0.5">Mes actual</p>
-      <p v-else-if="!esActual && showCurrentLabel" class="text-[10px] text-blue-400/60 font-medium mt-0.5">Toca para ir al mes actual</p>
+      <p v-if="esActual && showCurrentLabel" class="text-[10px] text-theme-accent/70 font-medium mt-0.5">Mes actual</p>
+      <p v-else-if="!esActual && showCurrentLabel" class="text-[10px] text-theme-accent/60 font-medium mt-0.5">Toca para ir al mes actual</p>
     </div>
 
     <button

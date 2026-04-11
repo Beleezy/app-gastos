@@ -10,7 +10,7 @@
           v-model="busqueda"
           type="text"
           placeholder="Buscar persona..."
-          class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-primary-900/60 border border-primary-700/30 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+          class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-primary-900/60 border border-primary-700/30 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent transition-colors"
         />
         <button v-if="busqueda" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300" @click="busqueda = ''">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -36,7 +36,7 @@
         v-for="f in filtrosEstado"
         :key="f.value"
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="filtroEstado === f.value ? 'bg-blue-500 text-white' : 'bg-primary-800 text-gray-400'"
+        :class="filtroEstado === f.value ? 'bg-theme-accent text-white' : 'bg-primary-800 text-gray-400'"
         @click="filtroEstado = f.value"
       >
         {{ f.label }}
@@ -79,7 +79,7 @@
         <!-- Quick actions revealed by swipe -->
         <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-primary-800">
           <button
-            class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-blue-400 bg-blue-500/10 rounded-lg"
+            class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-theme-accent bg-theme-accent-bg rounded-lg"
             @click.stop="emit('seleccionar', persona)"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -126,7 +126,7 @@
                   <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-primary-700 text-gray-400">
                     ORG
                   </span>
-                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-500/15 text-blue-400" title="Vinculado con usuario">
+                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
@@ -176,7 +176,7 @@
               <div v-if="persona.contacto && isPhone(persona.contacto)" class="flex items-center gap-1 shrink-0" @click.stop>
                 <a
                   :href="`tel:${persona.contacto}`"
-                  class="w-7 h-7 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                  class="w-7 h-7 flex items-center justify-center rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg transition-colors"
                   title="Llamar"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -218,7 +218,7 @@
           <!-- Quick actions revealed by swipe -->
           <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-primary-800">
             <button
-              class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-blue-400 bg-blue-500/10 rounded-lg"
+              class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-theme-accent bg-theme-accent-bg rounded-lg"
               @click.stop="emit('seleccionar', persona)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

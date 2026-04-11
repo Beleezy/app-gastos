@@ -28,7 +28,7 @@
           step="0.01"
           :max="deuda.montoPendiente"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
       <div class="flex gap-2 mt-2">
@@ -54,7 +54,7 @@
       <input
         v-model="form.fecha"
         type="date"
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
     </div>
 
@@ -66,7 +66,7 @@
           v-for="metodo in metodos"
           :key="metodo"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="form.metodoPago === metodo ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
+          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-primary-900/50 text-gray-500 border border-transparent'"
           @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
         >
           {{ metodo }}
@@ -81,7 +81,7 @@
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas del pago..."
-        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+        class="w-full px-4 py-3 rounded-xl bg-primary-900/80 border border-primary-700/50 text-white placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
       ></textarea>
     </div>
 
@@ -89,7 +89,7 @@
 
     <button
       class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-      :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
+      :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
     >

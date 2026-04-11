@@ -28,7 +28,7 @@
 
       <!-- Loading -->
       <div v-if="isParsing" class="flex flex-col items-center gap-3 py-8">
-        <svg class="animate-spin w-8 h-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg class="animate-spin w-8 h-8 text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
         </svg>
@@ -38,7 +38,7 @@
       <!-- Error -->
       <div v-else-if="parseError" class="mx-5 mb-4 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl">
         <p class="text-sm text-red-400">{{ parseError }}</p>
-        <button class="mt-2 text-xs text-blue-400 underline" @click="$emit('retry')">Intentar de nuevo</button>
+        <button class="mt-2 text-xs text-theme-accent underline" @click="$emit('retry')">Intentar de nuevo</button>
       </div>
 
       <!-- Parsed expenses list -->
@@ -83,7 +83,7 @@
             <div>
               <label class="block text-xs text-gray-500 mb-1">Concepto</label>
               <input v-model="gasto.concepto" type="text"
-                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent transition-colors"
               />
             </div>
             <div class="grid grid-cols-2 gap-3">
@@ -92,26 +92,26 @@
                 <div class="relative">
                   <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-500">{{ currencySymbol }}</span>
                   <input v-model.number="gasto.monto" type="number" step="0.01"
-                    class="w-full pl-8 pr-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    class="w-full pl-8 pr-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent transition-colors"
                   />
                 </div>
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-1">Fecha</label>
                 <input v-model="gasto.fecha" type="date"
-                  class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                  class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent transition-colors"
                 />
               </div>
             </div>
             <div>
               <label class="block text-xs text-gray-500 mb-1">Categoría</label>
               <select v-model="gasto.categoria"
-                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                class="w-full px-3 py-2 rounded-lg bg-primary-800 border border-primary-700/50 text-white text-sm focus:outline-none focus:border-theme-accent transition-colors"
               >
                 <option v-for="cat in categoriasDisponibles" :key="cat" :value="cat">{{ cat }}</option>
               </select>
             </div>
-            <button class="text-xs text-blue-400 hover:text-blue-300" @click="editingIdx = null">
+            <button class="text-xs text-theme-accent hover:text-theme-accent-light" @click="editingIdx = null">
               Listo
             </button>
           </div>
@@ -170,7 +170,7 @@
           </button>
           <button
             class="flex-1 py-3 rounded-xl text-white font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-            :class="saving ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'"
+            :class="saving ? 'bg-[var(--color-accent)]/70 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
             :disabled="saving"
             @click="confirmar"
           >
