@@ -79,6 +79,28 @@
             {{ porcentajePlanPagado.toFixed(0) }}%
           </p>
           <p class="text-[10px] text-theme-text-muted mt-0.5">{{ countPagados }}/{{ countTotal }} pagados</p>
+          <div class="mt-3 border-t border-theme-border pt-3">
+            <div class="flex items-center justify-between text-[10px] text-theme-text-sec">
+              <span>Futuros</span>
+              <span>{{ futureProjects }} proyecto{{ futureProjects !== 1 ? 's' : '' }}</span>
+            </div>
+            <div v-if="futureProjects > 0" class="mt-2 space-y-1">
+              <p class="text-[11px] text-sky-300">Prom {{ currencySymbol }} {{ formatMonto(futureAverage) }}</p>
+              <p class="text-[10px] text-theme-text-muted">
+                {{ currencySymbol }} {{ formatMonto(futureMin) }} - {{ currencySymbol }} {{ formatMonto(futureMax) }}
+              </p>
+              <div v-if="futureHighlights.length" class="mt-2 flex flex-wrap gap-1">
+                <span
+                  v-for="item in futureHighlights"
+                  :key="item.id"
+                  class="rounded-full bg-theme-input px-2 py-1 text-[9px] text-theme-text-sec"
+                >
+                  {{ item.tipoGasto }}
+                </span>
+              </div>
+            </div>
+            <p v-else class="mt-2 text-[10px] text-theme-text-muted">Sin proyectos futuros aun</p>
+          </div>
         </NuxtLink>
       </div>
     </div>
@@ -148,6 +170,11 @@ const totalMeDeben = ref(0)
 const countMeDeben = ref(0)
 const countPagados = ref(0)
 const countTotal = ref(0)
+const futureProjects = ref(0)
+const futureAverage = ref(0)
+const futureMin = ref(0)
+const futureMax = ref(0)
+const futureHighlights = ref([])
 
 const porcentajeGastado = computed(() => {
   if (presupuesto.value <= 0) return 0
@@ -218,12 +245,6 @@ async function cargarResumenGastos() {
       query: { mes: mesActualNum, anio: anioActual }
     })
     totalMes.value = parseFloat(data.totalMes) || 0
-
-    // Obtener presupuesto del planificador
-    const plan = await $fetch('/api/planificador', {
-      query: { mes: mesActualNum, anio: anioActual }
-    })
-    presupuesto.value = parseFloat(plan.plan?.montoPresupuesto) || 0
   } catch { /* silencioso */ }
 }
 
@@ -240,9 +261,17 @@ async function cargarResumenPlan() {
     const data = await $fetch('/api/planificador', {
       query: { mes: mesActualNum, anio: anioActual }
     })
+    presupuesto.value = parseFloat(data.plan?.montoPresupuesto) || 0
     const gastos = data.gastos || []
     countTotal.value = gastos.length
     countPagados.value = gastos.filter(g => g.estado === 'pagado').length
+
+    const futuros = data.resumenFuturos || {}
+    futureProjects.value = futuros.totalProyectos || 0
+    futureAverage.value = parseFloat(futuros.totalPromedio) || 0
+    futureMin.value = parseFloat(futuros.totalMinimo) || 0
+    futureMax.value = parseFloat(futuros.totalMaximo) || 0
+    futureHighlights.value = Array.isArray(futuros.destacados) ? futuros.destacados.slice(0, 2) : []
   } catch { /* silencioso */ }
 }
 </script>

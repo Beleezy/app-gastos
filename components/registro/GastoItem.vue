@@ -9,9 +9,9 @@
           <span class="text-xs">{{ resolveIcono(gasto.categoriaIcono) }}</span>
         </div>
         <p class="text-sm font-medium text-theme-text flex-1 min-w-0 break-words">{{ gasto.concepto }}</p>
-        <span v-if="gasto.metodoRegistro === 'voz'"
+        <span v-if="badgeLabel"
           class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full shrink-0"
-        >VOZ</span>
+        >{{ badgeLabel }}</span>
       </div>
       <!-- Details row: category, time, amount -->
       <div class="flex items-center justify-between ml-9">
@@ -52,7 +52,9 @@
 </template>
 
 <script setup>
-defineProps({
+import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
+
+const props = defineProps({
   gasto: { type: Object, required: true },
 })
 
@@ -64,6 +66,8 @@ function onDelete() {
   vibrate([10, 30, 10])
   emit('delete')
 }
+
+const badgeLabel = computed(() => getMetodoRegistroBadgeLabel(props.gasto))
 
 const ICON_MAP = {
   'utensils': '🍽️', 'bus': '🚌', 'home': '🏠', 'heart-pulse': '🏥',

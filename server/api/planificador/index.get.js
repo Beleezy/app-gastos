@@ -1,6 +1,7 @@
 import { db } from '../../utils/db.js'
 import { planesMensuales, gastosPlanificados, categorias, configuraciones, gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { fetchFuturePortfolio } from '../../utils/gastosFuturos.js'
 import { eq, and, between, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -71,9 +72,17 @@ export default defineEventHandler(async (event) => {
       categoriaNombre: categorias.nombre,
       categoriaIcono: categorias.icono,
       categoriaColor: categorias.color,
+      gastoRegistradoId: gastos.id,
+      gastoRegistradoFecha: gastos.fecha,
+      gastoRegistradoHora: gastos.hora,
+      gastoRegistradoNotas: gastos.notas,
     })
     .from(gastosPlanificados)
     .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
+    .leftJoin(gastos, and(
+      eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
+      eq(gastos.usuarioId, usuarioId),
+    ))
     .where(eq(gastosPlanificados.planMensualId, plan.id))
     .orderBy(gastosPlanificados.fechaProbablePago)
 
@@ -98,6 +107,8 @@ export default defineEventHandler(async (event) => {
     gastosRealesPorCategoria[g.categoriaId] = parseFloat(g.totalReal)
   }
 
+  const { gastosFuturos, resumenFuturos } = await fetchFuturePortfolio(db, usuarioId)
+
   return {
     plan: {
       ...plan,
@@ -105,8 +116,11 @@ export default defineEventHandler(async (event) => {
     },
     gastos: gastosRaw.map(g => ({
       ...g,
+      estado: g.gastoRegistradoId ? 'pagado' : g.estado,
       montoEstimado: parseFloat(g.montoEstimado),
     })),
     gastosRealesPorCategoria,
+    gastosFuturos,
+    resumenFuturos,
   }
 })

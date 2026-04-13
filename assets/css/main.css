@@ -344,6 +344,12 @@ html.light {
     -webkit-tap-highlight-color: transparent;
   }
 
+  html.modal-open,
+  html.modal-open body {
+    overflow: hidden;
+    height: 100%;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 4px;

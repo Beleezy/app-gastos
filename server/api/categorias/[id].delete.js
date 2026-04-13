@@ -1,5 +1,5 @@
 import { db } from '../../utils/db.js'
-import { categorias, gastos, gastosPlanificados } from '../../database/schema.js'
+import { categorias, gastos, gastosPlanificados, gastosFuturos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
 
@@ -38,6 +38,16 @@ export default defineEventHandler(async (event) => {
 
   if (planificadosAsociados.length > 0) {
     throw createError({ statusCode: 409, message: 'No se puede eliminar: tiene gastos planificados asociados' })
+  }
+
+  const futurosAsociados = await db
+    .select({ id: gastosFuturos.id })
+    .from(gastosFuturos)
+    .where(eq(gastosFuturos.categoriaId, id))
+    .limit(1)
+
+  if (futurosAsociados.length > 0) {
+    throw createError({ statusCode: 409, message: 'No se puede eliminar: tiene gastos futuros asociados' })
   }
 
   await db.delete(categorias).where(eq(categorias.id, id))

@@ -1,17 +1,20 @@
 /**
- * Pull-to-refresh composable para PWA móvil.
+ * Pull-to-refresh composable para PWA mÃ³vil.
  * Uso: const { PullToRefresh } = usePullToRefresh(onRefresh)
  * Agrega el componente <PullToRefresh /> al inicio del contenido.
  */
 export function usePullToRefresh(onRefresh) {
   const isRefreshing = ref(false)
   const pullDistance = ref(0)
-  const THRESHOLD = 70 // px mínimos para disparar refresh
+  const THRESHOLD = 70 // px mÃ­nimos para disparar refresh
+  const { isModalOpen } = useModalLayer()
 
   let startY = 0
   let isPulling = false
 
   function onTouchStart(e) {
+    if (isModalOpen.value) return
+
     // Solo activar si estamos al tope del scroll
     if (window.scrollY !== 0) return
     startY = e.touches[0].clientY
@@ -19,6 +22,12 @@ export function usePullToRefresh(onRefresh) {
   }
 
   function onTouchMove(e) {
+    if (isModalOpen.value) {
+      isPulling = false
+      pullDistance.value = 0
+      return
+    }
+
     if (!isPulling || isRefreshing.value) return
     const diff = e.touches[0].clientY - startY
     if (diff > 0) {
@@ -30,6 +39,12 @@ export function usePullToRefresh(onRefresh) {
   }
 
   async function onTouchEnd() {
+    if (isModalOpen.value) {
+      isPulling = false
+      pullDistance.value = 0
+      return
+    }
+
     if (!isPulling) return
     isPulling = false
 

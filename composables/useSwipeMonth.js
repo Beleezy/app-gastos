@@ -8,18 +8,26 @@
  */
 export function useSwipeMonth(onPrev, onNext, options = {}) {
   const { threshold = 60, verticalTolerance = 50 } = options
+  const { isModalOpen } = useModalLayer()
 
   let startX = 0
   let startY = 0
   let isTracking = false
 
   function onTouchStart(e) {
+    if (isModalOpen.value) return
+
     startX = e.touches[0].clientX
     startY = e.touches[0].clientY
     isTracking = true
   }
 
   function onTouchEnd(e) {
+    if (isModalOpen.value) {
+      isTracking = false
+      return
+    }
+
     if (!isTracking) return
     isTracking = false
 

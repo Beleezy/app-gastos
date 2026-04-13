@@ -1,5 +1,5 @@
 import { db } from '../../utils/db.js'
-import { categorias, gastos, gastosPlanificados, planesMensuales } from '../../database/schema.js'
+import { categorias, gastos, gastosPlanificados, planesMensuales, gastosFuturos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, inArray } from 'drizzle-orm'
 
@@ -79,6 +79,16 @@ export default defineEventHandler(async (event) => {
             inArray(gastosPlanificados.planMensualId, planIds)
           ))
       }
+    }
+
+    for (const [oldId, newId] of Object.entries(idMap)) {
+      await db
+        .update(gastosFuturos)
+        .set({ categoriaId: newId, updatedAt: new Date() })
+        .where(and(
+          eq(gastosFuturos.usuarioId, usuarioId),
+          eq(gastosFuturos.categoriaId, oldId)
+        ))
     }
   }
 

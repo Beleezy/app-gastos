@@ -103,11 +103,11 @@ export function useGastos() {
     }
   }
 
-  async function createGastosBulk(gastosData, transcripcionVoz) {
+  async function createGastosBulk(gastosData, transcripcionVoz, metodoRegistro = 'voz') {
     try {
       const nuevos = await apiFetch('/api/gastos/bulk', {
         method: 'POST',
-        body: { gastos: gastosData, transcripcionVoz }
+        body: { gastos: gastosData, transcripcionVoz, metodoRegistro }
       })
       // Add those matching current date
       const mismaFecha = nuevos.filter(g => g.fecha === fechaSeleccionada.value)

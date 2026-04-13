@@ -49,6 +49,7 @@ export default defineEventHandler(async (event) => {
       metodoRegistro: gastos.metodoRegistro,
       transcripcionVoz: gastos.transcripcionVoz,
       notas: gastos.notas,
+      gastoPlanificadoId: gastos.gastoPlanificadoId,
       categoriaId: gastos.categoriaId,
       categoriaNombre: categorias.nombre,
       categoriaIcono: categorias.icono,

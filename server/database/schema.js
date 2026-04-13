@@ -1,8 +1,8 @@
-import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique, index } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique, index, uniqueIndex } from 'drizzle-orm/pg-core'
 
 // ── Enums ──
 export const estadoGastoPlanificado = pgEnum('estado_gasto_planificado', ['pendiente', 'pagado'])
-export const metodoRegistro = pgEnum('metodo_registro', ['voz', 'manual'])
+export const metodoRegistro = pgEnum('metodo_registro', ['voz', 'foto', 'manual'])
 export const tipoPersonaEntidad = pgEnum('tipo_persona_entidad', ['persona', 'organizacion'])
 export const tipoDeuda = pgEnum('tipo_deuda', ['me_deben', 'yo_debo'])
 export const estadoDeuda = pgEnum('estado_deuda', ['pendiente', 'parcial', 'pagado', 'archivado'])
@@ -67,6 +67,7 @@ export const gastos = pgTable('gastos', {
   id: uuid('id').defaultRandom().primaryKey(),
   usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
   categoriaId: uuid('categoria_id').references(() => categorias.id).notNull(),
+  gastoPlanificadoId: uuid('gasto_planificado_id').references(() => gastosPlanificados.id, { onDelete: 'set null' }),
   concepto: varchar('concepto', { length: 255 }).notNull(),
   monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
   fecha: date('fecha').notNull(),
@@ -79,9 +80,52 @@ export const gastos = pgTable('gastos', {
 }, (table) => [
   index('gastos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
   index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
+  uniqueIndex('gastos_planificado_unique').on(table.gastoPlanificadoId),
 ])
 
 // ── Tabla 6: personas_entidades ──
+export const gastosFuturos = pgTable('gastos_futuros', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  categoriaId: uuid('categoria_id').references(() => categorias.id).notNull(),
+  tipoGasto: varchar('tipo_gasto', { length: 160 }).notNull(),
+  descripcion: text('descripcion'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('gastos_futuros_usuario_idx').on(table.usuarioId),
+  index('gastos_futuros_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
+])
+
+export const gastosFuturosDetalles = pgTable('gastos_futuros_detalles', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  gastoFuturoId: uuid('gasto_futuro_id').references(() => gastosFuturos.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 160 }).notNull(),
+  notas: text('notas'),
+  orden: integer('orden').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('gastos_futuros_detalles_gasto_idx').on(table.gastoFuturoId, table.orden),
+])
+
+export const gastosFuturosOpciones = pgTable('gastos_futuros_opciones', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  detalleId: uuid('detalle_id').references(() => gastosFuturosDetalles.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 200 }).notNull(),
+  referenciaUrl: text('referencia_url'),
+  imagenUrl: text('imagen_url'),
+  precioMinimo: decimal('precio_minimo', { precision: 12, scale: 2 }),
+  precioMaximo: decimal('precio_maximo', { precision: 12, scale: 2 }),
+  precioPromedio: decimal('precio_promedio', { precision: 12, scale: 2 }),
+  notas: text('notas'),
+  orden: integer('orden').default(0).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('gastos_futuros_opciones_detalle_idx').on(table.detalleId, table.orden),
+])
+
 export const personasEntidades = pgTable('personas_entidades', {
   id: uuid('id').defaultRandom().primaryKey(),
   usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),

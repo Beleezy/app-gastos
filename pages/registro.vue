@@ -312,6 +312,7 @@ const {
   reintentarParseImage, cerrarPhotoConfirmacion,
 } = usePhotoDraft()
 
+const route = useRoute()
 const { config, fetchConfig } = useConfiguraciones()
 const { apiFetch } = useApiFetch()
 const { success: toastSuccess, error: toastError } = useToast()
@@ -439,7 +440,7 @@ async function onConfirmGastos(gastosEditados) {
     }
   })
 
-  await createGastosBulk(gastosConIds, lastTranscript.value)
+  await createGastosBulk(gastosConIds, lastTranscript.value, 'voz')
   cerrarConfirmacion()
   showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
@@ -457,7 +458,7 @@ async function onConfirmPhotoGastos(gastosEditados) {
     }
   })
 
-  await createGastosBulk(gastosConIds, 'Escaneado desde foto de voucher')
+  await createGastosBulk(gastosConIds, 'Escaneado desde foto de voucher', 'foto')
   cerrarPhotoConfirmacion()
   showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
@@ -548,8 +549,21 @@ const { isRefreshing } = usePullToRefresh(async () => {
 const historialSwipeZone = ref(null)
 const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(mesAnterior, mesSiguiente)
 
+function aplicarQueryMes() {
+  const mes = Number(route.query.mes)
+  const anio = Number(route.query.anio)
+
+  if (mes >= 1 && mes <= 12) {
+    mesSeleccionado.value = mes
+  }
+  if (anio >= 2000 && anio <= 3000) {
+    anioSeleccionado.value = anio
+  }
+}
+
 // Initial load
 onMounted(async () => {
+  aplicarQueryMes()
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto(), fetchConfig()])
   attachSwipe(historialSwipeZone.value)
 })

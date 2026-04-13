@@ -28,7 +28,7 @@
           <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
             <div class="flex items-center gap-1.5 mb-1">
               <span
-                class="text-[10px] font-semibold px-1.5 py-0.5 rounded-md"
+                class="text-xs font-semibold px-1.5 py-0.5 rounded-md"
                 :class="getAccionBadgeClass(entrada.accion)"
               >
                 {{ getAccionLabel(entrada.accion) }}
@@ -87,6 +87,8 @@ function getAccionColor(accion) {
   const map = {
     vinculo_creado: 'bg-blue-500',
     vinculo_disuelto: 'bg-orange-500',
+    checkpoint_creado: 'bg-violet-500',
+    checkpoint_restaurado: 'bg-indigo-500',
     deuda_creada: 'bg-emerald-500',
     deuda_editada: 'bg-amber-500',
     deuda_eliminada: 'bg-red-500',
@@ -101,6 +103,8 @@ function getAccionBadgeClass(accion) {
   const map = {
     vinculo_creado: 'bg-blue-500/15 text-blue-400',
     vinculo_disuelto: 'bg-orange-500/15 text-orange-400',
+    checkpoint_creado: 'bg-violet-500/15 text-violet-400',
+    checkpoint_restaurado: 'bg-indigo-500/15 text-indigo-400',
     deuda_creada: 'bg-emerald-500/15 text-emerald-400',
     deuda_editada: 'bg-amber-500/15 text-amber-400',
     deuda_eliminada: 'bg-red-500/15 text-red-400',
@@ -115,6 +119,8 @@ function getAccionLabel(accion) {
   const map = {
     vinculo_creado: 'Vínculo',
     vinculo_disuelto: 'Desvinculado',
+    checkpoint_creado: 'Punto guardado',
+    checkpoint_restaurado: 'Punto restaurado',
     deuda_creada: 'Nueva deuda',
     deuda_editada: 'Deuda editada',
     deuda_eliminada: 'Deuda eliminada',

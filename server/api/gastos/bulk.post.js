@@ -6,6 +6,7 @@ import { eq, inArray } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  const metodosPermitidos = new Set(['voz', 'foto', 'manual'])
 
   if (!body.gastos || !Array.isArray(body.gastos) || body.gastos.length === 0) {
     throw createError({ statusCode: 400, message: 'Se requiere un array de gastos' })
@@ -14,6 +15,12 @@ export default defineEventHandler(async (event) => {
   const ahora = new Date()
   const horaActual = ahora.toTimeString().split(' ')[0].substring(0, 5)
 
+  const metodoRegistro = metodosPermitidos.has(body.metodoRegistro)
+    ? body.metodoRegistro
+    : body.transcripcionVoz === 'Escaneado desde foto de voucher'
+      ? 'foto'
+      : 'voz'
+
   const valores = body.gastos.map(g => ({
     usuarioId,
     categoriaId: g.categoriaId,
@@ -21,7 +28,7 @@ export default defineEventHandler(async (event) => {
     monto: String(g.monto || 0),
     fecha: g.fecha || ahora.toISOString().split('T')[0],
     hora: g.hora || horaActual,
-    metodoRegistro: 'voz',
+    metodoRegistro,
     transcripcionVoz: body.transcripcionVoz || null,
     notas: g.notas || null,
   }))

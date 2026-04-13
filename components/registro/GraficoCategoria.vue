@@ -149,9 +149,9 @@
                   <div class="flex items-center gap-2 mt-0.5">
                     <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(gasto.fecha) }}</span>
                     <span v-if="gasto.hora" class="text-[10px] text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
-                    <span v-if="gasto.metodoRegistro === 'voz'"
+                    <span v-if="getMetodoRegistroBadgeLabel(gasto)"
                       class="text-[8px] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
-                    >VOZ</span>
+                    >{{ getMetodoRegistroBadgeLabel(gasto) }}</span>
                   </div>
                 </div>
                 <span class="text-sm font-medium text-theme-text shrink-0 ml-3">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
@@ -165,6 +165,8 @@
 </template>
 
 <script setup>
+import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
+
 const props = defineProps({
   datos: { type: Array, default: () => [] },
   gastos: { type: Array, default: () => [] },

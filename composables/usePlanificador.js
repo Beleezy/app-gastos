@@ -4,6 +4,18 @@ export function usePlanificador() {
   const { apiFetch } = useApiFetch()
   const plan = useState('planificador-plan', () => null)
   const gastosPlaneados = useState('planificador-gastos', () => [])
+  const gastosFuturos = useState('planificador-futuros', () => [])
+  const resumenFuturos = useState('planificador-futuros-resumen', () => ({
+    totalProyectos: 0,
+    totalDetalles: 0,
+    totalOpciones: 0,
+    proyectosConReferencia: 0,
+    totalMinimo: 0,
+    totalMaximo: 0,
+    totalPromedio: 0,
+    promedioPorProyecto: 0,
+    destacados: [],
+  }))
   const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
   const categorias = useState('planificador-categorias', () => [])
   const isLoading = ref(false)
@@ -87,6 +99,18 @@ export function usePlanificador() {
       })
       plan.value = data.plan
       gastosPlaneados.value = data.gastos
+      gastosFuturos.value = data.gastosFuturos || []
+      resumenFuturos.value = data.resumenFuturos || {
+        totalProyectos: 0,
+        totalDetalles: 0,
+        totalOpciones: 0,
+        proyectosConReferencia: 0,
+        totalMinimo: 0,
+        totalMaximo: 0,
+        totalPromedio: 0,
+        promedioPorProyecto: 0,
+        destacados: [],
+      }
       gastosRealesPorCategoria.value = data.gastosRealesPorCategoria || {}
     } catch (e) {
       error.value = e.message || 'Error al cargar el plan'
@@ -151,6 +175,58 @@ export function usePlanificador() {
     await updateGastoPlaneado(gasto.id, { estado: nuevoEstado })
   }
 
+  async function registrarGastoEnRegistro(id, data) {
+    try {
+      const result = await apiFetch(`/api/planificador/gastos/${id}/registro`, {
+        method: 'POST',
+        body: data,
+      })
+      await fetchPlan()
+      return result
+    } catch (e) {
+      error.value = e.data?.message || e.message || 'Error al registrar el gasto'
+      throw e
+    }
+  }
+
+  async function createGastoFuturo(data) {
+    try {
+      await apiFetch('/api/planificador/futuros', {
+        method: 'POST',
+        body: data,
+      })
+      await fetchPlan()
+    } catch (e) {
+      error.value = e.data?.message || e.message || 'Error al crear gasto futuro'
+      throw e
+    }
+  }
+
+  async function updateGastoFuturo(id, data) {
+    try {
+      await apiFetch(`/api/planificador/futuros/${id}`, {
+        method: 'PUT',
+        body: data,
+      })
+      await fetchPlan()
+    } catch (e) {
+      error.value = e.data?.message || e.message || 'Error al actualizar gasto futuro'
+      throw e
+    }
+  }
+
+  async function deleteGastoFuturo(id) {
+    try {
+      await apiFetch(`/api/planificador/futuros/${id}`, {
+        method: 'DELETE',
+      })
+      await fetchPlan()
+    } catch (e) {
+      error.value = e.data?.message || e.message || 'Error al eliminar gasto futuro'
+      throw e
+    }
+  }
+
   async function fetchCategorias() {
     try {
       categorias.value = await apiFetch('/api/categorias')
@@ -201,12 +277,14 @@ export function usePlanificador() {
   }
 
   return {
-    plan, gastosPlaneados, gastosRealesPorCategoria, categorias, isLoading, error,
+    plan, gastosPlaneados, gastosFuturos, resumenFuturos, gastosRealesPorCategoria, categorias, isLoading, error,
     mesActual, anioActual, nombreMes, esHoy,
     resumen, gastosPorCategoria, datosGrafico, totalGastoReal,
     fetchPlan, updatePresupuesto,
     createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado,
-    toggleEstado, fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,
+    toggleEstado, registrarGastoEnRegistro,
+    createGastoFuturo, updateGastoFuturo, deleteGastoFuturo,
+    fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,
     duplicarMes,
   }
 }
