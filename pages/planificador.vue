@@ -67,7 +67,6 @@
         </div>
 
         <div v-else>
-          <PlanificadorResumenGastosFuturos />
           <PlanificadorListaGastosFuturos @editar="editarGastoFuturo" />
         </div>
       </div>

@@ -23,6 +23,7 @@ export default defineEventHandler(async (event) => {
         categoriaId: payload.categoriaId,
         tipoGasto: payload.tipoGasto,
         descripcion: payload.descripcion,
+        prioridad: payload.prioridad,
       })
       .returning({ id: gastosFuturos.id })
 

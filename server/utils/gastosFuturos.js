@@ -65,6 +65,15 @@ export function normalizeGastoFuturoPayload(body) {
   const categoriaId = textRequired(body?.categoriaId, 'La categoria')
   const tipoGasto = textRequired(body?.tipoGasto, 'El tipo de gasto')
   const descripcion = textOptional(body?.descripcion)
+  const prioridadRaw = body?.prioridad
+  let prioridad = 0
+  if (prioridadRaw !== undefined && prioridadRaw !== null && prioridadRaw !== '') {
+    const n = Number(prioridadRaw)
+    if (!Number.isInteger(n) || n < 0 || n > 3) {
+      throw createError({ statusCode: 400, message: 'La prioridad debe estar entre 0 y 3' })
+    }
+    prioridad = n
+  }
   const detallesBody = Array.isArray(body?.detalles) ? body.detalles : []
 
   const detalles = detallesBody
@@ -126,6 +135,7 @@ export function normalizeGastoFuturoPayload(body) {
       }
 
       return {
+        id: textOptional(detalle?.id),
         nombre,
         notas,
         opciones,
@@ -141,6 +151,7 @@ export function normalizeGastoFuturoPayload(body) {
     categoriaId,
     tipoGasto,
     descripcion,
+    prioridad,
     detalles,
   }
 }
@@ -314,6 +325,7 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
       categoriaId: gastosFuturos.categoriaId,
       tipoGasto: gastosFuturos.tipoGasto,
       descripcion: gastosFuturos.descripcion,
+      prioridad: gastosFuturos.prioridad,
       createdAt: gastosFuturos.createdAt,
       updatedAt: gastosFuturos.updatedAt,
       categoriaNombre: categorias.nombre,
@@ -323,7 +335,7 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
     .from(gastosFuturos)
     .leftJoin(categorias, eq(gastosFuturos.categoriaId, categorias.id))
     .where(eq(gastosFuturos.usuarioId, usuarioId))
-    .orderBy(desc(gastosFuturos.updatedAt), asc(gastosFuturos.tipoGasto))
+    .orderBy(desc(gastosFuturos.prioridad), desc(gastosFuturos.updatedAt), asc(gastosFuturos.tipoGasto))
 
   if (proyectosRows.length === 0) {
     return {
@@ -370,6 +382,10 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
       ...detalle,
       opciones,
       resumen: summarizeDetail(opciones),
+      estadoDecision: detalle.estadoDecision || null,
+      decididoEn: detalle.decididoEn || null,
+      gastoId: detalle.gastoId || null,
+      gastoPlanificadoId: detalle.gastoPlanificadoId || null,
     }
 
     if (!detallesByProyecto.has(detalle.gastoFuturoId)) {

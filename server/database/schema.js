@@ -90,11 +90,13 @@ export const gastosFuturos = pgTable('gastos_futuros', {
   categoriaId: uuid('categoria_id').references(() => categorias.id).notNull(),
   tipoGasto: varchar('tipo_gasto', { length: 160 }).notNull(),
   descripcion: text('descripcion'),
+  prioridad: integer('prioridad').default(0).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   index('gastos_futuros_usuario_idx').on(table.usuarioId),
   index('gastos_futuros_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
+  index('gastos_futuros_usuario_prioridad_idx').on(table.usuarioId, table.prioridad),
 ])
 
 export const gastosFuturosDetalles = pgTable('gastos_futuros_detalles', {
@@ -103,10 +105,15 @@ export const gastosFuturosDetalles = pgTable('gastos_futuros_detalles', {
   nombre: varchar('nombre', { length: 160 }).notNull(),
   notas: text('notas'),
   orden: integer('orden').default(0).notNull(),
+  estadoDecision: varchar('estado_decision', { length: 20 }),
+  decididoEn: timestamp('decidido_en'),
+  gastoId: uuid('gasto_id').references(() => gastos.id, { onDelete: 'set null' }),
+  gastoPlanificadoId: uuid('gasto_planificado_id').references(() => gastosPlanificados.id, { onDelete: 'set null' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   index('gastos_futuros_detalles_gasto_idx').on(table.gastoFuturoId, table.orden),
+  index('gastos_futuros_detalles_decision_idx').on(table.estadoDecision),
 ])
 
 export const gastosFuturosOpciones = pgTable('gastos_futuros_opciones', {

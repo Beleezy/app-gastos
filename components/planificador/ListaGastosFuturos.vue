@@ -1,5 +1,21 @@
 <template>
   <div class="px-4 py-3">
+    <!-- Resumen compacto -->
+    <div v-if="gastosFuturos.length" class="mb-4 grid grid-cols-4 gap-2">
+      <div class="rounded-2xl border border-theme-border bg-theme-card px-3 py-2.5 text-center">
+        <p class="text-[10px] uppercase tracking-[0.15em] text-theme-text-muted">Proyectos</p>
+        <p class="mt-1 text-sm font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
+      </div>
+      <div class="rounded-2xl border border-theme-border bg-theme-card px-3 py-2.5 text-center">
+        <p class="text-[10px] uppercase tracking-[0.15em] text-theme-text-muted">Min</p>
+        <p class="mt-1 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }}</p>
+      </div>
+      <div class="col-span-2 rounded-2xl border border-sky-500/20 bg-sky-500/8 px-3 py-2.5 text-center">
+        <p class="text-[10px] uppercase tracking-[0.15em] text-sky-300/70">Promedio total</p>
+        <p class="mt-1 text-sm font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+      </div>
+    </div>
+
     <div class="mb-4 flex items-center gap-2">
       <div class="relative flex-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -42,6 +58,7 @@
         :key="proyecto.id"
         class="overflow-hidden rounded-2xl border border-theme-border bg-theme-card"
       >
+        <!-- Cabecera del proyecto -->
         <div class="p-4">
           <div class="flex items-start justify-between gap-3">
             <div class="flex min-w-0 gap-3">
@@ -54,6 +71,13 @@
               <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
                   <h3 class="truncate text-sm font-semibold text-theme-text">{{ proyecto.tipoGasto }}</h3>
+                  <span
+                    v-if="prioridadBadge(proyecto.prioridad)"
+                    class="rounded-full px-2 py-1 text-[10px] font-medium"
+                    :class="prioridadBadge(proyecto.prioridad).clases"
+                  >
+                    {{ prioridadBadge(proyecto.prioridad).label }}
+                  </span>
                   <span class="rounded-full bg-theme-input px-2 py-1 text-[10px] text-theme-text-sec">
                     {{ proyecto.categoriaNombre || 'Sin categoria' }}
                   </span>
@@ -96,79 +120,236 @@
               {{ estaExpandido(proyecto.id) ? 'Ocultar detalle' : 'Ver detalle' }}
             </button>
             <div class="flex items-center gap-4">
-              <button class="text-xs text-theme-text-sec transition-colors hover:text-theme-accent" @click="emit('editar', proyecto)">Editar</button>
+              <button class="text-xs text-theme-text-sec transition-colors hover:text-theme-accent" @click="emit('editar', proyecto)">Editar todo</button>
               <button class="text-xs text-theme-text-sec transition-colors hover:text-red-400" @click="proyectoAEliminar = proyecto">Eliminar</button>
             </div>
           </div>
         </div>
 
+        <!-- Detalles expandidos -->
         <div v-if="estaExpandido(proyecto.id)" class="border-t border-theme-border bg-theme-input/45 px-4 py-4">
           <div class="space-y-3">
             <div
               v-for="detalle in proyecto.detalles"
               :key="detalle.id"
-              class="rounded-2xl border border-theme-border bg-theme-card p-3"
+              class="rounded-2xl border border-theme-border bg-theme-card"
             >
-              <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
-                  <p class="text-sm font-medium text-theme-text">{{ detalle.nombre }}</p>
-                  <p v-if="detalle.notas" class="mt-1 text-[11px] text-theme-text-sec">{{ detalle.notas }}</p>
-                  <p class="mt-1 text-[10px] text-theme-text-muted">
-                    {{ detalle.opciones.length }} opcion{{ detalle.opciones.length !== 1 ? 'es' : '' }}
-                  </p>
+              <!-- Cabecera detalle: modo edición -->
+              <div v-if="detalleEditando?.detalleId === detalle.id" class="p-3 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-xs font-medium text-theme-text">Editando detalle</p>
+                  <button class="text-[11px] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionDetalle">Cancelar</button>
                 </div>
-                <div class="shrink-0 text-right">
-                  <p class="text-[11px] font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
-                  <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }} {{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
-                </div>
+                <input
+                  v-model="detalleEditando.nombre"
+                  type="text"
+                  placeholder="Nombre del detalle *"
+                  class="w-full rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                />
+                <textarea
+                  v-model="detalleEditando.notas"
+                  rows="2"
+                  placeholder="Notas del detalle (opcional)"
+                  class="w-full resize-none rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                ></textarea>
+                <button
+                  class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+                  :disabled="guardandoInline"
+                  @click="guardarEdicionDetalle(proyecto, detalle)"
+                >
+                  {{ guardandoInline ? 'Guardando...' : 'Guardar detalle' }}
+                </button>
               </div>
 
-              <div v-if="detalle.opciones.length" class="mt-3 space-y-2">
-                <div
-                  v-for="opcion in detalle.opciones"
-                  :key="opcion.id"
-                  class="rounded-xl border border-theme-border bg-theme-input px-3 py-3"
-                >
-                  <div class="flex gap-3">
-                    <img
-                      v-if="opcion.imagenUrl"
-                      :src="opcion.imagenUrl"
-                      :alt="opcion.nombre"
-                      class="h-16 w-16 shrink-0 rounded-xl object-cover"
-                      loading="lazy"
-                    />
-                    <div class="min-w-0 flex-1">
-                      <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                          <p class="truncate text-sm font-medium text-theme-text">{{ opcion.nombre }}</p>
-                          <a
-                            v-if="opcion.referenciaUrl"
-                            :href="opcion.referenciaUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] text-theme-accent hover:text-theme-accent-light"
-                          >
-                            <span class="truncate">{{ hostDeUrl(opcion.referenciaUrl) }}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5v7.5h7.5" />
-                            </svg>
-                          </a>
-                        </div>
-                        <div class="shrink-0 text-right">
-                          <p class="text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(opcion.precioPromedio || 0) }}</p>
-                          <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(opcion.precioMinimo || 0) }} - {{ currencySymbol }} {{ formatMonto(opcion.precioMaximo || 0) }}</p>
-                        </div>
-                      </div>
-                      <p v-if="opcion.notas" class="mt-2 text-[11px] text-theme-text-sec">{{ opcion.notas }}</p>
-                    </div>
+              <!-- Cabecera detalle: modo lectura -->
+              <div v-else class="flex items-start justify-between gap-3 p-3">
+                <div class="min-w-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-sm font-medium text-theme-text">{{ detalle.nombre }}</p>
+                    <span
+                      v-if="decisionBadge(detalle)"
+                      class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                      :class="decisionBadge(detalle).clases"
+                    >
+                      {{ decisionBadge(detalle).label }}
+                    </span>
+                  </div>
+                  <p v-if="detalle.notas" class="mt-1 text-[11px] text-theme-text-sec">{{ detalle.notas }}</p>
+                  <p class="mt-1 text-[10px] text-theme-text-muted">
+                    {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
+                  </p>
+                </div>
+                <div class="flex shrink-0 flex-col items-end gap-2">
+                  <div class="text-right">
+                    <p class="text-[11px] font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
+                    <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }} {{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
+                  </div>
+                  <div v-if="!detalle.estadoDecision" class="flex items-center gap-3">
+                    <button
+                      class="text-[11px] text-theme-text-sec transition-colors hover:text-theme-accent"
+                      @click="iniciarEdicionDetalle(detalle)"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                      @click="eliminarDetalleInline(proyecto, detalle)"
+                    >
+                      Eliminar
+                    </button>
                   </div>
                 </div>
               </div>
 
-              <div v-else class="mt-3 rounded-xl border border-dashed border-theme-border bg-theme-input/70 px-3 py-4 text-center text-[11px] text-theme-text-sec">
-                Este detalle aun no tiene opciones tentativas.
+              <!-- Opciones del detalle -->
+              <div class="border-t border-theme-border/60 px-3 pb-3 pt-2 space-y-2">
+                <div
+                  v-for="opcion in detalle.opciones"
+                  :key="opcion.id"
+                  class="rounded-xl border border-theme-border bg-theme-input"
+                >
+                  <!-- Opción: modo edición -->
+                  <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-xs font-medium text-theme-text">Editando opcion</p>
+                      <button class="text-[11px] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionOpcion">Cancelar</button>
+                    </div>
+                    <input
+                      v-model="opcionEditando.nombre"
+                      type="text"
+                      placeholder="Nombre de la opcion *"
+                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                    />
+                    <input
+                      v-model="opcionEditando.referenciaUrl"
+                      type="url"
+                      placeholder="Link de referencia (opcional)"
+                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                    />
+                    <input
+                      v-model="opcionEditando.imagenUrl"
+                      type="url"
+                      placeholder="Link de imagen (opcional)"
+                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                    />
+                    <div class="grid grid-cols-3 gap-2">
+                      <div>
+                        <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
+                        <input v-model="opcionEditando.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
+                        <input v-model="opcionEditando.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
+                        <input v-model="opcionEditando.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+                      </div>
+                    </div>
+                    <textarea
+                      v-model="opcionEditando.notas"
+                      rows="2"
+                      placeholder="Notas (tienda, color, talla, etc.)"
+                      class="w-full resize-none rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                    ></textarea>
+                    <button
+                      class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+                      :disabled="guardandoInline"
+                      @click="guardarEdicionOpcion(proyecto, detalle)"
+                    >
+                      {{ guardandoInline ? 'Guardando...' : 'Guardar cambios' }}
+                    </button>
+                  </div>
+
+                  <!-- Opción: modo lectura -->
+                  <div v-else class="px-3 py-3">
+                    <div class="flex gap-3">
+                      <img
+                        v-if="opcion.imagenUrl"
+                        :src="opcion.imagenUrl"
+                        :alt="opcion.nombre"
+                        class="h-16 w-16 shrink-0 rounded-xl object-cover"
+                        loading="lazy"
+                      />
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-start justify-between gap-2">
+                          <div class="min-w-0">
+                            <p class="truncate text-sm font-medium text-theme-text">{{ opcion.nombre }}</p>
+                            <a
+                              v-if="opcion.referenciaUrl"
+                              :href="opcion.referenciaUrl"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] text-theme-accent hover:text-theme-accent-light"
+                            >
+                              <span class="truncate">{{ hostDeUrl(opcion.referenciaUrl) }}</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5v7.5h7.5" />
+                              </svg>
+                            </a>
+                          </div>
+                          <div class="shrink-0 text-right">
+                            <p class="text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(opcion.precioPromedio || 0) }}</p>
+                            <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(opcion.precioMinimo || 0) }} - {{ currencySymbol }} {{ formatMonto(opcion.precioMaximo || 0) }}</p>
+                          </div>
+                        </div>
+                        <p v-if="opcion.notas" class="mt-1.5 text-[11px] text-theme-text-sec">{{ opcion.notas }}</p>
+                      </div>
+                    </div>
+                    <div v-if="!detalle.estadoDecision" class="mt-2.5 flex flex-wrap items-center justify-end gap-2 border-t border-theme-border/50 pt-2.5">
+                      <button
+                        class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
+                        @click="abrirDecision(proyecto, detalle, opcion, 'planificar')"
+                      >
+                        Planificar
+                      </button>
+                      <button
+                        class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-400 transition-colors hover:bg-emerald-500/25"
+                        @click="abrirDecision(proyecto, detalle, opcion, 'comprar')"
+                      >
+                        Comprar ya
+                      </button>
+                      <span class="flex-1"></span>
+                      <button
+                        class="text-[11px] text-theme-text-sec transition-colors hover:text-theme-accent"
+                        @click="iniciarEdicionOpcion(opcion)"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                        @click="eliminarOpcionInline(proyecto, detalle, opcion)"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Botón agregar opción -->
+                <button
+                  v-if="!detalle.estadoDecision"
+                  class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-theme-border bg-theme-input/50 py-2.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent"
+                  @click="abrirNuevaOpcion(proyecto, detalle)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  Agregar opcion
+                </button>
               </div>
             </div>
+
+            <!-- Botón agregar detalle -->
+            <button
+              class="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-theme-border bg-theme-card/60 py-3 text-xs font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent"
+              @click="abrirNuevoDetalle(proyecto)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Agregar detalle
+            </button>
           </div>
         </div>
       </article>
@@ -176,13 +357,12 @@
       <div class="h-16"></div>
     </div>
 
+    <!-- Modal: confirmar eliminar proyecto -->
     <div v-if="proyectoAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="proyectoAEliminar = null"></div>
       <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
         <h3 class="text-base font-semibold text-theme-text">Eliminar gasto futuro</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminaran el proyecto, sus detalles y todas las opciones guardadas.
-        </p>
+        <p class="mt-2 text-sm text-theme-text-sec">Se eliminaran el proyecto, sus detalles y todas las opciones guardadas.</p>
         <p class="mt-2 text-sm font-medium text-theme-text">{{ proyectoAEliminar.tipoGasto }}</p>
         <div class="mt-5 space-y-2">
           <button
@@ -192,13 +372,167 @@
           >
             {{ eliminando ? 'Eliminando...' : 'Eliminar proyecto' }}
           </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="proyectoAEliminar = null"
-          >
+          <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="proyectoAEliminar = null">
             Cancelar
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Panel: nueva opción -->
+    <div v-if="nuevaOpcionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevaOpcion"></div>
+      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 80dvh; overflow-y: auto;">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold text-theme-text">Nueva opcion</h3>
+          <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevaOpcion">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-xs text-theme-text-sec">{{ nuevaOpcionCtx.proyecto.tipoGasto }} › {{ nuevaOpcionCtx.detalle.nombre }}</p>
+        <input
+          v-model="nuevaOpcion.nombre"
+          type="text"
+          placeholder="Nombre de la opcion *"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        />
+        <input
+          v-model="nuevaOpcion.referenciaUrl"
+          type="url"
+          placeholder="Link de referencia (opcional)"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        />
+        <input
+          v-model="nuevaOpcion.imagenUrl"
+          type="url"
+          placeholder="Link de imagen (opcional)"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        />
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
+            <input v-model="nuevaOpcion.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+          </div>
+          <div>
+            <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
+            <input v-model="nuevaOpcion.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+          </div>
+          <div>
+            <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
+            <input v-model="nuevaOpcion.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+          </div>
+        </div>
+        <textarea
+          v-model="nuevaOpcion.notas"
+          rows="2"
+          placeholder="Notas (tienda, color, talla, etc.)"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        ></textarea>
+        <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
+        <button
+          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+          :disabled="guardandoInline"
+          @click="confirmarNuevaOpcion"
+        >
+          {{ guardandoInline ? 'Guardando...' : 'Agregar opcion' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel: nuevo detalle -->
+    <div v-if="nuevoDetalleCtx" class="fixed inset-0 z-50 flex items-end justify-center">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevoDetalle"></div>
+      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold text-theme-text">Nuevo detalle</h3>
+          <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevoDetalle">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-xs text-theme-text-sec">{{ nuevoDetalleCtx.proyecto.tipoGasto }}</p>
+        <input
+          v-model="nuevoDetalle.nombre"
+          type="text"
+          placeholder="Nombre del detalle * (ej: CPU, jean, casaca...)"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        />
+        <textarea
+          v-model="nuevoDetalle.notas"
+          rows="2"
+          placeholder="Notas del detalle (opcional)"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        ></textarea>
+        <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
+        <button
+          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+          :disabled="guardandoInline"
+          @click="confirmarNuevoDetalle"
+        >
+          {{ guardandoInline ? 'Guardando...' : 'Agregar detalle' }}
+        </button>
+      </div>
+    </div>
+    <!-- Modal: decidir opción -->
+    <div v-if="decisionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarDecision"></div>
+      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-semibold text-theme-text">
+            {{ decisionCtx.tipo === 'comprar' ? 'Comprar ya' : 'Enviar al planificador' }}
+          </h3>
+          <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarDecision">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-xs text-theme-text-sec">
+          {{ decisionCtx.proyecto.tipoGasto }} › {{ decisionCtx.detalle.nombre }} › <span class="text-theme-text">{{ decisionCtx.opcion.nombre }}</span>
+        </p>
+        <p class="text-[11px] text-theme-text-muted">
+          {{ decisionCtx.tipo === 'comprar'
+            ? 'Se registrara como gasto real y el detalle quedara marcado como comprado. Las demas opciones se eliminaran.'
+            : 'Se creara un gasto planificado en el mes de la fecha elegida. Las demas opciones se eliminaran.' }}
+        </p>
+        <div>
+          <label class="mb-1 block text-[11px] text-theme-text-muted">Monto *</label>
+          <input
+            v-model="decisionForm.monto"
+            type="number"
+            min="0"
+            step="0.01"
+            class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors"
+          />
+        </div>
+        <div>
+          <label class="mb-1 block text-[11px] text-theme-text-muted">
+            {{ decisionCtx.tipo === 'comprar' ? 'Fecha de compra *' : 'Fecha probable de pago *' }}
+          </label>
+          <input
+            v-model="decisionForm.fecha"
+            type="date"
+            class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors"
+          />
+        </div>
+        <textarea
+          v-model="decisionForm.notas"
+          rows="2"
+          placeholder="Notas (opcional)"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+        ></textarea>
+        <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
+        <button
+          class="w-full rounded-xl py-3 text-sm font-semibold text-theme-text transition-colors disabled:opacity-60"
+          :class="decisionCtx.tipo === 'comprar' ? 'bg-emerald-500/80 hover:bg-emerald-500' : 'bg-sky-500/80 hover:bg-sky-500'"
+          :disabled="decidiendo"
+          @click="confirmarDecision"
+        >
+          {{ decidiendo ? 'Guardando...' : (decisionCtx.tipo === 'comprar' ? 'Registrar compra' : 'Crear gasto planificado') }}
+        </button>
       </div>
     </div>
   </div>
@@ -207,7 +541,7 @@
 <script setup>
 const emit = defineEmits(['editar'])
 
-const { gastosFuturos, deleteGastoFuturo, isLoading } = usePlanificador()
+const { gastosFuturos, resumenFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = usePlanificador()
 const { currencySymbol, formatMonto } = useCurrency()
 const { success, error: toastError } = useToast()
 
@@ -215,13 +549,33 @@ const busqueda = ref('')
 const expandido = ref({})
 const proyectoAEliminar = ref(null)
 const eliminando = ref(false)
+const guardandoInline = ref(false)
+const errorPanel = ref('')
+
+// Edición inline de detalle
+const detalleEditando = ref(null) // { detalleId, nombre, notas }
+
+// Edición inline de opción
+const opcionEditando = ref(null) // { opcionId, nombre, referenciaUrl, ... }
+
+// Nuevo detalle
+const nuevoDetalleCtx = ref(null) // { proyecto }
+const nuevoDetalle = ref({ nombre: '', notas: '' })
+
+// Nueva opción
+const nuevaOpcionCtx = ref(null) // { proyecto, detalle }
+const nuevaOpcion = ref(opcionVacia())
+
+// Decisión de opción
+const decisionCtx = ref(null) // { proyecto, detalle, opcion, tipo }
+const decisionForm = ref({ monto: '', fecha: '', notas: '' })
+const decidiendo = ref(false)
 
 watch(gastosFuturos, (items) => {
   if (!items.length) {
     expandido.value = {}
     return
   }
-
   if (!Object.keys(expandido.value).length) {
     expandido.value = { [items[0].id]: true }
   }
@@ -230,50 +584,332 @@ watch(gastosFuturos, (items) => {
 const gastosFiltrados = computed(() => {
   const term = busqueda.value.trim().toLowerCase()
   if (!term) return gastosFuturos.value
-
   return gastosFuturos.value.filter((proyecto) => {
-    const hayEnProyecto = [
-      proyecto.tipoGasto,
-      proyecto.descripcion,
-      proyecto.categoriaNombre,
-    ].some(value => (value || '').toLowerCase().includes(term))
-
+    const hayEnProyecto = [proyecto.tipoGasto, proyecto.descripcion, proyecto.categoriaNombre]
+      .some(v => (v || '').toLowerCase().includes(term))
     if (hayEnProyecto) return true
-
-    return proyecto.detalles.some(detalle =>
-      (detalle.nombre || '').toLowerCase().includes(term)
-      || (detalle.notas || '').toLowerCase().includes(term)
-      || detalle.opciones.some(opcion =>
-        (opcion.nombre || '').toLowerCase().includes(term)
-        || (opcion.notas || '').toLowerCase().includes(term)
-        || (opcion.referenciaUrl || '').toLowerCase().includes(term)
+    return proyecto.detalles.some(d =>
+      (d.nombre || '').toLowerCase().includes(term)
+      || (d.notas || '').toLowerCase().includes(term)
+      || d.opciones.some(o =>
+        (o.nombre || '').toLowerCase().includes(term)
+        || (o.notas || '').toLowerCase().includes(term)
+        || (o.referenciaUrl || '').toLowerCase().includes(term)
       )
     )
   })
 })
 
 function toggleExpandido(id) {
-  expandido.value = {
-    ...expandido.value,
-    [id]: !expandido.value[id],
-  }
+  expandido.value = { ...expandido.value, [id]: !expandido.value[id] }
 }
 
 function estaExpandido(id) {
   return !!expandido.value[id]
 }
 
-function hostDeUrl(url) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return 'Abrir enlace'
+function prioridadBadge(valor) {
+  switch (valor) {
+    case 3: return { label: '● Alta', clases: 'bg-red-500/15 text-red-400' }
+    case 2: return { label: '● Media', clases: 'bg-amber-500/15 text-amber-300' }
+    case 1: return { label: '● Baja', clases: 'bg-emerald-500/15 text-emerald-400' }
+    default: return null
   }
 }
 
+function hostDeUrl(url) {
+  try { return new URL(url).hostname.replace(/^www\./, '') } catch { return 'Abrir enlace' }
+}
+
+function opcionVacia() {
+  return { nombre: '', referenciaUrl: '', imagenUrl: '', precioMinimo: '', precioPromedio: '', precioMaximo: '', notas: '' }
+}
+
+function parseAmount(value) {
+  if (value === '' || value === null || value === undefined) return null
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.round((n + Number.EPSILON) * 100) / 100 : null
+}
+
+function opcionToPayload(o) {
+  return {
+    nombre: o.nombre,
+    referenciaUrl: o.referenciaUrl || null,
+    imagenUrl: o.imagenUrl || null,
+    precioMinimo: o.precioMinimo ?? null,
+    precioPromedio: o.precioPromedio ?? null,
+    precioMaximo: o.precioMaximo ?? null,
+    notas: o.notas || null,
+  }
+}
+
+// Construye el payload completo del proyecto con detalles/opciones sobreescritos según necesidad
+function buildPayload(proyecto, overrides = {}) {
+  return {
+    categoriaId: proyecto.categoriaId,
+    tipoGasto: proyecto.tipoGasto,
+    descripcion: proyecto.descripcion,
+    prioridad: proyecto.prioridad ?? 0,
+    detalles: (overrides.detalles ?? proyecto.detalles).map(d => {
+      const detalleOverride = overrides.detalleId === d.id ? overrides : null
+      return {
+        id: d.id,
+        nombre: detalleOverride?.nombre ?? d.nombre,
+        notas: detalleOverride?.notas ?? d.notas ?? null,
+        opciones: (overrides.opcionesDetalleId === d.id ? overrides.opciones : d.opciones).map(opcionToPayload),
+      }
+    }),
+  }
+}
+
+// ── Detalle: editar ──────────────────────────────────────────────
+function iniciarEdicionDetalle(detalle) {
+  opcionEditando.value = null
+  detalleEditando.value = { detalleId: detalle.id, nombre: detalle.nombre, notas: detalle.notas || '' }
+}
+
+function cancelarEdicionDetalle() {
+  detalleEditando.value = null
+}
+
+async function guardarEdicionDetalle(proyecto, detalle) {
+  const nombre = detalleEditando.value.nombre.trim()
+  if (!nombre) { toastError('El nombre del detalle es obligatorio'); return }
+
+  guardandoInline.value = true
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      detalleId: detalle.id,
+      nombre,
+      notas: detalleEditando.value.notas.trim() || null,
+    }))
+    detalleEditando.value = null
+    success('Detalle actualizado')
+  } catch (e) {
+    toastError(e?.data?.message || e?.message || 'No se pudo guardar')
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Detalle: eliminar ────────────────────────────────────────────
+async function eliminarDetalleInline(proyecto, detalle) {
+  if (proyecto.detalles.length <= 1) {
+    toastError('El proyecto debe tener al menos un detalle')
+    return
+  }
+  guardandoInline.value = true
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      detalles: proyecto.detalles.filter(d => d.id !== detalle.id),
+    }))
+    success('Detalle eliminado')
+  } catch (e) {
+    toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Detalle: nuevo ───────────────────────────────────────────────
+function abrirNuevoDetalle(proyecto) {
+  nuevoDetalleCtx.value = { proyecto }
+  nuevoDetalle.value = { nombre: '', notas: '' }
+  errorPanel.value = ''
+}
+
+function cancelarNuevoDetalle() {
+  nuevoDetalleCtx.value = null
+  errorPanel.value = ''
+}
+
+async function confirmarNuevoDetalle() {
+  const nombre = nuevoDetalle.value.nombre.trim()
+  if (!nombre) { errorPanel.value = 'El nombre del detalle es obligatorio'; return }
+
+  const { proyecto } = nuevoDetalleCtx.value
+  const detalleNuevo = { nombre, notas: nuevoDetalle.value.notas.trim() || null, opciones: [] }
+
+  guardandoInline.value = true
+  errorPanel.value = ''
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      detalles: [...proyecto.detalles, detalleNuevo],
+    }))
+    nuevoDetalleCtx.value = null
+    success('Detalle agregado')
+  } catch (e) {
+    errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Opción: editar ───────────────────────────────────────────────
+function iniciarEdicionOpcion(opcion) {
+  detalleEditando.value = null
+  opcionEditando.value = {
+    opcionId: opcion.id,
+    nombre: opcion.nombre,
+    referenciaUrl: opcion.referenciaUrl || '',
+    imagenUrl: opcion.imagenUrl || '',
+    precioMinimo: opcion.precioMinimo ?? '',
+    precioPromedio: opcion.precioPromedio ?? '',
+    precioMaximo: opcion.precioMaximo ?? '',
+    notas: opcion.notas || '',
+  }
+}
+
+function cancelarEdicionOpcion() {
+  opcionEditando.value = null
+}
+
+async function guardarEdicionOpcion(proyecto, detalle) {
+  const nombre = opcionEditando.value.nombre.trim()
+  if (!nombre) { toastError('El nombre de la opcion es obligatorio'); return }
+
+  const opcionActualizada = {
+    nombre,
+    referenciaUrl: opcionEditando.value.referenciaUrl.trim() || null,
+    imagenUrl: opcionEditando.value.imagenUrl.trim() || null,
+    precioMinimo: parseAmount(opcionEditando.value.precioMinimo),
+    precioPromedio: parseAmount(opcionEditando.value.precioPromedio),
+    precioMaximo: parseAmount(opcionEditando.value.precioMaximo),
+    notas: opcionEditando.value.notas.trim() || null,
+  }
+
+  const nuevasOpciones = detalle.opciones.map(o =>
+    o.id === opcionEditando.value.opcionId ? opcionActualizada : opcionToPayload(o)
+  )
+
+  guardandoInline.value = true
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      opcionesDetalleId: detalle.id,
+      opciones: nuevasOpciones,
+    }))
+    opcionEditando.value = null
+    success('Opcion actualizada')
+  } catch (e) {
+    toastError(e?.data?.message || e?.message || 'No se pudo guardar')
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Opción: eliminar ─────────────────────────────────────────────
+async function eliminarOpcionInline(proyecto, detalle, opcion) {
+  const nuevasOpciones = detalle.opciones.filter(o => o.id !== opcion.id).map(opcionToPayload)
+
+  guardandoInline.value = true
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      opcionesDetalleId: detalle.id,
+      opciones: nuevasOpciones,
+    }))
+    success('Opcion eliminada')
+  } catch (e) {
+    toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Opción: nueva ────────────────────────────────────────────────
+function abrirNuevaOpcion(proyecto, detalle) {
+  nuevaOpcionCtx.value = { proyecto, detalle }
+  nuevaOpcion.value = opcionVacia()
+  errorPanel.value = ''
+}
+
+function cancelarNuevaOpcion() {
+  nuevaOpcionCtx.value = null
+  errorPanel.value = ''
+}
+
+async function confirmarNuevaOpcion() {
+  const nombre = nuevaOpcion.value.nombre.trim()
+  if (!nombre) { errorPanel.value = 'El nombre de la opcion es obligatorio'; return }
+
+  const { proyecto, detalle } = nuevaOpcionCtx.value
+  const opcionNueva = {
+    nombre,
+    referenciaUrl: nuevaOpcion.value.referenciaUrl.trim() || null,
+    imagenUrl: nuevaOpcion.value.imagenUrl.trim() || null,
+    precioMinimo: parseAmount(nuevaOpcion.value.precioMinimo),
+    precioPromedio: parseAmount(nuevaOpcion.value.precioPromedio),
+    precioMaximo: parseAmount(nuevaOpcion.value.precioMaximo),
+    notas: nuevaOpcion.value.notas.trim() || null,
+  }
+
+  guardandoInline.value = true
+  errorPanel.value = ''
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      opcionesDetalleId: detalle.id,
+      opciones: [...detalle.opciones.map(opcionToPayload), opcionNueva],
+    }))
+    nuevaOpcionCtx.value = null
+    success('Opcion agregada')
+  } catch (e) {
+    errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Decisión de opción ───────────────────────────────────────────
+function abrirDecision(proyecto, detalle, opcion, tipo) {
+  const hoy = new Date().toISOString().split('T')[0]
+  decisionCtx.value = { proyecto, detalle, opcion, tipo }
+  decisionForm.value = {
+    monto: opcion.precioPromedio ?? opcion.precioMinimo ?? opcion.precioMaximo ?? '',
+    fecha: hoy,
+    notas: '',
+  }
+  errorPanel.value = ''
+}
+
+function cancelarDecision() {
+  decisionCtx.value = null
+  errorPanel.value = ''
+}
+
+async function confirmarDecision() {
+  const ctx = decisionCtx.value
+  if (!ctx) return
+  const monto = parseAmount(decisionForm.value.monto)
+  if (!monto || monto <= 0) { errorPanel.value = 'El monto debe ser mayor a 0'; return }
+  if (!decisionForm.value.fecha) { errorPanel.value = 'La fecha es obligatoria'; return }
+
+  decidiendo.value = true
+  errorPanel.value = ''
+  try {
+    await decidirOpcionFutura(ctx.proyecto.id, ctx.detalle.id, {
+      tipo: ctx.tipo,
+      opcionId: ctx.opcion.id,
+      monto,
+      fecha: decisionForm.value.fecha,
+      notas: decisionForm.value.notas.trim() || null,
+    })
+    success(ctx.tipo === 'comprar' ? 'Opcion comprada y registrada' : 'Opcion planificada')
+    decisionCtx.value = null
+  } catch (e) {
+    errorPanel.value = e?.data?.message || e?.message || 'No se pudo decidir'
+  } finally {
+    decidiendo.value = false
+  }
+}
+
+function decisionBadge(detalle) {
+  if (detalle.estadoDecision === 'comprada') return { label: 'Elegida · Comprada', clases: 'bg-emerald-500/15 text-emerald-400' }
+  if (detalle.estadoDecision === 'planificada') return { label: 'Elegida · Planificada', clases: 'bg-sky-500/15 text-sky-300' }
+  return null
+}
+
+// ── Proyecto: eliminar ───────────────────────────────────────────
 async function confirmarEliminar() {
   if (!proyectoAEliminar.value) return
-
   eliminando.value = true
   try {
     await deleteGastoFuturo(proyectoAEliminar.value.id)

@@ -51,6 +51,22 @@
       </div>
 
       <div>
+        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Prioridad</label>
+        <div class="grid grid-cols-4 gap-2">
+          <button
+            v-for="opt in prioridadOpciones"
+            :key="opt.value"
+            type="button"
+            class="rounded-xl border px-2 py-2.5 text-xs font-medium transition-all"
+            :class="form.prioridad === opt.value ? opt.bg + ' ' + opt.color : 'border-theme-border bg-theme-input text-theme-text-muted'"
+            @click="form.prioridad = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
+      </div>
+
+      <div>
         <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Descripcion general <span class="text-theme-text-muted">(opcional)</span></label>
         <textarea
           v-model="form.descripcion"
@@ -64,7 +80,7 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-theme-text">Detalles</p>
-            <p class="text-xs text-theme-text-sec">Cada detalle puede tener varias opciones con link e imagen externa.</p>
+            <p class="text-xs text-theme-text-sec">Toca un detalle para expandirlo y editar sus opciones.</p>
           </div>
           <button
             class="rounded-full bg-theme-accent-bg px-3 py-1.5 text-xs font-medium text-theme-accent transition-colors hover:bg-theme-accent-bg-hover"
@@ -77,20 +93,44 @@
         <div
           v-for="(detalle, detalleIndex) in form.detalles"
           :key="detalle.key"
-          class="rounded-2xl border border-theme-border bg-theme-card p-3"
+          class="overflow-hidden rounded-2xl border border-theme-border bg-theme-card"
         >
-          <div class="flex items-center justify-between gap-3">
-            <p class="text-sm font-medium text-theme-text">Detalle {{ detalleIndex + 1 }}</p>
-            <button
-              v-if="form.detalles.length > 1"
-              class="text-xs text-theme-text-sec transition-colors hover:text-red-400"
-              @click="eliminarDetalle(detalleIndex)"
-            >
-              Eliminar
-            </button>
-          </div>
+          <!-- Cabecera colapsable -->
+          <button
+            type="button"
+            class="flex w-full items-center justify-between gap-3 px-3 py-3 text-left"
+            @click="toggleDetalle(detalle.key)"
+          >
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-sm font-medium text-theme-text">
+                {{ detalle.nombre || `Detalle ${detalleIndex + 1}` }}
+              </p>
+              <p class="mt-0.5 text-[11px] text-theme-text-muted">
+                {{ detalle.opciones.length }} opcion{{ detalle.opciones.length !== 1 ? 'es' : '' }}
+              </p>
+            </div>
+            <div class="flex shrink-0 items-center gap-3">
+              <button
+                v-if="form.detalles.length > 1"
+                type="button"
+                class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                @click.stop="eliminarDetalle(detalleIndex)"
+              >
+                Quitar
+              </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4 shrink-0 text-theme-text-muted transition-transform"
+                :class="detalleExpandido(detalle.key) ? 'rotate-180' : ''"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25L12 15.75 4.5 8.25" />
+              </svg>
+            </div>
+          </button>
 
-          <div class="mt-3 space-y-3">
+          <!-- Contenido expandido -->
+          <div v-if="detalleExpandido(detalle.key)" class="border-t border-theme-border px-3 pb-3 pt-3 space-y-3">
             <input
               v-model="detalle.nombre"
               type="text"
@@ -109,6 +149,7 @@
               <div class="flex items-center justify-between">
                 <p class="text-xs font-medium uppercase tracking-[0.18em] text-theme-text-muted">Opciones tentativas</p>
                 <button
+                  type="button"
                   class="rounded-full bg-theme-input px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-theme-text"
                   @click="agregarOpcion(detalle)"
                 >
@@ -122,9 +163,9 @@
                 class="rounded-xl border border-theme-border bg-theme-input/70 p-3"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <p class="text-xs font-medium text-theme-text">Opcion {{ optionIndex + 1 }}</p>
+                  <p class="text-xs font-medium text-theme-text">{{ opcion.nombre || `Opcion ${optionIndex + 1}` }}</p>
                   <button
-                    v-if="detalle.opciones.length > 1"
+                    type="button"
                     class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
                     @click="eliminarOpcion(detalle, optionIndex)"
                   >
@@ -266,13 +307,32 @@ const form = reactive({
   categoriaId: props.gastoEditar?.categoriaId || null,
   tipoGasto: props.gastoEditar?.tipoGasto || '',
   descripcion: props.gastoEditar?.descripcion || '',
+  prioridad: props.gastoEditar?.prioridad ?? 0,
   detalles: Array.isArray(props.gastoEditar?.detalles) && props.gastoEditar.detalles.length
     ? props.gastoEditar.detalles.map(detalle => createDetail(detalle))
     : [createDetail()],
 })
 
+const prioridadOpciones = [
+  { value: 3, label: 'Alta', color: 'text-red-400', bg: 'bg-red-500/15 border-red-500/40' },
+  { value: 2, label: 'Media', color: 'text-amber-300', bg: 'bg-amber-500/15 border-amber-500/40' },
+  { value: 1, label: 'Baja', color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/40' },
+  { value: 0, label: 'Sin def.', color: 'text-theme-text-sec', bg: 'bg-theme-input border-theme-border' },
+]
+
 const saving = ref(false)
 const errorMsg = ref('')
+
+// Acordeón de detalles — solo uno abierto a la vez
+const detalleAbierto = ref(form.detalles[0]?.key ?? null)
+
+function detalleExpandido(key) {
+  return detalleAbierto.value === key
+}
+
+function toggleDetalle(key) {
+  detalleAbierto.value = detalleAbierto.value === key ? null : key
+}
 
 const resumenTentativo = computed(() => {
   const payload = normalizarDetalles(false)
@@ -331,7 +391,9 @@ function inferAverage(option) {
 }
 
 function agregarDetalle() {
-  form.detalles.push(createDetail())
+  const nuevo = createDetail()
+  form.detalles.push(nuevo)
+  detalleAbierto.value = nuevo.key
 }
 
 function eliminarDetalle(index) {
@@ -344,6 +406,9 @@ function agregarOpcion(detalle) {
 
 function eliminarOpcion(detalle, index) {
   detalle.opciones.splice(index, 1)
+  if (detalle.opciones.length === 0) {
+    detalle.opciones.push(createOption())
+  }
 }
 
 function normalizarDetalles(validar = true) {
@@ -438,6 +503,7 @@ async function guardar() {
       categoriaId: form.categoriaId,
       tipoGasto: form.tipoGasto.trim(),
       descripcion: form.descripcion.trim() || null,
+      prioridad: form.prioridad ?? 0,
       detalles,
     }
 

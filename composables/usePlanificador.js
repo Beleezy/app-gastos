@@ -215,6 +215,20 @@ export function usePlanificador() {
     }
   }
 
+  async function decidirOpcionFutura(proyectoId, detalleId, data) {
+    try {
+      const result = await apiFetch(`/api/planificador/futuros/${proyectoId}/detalles/${detalleId}/decidir`, {
+        method: 'POST',
+        body: data,
+      })
+      await fetchPlan()
+      return result
+    } catch (e) {
+      error.value = e.data?.message || e.message || 'Error al decidir la opcion'
+      throw e
+    }
+  }
+
   async function deleteGastoFuturo(id) {
     try {
       await apiFetch(`/api/planificador/futuros/${id}`, {
@@ -283,7 +297,7 @@ export function usePlanificador() {
     fetchPlan, updatePresupuesto,
     createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado,
     toggleEstado, registrarGastoEnRegistro,
-    createGastoFuturo, updateGastoFuturo, deleteGastoFuturo,
+    createGastoFuturo, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura,
     fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,
     duplicarMes,
   }

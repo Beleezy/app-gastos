@@ -37,9 +37,25 @@
       </div>
 
       <!-- Microphone + Camera section -->
-      <div class="py-4 mb-4 relative">
-        <!-- Camera button - absolute, no afecta el centrado -->
-        <div class="absolute left-1/2 top-0 pt-9 z-10" style="transform: translateX(calc(-50% - 4.5rem))">
+      <div class="flex items-start justify-center gap-8 py-4 mb-4 px-4">
+        <!-- Microphone -->
+        <RegistroBotonMicrofono
+          :is-listening="isListening"
+          :transcript="transcript"
+          :error="voiceError"
+          :is-supported="isSupported"
+          :has-draft="hasDraft"
+          @start="onStartListening"
+          @stop="onStopListening"
+          @continue="onContinueListening"
+          @send="onSendDraft"
+          @discard="onDiscardDraft"
+          @overwrite="onOverwriteDraft"
+          @update:transcript="onUpdateTranscript"
+        />
+
+        <!-- Camera button -->
+        <div class="pt-9">
           <RegistroBotonCamara
             :show-preview="showPhotoPreview"
             :photo-preview="photoPreview"
@@ -47,24 +63,6 @@
             @send="onSendPhoto"
             @cancel="onCancelPhoto"
             @retake="onRetakePhoto"
-          />
-        </div>
-
-        <!-- Microphone (siempre centrado) -->
-        <div class="flex justify-center">
-          <RegistroBotonMicrofono
-            :is-listening="isListening"
-            :transcript="transcript"
-            :error="voiceError"
-            :is-supported="isSupported"
-            :has-draft="hasDraft"
-            @start="onStartListening"
-            @stop="onStopListening"
-            @continue="onContinueListening"
-            @send="onSendDraft"
-            @discard="onDiscardDraft"
-            @overwrite="onOverwriteDraft"
-            @update:transcript="onUpdateTranscript"
           />
         </div>
       </div>

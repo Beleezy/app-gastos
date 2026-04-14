@@ -49,7 +49,7 @@
         <p v-else class="text-[10px] text-theme-text-muted">Sin presupuesto configurado para este mes</p>
       </div>
 
-      <!-- Fila: Deudas + Planificador -->
+      <!-- Fila: Deudas + Plan -->
       <div class="grid grid-cols-2 gap-2.5">
         <!-- Deudas pendientes -->
         <NuxtLink to="/deudas" class="bg-theme-card rounded-2xl p-3.5 border border-theme-border block active:bg-theme-border-md transition-colors">
@@ -73,36 +73,56 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
               </svg>
             </div>
-            <span class="text-[10px] text-theme-text-muted font-medium">Plan</span>
+            <span class="text-[10px] text-theme-text-muted font-medium">Plan mensual</span>
           </div>
           <p class="text-lg font-bold" :class="porcentajePlanPagado > 70 ? 'text-emerald-400' : 'text-theme-accent'">
             {{ porcentajePlanPagado.toFixed(0) }}%
           </p>
           <p class="text-[10px] text-theme-text-muted mt-0.5">{{ countPagados }}/{{ countTotal }} pagados</p>
-          <div class="mt-3 border-t border-theme-border pt-3">
-            <div class="flex items-center justify-between text-[10px] text-theme-text-sec">
-              <span>Futuros</span>
-              <span>{{ futureProjects }} proyecto{{ futureProjects !== 1 ? 's' : '' }}</span>
-            </div>
-            <div v-if="futureProjects > 0" class="mt-2 space-y-1">
-              <p class="text-[11px] text-sky-300">Prom {{ currencySymbol }} {{ formatMonto(futureAverage) }}</p>
-              <p class="text-[10px] text-theme-text-muted">
-                {{ currencySymbol }} {{ formatMonto(futureMin) }} - {{ currencySymbol }} {{ formatMonto(futureMax) }}
-              </p>
-              <div v-if="futureHighlights.length" class="mt-2 flex flex-wrap gap-1">
-                <span
-                  v-for="item in futureHighlights"
-                  :key="item.id"
-                  class="rounded-full bg-theme-input px-2 py-1 text-[9px] text-theme-text-sec"
-                >
-                  {{ item.tipoGasto }}
-                </span>
-              </div>
-            </div>
-            <p v-else class="mt-2 text-[10px] text-theme-text-muted">Sin proyectos futuros aun</p>
-          </div>
         </NuxtLink>
       </div>
+
+      <!-- Gastos futuros -->
+      <NuxtLink
+        v-if="futureProjects > 0"
+        to="/planificador"
+        class="bg-theme-card rounded-2xl p-4 border border-sky-500/20 block active:bg-theme-border-md transition-colors"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-sky-500/15 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+              </svg>
+            </div>
+            <span class="text-xs font-semibold text-theme-text">Gastos futuros</span>
+          </div>
+          <span class="text-[10px] text-sky-400">{{ futureProjects }} proyecto{{ futureProjects !== 1 ? 's' : '' }} →</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="rounded-xl bg-theme-input px-3 py-2">
+            <p class="text-[10px] text-theme-text-muted">Min</p>
+            <p class="mt-0.5 text-xs font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(futureMin) }}</p>
+          </div>
+          <div class="rounded-xl bg-sky-500/10 px-3 py-2">
+            <p class="text-[10px] text-sky-300/70">Promedio</p>
+            <p class="mt-0.5 text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(futureAverage) }}</p>
+          </div>
+          <div class="rounded-xl bg-theme-input px-3 py-2">
+            <p class="text-[10px] text-theme-text-muted">Max</p>
+            <p class="mt-0.5 text-xs font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(futureMax) }}</p>
+          </div>
+        </div>
+        <div v-if="futureHighlights.length" class="mt-2.5 flex flex-wrap gap-1.5">
+          <span
+            v-for="item in futureHighlights"
+            :key="item.id"
+            class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec"
+          >
+            {{ item.tipoGasto }}
+          </span>
+        </div>
+      </NuxtLink>
     </div>
 
     <!-- Quick access modules -->
@@ -122,12 +142,37 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold text-theme-text">{{ modulo.titulo }}</p>
-          <p class="text-xs text-theme-text-sec truncate">{{ modulo.descripcion }}</p>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </NuxtLink>
+    </div>
+
+    <!-- Información de módulos -->
+    <div class="px-5 mt-4 mb-2">
+      <div class="rounded-2xl border border-theme-border bg-theme-card overflow-hidden">
+        <div class="px-4 py-3 border-b border-theme-border flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+          <span class="text-xs font-semibold text-theme-text">Información</span>
+        </div>
+        <div
+          v-for="(modulo, idx) in modulos"
+          :key="modulo.to + '-info'"
+          class="px-4 py-3"
+          :class="{ 'border-t border-theme-border': idx > 0 }"
+        >
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0" :class="modulo.iconBg">
+              <component :is="modulo.icon" class="w-3 h-3" :class="modulo.iconColor" />
+            </div>
+            <p class="text-xs font-semibold text-theme-text">{{ modulo.titulo }}</p>
+          </div>
+          <p class="text-[11px] text-theme-text-muted leading-relaxed pl-7">{{ modulo.descripcion }}</p>
+        </div>
+      </div>
     </div>
 
     <!-- Settings link -->
@@ -210,7 +255,7 @@ const modulos = [
     iconBg: 'bg-theme-accent-bg',
     iconColor: 'text-theme-accent',
     titulo: 'Planificador',
-    descripcion: 'Organiza tu presupuesto mensual por categoría',
+    descripcion: 'Aquí defines tu presupuesto mensual y distribuyes tus gastos planificados por categoría. Es una hoja de ruta: anota cuánto piensas gastar en cada cosa y marca los ítems conforme los vas pagando.',
   },
   {
     to: '/registro',
@@ -218,7 +263,7 @@ const modulos = [
     iconBg: 'bg-emerald-500/15',
     iconColor: 'text-emerald-400',
     titulo: 'Registro de Gastos',
-    descripcion: 'Registra gastos por voz o manualmente',
+    descripcion: 'Registra tus gastos reales del día a día, ya sea dictando por voz o ingresándolos manualmente. La IA interpreta lo que dices y extrae automáticamente el monto, la categoría y la fecha.',
   },
   {
     to: '/deudas',
@@ -226,7 +271,7 @@ const modulos = [
     iconBg: 'bg-amber-500/15',
     iconColor: 'text-amber-400',
     titulo: 'Deudas y Pagos',
-    descripcion: 'Controla quién te debe y a quién le debes',
+    descripcion: 'Lleva el control de lo que te deben y lo que debes. Puedes registrar múltiples conceptos por persona, hacer pagos parciales y ver el historial de cada deuda.',
   },
 ]
 

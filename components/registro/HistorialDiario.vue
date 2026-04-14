@@ -37,25 +37,45 @@
       <div v-for="dia in gastosPorDia" :key="dia.fecha">
         <!-- Day header -->
         <button
-          class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
+          class="w-full px-3.5 py-2.5 rounded-xl transition-all duration-200"
           :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
           @click="toggleDia(dia.fecha)"
         >
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors"
-              :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg' : 'bg-theme-border-md'"
+            <!-- Day number block -->
+            <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
+              :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
             >
-              <span class="text-xs font-bold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text-muted'">{{ extraerDia(dia.fecha) }}</span>
+              <span class="text-[9px] uppercase leading-none font-semibold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
+              <span class="text-base font-bold leading-tight" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text'">{{ extraerDia(dia.fecha) }}</span>
             </div>
-            <div class="text-left">
-              <p class="text-sm font-medium text-theme-text">{{ formatFechaDia(dia.fecha) }}</p>
-              <p class="text-xs text-theme-text-sec">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</p>
+
+            <!-- Main info -->
+            <div class="flex-1 min-w-0 text-left">
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-sm font-semibold text-theme-text truncate">{{ formatFechaDia(dia.fecha) }}</p>
+                <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+              </div>
+              <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
+                  {{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}
+                </span>
+                <span v-if="statsDia(dia).topCat" class="text-[10px] px-1.5 py-0.5 rounded-md leading-none font-medium"
+                  :style="{ backgroundColor: statsDia(dia).topCat.color + '20', color: statsDia(dia).topCat.color }"
+                >
+                  {{ statsDia(dia).topCat.icono }} {{ statsDia(dia).topCat.nombre }}
+                </span>
+                <span class="text-[10px] text-theme-text-muted leading-none">
+                  Prom. {{ currencySymbol }} {{ formatMonto(statsDia(dia).promedio) }}
+                </span>
+                <span v-if="statsDia(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">
+                  · {{ statsDia(dia).rangoHoras }}
+                </span>
+              </div>
             </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+
             <svg
-              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
+              xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform shrink-0"
               :class="{ 'rotate-180': diaExpandido === dia.fecha }"
               fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
             >
@@ -110,18 +130,32 @@
             <div v-for="dia in semana.dias" :key="dia.fecha">
               <!-- Day within week -->
               <button
-                class="w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors"
+                class="w-full px-3 py-2 rounded-lg transition-colors"
                 :class="diaExpandido === dia.fecha ? 'bg-theme-border-md border border-theme-border' : 'bg-theme-card hover:bg-theme-card'"
                 @click.stop="toggleDia(dia.fecha)"
               >
-                <div class="flex items-center gap-2">
-                  <span class="text-xs font-bold text-theme-text-muted w-6 text-center">{{ extraerDia(dia.fecha) }}</span>
-                  <p class="text-sm text-theme-text-sec">{{ formatFechaDia(dia.fecha) }}</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-lg flex flex-col items-center justify-center bg-theme-card border border-theme-border shrink-0">
+                    <span class="text-[8px] uppercase leading-none font-semibold text-theme-text-muted">{{ nombreDiaSemana(dia.fecha) }}</span>
+                    <span class="text-xs font-bold text-theme-text leading-tight">{{ extraerDia(dia.fecha) }}</span>
+                  </div>
+                  <div class="flex-1 min-w-0 text-left">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-xs font-medium text-theme-text-sec truncate">{{ formatFechaDia(dia.fecha) }}</p>
+                      <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                      <span class="text-[10px] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
+                      <span v-if="statsDia(dia).topCat" class="text-[10px] px-1 py-0.5 rounded leading-none font-medium"
+                        :style="{ backgroundColor: statsDia(dia).topCat.color + '20', color: statsDia(dia).topCat.color }"
+                      >
+                        {{ statsDia(dia).topCat.icono }} {{ statsDia(dia).topCat.nombre }}
+                      </span>
+                      <span v-if="statsDia(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">· {{ statsDia(dia).rangoHoras }}</span>
+                    </div>
+                  </div>
                   <svg
-                    xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform"
+                    xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform shrink-0"
                     :class="{ 'rotate-180': diaExpandido === dia.fecha }"
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                   >
@@ -196,6 +230,61 @@ function toggleSemana(key) {
 
 function extraerDia(fechaStr) {
   return parseInt(fechaStr.split('-')[2])
+}
+
+const DIAS_SEMANA = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+function nombreDiaSemana(fechaStr) {
+  const [y, m, d] = fechaStr.split('-').map(Number)
+  return DIAS_SEMANA[new Date(y, m - 1, d).getDay()]
+}
+
+const ICON_MAP = {
+  'utensils': '🍽️', 'bus': '🚌', 'home': '🏠', 'heart-pulse': '🏥',
+  'graduation-cap': '📚', 'gamepad': '🎮', 'shirt': '👕', 'zap': '⚡',
+  'piggy-bank': '💰', 'credit-card': '💳', 'circle-dot': '📦',
+}
+function resolveIcono(icono) {
+  if (!icono) return '📦'
+  if (icono.charCodeAt(0) > 255) return icono
+  return ICON_MAP[icono] || '📦'
+}
+
+function formatHoraCorta(hora) {
+  if (!hora) return ''
+  const [h, m] = hora.split(':')
+  const hour = parseInt(h)
+  const ampm = hour >= 12 ? 'pm' : 'am'
+  const h12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+  return `${h12}:${m}${ampm}`
+}
+
+function statsDia(dia) {
+  const gastos = dia.gastos || []
+  if (!gastos.length) return { topCat: null, promedio: 0, rangoHoras: '' }
+
+  const porCat = new Map()
+  for (const g of gastos) {
+    const key = g.categoriaId || g.categoriaNombre || 'otros'
+    const acc = porCat.get(key) || { total: 0, nombre: g.categoriaNombre || 'Otros', color: g.categoriaColor || '#6b7280', icono: resolveIcono(g.categoriaIcono) }
+    acc.total += Number(g.monto) || 0
+    porCat.set(key, acc)
+  }
+  let topCat = null
+  for (const c of porCat.values()) {
+    if (!topCat || c.total > topCat.total) topCat = c
+  }
+
+  const promedio = dia.total / gastos.length
+
+  const horas = gastos.map(g => g.hora).filter(Boolean).sort()
+  let rangoHoras = ''
+  if (horas.length >= 2) {
+    rangoHoras = `${formatHoraCorta(horas[0])}–${formatHoraCorta(horas[horas.length - 1])}`
+  } else if (horas.length === 1) {
+    rangoHoras = formatHoraCorta(horas[0])
+  }
+
+  return { topCat, promedio, rangoHoras }
 }
 
 const { currencySymbol, formatMonto } = useCurrency()
