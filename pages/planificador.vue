@@ -61,7 +61,12 @@
             <div :key="vistaActual">
               <PlanificadorGraficoCategoria v-if="vistaActual === 'grafico'" />
               <PlanificadorCalendarioMensual v-else-if="vistaActual === 'calendario'" />
-              <PlanificadorListaGastosPlaneados v-else @editar="editarGastoPlaneado" />
+              <PlanificadorListaGastosPlaneados
+                v-else
+                @editar="editarGastoPlaneado"
+                @registrar="abrirRegistroPago"
+                @abrir-registro="abrirRegistroPago"
+              />
             </div>
           </Transition>
         </div>
@@ -94,6 +99,13 @@
       @close="cerrarFormFuturo"
       @saved="cerrarFormFuturo"
     />
+
+    <PlanificadorFormRegistrarPago
+      v-if="showFormRegistrarPago && gastoParaRegistrar"
+      :gasto="gastoParaRegistrar"
+      @close="cerrarFormRegistrarPago"
+      @saved="cerrarFormRegistrarPago"
+    />
   </div>
 </template>
 
@@ -117,8 +129,10 @@ const seccionActual = ref('mensual')
 
 const showFormMensual = ref(false)
 const showFormFuturo = ref(false)
+const showFormRegistrarPago = ref(false)
 const gastoMensualEditando = ref(null)
 const gastoFuturoEditando = ref(null)
+const gastoParaRegistrar = ref(null)
 
 const vistas = [
   { value: 'lista', label: 'Lista' },
@@ -166,6 +180,16 @@ function cerrarFormMensual() {
 function cerrarFormFuturo() {
   showFormFuturo.value = false
   gastoFuturoEditando.value = null
+}
+
+function abrirRegistroPago(gasto) {
+  gastoParaRegistrar.value = gasto
+  showFormRegistrarPago.value = true
+}
+
+function cerrarFormRegistrarPago() {
+  showFormRegistrarPago.value = false
+  gastoParaRegistrar.value = null
 }
 
 const { isRefreshing } = usePullToRefresh(async () => {

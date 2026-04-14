@@ -87,6 +87,19 @@
         </div>
       </div>
 
+      <!-- Rangos rápidos -->
+      <div class="px-4 mb-2 flex gap-1.5">
+        <button
+          v-for="r in rangosRapidos"
+          :key="r.value"
+          class="flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors"
+          :class="rangoRapido === r.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+          @click="rangoRapido = r.value"
+        >
+          {{ r.label }}
+        </button>
+      </div>
+
       <!-- Filtros de categoría -->
       <div class="px-4 mb-3">
         <RegistroFiltrosCategoriaBar
@@ -349,13 +362,37 @@ async function actualizarPresupuesto(monto) {
 const vistaRegistro = ref('historial')
 const busquedaGasto = ref('')
 const categoriaFiltro = ref(null)
+const rangoRapido = ref('mes') // 'hoy' | '7d' | 'mes'
 
-// Filtrar gastos por búsqueda y categoría
+const rangosRapidos = [
+  { value: 'hoy', label: 'Hoy' },
+  { value: '7d', label: '7 días' },
+  { value: 'mes', label: 'Mes' },
+]
+
+function fechaDentroRango(fecha) {
+  if (rangoRapido.value === 'mes') return true
+  const hoy = new Date()
+  const d = new Date(`${fecha}T00:00:00`)
+  if (rangoRapido.value === 'hoy') {
+    return d.toDateString() === hoy.toDateString()
+  }
+  if (rangoRapido.value === '7d') {
+    const desde = new Date(hoy)
+    desde.setDate(desde.getDate() - 6)
+    desde.setHours(0, 0, 0, 0)
+    return d >= desde && d <= hoy
+  }
+  return true
+}
+
+// Filtrar gastos por búsqueda, categoría y rango rápido
 function filtrarGastos(gastosArr) {
   return gastosArr.filter(g => {
     const matchBusqueda = !busquedaGasto.value || g.concepto.toLowerCase().includes(busquedaGasto.value.toLowerCase())
     const matchCategoria = !categoriaFiltro.value || g.categoriaId === categoriaFiltro.value
-    return matchBusqueda && matchCategoria
+    const matchRango = fechaDentroRango(g.fecha)
+    return matchBusqueda && matchCategoria && matchRango
   })
 }
 
@@ -425,10 +462,8 @@ function showToast(msg) {
   setTimeout(() => { toastMsg.value = '' }, 2500)
 }
 
-async function onConfirmGastos(gastosEditados) {
-  vibrate([10, 50, 10])
-  // Map category names to IDs
-  const gastosConIds = gastosEditados.map(g => {
+function mapGastosConIds(gastosEditados) {
+  return gastosEditados.map(g => {
     const cat = getCategoriaPorNombre(g.categoria)
     return {
       concepto: g.concepto,
@@ -437,29 +472,64 @@ async function onConfirmGastos(gastosEditados) {
       fecha: g.fecha,
     }
   })
+}
 
-  await createGastosBulk(gastosConIds, lastTranscript.value, 'voz')
+function pushOptimisticGastos(gastosConIds) {
+  const now = new Date()
+  const hora = now.toTimeString().slice(0, 5)
+  const optimistas = gastosConIds.map((g, i) => {
+    const cat = categorias.value.find(c => c.id === g.categoriaId)
+    return {
+      id: `tmp-${Date.now()}-${i}`,
+      concepto: g.concepto,
+      monto: g.monto,
+      categoriaId: g.categoriaId,
+      categoriaNombre: cat?.nombre || '',
+      categoriaColor: cat?.color || null,
+      categoriaIcono: cat?.icono || null,
+      fecha: g.fecha,
+      hora,
+      pendiente: true,
+    }
+  })
+  gastosMensuales.value = [...optimistas, ...gastosMensuales.value]
+  return optimistas.map(o => o.id)
+}
+
+function rollbackOptimistic(tempIds) {
+  gastosMensuales.value = gastosMensuales.value.filter(g => !tempIds.includes(g.id))
+}
+
+async function onConfirmGastos(gastosEditados) {
+  vibrate([10, 50, 10])
+  const gastosConIds = mapGastosConIds(gastosEditados)
+  const tempIds = pushOptimisticGastos(gastosConIds)
   cerrarConfirmacion()
   showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
-  await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
+
+  try {
+    await createGastosBulk(gastosConIds, lastTranscript.value, 'voz')
+    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
+  } catch (e) {
+    rollbackOptimistic(tempIds)
+    toastError(handleApiError(e) || 'No se pudo guardar el gasto')
+  }
 }
 
 async function onConfirmPhotoGastos(gastosEditados) {
   vibrate([10, 50, 10])
-  const gastosConIds = gastosEditados.map(g => {
-    const cat = getCategoriaPorNombre(g.categoria)
-    return {
-      concepto: g.concepto,
-      monto: parseFloat(g.monto),
-      categoriaId: cat?.id || categorias.value[0]?.id,
-      fecha: g.fecha,
-    }
-  })
-
-  await createGastosBulk(gastosConIds, 'Escaneado desde foto de voucher', 'foto')
+  const gastosConIds = mapGastosConIds(gastosEditados)
+  const tempIds = pushOptimisticGastos(gastosConIds)
   cerrarPhotoConfirmacion()
   showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
-  await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
+
+  try {
+    await createGastosBulk(gastosConIds, 'Escaneado desde foto de voucher', 'foto')
+    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
+  } catch (e) {
+    rollbackOptimistic(tempIds)
+    toastError(handleApiError(e) || 'No se pudo guardar el gasto')
+  }
 }
 
 // Manual form

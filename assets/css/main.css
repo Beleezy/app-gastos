@@ -151,17 +151,17 @@ html.accent-morado {
   --color-accent-ring: rgba(139, 92, 246, 0.5);
 }
 html.dark.accent-morado {
-  --color-bg: #2e1065;
-  --color-card: #4c1d95;
-  --color-card-hover: #5b21b6;
-  --color-input: rgba(46, 16, 101, 0.8);
-  --color-nav: rgba(76, 29, 149, 0.85);
-  --glass-bg: rgba(76, 29, 149, 0.6);
-  --color-text: #f5f3ff;
-  --color-text-sec: #c4b5fd;
-  --color-text-muted: #a78bfa;
-  --color-border: rgba(255, 255, 255, 0.1);
-  --color-border-md: rgba(255, 255, 255, 0.2);
+  --color-bg: #1a0b2e;
+  --color-card: #261340;
+  --color-card-hover: #311a52;
+  --color-input: rgba(26, 11, 46, 0.8);
+  --color-nav: rgba(38, 19, 64, 0.85);
+  --glass-bg: rgba(38, 19, 64, 0.6);
+  --color-text: #ede9fe;
+  --color-text-sec: #a794d4;
+  --color-text-muted: #7c6aa8;
+  --color-border: rgba(167, 139, 250, 0.12);
+  --color-border-md: rgba(167, 139, 250, 0.22);
 }
 html.light.accent-morado {
   --color-bg: #faf5ff;
@@ -178,38 +178,26 @@ html.light.accent-morado {
 }
 
 html.accent-rosado {
-  --color-accent: #ec4899;
-  --color-accent-light: #f472b6;
-  --color-accent-dark: #db2777;
-  --color-accent-bg: rgba(236, 72, 153, 0.1);
-  --color-accent-bg-hover: rgba(236, 72, 153, 0.2);
-  --color-accent-ring: rgba(236, 72, 153, 0.5);
+  --color-accent: #f9a8d4;
+  --color-accent-light: #fbcfe8;
+  --color-accent-dark: #f472b6;
+  --color-accent-bg: rgba(249, 168, 212, 0.12);
+  --color-accent-bg-hover: rgba(249, 168, 212, 0.22);
+  --color-accent-ring: rgba(249, 168, 212, 0.5);
 }
 html.dark.accent-rosado {
-  --color-bg: #500724;
-  --color-card: #831843;
-  --color-card-hover: #9d174d;
-  --color-input: rgba(80, 7, 36, 0.8);
-  --color-nav: rgba(131, 24, 67, 0.85);
-  --glass-bg: rgba(131, 24, 67, 0.6);
-  --color-text: #fdf2f8;
-  --color-text-sec: #fbcfe8;
-  --color-text-muted: #f472b6;
-  --color-border: rgba(255, 255, 255, 0.15);
-  --color-border-md: rgba(255, 255, 255, 0.25);
-}
-html.light.accent-rosado {
   --color-bg: #fdf2f8;
   --color-card: #ffffff;
   --color-card-hover: #fce7f3;
   --color-input: rgba(0, 0, 0, 0.04);
   --color-nav: rgba(255, 255, 255, 0.92);
   --glass-bg: rgba(255, 255, 255, 0.75);
-  --color-text: #831843;
-  --color-text-sec: #be185d;
-  --color-text-muted: #db2777;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-md: rgba(0, 0, 0, 0.15);
+  --color-text: #6b214a;
+  --color-text-sec: #a14479;
+  --color-text-muted: #c77ba3;
+  --color-border: rgba(219, 39, 119, 0.1);
+  --color-border-md: rgba(219, 39, 119, 0.18);
+  --color-accent: #ec4899;
 }
 
 html.accent-naranja {

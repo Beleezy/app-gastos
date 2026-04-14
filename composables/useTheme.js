@@ -1,11 +1,11 @@
 const ACCENT_COLORS = [
-  { id: 'negro',   label: 'Negro',   color: '#6b7280' },
-  { id: 'azul',    label: 'Azul',    color: '#3b82f6' },
-  { id: 'celeste', label: 'Celeste', color: '#06b6d4' },
-  { id: 'morado',  label: 'Morado',  color: '#8b5cf6' },
-  { id: 'rosado',  label: 'Rosado',  color: '#ec4899' },
+  { id: 'negro',   label: 'Negro',   color: '#6b7280', mode: 'dark' },
+  { id: 'azul',    label: 'Azul',    color: '#3b82f6', mode: 'dark' },
+  { id: 'celeste', label: 'Celeste', color: '#06b6d4', mode: 'dark' },
+  { id: 'morado',  label: 'Morado',  color: '#8b5cf6', mode: 'dark' },
+  { id: 'rosado',  label: 'Rosado',  color: '#f9a8d4', mode: 'light' },
 
-  { id: 'blanco',  label: 'Blanco',  color: '#e2e8f0' },
+  { id: 'blanco',  label: 'Blanco',  color: '#e2e8f0', mode: 'light' },
 ]
 
 export function useTheme() {
@@ -33,8 +33,16 @@ export function useTheme() {
     localStorage.setItem('theme-accent', id)
   }
 
+  function modeFor(id) {
+    const c = ACCENT_COLORS.find(x => x.id === id)
+    return c?.mode === 'light' ? false : true
+  }
+
   function setAccentColor(id) {
     accentColor.value = id
+    const dark = modeFor(id)
+    isDark.value = dark
+    applyTheme(dark)
     applyAccent(id)
   }
 
@@ -45,13 +53,12 @@ export function useTheme() {
 
   function initTheme() {
     if (!process.client) return
-    const saved = localStorage.getItem('theme')
-    isDark.value = saved ? saved === 'dark' : true
-    applyTheme(isDark.value)
-
-    const savedAccent = localStorage.getItem('theme-accent')
-    accentColor.value = savedAccent || 'azul'
-    applyAccent(accentColor.value)
+    const savedAccent = localStorage.getItem('theme-accent') || 'azul'
+    accentColor.value = savedAccent
+    const dark = modeFor(savedAccent)
+    isDark.value = dark
+    applyTheme(dark)
+    applyAccent(savedAccent)
   }
 
   return { isDark, toggleTheme, initTheme, accentColor, setAccentColor, ACCENT_COLORS }

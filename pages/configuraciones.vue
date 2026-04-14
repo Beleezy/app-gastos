@@ -156,31 +156,6 @@
           />
         </div>
 
-        <!-- Tema -->
-        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 110 10A5 5 0 0112 7z" />
-              </svg>
-              <div>
-                <p class="text-sm font-medium text-theme-text">Tema</p>
-                <p class="text-xs text-theme-text-sec">{{ isDark ? 'Oscuro' : 'Claro' }}</p>
-              </div>
-            </div>
-            <button
-              class="relative w-12 h-6 rounded-full transition-colors duration-300 focus:outline-none"
-              :class="isDark ? 'bg-theme-border-md' : 'bg-blue-500'"
-              @click="toggleTheme"
-            >
-              <span
-                class="absolute top-0.5 w-5 h-5 rounded-full bg-theme-card shadow transition-transform duration-300"
-                :class="isDark ? 'left-0.5' : 'left-6'"
-              ></span>
-            </button>
-          </div>
-        </div>
-
         <!-- Color de acento -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
@@ -275,7 +250,7 @@
 <script setup>
 const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
-const { isDark, toggleTheme, accentColor, setAccentColor, ACCENT_COLORS } = useTheme()
+const { accentColor, setAccentColor, ACCENT_COLORS } = useTheme()
 const { logout } = useAuth()
 
 

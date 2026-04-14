@@ -164,6 +164,8 @@ const props = defineProps({
   isSupported: { type: Boolean, default: true },
 })
 
+const { vibrate } = useHaptic()
+
 const isEditing = ref(false)
 const editText = ref('')
 
@@ -217,8 +219,10 @@ function cancelEdit() {
 // Modo tap: toggle normal
 function toggleListening() {
   if (props.isListening) {
+    vibrate(20)
     emit('stop')
   } else {
+    vibrate(30)
     emit('start')
   }
 }
@@ -231,6 +235,7 @@ function onPointerDown() {
   if (props.isListening || props.hasDraft) return
   holdTimer = setTimeout(() => {
     isHoldMode = true
+    vibrate(30)
     emit('start')
   }, 350)
 }

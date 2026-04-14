@@ -22,12 +22,16 @@
       <!-- Gasto del mes vs presupuesto -->
       <div class="bg-gradient-to-br from-theme-card to-theme-card/80 rounded-2xl p-4 border border-theme-border">
         <div class="flex items-center justify-between mb-3">
-          <span class="text-xs text-theme-text-muted font-medium">Gasto de {{ mesActual }}</span>
+          <span class="text-xs text-theme-text-muted font-medium flex items-center gap-1.5">
+            Gasto de {{ mesActual }}
+            <span v-if="errorGastos" title="No se pudo cargar" class="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-red-500/15 text-red-400 text-[9px] font-bold">!</span>
+          </span>
           <NuxtLink to="/registro" class="text-[10px] text-theme-accent hover:text-theme-accent-light transition-colors">Ver detalle →</NuxtLink>
         </div>
         <div class="flex items-end justify-between mb-2">
-          <p class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(totalMes) }}</p>
-          <p v-if="presupuesto > 0" class="text-sm text-theme-text-muted">
+          <div v-if="loadingGastos" class="h-7 w-32 rounded-md bg-theme-border-md shimmer"></div>
+          <p v-else class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(totalMes) }}</p>
+          <p v-if="!loadingGastos && presupuesto > 0" class="text-sm text-theme-text-muted">
             de {{ currencySymbol }} {{ formatMonto(presupuesto) }}
           </p>
         </div>
@@ -59,10 +63,15 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
               </svg>
             </div>
-            <span class="text-[10px] text-theme-text-muted font-medium">Me deben</span>
+            <span class="text-[10px] text-theme-text-muted font-medium flex items-center gap-1">
+              Me deben
+              <span v-if="errorDeudas" title="No se pudo cargar" class="inline-flex h-3 w-3 items-center justify-center rounded-full bg-red-500/15 text-red-400 text-[8px] font-bold">!</span>
+            </span>
           </div>
-          <p class="text-lg font-bold text-amber-400">{{ currencySymbol }} {{ formatMonto(totalMeDeben) }}</p>
-          <p class="text-[10px] text-theme-text-muted mt-0.5">{{ countMeDeben }} persona{{ countMeDeben !== 1 ? 's' : '' }}</p>
+          <div v-if="loadingDeudas" class="h-5 w-20 rounded-md bg-theme-border-md shimmer"></div>
+          <p v-else class="text-lg font-bold text-amber-400">{{ currencySymbol }} {{ formatMonto(totalMeDeben) }}</p>
+          <p v-if="!loadingDeudas" class="text-[10px] text-theme-text-muted mt-0.5">{{ countMeDeben }} persona{{ countMeDeben !== 1 ? 's' : '' }}</p>
+          <div v-else class="h-3 w-12 rounded bg-theme-border-md shimmer mt-1"></div>
         </NuxtLink>
 
         <!-- Plan del mes -->
@@ -73,12 +82,17 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
               </svg>
             </div>
-            <span class="text-[10px] text-theme-text-muted font-medium">Plan mensual</span>
+            <span class="text-[10px] text-theme-text-muted font-medium flex items-center gap-1">
+              Plan mensual
+              <span v-if="errorPlan" title="No se pudo cargar" class="inline-flex h-3 w-3 items-center justify-center rounded-full bg-red-500/15 text-red-400 text-[8px] font-bold">!</span>
+            </span>
           </div>
-          <p class="text-lg font-bold" :class="porcentajePlanPagado > 70 ? 'text-emerald-400' : 'text-theme-accent'">
+          <div v-if="loadingPlan" class="h-5 w-14 rounded-md bg-theme-border-md shimmer"></div>
+          <p v-else class="text-lg font-bold" :class="porcentajePlanPagado > 70 ? 'text-emerald-400' : 'text-theme-accent'">
             {{ porcentajePlanPagado.toFixed(0) }}%
           </p>
-          <p class="text-[10px] text-theme-text-muted mt-0.5">{{ countPagados }}/{{ countTotal }} pagados</p>
+          <p v-if="!loadingPlan" class="text-[10px] text-theme-text-muted mt-0.5">{{ countPagados }}/{{ countTotal }} pagados</p>
+          <div v-else class="h-3 w-16 rounded bg-theme-border-md shimmer mt-1"></div>
         </NuxtLink>
       </div>
 
@@ -125,54 +139,29 @@
       </NuxtLink>
     </div>
 
-    <!-- Quick access modules -->
-    <div class="px-5 space-y-2.5 flex-1">
+    <div class="flex-1"></div>
+
+    <!-- Botón de Información -->
+    <div class="px-5 mt-4">
       <NuxtLink
-        v-for="(modulo, idx) in modulos"
-        :key="modulo.to"
-        :to="modulo.to"
-        class="group flex items-center gap-4 rounded-2xl p-3.5 transition-all duration-300 active:scale-[0.98] module-card border border-theme-border bg-theme-card"
-        :style="{ animationDelay: `${idx * 60}ms` }"
+        to="/informacion"
+        class="flex items-center justify-between gap-3 rounded-2xl p-3.5 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
       >
-        <div
-          class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105"
-          :class="modulo.iconBg"
-        >
-          <component :is="modulo.icon" class="w-5 h-5" :class="modulo.iconColor" />
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-theme-accent-bg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+            </svg>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-theme-text">Información</p>
+            <p class="text-[11px] text-theme-text-muted">Cómo funciona cada módulo</p>
+          </div>
         </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-theme-text">{{ modulo.titulo }}</p>
-        </div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </NuxtLink>
-    </div>
-
-    <!-- Información de módulos -->
-    <div class="px-5 mt-4 mb-2">
-      <div class="rounded-2xl border border-theme-border bg-theme-card overflow-hidden">
-        <div class="px-4 py-3 border-b border-theme-border flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-          </svg>
-          <span class="text-xs font-semibold text-theme-text">Información</span>
-        </div>
-        <div
-          v-for="(modulo, idx) in modulos"
-          :key="modulo.to + '-info'"
-          class="px-4 py-3"
-          :class="{ 'border-t border-theme-border': idx > 0 }"
-        >
-          <div class="flex items-center gap-2 mb-1">
-            <div class="w-5 h-5 rounded-md flex items-center justify-center shrink-0" :class="modulo.iconBg">
-              <component :is="modulo.icon" class="w-3 h-3" :class="modulo.iconColor" />
-            </div>
-            <p class="text-xs font-semibold text-theme-text">{{ modulo.titulo }}</p>
-          </div>
-          <p class="text-[11px] text-theme-text-muted leading-relaxed pl-7">{{ modulo.descripcion }}</p>
-        </div>
-      </div>
     </div>
 
     <!-- Settings link -->
@@ -221,6 +210,16 @@ const futureMin = ref(0)
 const futureMax = ref(0)
 const futureHighlights = ref([])
 
+// Estados de error por card (A3)
+const errorGastos = ref(false)
+const errorDeudas = ref(false)
+const errorPlan = ref(false)
+
+// Estados de carga por card (C1)
+const loadingGastos = ref(true)
+const loadingDeudas = ref(true)
+const loadingPlan = ref(true)
+
 const porcentajeGastado = computed(() => {
   if (presupuesto.value <= 0) return 0
   return (totalMes.value / presupuesto.value) * 100
@@ -233,48 +232,6 @@ const porcentajePlanPagado = computed(() => {
   return (countPagados.value / countTotal.value) * 100
 })
 
-// Icons usando render functions (evita necesitar el compilador Vue en runtime)
-import { h } from 'vue'
-
-const makeIcon = (d) => () => h('svg', {
-  xmlns: 'http://www.w3.org/2000/svg',
-  fill: 'none',
-  viewBox: '0 0 24 24',
-  'stroke-width': '1.75',
-  stroke: 'currentColor'
-}, [h('path', { 'stroke-linecap': 'round', 'stroke-linejoin': 'round', d })])
-
-const IconClipboard = makeIcon('M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z')
-const IconMic = makeIcon('M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z')
-const IconCreditCard = makeIcon('M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z')
-
-const modulos = [
-  {
-    to: '/planificador',
-    icon: IconClipboard,
-    iconBg: 'bg-theme-accent-bg',
-    iconColor: 'text-theme-accent',
-    titulo: 'Planificador',
-    descripcion: 'Aquí defines tu presupuesto mensual y distribuyes tus gastos planificados por categoría. Es una hoja de ruta: anota cuánto piensas gastar en cada cosa y marca los ítems conforme los vas pagando.',
-  },
-  {
-    to: '/registro',
-    icon: IconMic,
-    iconBg: 'bg-emerald-500/15',
-    iconColor: 'text-emerald-400',
-    titulo: 'Registro de Gastos',
-    descripcion: 'Registra tus gastos reales del día a día, ya sea dictando por voz o ingresándolos manualmente. La IA interpreta lo que dices y extrae automáticamente el monto, la categoría y la fecha.',
-  },
-  {
-    to: '/deudas',
-    icon: IconCreditCard,
-    iconBg: 'bg-amber-500/15',
-    iconColor: 'text-amber-400',
-    titulo: 'Deudas y Pagos',
-    descripcion: 'Lleva el control de lo que te deben y lo que debes. Puedes registrar múltiples conceptos por persona, hacer pagos parciales y ver el historial de cada deuda.',
-  },
-]
-
 onMounted(async () => {
   // Cargar en paralelo
   await Promise.allSettled([
@@ -286,23 +243,36 @@ onMounted(async () => {
 
 async function cargarResumenGastos() {
   try {
+    errorGastos.value = false
     const data = await $fetch('/api/gastos/resumen', {
       query: { mes: mesActualNum, anio: anioActual }
     })
     totalMes.value = parseFloat(data.totalMes) || 0
-  } catch { /* silencioso */ }
+  } catch (e) {
+    errorGastos.value = true
+    console.warn('[dashboard] cargarResumenGastos falló:', e)
+  } finally {
+    loadingGastos.value = false
+  }
 }
 
 async function cargarResumenDeudas() {
   try {
+    errorDeudas.value = false
     const data = await $fetch('/api/deudas/resumen')
     totalMeDeben.value = parseFloat(data.totalMeDeben) || 0
     countMeDeben.value = data.countMeDeben || 0
-  } catch { /* silencioso */ }
+  } catch (e) {
+    errorDeudas.value = true
+    console.warn('[dashboard] cargarResumenDeudas falló:', e)
+  } finally {
+    loadingDeudas.value = false
+  }
 }
 
 async function cargarResumenPlan() {
   try {
+    errorPlan.value = false
     const data = await $fetch('/api/planificador', {
       query: { mes: mesActualNum, anio: anioActual }
     })
@@ -317,16 +287,11 @@ async function cargarResumenPlan() {
     futureMin.value = parseFloat(futuros.totalMinimo) || 0
     futureMax.value = parseFloat(futuros.totalMaximo) || 0
     futureHighlights.value = Array.isArray(futuros.destacados) ? futuros.destacados.slice(0, 2) : []
-  } catch { /* silencioso */ }
+  } catch (e) {
+    errorPlan.value = true
+    console.warn('[dashboard] cargarResumenPlan falló:', e)
+  } finally {
+    loadingPlan.value = false
+  }
 }
 </script>
-
-<style scoped>
-.module-card {
-  animation: fadeInUp 0.4s ease-out both;
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>

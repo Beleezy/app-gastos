@@ -1,5 +1,8 @@
 <template>
-  <div class="group relative bg-theme-card rounded-xl border border-theme-border hover:border-theme-accent/30 transition-colors">
+  <div
+    class="group relative bg-theme-card rounded-xl border border-theme-border hover:border-theme-accent/30 transition-colors"
+    :class="gasto.pendiente ? 'opacity-60 animate-pulse' : ''"
+  >
     <div class="flex items-stretch">
       <!-- Left: Category icon + colored accent bar -->
       <div class="flex items-center pl-2.5 pr-2 py-2.5">
@@ -45,7 +48,7 @@
           <button
             class="w-6 h-6 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
             aria-label="Editar"
-            @click.stop="$emit('edit')"
+            @click.stop="onEdit"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -78,8 +81,14 @@ const emit = defineEmits(['edit', 'delete'])
 const { vibrate } = useHaptic()
 
 function onDelete() {
+  if (props.gasto.pendiente) return
   vibrate([10, 30, 10])
   emit('delete')
+}
+
+function onEdit() {
+  if (props.gasto.pendiente) return
+  emit('edit')
 }
 
 const badgeLabel = computed(() => getMetodoRegistroBadgeLabel(props.gasto))
