@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm'
-import { db } from '../../../../../utils/db.js'
+import { db } from '../../../../../../utils/db.js'
 import {
   gastosFuturos,
   gastosFuturosDetalles,
@@ -8,9 +8,9 @@ import {
   gastosPlanificados,
   planesMensuales,
   configuraciones,
-} from '../../../../../database/schema.js'
-import { getUsuarioFromEvent } from '../../../../../utils/getUsuario.js'
-import { fetchFutureExpenseById } from '../../../../../utils/gastosFuturos.js'
+} from '../../../../../../database/schema.js'
+import { getUsuarioFromEvent } from '../../../../../../utils/getUsuario.js'
+import { fetchFutureExpenseById } from '../../../../../../utils/gastosFuturos.js'
 
 function parseAmount(value) {
   if (value === null || value === undefined || value === '') return null
