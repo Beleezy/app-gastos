@@ -25,7 +25,14 @@
         <svg v-else class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span>{{ toast.message }}</span>
+        <span class="flex-1">{{ toast.message }}</span>
+        <button
+          v-if="toast.action"
+          class="shrink-0 px-2 py-0.5 rounded-md bg-white/20 text-white text-xs font-semibold hover:bg-white/30 transition-colors"
+          @click="toast.action.onClick()"
+        >
+          {{ toast.action.label }}
+        </button>
       </div>
     </TransitionGroup>
   </div>

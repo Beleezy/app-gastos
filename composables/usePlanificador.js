@@ -18,6 +18,7 @@ export function usePlanificador() {
   }))
   const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
   const categorias = useState('planificador-categorias', () => [])
+  const mesAnteriorResumen = useState('planificador-mes-anterior', () => null)
   const isLoading = ref(false)
   const error = ref(null)
 
@@ -30,19 +31,35 @@ export function usePlanificador() {
     return mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
   })
 
+  function _hoyISO() {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  }
+
   const resumen = computed(() => {
     const presupuesto = plan.value?.montoPresupuesto || 0
     const totalPlanificado = gastosPlaneados.value.reduce((s, g) => s + g.montoEstimado, 0)
     const pagados = gastosPlaneados.value.filter(g => g.estado === 'pagado')
     const pendientes = gastosPlaneados.value.filter(g => g.estado === 'pendiente')
+    const hoy = _hoyISO()
+    const vencidos = pendientes.filter(g => g.fechaProbablePago && g.fechaProbablePago < hoy)
+    const hoyItems = pendientes.filter(g => g.fechaProbablePago === hoy)
     const porcentaje = presupuesto > 0 ? (totalPlanificado / presupuesto * 100) : 0
+    const gastoRealTotal = Object.values(gastosRealesPorCategoria.value).reduce((s, v) => s + v, 0)
+    const porcentajeGastadoReal = presupuesto > 0 ? (gastoRealTotal / presupuesto * 100) : 0
     return {
       presupuesto,
       totalPlanificado,
       saldoRestante: presupuesto - totalPlanificado,
+      saldoReal: presupuesto - gastoRealTotal,
       porcentajeAsignado: Math.min(porcentaje, 100),
+      porcentajeGastadoReal: Math.min(porcentajeGastadoReal, 100),
+      excedeGastoReal: gastoRealTotal > presupuesto && presupuesto > 0,
       countPagados: pagados.length,
       countPendientes: pendientes.length,
+      countVencidos: vencidos.length,
+      countHoy: hoyItems.length,
+      countTotal: gastosPlaneados.value.length,
     }
   })
 
@@ -71,6 +88,43 @@ export function usePlanificador() {
     return Object.values(gastosRealesPorCategoria.value).reduce((s, v) => s + v, 0)
   })
 
+  // Analítica: proyección, ritmo diario, comparativas
+  const analitica = computed(() => {
+    const presupuesto = plan.value?.montoPresupuesto || 0
+    const gastoReal = totalGastoReal.value
+    const now = new Date()
+    const esMesActual = mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
+    const diasTotales = new Date(anioActual.value, mesActual.value, 0).getDate()
+    const diaActual = esMesActual ? now.getDate() : diasTotales
+    const diasRestantes = Math.max(0, diasTotales - diaActual)
+    // Proyección lineal: ritmo_diario * días_totales
+    const proyeccionFinMes = diaActual > 0 ? (gastoReal / diaActual) * diasTotales : 0
+    const ritmoDiarioRecomendado = diasRestantes > 0 ? Math.max(0, (presupuesto - gastoReal) / diasRestantes) : 0
+    const excedeProyeccion = proyeccionFinMes > presupuesto && presupuesto > 0 && esMesActual
+    const excesoProyectado = Math.max(0, proyeccionFinMes - presupuesto)
+    // Comparativa vs mes anterior
+    const prev = mesAnteriorResumen.value
+    let deltaPct = null
+    let deltaAbs = null
+    if (prev && prev.gastoReal > 0) {
+      deltaAbs = gastoReal - prev.gastoReal
+      deltaPct = (deltaAbs / prev.gastoReal) * 100
+    }
+    return {
+      esMesActual,
+      diasTotales,
+      diaActual,
+      diasRestantes,
+      proyeccionFinMes,
+      ritmoDiarioRecomendado,
+      excedeProyeccion,
+      excesoProyectado,
+      deltaAbs,
+      deltaPct,
+      gastoRealMesAnterior: prev?.gastoReal ?? null,
+    }
+  })
+
   const datosGrafico = computed(() => {
     const total = resumen.value.totalPlanificado
     if (total === 0) return []
@@ -89,6 +143,26 @@ export function usePlanificador() {
       }
     })
   })
+
+  async function fetchMesAnterior() {
+    let m = mesActual.value - 1
+    let a = anioActual.value
+    if (m === 0) { m = 12; a -= 1 }
+    try {
+      const data = await apiFetch('/api/planificador', { query: { mes: m, anio: a } })
+      const real = Object.values(data.gastosRealesPorCategoria || {}).reduce((s, v) => s + v, 0)
+      const planificado = (data.gastos || []).reduce((s, g) => s + (g.montoEstimado || 0), 0)
+      mesAnteriorResumen.value = {
+        mes: m,
+        anio: a,
+        gastoReal: real,
+        totalPlanificado: planificado,
+        presupuesto: data.plan?.montoPresupuesto || 0,
+      }
+    } catch (e) {
+      mesAnteriorResumen.value = null
+    }
+  }
 
   async function fetchPlan() {
     isLoading.value = true
@@ -148,6 +222,7 @@ export function usePlanificador() {
 
   async function updateGastoPlaneado(id, data) {
     try {
+      // data puede incluir alcanceEdicion: 'solo' | 'futuros' para recurrentes
       await apiFetch(`/api/planificador/gastos/${id}`, {
         method: 'PUT',
         body: data
@@ -167,6 +242,38 @@ export function usePlanificador() {
       gastosPlaneados.value = gastosPlaneados.value.filter(g => g.id !== id)
     } catch (e) {
       error.value = e.message || 'Error al eliminar gasto'
+    }
+  }
+
+  // Soft-delete con ventana de undo: remueve de UI inmediatamente,
+  // difiere la eliminación en backend, permite cancelar.
+  const _pendingDeletes = new Map()
+  function softDeleteGastoPlaneado(id, delayMs = 5000) {
+    const gasto = gastosPlaneados.value.find(g => g.id === id)
+    if (!gasto) return null
+    const index = gastosPlaneados.value.findIndex(g => g.id === id)
+    gastosPlaneados.value = gastosPlaneados.value.filter(g => g.id !== id)
+    const timeoutId = setTimeout(async () => {
+      _pendingDeletes.delete(id)
+      try {
+        await apiFetch(`/api/planificador/gastos/${id}`, { method: 'DELETE' })
+      } catch (e) {
+        // Restaurar si el backend falla
+        gastosPlaneados.value = [...gastosPlaneados.value.slice(0, index), gasto, ...gastosPlaneados.value.slice(index)]
+        error.value = e.message || 'Error al eliminar gasto'
+      }
+    }, delayMs)
+    _pendingDeletes.set(id, { gasto, index, timeoutId })
+    return {
+      undo: () => {
+        const entry = _pendingDeletes.get(id)
+        if (!entry) return false
+        clearTimeout(entry.timeoutId)
+        _pendingDeletes.delete(id)
+        const idx = Math.min(entry.index, gastosPlaneados.value.length)
+        gastosPlaneados.value = [...gastosPlaneados.value.slice(0, idx), entry.gasto, ...gastosPlaneados.value.slice(idx)]
+        return true
+      }
     }
   }
 
@@ -293,9 +400,9 @@ export function usePlanificador() {
   return {
     plan, gastosPlaneados, gastosFuturos, resumenFuturos, gastosRealesPorCategoria, categorias, isLoading, error,
     mesActual, anioActual, nombreMes, esHoy,
-    resumen, gastosPorCategoria, datosGrafico, totalGastoReal,
+    resumen, gastosPorCategoria, datosGrafico, totalGastoReal, analitica, mesAnteriorResumen, fetchMesAnterior,
     fetchPlan, updatePresupuesto,
-    createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado,
+    createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado, softDeleteGastoPlaneado,
     toggleEstado, registrarGastoEnRegistro,
     createGastoFuturo, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura,
     fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,

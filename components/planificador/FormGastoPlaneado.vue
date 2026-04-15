@@ -1,5 +1,15 @@
 <template>
   <SharedBaseBottomSheet :title="modoEdicion ? 'Editar gasto planificado' : 'Nuevo gasto planificado'" @close="$emit('close')">
+    <!-- Badge recurrente en edición -->
+    <div v-if="modoEdicion && gastoEditar?.esRecurrente" class="flex items-start gap-2 rounded-xl border border-theme-accent/30 bg-theme-accent-bg px-3 py-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      <div class="text-[11px] text-theme-accent leading-tight">
+        Gasto recurrente. Al guardar elegirás si los cambios se aplican solo a este mes o también a los meses futuros.
+      </div>
+    </div>
+
     <!-- Concepto -->
     <div>
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
@@ -121,6 +131,40 @@
       </svg>
       {{ saving ? 'Guardando...' : modoEdicion ? 'Guardar cambios' : 'Agregar gasto planificado' }}
     </button>
+
+    <!-- Modal: alcance de la edición para recurrentes -->
+    <div v-if="mostrarAlcance" class="fixed inset-0 z-[60] flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="mostrarAlcance = false"></div>
+      <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
+        <h3 class="mb-1 text-base font-semibold text-theme-text">Gasto recurrente</h3>
+        <p class="mb-5 text-sm text-theme-text-muted">¿Dónde quieres aplicar los cambios?</p>
+        <div class="space-y-2">
+          <button
+            class="w-full rounded-xl bg-theme-accent-bg px-3 py-2.5 text-sm font-medium text-theme-accent transition-colors hover:bg-theme-accent-bg-hover"
+            :disabled="saving"
+            @click="confirmarGuardar('solo')"
+          >
+            Solo este mes
+            <span class="block text-[10px] text-theme-text-muted mt-0.5">Este registro se desvincula y no afecta los futuros</span>
+          </button>
+          <button
+            class="w-full rounded-xl bg-theme-accent px-3 py-2.5 text-sm font-medium text-theme-text transition-colors hover:bg-theme-accent-dark"
+            :disabled="saving"
+            @click="confirmarGuardar('futuros')"
+          >
+            Este y los meses futuros
+            <span class="block text-[10px] text-white/70 mt-0.5">Propaga los cambios a todas las instancias del grupo</span>
+          </button>
+          <button
+            class="w-full rounded-xl py-2 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
+            :disabled="saving"
+            @click="mostrarAlcance = false"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
   </SharedBaseBottomSheet>
 </template>
 
@@ -161,6 +205,7 @@ const form = reactive({
 
 const saving = ref(false)
 const errorMsg = ref('')
+const mostrarAlcance = ref(false)
 
 const { currencySymbol } = useCurrency()
 const { success: toastSuccess } = useToast()
@@ -177,37 +222,51 @@ function esPasado(dia) {
   return false
 }
 
-async function guardar() {
-  errorMsg.value = ''
-  if (!form.concepto.trim()) {
-    errorMsg.value = 'El concepto es obligatorio'
-    return
-  }
-  if (!form.categoriaId) {
-    errorMsg.value = 'Selecciona una categoría'
-    return
-  }
-  if (!form.montoEstimado || form.montoEstimado <= 0) {
-    errorMsg.value = 'Ingresa un monto válido'
-    return
-  }
+function validar() {
+  if (!form.concepto.trim()) { errorMsg.value = 'El concepto es obligatorio'; return false }
+  if (!form.categoriaId) { errorMsg.value = 'Selecciona una categoría'; return false }
+  if (!form.montoEstimado || form.montoEstimado <= 0) { errorMsg.value = 'Ingresa un monto válido'; return false }
+  return true
+}
 
+function buildPayload() {
   const mes = String(mesActual.value).padStart(2, '0')
   const dia = String(form.diaSeleccionado).padStart(2, '0')
   const fecha = `${anioActual.value}-${mes}-${dia}`
+  return {
+    categoriaId: form.categoriaId,
+    concepto: form.concepto.trim(),
+    montoEstimado: parseFloat(form.montoEstimado),
+    fechaProbablePago: fecha,
+    esRecurrente: form.esRecurrente,
+    notas: form.notas.trim() || null,
+  }
+}
 
+async function guardar() {
+  errorMsg.value = ''
+  if (!validar()) return
+
+  // Edición de recurrente: pedir alcance antes de guardar
+  if (modoEdicion.value && props.gastoEditar?.esRecurrente && form.esRecurrente) {
+    mostrarAlcance.value = true
+    return
+  }
+
+  await ejecutarGuardado()
+}
+
+async function confirmarGuardar(alcance) {
+  mostrarAlcance.value = false
+  await ejecutarGuardado(alcance)
+}
+
+async function ejecutarGuardado(alcanceEdicion = null) {
   saving.value = true
   try {
-    const data = {
-      categoriaId: form.categoriaId,
-      concepto: form.concepto.trim(),
-      montoEstimado: parseFloat(form.montoEstimado),
-      fechaProbablePago: fecha,
-      esRecurrente: form.esRecurrente,
-      notas: form.notas.trim() || null,
-    }
-
+    const data = buildPayload()
     if (modoEdicion.value) {
+      if (alcanceEdicion) data.alcanceEdicion = alcanceEdicion
       await updateGastoPlaneado(props.gastoEditar.id, data)
       toastSuccess('Gasto actualizado correctamente')
     } else {

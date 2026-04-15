@@ -36,32 +36,52 @@
     </Transition>
 
     <!-- Notificaciones de vínculos pendientes -->
-    <div class="px-4">
+    <div class="px-4 lg:px-0">
       <DeudasNotificacionesVinculo @vinculo-aceptado="onVinculoAceptado" />
     </div>
 
-    <!-- Resumen (balance general + tabs) -->
-    <DeudasResumenDeudas />
+    <!-- Desktop 2-column grid: sidebar (resumen) + contenido (lista/detalle) -->
+    <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6">
+      <!-- Sidebar izquierdo (sticky en desktop) -->
+      <div class="lg:sticky lg:top-20 lg:self-start lg:pt-4">
+        <DeudasResumenDeudas />
 
-    <!-- Vista: Lista de personas o Detalle de persona -->
-    <Transition name="page" mode="out-in">
-      <div :key="personaSeleccionada ? 'detalle' : 'lista'">
-        <DeudasDetallePersona
-          v-if="personaSeleccionada"
-          @registrar-pago="abrirFormPago"
-          @agregar-deuda="showFormDeuda = true"
-          @editar-deuda="abrirFormEditar"
-          @pago-global="showFormPagoGlobal = true"
-        />
-        <DeudasListaPersonas
-          v-else
-          @seleccionar="onSeleccionarPersona"
-        />
+        <!-- Botón volver a la lista (solo en detalle, desktop) -->
+        <div v-if="personaSeleccionada" class="hidden lg:block px-0 mt-2">
+          <button
+            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-theme-card border border-theme-border text-theme-text-sec text-sm font-medium hover:text-theme-text hover:border-theme-accent/40 transition-colors"
+            @click="seleccionarPersona(null)"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver a la lista
+          </button>
+        </div>
       </div>
-    </Transition>
+
+      <!-- Vista principal: Lista de personas o Detalle de persona -->
+      <div>
+        <Transition name="page" mode="out-in">
+          <div :key="personaSeleccionada ? 'detalle' : 'lista'">
+            <DeudasDetallePersona
+              v-if="personaSeleccionada"
+              @registrar-pago="abrirFormPago"
+              @agregar-deuda="showFormDeuda = true"
+              @editar-deuda="abrirFormEditar"
+              @pago-global="showFormPagoGlobal = true"
+            />
+            <DeudasListaPersonas
+              v-else
+              @seleccionar="onSeleccionarPersona"
+            />
+          </div>
+        </Transition>
+      </div>
+    </div>
 
     <!-- FABs: Voz + Manual (hidden when voice overlay is active) -->
-    <div v-if="!showVozOverlay" class="fixed right-4 bottom-24 z-40 flex flex-col gap-3 items-center">
+    <div v-if="!showVozOverlay" class="fixed right-4 bottom-24 lg:right-8 lg:bottom-8 z-40 flex flex-col gap-3 items-center">
       <button
         class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-purple-600 opacity-85 hover:opacity-100 shadow-purple-500/25 backdrop-blur-md"
         @click="abrirVozOverlay"

@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-3">
+  <div class="px-4 lg:px-0 py-3 lg:py-5">
     <!-- Barra de búsqueda y ordenamiento -->
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
@@ -35,11 +35,22 @@
       <button
         v-for="f in filtrosEstado"
         :key="f.value"
-        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="filtroEstado === f.value ? 'bg-theme-accent text-theme-text' : 'bg-theme-card text-theme-text-muted'"
+        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
+        :class="[
+          filtroEstado === f.value
+            ? (f.value === 'vencidas' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-theme-accent text-theme-text')
+            : (f.value === 'vencidas' && countVencidas > 0 ? 'bg-red-500/10 text-red-400' : 'bg-theme-card text-theme-text-muted')
+        ]"
         @click="filtroEstado = f.value"
       >
+        <span v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
+          :class="{ 'animate-pulse': countVencidas > 0 }"
+        ></span>
         {{ f.label }}
+        <span
+          v-if="f.value === 'vencidas' && countVencidas > 0"
+          class="px-1.5 py-0 rounded-full bg-red-500/30 text-red-300 text-[9px] font-bold"
+        >{{ countVencidas }}</span>
       </button>
     </div>
 
@@ -64,13 +75,20 @@
         </svg>
       </div>
       <p class="text-theme-text-sec text-sm">
-        {{ tabActual === 'me_deben' ? 'Nadie te debe por ahora' : 'No tienes deudas pendientes' }}
+        {{ emptyStateMsg }}
       </p>
-      <p class="text-theme-text-muted text-xs mt-1">Agrega una nueva deuda con el boton +</p>
+      <p v-if="filtroEstado === 'todos'" class="text-theme-text-muted text-xs mt-1">Agrega una nueva deuda con el boton +</p>
+      <button
+        v-else
+        class="mt-3 px-3 py-1.5 rounded-full text-xs font-medium bg-theme-card border border-theme-border text-theme-text-sec hover:text-theme-text transition-colors"
+        @click="filtroEstado = 'todos'"
+      >
+        Ver todas
+      </button>
     </div>
 
     <!-- Personas List -->
-    <div v-else class="space-y-2.5">
+    <div v-else class="space-y-2.5 xl:space-y-0 xl:grid xl:grid-cols-2 xl:gap-3">
       <div
         v-for="persona in personasActivas"
         :key="persona.id"
@@ -102,7 +120,8 @@
 
         <!-- Swipeable card -->
         <div
-          class="relative bg-theme-card rounded-xl border border-theme-border transition-transform duration-200 cursor-pointer"
+          class="relative bg-theme-card rounded-xl border transition-transform duration-200 cursor-pointer"
+          :class="persona.tieneVencidas ? 'border-red-500/40 shadow-sm shadow-red-500/5' : 'border-theme-border'"
           :style="{ transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '' }"
           @click="handleCardClick(persona)"
           @touchstart.passive="onTouchStart($event, persona.id)"
@@ -121,7 +140,7 @@
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-theme-text leading-snug break-words">{{ persona.nombre }}</p>
+                <p class="text-sm font-medium text-theme-text leading-snug truncate" :title="persona.nombre">{{ persona.nombre }}</p>
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-border-md text-theme-text-muted">
                     ORG
@@ -184,11 +203,11 @@
                   </svg>
                 </a>
                 <a
-                  :href="`https://wa.me/${cleanPhone(persona.contacto)}`"
+                  :href="whatsappUrl(persona)"
                   target="_blank"
                   rel="noopener"
                   class="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
-                  title="WhatsApp"
+                  :title="tabActual === 'me_deben' && persona.totalPendiente > 0 ? 'WhatsApp — recordatorio' : 'WhatsApp'"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -207,7 +226,7 @@
 
       <!-- Sección "Otros" para personas sin deudas activas -->
       <template v-if="personasInactivas.length > 0">
-        <div class="mt-6 mb-2">
+        <div class="mt-6 mb-2 xl:col-span-2">
           <p class="text-xs font-medium text-theme-text-sec uppercase tracking-wider px-1">Sin deudas activas</p>
         </div>
         <div
@@ -279,19 +298,30 @@
 <script setup>
 const emit = defineEmits(['seleccionar'])
 
-const { personas, isLoading, tabActual } = useDeudas()
+const { personas, isLoading, tabActual, filtroEstado, resumen } = useDeudas()
 const { descargarPdf } = useDeudaPdf()
 
 const busqueda = ref('')
 const ordenActual = ref('monto') // monto | nombre | antiguo
 const ordenOpciones = ['monto', 'nombre', 'antiguo']
 const ordenLabels = { monto: 'Mayor monto', nombre: 'Nombre A-Z', antiguo: 'Más antiguo' }
-const filtroEstado = ref('todos')
 const filtrosEstado = [
   { value: 'todos', label: 'Todos' },
+  { value: 'vencidas', label: 'Vencidas' },
   { value: 'pendiente', label: 'Pendientes' },
   { value: 'saldado', label: 'Saldados' },
 ]
+
+const countVencidas = computed(() =>
+  tabActual.value === 'me_deben' ? resumen.value.countVencidasMeDeben : resumen.value.countVencidasYoDebo
+)
+
+const emptyStateMsg = computed(() => {
+  if (filtroEstado.value === 'vencidas') return 'No hay deudas vencidas'
+  if (filtroEstado.value === 'pendiente') return 'No hay deudas pendientes'
+  if (filtroEstado.value === 'saldado') return 'No hay deudas saldadas'
+  return tabActual.value === 'me_deben' ? 'Nadie te debe por ahora' : 'No tienes deudas pendientes'
+})
 
 function ciclarOrden() {
   const idx = ordenOpciones.indexOf(ordenActual.value)
@@ -306,6 +336,8 @@ function aplicarFiltros(list) {
     result = result.filter(p => p.totalPendiente > 0)
   } else if (filtroEstado.value === 'saldado') {
     result = result.filter(p => p.totalPendiente === 0)
+  } else if (filtroEstado.value === 'vencidas') {
+    result = result.filter(p => p.tieneVencidas)
   }
 
   // Filtrar por búsqueda
@@ -361,6 +393,19 @@ function isPhone(contacto) {
 
 function cleanPhone(contacto) {
   return contacto.replace(/[\s\-()]/g, '')
+}
+
+function whatsappUrl(persona) {
+  const phone = cleanPhone(persona.contacto)
+  if (tabActual.value !== 'me_deben' || !(persona.totalPendiente > 0)) {
+    return `https://wa.me/${phone}`
+  }
+  const nombre = persona.nombre.split(' ')[0]
+  const monto = `${currencySymbol.value} ${formatMonto(persona.totalPendiente)}`
+  const msg = persona.tieneVencidas
+    ? `Hola ${nombre}, te escribo para recordarte el saldo pendiente de ${monto} que ya está vencido. ¿Podemos coordinar el pago? ¡Gracias!`
+    : `Hola ${nombre}, un recordatorio amistoso sobre el saldo pendiente de ${monto}. ¿Podemos coordinar el pago cuando puedas? ¡Gracias!`
+  return `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`
 }
 
 function formatFechaCorta(fecha) {

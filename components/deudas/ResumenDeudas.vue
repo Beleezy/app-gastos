@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 pt-4 pb-2">
+  <div class="px-4 lg:px-0 pt-4 lg:pt-6 pb-2">
     <!-- Header principal: Me deben (protagonista) -->
     <div class="relative bg-gradient-to-br from-theme-card to-theme-card/90 rounded-2xl p-4 mb-3 border border-theme-border overflow-hidden">
       <!-- Decorative accent -->
@@ -38,6 +38,29 @@
             <span v-if="tendencia !== 0">({{ tendencia > 0 ? '+' : '' }}{{ currencySymbol }} {{ formatMonto(Math.abs(tendencia)) }})</span>
           </span>
         </div>
+
+        <!-- Alerta de vencidas -->
+        <button
+          v-if="countVencidas > 0"
+          class="mt-3 w-full flex items-center gap-2 px-3 py-2 rounded-xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/15 transition-colors text-left"
+          @click="toggleFiltroVencidas"
+        >
+          <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse shrink-0"></span>
+          <div class="flex-1 min-w-0">
+            <p class="text-[11px] font-semibold text-red-400 leading-tight">
+              {{ countVencidas }} deuda{{ countVencidas !== 1 ? 's' : '' }} vencida{{ countVencidas !== 1 ? 's' : '' }}
+            </p>
+            <p class="text-[10px] text-red-400/80 leading-tight">
+              {{ currencySymbol }} {{ formatMonto(montoVencido) }} · toca para filtrar
+            </p>
+          </div>
+          <svg v-if="filtroEstado === 'vencidas'" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-red-400/70 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+        </button>
 
         <!-- Balance visual bar -->
         <div v-if="totalGeneral > 0" class="mt-4 mb-1">
@@ -100,13 +123,24 @@
 </template>
 
 <script setup>
-const { resumen, tabActual, cambiarTab } = useDeudas()
+const { resumen, tabActual, cambiarTab, filtroEstado } = useDeudas()
 
 const totalGeneral = computed(() => resumen.value.totalMeDeben + resumen.value.totalYoDebo)
 const porcentajeMeDeben = computed(() => {
   if (totalGeneral.value === 0) return 50
   return (resumen.value.totalMeDeben / totalGeneral.value) * 100
 })
+
+const countVencidas = computed(() =>
+  tabActual.value === 'me_deben' ? resumen.value.countVencidasMeDeben : resumen.value.countVencidasYoDebo
+)
+const montoVencido = computed(() =>
+  tabActual.value === 'me_deben' ? resumen.value.montoVencidoMeDeben : resumen.value.montoVencidoYoDebo
+)
+
+function toggleFiltroVencidas() {
+  filtroEstado.value = filtroEstado.value === 'vencidas' ? 'todos' : 'vencidas'
+}
 
 function toggleYoDebo() {
   cambiarTab(tabActual.value === 'yo_debo' ? 'me_deben' : 'yo_debo')

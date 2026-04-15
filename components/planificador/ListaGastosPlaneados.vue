@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 py-3">
+  <div class="px-4 lg:px-0 py-3">
     <!-- Search + Sort -->
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
@@ -27,13 +27,22 @@
     <!-- Filters -->
     <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
       <button
-        v-for="f in filtros"
+        v-for="f in filtrosConContador"
         :key="f.value"
-        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="filtroActual === f.value ? 'bg-theme-accent text-theme-text' : 'bg-theme-card text-theme-text-muted'"
+        class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
+        :class="[
+          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-text') : 'bg-theme-card text-theme-text-muted',
+          f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
+        ]"
         @click="filtroActual = f.value"
       >
         {{ f.label }}
+        <span
+          class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
+          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-input text-theme-text-sec'"
+        >
+          {{ f.count }}
+        </span>
       </button>
     </div>
 
@@ -104,7 +113,8 @@
         <div
           v-for="gasto in cat.gastos"
           :key="gasto.id"
-          class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border transition-all"
+          class="bg-theme-card rounded-xl p-3.5 mb-2 border transition-all"
+          :class="esVencido(gasto) ? 'border-red-500/40' : (esHoyGasto(gasto) && gasto.estado === 'pendiente' ? 'border-orange-500/40' : 'border-theme-border')"
         >
           <div class="flex items-start justify-between">
             <div class="flex items-start gap-3">
@@ -116,12 +126,21 @@
               </div>
               <div>
                 <p class="text-sm font-medium text-theme-text">{{ gasto.concepto }}</p>
-                <p class="text-xs text-theme-text-sec mt-0.5">
-                  <span v-if="gasto._catNombre" class="inline-flex items-center gap-1 mr-1.5">
+                <p class="text-xs mt-0.5 flex items-center gap-1.5 flex-wrap">
+                  <span v-if="gasto._catNombre" class="inline-flex items-center gap-1 text-theme-text-sec">
                     <span class="w-1.5 h-1.5 rounded-full inline-block" :style="{ backgroundColor: gasto._catColor }"></span>
-                    {{ gasto._catNombre }} ·
+                    {{ gasto._catNombre }}
                   </span>
-                  {{ formatFecha(gasto.fechaProbablePago) }}
+                  <span
+                    class="inline-flex items-center gap-1 font-medium"
+                    :class="esVencido(gasto) ? 'text-red-400' : (esHoyGasto(gasto) && gasto.estado === 'pendiente' ? 'text-orange-400' : 'text-theme-text-sec')"
+                    :title="formatFecha(gasto.fechaProbablePago)"
+                  >
+                    <svg v-if="esVencido(gasto)" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M4.93 19h14.14a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.19 16a2 2 0 001.74 3z" />
+                    </svg>
+                    {{ fechaRelativa(gasto.fechaProbablePago) }}
+                  </span>
                 </p>
                 <div v-if="gasto.esRecurrente" class="flex items-center gap-1 mt-1">
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -148,7 +167,18 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex justify-end gap-4 mt-2 pt-2 border-t border-theme-border">
+          <div class="flex justify-end flex-wrap gap-x-4 gap-y-2 mt-2 pt-2 border-t border-theme-border">
+            <button
+              v-if="gasto.estado === 'pendiente'"
+              class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
+              title="Marcar como pagado con el monto estimado y la fecha de hoy"
+              @click="marcarPagadoRapido(gasto)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              Pagar
+            </button>
             <button
               class="text-xs transition-colors flex items-center gap-1"
               :class="gasto.estado === 'pagado' ? 'text-emerald-400 hover:text-emerald-300' : 'text-orange-400 hover:text-orange-300'"
@@ -157,7 +187,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8" />
               </svg>
-              {{ gasto.estado === 'pagado' ? 'Editar registro' : 'Registrar pago' }}
+              {{ gasto.estado === 'pagado' ? 'Editar registro' : 'Registrar' }}
             </button>
             <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('abrir-registro', gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -219,11 +249,53 @@
 <script setup>
 const emit = defineEmits(['editar', 'registrar', 'abrir-registro'])
 
-const { gastosPorCategoria, isLoading, deleteGastoPlaneado } = usePlanificador()
+const {
+  gastosPorCategoria,
+  gastosPlaneados,
+  isLoading,
+  deleteGastoPlaneado,
+  softDeleteGastoPlaneado,
+  updateGastoPlaneado,
+} = usePlanificador()
+const { success, show: toastShow } = useToast()
 
 const filtroActual = ref('todos')
 const busqueda = ref('')
 const ordenActual = ref('fecha')
+
+function hoyISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function esVencido(gasto) {
+  return gasto.estado === 'pendiente' && gasto.fechaProbablePago && gasto.fechaProbablePago < hoyISO()
+}
+
+function esHoyGasto(gasto) {
+  return gasto.fechaProbablePago === hoyISO()
+}
+
+function diasDesdeHoy(fecha) {
+  if (!fecha) return null
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+  const d = new Date(fecha + 'T00:00:00')
+  return Math.round((d - hoy) / 86400000)
+}
+
+function fechaRelativa(fecha) {
+  if (!fecha) return ''
+  const diff = diasDesdeHoy(fecha)
+  if (diff === 0) return 'Hoy'
+  if (diff === 1) return 'Mañana'
+  if (diff === -1) return 'Ayer'
+  if (diff > 1 && diff <= 7) return `En ${diff} días`
+  if (diff < -1 && diff >= -30) return `Vencido hace ${Math.abs(diff)} días`
+  const d = new Date(fecha + 'T00:00:00')
+  const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+  return `${d.getDate()} ${meses[d.getMonth()]}`
+}
 
 const ordenes = [
   { value: 'fecha', label: 'Fecha' },
@@ -252,9 +324,30 @@ function ordenarGastos(gastos) {
 
 const filtros = [
   { value: 'todos', label: 'Todos' },
+  { value: 'vencido', label: 'Vencidos', accent: 'bg-red-500 text-white' },
+  { value: 'hoy', label: 'Hoy', accent: 'bg-orange-500 text-white' },
   { value: 'pendiente', label: 'Pendientes' },
-  { value: 'pagado', label: 'Pagados' },
+  { value: 'pagado', label: 'Pagados', accent: 'bg-emerald-500 text-white' },
 ]
+
+const filtrosConContador = computed(() => {
+  const todos = gastosPlaneados.value
+  return filtros.map(f => {
+    let count = 0
+    if (f.value === 'todos') count = todos.length
+    else if (f.value === 'vencido') count = todos.filter(esVencido).length
+    else if (f.value === 'hoy') count = todos.filter(g => esHoyGasto(g) && g.estado === 'pendiente').length
+    else count = todos.filter(g => g.estado === f.value).length
+    return { ...f, count }
+  })
+})
+
+function pasaFiltro(gasto) {
+  if (filtroActual.value === 'todos') return true
+  if (filtroActual.value === 'vencido') return esVencido(gasto)
+  if (filtroActual.value === 'hoy') return esHoyGasto(gasto) && gasto.estado === 'pendiente'
+  return gasto.estado === filtroActual.value
+}
 
 const categoriasFiltered = computed(() => {
   const term = busqueda.value.trim().toLowerCase()
@@ -266,7 +359,7 @@ const categoriasFiltered = computed(() => {
       .map(cat => {
         let gastos = cat.gastos
         if (filtroActual.value !== 'todos') {
-          gastos = gastos.filter(g => g.estado === filtroActual.value)
+          gastos = gastos.filter(pasaFiltro)
         }
         if (term) {
           gastos = gastos.filter(g => g.concepto.toLowerCase().includes(term))
@@ -286,7 +379,7 @@ const categoriasFiltered = computed(() => {
     cat.gastos.map(g => ({ ...g, _catNombre: cat.nombre, _catColor: cat.color }))
   )
   if (filtroActual.value !== 'todos') {
-    todosLosGastos = todosLosGastos.filter(g => g.estado === filtroActual.value)
+    todosLosGastos = todosLosGastos.filter(pasaFiltro)
   }
   if (term) {
     todosLosGastos = todosLosGastos.filter(g => g.concepto.toLowerCase().includes(term))
@@ -325,9 +418,21 @@ const gastoParaEliminar = ref(null)
 function eliminarGasto(gasto) {
   if (gasto.esRecurrente && gasto.recurrenteGrupoId) {
     gastoParaEliminar.value = gasto
-  } else {
-    deleteGastoPlaneado(gasto.id, false)
+    return
   }
+  const handle = softDeleteGastoPlaneado(gasto.id, 5000)
+  if (!handle) return
+  toastShow({
+    message: `"${gasto.concepto}" eliminado`,
+    type: 'info',
+    duration: 5000,
+    action: {
+      label: 'Deshacer',
+      onClick: () => {
+        if (handle.undo()) success('Restaurado')
+      },
+    },
+  })
 }
 
 async function confirmarEliminar(incluirFuturos) {
@@ -335,5 +440,14 @@ async function confirmarEliminar(incluirFuturos) {
   if (!gasto) return
   gastoParaEliminar.value = null
   await deleteGastoPlaneado(gasto.id, incluirFuturos)
+}
+
+async function marcarPagadoRapido(gasto) {
+  try {
+    await updateGastoPlaneado(gasto.id, { estado: 'pagado' })
+    success(`"${gasto.concepto}" marcado como pagado`)
+  } catch (e) {
+    // error queda en composable
+  }
 }
 </script>

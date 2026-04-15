@@ -26,5 +26,8 @@
       "Bash(node -e \"const pkg = require\\(''./package.json''\\); console.log\\(JSON.stringify\\(pkg.scripts, null, 2\\)\\)\")",
       "Bash(find /c/Users/bryan/OneDrive/Escritorio/sistemas/gastos -type f \\\\\\(-name *.env* -o -name .env* \\\\\\))"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }

@@ -41,22 +41,46 @@
           </div>
         </div>
 
-        <!-- Legend -->
-        <div class="space-y-1.5 w-full">
+        <!-- Legend con barras comparativas real vs planificado -->
+        <div class="space-y-2 w-full">
           <button
             v-for="(seg, idx) in datosGrafico"
             :key="seg.nombre"
-            class="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg transition-all duration-200"
+            class="w-full flex flex-col gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 text-left"
             :class="segmentoActivo === idx ? 'bg-theme-border-md' : 'hover:bg-theme-border-md'"
             @click="toggleSegmento(idx)"
           >
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: seg.color }"></span>
-              <span class="text-xs text-theme-text-muted truncate">{{ seg.nombre }}</span>
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-sm shrink-0" :style="{ backgroundColor: seg.color }"></span>
+                <span class="text-xs text-theme-text-muted truncate">{{ seg.nombre }}</span>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(seg.total) }}</span>
+                <span class="text-xs font-semibold w-8 text-right" :style="{ color: seg.color }">{{ seg.porcentaje }}%</span>
+              </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(seg.total) }}</span>
-              <span class="text-xs font-semibold w-8 text-right" :style="{ color: seg.color }">{{ seg.porcentaje }}%</span>
+            <!-- Comparativa real vs planificado -->
+            <div v-if="gastosPorCategoria[idx]?.totalReal > 0" class="flex items-center gap-1.5 w-full">
+              <div class="flex-1 h-1 bg-theme-input rounded-full relative overflow-hidden">
+                <!-- planned baseline -->
+                <div class="absolute inset-y-0 left-0 right-0 opacity-30" :style="{ backgroundColor: seg.color }"></div>
+                <!-- real progress -->
+                <div
+                  class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+                  :class="gastosPorCategoria[idx].totalReal > seg.total ? 'bg-red-400' : ''"
+                  :style="{
+                    width: Math.min((gastosPorCategoria[idx].totalReal / seg.total) * 100, 100) + '%',
+                    backgroundColor: gastosPorCategoria[idx].totalReal > seg.total ? undefined : seg.color,
+                  }"
+                ></div>
+              </div>
+              <span
+                class="text-[9px] font-medium shrink-0 min-w-[50px] text-right"
+                :class="gastosPorCategoria[idx].totalReal > seg.total ? 'text-red-400' : 'text-emerald-400'"
+              >
+                {{ currencySymbol }} {{ formatMonto(gastosPorCategoria[idx].totalReal) }}
+              </span>
             </div>
           </button>
         </div>

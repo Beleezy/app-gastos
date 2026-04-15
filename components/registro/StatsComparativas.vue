@@ -20,6 +20,19 @@
 
     <!-- ===== VISTA COMPARAR ===== -->
     <div v-if="vista === 'comparar'">
+      <!-- Insights automáticos -->
+      <div v-if="insights.length > 0" class="mb-4 space-y-1.5">
+        <div
+          v-for="(ins, i) in insights"
+          :key="i"
+          class="flex items-start gap-2 px-3 py-2 rounded-xl border text-xs"
+          :class="ins.tono === 'positivo' ? 'bg-emerald-500/8 border-emerald-500/20 text-emerald-300' : ins.tono === 'negativo' ? 'bg-red-500/8 border-red-500/20 text-red-300' : 'bg-theme-card border-theme-border text-theme-text-sec'"
+        >
+          <span class="text-sm leading-none mt-0.5">{{ ins.icono }}</span>
+          <span class="flex-1 leading-snug">{{ ins.texto }}</span>
+        </div>
+      </div>
+
       <!-- Selector de mes a comparar -->
       <div class="mb-4">
         <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-2">Comparar con:</p>
@@ -320,6 +333,59 @@ function agrupar(gastos) {
   }
   return map
 }
+
+// Insights automáticos — frases generadas de la comparación
+const insights = computed(() => {
+  const lista = []
+  if (isLoadingComparar.value || !gastosComparar.value.length) return lista
+
+  const pct = parseFloat(porcentajeDiferencia.value)
+  if (!isNaN(pct) && totalComparar.value > 0) {
+    if (pct >= 15) {
+      lista.push({
+        tono: 'negativo', icono: '📈',
+        texto: `Gastaste ${pct.toFixed(0)}% más que en ${mesCompararLabel.value}.`,
+      })
+    } else if (pct <= -15) {
+      lista.push({
+        tono: 'positivo', icono: '📉',
+        texto: `Gastaste ${Math.abs(pct).toFixed(0)}% menos que en ${mesCompararLabel.value}. ¡Buen control!`,
+      })
+    }
+  }
+
+  // Categoría con mayor crecimiento
+  const cats = Object.values(agrupar(props.gastosActuales))
+  const cmpCats = agrupar(gastosComparar.value)
+  let maxCrec = null
+  for (const [nombre, data] of Object.entries(agrupar(props.gastosActuales))) {
+    const prev = cmpCats[nombre]?.total || 0
+    if (prev > 0) {
+      const crec = ((data.total - prev) / prev) * 100
+      if (crec >= 25 && (!maxCrec || crec > maxCrec.crec)) {
+        maxCrec = { nombre, crec, actual: data.total }
+      }
+    }
+  }
+  if (maxCrec) {
+    lista.push({
+      tono: 'negativo', icono: '⚠️',
+      texto: `${maxCrec.nombre} subió ${maxCrec.crec.toFixed(0)}% este mes.`,
+    })
+  }
+
+  // Días promedio de registro
+  const fechasUnicas = new Set(props.gastosActuales.map(g => g.fecha))
+  if (fechasUnicas.size > 0 && cats.length > 0) {
+    const promedioDiario = totalActual.value / fechasUnicas.size
+    lista.push({
+      tono: 'neutro', icono: '📊',
+      texto: `Promedio diario: ${currencySymbol.value} ${formatMonto(promedioDiario)} en ${fechasUnicas.size} ${fechasUnicas.size === 1 ? 'día' : 'días'} con registros.`,
+    })
+  }
+
+  return lista.slice(0, 3)
+})
 
 const categoriasComparadas = computed(() => {
   const actMap = agrupar(props.gastosActuales)

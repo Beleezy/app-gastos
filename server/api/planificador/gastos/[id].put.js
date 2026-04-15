@@ -28,6 +28,9 @@ export default defineEventHandler(async (event) => {
   const eraRecurrente = gastoAnterior.esRecurrente
   const seraRecurrente = body.esRecurrente !== undefined ? body.esRecurrente : eraRecurrente
   const grupoAnterior = gastoAnterior.recurrenteGrupoId
+  // alcanceEdicion: 'solo' => aplicar solo a este registro (desvincula del grupo),
+  //                 'futuros' (default) => propagar a este y los futuros del grupo
+  const alcanceEdicion = body.alcanceEdicion === 'solo' ? 'solo' : 'futuros'
 
   // Build update data
   const updateData = { updatedAt: new Date() }
@@ -38,6 +41,23 @@ export default defineEventHandler(async (event) => {
   if (body.esRecurrente !== undefined) updateData.esRecurrente = body.esRecurrente
   if (body.estado !== undefined) updateData.estado = body.estado
   if (body.notas !== undefined) updateData.notas = body.notas
+  // No persistimos alcanceEdicion en la DB
+  delete updateData.alcanceEdicion
+
+  // Caso especial: editar recurrente con alcance "solo este mes"
+  // Desvincula del grupo sin tocar los demás meses del grupo.
+  if (eraRecurrente && alcanceEdicion === 'solo') {
+    updateData.recurrenteGrupoId = null
+    updateData.esRecurrente = false
+
+    const [updated] = await db
+      .update(gastosPlanificados)
+      .set(updateData)
+      .where(eq(gastosPlanificados.id, id))
+      .returning()
+
+    return await respuestaConCategoria(updated)
+  }
 
   // Handle recurrence transitions
   if (!eraRecurrente && seraRecurrente) {

@@ -16,7 +16,7 @@
       </div>
     </div>
 
-    <div class="mb-4 flex items-center gap-2">
+    <div class="mb-2 flex items-center gap-2">
       <div class="relative flex-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -28,9 +28,38 @@
           class="w-full rounded-xl border border-theme-border bg-theme-card py-2 pl-9 pr-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
         />
       </div>
-      <div class="rounded-xl border border-theme-border bg-theme-card px-3 py-2 text-[11px] text-theme-text-sec">
-        {{ gastosFuturos.length }} total
-      </div>
+      <button
+        class="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-theme-border bg-theme-card px-3 py-2 text-[11px] text-theme-text-sec hover:text-theme-text transition-colors"
+        :title="`Ordenar por ${ordenLabel}`"
+        @click="ciclarOrden"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
+        {{ ordenLabel }}
+      </button>
+    </div>
+
+    <!-- Filtros por prioridad y estado -->
+    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <button
+        v-for="f in filtrosProyecto"
+        :key="f.value"
+        class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
+        :class="[
+          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-text') : 'bg-theme-card text-theme-text-muted',
+          f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
+        ]"
+        @click="filtroActual = f.value"
+      >
+        {{ f.label }}
+        <span
+          class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
+          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-input text-theme-text-sec'"
+        >
+          {{ f.count }}
+        </span>
+      </button>
     </div>
 
     <div v-if="isLoading && gastosFuturos.length === 0" class="space-y-3">
@@ -106,6 +135,24 @@
             <div class="rounded-xl bg-theme-input px-3 py-2">
               <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
               <p class="mt-1 text-xs font-medium text-amber-300">{{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
+            </div>
+          </div>
+
+          <!-- Progreso de decisión -->
+          <div v-if="progresoProyecto(proyecto).total > 0" class="mt-3">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decisión</span>
+              <span class="text-[10px] font-semibold" :class="progresoProyecto(proyecto).porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
+                {{ progresoProyecto(proyecto).decididos }} / {{ progresoProyecto(proyecto).total }}
+                · {{ progresoProyecto(proyecto).porcentaje }}%
+              </span>
+            </div>
+            <div class="h-1.5 w-full overflow-hidden rounded-full bg-theme-input">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                :class="progresoProyecto(proyecto).porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
+                :style="{ width: progresoProyecto(proyecto).porcentaje + '%' }"
+              ></div>
             </div>
           </div>
 
@@ -546,6 +593,45 @@ const { currencySymbol, formatMonto } = useCurrency()
 const { success, error: toastError } = useToast()
 
 const busqueda = ref('')
+const filtroActual = ref('todos')
+const ordenActual = ref('reciente')
+const ordenes = [
+  { value: 'reciente', label: 'Reciente' },
+  { value: 'prom_desc', label: 'Mayor $' },
+  { value: 'prom_asc', label: 'Menor $' },
+  { value: 'nombre', label: 'Nombre' },
+]
+const ordenLabel = computed(() => ordenes.find(o => o.value === ordenActual.value)?.label || 'Reciente')
+function ciclarOrden() {
+  const idx = ordenes.findIndex(o => o.value === ordenActual.value)
+  ordenActual.value = ordenes[(idx + 1) % ordenes.length].value
+}
+
+function progresoProyecto(proyecto) {
+  const total = proyecto.detalles?.length || 0
+  if (total === 0) return { total: 0, decididos: 0, porcentaje: 0 }
+  const decididos = proyecto.detalles.filter(d => d.estadoDecision).length
+  return { total, decididos, porcentaje: Math.round((decididos / total) * 100) }
+}
+
+function proyectoTieneDecididos(p) { return p.detalles?.some(d => d.estadoDecision) }
+function proyectoCompletamenteDecidido(p) {
+  return p.detalles?.length > 0 && p.detalles.every(d => d.estadoDecision)
+}
+
+const filtrosProyecto = computed(() => {
+  const all = gastosFuturos.value
+  const count = (pred) => all.filter(pred).length
+  return [
+    { value: 'todos', label: 'Todos', count: all.length },
+    { value: 'alta', label: 'Alta', count: count(p => p.prioridad === 3), accent: 'bg-red-500 text-white' },
+    { value: 'media', label: 'Media', count: count(p => p.prioridad === 2), accent: 'bg-amber-500 text-white' },
+    { value: 'baja', label: 'Baja', count: count(p => p.prioridad === 1), accent: 'bg-emerald-500 text-white' },
+    { value: 'pendientes', label: 'Pendientes', count: count(p => !proyectoCompletamenteDecidido(p)) },
+    { value: 'decididos', label: 'Decididos', count: count(proyectoTieneDecididos), accent: 'bg-sky-500 text-white' },
+  ]
+})
+
 const expandido = ref({})
 const proyectoAEliminar = ref(null)
 const eliminando = ref(false)
@@ -583,21 +669,43 @@ watch(gastosFuturos, (items) => {
 
 const gastosFiltrados = computed(() => {
   const term = busqueda.value.trim().toLowerCase()
-  if (!term) return gastosFuturos.value
-  return gastosFuturos.value.filter((proyecto) => {
-    const hayEnProyecto = [proyecto.tipoGasto, proyecto.descripcion, proyecto.categoriaNombre]
-      .some(v => (v || '').toLowerCase().includes(term))
-    if (hayEnProyecto) return true
-    return proyecto.detalles.some(d =>
-      (d.nombre || '').toLowerCase().includes(term)
-      || (d.notas || '').toLowerCase().includes(term)
-      || d.opciones.some(o =>
-        (o.nombre || '').toLowerCase().includes(term)
-        || (o.notas || '').toLowerCase().includes(term)
-        || (o.referenciaUrl || '').toLowerCase().includes(term)
+  let result = gastosFuturos.value
+
+  // Filtro por prioridad/estado
+  if (filtroActual.value === 'alta') result = result.filter(p => p.prioridad === 3)
+  else if (filtroActual.value === 'media') result = result.filter(p => p.prioridad === 2)
+  else if (filtroActual.value === 'baja') result = result.filter(p => p.prioridad === 1)
+  else if (filtroActual.value === 'pendientes') result = result.filter(p => !proyectoCompletamenteDecidido(p))
+  else if (filtroActual.value === 'decididos') result = result.filter(proyectoTieneDecididos)
+
+  // Búsqueda
+  if (term) {
+    result = result.filter((proyecto) => {
+      const hayEnProyecto = [proyecto.tipoGasto, proyecto.descripcion, proyecto.categoriaNombre]
+        .some(v => (v || '').toLowerCase().includes(term))
+      if (hayEnProyecto) return true
+      return proyecto.detalles.some(d =>
+        (d.nombre || '').toLowerCase().includes(term)
+        || (d.notas || '').toLowerCase().includes(term)
+        || d.opciones.some(o =>
+          (o.nombre || '').toLowerCase().includes(term)
+          || (o.notas || '').toLowerCase().includes(term)
+          || (o.referenciaUrl || '').toLowerCase().includes(term)
+        )
       )
-    )
-  })
+    })
+  }
+
+  // Ordenamiento
+  const sorted = [...result]
+  if (ordenActual.value === 'prom_desc') {
+    sorted.sort((a, b) => (b.resumen?.totalPromedio || 0) - (a.resumen?.totalPromedio || 0))
+  } else if (ordenActual.value === 'prom_asc') {
+    sorted.sort((a, b) => (a.resumen?.totalPromedio || 0) - (b.resumen?.totalPromedio || 0))
+  } else if (ordenActual.value === 'nombre') {
+    sorted.sort((a, b) => (a.tipoGasto || '').localeCompare(b.tipoGasto || ''))
+  }
+  return sorted
 })
 
 function toggleExpandido(id) {

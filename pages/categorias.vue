@@ -4,7 +4,7 @@
       <template #title>Mis Categorias</template>
     </LayoutAppHeader>
 
-    <div class="max-w-lg mx-auto px-4 py-4 space-y-4">
+    <div class="max-w-lg lg:max-w-3xl mx-auto lg:mx-0 px-4 lg:px-0 py-4 lg:py-6 space-y-4">
       <p class="text-sm text-theme-text-sec mb-4">Personaliza las categorias para clasificar tus gastos. Puedes crear nuevas o elegir de las preseleccionadas.</p>
 
       <!-- Categorías actuales del usuario -->

@@ -4,7 +4,7 @@
       <template #title>Configuraciones</template>
     </LayoutAppHeader>
 
-    <div class="max-w-lg mx-auto px-4 py-4 space-y-4">
+    <div class="max-w-lg mx-auto lg:max-w-none lg:mx-0 px-4 lg:px-0 py-4 lg:py-6 space-y-4 lg:space-y-0 lg:grid lg:grid-cols-2 lg:gap-6">
       <!-- Loading -->
       <div v-if="isLoading" class="space-y-4">
         <div v-for="i in 3" :key="i" class="bg-theme-card rounded-xl p-5 animate-pulse">

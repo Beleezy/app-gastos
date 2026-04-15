@@ -14,6 +14,10 @@ export function useDeudas() {
     balanceNeto: 0,
     countMeDeben: 0,
     countYoDebo: 0,
+    montoVencidoMeDeben: 0,
+    countVencidasMeDeben: 0,
+    montoVencidoYoDebo: 0,
+    countVencidasYoDebo: 0,
   }))
 
   const isLoading = ref(false)
@@ -21,6 +25,7 @@ export function useDeudas() {
 
   const tabActual = useState('deudas-tab', () => 'me_deben')
   const personaSeleccionada = useState('deudas-persona-sel', () => null)
+  const filtroEstado = useState('deudas-filtro-estado', () => 'todos')
 
   const personasFiltradas = computed(() => {
     return personas.value.filter(p => {
@@ -397,6 +402,7 @@ export function useDeudas() {
     tabActual.value = tab
     personaSeleccionada.value = null
     deudasList.value = []
+    filtroEstado.value = 'todos'
   }
 
   async function mergePersonas(personaPrincipalId, personasSecundariasIds) {
@@ -421,7 +427,7 @@ export function useDeudas() {
     personas, deudasList, pagos, pagosPersona, auditoriaPersona, resumen,
     checkpoints, guardando, restaurando, cargando: cargandoCheckpoints,
     isLoading, error,
-    tabActual, personaSeleccionada,
+    tabActual, personaSeleccionada, filtroEstado,
     personasFiltradas, deudasPersona,
     deudasActivasPersona, deudasSaldadasPersona,
     totalPendientePersona,

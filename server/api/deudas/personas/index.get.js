@@ -24,7 +24,8 @@ export default defineEventHandler(async (event) => {
       totalDeudas: sql`COUNT(${deudas.id})`.as('total_deudas'),
       deudasActivas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN 1 END)`.as('deudas_activas'),
       ultimoMovimiento: sql`MAX(${deudas.updatedAt})`.as('ultimo_movimiento'),
-      tieneVencidas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN 1 END)`.as('tiene_vencidas'),
+      countVencidas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN 1 END)`.as('count_vencidas'),
+      montoVencido: sql`COALESCE(SUM(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as('monto_vencido'),
       fechaProximaVencer: sql`MIN(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} >= ${hoy} THEN ${deudas.fechaPago} END)`.as('fecha_proxima_vencer'),
     })
     .from(personasEntidades)
@@ -36,12 +37,17 @@ export default defineEventHandler(async (event) => {
     .groupBy(personasEntidades.id)
     .orderBy(sql`MAX(${deudas.updatedAt}) DESC NULLS LAST`)
 
-  return personasRaw.map(p => ({
-    ...p,
-    totalPendiente: parseFloat(p.totalPendiente),
-    totalDeudas: Number(p.totalDeudas),
-    deudasActivas: Number(p.deudasActivas),
-    tieneVencidas: Number(p.tieneVencidas) > 0,
-    fechaProximaVencer: p.fechaProximaVencer || null,
-  }))
+  return personasRaw.map(p => {
+    const countVencidas = Number(p.countVencidas)
+    return {
+      ...p,
+      totalPendiente: parseFloat(p.totalPendiente),
+      totalDeudas: Number(p.totalDeudas),
+      deudasActivas: Number(p.deudasActivas),
+      countVencidas,
+      montoVencido: parseFloat(p.montoVencido),
+      tieneVencidas: countVencidas > 0,
+      fechaProximaVencer: p.fechaProximaVencer || null,
+    }
+  })
 })

@@ -18,9 +18,9 @@
     </div>
 
     <!-- Dashboard summary cards -->
-    <div class="px-5 mb-4 space-y-2.5">
+    <div class="px-5 lg:px-0 mb-4 space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
       <!-- Gasto del mes vs presupuesto -->
-      <div class="bg-gradient-to-br from-theme-card to-theme-card/80 rounded-2xl p-4 border border-theme-border">
+      <div class="bg-gradient-to-br from-theme-card to-theme-card/80 rounded-2xl p-4 border border-theme-border lg:col-span-3">
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs text-theme-text-muted font-medium flex items-center gap-1.5">
             Gasto de {{ mesActual }}
@@ -54,7 +54,7 @@
       </div>
 
       <!-- Fila: Deudas + Plan -->
-      <div class="grid grid-cols-2 gap-2.5">
+      <div class="grid grid-cols-2 gap-2.5 lg:contents">
         <!-- Deudas pendientes -->
         <NuxtLink to="/deudas" class="bg-theme-card rounded-2xl p-3.5 border border-theme-border block active:bg-theme-border-md transition-colors">
           <div class="flex items-center gap-2 mb-2">
@@ -100,7 +100,7 @@
       <NuxtLink
         v-if="futureProjects > 0"
         to="/planificador"
-        class="bg-theme-card rounded-2xl p-4 border border-sky-500/20 block active:bg-theme-border-md transition-colors"
+        class="bg-theme-card rounded-2xl p-4 border border-sky-500/20 block active:bg-theme-border-md transition-colors lg:col-span-1"
       >
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
