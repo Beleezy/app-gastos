@@ -1,7 +1,6 @@
 const FONT_SIZES = [
-  { id: 'normal',     label: 'Normal',     rootPx: 16 },
-  { id: 'grande',     label: 'Grande',     rootPx: 18 },
-  { id: 'muy_grande', label: 'Muy grande', rootPx: 20 },
+  { id: 'normal', label: 'Normal', rootPx: 16 },
+  { id: 'grande', label: 'Grande', rootPx: 18 },
 ]
 
 const ACCENT_COLORS = [

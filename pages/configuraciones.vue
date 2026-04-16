@@ -198,19 +198,19 @@
             <label class="text-sm font-medium text-theme-text">Tamano de letra</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Ajusta el tamano del texto en toda la aplicacion. Ideal para mejorar la legibilidad.</p>
-          <div class="grid grid-cols-3 gap-2">
+          <div class="grid grid-cols-2 gap-3">
             <button
               v-for="size in FONT_SIZES"
               :key="size.id"
-              class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all duration-200"
+              class="flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl border-2 transition-all duration-200"
               :class="fontSize === size.id ? 'border-blue-500 bg-blue-500/10' : 'border-theme-border hover:border-theme-border-md'"
               @click="cambiarTamanoLetra(size.id)"
             >
               <span
                 class="font-semibold text-theme-text"
-                :class="size.id === 'normal' ? 'text-sm' : size.id === 'grande' ? 'text-base' : 'text-lg'"
+                :class="size.id === 'normal' ? 'text-sm' : 'text-[17px]'"
               >Aa</span>
-              <span class="text-[10px] text-theme-text-sec">{{ size.label }}</span>
+              <span class="text-xs text-theme-text-sec">{{ size.label }}</span>
             </button>
           </div>
         </div>

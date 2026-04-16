@@ -193,6 +193,7 @@
                   @edit="abrirEdicion"
                   @delete="confirmarEliminar"
                   @duplicate="duplicarGasto"
+                  @bulk-edit="onBulkEditSolicitado"
                   @bulk-delete="onBulkDeleteSolicitado"
                   @request-voice="onStartListening"
                   @request-manual="showFormManual = true"
@@ -238,7 +239,7 @@
 
     <!-- FAB móvil -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-85 hover:opacity-100 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse backdrop-blur-md lg:hidden"
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-60 hover:opacity-80 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse lg:hidden"
       aria-label="Agregar gasto manual"
       @click="showFormManual = true"
     >
@@ -284,6 +285,15 @@
       :gasto-editar="gastoEditar"
       @close="cerrarFormManual"
       @saved="onGastoManualSaved"
+    />
+
+    <!-- Bulk edit form modal (lazy) -->
+    <RegistroFormBulkEditAsync
+      v-if="showBulkEdit"
+      :categorias="categorias"
+      :ids="bulkEditPayload?.ids || []"
+      @close="cerrarBulkEdit"
+      @saved="ejecutarBulkEdit"
     />
 
     <!-- Delete confirm dialog (shared) -->
@@ -353,13 +363,16 @@ const RegistroConfirmacionVozAsync = defineAsyncComponent(() =>
 const RegistroFormGastoManualAsync = defineAsyncComponent(() =>
   import('~/components/registro/FormGastoManual.vue')
 )
+const RegistroFormBulkEditAsync = defineAsyncComponent(() =>
+  import('~/components/registro/FormBulkEdit.vue')
+)
 
 const {
   gastosMensuales, categorias, resumen, isLoadingMensual,
   mesSeleccionado, anioSeleccionado, mesFormateado, esMesActual,
   gastosPorDia, gastosPorSemana, gastosPorCategoria,
   fetchResumen, fetchCategorias, fetchGastosMensuales,
-  createGastosBulk, deleteGasto, deleteGastosBulk,
+  createGastosBulk, updateGastosBulk, deleteGasto, deleteGastosBulk,
   mesAnterior, mesSiguiente, irAMesActual,
   getCategoriaPorNombre,
   formatFechaDia, formatRangoSemana,
@@ -496,6 +509,34 @@ async function ejecutarBulkEliminar() {
   } finally {
     bulkDeleteLoading.value = false
     bulkDeletePayload.value = null
+  }
+}
+
+// ─── Bulk edit ──────────────────────────────────────────
+const showBulkEdit = ref(false)
+const bulkEditPayload = ref(null)
+
+function onBulkEditSolicitado(payload) {
+  bulkEditPayload.value = payload
+  showBulkEdit.value = true
+}
+
+function cerrarBulkEdit() {
+  showBulkEdit.value = false
+  bulkEditPayload.value = null
+}
+
+async function ejecutarBulkEdit({ ids, campos }) {
+  try {
+    const res = await updateGastosBulk(ids, campos)
+    showBulkEdit.value = false
+    showToast(`${res.actualizados || ids.length} gastos actualizados`)
+    bulkEditPayload.value?.onDone?.()
+    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
+  } catch (e) {
+    toastError(handleApiError(e) || 'No se pudieron actualizar los gastos')
+  } finally {
+    bulkEditPayload.value = null
   }
 }
 

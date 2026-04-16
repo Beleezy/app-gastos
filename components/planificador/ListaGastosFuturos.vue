@@ -1,18 +1,108 @@
 <template>
   <div class="px-4 py-3">
     <!-- Resumen compacto -->
-    <div v-if="gastosFuturos.length" class="mb-4 grid grid-cols-4 gap-2">
-      <div class="rounded-2xl border border-theme-border bg-theme-card px-3 py-2.5 text-center">
-        <p class="text-[10px] uppercase tracking-[0.15em] text-theme-text-muted">Proyectos</p>
-        <p class="mt-1 text-sm font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
-      </div>
-      <div class="rounded-2xl border border-theme-border bg-theme-card px-3 py-2.5 text-center">
-        <p class="text-[10px] uppercase tracking-[0.15em] text-theme-text-muted">Min</p>
-        <p class="mt-1 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }}</p>
-      </div>
-      <div class="col-span-2 rounded-2xl border border-sky-500/20 bg-sky-500/8 px-3 py-2.5 text-center">
-        <p class="text-[10px] uppercase tracking-[0.15em] text-sky-300/70">Promedio total</p>
-        <p class="mt-1 text-sm font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+    <div v-if="gastosFuturos.length" class="mb-4 space-y-3">
+      <!-- Fila principal: monto promedio + rango -->
+      <div class="relative overflow-hidden rounded-2xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/90 p-4">
+        <div class="absolute -top-10 right-0 h-28 w-28 rounded-full bg-sky-500/10 blur-2xl"></div>
+        <div class="relative flex items-end justify-between mb-3">
+          <div>
+            <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Inversión estimada</p>
+            <p class="text-2xl font-bold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Rango</p>
+            <p class="text-sm font-semibold text-theme-text-sec">
+              {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }} — {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMaximo) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Stats grid -->
+        <div class="grid grid-cols-3 gap-2 mb-3">
+          <div class="bg-theme-input rounded-xl p-2.5 border border-theme-border/50">
+            <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Proyectos</p>
+            <p class="text-sm font-bold text-theme-text mt-0.5">{{ resumenFuturos.totalProyectos }}</p>
+            <p class="text-[9px] text-theme-text-muted">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
+          </div>
+          <div class="bg-theme-input rounded-xl p-2.5 border border-theme-border/50">
+            <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Por proy.</p>
+            <p class="text-sm font-bold text-violet-300 mt-0.5">{{ currencySymbol }} {{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
+            <p class="text-[9px] text-theme-text-muted">promedio</p>
+          </div>
+          <div class="bg-theme-input rounded-xl p-2.5 border border-emerald-500/10">
+            <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Ahorro</p>
+            <p class="text-sm font-bold mt-0.5" :class="ahorroPotencial > 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
+              {{ ahorroPotencial > 0 ? `${currencySymbol} ${formatMonto(ahorroPotencial)}` : '—' }}
+            </p>
+            <p class="text-[9px] text-theme-text-muted">potencial</p>
+          </div>
+        </div>
+
+        <!-- Progreso de decisión -->
+        <div v-if="resumenFuturos.progresoDecision?.total > 0">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decisión</span>
+            <span class="text-[10px] font-semibold" :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
+              {{ resumenFuturos.progresoDecision.decididos }} / {{ resumenFuturos.progresoDecision.total }}
+              · {{ resumenFuturos.progresoDecision.porcentaje }}%
+            </span>
+          </div>
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-theme-input">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
+              :style="{ width: resumenFuturos.progresoDecision.porcentaje + '%' }"
+            ></div>
+          </div>
+          <!-- Desglose -->
+          <div class="mt-2 flex items-center gap-3">
+            <div v-if="desglose.compradas > 0" class="flex items-center gap-1.5">
+              <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+              <span class="text-[10px] text-emerald-400">{{ desglose.compradas }} comprada{{ desglose.compradas > 1 ? 's' : '' }}</span>
+            </div>
+            <div v-if="desglose.planificadas > 0" class="flex items-center gap-1.5">
+              <span class="h-2 w-2 rounded-full bg-sky-400"></span>
+              <span class="text-[10px] text-sky-300">{{ desglose.planificadas }} planificada{{ desglose.planificadas > 1 ? 's' : '' }}</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="h-2 w-2 rounded-full bg-gray-500"></span>
+              <span class="text-[10px] text-theme-text-muted">{{ desglose.pendientes }} pendiente{{ desglose.pendientes > 1 ? 's' : '' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prioridades -->
+        <div v-if="resumenFuturos.porPrioridad && (resumenFuturos.porPrioridad.alta || resumenFuturos.porPrioridad.media || resumenFuturos.porPrioridad.baja)" class="mt-3 flex items-center gap-2">
+          <span class="text-[10px] text-theme-text-muted uppercase tracking-wider">Prioridad:</span>
+          <div v-if="resumenFuturos.porPrioridad.alta" class="flex items-center gap-1 rounded-full bg-red-500/12 px-2 py-0.5">
+            <span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>
+            <span class="text-[10px] font-medium text-red-400">{{ resumenFuturos.porPrioridad.alta }}</span>
+          </div>
+          <div v-if="resumenFuturos.porPrioridad.media" class="flex items-center gap-1 rounded-full bg-amber-500/12 px-2 py-0.5">
+            <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
+            <span class="text-[10px] font-medium text-amber-300">{{ resumenFuturos.porPrioridad.media }}</span>
+          </div>
+          <div v-if="resumenFuturos.porPrioridad.baja" class="flex items-center gap-1 rounded-full bg-emerald-500/12 px-2 py-0.5">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+            <span class="text-[10px] font-medium text-emerald-400">{{ resumenFuturos.porPrioridad.baja }}</span>
+          </div>
+        </div>
+
+        <!-- Proyecto más caro -->
+        <div v-if="resumenFuturos.proyectoMasCaro && resumenFuturos.totalProyectos > 1" class="mt-3 flex items-center justify-between rounded-xl bg-amber-500/8 border border-amber-500/15 px-3 py-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-sm">{{ resumenFuturos.proyectoMasCaro.categoriaIcono || '📦' }}</span>
+            <div class="min-w-0">
+              <p class="text-[9px] uppercase tracking-wider text-amber-300/70">Más costoso</p>
+              <p class="truncate text-xs font-medium text-theme-text">{{ resumenFuturos.proyectoMasCaro.tipoGasto }}</p>
+            </div>
+          </div>
+          <div class="shrink-0 text-right">
+            <p class="text-xs font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
+            <p v-if="resumenFuturos.totalPromedio > 0" class="text-[9px] text-amber-300/60">{{ Math.round((resumenFuturos.proyectoMasCaro.totalPromedio / resumenFuturos.totalPromedio) * 100) }}%</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -475,6 +565,53 @@
       </div>
     </div>
 
+    <!-- Modal: confirmar eliminar detalle -->
+    <div v-if="detalleAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="detalleAEliminar = null"></div>
+      <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
+        <h3 class="text-base font-semibold text-theme-text">Eliminar detalle</h3>
+        <p class="mt-2 text-sm text-theme-text-sec">Se eliminara el detalle y todas sus opciones guardadas.</p>
+        <p class="mt-2 text-sm font-medium text-theme-text">{{ detalleAEliminar.detalle.nombre }}</p>
+        <p v-if="detalleAEliminar.detalle.opciones?.length" class="mt-1 text-xs text-theme-text-muted">
+          {{ detalleAEliminar.detalle.opciones.length }} opcion{{ detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : '' }} se perderan
+        </p>
+        <div class="mt-5 space-y-2">
+          <button
+            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
+            :disabled="guardandoInline"
+            @click="confirmarEliminarDetalle"
+          >
+            {{ guardandoInline ? 'Eliminando...' : 'Eliminar detalle' }}
+          </button>
+          <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="detalleAEliminar = null">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: confirmar eliminar opción -->
+    <div v-if="opcionAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="opcionAEliminar = null"></div>
+      <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
+        <h3 class="text-base font-semibold text-theme-text">Eliminar opcion</h3>
+        <p class="mt-2 text-sm text-theme-text-sec">Se eliminara esta opcion de forma permanente.</p>
+        <p class="mt-2 text-sm font-medium text-theme-text">{{ opcionAEliminar.opcion.nombre }}</p>
+        <div class="mt-5 space-y-2">
+          <button
+            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
+            :disabled="guardandoInline"
+            @click="confirmarEliminarOpcion"
+          >
+            {{ guardandoInline ? 'Eliminando...' : 'Eliminar opcion' }}
+          </button>
+          <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="opcionAEliminar = null">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Panel: nueva opción -->
     <div v-if="nuevaOpcionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevaOpcion"></div>
@@ -653,6 +790,26 @@ const { gastosFuturos, resumenFuturos, updateGastoFuturo, deleteGastoFuturo, dec
 const { currencySymbol, formatMonto } = useCurrency()
 const { success, error: toastError } = useToast()
 
+const ahorroPotencial = computed(() => {
+  const max = resumenFuturos.value.totalMaximo || 0
+  const min = resumenFuturos.value.totalMinimo || 0
+  return max > min ? Math.round((max - min + Number.EPSILON) * 100) / 100 : 0
+})
+
+const desglose = computed(() => {
+  let compradas = 0
+  let planificadas = 0
+  let pendientes = 0
+  for (const proyecto of gastosFuturos.value) {
+    for (const detalle of proyecto.detalles || []) {
+      if (detalle.estadoDecision === 'comprada') compradas++
+      else if (detalle.estadoDecision === 'planificada') planificadas++
+      else pendientes++
+    }
+  }
+  return { compradas, planificadas, pendientes }
+})
+
 const busqueda = ref('')
 const filtroActual = ref('todos')
 const ordenActual = ref('reciente')
@@ -696,6 +853,8 @@ const filtrosProyecto = computed(() => {
 const expandido = ref({})
 const opcionesVisibles = ref({})
 const proyectoAEliminar = ref(null)
+const detalleAEliminar = ref(null) // { proyecto, detalle }
+const opcionAEliminar = ref(null) // { proyecto, detalle, opcion }
 const eliminando = ref(false)
 const guardandoInline = ref(false)
 const errorPanel = ref('')
@@ -881,17 +1040,24 @@ async function guardarEdicionDetalle(proyecto, detalle) {
 }
 
 // ── Detalle: eliminar ────────────────────────────────────────────
-async function eliminarDetalleInline(proyecto, detalle) {
+function eliminarDetalleInline(proyecto, detalle) {
   if (proyecto.detalles.length <= 1) {
     toastError('El proyecto debe tener al menos un detalle')
     return
   }
+  detalleAEliminar.value = { proyecto, detalle }
+}
+
+async function confirmarEliminarDetalle() {
+  if (!detalleAEliminar.value) return
+  const { proyecto, detalle } = detalleAEliminar.value
   guardandoInline.value = true
   try {
     await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
       detalles: proyecto.detalles.filter(d => d.id !== detalle.id),
     }))
     success('Detalle eliminado')
+    detalleAEliminar.value = null
   } catch (e) {
     toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
   } finally {
@@ -1008,7 +1174,13 @@ async function guardarEdicionOpcion(proyecto, detalle) {
 }
 
 // ── Opción: eliminar ─────────────────────────────────────────────
-async function eliminarOpcionInline(proyecto, detalle, opcion) {
+function eliminarOpcionInline(proyecto, detalle, opcion) {
+  opcionAEliminar.value = { proyecto, detalle, opcion }
+}
+
+async function confirmarEliminarOpcion() {
+  if (!opcionAEliminar.value) return
+  const { proyecto, detalle, opcion } = opcionAEliminar.value
   const nuevasOpciones = detalle.opciones.filter(o => o.id !== opcion.id).map(opcionToPayload)
 
   guardandoInline.value = true
@@ -1018,6 +1190,7 @@ async function eliminarOpcionInline(proyecto, detalle, opcion) {
       opciones: nuevasOpciones,
     }))
     success('Opcion eliminada')
+    opcionAEliminar.value = null
   } catch (e) {
     toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
   } finally {

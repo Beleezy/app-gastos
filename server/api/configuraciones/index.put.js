@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
   if (body.vistaRegistroDia !== undefined) updateData.vistaRegistroDia = !!body.vistaRegistroDia
   if (body.vistaRegistroSemana !== undefined) updateData.vistaRegistroSemana = !!body.vistaRegistroSemana
   if (body.tamanoLetra !== undefined) {
-    const valid = ['normal', 'grande', 'muy_grande']
+    const valid = ['normal', 'grande']
     updateData.tamanoLetra = valid.includes(body.tamanoLetra) ? body.tamanoLetra : 'normal'
   }
   if (body.modoDaltonico !== undefined) updateData.modoDaltonico = !!body.modoDaltonico

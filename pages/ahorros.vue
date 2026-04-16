@@ -43,7 +43,7 @@
 
     <!-- FAB -->
     <button
-      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 opacity-85 shadow-lg shadow-emerald-500/25 backdrop-blur-md transition-all duration-300 hover:opacity-100 active:scale-90"
+      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 opacity-60 shadow-lg shadow-emerald-500/25 transition-all duration-300 hover:opacity-80 active:scale-90"
       @click="showFormAhorro = true"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
