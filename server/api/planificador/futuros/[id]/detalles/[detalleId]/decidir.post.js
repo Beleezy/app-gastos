@@ -10,6 +10,7 @@ import {
   configuraciones,
 } from '../../../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../../../utils/getUsuario.js'
+import { getFechaHoraLocalUsuario } from '../../../../../../utils/fechaLocal.js'
 import { fetchFutureExpenseById } from '../../../../../../utils/gastosFuturos.js'
 
 function parseAmount(value) {
@@ -116,9 +117,9 @@ export default defineEventHandler(async (event) => {
     let gastoPlanificadoId = null
 
     if (tipo === 'comprar') {
-      const ahora = new Date()
-      const fecha = body?.fecha || ahora.toISOString().split('T')[0]
-      const hora = ahora.toTimeString().split(' ')[0].substring(0, 5)
+      const { fecha: fechaLocal, hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
+      const fecha = body?.fecha || fechaLocal
+      const hora = horaLocal
 
       const [creado] = await tx
         .insert(gastos)

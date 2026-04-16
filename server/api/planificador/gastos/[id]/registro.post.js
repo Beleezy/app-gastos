@@ -1,6 +1,7 @@
 import { db } from '../../../../utils/db.js'
 import { gastosPlanificados, planesMensuales, gastos, categorias, ahorros } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
+import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -43,8 +44,8 @@ export default defineEventHandler(async (event) => {
     ))
     .limit(1)
 
-  const ahora = new Date()
-  const horaRegistro = gastoExistente?.hora || ahora.toTimeString().split(' ')[0].substring(0, 5)
+  const { hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
+  const horaRegistro = gastoExistente?.hora || horaLocal
 
   const [gastoGuardado] = await db.transaction(async (tx) => {
     let gastoActualizado

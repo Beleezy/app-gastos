@@ -15,6 +15,13 @@ export default defineEventHandler(async (event) => {
   if (body.zonaHoraria !== undefined) updateData.zonaHoraria = String(body.zonaHoraria).slice(0, 50)
   if (body.locale !== undefined) updateData.locale = String(body.locale).slice(0, 10)
   if (body.diasPdfSaldadas !== undefined) updateData.diasPdfSaldadas = Math.max(1, Math.min(90, parseInt(body.diasPdfSaldadas) || 7))
+  if (body.vistaRegistroDia !== undefined) updateData.vistaRegistroDia = !!body.vistaRegistroDia
+  if (body.vistaRegistroSemana !== undefined) updateData.vistaRegistroSemana = !!body.vistaRegistroSemana
+  if (body.tamanoLetra !== undefined) {
+    const valid = ['normal', 'grande', 'muy_grande']
+    updateData.tamanoLetra = valid.includes(body.tamanoLetra) ? body.tamanoLetra : 'normal'
+  }
+  if (body.modoDaltonico !== undefined) updateData.modoDaltonico = !!body.modoDaltonico
   updateData.updatedAt = new Date()
 
   const [updated] = await db

@@ -1,11 +1,12 @@
 import { db } from '../../utils/db.js'
 import { deudas } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const hoy = new Date().toISOString().split('T')[0]
+  const { fecha: hoy } = await getFechaHoraLocalUsuario(usuarioId)
 
   const [resumen] = await db
     .select({

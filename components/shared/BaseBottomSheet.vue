@@ -7,16 +7,13 @@
       class="relative flex w-full max-w-lg md:max-w-2xl lg:max-w-3xl flex-col overflow-hidden rounded-t-3xl md:rounded-3xl border-t md:border border-theme-border bg-theme-card animate-slide-up md:animate-dialog-in md:shadow-2xl md:shadow-black/40"
       style="max-height: 90dvh;"
       :style="sheetStyle"
-      @touchstart.stop
-      @touchmove.stop
-      @touchend.stop
+      @touchstart="onSheetTouchStart"
+      @touchmove="onSheetTouchMove"
+      @touchend="onSheetTouchEnd"
+      @touchcancel="onSheetTouchEnd"
     >
       <div
         class="flex justify-center pt-3 pb-1 select-none md:hidden"
-        @touchstart.stop="onHandleTouchStart"
-        @touchmove.stop="onHandleTouchMove"
-        @touchend.stop="onHandleTouchEnd"
-        @touchcancel.stop="onHandleTouchEnd"
       >
         <div class="w-10 h-1 rounded-full bg-theme-border-md"></div>
       </div>
@@ -33,8 +30,6 @@
       <div
         ref="scrollRef"
         class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 md:px-6 pb-8 md:pb-6 space-y-4"
-        @touchstart.stop="onScrollTouchStart"
-        @touchmove.stop="onScrollTouchMove"
       >
         <slot />
       </div>
@@ -68,66 +63,107 @@ const isDragging = ref(false)
 
 const { registerModal, unregisterModal } = useModalLayer()
 
-let scrollTouchStartY = 0
+let touchStartY = 0
 let dragStartY = 0
 let dragStartedAt = 0
+let draggingSheet = false
+let decidedAction = false // 'drag' | 'scroll' | false
 
 const CLOSE_DRAG_THRESHOLD = 96
 const CLOSE_VELOCITY_THRESHOLD = 0.6
 const MAX_DRAG_OFFSET = 320
+const DRAG_DECISION_THRESHOLD = 8
 
 const sheetStyle = computed(() => ({
   transform: dragOffset.value > 0 ? `translateY(${dragOffset.value}px)` : 'translateY(0px)',
   transition: isDragging.value ? 'none' : 'transform 220ms cubic-bezier(0.16, 1, 0.3, 1)',
 }))
 
-function onScrollTouchStart(event) {
-  scrollTouchStartY = event.touches[0].clientY
+function isInputElement(el) {
+  const tag = el.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable
 }
 
-function onScrollTouchMove(event) {
-  const scrollEl = scrollRef.value
-  if (!scrollEl) return
+function onSheetTouchStart(event) {
+  if (event.touches.length !== 1) return
+  if (isInputElement(event.target)) return
 
-  const deltaY = event.touches[0].clientY - scrollTouchStartY
-  const canScroll = scrollEl.scrollHeight > scrollEl.clientHeight + 1
-  const atTop = scrollEl.scrollTop <= 0
-  const atBottom = scrollEl.scrollTop + scrollEl.clientHeight >= scrollEl.scrollHeight - 1
-
-  if (!canScroll || (atTop && deltaY > 0) || (atBottom && deltaY < 0)) {
-    event.preventDefault()
-  }
+  touchStartY = event.touches[0].clientY
+  dragStartY = touchStartY
+  dragStartedAt = performance.now()
+  draggingSheet = false
+  decidedAction = false
 }
 
-function onHandleTouchStart(event) {
+function onSheetTouchMove(event) {
   if (event.touches.length !== 1) return
 
-  isDragging.value = true
-  dragStartY = event.touches[0].clientY
-  dragStartedAt = performance.now()
-}
+  const currentY = event.touches[0].clientY
+  const deltaFromStart = currentY - touchStartY
+  const scrollEl = scrollRef.value
 
-function onHandleTouchMove(event) {
-  if (!isDragging.value) return
+  // Decide si es drag del sheet o scroll del contenido
+  if (!decidedAction) {
+    if (Math.abs(deltaFromStart) < DRAG_DECISION_THRESHOLD) return
 
-  const deltaY = event.touches[0].clientY - dragStartY
+    const isScrollArea = scrollEl && scrollEl.contains(event.target)
+    const scrollTop = scrollEl ? scrollEl.scrollTop : 0
+    const isAtTop = scrollTop <= 0
+    const isDownward = deltaFromStart > 0
 
-  if (deltaY <= 0) {
+    // Arrastrar el sheet si:
+    // - No estamos en el área scrollable, o
+    // - Estamos en el área scrollable pero el scroll está arriba y se arrastra hacia abajo
+    if (!isScrollArea || (isAtTop && isDownward)) {
+      decidedAction = 'drag'
+      draggingSheet = true
+      isDragging.value = true
+      dragStartY = currentY
+      dragStartedAt = performance.now()
+    } else {
+      decidedAction = 'scroll'
+      return
+    }
+  }
+
+  if (decidedAction === 'scroll') {
+    // Durante el scroll, si llegamos al tope y seguimos arrastrando abajo, transicionar a drag
+    if (scrollEl && scrollEl.scrollTop <= 0 && (currentY - touchStartY) > 0) {
+      decidedAction = 'drag'
+      draggingSheet = true
+      isDragging.value = true
+      dragStartY = currentY
+      dragStartedAt = performance.now()
+    }
+    return
+  }
+
+  // Modo drag del sheet
+  if (!draggingSheet) return
+
+  const dragDelta = currentY - dragStartY
+
+  if (dragDelta <= 0) {
     dragOffset.value = 0
     return
   }
 
   event.preventDefault()
-  dragOffset.value = Math.min(deltaY, MAX_DRAG_OFFSET)
+  dragOffset.value = Math.min(dragDelta, MAX_DRAG_OFFSET)
 }
 
-function onHandleTouchEnd() {
-  if (!isDragging.value) return
+function onSheetTouchEnd() {
+  if (!draggingSheet) {
+    decidedAction = false
+    return
+  }
 
   const elapsed = Math.max(performance.now() - dragStartedAt, 1)
   const velocity = dragOffset.value / elapsed
 
   isDragging.value = false
+  draggingSheet = false
+  decidedAction = false
 
   if (dragOffset.value >= CLOSE_DRAG_THRESHOLD || velocity >= CLOSE_VELOCITY_THRESHOLD) {
     emit('close')

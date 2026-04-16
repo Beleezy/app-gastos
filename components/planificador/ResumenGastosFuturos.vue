@@ -2,6 +2,7 @@
   <div class="px-4 pt-4 pb-2">
     <div class="relative overflow-hidden rounded-2xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/90 p-4 space-y-4">
       <div class="absolute -top-10 right-0 h-28 w-28 rounded-full bg-sky-500/10 blur-2xl"></div>
+      <div class="absolute -bottom-8 -left-8 h-24 w-24 rounded-full bg-violet-500/8 blur-2xl"></div>
 
       <div class="relative flex items-start justify-between gap-3">
         <div>
@@ -19,22 +20,45 @@
       </div>
 
       <!-- Stats principales -->
-      <div class="grid grid-cols-2 gap-2">
+      <div class="grid grid-cols-3 gap-2">
         <div class="rounded-xl border border-theme-border bg-theme-input p-3">
           <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Proyectos</p>
           <p class="mt-1 text-lg font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
-          <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.totalDetalles }} detalles · {{ resumenFuturos.totalOpciones }} opciones</p>
+          <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
         </div>
         <div class="rounded-xl border border-theme-border bg-theme-input p-3">
-          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Promedio total</p>
+          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Promedio</p>
           <p class="mt-1 text-lg font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
           <p class="text-[11px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }} - {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMaximo) }}</p>
+        </div>
+        <div class="rounded-xl border border-theme-border bg-theme-input p-3">
+          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Por proy.</p>
+          <p class="mt-1 text-lg font-semibold text-violet-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
+          <p class="text-[11px] text-theme-text-sec">promedio</p>
+        </div>
+      </div>
+
+      <!-- Ahorro potencial -->
+      <div v-if="ahorroPotencial > 0" class="rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-3 py-2.5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+              </svg>
+            </div>
+            <div>
+              <p class="text-[10px] uppercase tracking-[0.16em] text-emerald-300/70">Ahorro potencial</p>
+              <p class="text-[11px] text-theme-text-sec">Eligiendo las opciones mas baratas</p>
+            </div>
+          </div>
+          <p class="shrink-0 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(ahorroPotencial) }}</p>
         </div>
       </div>
 
       <!-- Progreso de decision global -->
       <div v-if="resumenFuturos.progresoDecision?.total > 0" class="rounded-xl border border-theme-border bg-theme-input p-3">
-        <div class="flex items-center justify-between mb-1.5">
+        <div class="flex items-center justify-between mb-2">
           <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decision</p>
           <span class="text-[11px] font-semibold" :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
             {{ resumenFuturos.progresoDecision.decididos }} / {{ resumenFuturos.progresoDecision.total }} detalles
@@ -47,6 +71,21 @@
             :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
             :style="{ width: resumenFuturos.progresoDecision.porcentaje + '%' }"
           ></div>
+        </div>
+        <!-- Desglose de decisiones -->
+        <div v-if="desglose.compradas > 0 || desglose.planificadas > 0" class="mt-2.5 flex items-center gap-3">
+          <div v-if="desglose.compradas > 0" class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            <span class="text-[10px] text-emerald-400">{{ desglose.compradas }} comprada{{ desglose.compradas > 1 ? 's' : '' }}</span>
+          </div>
+          <div v-if="desglose.planificadas > 0" class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-sky-400"></span>
+            <span class="text-[10px] text-sky-300">{{ desglose.planificadas }} planificada{{ desglose.planificadas > 1 ? 's' : '' }}</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-gray-500"></span>
+            <span class="text-[10px] text-theme-text-muted">{{ desglose.pendientes }} pendiente{{ desglose.pendientes > 1 ? 's' : '' }}</span>
+          </div>
         </div>
       </div>
 
@@ -82,25 +121,36 @@
               {{ resumenFuturos.proyectoMasCaro.categoriaIcono || '' }} {{ resumenFuturos.proyectoMasCaro.tipoGasto }}
             </p>
           </div>
-          <p class="shrink-0 text-sm font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
+          <div class="shrink-0 text-right">
+            <p class="text-sm font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
+            <p v-if="resumenFuturos.totalPromedio > 0" class="text-[10px] text-amber-300/60">{{ Math.round((resumenFuturos.proyectoMasCaro.totalPromedio / resumenFuturos.totalPromedio) * 100) }}% del total</p>
+          </div>
         </div>
       </div>
 
-      <!-- Por categoria -->
+      <!-- Por categoria con barras proporcionales -->
       <div v-if="resumenFuturos.porCategoria?.length > 1" class="space-y-2">
         <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Por categoria</p>
         <div class="space-y-1.5">
           <div
             v-for="cat in resumenFuturos.porCategoria"
             :key="cat.nombre"
-            class="flex items-center justify-between gap-3 rounded-lg bg-theme-input/60 px-3 py-2"
+            class="rounded-lg bg-theme-input/60 px-3 py-2"
           >
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="text-sm">{{ cat.icono || '📦' }}</span>
-              <span class="truncate text-xs text-theme-text">{{ cat.nombre }}</span>
-              <span class="shrink-0 rounded-full bg-theme-card px-1.5 py-0.5 text-[10px] text-theme-text-muted">{{ cat.cantidad }}</span>
+            <div class="flex items-center justify-between gap-3 mb-1.5">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="text-sm">{{ cat.icono || '📦' }}</span>
+                <span class="truncate text-xs text-theme-text">{{ cat.nombre }}</span>
+                <span class="shrink-0 rounded-full bg-theme-card px-1.5 py-0.5 text-[10px] text-theme-text-muted">{{ cat.cantidad }}</span>
+              </div>
+              <span class="shrink-0 text-xs font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(cat.totalPromedio) }}</span>
             </div>
-            <span class="shrink-0 text-xs font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(cat.totalPromedio) }}</span>
+            <div class="h-1 w-full overflow-hidden rounded-full bg-theme-card">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-sky-500/60 to-sky-400/60 transition-all duration-500"
+                :style="{ width: barraCategoria(cat.totalPromedio) + '%' }"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
@@ -162,6 +212,36 @@
 </template>
 
 <script setup>
-const { resumenFuturos } = usePlanificador()
+const { resumenFuturos, gastosFuturos } = usePlanificador()
 const { currencySymbol, formatMonto } = useCurrency()
+
+const ahorroPotencial = computed(() => {
+  const max = resumenFuturos.value.totalMaximo || 0
+  const min = resumenFuturos.value.totalMinimo || 0
+  return max > min ? Math.round((max - min + Number.EPSILON) * 100) / 100 : 0
+})
+
+const desglose = computed(() => {
+  let compradas = 0
+  let planificadas = 0
+  let pendientes = 0
+  for (const proyecto of gastosFuturos.value) {
+    for (const detalle of proyecto.detalles || []) {
+      if (detalle.estadoDecision === 'comprada') compradas++
+      else if (detalle.estadoDecision === 'planificada') planificadas++
+      else pendientes++
+    }
+  }
+  return { compradas, planificadas, pendientes }
+})
+
+const maxCategoria = computed(() => {
+  const cats = resumenFuturos.value.porCategoria || []
+  if (!cats.length) return 1
+  return Math.max(...cats.map(c => c.totalPromedio || 0), 1)
+})
+
+function barraCategoria(totalPromedio) {
+  return Math.max(Math.round(((totalPromedio || 0) / maxCategoria.value) * 100), 2)
+}
 </script>

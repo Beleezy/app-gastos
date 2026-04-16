@@ -188,6 +188,113 @@
           </div>
         </div>
 
+        <!-- Tamaño de letra -->
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
+          <div class="flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M3 17v2a2 2 0 002 2h2M17 21h2a2 2 0 002-2v-2" />
+              <text x="7" y="16" font-size="12" font-weight="bold" fill="currentColor" stroke="none">A</text>
+            </svg>
+            <label class="text-sm font-medium text-theme-text">Tamano de letra</label>
+          </div>
+          <p class="text-xs text-theme-text-sec mb-3">Ajusta el tamano del texto en toda la aplicacion. Ideal para mejorar la legibilidad.</p>
+          <div class="grid grid-cols-3 gap-2">
+            <button
+              v-for="size in FONT_SIZES"
+              :key="size.id"
+              class="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all duration-200"
+              :class="fontSize === size.id ? 'border-blue-500 bg-blue-500/10' : 'border-theme-border hover:border-theme-border-md'"
+              @click="cambiarTamanoLetra(size.id)"
+            >
+              <span
+                class="font-semibold text-theme-text"
+                :class="size.id === 'normal' ? 'text-sm' : size.id === 'grande' ? 'text-base' : 'text-lg'"
+              >Aa</span>
+              <span class="text-[10px] text-theme-text-sec">{{ size.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modo daltónico -->
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
+          <label class="flex items-center justify-between cursor-pointer">
+            <div class="flex items-center gap-2.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-text-sec shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <div>
+                <span class="text-sm text-theme-text font-medium">Modo daltonico</span>
+                <p class="text-[11px] text-theme-text-sec leading-tight">Reduce la variedad de colores y mejora el contraste</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0 ml-3"
+              :class="form.modoDaltonico ? 'bg-blue-500' : 'bg-theme-border-md'"
+              @click="toggleModoDaltonico"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200"
+                :class="form.modoDaltonico ? 'translate-x-6' : 'translate-x-1'"
+              />
+            </button>
+          </label>
+        </div>
+
+        <!-- Vista del registro de gastos -->
+        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
+          <div class="flex items-center gap-2 mb-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            <label class="text-sm font-medium text-theme-text">Vista del registro</label>
+          </div>
+          <p class="text-xs text-theme-text-sec mb-3">Elige que vistas mostrar en el historial de gastos. Puedes activar ambas a la vez.</p>
+          <div class="space-y-3">
+            <label class="flex items-center justify-between cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📅</span>
+                <div>
+                  <span class="text-sm text-theme-text font-medium">Por dia</span>
+                  <p class="text-[11px] text-theme-text-sec leading-tight">Gastos agrupados por dia individual</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0"
+                :class="form.vistaRegistroDia ? 'bg-blue-500' : 'bg-theme-border-md'"
+                @click="toggleVistaDia"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200"
+                  :class="form.vistaRegistroDia ? 'translate-x-6' : 'translate-x-1'"
+                />
+              </button>
+            </label>
+            <label class="flex items-center justify-between cursor-pointer">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">🗓️</span>
+                <div>
+                  <span class="text-sm text-theme-text font-medium">Por semana</span>
+                  <p class="text-[11px] text-theme-text-sec leading-tight">Gastos agrupados por semana</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0"
+                :class="form.vistaRegistroSemana ? 'bg-blue-500' : 'bg-theme-border-md'"
+                @click="toggleVistaSemana"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200"
+                  :class="form.vistaRegistroSemana ? 'translate-x-6' : 'translate-x-1'"
+                />
+              </button>
+            </label>
+          </div>
+        </div>
+
         <!-- Administrar Categorías Link -->
         <button
           class="bg-theme-card rounded-2xl p-5 border border-theme-border w-full flex items-center justify-between group hover:border-theme-accent transition-colors"
@@ -250,7 +357,7 @@
 <script setup>
 const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
-const { accentColor, setAccentColor, ACCENT_COLORS } = useTheme()
+const { accentColor, setAccentColor, ACCENT_COLORS, fontSize, setFontSize, FONT_SIZES, isColorblind, setColorblindMode } = useTheme()
 const { logout } = useAuth()
 
 
@@ -266,6 +373,10 @@ const form = reactive({
   zonaHoraria: 'America/Lima',
   locale: 'es-PE',
   diasPdfSaldadas: 7,
+  vistaRegistroDia: true,
+  vistaRegistroSemana: false,
+  tamanoLetra: 'normal',
+  modoDaltonico: false,
 })
 
 const originalValues = ref({})
@@ -280,6 +391,10 @@ const hasChanges = computed(() => {
     || form.zonaHoraria !== originalValues.value.zonaHoraria
     || form.locale !== originalValues.value.locale
     || form.diasPdfSaldadas != originalValues.value.diasPdfSaldadas
+    || form.vistaRegistroDia !== originalValues.value.vistaRegistroDia
+    || form.vistaRegistroSemana !== originalValues.value.vistaRegistroSemana
+    || form.tamanoLetra !== originalValues.value.tamanoLetra
+    || form.modoDaltonico !== originalValues.value.modoDaltonico
 })
 
 function loadFromConfig() {
@@ -291,6 +406,12 @@ function loadFromConfig() {
   form.zonaHoraria = config.value.zonaHoraria || 'America/Lima'
   form.locale = config.value.locale || 'es-PE'
   form.diasPdfSaldadas = config.value.diasPdfSaldadas || 7
+  form.vistaRegistroDia = config.value.vistaRegistroDia !== false
+  form.vistaRegistroSemana = config.value.vistaRegistroSemana === true
+  form.tamanoLetra = config.value.tamanoLetra || 'normal'
+  form.modoDaltonico = config.value.modoDaltonico === true
+  setFontSize(form.tamanoLetra)
+  setColorblindMode(form.modoDaltonico)
   originalValues.value = { ...form }
 }
 
@@ -305,6 +426,10 @@ async function guardar() {
       zonaHoraria: form.zonaHoraria,
       locale: form.locale,
       diasPdfSaldadas: form.diasPdfSaldadas,
+      vistaRegistroDia: form.vistaRegistroDia,
+      vistaRegistroSemana: form.vistaRegistroSemana,
+      tamanoLetra: form.tamanoLetra,
+      modoDaltonico: form.modoDaltonico,
     })
     originalValues.value = { ...form }
     toastMsg.value = 'Configuracion guardada'
@@ -314,6 +439,26 @@ async function guardar() {
   } finally {
     saving.value = false
   }
+}
+
+function cambiarTamanoLetra(id) {
+  form.tamanoLetra = id
+  setFontSize(id)
+}
+
+function toggleModoDaltonico() {
+  form.modoDaltonico = !form.modoDaltonico
+  setColorblindMode(form.modoDaltonico)
+}
+
+function toggleVistaDia() {
+  if (form.vistaRegistroDia && !form.vistaRegistroSemana) return
+  form.vistaRegistroDia = !form.vistaRegistroDia
+}
+
+function toggleVistaSemana() {
+  if (form.vistaRegistroSemana && !form.vistaRegistroDia) return
+  form.vistaRegistroSemana = !form.vistaRegistroSemana
 }
 
 onMounted(async () => {

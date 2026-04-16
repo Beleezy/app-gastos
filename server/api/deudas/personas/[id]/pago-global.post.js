@@ -2,6 +2,7 @@ import { db } from '../../../../utils/db.js'
 import { deudas, pagosDeuda, personasEntidades } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { crearPagoEspejo, registrarAuditoria } from '../../../../utils/vinculos.js'
+import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -14,10 +15,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'El monto debe ser mayor a 0' })
   }
 
-  const fechaPago = body.fecha || new Date().toISOString().split('T')[0]
+  const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
+  const fechaPago = body.fecha || fechaLocal
   const metodoPago = body.metodoPago?.trim() || null
   const notas = body.notas?.trim() || null
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = fechaLocal
 
   // Verificar persona y si está vinculada
   const [persona] = await db

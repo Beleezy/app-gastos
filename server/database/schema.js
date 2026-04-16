@@ -181,6 +181,10 @@ export const configuraciones = pgTable('configuraciones', {
   zonaHoraria: varchar('zona_horaria', { length: 50 }).default('America/Lima').notNull(),
   locale: varchar('locale', { length: 10 }).default('es-PE').notNull(),
   diasPdfSaldadas: integer('dias_pdf_saldadas').default(7).notNull(),
+  vistaRegistroDia: boolean('vista_registro_dia').default(true).notNull(),
+  vistaRegistroSemana: boolean('vista_registro_semana').default(false).notNull(),
+  tamanoLetra: varchar('tamano_letra', { length: 20 }).default('normal').notNull(),
+  modoDaltonico: boolean('modo_daltonico').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

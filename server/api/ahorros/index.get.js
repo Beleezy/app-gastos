@@ -1,13 +1,16 @@
 import { db } from '../../utils/db.js'
 import { ahorros, mediosAhorro, metasAhorro } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, sql, desc } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
-  const mes = parseInt(query.mes) || (new Date().getMonth() + 1)
-  const anio = parseInt(query.anio) || new Date().getFullYear()
   const usuarioId = await getUsuarioFromEvent(event)
+  const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
+  const [anioLocal, mesLocal] = fechaLocal.split('-').map(Number)
+  const mes = parseInt(query.mes) || mesLocal
+  const anio = parseInt(query.anio) || anioLocal
 
   const ahorrosMes = await db
     .select({

@@ -2,13 +2,16 @@ import { db } from '../../utils/db.js'
 import { planesMensuales, gastosPlanificados, categorias, configuraciones, gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { fetchFuturePortfolio } from '../../utils/gastosFuturos.js'
+import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, sql } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
-  const mes = parseInt(query.mes) || (new Date().getMonth() + 1)
-  const anio = parseInt(query.anio) || new Date().getFullYear()
   const usuarioId = await getUsuarioFromEvent(event)
+  const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
+  const [anioLocal, mesLocal] = fechaLocal.split('-').map(Number)
+  const mes = parseInt(query.mes) || mesLocal
+  const anio = parseInt(query.anio) || anioLocal
 
   // Find existing plan
   let [plan] = await db

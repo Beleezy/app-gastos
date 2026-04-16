@@ -188,6 +188,8 @@
                   :is-loading="isLoadingMensual"
                   :format-fecha-dia="formatFechaDia"
                   :format-rango-semana="formatRangoSemana"
+                  :mostrar-vista-dia="configVistaDia"
+                  :mostrar-vista-semana="configVistaSemana"
                   @edit="abrirEdicion"
                   @delete="confirmarEliminar"
                   @duplicate="duplicarGasto"
@@ -390,6 +392,8 @@ const { presupuesto, fetchPresupuesto, actualizarPresupuesto } = usePresupuestoM
   mesSeleccionado, anioSeleccionado,
 })
 const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
+const configVistaDia = computed(() => config.value?.vistaRegistroDia !== false)
+const configVistaSemana = computed(() => config.value?.vistaRegistroSemana === true)
 
 // Filtros (composable)
 const {

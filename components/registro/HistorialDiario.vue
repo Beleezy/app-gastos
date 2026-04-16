@@ -1,24 +1,6 @@
 <template>
   <div class="px-4">
-    <!-- View mode toggle: Semana / Día -->
-    <div class="flex items-center gap-2 mb-4">
-      <button
-        class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vistaActiva === 'semana' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
-        @click="cambiarVista('semana')"
-      >
-        Por semana
-      </button>
-      <button
-        class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-        :class="vistaActiva === 'dia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
-        @click="cambiarVista('dia')"
-      >
-        Por día
-      </button>
-    </div>
-
-    <!-- Loading skeleton fiel a la estructura real -->
+    <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-2">
       <div v-for="i in 3" :key="i" class="space-y-1.5">
         <div class="bg-theme-card rounded-xl h-14 shimmer border border-theme-border"></div>
@@ -28,7 +10,7 @@
       </div>
     </div>
 
-    <!-- Empty state accionable -->
+    <!-- Empty state -->
     <div v-else-if="sinDatos" class="flex flex-col items-center py-10">
       <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-theme-card/80 to-theme-card/40 flex items-center justify-center mb-4 border border-theme-border">
         <span class="text-3xl opacity-40">📝</span>
@@ -54,166 +36,201 @@
       </div>
     </div>
 
-    <!-- Vista por día -->
-    <div v-else-if="vistaActiva === 'dia'" class="space-y-2">
-      <div v-for="dia in gastosPorDia" :key="dia.fecha">
+    <!-- Content -->
+    <template v-else>
+      <!-- Toggle solo si ambas vistas están activas -->
+      <div v-if="ambasVistas" class="flex items-center gap-2 mb-4">
         <button
-          class="w-full px-3.5 py-2.5 rounded-xl transition-all duration-200"
-          :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
-          @click="onDayHeaderClick(dia)"
-          @contextmenu.prevent="activarSeleccionDia(dia)"
+          class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+          :class="vistaActiva === 'semana' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+          @click="cambiarVista('semana')"
         >
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
-              :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
-            >
-              <span class="text-[9px] uppercase leading-none font-semibold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
-              <span class="text-base font-bold leading-tight" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text'">{{ extraerDia(dia.fecha) }}</span>
+          Por semana
+        </button>
+        <button
+          class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
+          :class="vistaActiva === 'dia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+          @click="cambiarVista('dia')"
+        >
+          Por dia
+        </button>
+      </div>
+
+      <!-- Vista por semana -->
+      <div v-if="mostrarSemana" class="space-y-3" :class="{ 'mb-6': ambasVistas && vistaActiva === 'semana' }">
+        <div v-for="semana in gastosPorSemana" :key="semana.key">
+          <button
+            class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
+            :class="semanaExpandida === semana.key ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
+            @click="toggleSemana(semana.key)"
+          >
+            <div class="text-left">
+              <p class="text-sm font-medium text-theme-text">{{ formatRangoSemana(semana.desde, semana.hasta) }}</p>
+              <p class="text-xs text-theme-text-sec">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'dia' : 'dias' }} con gastos</p>
             </div>
-            <div class="flex-1 min-w-0 text-left">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-theme-text truncate">{{ formatFechaDia(dia.fecha) }}</p>
-                <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
-              </div>
-              <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
-                  {{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}
-                </span>
-                <span v-if="getStats(dia).topCat" class="text-[10px] px-1.5 py-0.5 rounded-md leading-none font-medium"
-                  :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
-                >
-                  {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
-                </span>
-                <span class="text-[10px] text-theme-text-muted leading-none">
-                  Prom. {{ currencySymbol }} {{ formatMonto(getStats(dia).promedio) }}
-                </span>
-                <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">
-                  · {{ getStats(dia).rangoHoras }}
-                </span>
-              </div>
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <span
-                v-if="!seleccionActiva"
-                class="w-7 h-7 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
-                role="button"
-                aria-label="Seleccionar gastos"
-                @click.stop="activarSeleccionDia(dia)"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                </svg>
-              </span>
+            <div class="flex items-center gap-2">
+              <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
-                :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                :class="{ 'rotate-180': semanaExpandida === semana.key }"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </div>
-          </div>
-        </button>
+          </button>
 
-        <Transition name="expand">
-          <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-4 mt-1 space-y-1.5">
-            <RegistroGastoItem
-              v-for="gasto in dia.gastos"
-              :key="gasto.id"
-              :gasto="gasto"
-              :selectable="seleccionActiva"
-              :selected="selectedIds.has(gasto.id)"
-              @edit="$emit('edit', gasto)"
-              @delete="$emit('delete', gasto)"
-              @duplicate="$emit('duplicate', gasto)"
-              @toggle-select="toggleSelect(gasto)"
-              @long-press="onItemLongPress(gasto)"
-            />
-          </TransitionGroup>
-        </Transition>
-      </div>
-    </div>
-
-    <!-- Vista por semana -->
-    <div v-else class="space-y-3">
-      <div v-for="semana in gastosPorSemana" :key="semana.key">
-        <button
-          class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200"
-          :class="semanaExpandida === semana.key ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
-          @click="toggleSemana(semana.key)"
-        >
-          <div class="text-left">
-            <p class="text-sm font-medium text-theme-text">{{ formatRangoSemana(semana.desde, semana.hasta) }}</p>
-            <p class="text-xs text-theme-text-sec">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'día' : 'días' }} con gastos</p>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
-              :class="{ 'rotate-180': semanaExpandida === semana.key }"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </button>
-
-        <Transition name="expand">
-          <div v-if="semanaExpandida === semana.key" class="ml-2 mt-1 space-y-1.5">
-            <div v-for="dia in semana.dias" :key="dia.fecha">
-              <button
-                class="w-full px-3 py-2 rounded-lg transition-colors"
-                :class="diaExpandido === dia.fecha ? 'bg-theme-border-md border border-theme-border' : 'bg-theme-card hover:bg-theme-card'"
-                @click.stop="toggleDia(dia.fecha)"
-              >
-                <div class="flex items-center gap-2.5">
-                  <div class="w-9 h-9 rounded-lg flex flex-col items-center justify-center bg-theme-card border border-theme-border shrink-0">
-                    <span class="text-[8px] uppercase leading-none font-semibold text-theme-text-muted">{{ nombreDiaSemana(dia.fecha) }}</span>
-                    <span class="text-xs font-bold text-theme-text leading-tight">{{ extraerDia(dia.fecha) }}</span>
-                  </div>
-                  <div class="flex-1 min-w-0 text-left">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="text-xs font-medium text-theme-text-sec truncate">{{ formatFechaDia(dia.fecha) }}</p>
-                      <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+          <Transition name="expand">
+            <div v-if="semanaExpandida === semana.key" class="ml-2 mt-1 space-y-1.5">
+              <div v-for="dia in semana.dias" :key="dia.fecha">
+                <button
+                  class="w-full px-3 py-2 rounded-lg transition-colors"
+                  :class="diaExpandido === dia.fecha ? 'bg-theme-border-md border border-theme-border' : 'bg-theme-card hover:bg-theme-card'"
+                  @click.stop="onSemDayClick(dia)"
+                  @contextmenu.prevent="activarSeleccionDia(dia)"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-lg flex flex-col items-center justify-center bg-theme-card border border-theme-border shrink-0">
+                      <span class="text-[8px] uppercase leading-none font-semibold text-theme-text-muted">{{ nombreDiaSemana(dia.fecha) }}</span>
+                      <span class="text-xs font-bold text-theme-text leading-tight">{{ extraerDia(dia.fecha) }}</span>
                     </div>
-                    <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                      <span class="text-[10px] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
-                      <span v-if="getStats(dia).topCat" class="text-[10px] px-1 py-0.5 rounded leading-none font-medium"
-                        :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
+                    <div class="flex-1 min-w-0 text-left">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-xs font-medium text-theme-text-sec truncate">{{ formatFechaDia(dia.fecha) }}</p>
+                        <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                      </div>
+                      <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                        <span class="text-[10px] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
+                        <span v-if="getStats(dia).topCat" class="text-[10px] px-1 py-0.5 rounded leading-none font-medium"
+                          :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
+                        >
+                          {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
+                        </span>
+                        <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">· {{ getStats(dia).rangoHoras }}</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <span
+                        v-if="!seleccionActiva"
+                        class="w-6 h-6 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                        role="button"
+                        aria-label="Seleccionar gastos"
+                        @click.stop="activarSeleccionDia(dia)"
                       >
-                        {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
                       </span>
-                      <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">· {{ getStats(dia).rangoHoras }}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform shrink-0"
+                        :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
                     </div>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform shrink-0"
-                    :class="{ 'rotate-180': diaExpandido === dia.fecha }"
-                    fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-                  >
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
+                </button>
 
-              <Transition name="expand">
-                <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-6 mt-1 space-y-1.5">
-                  <RegistroGastoItem
-                    v-for="gasto in dia.gastos"
-                    :key="gasto.id"
-                    :gasto="gasto"
-                    :selectable="seleccionActiva"
-                    :selected="selectedIds.has(gasto.id)"
-                    @edit="$emit('edit', gasto)"
-                    @delete="$emit('delete', gasto)"
-                    @duplicate="$emit('duplicate', gasto)"
-                    @toggle-select="toggleSelect(gasto)"
-                    @long-press="onItemLongPress(gasto)"
-                  />
-                </TransitionGroup>
-              </Transition>
+                <Transition name="expand">
+                  <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-6 mt-1 space-y-1.5">
+                    <RegistroGastoItem
+                      v-for="gasto in dia.gastos"
+                      :key="gasto.id"
+                      :gasto="gasto"
+                      :selectable="seleccionActiva"
+                      :selected="selectedIds.has(gasto.id)"
+                      @edit="$emit('edit', gasto)"
+                      @delete="$emit('delete', gasto)"
+                      @duplicate="$emit('duplicate', gasto)"
+                      @toggle-select="toggleSelect(gasto)"
+                      @long-press="onItemLongPress(gasto)"
+                    />
+                  </TransitionGroup>
+                </Transition>
+              </div>
             </div>
-          </div>
-        </Transition>
+          </Transition>
+        </div>
       </div>
-    </div>
+
+      <!-- Vista por día -->
+      <div v-if="mostrarDia" class="space-y-2">
+        <div v-for="dia in gastosPorDia" :key="dia.fecha">
+          <button
+            class="w-full px-3.5 py-2.5 rounded-xl transition-all duration-200"
+            :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
+            @click="onDayHeaderClick(dia)"
+            @contextmenu.prevent="activarSeleccionDia(dia)"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
+                :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
+              >
+                <span class="text-[9px] uppercase leading-none font-semibold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
+                <span class="text-base font-bold leading-tight" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text'">{{ extraerDia(dia.fecha) }}</span>
+              </div>
+              <div class="flex-1 min-w-0 text-left">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-sm font-semibold text-theme-text truncate">{{ formatFechaDia(dia.fecha) }}</p>
+                  <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-1 flex-wrap">
+                  <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
+                    {{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}
+                  </span>
+                  <span v-if="getStats(dia).topCat" class="text-[10px] px-1.5 py-0.5 rounded-md leading-none font-medium"
+                    :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
+                  >
+                    {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
+                  </span>
+                  <span class="text-[10px] text-theme-text-muted leading-none">
+                    Prom. {{ currencySymbol }} {{ formatMonto(getStats(dia).promedio) }}
+                  </span>
+                  <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">
+                    · {{ getStats(dia).rangoHoras }}
+                  </span>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <span
+                  v-if="!seleccionActiva"
+                  class="w-7 h-7 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                  role="button"
+                  aria-label="Seleccionar gastos"
+                  @click.stop="activarSeleccionDia(dia)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
+                  :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </button>
+
+          <Transition name="expand">
+            <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-4 mt-1 space-y-1.5">
+              <RegistroGastoItem
+                v-for="gasto in dia.gastos"
+                :key="gasto.id"
+                :gasto="gasto"
+                :selectable="seleccionActiva"
+                :selected="selectedIds.has(gasto.id)"
+                @edit="$emit('edit', gasto)"
+                @delete="$emit('delete', gasto)"
+                @duplicate="$emit('duplicate', gasto)"
+                @toggle-select="toggleSelect(gasto)"
+                @long-press="onItemLongPress(gasto)"
+              />
+            </TransitionGroup>
+          </Transition>
+        </div>
+      </div>
+    </template>
 
     <!-- Barra flotante de selección -->
     <Transition name="selection-bar">
@@ -222,7 +239,7 @@
       >
         <button
           class="w-8 h-8 rounded-lg bg-theme-border-md text-theme-text-muted hover:text-theme-text flex items-center justify-center active:scale-90 transition-all shrink-0"
-          aria-label="Cancelar selección"
+          aria-label="Cancelar seleccion"
           @click="cancelarSeleccion"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -237,7 +254,7 @@
           class="px-2.5 py-1.5 rounded-lg bg-theme-border-md text-theme-text-sec text-[11px] font-medium hover:text-theme-text transition-colors whitespace-nowrap shrink-0"
           @click="toggleSelectAllDia"
         >
-          {{ todosSeleccionadosEnDia ? 'Quitar' : 'Todo día' }}
+          {{ todosSeleccionadosEnDia ? 'Quitar' : 'Todo dia' }}
         </button>
         <button
           class="px-3 py-1.5 rounded-lg bg-red-500/15 text-red-400 text-[11px] font-semibold hover:bg-red-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap shrink-0"
@@ -261,13 +278,34 @@ const props = defineProps({
   isLoading: { type: Boolean, default: false },
   formatFechaDia: { type: Function, required: true },
   formatRangoSemana: { type: Function, required: true },
+  mostrarVistaDia: { type: Boolean, default: true },
+  mostrarVistaSemana: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['edit', 'delete', 'duplicate', 'request-voice', 'request-manual', 'bulk-delete'])
 
 const { vibrate } = useHaptic()
 
-const vistaActiva = ref('semana')
+// Determinar qué vistas mostrar
+const ambasVistas = computed(() => props.mostrarVistaDia && props.mostrarVistaSemana)
+const soloSemana = computed(() => props.mostrarVistaSemana && !props.mostrarVistaDia)
+const soloDia = computed(() => props.mostrarVistaDia && !props.mostrarVistaSemana)
+
+// Vista activa cuando ambas están habilitadas (toggle)
+const vistaActiva = ref('dia')
+
+// Qué vista se renderiza ahora
+const mostrarDia = computed(() => {
+  if (soloDia.value) return true
+  if (soloSemana.value) return false
+  return vistaActiva.value === 'dia'
+})
+
+const mostrarSemana = computed(() => {
+  if (soloSemana.value) return true
+  if (soloDia.value) return false
+  return vistaActiva.value === 'semana'
+})
 
 // ─── Selección múltiple ─────────────────────────────────
 const seleccionActiva = ref(false)
@@ -277,7 +315,13 @@ const diaSeleccionActual = ref(null)
 const gastosDelDiaActual = computed(() => {
   if (!diaSeleccionActual.value) return []
   const dia = props.gastosPorDia.find(d => d.fecha === diaSeleccionActual.value)
-  return dia?.gastos || []
+  if (dia) return dia.gastos || []
+  // Buscar en semanas también
+  for (const sem of props.gastosPorSemana) {
+    const d = sem.dias.find(d => d.fecha === diaSeleccionActual.value)
+    if (d) return d.gastos || []
+  }
+  return []
 })
 
 const todosSeleccionadosEnDia = computed(() => {
@@ -291,7 +335,6 @@ function activarSeleccionDia(dia) {
   seleccionActiva.value = true
   diaSeleccionActual.value = dia.fecha
   diaExpandido.value = dia.fecha
-  // Preseleccionar todos los gastos del día
   selectedIds.value = new Set(dia.gastos.map(g => g.id))
 }
 
@@ -346,10 +389,12 @@ function solicitarBulkDelete() {
 }
 
 function onDayHeaderClick(dia) {
-  if (seleccionActiva.value && diaSeleccionActual.value === dia.fecha) {
-    // En selección, click en header no colapsa (evita UX confusa)
-    return
-  }
+  if (seleccionActiva.value && diaSeleccionActual.value === dia.fecha) return
+  toggleDia(dia.fecha)
+}
+
+function onSemDayClick(dia) {
+  if (seleccionActiva.value && diaSeleccionActual.value === dia.fecha) return
   toggleDia(dia.fecha)
 }
 
@@ -361,7 +406,7 @@ const hoy = (() => {
 const diaExpandido = ref(null)
 const semanaExpandida = ref(null)
 
-// Expandir por defecto: "hoy" si existe en el mes, si no, el primer día con gastos
+// Expandir por defecto: "hoy" si existe, si no, el primer día
 const diaInicializado = ref(false)
 watch(() => props.gastosPorDia, (dias) => {
   if (diaInicializado.value || !dias.length) return
@@ -384,6 +429,8 @@ const sinDatos = computed(() => props.gastosPorDia.length === 0 && props.gastosP
 function cambiarVista(v) {
   vibrate(10)
   vistaActiva.value = v
+  // Limpiar selección al cambiar vista
+  if (seleccionActiva.value) cancelarSeleccion()
 }
 
 function toggleDia(fecha) {
@@ -401,7 +448,7 @@ function extraerDia(fechaStr) {
   return parseInt(fechaStr.split('-')[2])
 }
 
-const DIAS_SEMANA = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+const DIAS_SEMANA = ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab']
 function nombreDiaSemana(fechaStr) {
   const [y, m, d] = fechaStr.split('-').map(Number)
   return DIAS_SEMANA[new Date(y, m - 1, d).getDay()]
@@ -427,7 +474,7 @@ function formatHoraCorta(hora) {
   return `${h12}:${m}${ampm}`
 }
 
-// Memoización de statsDia por fecha + firma del total (invalidates cuando cambia)
+// Memoización de statsDia
 const statsCache = new Map()
 function cacheKey(dia) {
   return `${dia.fecha}|${dia.gastos.length}|${dia.total}`

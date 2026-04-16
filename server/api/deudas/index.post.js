@@ -2,6 +2,7 @@ import { db } from '../../utils/db.js'
 import { deudas, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { crearDeudaEspejo, registrarAuditoria } from '../../utils/vinculos.js'
+import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -64,7 +65,7 @@ export default defineEventHandler(async (event) => {
     concepto: body.concepto.trim(),
     montoOriginal: String(monto),
     montoPendiente: String(monto),
-    fechaCreacion: body.fecha || new Date().toISOString().split('T')[0],
+    fechaCreacion: body.fecha || (await getFechaHoraLocalUsuario(usuarioId)).fecha,
     fechaPago: body.fechaPago || null,
     notas: body.notas?.trim() || null,
   }
