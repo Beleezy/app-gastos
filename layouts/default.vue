@@ -11,6 +11,7 @@
       </div>
     </main>
     <LayoutBottomNav />
+    <LayoutMobileDrawer />
     <SharedToastNotification />
   </div>
 </template>

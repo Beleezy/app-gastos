@@ -137,7 +137,12 @@ const secciones = [
   { value: 'mensual', label: 'Plan mensual' },
   { value: 'futuros', label: 'Gastos futuros' },
 ]
-const seccionActual = ref('mensual')
+const route = useRoute()
+const seccionActual = ref(route.query.seccion === 'futuros' ? 'futuros' : 'mensual')
+
+watch(() => route.query.seccion, (val) => {
+  seccionActual.value = val === 'futuros' ? 'futuros' : 'mensual'
+})
 
 const showFormMensual = ref(false)
 const showFormFuturo = ref(false)

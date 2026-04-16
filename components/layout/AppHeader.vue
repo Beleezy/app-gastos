@@ -1,6 +1,17 @@
 <template>
   <header class="sticky top-0 z-40 bg-theme-card backdrop-blur-sm border-b border-theme-border">
     <div class="flex items-center justify-between px-4 lg:px-6 h-14 lg:h-16 max-w-lg lg:max-w-none mx-auto gap-2">
+      <!-- Mobile menu button (left side) -->
+      <button
+        class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
+        @click="toggleDrawer"
+        title="Menú"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+
       <!-- Back button (optional) -->
       <slot name="back" />
 
@@ -19,9 +30,13 @@
       </div>
 
       <!-- Right-side actions -->
-      <div class="shrink-0">
+      <div class="shrink-0 flex items-center gap-1">
         <slot name="actions" />
       </div>
     </div>
   </header>
 </template>
+
+<script setup>
+const { toggle: toggleDrawer } = useMobileDrawer()
+</script>
