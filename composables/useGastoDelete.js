@@ -20,11 +20,34 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
     if (undoCountdownTimer) { clearInterval(undoCountdownTimer); undoCountdownTimer = null }
   }
 
-  function ejecutarEliminar() {
+  async function flushPendiente() {
+    const gastoPrev = undoPendiente.value
+    if (!gastoPrev) return
+    clearTimers()
+    undoPendiente.value = null
+    try {
+      await deleteGasto(gastoPrev.id)
+      await fetchResumenMensual()
+    } catch (e) {
+      gastosMensuales.value = [...gastosMensuales.value, gastoPrev]
+        .sort((a, b) => {
+          if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
+          return (b.hora || '').localeCompare(a.hora || '')
+        })
+      toastError?.('No se pudo eliminar el gasto')
+    }
+  }
+
+  async function ejecutarEliminar() {
     if (!gastoEliminar.value) return
     const gasto = gastoEliminar.value
     gastoEliminar.value = null
     vibrate([10, 30, 10])
+
+    // Si había otro delete pendiente, confirmarlo inmediatamente antes de iniciar el nuevo
+    if (undoPendiente.value && undoPendiente.value.id !== gasto.id) {
+      await flushPendiente()
+    }
 
     gastosMensuales.value = gastosMensuales.value.filter(g => g.id !== gasto.id)
 
@@ -42,14 +65,21 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
 
     undoTimer = setTimeout(async () => {
       if (undoCountdownTimer) { clearInterval(undoCountdownTimer); undoCountdownTimer = null }
+      const gastoActual = undoPendiente.value
       undoPendiente.value = null
+      undoTimer = null
+      if (!gastoActual) return
       try {
-        await deleteGasto(gasto.id)
+        await deleteGasto(gastoActual.id)
         await fetchResumenMensual()
       } catch (e) {
+        gastosMensuales.value = [...gastosMensuales.value, gastoActual]
+          .sort((a, b) => {
+            if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
+            return (b.hora || '').localeCompare(a.hora || '')
+          })
         toastError?.('No se pudo eliminar el gasto')
       }
-      undoTimer = null
     }, 5000)
   }
 
@@ -66,10 +96,27 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
     undoPendiente.value = null
   }
 
-  onUnmounted(clearTimers)
+  // Al desmontar: si hay un delete pendiente, ejecutarlo sincronamente en el servidor
+  // para no perder la operación (el timer de 5s sería cancelado al navegar)
+  async function flushOnUnmount() {
+    const gastoPrev = undoPendiente.value
+    clearTimers()
+    undoPendiente.value = null
+    if (!gastoPrev) return
+    try {
+      await deleteGasto(gastoPrev.id)
+    } catch (e) {
+      // best effort
+    }
+  }
+
+  onUnmounted(() => {
+    flushOnUnmount()
+  })
 
   return {
     gastoEliminar, undoPendiente, undoCountdown,
     confirmarEliminar, cancelarConfirmacion, ejecutarEliminar, deshacerEliminar,
+    flushPendiente,
   }
 }

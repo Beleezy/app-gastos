@@ -228,6 +228,55 @@ export const vinculosCheckpoints = pgTable('vinculos_checkpoints', {
   index('vinculos_checkpoints_par_tipo_idx').on(table.personaAId, table.tipo),
 ])
 
+// ── Tabla: medios_ahorro ──
+export const mediosAhorro = pgTable('medios_ahorro', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 80 }).notNull(),
+  tipo: varchar('tipo', { length: 40 }),
+  icono: varchar('icono', { length: 16 }),
+  color: varchar('color', { length: 16 }),
+  orden: integer('orden').default(0).notNull(),
+  activo: boolean('activo').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('medios_ahorro_usuario_idx').on(table.usuarioId),
+])
+
+// ── Tabla: ahorros ──
+export const ahorros = pgTable('ahorros', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  medioAhorroId: uuid('medio_ahorro_id').references(() => mediosAhorro.id, { onDelete: 'set null' }),
+  gastoPlanificadoId: uuid('gasto_planificado_id').references(() => gastosPlanificados.id, { onDelete: 'set null' }),
+  gastoId: uuid('gasto_id').references(() => gastos.id, { onDelete: 'set null' }),
+  concepto: varchar('concepto', { length: 200 }),
+  monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
+  fecha: date('fecha').notNull(),
+  mes: integer('mes').notNull(),
+  anio: integer('anio').notNull(),
+  notas: text('notas'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('ahorros_usuario_mes_idx').on(table.usuarioId, table.anio, table.mes),
+  index('ahorros_medio_idx').on(table.medioAhorroId),
+])
+
+// ── Tabla: metas_ahorro ──
+export const metasAhorro = pgTable('metas_ahorro', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  tipo: varchar('tipo', { length: 16 }).notNull(),
+  mes: integer('mes'),
+  anio: integer('anio'),
+  montoObjetivo: decimal('monto_objetivo', { precision: 12, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('metas_ahorro_mensual_uniq').on(table.usuarioId, table.tipo, table.mes, table.anio),
+])
+
 // ── Tabla 12: solicitudes_vinculo ──
 export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
   id: uuid('id').defaultRandom().primaryKey(),

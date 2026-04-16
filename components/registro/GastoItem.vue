@@ -1,7 +1,12 @@
 <template>
   <div
     class="swipe-wrapper relative overflow-hidden rounded-xl"
-    :class="gasto.pendiente ? 'opacity-60 animate-pulse pointer-events-none' : ''"
+    :class="[
+      gasto.pendiente ? 'opacity-60 animate-pulse pointer-events-none' : '',
+      selectable && selected ? 'ring-2 ring-theme-accent' : '',
+    ]"
+    @click="onWrapperClick"
+    @contextmenu.prevent="onLongPress"
   >
     <!-- Acción revelada al swipe-derecha: Editar -->
     <div class="swipe-action swipe-action-left absolute inset-y-0 left-0 flex items-center pl-4"
@@ -29,13 +34,24 @@
 
     <!-- Contenido principal (con transform) -->
     <div
-      class="group relative bg-theme-card border border-theme-border hover:border-theme-accent/30 transition-colors rounded-xl"
+      class="group relative bg-theme-card border border-theme-border hover:border-theme-accent/30 transition-colors rounded-xl flex items-stretch"
       :style="{ transform: `translateX(${swipeOffset}px)`, transition: isDragging ? 'none' : 'transform 0.25s ease' }"
       @touchstart.passive="onTouchStart"
       @touchmove.passive="onTouchMove"
       @touchend="onTouchEnd"
     >
-      <div class="flex items-stretch">
+      <!-- Checkbox de selección -->
+      <div v-if="selectable" class="flex items-center pl-3 pr-0 shrink-0">
+        <div
+          class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors"
+          :class="selected ? 'bg-theme-accent border-theme-accent' : 'border-theme-border-md bg-theme-card'"
+        >
+          <svg v-if="selected" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      </div>
+      <div class="flex items-stretch flex-1 min-w-0">
         <div class="flex items-center pl-2.5 pr-2 py-2.5">
           <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 relative"
             :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '20' }"
@@ -73,7 +89,7 @@
           <p class="text-sm font-bold text-theme-text leading-none whitespace-nowrap">
             {{ currencySymbol }} {{ formatMonto(gasto.monto) }}
           </p>
-          <div class="flex items-center gap-0.5 mt-1.5">
+          <div v-if="!selectable" class="flex items-center gap-0.5 mt-1.5">
             <button
               class="w-6 h-6 flex items-center justify-center rounded-md text-theme-text-muted hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 transition-all"
               aria-label="Duplicar"
@@ -113,9 +129,11 @@ import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
 
 const props = defineProps({
   gasto: { type: Object, required: true },
+  selectable: { type: Boolean, default: false },
+  selected: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['edit', 'delete', 'duplicate'])
+const emit = defineEmits(['edit', 'delete', 'duplicate', 'toggle-select', 'long-press'])
 
 const { vibrate } = useHaptic()
 
@@ -136,6 +154,50 @@ function onDuplicate() {
   emit('duplicate')
 }
 
+function onWrapperClick(e) {
+  if (props.gasto.pendiente) return
+  if (!props.selectable) return
+  // En modo selección, el wrapper intercepta el click (los botones internos tienen .stop)
+  vibrate(8)
+  emit('toggle-select')
+}
+
+function onLongPress() {
+  if (props.gasto.pendiente) return
+  if (props.selectable) return
+  emit('long-press')
+}
+
+// Long-press por touch para activar modo selección
+let longPressTimer = null
+let longPressStart = { x: 0, y: 0 }
+function startLongPressTouch(e) {
+  if (props.gasto.pendiente || props.selectable) return
+  const t = e.touches?.[0]
+  if (!t) return
+  longPressStart = { x: t.clientX, y: t.clientY }
+  clearTimeout(longPressTimer)
+  longPressTimer = setTimeout(() => {
+    vibrate([20, 40, 20])
+    emit('long-press')
+  }, 450)
+}
+function moveLongPressTouch(e) {
+  if (!longPressTimer) return
+  const t = e.touches?.[0]
+  if (!t) return
+  const dx = Math.abs(t.clientX - longPressStart.x)
+  const dy = Math.abs(t.clientY - longPressStart.y)
+  if (dx > 10 || dy > 10) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+}
+function endLongPressTouch() {
+  clearTimeout(longPressTimer)
+  longPressTimer = null
+}
+
 const badgeLabel = computed(() => getMetodoRegistroBadgeLabel(props.gasto))
 
 // ─── Swipe actions ──────────────────────────────────────
@@ -154,10 +216,13 @@ function onTouchStart(e) {
   startY = t.clientY
   isDragging.value = true
   blockSwipe = false
+  startLongPressTouch(e)
 }
 
 function onTouchMove(e) {
+  moveLongPressTouch(e)
   if (!isDragging.value || blockSwipe) return
+  if (props.selectable) return
   const t = e.touches[0]
   const dx = t.clientX - startX
   const dy = t.clientY - startY
@@ -173,6 +238,7 @@ function onTouchMove(e) {
 }
 
 function onTouchEnd() {
+  endLongPressTouch()
   if (!isDragging.value) {
     swipeOffset.value = 0
     return
@@ -180,7 +246,7 @@ function onTouchEnd() {
   isDragging.value = false
   const offset = swipeOffset.value
   swipeOffset.value = 0
-  if (blockSwipe) return
+  if (blockSwipe || props.selectable) return
 
   if (offset <= -SWIPE_THRESHOLD) {
     onDelete()

@@ -1,5 +1,5 @@
 import { db } from '../../../../utils/db.js'
-import { gastosPlanificados, planesMensuales, gastos, categorias } from '../../../../database/schema.js'
+import { gastosPlanificados, planesMensuales, gastos, categorias, ahorros } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
 
@@ -99,6 +99,25 @@ export default defineEventHandler(async (event) => {
     .from(categorias)
     .where(eq(categorias.id, gastoGuardado.categoriaId))
     .limit(1)
+
+  if (categoria?.nombre?.toLowerCase() === 'ahorro') {
+    const fechaObj = new Date(gastoGuardado.fecha + 'T00:00:00')
+    try {
+      await db.insert(ahorros).values({
+        usuarioId,
+        medioAhorroId: body.medioAhorroId || null,
+        gastoPlanificadoId: gastoPlanificado.id,
+        gastoId: gastoGuardado.id,
+        concepto: gastoGuardado.concepto,
+        monto: String(gastoGuardado.monto),
+        fecha: gastoGuardado.fecha,
+        mes: fechaObj.getMonth() + 1,
+        anio: fechaObj.getFullYear(),
+      })
+    } catch (_) {
+      // No bloquear si falla la creación del ahorro vinculado
+    }
+  }
 
   return {
     gasto: {

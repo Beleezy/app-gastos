@@ -26,6 +26,36 @@
         <p class="text-sm text-theme-text-muted italic">"{{ transcripcion }}"</p>
       </div>
 
+      <!-- Fecha global (útil cuando la IA equivocó la fecha del voucher) -->
+      <div v-if="showFechaGlobal && !isParsing && !parseError && editableGastos.length > 0"
+        class="mx-5 mb-4 px-3 py-2.5 bg-theme-accent-bg/40 rounded-lg border border-theme-accent/30"
+      >
+        <label class="flex items-center gap-2 text-xs text-theme-text-sec mb-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          Fecha global del comprobante
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            v-model="fechaGlobal"
+            type="date"
+            class="flex-1 px-3 py-2 rounded-lg bg-theme-card border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent transition-colors"
+            @change="aplicarFechaGlobal"
+          />
+          <button
+            v-if="fechaGlobalDiferente"
+            class="px-3 py-2 rounded-lg text-xs font-semibold text-theme-accent bg-theme-accent-bg border border-theme-accent hover:bg-theme-accent/20 transition-colors whitespace-nowrap"
+            @click="aplicarFechaGlobal"
+          >
+            Aplicar a todos
+          </button>
+        </div>
+        <p v-if="fechaGlobalDiferente" class="text-[11px] text-theme-text-muted mt-1.5">
+          Al aplicar, todos los ítems usarán esta fecha.
+        </p>
+      </div>
+
       <!-- Loading -->
       <div v-if="isParsing" class="flex flex-col items-center gap-3 py-8">
         <svg class="animate-spin w-8 h-8 text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -196,6 +226,7 @@ const props = defineProps({
   categorias: { type: Array, default: () => [] },
   onConfirm: { type: Function, default: null },
   totalComprobante: { type: Number, default: null },
+  showFechaGlobal: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'confirm', 'retry'])
@@ -210,6 +241,17 @@ const { currencySymbol, formatMonto } = useCurrency()
 const editableGastos = ref([])
 const editingIdx = ref(null)
 const saving = ref(false)
+const fechaGlobal = ref('')
+
+const fechaGlobalDiferente = computed(() => {
+  if (!fechaGlobal.value) return false
+  return editableGastos.value.some(g => g.fecha !== fechaGlobal.value)
+})
+
+function aplicarFechaGlobal() {
+  if (!fechaGlobal.value) return
+  for (const g of editableGastos.value) g.fecha = fechaGlobal.value
+}
 
 const { getCategoriaColor, getCategoriaIcono, getCategoriaNames } = useCategorias()
 
@@ -231,6 +273,11 @@ const diferenciaTotal = computed(() => {
 
 watch(() => props.gastos, (newVal) => {
   editableGastos.value = newVal.map(g => ({ ...g }))
+  // Inicializar fechaGlobal: si todos los gastos comparten fecha, usar esa; si no, usar la primera
+  if (props.showFechaGlobal && newVal.length > 0) {
+    const fechas = new Set(newVal.map(g => g.fecha).filter(Boolean))
+    fechaGlobal.value = fechas.size === 1 ? [...fechas][0] : (newVal[0]?.fecha || '')
+  }
 }, { immediate: true, deep: true })
 
 function formatFecha(fecha) {

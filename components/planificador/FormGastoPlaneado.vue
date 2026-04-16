@@ -45,6 +45,21 @@
       </div>
     </div>
 
+    <!-- Banner categoría Ahorro -->
+    <div v-if="esCategoriaAhorro" class="flex items-start gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+      </svg>
+      <div class="flex-1 min-w-0">
+        <p class="text-[11px] text-emerald-400 leading-tight">
+          Al marcar este gasto como pagado se registrará como ahorro automáticamente.
+        </p>
+        <NuxtLink to="/ahorros" class="text-[10px] text-emerald-400 font-medium underline mt-1 inline-block">
+          Ver mis ahorros
+        </NuxtLink>
+      </div>
+    </div>
+
     <!-- Monto -->
     <div>
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto estimado</label>
@@ -210,6 +225,12 @@ const mostrarAlcance = ref(false)
 const { currencySymbol } = useCurrency()
 const { success: toastSuccess } = useToast()
 const { getCategoriaIcono } = useCategorias()
+
+const esCategoriaAhorro = computed(() => {
+  if (!form.categoriaId) return false
+  const cat = categorias.value.find(c => c.id === form.categoriaId)
+  return cat?.nombre?.toLowerCase() === 'ahorro'
+})
 
 function getEmoji(nombre) {
   return getCategoriaIcono(nombre)

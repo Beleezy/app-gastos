@@ -191,6 +191,7 @@
                   @edit="abrirEdicion"
                   @delete="confirmarEliminar"
                   @duplicate="duplicarGasto"
+                  @bulk-delete="onBulkDeleteSolicitado"
                   @request-voice="onStartListening"
                   @request-manual="showFormManual = true"
                 />
@@ -268,6 +269,7 @@
       :retry-status="photoRetryStatus"
       :categorias="categorias"
       :total-comprobante="photoTotalComprobante"
+      :show-fecha-global="true"
       :on-confirm="onConfirmPhotoGastos"
       @close="cerrarPhotoConfirmacion"
       @retry="reintentarParseImage"
@@ -290,6 +292,19 @@
       confirm-label="Eliminar"
       variant="danger"
       @confirm="ejecutarEliminar"
+    />
+
+    <!-- Bulk delete confirm dialog -->
+    <SharedConfirmDialog
+      v-model="showBulkDeleteConfirm"
+      title="Eliminar varios gastos"
+      :message="mensajeBulkEliminar"
+      :confirm-label="`Eliminar ${bulkDeletePayload?.count || 0} gastos`"
+      variant="danger"
+      require-checkbox
+      checkbox-label="Confirmo que quiero eliminar estos gastos. Esta acción NO se puede deshacer."
+      :loading="bulkDeleteLoading"
+      @confirm="ejecutarBulkEliminar"
     />
 
     <!-- Toast success -->
@@ -342,7 +357,7 @@ const {
   mesSeleccionado, anioSeleccionado, mesFormateado, esMesActual,
   gastosPorDia, gastosPorSemana, gastosPorCategoria,
   fetchResumen, fetchCategorias, fetchGastosMensuales,
-  createGastosBulk, deleteGasto,
+  createGastosBulk, deleteGasto, deleteGastosBulk,
   mesAnterior, mesSiguiente, irAMesActual,
   getCategoriaPorNombre,
   formatFechaDia, formatRangoSemana,
@@ -444,6 +459,40 @@ const mensajeEliminar = computed(() => {
 
 function confirmarEliminar(gasto) {
   confirmarEliminarInterno(gasto)
+}
+
+// ─── Bulk delete ────────────────────────────────────────
+const showBulkDeleteConfirm = ref(false)
+const bulkDeleteLoading = ref(false)
+const bulkDeletePayload = ref(null)
+
+const mensajeBulkEliminar = computed(() => {
+  if (!bulkDeletePayload.value) return ''
+  const n = bulkDeletePayload.value.count
+  return `Vas a eliminar ${n} ${n === 1 ? 'gasto' : 'gastos'} de forma permanente. Esta acción no tiene undo.`
+})
+
+function onBulkDeleteSolicitado(payload) {
+  bulkDeletePayload.value = payload
+  showBulkDeleteConfirm.value = true
+}
+
+async function ejecutarBulkEliminar() {
+  if (!bulkDeletePayload.value) return
+  const { ids, onDone } = bulkDeletePayload.value
+  bulkDeleteLoading.value = true
+  try {
+    const res = await deleteGastosBulk(ids)
+    showBulkDeleteConfirm.value = false
+    showToast(`${res.eliminados || ids.length} gastos eliminados`)
+    onDone?.()
+    await fetchResumenMensual()
+  } catch (e) {
+    toastError(handleApiError(e) || 'No se pudieron eliminar los gastos')
+  } finally {
+    bulkDeleteLoading.value = false
+    bulkDeletePayload.value = null
+  }
 }
 
 // Quick-add: registrar rápidamente un favorito

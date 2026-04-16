@@ -21,6 +21,31 @@
       />
     </div>
 
+    <!-- Medio de ahorro (si categoría = Ahorro) -->
+    <div v-if="esCategoriaAhorro">
+      <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Medio de ahorro</label>
+      <div v-if="mediosLoading" class="text-xs text-theme-text-sec">Cargando medios...</div>
+      <div v-else class="grid grid-cols-4 gap-2">
+        <button
+          v-for="medio in medios"
+          :key="medio.id"
+          class="flex flex-col items-center gap-1 p-2 rounded-xl border transition-all"
+          :class="form.medioAhorroId === medio.id
+            ? 'border-emerald-500 bg-emerald-500/10'
+            : 'border-theme-border bg-theme-input'"
+          @click="form.medioAhorroId = medio.id"
+        >
+          <div
+            class="w-8 h-8 rounded-lg flex items-center justify-center"
+            :style="{ backgroundColor: (medio.color || '#6b7280') + '26' }"
+          >
+            <span class="text-sm">{{ medio.icono || '💰' }}</span>
+          </div>
+          <span class="text-[10px] text-theme-text-muted text-center leading-tight truncate w-full">{{ medio.nombre }}</span>
+        </button>
+      </div>
+    </div>
+
     <div>
       <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Nota <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
@@ -60,14 +85,29 @@ const hoy = new Date().toISOString().split('T')[0]
 const form = reactive({
   fechaPago: props.gasto.gastoRegistradoFecha || props.gasto.fechaProbablePago || hoy,
   notas: props.gasto.gastoRegistradoNotas || '',
+  medioAhorroId: null,
 })
 
 const saving = ref(false)
 const errorMsg = ref('')
 
-const { registrarGastoEnRegistro } = usePlanificador()
+const { registrarGastoEnRegistro, categorias } = usePlanificador()
 const { success, error: toastError } = useToast()
 const { currencySymbol, formatMonto } = useCurrency()
+const { medios, fetchMedios } = useAhorros()
+
+const esCategoriaAhorro = computed(() => {
+  if (!props.gasto.categoriaId) return false
+  const cat = categorias.value.find(c => c.id === props.gasto.categoriaId)
+  return cat?.nombre?.toLowerCase() === 'ahorro'
+})
+
+const mediosLoading = ref(false)
+
+if (esCategoriaAhorro.value) {
+  mediosLoading.value = true
+  fetchMedios().finally(() => { mediosLoading.value = false })
+}
 
 function formatFecha(fecha) {
   if (!fecha) return 'Sin fecha programada'
@@ -89,10 +129,14 @@ async function guardar() {
 
   saving.value = true
   try {
-    await registrarGastoEnRegistro(props.gasto.id, {
+    const payload = {
       fechaPago: form.fechaPago,
       notas: form.notas?.trim() || null,
-    })
+    }
+    if (esCategoriaAhorro.value && form.medioAhorroId) {
+      payload.medioAhorroId = form.medioAhorroId
+    }
+    await registrarGastoEnRegistro(props.gasto.id, payload)
     success(props.gasto.gastoRegistradoId ? 'Registro actualizado' : 'Gasto enviado al registro')
     emit('saved')
     emit('close')

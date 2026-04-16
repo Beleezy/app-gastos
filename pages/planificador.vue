@@ -14,16 +14,24 @@
     </Transition>
 
     <div class="px-4 lg:px-0 pt-4 lg:pt-6 lg:max-w-md">
-      <div class="grid grid-cols-2 gap-2 rounded-2xl border border-theme-border bg-theme-card p-1">
-        <button
-          v-for="seccion in secciones"
-          :key="seccion.value"
-          class="rounded-xl px-3 py-2 text-sm font-medium transition-colors"
-          :class="seccionActual === seccion.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
-          @click="seccionActual = seccion.value"
+      <div class="flex items-center gap-2">
+        <div class="flex-1 grid grid-cols-2 gap-2 rounded-2xl border border-theme-border bg-theme-card p-1">
+          <button
+            v-for="seccion in secciones"
+            :key="seccion.value"
+            class="rounded-xl px-3 py-2 text-sm font-medium transition-colors"
+            :class="seccionActual === seccion.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
+            @click="seccionActual = seccion.value"
+          >
+            {{ seccion.label }}
+          </button>
+        </div>
+        <NuxtLink
+          to="/ahorros"
+          class="flex items-center gap-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/15 transition-colors shrink-0"
         >
-          {{ seccion.label }}
-        </button>
+          💰 Ahorros
+        </NuxtLink>
       </div>
     </div>
 

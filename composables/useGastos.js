@@ -151,6 +151,24 @@ export function useGastos() {
     }
   }
 
+  async function deleteGastosBulk(ids) {
+    if (!ids?.length) return { eliminados: 0 }
+    try {
+      const res = await apiFetch('/api/gastos/bulk', {
+        method: 'DELETE',
+        body: { ids },
+      })
+      const idsSet = new Set(res.ids || ids)
+      gastos.value = gastos.value.filter(g => !idsSet.has(g.id))
+      gastosMensuales.value = gastosMensuales.value.filter(g => !idsSet.has(g.id))
+      await fetchResumen()
+      return res
+    } catch (e) {
+      error.value = e.message || 'Error al eliminar gastos'
+      throw e
+    }
+  }
+
   async function fetchGastosMensuales() {
     if (fetchMensualController) fetchMensualController.abort()
     fetchMensualController = new AbortController()
@@ -331,7 +349,7 @@ export function useGastos() {
     mesSeleccionado, anioSeleccionado, mesFormateado, esMesActual,
     gastosPorDia, gastosPorSemana, gastosPorCategoria,
     fetchGastos, fetchResumen, fetchCategorias, fetchGastosMensuales,
-    createGasto, createGastosBulk, updateGasto, deleteGasto,
+    createGasto, createGastosBulk, updateGasto, deleteGasto, deleteGastosBulk,
     diaAnterior, diaSiguiente, irAHoy,
     mesAnterior, mesSiguiente, irAMesActual,
     getCategoriaById, getCategoriaPorNombre,

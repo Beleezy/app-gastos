@@ -60,7 +60,8 @@
         <button
           class="w-full px-3.5 py-2.5 rounded-xl transition-all duration-200"
           :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
-          @click="toggleDia(dia.fecha)"
+          @click="onDayHeaderClick(dia)"
+          @contextmenu.prevent="activarSeleccionDia(dia)"
         >
           <div class="flex items-center gap-3">
             <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
@@ -91,12 +92,25 @@
                 </span>
               </div>
             </div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform shrink-0"
-              :class="{ 'rotate-180': diaExpandido === dia.fecha }"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            <div class="flex items-center gap-1 shrink-0">
+              <span
+                v-if="!seleccionActiva"
+                class="w-7 h-7 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                role="button"
+                aria-label="Seleccionar gastos"
+                @click.stop="activarSeleccionDia(dia)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+              </span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
+                :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
         </button>
 
@@ -106,9 +120,13 @@
               v-for="gasto in dia.gastos"
               :key="gasto.id"
               :gasto="gasto"
+              :selectable="seleccionActiva"
+              :selected="selectedIds.has(gasto.id)"
               @edit="$emit('edit', gasto)"
               @delete="$emit('delete', gasto)"
               @duplicate="$emit('duplicate', gasto)"
+              @toggle-select="toggleSelect(gasto)"
+              @long-press="onItemLongPress(gasto)"
             />
           </TransitionGroup>
         </Transition>
@@ -181,9 +199,13 @@
                     v-for="gasto in dia.gastos"
                     :key="gasto.id"
                     :gasto="gasto"
+                    :selectable="seleccionActiva"
+                    :selected="selectedIds.has(gasto.id)"
                     @edit="$emit('edit', gasto)"
                     @delete="$emit('delete', gasto)"
                     @duplicate="$emit('duplicate', gasto)"
+                    @toggle-select="toggleSelect(gasto)"
+                    @long-press="onItemLongPress(gasto)"
                   />
                 </TransitionGroup>
               </Transition>
@@ -192,6 +214,43 @@
         </Transition>
       </div>
     </div>
+
+    <!-- Barra flotante de selección -->
+    <Transition name="selection-bar">
+      <div v-if="seleccionActiva"
+        class="fixed left-1/2 -translate-x-1/2 bottom-24 z-40 flex items-center gap-2 bg-theme-card border border-theme-border shadow-xl shadow-black/40 backdrop-blur-sm rounded-2xl px-3 py-2.5 max-w-[calc(100%-1.5rem)]"
+      >
+        <button
+          class="w-8 h-8 rounded-lg bg-theme-border-md text-theme-text-muted hover:text-theme-text flex items-center justify-center active:scale-90 transition-all shrink-0"
+          aria-label="Cancelar selección"
+          @click="cancelarSeleccion"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div class="flex flex-col min-w-0 shrink">
+          <span class="text-[10px] text-theme-text-sec leading-none">Seleccionados</span>
+          <span class="text-xs font-bold text-theme-text leading-tight">{{ selectedIds.size }} gasto{{ selectedIds.size === 1 ? '' : 's' }}</span>
+        </div>
+        <button
+          class="px-2.5 py-1.5 rounded-lg bg-theme-border-md text-theme-text-sec text-[11px] font-medium hover:text-theme-text transition-colors whitespace-nowrap shrink-0"
+          @click="toggleSelectAllDia"
+        >
+          {{ todosSeleccionadosEnDia ? 'Quitar' : 'Todo día' }}
+        </button>
+        <button
+          class="px-3 py-1.5 rounded-lg bg-red-500/15 text-red-400 text-[11px] font-semibold hover:bg-red-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap shrink-0"
+          :disabled="selectedIds.size === 0"
+          @click="solicitarBulkDelete"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Eliminar
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -204,11 +263,95 @@ const props = defineProps({
   formatRangoSemana: { type: Function, required: true },
 })
 
-defineEmits(['edit', 'delete', 'duplicate', 'request-voice', 'request-manual'])
+const emit = defineEmits(['edit', 'delete', 'duplicate', 'request-voice', 'request-manual', 'bulk-delete'])
 
 const { vibrate } = useHaptic()
 
 const vistaActiva = ref('semana')
+
+// ─── Selección múltiple ─────────────────────────────────
+const seleccionActiva = ref(false)
+const selectedIds = ref(new Set())
+const diaSeleccionActual = ref(null)
+
+const gastosDelDiaActual = computed(() => {
+  if (!diaSeleccionActual.value) return []
+  const dia = props.gastosPorDia.find(d => d.fecha === diaSeleccionActual.value)
+  return dia?.gastos || []
+})
+
+const todosSeleccionadosEnDia = computed(() => {
+  const gastos = gastosDelDiaActual.value
+  if (!gastos.length) return false
+  return gastos.every(g => selectedIds.value.has(g.id))
+})
+
+function activarSeleccionDia(dia) {
+  vibrate([15, 30, 15])
+  seleccionActiva.value = true
+  diaSeleccionActual.value = dia.fecha
+  diaExpandido.value = dia.fecha
+  // Preseleccionar todos los gastos del día
+  selectedIds.value = new Set(dia.gastos.map(g => g.id))
+}
+
+function cancelarSeleccion() {
+  vibrate(10)
+  seleccionActiva.value = false
+  selectedIds.value = new Set()
+  diaSeleccionActual.value = null
+}
+
+function toggleSelect(gasto) {
+  const nueva = new Set(selectedIds.value)
+  if (nueva.has(gasto.id)) nueva.delete(gasto.id)
+  else nueva.add(gasto.id)
+  selectedIds.value = nueva
+  if (nueva.size === 0) cancelarSeleccion()
+}
+
+function onItemLongPress(gasto) {
+  if (seleccionActiva.value) return
+  vibrate([20, 40, 20])
+  seleccionActiva.value = true
+  diaSeleccionActual.value = gasto.fecha
+  selectedIds.value = new Set([gasto.id])
+}
+
+function toggleSelectAllDia() {
+  const gastos = gastosDelDiaActual.value
+  if (!gastos.length) return
+  if (todosSeleccionadosEnDia.value) {
+    const nueva = new Set(selectedIds.value)
+    for (const g of gastos) nueva.delete(g.id)
+    selectedIds.value = nueva
+    if (nueva.size === 0) cancelarSeleccion()
+  } else {
+    const nueva = new Set(selectedIds.value)
+    for (const g of gastos) nueva.add(g.id)
+    selectedIds.value = nueva
+  }
+}
+
+function solicitarBulkDelete() {
+  if (selectedIds.value.size === 0) return
+  const ids = [...selectedIds.value]
+  emit('bulk-delete', {
+    ids,
+    count: ids.length,
+    onDone: () => {
+      cancelarSeleccion()
+    },
+  })
+}
+
+function onDayHeaderClick(dia) {
+  if (seleccionActiva.value && diaSeleccionActual.value === dia.fecha) {
+    // En selección, click en header no colapsa (evita UX confusa)
+    return
+  }
+  toggleDia(dia.fecha)
+}
 
 const hoy = (() => {
   const now = new Date()

@@ -1,6 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -12,8 +13,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Se requiere un array de gastos' })
   }
 
-  const ahora = new Date()
-  const horaActual = ahora.toTimeString().split(' ')[0].substring(0, 5)
+  const { fecha: fechaLocal, hora: horaActual } = await getFechaHoraLocalUsuario(usuarioId)
 
   const metodoRegistro = metodosPermitidos.has(body.metodoRegistro)
     ? body.metodoRegistro
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     categoriaId: g.categoriaId,
     concepto: g.concepto?.trim() || 'Gasto no especificado',
     monto: String(g.monto || 0),
-    fecha: g.fecha || ahora.toISOString().split('T')[0],
+    fecha: g.fecha || fechaLocal,
     hora: g.hora || horaActual,
     metodoRegistro,
     transcripcionVoz: body.transcripcionVoz || null,

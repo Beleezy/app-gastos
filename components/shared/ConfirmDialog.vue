@@ -10,13 +10,29 @@
         </svg>
       </div>
       <h3 class="text-base font-semibold text-theme-text mb-1.5" :class="icon ? 'text-center' : ''">{{ title }}</h3>
-      <p class="text-sm text-theme-text-muted mb-5" :class="icon ? 'text-center' : ''">{{ message }}</p>
+      <p class="text-sm text-theme-text-muted mb-4" :class="icon ? 'text-center' : ''">{{ message }}</p>
+      <label
+        v-if="requireCheckbox"
+        class="flex items-start gap-2.5 mb-5 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors"
+        :class="checkboxChecked ? 'border-theme-accent bg-theme-accent-bg/30' : 'border-theme-border bg-theme-input'"
+      >
+        <input v-model="checkboxChecked" type="checkbox" class="sr-only" />
+        <div
+          class="w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors"
+          :class="checkboxChecked ? 'bg-theme-accent border-theme-accent' : 'border-theme-border-md bg-theme-card'"
+        >
+          <svg v-if="checkboxChecked" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <span class="text-xs text-theme-text-sec leading-snug">{{ checkboxLabel }}</span>
+      </label>
       <div class="space-y-2">
         <button
           class="w-full py-2.5 rounded-xl text-sm font-medium transition-colors"
-          :class="confirmClass"
-          :disabled="loading"
-          @click="$emit('confirm')"
+          :class="[confirmClass, (requireCheckbox && !checkboxChecked) ? 'opacity-40 cursor-not-allowed' : '']"
+          :disabled="loading || (requireCheckbox && !checkboxChecked)"
+          @click="onConfirm"
         >
           <span v-if="loading" class="flex items-center justify-center gap-2">
             <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -47,9 +63,22 @@ const props = defineProps({
   variant: { type: String, default: 'danger' }, // 'danger' | 'warning' | 'success'
   loading: { type: Boolean, default: false },
   icon: { type: Boolean, default: true },
+  requireCheckbox: { type: Boolean, default: false },
+  checkboxLabel: { type: String, default: 'Entiendo que esta acción no se puede deshacer' },
 })
 
-defineEmits(['update:modelValue', 'confirm'])
+const emit = defineEmits(['update:modelValue', 'confirm'])
+
+const checkboxChecked = ref(false)
+
+watch(() => props.modelValue, (v) => {
+  if (!v) checkboxChecked.value = false
+})
+
+function onConfirm() {
+  if (props.requireCheckbox && !checkboxChecked.value) return
+  emit('confirm')
+}
 
 const iconBg = computed(() => ({
   'bg-red-500/15': props.variant === 'danger',

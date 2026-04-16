@@ -1,6 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -17,9 +18,9 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'La categoría es obligatoria' })
   }
 
-  const ahora = new Date()
-  const fechaHoy = body.fecha || ahora.toISOString().split('T')[0]
-  const horaActual = body.hora || ahora.toTimeString().split(' ')[0].substring(0, 5)
+  const { fecha: fechaLocal, hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
+  const fechaHoy = body.fecha || fechaLocal
+  const horaActual = body.hora || horaLocal
 
   const [gasto] = await db
     .insert(gastos)
