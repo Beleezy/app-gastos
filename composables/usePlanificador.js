@@ -15,6 +15,10 @@ export function usePlanificador() {
     totalPromedio: 0,
     promedioPorProyecto: 0,
     destacados: [],
+    porPrioridad: { alta: 0, media: 0, baja: 0, sinDefinir: 0 },
+    progresoDecision: { total: 0, decididos: 0, porcentaje: 0 },
+    proyectoMasCaro: null,
+    porCategoria: [],
   }))
   const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
   const categorias = useState('planificador-categorias', () => [])

@@ -134,10 +134,18 @@ export function normalizeGastoFuturoPayload(body) {
         throw createError({ statusCode: 400, message: `El detalle ${detalleIndex + 1} debe tener nombre` })
       }
 
+      const prioridadDetalle = detalle?.prioridad
+      let prioridadDetalleNorm = 0
+      if (prioridadDetalle !== undefined && prioridadDetalle !== null && prioridadDetalle !== '') {
+        const pd = Number(prioridadDetalle)
+        if (Number.isInteger(pd) && pd >= 0 && pd <= 3) prioridadDetalleNorm = pd
+      }
+
       return {
         id: textOptional(detalle?.id),
         nombre,
         notas,
+        prioridad: prioridadDetalleNorm,
         opciones,
       }
     })
@@ -186,6 +194,7 @@ export async function persistGastoFuturoChildren(tx, gastoFuturoId, detalles) {
         gastoFuturoId,
         nombre: detalle.nombre,
         notas: detalle.notas,
+        prioridad: detalle.prioridad ?? 0,
         orden: detalleIndex,
       })
       .returning({ id: gastosFuturosDetalles.id })
@@ -277,17 +286,55 @@ export function summarizeFuturePortfolio(proyectos) {
     totalMaximo: 0,
     totalPromedio: 0,
     destacados: [],
+    // Nuevos campos
+    porPrioridad: { alta: 0, media: 0, baja: 0, sinDefinir: 0 },
+    progresoDecision: { total: 0, decididos: 0, porcentaje: 0 },
+    proyectoMasCaro: null,
+    porCategoria: [],
   }
+
+  const categoriaMap = new Map()
 
   for (const proyecto of proyectos) {
     summary.totalDetalles += proyecto.resumen.totalDetalles
     summary.totalOpciones += proyecto.resumen.totalOpciones
+
+    // Distribución por prioridad
+    if (proyecto.prioridad === 3) summary.porPrioridad.alta++
+    else if (proyecto.prioridad === 2) summary.porPrioridad.media++
+    else if (proyecto.prioridad === 1) summary.porPrioridad.baja++
+    else summary.porPrioridad.sinDefinir++
+
+    // Progreso de decisión
+    for (const detalle of proyecto.detalles) {
+      summary.progresoDecision.total++
+      if (detalle.estadoDecision) summary.progresoDecision.decididos++
+    }
+
+    // Por categoría
+    const catKey = proyecto.categoriaNombre || 'Sin categoria'
+    if (!categoriaMap.has(catKey)) {
+      categoriaMap.set(catKey, { nombre: catKey, icono: proyecto.categoriaIcono, color: proyecto.categoriaColor, cantidad: 0, totalPromedio: 0 })
+    }
+    const cat = categoriaMap.get(catKey)
+    cat.cantidad++
+    cat.totalPromedio += proyecto.resumen.totalPromedio || 0
 
     if (proyecto.resumen.tieneReferencias) {
       summary.proyectosConReferencia += 1
       summary.totalMinimo += proyecto.resumen.totalMinimo
       summary.totalMaximo += proyecto.resumen.totalMaximo
       summary.totalPromedio += proyecto.resumen.totalPromedio
+
+      // Proyecto más caro
+      if (!summary.proyectoMasCaro || proyecto.resumen.totalPromedio > summary.proyectoMasCaro.totalPromedio) {
+        summary.proyectoMasCaro = {
+          tipoGasto: proyecto.tipoGasto,
+          totalPromedio: proyecto.resumen.totalPromedio,
+          categoriaNombre: proyecto.categoriaNombre,
+          categoriaIcono: proyecto.categoriaIcono,
+        }
+      }
     }
   }
 
@@ -297,6 +344,12 @@ export function summarizeFuturePortfolio(proyectos) {
   summary.promedioPorProyecto = summary.proyectosConReferencia > 0
     ? round2(summary.totalPromedio / summary.proyectosConReferencia)
     : 0
+  summary.progresoDecision.porcentaje = summary.progresoDecision.total > 0
+    ? Math.round((summary.progresoDecision.decididos / summary.progresoDecision.total) * 100)
+    : 0
+  summary.porCategoria = Array.from(categoriaMap.values())
+    .map(c => ({ ...c, totalPromedio: round2(c.totalPromedio) }))
+    .sort((a, b) => b.totalPromedio - a.totalPromedio)
   summary.destacados = proyectos
     .slice()
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
@@ -305,6 +358,7 @@ export function summarizeFuturePortfolio(proyectos) {
       id: proyecto.id,
       tipoGasto: proyecto.tipoGasto,
       categoriaNombre: proyecto.categoriaNombre,
+      prioridad: proyecto.prioridad,
       totalMinimo: proyecto.resumen.totalMinimo,
       totalMaximo: proyecto.resumen.totalMaximo,
       totalPromedio: proyecto.resumen.totalPromedio,
@@ -349,7 +403,7 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
     .select()
     .from(gastosFuturosDetalles)
     .where(inArray(gastosFuturosDetalles.gastoFuturoId, proyectoIds))
-    .orderBy(asc(gastosFuturosDetalles.orden), asc(gastosFuturosDetalles.createdAt))
+    .orderBy(desc(gastosFuturosDetalles.prioridad), asc(gastosFuturosDetalles.orden), asc(gastosFuturosDetalles.createdAt))
 
   const detalleIds = detallesRows.map(detalle => detalle.id)
   const opcionesRows = detalleIds.length > 0

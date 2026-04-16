@@ -104,6 +104,7 @@ export const gastosFuturosDetalles = pgTable('gastos_futuros_detalles', {
   gastoFuturoId: uuid('gasto_futuro_id').references(() => gastosFuturos.id, { onDelete: 'cascade' }).notNull(),
   nombre: varchar('nombre', { length: 160 }).notNull(),
   notas: text('notas'),
+  prioridad: integer('prioridad').default(0).notNull(),
   orden: integer('orden').default(0).notNull(),
   estadoDecision: varchar('estado_decision', { length: 20 }),
   decididoEn: timestamp('decidido_en'),

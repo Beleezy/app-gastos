@@ -1,7 +1,7 @@
 <template>
-  <SharedBaseBottomSheet :title="modoEdicion ? 'Editar gasto futuro' : 'Nuevo gasto futuro'" @close="$emit('close')">
+  <SharedBaseBottomSheet :title="modoEdicion ? 'Editar proyecto' : 'Nuevo gasto futuro'" @close="$emit('close')">
     <div class="space-y-4">
-      <div class="rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3">
+      <div v-if="!modoEdicion" class="rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3">
         <p class="text-xs uppercase tracking-[0.18em] text-sky-300/80">Resumen tentativo</p>
         <div class="mt-2 grid grid-cols-3 gap-2">
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
@@ -20,6 +20,10 @@
         <p class="mt-2 text-[11px] text-theme-text-sec">
           {{ resumenTentativo.totalDetalles }} detalles · {{ resumenTentativo.totalOpciones }} opciones tentativas
         </p>
+      </div>
+
+      <div v-if="modoEdicion" class="rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3">
+        <p class="text-[11px] text-sky-300/80">Edita los datos generales del proyecto. Los detalles y opciones se gestionan desde la vista principal.</p>
       </div>
 
       <div>
@@ -76,7 +80,7 @@
         ></textarea>
       </div>
 
-      <div class="space-y-3">
+      <div v-if="!modoEdicion" class="space-y-3">
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-theme-text">Detalles</p>
@@ -485,32 +489,56 @@ async function guardar() {
   }
 
   let detalles = []
-  try {
-    detalles = normalizarDetalles(true)
-  } catch (error) {
-    errorMsg.value = error.message || 'Revisa los detalles ingresados'
-    return
-  }
+  if (!modoEdicion.value) {
+    try {
+      detalles = normalizarDetalles(true)
+    } catch (error) {
+      errorMsg.value = error.message || 'Revisa los detalles ingresados'
+      return
+    }
 
-  if (!detalles.length) {
-    errorMsg.value = 'Agrega al menos un detalle'
-    return
+    if (!detalles.length) {
+      errorMsg.value = 'Agrega al menos un detalle'
+      return
+    }
   }
 
   saving.value = true
   try {
-    const payload = {
-      categoriaId: form.categoriaId,
-      tipoGasto: form.tipoGasto.trim(),
-      descripcion: form.descripcion.trim() || null,
-      prioridad: form.prioridad ?? 0,
-      detalles,
-    }
-
     if (modoEdicion.value) {
+      // En modo edición solo actualizamos los datos del proyecto, preservando detalles existentes
+      const existingDetalles = (props.gastoEditar.detalles || []).map(d => ({
+        id: d.id,
+        nombre: d.nombre,
+        notas: d.notas || null,
+        prioridad: d.prioridad ?? 0,
+        opciones: (d.opciones || []).map(o => ({
+          nombre: o.nombre,
+          referenciaUrl: o.referenciaUrl || null,
+          imagenUrl: o.imagenUrl || null,
+          precioMinimo: o.precioMinimo ?? null,
+          precioPromedio: o.precioPromedio ?? null,
+          precioMaximo: o.precioMaximo ?? null,
+          notas: o.notas || null,
+        })),
+      }))
+      const payload = {
+        categoriaId: form.categoriaId,
+        tipoGasto: form.tipoGasto.trim(),
+        descripcion: form.descripcion.trim() || null,
+        prioridad: form.prioridad ?? 0,
+        detalles: existingDetalles,
+      }
       await updateGastoFuturo(props.gastoEditar.id, payload)
-      success('Gasto futuro actualizado')
+      success('Proyecto actualizado')
     } else {
+      const payload = {
+        categoriaId: form.categoriaId,
+        tipoGasto: form.tipoGasto.trim(),
+        descripcion: form.descripcion.trim() || null,
+        prioridad: form.prioridad ?? 0,
+        detalles,
+      }
       await createGastoFuturo(payload)
       success('Gasto futuro creado')
     }

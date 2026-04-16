@@ -146,44 +146,89 @@
           </span>
         </div>
       </NuxtLink>
-    </div>
 
-    <div class="flex-1"></div>
-
-    <!-- Botón de Información -->
-    <div class="px-5 mt-4">
+      <!-- Resumen de ahorros -->
       <NuxtLink
-        to="/informacion"
-        class="flex items-center justify-between gap-3 rounded-2xl p-3.5 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
+        v-if="!loadingAhorros && (ahorrosTotalGlobal > 0 || ahorrosTotalMes > 0)"
+        to="/ahorros"
+        class="bg-theme-card rounded-2xl p-4 border border-emerald-500/20 block active:bg-theme-border-md transition-colors lg:col-span-1"
       >
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-theme-accent-bg flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-            </svg>
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+              </svg>
+            </div>
+            <span class="text-xs font-semibold text-theme-text">Ahorros</span>
           </div>
-          <div>
-            <p class="text-sm font-semibold text-theme-text">Información</p>
-            <p class="text-[11px] text-theme-text-muted">Cómo funciona cada módulo</p>
+          <span class="text-[10px] text-emerald-400">Ver detalle →</span>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="rounded-xl bg-theme-input px-3 py-2">
+            <p class="text-[10px] text-theme-text-muted">Este mes</p>
+            <p class="mt-0.5 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(ahorrosTotalMes) }}</p>
+          </div>
+          <div class="rounded-xl bg-emerald-500/10 px-3 py-2">
+            <p class="text-[10px] text-emerald-300/70">Total acumulado</p>
+            <p class="mt-0.5 text-sm font-semibold text-emerald-300">{{ currencySymbol }} {{ formatMonto(ahorrosTotalGlobal) }}</p>
           </div>
         </div>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
+        <div v-if="ahorrosMetaMensual && ahorrosTotalMes > 0" class="mt-2.5">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-[10px] text-theme-text-muted">Meta mensual</span>
+            <span class="text-[10px] text-emerald-400">{{ ahorrosProgresoMensual.toFixed(0) }}%</span>
+          </div>
+          <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+              :style="{ width: Math.min(ahorrosProgresoMensual, 100) + '%' }"
+            ></div>
+          </div>
+        </div>
+        <div v-if="ahorrosPorMedio.length" class="mt-2.5 flex flex-wrap gap-1.5">
+          <span
+            v-for="medio in ahorrosPorMedio"
+            :key="medio.medioAhorroId"
+            class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec flex items-center gap-1"
+          >
+            <span v-if="medio.medioIcono">{{ medio.medioIcono }}</span>
+            {{ medio.medioNombre }}: {{ currencySymbol }} {{ formatMonto(medio.total) }}
+          </span>
+        </div>
       </NuxtLink>
     </div>
 
-    <!-- Settings link -->
-    <div class="px-5 py-5">
+    <!-- Información y Configuraciones -->
+    <div class="px-5 mt-4 mb-5 grid grid-cols-2 gap-2.5">
       <NuxtLink
         to="/configuraciones"
-        class="group flex items-center justify-center gap-2 w-full py-3 rounded-xl glass-card text-theme-text-sec text-sm hover:text-theme-text-sec transition-all duration-300"
+        class="flex items-center gap-2.5 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform duration-500 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-        Configuraciones
+        <div class="w-8 h-8 rounded-lg bg-theme-input flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-theme-text">Configuraciones</p>
+          <p class="text-[10px] text-theme-text-muted truncate">Perfil y preferencias</p>
+        </div>
+      </NuxtLink>
+      <NuxtLink
+        to="/informacion"
+        class="flex items-center gap-2.5 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
+      >
+        <div class="w-8 h-8 rounded-lg bg-theme-input flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-theme-text">Información</p>
+          <p class="text-[10px] text-theme-text-muted truncate">Cómo funciona</p>
+        </div>
       </NuxtLink>
     </div>
   </div>
@@ -220,6 +265,13 @@ const futureMin = ref(0)
 const futureMax = ref(0)
 const futureHighlights = ref([])
 
+// Ahorros
+const ahorrosTotalMes = ref(0)
+const ahorrosTotalGlobal = ref(0)
+const ahorrosMetaMensual = ref(null)
+const ahorrosProgresoMensual = ref(0)
+const ahorrosPorMedio = ref([])
+
 // Estados de error por card (A3)
 const errorGastos = ref(false)
 const errorDeudas = ref(false)
@@ -229,6 +281,7 @@ const errorPlan = ref(false)
 const loadingGastos = ref(true)
 const loadingDeudas = ref(true)
 const loadingPlan = ref(true)
+const loadingAhorros = ref(true)
 
 const porcentajeGastado = computed(() => {
   if (presupuesto.value <= 0) return 0
@@ -248,6 +301,7 @@ onMounted(async () => {
     cargarResumenGastos(),
     cargarResumenDeudas(),
     cargarResumenPlan(),
+    cargarResumenAhorros(),
   ])
 })
 
@@ -302,6 +356,23 @@ async function cargarResumenPlan() {
     console.warn('[dashboard] cargarResumenPlan falló:', e)
   } finally {
     loadingPlan.value = false
+  }
+}
+
+async function cargarResumenAhorros() {
+  try {
+    const data = await $fetch('/api/ahorros', {
+      query: { mes: mesActualNum, anio: anioActual }
+    })
+    ahorrosTotalMes.value = parseFloat(data.totalMes) || 0
+    ahorrosTotalGlobal.value = parseFloat(data.totalGlobal) || 0
+    ahorrosMetaMensual.value = data.metaMensual
+    ahorrosProgresoMensual.value = data.progresoMensual || 0
+    ahorrosPorMedio.value = (data.porMedio || []).filter(m => m.total > 0)
+  } catch (e) {
+    console.warn('[dashboard] cargarResumenAhorros falló:', e)
+  } finally {
+    loadingAhorros.value = false
   }
 }
 </script>

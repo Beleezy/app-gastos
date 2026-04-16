@@ -18,33 +18,97 @@
         </div>
       </div>
 
+      <!-- Stats principales -->
       <div class="grid grid-cols-2 gap-2">
         <div class="rounded-xl border border-theme-border bg-theme-input p-3">
           <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Proyectos</p>
           <p class="mt-1 text-lg font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
-          <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.totalDetalles }} detalles</p>
-        </div>
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3">
-          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Opciones</p>
-          <p class="mt-1 text-lg font-semibold text-theme-text">{{ resumenFuturos.totalOpciones }}</p>
-          <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.proyectosConReferencia }} con rango</p>
-        </div>
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3">
-          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Minimo total</p>
-          <p class="mt-1 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }}</p>
-          <p class="text-[11px] text-theme-text-sec">Escenario base</p>
+          <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.totalDetalles }} detalles · {{ resumenFuturos.totalOpciones }} opciones</p>
         </div>
         <div class="rounded-xl border border-theme-border bg-theme-input p-3">
           <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Promedio total</p>
-          <p class="mt-1 text-sm font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
-          <p class="text-[11px] text-theme-text-sec">Rango max: {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMaximo) }}</p>
+          <p class="mt-1 text-lg font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+          <p class="text-[11px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }} - {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMaximo) }}</p>
         </div>
       </div>
 
+      <!-- Progreso de decision global -->
+      <div v-if="resumenFuturos.progresoDecision?.total > 0" class="rounded-xl border border-theme-border bg-theme-input p-3">
+        <div class="flex items-center justify-between mb-1.5">
+          <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decision</p>
+          <span class="text-[11px] font-semibold" :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
+            {{ resumenFuturos.progresoDecision.decididos }} / {{ resumenFuturos.progresoDecision.total }} detalles
+            · {{ resumenFuturos.progresoDecision.porcentaje }}%
+          </span>
+        </div>
+        <div class="h-2 w-full overflow-hidden rounded-full bg-theme-card">
+          <div
+            class="h-full rounded-full transition-all duration-500"
+            :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
+            :style="{ width: resumenFuturos.progresoDecision.porcentaje + '%' }"
+          ></div>
+        </div>
+      </div>
+
+      <!-- Distribucion por prioridad -->
+      <div v-if="resumenFuturos.totalProyectos > 0 && resumenFuturos.porPrioridad" class="rounded-xl border border-theme-border bg-theme-input p-3">
+        <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted mb-2">Por prioridad</p>
+        <div class="flex gap-2">
+          <div v-if="resumenFuturos.porPrioridad.alta" class="flex items-center gap-1.5 rounded-full bg-red-500/12 px-2.5 py-1">
+            <span class="h-2 w-2 rounded-full bg-red-400"></span>
+            <span class="text-[11px] font-medium text-red-400">{{ resumenFuturos.porPrioridad.alta }} alta{{ resumenFuturos.porPrioridad.alta > 1 ? 's' : '' }}</span>
+          </div>
+          <div v-if="resumenFuturos.porPrioridad.media" class="flex items-center gap-1.5 rounded-full bg-amber-500/12 px-2.5 py-1">
+            <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+            <span class="text-[11px] font-medium text-amber-300">{{ resumenFuturos.porPrioridad.media }} media{{ resumenFuturos.porPrioridad.media > 1 ? 's' : '' }}</span>
+          </div>
+          <div v-if="resumenFuturos.porPrioridad.baja" class="flex items-center gap-1.5 rounded-full bg-emerald-500/12 px-2.5 py-1">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            <span class="text-[11px] font-medium text-emerald-400">{{ resumenFuturos.porPrioridad.baja }} baja{{ resumenFuturos.porPrioridad.baja > 1 ? 's' : '' }}</span>
+          </div>
+          <div v-if="resumenFuturos.porPrioridad.sinDefinir" class="flex items-center gap-1.5 rounded-full bg-theme-card px-2.5 py-1">
+            <span class="h-2 w-2 rounded-full bg-gray-500"></span>
+            <span class="text-[11px] font-medium text-theme-text-sec">{{ resumenFuturos.porPrioridad.sinDefinir }} sin def.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proyecto mas caro -->
+      <div v-if="resumenFuturos.proyectoMasCaro && resumenFuturos.totalProyectos > 1" class="rounded-xl border border-amber-500/20 bg-amber-500/8 px-3 py-2.5">
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase tracking-[0.16em] text-amber-300/70">Proyecto mas costoso</p>
+            <p class="mt-0.5 truncate text-sm font-medium text-theme-text">
+              {{ resumenFuturos.proyectoMasCaro.categoriaIcono || '' }} {{ resumenFuturos.proyectoMasCaro.tipoGasto }}
+            </p>
+          </div>
+          <p class="shrink-0 text-sm font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
+        </div>
+      </div>
+
+      <!-- Por categoria -->
+      <div v-if="resumenFuturos.porCategoria?.length > 1" class="space-y-2">
+        <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Por categoria</p>
+        <div class="space-y-1.5">
+          <div
+            v-for="cat in resumenFuturos.porCategoria"
+            :key="cat.nombre"
+            class="flex items-center justify-between gap-3 rounded-lg bg-theme-input/60 px-3 py-2"
+          >
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-sm">{{ cat.icono || '📦' }}</span>
+              <span class="truncate text-xs text-theme-text">{{ cat.nombre }}</span>
+              <span class="shrink-0 rounded-full bg-theme-card px-1.5 py-0.5 text-[10px] text-theme-text-muted">{{ cat.cantidad }}</span>
+            </div>
+            <span class="shrink-0 text-xs font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(cat.totalPromedio) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Destacados -->
       <div v-if="resumenFuturos.destacados.length" class="space-y-2">
         <div class="flex items-center justify-between">
-          <p class="text-xs font-medium text-theme-text">Resumen rapido</p>
-          <p class="text-[11px] text-theme-text-sec">Ultimos actualizados</p>
+          <p class="text-xs font-medium text-theme-text">Ultimos actualizados</p>
         </div>
         <div class="space-y-2">
           <div
@@ -54,7 +118,19 @@
           >
             <div class="flex items-center justify-between gap-3">
               <div class="min-w-0">
-                <p class="truncate text-sm font-medium text-theme-text">{{ destacado.tipoGasto }}</p>
+                <div class="flex items-center gap-2">
+                  <p class="truncate text-sm font-medium text-theme-text">{{ destacado.tipoGasto }}</p>
+                  <span
+                    v-if="destacado.prioridad === 3"
+                    class="shrink-0 h-2 w-2 rounded-full bg-red-400"
+                    title="Alta"
+                  ></span>
+                  <span
+                    v-else-if="destacado.prioridad === 2"
+                    class="shrink-0 h-2 w-2 rounded-full bg-amber-400"
+                    title="Media"
+                  ></span>
+                </div>
                 <p class="truncate text-[11px] text-theme-text-sec">
                   {{ destacado.categoriaNombre || 'Sin categoria' }} · {{ destacado.totalDetalles }} detalles · {{ destacado.totalOpciones }} opciones
                 </p>

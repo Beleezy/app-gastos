@@ -167,7 +167,7 @@
               {{ estaExpandido(proyecto.id) ? 'Ocultar detalle' : 'Ver detalle' }}
             </button>
             <div class="flex items-center gap-4">
-              <button class="text-xs text-theme-text-sec transition-colors hover:text-theme-accent" @click="emit('editar', proyecto)">Editar todo</button>
+              <button class="text-xs text-theme-text-sec transition-colors hover:text-theme-accent" @click="emit('editar', proyecto)">Editar proyecto</button>
               <button class="text-xs text-theme-text-sec transition-colors hover:text-red-400" @click="proyectoAEliminar = proyecto">Eliminar</button>
             </div>
           </div>
@@ -193,6 +193,18 @@
                   placeholder="Nombre del detalle *"
                   class="w-full rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
                 />
+                <div class="flex gap-1.5">
+                  <button
+                    v-for="opt in prioridadOpcionesDetalle"
+                    :key="opt.value"
+                    type="button"
+                    class="flex-1 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-all"
+                    :class="detalleEditando.prioridad === opt.value ? opt.activo : 'border-theme-border bg-theme-input text-theme-text-muted'"
+                    @click="detalleEditando.prioridad = opt.value"
+                  >
+                    {{ opt.label }}
+                  </button>
+                </div>
                 <textarea
                   v-model="detalleEditando.notas"
                   rows="2"
@@ -213,6 +225,13 @@
                 <div class="min-w-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <p class="text-sm font-medium text-theme-text">{{ detalle.nombre }}</p>
+                    <span
+                      v-if="prioridadBadge(detalle.prioridad)"
+                      class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                      :class="prioridadBadge(detalle.prioridad).clases"
+                    >
+                      {{ prioridadBadge(detalle.prioridad).label }}
+                    </span>
                     <span
                       v-if="decisionBadge(detalle)"
                       class="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -250,6 +269,17 @@
 
               <!-- Opciones del detalle -->
               <div class="border-t border-theme-border/60 px-3 pb-3 pt-2 space-y-2">
+                <button
+                  v-if="detalle.opciones.length > 0"
+                  class="flex w-full items-center gap-1.5 py-1 text-[11px] text-theme-text-muted transition-colors hover:text-theme-text-sec"
+                  @click="toggleOpcionesVisibles(detalle.id)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform" :class="opcionesEstanVisibles(detalle.id) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25L12 15.75 4.5 8.25" />
+                  </svg>
+                  {{ opcionesEstanVisibles(detalle.id) ? 'Ocultar opciones' : `Ver ${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
+                </button>
+                <template v-if="opcionesEstanVisibles(detalle.id)">
                 <div
                   v-for="opcion in detalle.opciones"
                   :key="opcion.id"
@@ -357,6 +387,24 @@
                         Comprar ya
                       </button>
                       <span class="flex-1"></span>
+                      <div v-if="detalle.opciones.length > 1" class="flex items-center gap-0.5">
+                        <button
+                          class="rounded-lg p-1 text-theme-text-muted transition-colors hover:text-theme-text hover:bg-theme-input disabled:opacity-30"
+                          :disabled="detalle.opciones.indexOf(opcion) === 0"
+                          title="Subir"
+                          @click="moverOpcion(proyecto, detalle, opcion, -1)"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                        </button>
+                        <button
+                          class="rounded-lg p-1 text-theme-text-muted transition-colors hover:text-theme-text hover:bg-theme-input disabled:opacity-30"
+                          :disabled="detalle.opciones.indexOf(opcion) === detalle.opciones.length - 1"
+                          title="Bajar"
+                          @click="moverOpcion(proyecto, detalle, opcion, 1)"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                        </button>
+                      </div>
                       <button
                         class="text-[11px] text-theme-text-sec transition-colors hover:text-theme-accent"
                         @click="iniciarEdicionOpcion(opcion)"
@@ -384,6 +432,7 @@
                   </svg>
                   Agregar opcion
                 </button>
+                </template>
               </div>
             </div>
 
@@ -507,6 +556,18 @@
           placeholder="Nombre del detalle * (ej: CPU, jean, casaca...)"
           class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
         />
+        <div class="flex gap-1.5">
+          <button
+            v-for="opt in prioridadOpcionesDetalle"
+            :key="opt.value"
+            type="button"
+            class="flex-1 rounded-lg border px-2 py-2 text-[11px] font-medium transition-all"
+            :class="nuevoDetalle.prioridad === opt.value ? opt.activo : 'border-theme-border bg-theme-input text-theme-text-muted'"
+            @click="nuevoDetalle.prioridad = opt.value"
+          >
+            {{ opt.label }}
+          </button>
+        </div>
         <textarea
           v-model="nuevoDetalle.notas"
           rows="2"
@@ -633,20 +694,28 @@ const filtrosProyecto = computed(() => {
 })
 
 const expandido = ref({})
+const opcionesVisibles = ref({})
 const proyectoAEliminar = ref(null)
 const eliminando = ref(false)
 const guardandoInline = ref(false)
 const errorPanel = ref('')
 
+const prioridadOpcionesDetalle = [
+  { value: 3, label: 'Alta', activo: 'bg-red-500/15 border-red-500/40 text-red-400' },
+  { value: 2, label: 'Media', activo: 'bg-amber-500/15 border-amber-500/40 text-amber-300' },
+  { value: 1, label: 'Baja', activo: 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400' },
+  { value: 0, label: 'Sin def.', activo: 'bg-theme-input border-theme-border text-theme-text-sec' },
+]
+
 // Edición inline de detalle
-const detalleEditando = ref(null) // { detalleId, nombre, notas }
+const detalleEditando = ref(null) // { detalleId, nombre, notas, prioridad }
 
 // Edición inline de opción
 const opcionEditando = ref(null) // { opcionId, nombre, referenciaUrl, ... }
 
 // Nuevo detalle
 const nuevoDetalleCtx = ref(null) // { proyecto }
-const nuevoDetalle = ref({ nombre: '', notas: '' })
+const nuevoDetalle = ref({ nombre: '', notas: '', prioridad: 0 })
 
 // Nueva opción
 const nuevaOpcionCtx = ref(null) // { proyecto, detalle }
@@ -716,6 +785,14 @@ function estaExpandido(id) {
   return !!expandido.value[id]
 }
 
+function toggleOpcionesVisibles(detalleId) {
+  opcionesVisibles.value = { ...opcionesVisibles.value, [detalleId]: !opcionesVisibles.value[detalleId] }
+}
+
+function opcionesEstanVisibles(detalleId) {
+  return opcionesVisibles.value[detalleId] !== false
+}
+
 function prioridadBadge(valor) {
   switch (valor) {
     case 3: return { label: '● Alta', clases: 'bg-red-500/15 text-red-400' }
@@ -760,11 +837,13 @@ function buildPayload(proyecto, overrides = {}) {
     prioridad: proyecto.prioridad ?? 0,
     detalles: (overrides.detalles ?? proyecto.detalles).map(d => {
       const detalleOverride = overrides.detalleId === d.id ? overrides : null
+      const useOverrideOpciones = overrides.opcionesDetalleId && d.id && overrides.opcionesDetalleId === d.id
       return {
         id: d.id,
         nombre: detalleOverride?.nombre ?? d.nombre,
         notas: detalleOverride?.notas ?? d.notas ?? null,
-        opciones: (overrides.opcionesDetalleId === d.id ? overrides.opciones : d.opciones).map(opcionToPayload),
+        prioridad: detalleOverride?.prioridad ?? d.prioridad ?? 0,
+        opciones: (useOverrideOpciones ? overrides.opciones : (d.opciones || [])).map(opcionToPayload),
       }
     }),
   }
@@ -773,7 +852,7 @@ function buildPayload(proyecto, overrides = {}) {
 // ── Detalle: editar ──────────────────────────────────────────────
 function iniciarEdicionDetalle(detalle) {
   opcionEditando.value = null
-  detalleEditando.value = { detalleId: detalle.id, nombre: detalle.nombre, notas: detalle.notas || '' }
+  detalleEditando.value = { detalleId: detalle.id, nombre: detalle.nombre, notas: detalle.notas || '', prioridad: detalle.prioridad ?? 0 }
 }
 
 function cancelarEdicionDetalle() {
@@ -790,6 +869,7 @@ async function guardarEdicionDetalle(proyecto, detalle) {
       detalleId: detalle.id,
       nombre,
       notas: detalleEditando.value.notas.trim() || null,
+      prioridad: detalleEditando.value.prioridad ?? 0,
     }))
     detalleEditando.value = null
     success('Detalle actualizado')
@@ -822,7 +902,7 @@ async function eliminarDetalleInline(proyecto, detalle) {
 // ── Detalle: nuevo ───────────────────────────────────────────────
 function abrirNuevoDetalle(proyecto) {
   nuevoDetalleCtx.value = { proyecto }
-  nuevoDetalle.value = { nombre: '', notas: '' }
+  nuevoDetalle.value = { nombre: '', notas: '', prioridad: 0 }
   errorPanel.value = ''
 }
 
@@ -836,7 +916,7 @@ async function confirmarNuevoDetalle() {
   if (!nombre) { errorPanel.value = 'El nombre del detalle es obligatorio'; return }
 
   const { proyecto } = nuevoDetalleCtx.value
-  const detalleNuevo = { nombre, notas: nuevoDetalle.value.notas.trim() || null, opciones: [] }
+  const detalleNuevo = { nombre, notas: nuevoDetalle.value.notas.trim() || null, prioridad: nuevoDetalle.value.prioridad ?? 0, opciones: [] }
 
   guardandoInline.value = true
   errorPanel.value = ''
@@ -848,6 +928,28 @@ async function confirmarNuevoDetalle() {
     success('Detalle agregado')
   } catch (e) {
     errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+  } finally {
+    guardandoInline.value = false
+  }
+}
+
+// ── Opción: reordenar ────────────────────────────────────────────
+async function moverOpcion(proyecto, detalle, opcion, direction) {
+  const idx = detalle.opciones.indexOf(opcion)
+  const newIdx = idx + direction
+  if (newIdx < 0 || newIdx >= detalle.opciones.length) return
+
+  const reordered = [...detalle.opciones]
+  ;[reordered[idx], reordered[newIdx]] = [reordered[newIdx], reordered[idx]]
+
+  guardandoInline.value = true
+  try {
+    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
+      opcionesDetalleId: detalle.id,
+      opciones: reordered.map(opcionToPayload),
+    }))
+  } catch (e) {
+    toastError(e?.data?.message || e?.message || 'No se pudo reordenar')
   } finally {
     guardandoInline.value = false
   }

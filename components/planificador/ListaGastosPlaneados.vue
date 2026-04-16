@@ -171,8 +171,8 @@
             <button
               v-if="gasto.estado === 'pendiente'"
               class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
-              title="Marcar como pagado con el monto estimado y la fecha de hoy"
-              @click="marcarPagadoRapido(gasto)"
+              :title="esCategoriaAhorro(gasto) ? 'Registrar pago de ahorro' : 'Marcar como pagado con el monto estimado y la fecha de hoy'"
+              @click="esCategoriaAhorro(gasto) ? emit('registrar', gasto) : marcarPagadoRapido(gasto)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
@@ -401,6 +401,11 @@ const { getCategoriaIcono } = useCategorias()
 
 function getEmoji(nombre) {
   return getCategoriaIcono(nombre)
+}
+
+function esCategoriaAhorro(gasto) {
+  const nombre = gasto.categoriaNombre || gasto._catNombre || ''
+  return nombre.toLowerCase() === 'ahorro'
 }
 
 const { currencySymbol, formatMonto } = useCurrency()
