@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-0 pt-4 lg:pt-0 pb-2">
+  <div class="px-4 lg:px-0 pt-1 lg:pt-0 pb-2">
     <!-- Month Selector -->
     <SharedMonthSelector
       :label="`${nombreMes} ${anioActual}`"
@@ -79,7 +79,7 @@
       <!-- Dual progress: asignado + gastado real overlay -->
       <div>
         <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center gap-2 text-[10px] text-theme-text-muted">
+          <div class="flex items-center gap-2 text-xs text-theme-text-muted">
             <span class="flex items-center gap-1">
               <span class="w-2 h-2 rounded-sm bg-[var(--color-accent)]"></span>Asignado
             </span>
@@ -193,7 +193,7 @@
         </div>
         <!-- Duplicar mes - siempre accesible -->
         <button
-          class="flex items-center justify-center w-7 h-7 rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
+          class="flex items-center justify-center gap-1.5 px-2.5 h-7 rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10 text-xs font-medium"
           :disabled="duplicando"
           :title="gastosPlaneados.length > 0 ? 'Copiar gastos de otro mes (los duplicados por concepto se omiten)' : 'Copiar gastos de otro mes'"
           @click="showSelectorMes = true"
@@ -205,6 +205,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
           </svg>
+          Copiar
         </button>
       </div>
     </div>

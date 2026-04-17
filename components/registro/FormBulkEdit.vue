@@ -98,7 +98,7 @@
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent/60 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:scale-[0.98]'"
       :disabled="saving || !tieneCamposActivos"
       @click="guardar"
@@ -129,10 +129,11 @@ const campos = reactive({
   notas: false,
 })
 
+const { fechaHoy, horaActual } = useFechaPeru()
 const form = reactive({
   categoriaId: null,
-  fecha: new Date().toISOString().split('T')[0],
-  hora: `${String(new Date().getHours()).padStart(2, '0')}:${String(new Date().getMinutes()).padStart(2, '0')}`,
+  fecha: fechaHoy(),
+  hora: horaActual(),
   notas: '',
 })
 

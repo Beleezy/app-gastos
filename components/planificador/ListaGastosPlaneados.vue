@@ -39,7 +39,7 @@
         {{ f.label }}
         <span
           class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
-          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-input text-theme-text-sec'"
+          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-border-md text-theme-text'"
         >
           {{ f.count }}
         </span>
@@ -167,7 +167,7 @@
           </div>
 
           <!-- Actions -->
-          <div class="flex justify-end flex-wrap gap-x-4 gap-y-2 mt-2 pt-2 border-t border-theme-border">
+          <div class="flex justify-end gap-x-3 mt-2 pt-2 border-t border-theme-border">
             <button
               v-if="gasto.estado === 'pendiente'"
               class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
@@ -258,8 +258,7 @@ const busqueda = ref('')
 const ordenActual = ref('fecha')
 
 function hoyISO() {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  return useFechaPeru().fechaHoy()
 }
 
 function esVencido(gasto) {

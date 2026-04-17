@@ -131,7 +131,7 @@
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
@@ -162,7 +162,7 @@ const form = reactive({
   personaTipo: 'persona',
   concepto: '',
   monto: null,
-  fecha: new Date().toISOString().split('T')[0],
+  fecha: useFechaPeru().fechaHoy(),
   fechaPago: '',
   notas: '',
 })

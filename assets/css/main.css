@@ -202,17 +202,17 @@ html.dark.accent-rosado {
   --color-accent: #ec4899;
 }
 html.light.accent-rosado {
-  --color-bg: #fdf2f8;
-  --color-card: #ffffff;
+  --color-bg: #fce4ec;
+  --color-card: #fff0f5;
   --color-card-hover: #fce7f3;
-  --color-input: rgba(0, 0, 0, 0.04);
-  --color-nav: rgba(255, 255, 255, 0.92);
-  --glass-bg: rgba(255, 255, 255, 0.75);
+  --color-input: rgba(219, 39, 119, 0.06);
+  --color-nav: rgba(255, 240, 245, 0.92);
+  --glass-bg: rgba(255, 240, 245, 0.8);
   --color-text: #6b1542;
   --color-text-sec: #9d174d;
   --color-text-muted: #db2777;
-  --color-border: rgba(236, 72, 153, 0.15);
-  --color-border-md: rgba(236, 72, 153, 0.25);
+  --color-border: rgba(236, 72, 153, 0.18);
+  --color-border-md: rgba(236, 72, 153, 0.28);
   --color-accent: #db2777;
 }
 
@@ -284,6 +284,41 @@ html.light.accent-verde {
   --color-text-muted: #059669;
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-md: rgba(0, 0, 0, 0.15);
+}
+
+html.accent-gris {
+  --color-accent: #78716c;
+  --color-accent-light: #a8a29e;
+  --color-accent-dark: #57534e;
+  --color-accent-bg: rgba(120, 113, 108, 0.1);
+  --color-accent-bg-hover: rgba(120, 113, 108, 0.2);
+  --color-accent-ring: rgba(120, 113, 108, 0.5);
+}
+html.dark.accent-gris {
+  --color-bg: #1c1917;
+  --color-card: #292524;
+  --color-card-hover: #3a3533;
+  --color-input: rgba(28, 25, 23, 0.8);
+  --color-nav: rgba(28, 25, 23, 0.85);
+  --glass-bg: rgba(28, 25, 23, 0.6);
+  --color-text: #f5f5f4;
+  --color-text-sec: #a8a29e;
+  --color-text-muted: #78716c;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-md: rgba(255, 255, 255, 0.15);
+}
+html.light.accent-gris {
+  --color-bg: #e7e5e4;
+  --color-card: #f5f5f4;
+  --color-card-hover: #fafaf9;
+  --color-input: rgba(0, 0, 0, 0.04);
+  --color-nav: rgba(245, 245, 244, 0.92);
+  --glass-bg: rgba(245, 245, 244, 0.8);
+  --color-text: #1c1917;
+  --color-text-sec: #44403c;
+  --color-text-muted: #78716c;
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-md: rgba(0, 0, 0, 0.16);
 }
 
 html.accent-blanco {

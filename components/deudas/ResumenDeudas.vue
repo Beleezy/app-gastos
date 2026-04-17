@@ -155,8 +155,9 @@ const tendencia = ref(null)
 function actualizarTendencia() {
   if (!process.client) return
   const balance = resumen.value.balanceNeto
-  const hoy = new Date()
-  const mesActual = `${hoy.getFullYear()}-${hoy.getMonth() + 1}`
+  const hoyStr = useFechaPeru().fechaHoy()
+  const [a, m] = hoyStr.split('-')
+  const mesActual = `${a}-${parseInt(m, 10)}`
 
   try {
     const raw = localStorage.getItem(SNAPSHOT_KEY)

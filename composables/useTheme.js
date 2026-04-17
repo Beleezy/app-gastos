@@ -9,6 +9,7 @@ const ACCENT_COLORS = [
   { id: 'celeste', label: 'Celeste', color: '#06b6d4', mode: 'dark' },
   { id: 'morado',  label: 'Morado',  color: '#8b5cf6', mode: 'dark' },
   { id: 'rosado',  label: 'Rosado',  color: '#ec4899', mode: 'light' },
+  { id: 'gris',    label: 'Gris',    color: '#78716c', mode: 'dark' },
 
   { id: 'blanco',  label: 'Blanco',  color: '#e2e8f0', mode: 'light' },
 ]

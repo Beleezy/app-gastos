@@ -59,7 +59,7 @@
     <p v-if="errorMsg" class="text-xs text-red-400">{{ errorMsg }}</p>
 
     <button
-      class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-theme-text transition-colors"
+      class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-theme-on-accent transition-colors"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
@@ -80,7 +80,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
-const hoy = new Date().toISOString().split('T')[0]
+const { fechaHoy } = useFechaPeru()
+const hoy = fechaHoy()
 
 const form = reactive({
   fechaPago: props.gasto.gastoRegistradoFecha || props.gasto.fechaProbablePago || hoy,

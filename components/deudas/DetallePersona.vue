@@ -442,7 +442,8 @@ watch(() => personaSeleccionada.value?.id, (newId) => {
   }
 }, { immediate: true })
 
-const hoy = new Date().toISOString().split('T')[0]
+const { fechaHoy: fechaHoyPeru } = useFechaPeru()
+const hoy = fechaHoyPeru()
 function esVencida(deuda) {
   return !!deuda.fechaPago && deuda.fechaPago < hoy
 }
@@ -480,7 +481,7 @@ async function ejecutarSaldar() {
     if (deuda.montoPendiente > 0) {
       await registrarPago(deuda.id, {
         monto: deuda.montoPendiente,
-        fecha: new Date().toISOString().split('T')[0],
+        fecha: fechaHoyPeru(),
       })
     } else {
       await archivarDeuda(deuda.id)

@@ -1,10 +1,111 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3b82f6"/>
-      <stop offset="100%" style="stop-color:#1d4ed8"/>
+    <!-- Gradiente principal del hexágono -->
+    <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
     </linearGradient>
+    <!-- Gradiente de la moneda central -->
+    <radialGradient id="coinGrad" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#1e40af"/>
+      <stop offset="100%" stop-color="#172554"/>
+    </radialGradient>
+    <!-- Glow exterior -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- Glow para destellos -->
+    <filter id="sparkGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- Glow para el texto -->
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
   </defs>
-  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
-  <text x="32" y="42" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="30" fill="#fff">S/</text>
+
+  <!-- Glow exterior del hexágono -->
+  <polygon
+    points="256,38 443,146 443,366 256,474 69,366 69,146"
+    fill="none"
+    stroke="#38bdf8"
+    stroke-width="8"
+    opacity="0.2"
+    filter="url(#glow)"
+  />
+
+  <!-- Hexágono principal -->
+  <polygon
+    points="256,48 436,152 436,360 256,464 76,360 76,152"
+    fill="url(#hexGrad)"
+    stroke="#7dd3fc"
+    stroke-width="3"
+    stroke-opacity="0.4"
+  />
+
+  <!-- Borde interior del hexágono (bisel) -->
+  <polygon
+    points="256,68 418,162 418,350 256,444 94,350 94,162"
+    fill="none"
+    stroke="#60a5fa"
+    stroke-width="1.5"
+    stroke-opacity="0.2"
+  />
+
+  <!-- Moneda central - anillo exterior -->
+  <circle cx="256" cy="256" r="120" fill="none" stroke="#7dd3fc" stroke-width="4" opacity="0.6"/>
+  <circle cx="256" cy="256" r="112" fill="url(#coinGrad)" stroke="#38bdf8" stroke-width="2" opacity="0.8"/>
+
+  <!-- Detalle de la moneda - arco decorativo -->
+  <circle cx="256" cy="256" r="96" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.3" stroke-dasharray="12 8"/>
+
+  <!-- Símbolo S/ -->
+  <text
+    x="256" y="275"
+    text-anchor="middle"
+    font-family="'Inter', 'Segoe UI', Arial, sans-serif"
+    font-weight="700"
+    font-size="110"
+    fill="#ffffff"
+    filter="url(#textGlow)"
+  >S/</text>
+
+  <!-- Destello principal superior (sparkle anime - 4 puntas grandes) -->
+  <g filter="url(#sparkGlow)" opacity="0.95">
+    <polygon points="256,80 261,118 256,110 251,118" fill="#ffffff"/>
+    <polygon points="294,130 261,124 268,130 261,136" fill="#ffffff"/>
+    <polygon points="256,180 251,142 256,150 261,142" fill="#ffffff"/>
+    <polygon points="218,130 251,136 244,130 251,124" fill="#ffffff"/>
+    <!-- Centro brillante -->
+    <circle cx="256" cy="130" r="4" fill="#ffffff" opacity="0.9"/>
+  </g>
+
+  <!-- Destello inferior derecho -->
+  <g filter="url(#sparkGlow)" opacity="0.7">
+    <polygon points="370,340 373,356 370,352 367,356" fill="#ffffff"/>
+    <polygon points="386,352 373,349 376,352 373,355" fill="#ffffff"/>
+    <polygon points="370,368 367,356 370,360 373,356" fill="#ffffff"/>
+    <polygon points="354,352 367,355 364,352 367,349" fill="#ffffff"/>
+    <circle cx="370" cy="352" r="2.5" fill="#ffffff" opacity="0.8"/>
+  </g>
+
+  <!-- Destello superior izquierdo (pequeño) -->
+  <g filter="url(#sparkGlow)" opacity="0.5">
+    <polygon points="148,160 150,172 148,169 146,172" fill="#e0f2fe"/>
+    <polygon points="160,168 150,166 153,168 150,170" fill="#e0f2fe"/>
+    <polygon points="148,180 146,172 148,175 150,172" fill="#e0f2fe"/>
+    <polygon points="136,168 146,170 143,168 146,166" fill="#e0f2fe"/>
+    <circle cx="148" cy="168" r="2" fill="#ffffff" opacity="0.7"/>
+  </g>
+
+  <!-- Partículas de energía -->
+  <circle cx="390" cy="180" r="4" fill="#7dd3fc" opacity="0.6"/>
+  <circle cx="140" cy="340" r="3.5" fill="#38bdf8" opacity="0.5"/>
+  <circle cx="360" cy="400" r="3" fill="#e0f2fe" opacity="0.7"/>
+  <circle cx="160" cy="155" r="2.5" fill="#7dd3fc" opacity="0.4"/>
+  <circle cx="400" cy="290" r="2" fill="#e0f2fe" opacity="0.6"/>
+  <circle cx="120" cy="260" r="2" fill="#38bdf8" opacity="0.3"/>
 </svg>

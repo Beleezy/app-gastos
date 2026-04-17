@@ -125,7 +125,7 @@
 
     <button
       v-if="!resultado"
-      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
@@ -162,7 +162,7 @@ const metodos = ['Efectivo', 'Yape', 'Plin', 'Transferencia', 'Tarjeta']
 
 const form = reactive({
   monto: null,
-  fecha: new Date().toISOString().split('T')[0],
+  fecha: useFechaPeru().fechaHoy(),
   metodoPago: null,
   notas: '',
 })
@@ -172,12 +172,13 @@ const errorMsg = ref('')
 const resultado = ref(null)
 
 const { currencySymbol, formatMonto } = useCurrency()
+const { fechaHoy: fechaHoyPeru } = useFechaPeru()
 
 const simulacion = computed(() => {
   const monto = parseFloat(form.monto) || 0
   if (monto <= 0 || deudasActivasList.value.length === 0) return []
 
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = fechaHoyPeru()
 
   const sorted = [...deudasActivasList.value].sort((a, b) => {
     const aVencida = a.fechaPago && a.fechaPago <= hoy

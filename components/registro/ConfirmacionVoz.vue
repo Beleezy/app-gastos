@@ -199,7 +199,7 @@
             Descartar
           </button>
           <button
-            class="flex-1 py-3 rounded-xl text-theme-text font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+            class="flex-1 py-3 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
             :class="saving ? 'bg-[var(--color-accent)]/70 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
             :disabled="saving"
             @click="confirmar"
@@ -282,8 +282,8 @@ watch(() => props.gastos, (newVal) => {
 
 function formatFecha(fecha) {
   if (!fecha) return ''
-  const hoy = new Date().toISOString().split('T')[0]
-  if (fecha === hoy) return 'Hoy'
+  const { fechaHoy } = useFechaPeru()
+  if (fecha === fechaHoy()) return 'Hoy'
   const [a, m, d] = fecha.split('-')
   return `${d}/${m}`
 }

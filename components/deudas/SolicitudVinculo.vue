@@ -68,7 +68,7 @@
     <!-- Botón enviar -->
     <button
       class="w-full py-3 rounded-xl font-medium text-sm transition-all mt-2"
-      :class="isValid ? 'bg-theme-accent-dark text-theme-text active:bg-theme-accent-dark' : 'bg-theme-card text-theme-text-muted cursor-not-allowed'"
+      :class="isValid ? 'bg-theme-accent-dark text-theme-on-accent active:bg-theme-accent-dark' : 'bg-theme-card text-theme-text-muted cursor-not-allowed'"
       :disabled="!isValid || vinculos.isLoading.value"
       @click="enviar"
     >

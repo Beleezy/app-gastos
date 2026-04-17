@@ -100,7 +100,7 @@
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
@@ -124,14 +124,14 @@ const emit = defineEmits(['close', 'saved'])
 
 const editando = computed(() => !!props.gastoEditar)
 
-const ahora = new Date()
+const { fechaHoy, horaActual } = useFechaPeru()
 
 const form = reactive({
   concepto: props.gastoEditar?.concepto || '',
   monto: props.gastoEditar?.monto || null,
   categoriaId: props.gastoEditar?.categoriaId || null,
-  fecha: props.gastoEditar?.fecha || ahora.toISOString().split('T')[0],
-  hora: props.gastoEditar?.hora?.substring(0, 5) || ahora.toTimeString().split(' ')[0].substring(0, 5),
+  fecha: props.gastoEditar?.fecha || fechaHoy(),
+  hora: props.gastoEditar?.hora?.substring(0, 5) || horaActual(),
   notas: props.gastoEditar?.notas || '',
 })
 

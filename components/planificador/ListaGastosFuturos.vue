@@ -145,7 +145,7 @@
         {{ f.label }}
         <span
           class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
-          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-input text-theme-text-sec'"
+          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-border-md text-theme-text'"
         >
           {{ f.count }}
         </span>
@@ -299,7 +299,7 @@
                   class="w-full resize-none rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
                 ></textarea>
                 <button
-                  class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+                  class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
                   :disabled="guardandoInline"
                   @click="guardarEdicionDetalle(proyecto, detalle)"
                 >
@@ -417,7 +417,7 @@
                       class="w-full resize-none rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
                     ></textarea>
                     <button
-                      class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+                      class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
                       :disabled="guardandoInline"
                       @click="guardarEdicionOpcion(proyecto, detalle)"
                     >
@@ -662,7 +662,7 @@
         ></textarea>
         <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
         <button
-          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
           :disabled="guardandoInline"
           @click="confirmarNuevaOpcion"
         >
@@ -710,7 +710,7 @@
         ></textarea>
         <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
         <button
-          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-text transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
           :disabled="guardandoInline"
           @click="confirmarNuevoDetalle"
         >
@@ -1240,7 +1240,8 @@ async function confirmarNuevaOpcion() {
 
 // ── Decisión de opción ───────────────────────────────────────────
 function abrirDecision(proyecto, detalle, opcion, tipo) {
-  const hoy = new Date().toISOString().split('T')[0]
+  const { fechaHoy } = useFechaPeru()
+  const hoy = fechaHoy()
   decisionCtx.value = { proyecto, detalle, opcion, tipo }
   decisionForm.value = {
     monto: opcion.precioPromedio ?? opcion.precioMinimo ?? opcion.precioMaximo ?? '',

@@ -543,7 +543,7 @@ async function ejecutarBulkEdit({ ids, campos }) {
 // Quick-add: registrar rápidamente un favorito
 async function onQuickAdd(chip) {
   vibrate([10, 30, 10])
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = useFechaPeru().fechaHoy()
   const gastoConId = {
     concepto: chip.concepto,
     monto: Number(chip.monto),
@@ -565,7 +565,7 @@ async function onQuickAdd(chip) {
 // Duplicar gasto (E#2)
 async function duplicarGasto(gasto) {
   vibrate([10, 30, 10])
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = useFechaPeru().fechaHoy()
   const gastoConId = {
     concepto: gasto.concepto,
     monto: Number(gasto.monto),
@@ -645,7 +645,7 @@ watch([mesSeleccionado, anioSeleccionado], async () => {
 })
 
 async function fetchResumenMensual() {
-  const hoy = new Date().toISOString().split('T')[0]
+  const hoy = useFechaPeru().fechaHoy()
   await fetchResumen(hoy, mesSeleccionado.value, anioSeleccionado.value)
 }
 

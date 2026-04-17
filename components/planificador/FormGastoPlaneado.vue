@@ -135,7 +135,7 @@
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-theme-text font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-[var(--color-accent)]/70 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
       @click="guardar"
@@ -163,12 +163,12 @@
             <span class="block text-[10px] text-theme-text-muted mt-0.5">Este registro se desvincula y no afecta los futuros</span>
           </button>
           <button
-            class="w-full rounded-xl bg-theme-accent px-3 py-2.5 text-sm font-medium text-theme-text transition-colors hover:bg-theme-accent-dark"
+            class="w-full rounded-xl bg-theme-accent px-3 py-2.5 text-sm font-medium text-theme-on-accent transition-colors hover:bg-theme-accent-dark"
             :disabled="saving"
             @click="confirmarGuardar('futuros')"
           >
             Este y los meses futuros
-            <span class="block text-[10px] text-white/70 mt-0.5">Propaga los cambios a todas las instancias del grupo</span>
+            <span class="block text-[10px] text-theme-on-accent opacity-70 mt-0.5">Propaga los cambios a todas las instancias del grupo</span>
           </button>
           <button
             class="w-full rounded-xl py-2 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
@@ -200,13 +200,15 @@ const primerDiaOffset = computed(() => {
   return d.getDay() === 0 ? 6 : d.getDay() - 1
 })
 
-const hoy = new Date()
+const { fechaHoy } = useFechaPeru()
+const hoyStr = fechaHoy()
+const [hoyAnio, hoyMes, hoyDia] = hoyStr.split('-').map(Number)
 
 function getDiaInicial() {
   if (props.gastoEditar?.fechaProbablePago) {
     return new Date(props.gastoEditar.fechaProbablePago + 'T00:00:00').getDate()
   }
-  return (mesActual.value === hoy.getMonth() + 1 && anioActual.value === hoy.getFullYear()) ? hoy.getDate() : 1
+  return (mesActual.value === hoyMes && anioActual.value === hoyAnio) ? hoyDia : 1
 }
 
 const form = reactive({

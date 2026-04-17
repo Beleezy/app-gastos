@@ -243,17 +243,18 @@ const { currencySymbol, formatMonto } = useCurrency()
 const { formatMesAnio } = useFormatters()
 const { toggle: toggleDrawer } = useMobileDrawer()
 
+const { ahora: ahoraPeru } = useFechaPeru()
+
 // Saludo dinámico
 const saludo = computed(() => {
-  const hora = new Date().getHours()
+  const hora = parseInt(ahoraPeru().hora.split(':')[0], 10)
   if (hora < 12) return 'Buenos días'
   if (hora < 18) return 'Buenas tardes'
   return 'Buenas noches'
 })
 
-const hoy = new Date()
-const mesActualNum = hoy.getMonth() + 1
-const anioActual = hoy.getFullYear()
+const hoyStr = ahoraPeru().fecha
+const [anioActual, mesActualNum] = hoyStr.split('-').map(Number)
 const mesActual = formatMesAnio(mesActualNum, anioActual)
 
 // State

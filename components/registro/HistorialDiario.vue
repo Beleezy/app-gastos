@@ -422,10 +422,7 @@ function onSemDayClick(dia) {
   toggleDia(dia.fecha)
 }
 
-const hoy = (() => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-})()
+const hoy = useFechaPeru().fechaHoy()
 
 const diasExpandidos = ref(new Set())
 const semanaExpandida = ref(null)
