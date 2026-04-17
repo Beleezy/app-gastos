@@ -27,6 +27,7 @@ export default {
           'accent-dark': 'var(--color-accent-dark)',
           'accent-bg': 'var(--color-accent-bg)',
           'accent-bg-hover': 'var(--color-accent-bg-hover)',
+          'on-accent': 'var(--color-on-accent)',
         },
         primary: {
           50: '#eff6ff',

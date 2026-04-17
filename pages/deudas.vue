@@ -83,7 +83,7 @@
     <!-- FABs: Voz + Manual (hidden when voice overlay is active) -->
     <div v-if="!showVozOverlay" class="fixed right-4 bottom-24 lg:right-8 lg:bottom-8 z-40 flex flex-col gap-3 items-center">
       <button
-        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-purple-600 opacity-60 hover:opacity-80 shadow-purple-500/25"
+        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-purple-600 opacity-70 hover:opacity-85 shadow-purple-500/25"
         @click="abrirVozOverlay"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -91,7 +91,7 @@
         </svg>
       </button>
       <button
-        class="w-14 h-14 rounded-full bg-theme-accent opacity-60 hover:opacity-80 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse"
+        class="w-14 h-14 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse"
         @click="showFormDeuda = true"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

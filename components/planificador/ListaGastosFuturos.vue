@@ -137,7 +137,7 @@
         :key="f.value"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
         :class="[
-          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-text') : 'bg-theme-card text-theme-text-muted',
+          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-white') : 'bg-theme-card text-theme-text-muted',
           f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
         ]"
         @click="filtroActual = f.value"

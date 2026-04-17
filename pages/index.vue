@@ -199,8 +199,8 @@
       </NuxtLink>
     </div>
 
-    <!-- Información y Configuraciones -->
-    <div class="px-5 mt-4 mb-5 grid grid-cols-2 gap-2.5">
+    <!-- Configuraciones -->
+    <div class="px-5 lg:px-0 mt-4 mb-2 lg:mb-3">
       <NuxtLink
         to="/configuraciones"
         class="flex items-center gap-2.5 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
@@ -216,6 +216,10 @@
           <p class="text-[10px] text-theme-text-muted truncate">Perfil y preferencias</p>
         </div>
       </NuxtLink>
+    </div>
+
+    <!-- Información -->
+    <div class="px-5 lg:px-0 mb-5">
       <NuxtLink
         to="/informacion"
         class="flex items-center gap-2.5 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"

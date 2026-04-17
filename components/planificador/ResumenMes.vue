@@ -57,20 +57,20 @@
       <div class="border-t border-theme-border"></div>
 
       <!-- Stats Row -->
-      <div class="relative grid grid-cols-3 gap-2">
-        <div class="bg-theme-input rounded-xl p-3 border border-orange-500/5">
-          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider">Planificado</p>
-          <p class="text-sm font-bold text-orange-400 whitespace-nowrap">{{ formatMonto(resumen.totalPlanificado) }}</p>
+      <div class="relative grid grid-cols-3 gap-1.5">
+        <div class="bg-theme-input rounded-xl p-2.5 border border-orange-500/5 min-w-0">
+          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider leading-none">Planificado</p>
+          <p class="text-[13px] font-bold text-orange-400 truncate">{{ formatMonto(resumen.totalPlanificado) }}</p>
         </div>
-        <div class="bg-theme-input rounded-xl p-3 border" :class="resumen.excedeGastoReal ? 'border-red-500/10' : 'border-emerald-500/5'">
-          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider">Gastado</p>
-          <p class="text-sm font-bold whitespace-nowrap" :class="resumen.excedeGastoReal ? 'text-red-400' : 'text-emerald-400'">
+        <div class="bg-theme-input rounded-xl p-2.5 border min-w-0" :class="resumen.excedeGastoReal ? 'border-red-500/10' : 'border-emerald-500/5'">
+          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider leading-none">Gastado</p>
+          <p class="text-[13px] font-bold truncate" :class="resumen.excedeGastoReal ? 'text-red-400' : 'text-emerald-400'">
             {{ formatMonto(totalGastoReal) }}
           </p>
         </div>
-        <div class="bg-theme-input rounded-xl p-3 border" :class="resumen.saldoReal >= 0 ? 'border-emerald-500/5' : 'border-red-500/10'">
-          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider" title="Presupuesto menos gasto real">Disponible</p>
-          <p class="text-sm font-bold whitespace-nowrap" :class="resumen.saldoReal >= 0 ? 'text-emerald-400' : 'text-red-400'">
+        <div class="bg-theme-input rounded-xl p-2.5 border min-w-0" :class="resumen.saldoReal >= 0 ? 'border-emerald-500/5' : 'border-red-500/10'">
+          <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider leading-none" title="Presupuesto menos gasto real">Disponible</p>
+          <p class="text-[13px] font-bold truncate" :class="resumen.saldoReal >= 0 ? 'text-emerald-400' : 'text-red-400'">
             {{ formatMonto(resumen.saldoReal) }}
           </p>
         </div>
@@ -193,15 +193,18 @@
         </div>
         <!-- Duplicar mes - siempre accesible -->
         <button
-          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[10px] font-medium hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
+          class="flex items-center justify-center w-7 h-7 rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
           :disabled="duplicando"
           :title="gastosPlaneados.length > 0 ? 'Copiar gastos de otro mes (los duplicados por concepto se omiten)' : 'Copiar gastos de otro mes'"
           @click="showSelectorMes = true"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg v-if="!duplicando" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
           </svg>
-          {{ duplicando ? 'Copiando...' : 'Copiar mes' }}
+          <svg v-else class="w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
         </button>
       </div>
     </div>

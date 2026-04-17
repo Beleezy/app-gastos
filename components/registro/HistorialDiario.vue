@@ -84,7 +84,7 @@
               <div v-for="dia in semana.dias" :key="dia.fecha">
                 <button
                   class="w-full px-3 py-2 rounded-lg transition-colors"
-                  :class="diaExpandido === dia.fecha ? 'bg-theme-border-md border border-theme-border' : 'bg-theme-card hover:bg-theme-card'"
+                  :class="diasExpandidos.has(dia.fecha) ? 'bg-theme-border-md border border-theme-border' : 'bg-theme-card hover:bg-theme-card'"
                   @click.stop="onSemDayClick(dia)"
                   @contextmenu.prevent="activarSeleccionDia(dia)"
                 >
@@ -121,7 +121,7 @@
                         </svg>
                       </span>
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform shrink-0"
-                        :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                        :class="{ 'rotate-180': diasExpandidos.has(dia.fecha) }"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                       >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -131,7 +131,7 @@
                 </button>
 
                 <Transition name="expand">
-                  <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-6 mt-1 space-y-1.5">
+                  <TransitionGroup v-if="diasExpandidos.has(dia.fecha)" name="gasto-in" tag="div" class="ml-6 mt-1 space-y-1.5">
                     <RegistroGastoItem
                       v-for="gasto in dia.gastos"
                       :key="gasto.id"
@@ -157,16 +157,16 @@
         <div v-for="dia in gastosPorDia" :key="dia.fecha">
           <button
             class="w-full px-3.5 py-2.5 rounded-xl transition-all duration-200"
-            :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
+            :class="diasExpandidos.has(dia.fecha) ? 'bg-theme-accent-bg border border-theme-accent shadow-sm' : 'bg-theme-card border border-theme-border hover:bg-theme-card'"
             @click="onDayHeaderClick(dia)"
             @contextmenu.prevent="activarSeleccionDia(dia)"
           >
             <div class="flex items-center gap-3">
               <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
-                :class="diaExpandido === dia.fecha ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
+                :class="diasExpandidos.has(dia.fecha) ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
               >
-                <span class="text-[9px] uppercase leading-none font-semibold" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
-                <span class="text-base font-bold leading-tight" :class="diaExpandido === dia.fecha ? 'text-theme-accent' : 'text-theme-text'">{{ extraerDia(dia.fecha) }}</span>
+                <span class="text-[9px] uppercase leading-none font-semibold" :class="diasExpandidos.has(dia.fecha) ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
+                <span class="text-base font-bold leading-tight" :class="diasExpandidos.has(dia.fecha) ? 'text-theme-accent' : 'text-theme-text'">{{ extraerDia(dia.fecha) }}</span>
               </div>
               <div class="flex-1 min-w-0 text-left">
                 <div class="flex items-center justify-between gap-2">
@@ -203,7 +203,7 @@
                   </svg>
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
-                  :class="{ 'rotate-180': diaExpandido === dia.fecha }"
+                  :class="{ 'rotate-180': diasExpandidos.has(dia.fecha) }"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -213,7 +213,7 @@
           </button>
 
           <Transition name="expand">
-            <TransitionGroup v-if="diaExpandido === dia.fecha" name="gasto-in" tag="div" class="ml-4 mt-1 space-y-1.5">
+            <TransitionGroup v-if="diasExpandidos.has(dia.fecha)" name="gasto-in" tag="div" class="ml-4 mt-1 space-y-1.5">
               <RegistroGastoItem
                 v-for="gasto in dia.gastos"
                 :key="gasto.id"
@@ -344,7 +344,9 @@ function activarSeleccionDia(dia) {
   vibrate([15, 30, 15])
   seleccionActiva.value = true
   diaSeleccionActual.value = dia.fecha
-  diaExpandido.value = dia.fecha
+  const nuevo = new Set(diasExpandidos.value)
+  nuevo.add(dia.fecha)
+  diasExpandidos.value = nuevo
   selectedIds.value = new Set(dia.gastos.map(g => g.id))
 }
 
@@ -425,7 +427,7 @@ const hoy = (() => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 })()
 
-const diaExpandido = ref(null)
+const diasExpandidos = ref(new Set())
 const semanaExpandida = ref(null)
 
 // Expandir por defecto: "hoy" si existe, si no, el primer día
@@ -433,7 +435,7 @@ const diaInicializado = ref(false)
 watch(() => props.gastosPorDia, (dias) => {
   if (diaInicializado.value || !dias.length) return
   const tieneHoy = dias.some(d => d.fecha === hoy)
-  diaExpandido.value = tieneHoy ? hoy : dias[0].fecha
+  diasExpandidos.value = new Set([tieneHoy ? hoy : dias[0].fecha])
   diaInicializado.value = true
 }, { immediate: true })
 
@@ -457,13 +459,16 @@ function cambiarVista(v) {
 
 function toggleDia(fecha) {
   vibrate(8)
-  diaExpandido.value = diaExpandido.value === fecha ? null : fecha
+  const nuevo = new Set(diasExpandidos.value)
+  if (nuevo.has(fecha)) nuevo.delete(fecha)
+  else nuevo.add(fecha)
+  diasExpandidos.value = nuevo
 }
 
 function toggleSemana(key) {
   vibrate(8)
   semanaExpandida.value = semanaExpandida.value === key ? null : key
-  if (semanaExpandida.value !== key) diaExpandido.value = null
+  if (semanaExpandida.value !== key) diasExpandidos.value = new Set()
 }
 
 function extraerDia(fechaStr) {

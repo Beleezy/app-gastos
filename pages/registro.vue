@@ -37,6 +37,16 @@
           </div>
 
           <div class="flex items-start justify-center gap-8 py-4 mb-4 px-4 lg:px-0 lg:mb-0 lg:rounded-2xl lg:border lg:border-theme-border lg:bg-theme-card lg:py-6">
+            <div class="pt-9">
+              <RegistroBotonCamara
+                :show-preview="showPhotoPreview"
+                :photo-preview="photoPreview"
+                @capture="onPhotoCapture"
+                @send="onSendPhoto"
+                @cancel="onCancelPhoto"
+                @retake="onRetakePhoto"
+              />
+            </div>
             <RegistroBotonMicrofono
               :is-listening="isListening"
               :transcript="transcript"
@@ -51,16 +61,6 @@
               @overwrite="onOverwriteDraft"
               @update:transcript="onUpdateTranscript"
             />
-            <div class="pt-9">
-              <RegistroBotonCamara
-                :show-preview="showPhotoPreview"
-                :photo-preview="photoPreview"
-                @capture="onPhotoCapture"
-                @send="onSendPhoto"
-                @cancel="onCancelPhoto"
-                @retake="onRetakePhoto"
-              />
-            </div>
           </div>
 
           <!-- Quick-add chips (E#1): favoritos frecuentes -->
@@ -86,7 +86,7 @@
         </div>
 
         <!-- Área principal derecha -->
-        <div class="pb-28 lg:pb-0">
+        <div class="pb-20 lg:pb-0">
           <!-- Barra unificada de filtros (colapsable) -->
           <div class="px-4 lg:px-0 mb-3">
             <div class="flex items-center gap-2">
@@ -125,6 +125,16 @@
                   </svg>
                 </button>
               </div>
+
+              <button
+                class="flex items-center justify-center w-9 h-9 rounded-xl bg-theme-card text-theme-text-sec border border-theme-border hover:text-emerald-400 hover:border-emerald-500/30 transition-colors shrink-0"
+                aria-label="Exportar a Excel"
+                @click="exportarGastos"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </button>
             </div>
 
             <Transition name="expand">
@@ -163,16 +173,6 @@
                 @click="onCambiarVista(tab.value)"
               >
                 {{ tab.label }}
-              </button>
-              <button
-                class="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-medium bg-theme-card text-theme-text-sec border border-theme-border hover:text-emerald-400 hover:border-emerald-500/30 transition-colors lg:ml-auto"
-                aria-label="Exportar a Excel"
-                @click="exportarGastos"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Excel
               </button>
             </div>
           </div>
@@ -232,18 +232,18 @@
               </div>
             </Transition>
           </div>
-          <div class="h-8"></div>
+          <div class="h-2"></div>
         </div>
       </div>
     </div>
 
     <!-- FAB móvil -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-60 hover:opacity-80 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse lg:hidden"
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse lg:hidden"
       aria-label="Agregar gasto manual"
       @click="showFormManual = true"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
       </svg>
     </button>

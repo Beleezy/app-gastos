@@ -27,8 +27,8 @@
         class="relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 mic-btn"
         :class="[
           isListening
-            ? 'bg-gradient-to-br from-red-500/55 to-rose-600/55 shadow-xl shadow-red-500/30 backdrop-blur-md'
-            : 'bg-gradient-to-br from-[var(--color-accent)]/55 to-indigo-600/55 shadow-xl shadow-[var(--color-accent)]/30 hover:shadow-[var(--color-accent)]/40 backdrop-blur-md'
+            ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-xl shadow-red-500/30'
+            : 'bg-gradient-to-br from-[var(--color-accent)] to-indigo-600 shadow-xl shadow-[var(--color-accent)]/30 hover:shadow-[var(--color-accent)]/40'
         ]"
         :disabled="!isSupported"
         @click="toggleListening"
@@ -37,7 +37,7 @@
         @pointerleave="onPointerUp"
       >
         <!-- Mic icon -->
-        <svg v-if="!isListening" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+        <svg v-if="!isListening" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
         </svg>
         <!-- Stop icon -->

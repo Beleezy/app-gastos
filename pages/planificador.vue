@@ -13,24 +13,22 @@
       </div>
     </Transition>
 
-    <div class="px-4 lg:px-0 pt-4 lg:pt-6 lg:max-w-md">
-      <div class="flex items-center gap-2">
-        <div class="flex-1 grid grid-cols-2 gap-2 rounded-2xl border border-theme-border bg-theme-card p-1">
-          <button
-            v-for="seccion in secciones"
-            :key="seccion.value"
-            class="rounded-xl px-3 py-2 text-sm font-medium transition-colors"
-            :class="seccionActual === seccion.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
-            @click="seccionActual = seccion.value"
-          >
-            {{ seccion.label }}
-          </button>
-        </div>
+    <div class="px-4 lg:px-0 pt-3 lg:pt-5 lg:max-w-md">
+      <div class="flex items-center gap-1.5">
+        <button
+          v-for="seccion in secciones"
+          :key="seccion.value"
+          class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+          :class="seccionActual === seccion.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-muted hover:text-theme-text-sec'"
+          @click="seccionActual = seccion.value"
+        >
+          {{ seccion.label }}
+        </button>
         <NuxtLink
           to="/ahorros"
-          class="flex items-center gap-1 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-3 py-2.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/15 transition-colors shrink-0"
+          class="rounded-full px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 transition-colors"
         >
-          💰 Ahorros
+          Ahorros
         </NuxtLink>
       </div>
     </div>
@@ -76,7 +74,6 @@
                   v-else
                   @editar="editarGastoPlaneado"
                   @registrar="abrirRegistroPago"
-                  @abrir-registro="abrirRegistroPago"
                 />
               </div>
             </Transition>
@@ -90,7 +87,7 @@
     </Transition>
 
     <button
-      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-theme-accent opacity-60 shadow-lg shadow-theme-accent/25 transition-all duration-300 hover:opacity-80 active:scale-90"
+      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-theme-accent opacity-70 shadow-lg shadow-theme-accent/25 transition-all duration-300 hover:opacity-85 active:scale-90"
       @click="abrirFormulario"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

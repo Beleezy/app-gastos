@@ -79,7 +79,7 @@
             Cancelar
           </button>
           <button
-            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-theme-text text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
+            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-white text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
             :disabled="guardandoEdicion"
             @click="guardarEdicion"
           >

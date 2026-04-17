@@ -20,6 +20,7 @@
   --color-accent-bg: rgba(59, 130, 246, 0.1);
   --color-accent-bg-hover: rgba(59, 130, 246, 0.2);
   --color-accent-ring: rgba(59, 130, 246, 0.5);
+  --color-on-accent: #ffffff;
 }
 
 /* ── Temas de color (acento) y Adaptacion de tema completo ── */
@@ -49,6 +50,7 @@ html.dark.accent-negro {
   --color-accent-bg: rgba(255, 255, 255, 0.1);
   --color-accent-bg-hover: rgba(255, 255, 255, 0.2);
   --color-accent-ring: rgba(255, 255, 255, 0.5);
+  --color-on-accent: #111827;
 }
 html.light.accent-negro {
   --color-bg: #e5e5e5;

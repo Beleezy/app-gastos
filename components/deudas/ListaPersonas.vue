@@ -38,7 +38,7 @@
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
         :class="[
           filtroEstado === f.value
-            ? (f.value === 'vencidas' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-theme-accent text-theme-text')
+            ? (f.value === 'vencidas' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-theme-accent text-white')
             : (f.value === 'vencidas' && countVencidas > 0 ? 'bg-red-500/10 text-red-400' : 'bg-theme-card text-theme-text-muted')
         ]"
         @click="filtroEstado = f.value"

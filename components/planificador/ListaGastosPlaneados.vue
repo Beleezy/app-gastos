@@ -31,7 +31,7 @@
         :key="f.value"
         class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
         :class="[
-          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-text') : 'bg-theme-card text-theme-text-muted',
+          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-white') : 'bg-theme-card text-theme-text-muted',
           f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
         ]"
         @click="filtroActual = f.value"
@@ -189,12 +189,6 @@
               </svg>
               {{ gasto.estado === 'pagado' ? 'Editar registro' : 'Registrar' }}
             </button>
-            <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('abrir-registro', gasto)">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h6m-7 12h8a2 2 0 002-2V6a2 2 0 00-2-2h-1.172a2 2 0 01-1.414-.586l-.828-.828A2 2 0 0011.172 2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-              Registro
-            </button>
             <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -247,7 +241,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(['editar', 'registrar', 'abrir-registro'])
+const emit = defineEmits(['editar', 'registrar'])
 
 const {
   gastosPorCategoria,
