@@ -38,8 +38,8 @@
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
         :class="[
           filtroEstado === f.value
-            ? (f.value === 'vencidas' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-theme-accent text-white')
-            : (f.value === 'vencidas' && countVencidas > 0 ? 'bg-red-500/10 text-red-400' : 'bg-theme-card text-theme-text-muted')
+            ? (f.value === 'vencidas' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-theme-accent text-theme-on-accent')
+            : (f.value === 'vencidas' && countVencidas > 0 ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-theme-card text-theme-text-sec border border-theme-border')
         ]"
         @click="filtroEstado = f.value"
       >
@@ -49,7 +49,7 @@
         {{ f.label }}
         <span
           v-if="f.value === 'vencidas' && countVencidas > 0"
-          class="px-1.5 py-0 rounded-full bg-red-500/30 text-red-300 text-[9px] font-bold"
+          class="px-1.5 py-0 rounded-full bg-red-500/30 text-red-300 text-[0.5625rem] font-bold"
         >{{ countVencidas }}</span>
       </button>
     </div>
@@ -104,7 +104,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            <span class="text-[9px] font-medium">Ver</span>
+            <span class="text-[0.5625rem] font-medium">Ver</span>
           </button>
           <button
             v-if="tabActual === 'me_deben' && persona.totalPendiente > 0"
@@ -114,7 +114,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span class="text-[9px] font-medium">PDF</span>
+            <span class="text-[0.5625rem] font-medium">PDF</span>
           </button>
         </div>
 
@@ -132,7 +132,7 @@
             <div class="flex items-center gap-3">
               <!-- Avatar -->
               <div
-                class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-lg font-semibold"
+                class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold"
                 :class="tabActual === 'me_deben' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'"
               >
                 {{ getInitials(persona.nombre) }}
@@ -142,10 +142,10 @@
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-theme-text leading-snug truncate" :title="persona.nombre">{{ persona.nombre }}</p>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-border-md text-theme-text-muted">
+                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-border-md text-theme-text-muted">
                     ORG
                   </span>
-                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
+                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
@@ -156,13 +156,13 @@
                 </div>
                 <!-- Due date indicator -->
                 <div v-if="persona.tieneVencidas" class="flex items-center gap-1 mt-1">
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-red-500/20 text-red-400">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-semibold bg-red-500/20 text-red-400">
                     <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
                     VENCIDA
                   </span>
                 </div>
                 <div v-else-if="persona.fechaProximaVencer" class="flex items-center gap-1 mt-1">
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-amber-500/15 text-amber-400">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-medium bg-amber-500/15 text-amber-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -185,40 +185,42 @@
                     class="w-1.5 h-1.5 rounded-full"
                     :class="persona.totalPendiente > 0 ? (tabActual === 'me_deben' ? 'bg-emerald-400' : 'bg-red-400') : 'bg-gray-600'"
                   ></span>
-                  <span class="text-[10px] text-theme-text-sec">
+                  <span class="text-[0.625rem] text-theme-text-sec">
                     {{ persona.totalPendiente > 0 ? 'Pendiente' : 'Saldado' }}
                   </span>
                 </div>
-              </div>
-
-              <!-- Contact quick actions (phone / WhatsApp) -->
-              <div v-if="persona.contacto && isPhone(persona.contacto)" class="flex items-center gap-1 shrink-0" @click.stop>
-                <a
-                  :href="`tel:${persona.contacto}`"
-                  class="w-7 h-7 flex items-center justify-center rounded-lg bg-theme-accent-bg text-theme-accent hover:bg-theme-accent-bg transition-colors"
-                  title="Llamar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 7.734 6.678 14.412 14.412 14.412A2.338 2.338 0 0018.99 18.41l.9-1.798a1.125 1.125 0 00-.26-1.364l-2.248-1.686a1.125 1.125 0 00-1.393.044l-.728.728a.75.75 0 01-.938.077 12.742 12.742 0 01-5.736-5.736.75.75 0 01.077-.938l.728-.728a1.125 1.125 0 00.044-1.393L7.75 3.41a1.125 1.125 0 00-1.364-.26l-1.799.9A2.338 2.338 0 002.25 6.338z" />
-                  </svg>
-                </a>
-                <a
-                  :href="whatsappUrl(persona)"
-                  target="_blank"
-                  rel="noopener"
-                  class="w-7 h-7 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
-                  :title="tabActual === 'me_deben' && persona.totalPendiente > 0 ? 'WhatsApp — recordatorio' : 'WhatsApp'"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                </a>
               </div>
 
               <!-- Chevron -->
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
+            </div>
+
+            <!-- Contact quick actions (phone / WhatsApp) - below name row -->
+            <div v-if="persona.contacto && isPhone(persona.contacto)" class="flex items-center gap-1.5 mt-2 pt-2 border-t border-theme-border/50 pl-[3.75rem]" @click.stop>
+              <a
+                :href="`tel:${persona.contacto}`"
+                class="flex items-center gap-1 px-2 py-1 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.65rem] font-medium hover:bg-theme-accent-bg transition-colors"
+                title="Llamar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 7.734 6.678 14.412 14.412 14.412A2.338 2.338 0 0018.99 18.41l.9-1.798a1.125 1.125 0 00-.26-1.364l-2.248-1.686a1.125 1.125 0 00-1.393.044l-.728.728a.75.75 0 01-.938.077 12.742 12.742 0 01-5.736-5.736.75.75 0 01.077-.938l.728-.728a1.125 1.125 0 00.044-1.393L7.75 3.41a1.125 1.125 0 00-1.364-.26l-1.799.9A2.338 2.338 0 002.25 6.338z" />
+                </svg>
+                Llamar
+              </a>
+              <a
+                :href="whatsappUrl(persona)"
+                target="_blank"
+                rel="noopener"
+                class="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[0.65rem] font-medium hover:bg-emerald-500/20 transition-colors"
+                :title="tabActual === 'me_deben' && persona.totalPendiente > 0 ? 'WhatsApp — recordatorio' : 'WhatsApp'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                WhatsApp
+              </a>
             </div>
           </div>
         </div>
@@ -244,7 +246,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              <span class="text-[9px] font-medium">Ver</span>
+              <span class="text-[0.5625rem] font-medium">Ver</span>
             </button>
           </div>
 
@@ -260,14 +262,14 @@
             <div class="p-4">
               <div class="flex items-center gap-3">
                 <!-- Avatar -->
-                <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0 text-lg font-semibold bg-theme-card-hover0/15 text-theme-text-muted">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold bg-theme-card-hover0/15 text-theme-text-muted">
                   {{ getInitials(persona.nombre) }}
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
                     <p class="text-sm font-medium text-theme-text truncate">{{ persona.nombre }}</p>
-                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
+                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
                   </div>
                   <p class="text-xs text-theme-text-sec mt-0.5">Sin deudas activas</p>
                 </div>
@@ -276,7 +278,7 @@
                   <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} 0.00</p>
                   <div class="flex items-center justify-end gap-1 mt-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                    <span class="text-[10px] text-theme-text-sec">Saldado</span>
+                    <span class="text-[0.625rem] text-theme-text-sec">Saldado</span>
                   </div>
                 </div>
                 <!-- Chevron -->

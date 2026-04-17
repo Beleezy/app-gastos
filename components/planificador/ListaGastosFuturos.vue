@@ -5,15 +5,15 @@
       <!-- Fila principal: monto promedio + rango -->
       <div class="relative overflow-hidden rounded-2xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/90 p-4">
         <div class="absolute -top-10 right-0 h-28 w-28 rounded-full bg-sky-500/10 blur-2xl"></div>
-        <div class="relative flex items-end justify-between mb-3">
-          <div>
+        <div class="relative flex items-end justify-between gap-3 mb-3">
+          <div class="min-w-0">
             <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Inversión estimada</p>
-            <p class="text-2xl font-bold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+            <p class="text-2xl font-bold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}</p>
           </div>
-          <div class="text-right">
+          <div class="text-right shrink-0">
             <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Rango</p>
-            <p class="text-sm font-semibold text-theme-text-sec">
-              {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }} — {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMaximo) }}
+            <p class="text-sm font-semibold text-theme-text-sec whitespace-nowrap">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }}
             </p>
           </div>
         </div>
@@ -25,15 +25,15 @@
             <p class="text-sm font-bold text-theme-text mt-0.5">{{ resumenFuturos.totalProyectos }}</p>
             <p class="text-[9px] text-theme-text-muted">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
           </div>
-          <div class="bg-theme-input rounded-xl p-2.5 border border-theme-border/50">
+          <div class="bg-theme-input rounded-xl p-2.5 border border-theme-border/50 min-w-0">
             <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Por proy.</p>
-            <p class="text-sm font-bold text-violet-300 mt-0.5">{{ currencySymbol }} {{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
+            <p class="text-sm font-bold text-violet-300 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
             <p class="text-[9px] text-theme-text-muted">promedio</p>
           </div>
-          <div class="bg-theme-input rounded-xl p-2.5 border border-emerald-500/10">
+          <div class="bg-theme-input rounded-xl p-2.5 border border-emerald-500/10 min-w-0">
             <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Ahorro</p>
-            <p class="text-sm font-bold mt-0.5" :class="ahorroPotencial > 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
-              {{ ahorroPotencial > 0 ? `${currencySymbol} ${formatMonto(ahorroPotencial)}` : '—' }}
+            <p class="text-sm font-bold mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis" :class="ahorroPotencial > 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
+              {{ ahorroPotencial > 0 ? `${currencySymbol}\u00a0${formatMonto(ahorroPotencial)}` : '—' }}
             </p>
             <p class="text-[9px] text-theme-text-muted">potencial</p>
           </div>
@@ -99,7 +99,7 @@
             </div>
           </div>
           <div class="shrink-0 text-right">
-            <p class="text-xs font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
+            <p class="text-xs font-semibold text-amber-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
             <p v-if="resumenFuturos.totalPromedio > 0" class="text-[9px] text-amber-300/60">{{ Math.round((resumenFuturos.proyectoMasCaro.totalPromedio / resumenFuturos.totalPromedio) * 100) }}%</p>
           </div>
         </div>
@@ -137,7 +137,7 @@
         :key="f.value"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
         :class="[
-          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-white') : 'bg-theme-card text-theme-text-muted',
+          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-on-accent') : 'bg-theme-card text-theme-text-muted',
           f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
         ]"
         @click="filtroActual = f.value"
@@ -179,52 +179,49 @@
       >
         <!-- Cabecera del proyecto -->
         <div class="p-4">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex min-w-0 gap-3">
-              <div
-                class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-                :style="{ backgroundColor: (proyecto.categoriaColor || '#6b7280') + '22' }"
-              >
-                <span class="text-lg">{{ proyecto.categoriaIcono || '📦' }}</span>
+          <div class="flex min-w-0 gap-3">
+            <div
+              class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+              :style="{ backgroundColor: (proyecto.categoriaColor || '#6b7280') + '22' }"
+            >
+              <span class="text-lg">{{ proyecto.categoriaIcono || '📦' }}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="truncate text-sm font-semibold text-theme-text">{{ proyecto.tipoGasto }}</h3>
+                <span
+                  v-if="prioridadBadge(proyecto.prioridad)"
+                  class="rounded-full px-2 py-1 text-[10px] font-medium"
+                  :class="prioridadBadge(proyecto.prioridad).clases"
+                >
+                  {{ prioridadBadge(proyecto.prioridad).label }}
+                </span>
+                <span class="rounded-full bg-theme-input px-2 py-1 text-[10px] text-theme-text-sec">
+                  {{ proyecto.categoriaNombre || 'Sin categoria' }}
+                </span>
               </div>
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h3 class="truncate text-sm font-semibold text-theme-text">{{ proyecto.tipoGasto }}</h3>
-                  <span
-                    v-if="prioridadBadge(proyecto.prioridad)"
-                    class="rounded-full px-2 py-1 text-[10px] font-medium"
-                    :class="prioridadBadge(proyecto.prioridad).clases"
-                  >
-                    {{ prioridadBadge(proyecto.prioridad).label }}
-                  </span>
-                  <span class="rounded-full bg-theme-input px-2 py-1 text-[10px] text-theme-text-sec">
-                    {{ proyecto.categoriaNombre || 'Sin categoria' }}
-                  </span>
-                </div>
-                <p v-if="proyecto.descripcion" class="mt-1 text-xs text-theme-text-sec">{{ proyecto.descripcion }}</p>
-                <p class="mt-1 text-[11px] text-theme-text-muted">
+              <div class="mt-1 flex items-baseline justify-between gap-2">
+                <p class="text-[11px] text-theme-text-muted">
                   {{ proyecto.resumen.totalDetalles }} detalles · {{ proyecto.resumen.totalOpciones }} opciones
                 </p>
+                <p class="shrink-0 text-sm font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
               </div>
-            </div>
-            <div class="shrink-0 text-right">
-              <p class="text-sm font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
-              <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalMinimo) }} - {{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
+              <p v-if="proyecto.descripcion" class="mt-1 text-xs text-theme-text-sec">{{ proyecto.descripcion }}</p>
             </div>
           </div>
 
           <div class="mt-3 grid grid-cols-3 gap-2">
-            <div class="rounded-xl bg-theme-input px-3 py-2">
+            <div class="rounded-xl bg-theme-input px-3 py-2 min-w-0">
               <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Min</p>
-              <p class="mt-1 text-xs font-medium text-emerald-400">{{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalMinimo) }}</p>
+              <p class="mt-1 text-xs font-medium text-emerald-400 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMinimo) }}</p>
             </div>
-            <div class="rounded-xl bg-theme-input px-3 py-2">
+            <div class="rounded-xl bg-theme-input px-3 py-2 min-w-0">
               <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-              <p class="mt-1 text-xs font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
+              <p class="mt-1 text-xs font-medium text-sky-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
             </div>
-            <div class="rounded-xl bg-theme-input px-3 py-2">
+            <div class="rounded-xl bg-theme-input px-3 py-2 min-w-0">
               <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
-              <p class="mt-1 text-xs font-medium text-amber-300">{{ currencySymbol }} {{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
+              <p class="mt-1 text-xs font-medium text-amber-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
             </div>
           </div>
 
@@ -337,8 +334,8 @@
                 </div>
                 <div class="flex shrink-0 flex-col items-end gap-2">
                   <div class="text-right">
-                    <p class="text-[11px] font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
-                    <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }} {{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
+                    <p class="text-[11px] font-medium text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
+                    <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
                   </div>
                   <div v-if="!detalle.estadoDecision" class="flex items-center gap-3">
                     <button
@@ -456,14 +453,14 @@
                             </a>
                           </div>
                           <div class="shrink-0 text-right">
-                            <p class="text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(opcion.precioPromedio || 0) }}</p>
-                            <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(opcion.precioMinimo || 0) }} - {{ currencySymbol }} {{ formatMonto(opcion.precioMaximo || 0) }}</p>
+                            <p class="text-xs font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioPromedio || 0) }}</p>
+                            <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMinimo || 0) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMaximo || 0) }}</p>
                           </div>
                         </div>
                         <p v-if="opcion.notas" class="mt-1.5 text-[11px] text-theme-text-sec">{{ opcion.notas }}</p>
                       </div>
                     </div>
-                    <div v-if="!detalle.estadoDecision" class="mt-2.5 flex flex-wrap items-center justify-end gap-2 border-t border-theme-border/50 pt-2.5">
+                    <div v-if="!detalle.estadoDecision" class="mt-2.5 flex flex-wrap items-center justify-end gap-1.5">
                       <button
                         class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
                         @click="abrirDecision(proyecto, detalle, opcion, 'planificar')"
@@ -479,7 +476,7 @@
                       <span class="flex-1"></span>
                       <div v-if="detalle.opciones.length > 1" class="flex items-center gap-0.5">
                         <button
-                          class="rounded-lg p-1 text-theme-text-muted transition-colors hover:text-theme-text hover:bg-theme-input disabled:opacity-30"
+                          class="rounded-lg border border-theme-border bg-theme-card p-1.5 text-theme-text-muted transition-colors hover:text-theme-text hover:border-theme-accent disabled:opacity-30"
                           :disabled="detalle.opciones.indexOf(opcion) === 0"
                           title="Subir"
                           @click="moverOpcion(proyecto, detalle, opcion, -1)"
@@ -487,7 +484,7 @@
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
                         </button>
                         <button
-                          class="rounded-lg p-1 text-theme-text-muted transition-colors hover:text-theme-text hover:bg-theme-input disabled:opacity-30"
+                          class="rounded-lg border border-theme-border bg-theme-card p-1.5 text-theme-text-muted transition-colors hover:text-theme-text hover:border-theme-accent disabled:opacity-30"
                           :disabled="detalle.opciones.indexOf(opcion) === detalle.opciones.length - 1"
                           title="Bajar"
                           @click="moverOpcion(proyecto, detalle, opcion, 1)"
@@ -496,13 +493,13 @@
                         </button>
                       </div>
                       <button
-                        class="text-[11px] text-theme-text-sec transition-colors hover:text-theme-accent"
+                        class="rounded-full border border-theme-border bg-theme-card px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-theme-accent hover:border-theme-accent"
                         @click="iniciarEdicionOpcion(opcion)"
                       >
                         Editar
                       </button>
                       <button
-                        class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                        class="rounded-full border border-theme-border bg-theme-card px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-red-400 hover:border-red-400/50"
                         @click="eliminarOpcionInline(proyecto, detalle, opcion)"
                       >
                         Eliminar

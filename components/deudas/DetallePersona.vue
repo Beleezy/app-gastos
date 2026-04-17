@@ -23,7 +23,7 @@
             <h2 class="text-lg font-semibold text-theme-text break-words">{{ personaSeleccionada.nombre }}</h2>
             <p v-if="personaSeleccionada.contacto" class="text-xs text-theme-text-sec truncate">{{ personaSeleccionada.contacto }}</p>
             <!-- Badge vinculado inline -->
-            <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[10px] font-medium mt-1">
+            <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.625rem] font-medium mt-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
@@ -37,7 +37,7 @@
           <!-- Export PDF (only me_deben) -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.625rem] font-medium"
             title="Exportar PDF"
             @click="exportarPdf"
           >
@@ -49,7 +49,7 @@
           <!-- Share WhatsApp -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-emerald-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-emerald-400 transition-colors text-[0.625rem] font-medium"
             title="Enviar por WhatsApp"
             @click="enviarWhatsapp"
           >
@@ -61,7 +61,7 @@
           <!-- Vincular con usuario -->
           <button
             v-if="!personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.625rem] font-medium"
             title="Vincular con usuario"
             @click="showSolicitudVinculo = true"
           >
@@ -73,7 +73,7 @@
           <!-- Desvincular -->
           <button
             v-if="personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-orange-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-orange-400 transition-colors text-[0.625rem] font-medium"
             title="Desvincular"
             @click="showDesvincular = true"
           >
@@ -84,7 +84,7 @@
           </button>
           <!-- Edit persona -->
           <button
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-amber-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-amber-400 transition-colors text-[0.625rem] font-medium"
             title="Editar persona"
             @click="showEditarPersona = true"
           >
@@ -95,7 +95,7 @@
           </button>
           <!-- Delete persona -->
           <button
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-red-400 transition-colors text-[10px] font-medium"
+            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-red-400 transition-colors text-[0.625rem] font-medium"
             @click="confirmarEliminarPersona"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -167,22 +167,22 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p class="text-[10px] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'">
+                <p class="text-[0.625rem] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'">
                   {{ esVencida(deuda) ? 'Vencida:' : 'Pago:' }} {{ formatFecha(deuda.fechaPago) }}
                 </p>
-                <span v-if="esVencida(deuda)" class="text-[9px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
+                <span v-if="esVencida(deuda)" class="text-[0.5625rem] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
               </div>
               <div v-if="deuda.notas" class="mt-1">
-                <p class="text-[10px] text-theme-text-muted italic">{{ deuda.notas }}</p>
+                <p class="text-[0.625rem] text-theme-text-muted italic">{{ deuda.notas }}</p>
               </div>
             </div>
             <div class="text-right shrink-0 ml-3">
               <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
-              <p v-if="deuda.estado === 'parcial'" class="text-[10px] text-orange-400 mt-0.5">
+              <p v-if="deuda.estado === 'parcial'" class="text-[0.625rem] text-orange-400 mt-0.5">
                 Pendiente: {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
               </p>
               <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1"
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium mt-1"
                 :class="deuda.estado === 'parcial' ? 'bg-orange-500/15 text-orange-400' : 'bg-yellow-500/15 text-yellow-400'"
               >
                 {{ deuda.estado === 'parcial' ? 'Parcial' : 'Pendiente' }}
@@ -198,7 +198,7 @@
                 :style="{ width: ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100) + '%' }"
               ></div>
             </div>
-            <p class="text-[10px] text-theme-text-muted mt-0.5">
+            <p class="text-[0.625rem] text-theme-text-muted mt-0.5">
               {{ ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100).toFixed(0) }}% pagado
             </p>
           </div>
@@ -298,7 +298,7 @@
               </div>
               <div class="text-right shrink-0 ml-3">
                 <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 bg-emerald-500/15 text-emerald-400">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium mt-1 bg-emerald-500/15 text-emerald-400">
                   {{ deuda.estado === 'archivado' ? 'Archivada' : 'Pagada' }}
                 </span>
               </div>

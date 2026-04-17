@@ -178,7 +178,7 @@
                   <!-- Botón crear -->
                   <button
                     class="w-full py-2.5 rounded-xl text-sm font-semibold transition-all active:scale-[0.98]"
-                    :class="puedeCrearCategoria ? 'bg-theme-accent text-white hover:opacity-90' : 'bg-theme-border-md text-theme-text-sec cursor-not-allowed'"
+                    :class="puedeCrearCategoria ? 'bg-theme-accent text-theme-on-accent hover:opacity-90' : 'bg-theme-border-md text-theme-text-sec cursor-not-allowed'"
                     :disabled="!puedeCrearCategoria || guardandoCategoria"
                     @click="crearCategoriaPersonalizada"
                   >

@@ -91,7 +91,7 @@
             :key="dia"
             class="w-9 h-9 rounded-lg text-xs font-medium flex items-center justify-center transition-all"
             :class="form.diaSeleccionado === dia
-              ? 'bg-theme-accent text-white'
+              ? 'bg-theme-accent text-theme-on-accent'
               : esPasado(dia)
                 ? 'text-theme-text-muted'
                 : 'text-theme-text-sec hover:bg-theme-border-md'"

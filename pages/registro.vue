@@ -74,7 +74,7 @@
 
           <div class="hidden lg:block lg:px-0">
             <button
-              class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-theme-accent text-white font-medium text-sm shadow-sm shadow-theme-accent/20 hover:opacity-90 active:scale-[0.98] transition-all"
+              class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-theme-accent text-theme-on-accent font-medium text-sm shadow-sm shadow-theme-accent/20 hover:opacity-90 active:scale-[0.98] transition-all"
               @click="showFormManual = true"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -103,7 +103,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
                 Filtros
-                <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-white text-[9px] flex items-center justify-center font-bold leading-none">
+                <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[9px] flex items-center justify-center font-bold leading-none">
                   {{ conteoFiltrosActivos }}
                 </span>
               </button>

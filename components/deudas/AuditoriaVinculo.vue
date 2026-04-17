@@ -33,7 +33,7 @@
               >
                 {{ getAccionLabel(entrada.accion) }}
               </span>
-              <span class="text-[10px] text-theme-text-sec">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
+              <span class="text-[0.625rem] text-theme-text-sec">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
             </div>
             <p v-if="!tieneDetallesColoreados(entrada)" class="text-xs text-theme-text-sec">{{ entrada.descripcion }}</p>
             <!-- Detailed changes for edits -->
@@ -47,13 +47,13 @@
             </div>
             <!-- Detailed debts for global payments -->
             <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1.5 space-y-0.5">
-              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[10px] text-theme-text-sec flex items-center gap-1">
+              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[0.625rem] text-theme-text-sec flex items-center gap-1">
                 <span class="text-teal-400/70">S/ {{ dp.monto }}</span>
                 <span class="text-theme-text-muted">&rarr;</span>
                 <span class="text-theme-text-muted">{{ dp.concepto }}</span>
               </div>
             </div>
-            <p class="text-[10px] text-theme-text-muted mt-1">{{ formatFecha(entrada.createdAt) }}</p>
+            <p class="text-[0.625rem] text-theme-text-muted mt-1">{{ formatFecha(entrada.createdAt) }}</p>
           </div>
         </div>
       </div>

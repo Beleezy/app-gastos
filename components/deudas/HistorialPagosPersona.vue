@@ -79,7 +79,7 @@
             Cancelar
           </button>
           <button
-            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-white text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
+            class="flex-1 py-2.5 rounded-xl bg-theme-accent text-theme-on-accent text-sm font-medium hover:bg-theme-accent-dark transition-colors disabled:opacity-50"
             :disabled="guardandoEdicion"
             @click="guardarEdicion"
           >
@@ -108,9 +108,9 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                   </svg>
-                  <span class="text-[10px] text-theme-accent font-medium">{{ pago.metodoPago }}</span>
+                  <span class="text-[0.625rem] text-theme-accent font-medium">{{ pago.metodoPago }}</span>
                 </div>
-                <p v-else class="text-[10px] text-theme-text-muted mt-0.5">Sin método registrado</p>
+                <p v-else class="text-[0.625rem] text-theme-text-muted mt-0.5">Sin método registrado</p>
               </div>
               <div class="flex items-center gap-1.5">
                 <span class="text-sm font-bold text-theme-accent">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
@@ -142,17 +142,17 @@
               <div v-for="(detalle, dIdx) in pago.detalles" :key="dIdx" class="flex items-start gap-2">
                 <span class="w-1 h-1 rounded-full bg-theme-accent/60 shrink-0 mt-1.5"></span>
                 <div class="flex-1 min-w-0">
-                  <p class="text-[11px] text-theme-text-muted truncate">{{ detalle.concepto }}</p>
-                  <div v-if="detalle.metodoPago && detalle.metodoPago !== pago.metodoPago" class="text-[10px] text-theme-accent/70">
+                  <p class="text-[0.6875rem] text-theme-text-muted truncate">{{ detalle.concepto }}</p>
+                  <div v-if="detalle.metodoPago && detalle.metodoPago !== pago.metodoPago" class="text-[0.625rem] text-theme-accent/70">
                     {{ detalle.metodoPago }}
                   </div>
                 </div>
-                <span class="text-[11px] text-theme-text-sec font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
+                <span class="text-[0.6875rem] text-theme-text-sec font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
               </div>
             </div>
 
             <!-- Notes -->
-            <p v-if="pago.notas && !pago.notas.startsWith('Pago global')" class="text-[10px] text-theme-text-muted italic mt-1.5">
+            <p v-if="pago.notas && !pago.notas.startsWith('Pago global')" class="text-[0.625rem] text-theme-text-muted italic mt-1.5">
               {{ pago.notas }}
             </p>
           </div>

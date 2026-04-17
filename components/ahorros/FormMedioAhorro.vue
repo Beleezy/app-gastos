@@ -61,7 +61,7 @@
         <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
         <button
-          class="w-full py-3 rounded-xl bg-theme-accent text-white font-semibold text-sm transition-colors hover:bg-theme-accent-dark"
+          class="w-full py-3 rounded-xl bg-theme-accent text-theme-on-accent font-semibold text-sm transition-colors hover:bg-theme-accent-dark"
           :disabled="saving"
           @click="agregar"
         >

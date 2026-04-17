@@ -26,14 +26,14 @@
           <p class="mt-1 text-lg font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
           <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
         </div>
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3">
+        <div class="rounded-xl border border-theme-border bg-theme-input p-3 min-w-0">
           <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Promedio</p>
-          <p class="mt-1 text-lg font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalPromedio) }}</p>
-          <p class="text-[11px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMinimo) }} - {{ currencySymbol }} {{ formatMonto(resumenFuturos.totalMaximo) }}</p>
+          <p class="mt-1 text-lg font-semibold text-sky-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+          <p class="text-[11px] text-theme-text-sec whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }}</p>
         </div>
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3">
+        <div class="rounded-xl border border-theme-border bg-theme-input p-3 min-w-0">
           <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Por proy.</p>
-          <p class="mt-1 text-lg font-semibold text-violet-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
+          <p class="mt-1 text-lg font-semibold text-violet-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
           <p class="text-[11px] text-theme-text-sec">promedio</p>
         </div>
       </div>
@@ -52,7 +52,7 @@
               <p class="text-[11px] text-theme-text-sec">Eligiendo las opciones mas baratas</p>
             </div>
           </div>
-          <p class="shrink-0 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(ahorroPotencial) }}</p>
+          <p class="shrink-0 text-sm font-semibold text-emerald-400 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(ahorroPotencial) }}</p>
         </div>
       </div>
 
@@ -122,7 +122,7 @@
             </p>
           </div>
           <div class="shrink-0 text-right">
-            <p class="text-sm font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
+            <p class="text-sm font-semibold text-amber-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
             <p v-if="resumenFuturos.totalPromedio > 0" class="text-[10px] text-amber-300/60">{{ Math.round((resumenFuturos.proyectoMasCaro.totalPromedio / resumenFuturos.totalPromedio) * 100) }}% del total</p>
           </div>
         </div>
@@ -143,7 +143,7 @@
                 <span class="truncate text-xs text-theme-text">{{ cat.nombre }}</span>
                 <span class="shrink-0 rounded-full bg-theme-card px-1.5 py-0.5 text-[10px] text-theme-text-muted">{{ cat.cantidad }}</span>
               </div>
-              <span class="shrink-0 text-xs font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(cat.totalPromedio) }}</span>
+              <span class="shrink-0 text-xs font-medium text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.totalPromedio) }}</span>
             </div>
             <div class="h-1 w-full overflow-hidden rounded-full bg-theme-card">
               <div
@@ -186,8 +186,8 @@
                 </p>
               </div>
               <div class="shrink-0 text-right">
-                <p class="text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(destacado.totalPromedio) }}</p>
-                <p class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(destacado.totalMinimo) }} - {{ currencySymbol }} {{ formatMonto(destacado.totalMaximo) }}</p>
+                <p class="text-xs font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(destacado.totalPromedio) }}</p>
+                <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(destacado.totalMinimo) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(destacado.totalMaximo) }}</p>
               </div>
             </div>
             <div v-if="destacado.detalles.length" class="mt-2 flex flex-wrap gap-1.5">

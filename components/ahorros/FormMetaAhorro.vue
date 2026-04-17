@@ -63,7 +63,7 @@
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl bg-theme-accent text-white font-semibold text-sm transition-colors hover:bg-theme-accent-dark mt-4 flex items-center justify-center gap-2"
+      class="w-full py-3.5 rounded-xl bg-theme-accent text-theme-on-accent font-semibold text-sm transition-colors hover:bg-theme-accent-dark mt-4 flex items-center justify-center gap-2"
       :disabled="saving"
       @click="guardar"
     >

@@ -30,7 +30,7 @@
     <!-- Empty state -->
     <div v-else-if="checkpoints.length === 0" class="bg-theme-card rounded-xl p-4 text-center border border-theme-border">
       <p class="text-xs text-theme-text-sec">No hay puntos de guardado todavía</p>
-      <p class="text-[10px] text-theme-text-muted mt-0.5">Se creará uno automáticamente al vincular</p>
+      <p class="text-[0.625rem] text-theme-text-muted mt-0.5">Se creará uno automáticamente al vincular</p>
     </div>
 
     <!-- Lista de checkpoints (orden: actual → anterior → inicio) -->
@@ -47,7 +47,7 @@
         >
           <!-- Badge tipo -->
           <div
-            class="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+            class="flex-shrink-0 px-2 py-0.5 rounded-full text-[0.625rem] font-semibold"
             :class="tipoBadgeClass(cp.tipo)"
           >
             {{ tipoLabel(cp.tipo) }}
@@ -58,17 +58,17 @@
             <p class="text-xs font-medium text-theme-text break-words">
               {{ cp.descripcion || 'Punto de guardado' }}
             </p>
-            <p class="text-[10px] text-theme-text-sec mt-0.5">
+            <p class="text-[0.625rem] text-theme-text-sec mt-0.5">
               {{ formatFechaHora(cp.createdAt) }}
             </p>
           </div>
 
           <!-- Resumen numérico -->
           <div v-if="cp.snapshotResumen" class="text-right shrink-0">
-            <p class="text-[10px] text-theme-text-muted">
+            <p class="text-[0.625rem] text-theme-text-muted">
               {{ cp.snapshotResumen.totalDeudasA }}D / {{ cp.snapshotResumen.totalDeudasB }}D
             </p>
-            <p class="text-[10px] text-violet-400">
+            <p class="text-[0.625rem] text-violet-400">
               {{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}
             </p>
           </div>
@@ -89,20 +89,20 @@
 
           <!-- Resumen del estado guardado -->
           <div v-if="cp.snapshotResumen" class="bg-theme-input rounded-lg p-2.5">
-            <p class="text-[10px] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">Estado guardado</p>
+            <p class="text-[0.625rem] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">Estado guardado</p>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <p class="text-[10px] text-theme-text-sec">{{ cp.snapshotResumen.personaANombre }}</p>
+                <p class="text-[0.625rem] text-theme-text-sec">{{ cp.snapshotResumen.personaANombre }}</p>
                 <p class="text-xs font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
-                <p class="text-[10px] text-theme-text-muted">
+                <p class="text-[0.625rem] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasA }} deuda(s)
                   <span v-if="cp.snapshotResumen.totalPagosA > 0"> y {{ cp.snapshotResumen.totalPagosA }} pago(s)</span>
                 </p>
               </div>
               <div>
-                <p class="text-[10px] text-theme-text-sec">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
+                <p class="text-[0.625rem] text-theme-text-sec">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
                 <p class="text-xs font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
-                <p class="text-[10px] text-theme-text-muted">
+                <p class="text-[0.625rem] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasB }} deuda(s)
                   <span v-if="cp.snapshotResumen.totalPagosB > 0"> y {{ cp.snapshotResumen.totalPagosB }} pago(s)</span>
                 </p>
@@ -112,7 +112,7 @@
 
           <!-- Auditoría de cambios en este período -->
           <div v-if="cp.auditoria && cp.auditoria.length > 0">
-            <p class="text-[10px] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">
+            <p class="text-[0.625rem] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">
               Cambios en este período ({{ cp.auditoria.length }})
             </p>
             <div class="space-y-1.5 max-h-48 overflow-y-auto">
@@ -152,7 +152,7 @@
                   </div>
                   <!-- Detailed debts for global payments -->
                   <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1 space-y-0.5">
-                    <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[10px] text-theme-text-sec flex items-center gap-1">
+                    <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[0.625rem] text-theme-text-sec flex items-center gap-1">
                       <span class="text-teal-400/60">S/ {{ dp.monto }}</span>
                       <span class="text-theme-text-muted">&rarr;</span>
                       <span class="text-theme-text-muted">{{ dp.concepto }}</span>
@@ -160,12 +160,12 @@
                   </div>
                   <div class="flex items-center gap-1.5 mt-0.5">
                     <span
-                      class="text-[10px] font-medium px-1.5 py-0.5 rounded-full"
+                      class="text-[0.625rem] font-medium px-1.5 py-0.5 rounded-full"
                       :class="entrada.esTuyo ? 'bg-theme-accent-bg text-theme-accent' : 'bg-theme-card-hover0/20 text-theme-text-muted'"
                     >
                       {{ entrada.nombreActor }}
                     </span>
-                    <span class="text-[10px] text-theme-text-muted">{{ formatHora(entrada.createdAt) }}</span>
+                    <span class="text-[0.625rem] text-theme-text-muted">{{ formatHora(entrada.createdAt) }}</span>
                   </div>
                 </div>
               </div>
@@ -173,7 +173,7 @@
           </div>
 
           <div v-else class="text-center py-2">
-            <p class="text-[10px] text-theme-text-muted">Sin cambios registrados en este período</p>
+            <p class="text-[0.625rem] text-theme-text-muted">Sin cambios registrados en este período</p>
           </div>
 
           <!-- Botón restaurar -->

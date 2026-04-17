@@ -1,6 +1,6 @@
 <template>
   <header class="sticky top-0 z-40 bg-theme-card backdrop-blur-sm border-b border-theme-border">
-    <div class="flex items-center justify-between px-4 lg:px-6 h-14 lg:h-16 max-w-lg lg:max-w-none mx-auto gap-2">
+    <div class="flex items-center justify-between px-4 lg:px-6 min-h-[3.5rem] lg:min-h-[4rem] py-2 max-w-lg lg:max-w-none mx-auto gap-2">
       <!-- Mobile menu button (left side) -->
       <button
         class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
@@ -18,7 +18,7 @@
       <!-- Title + subtitle -->
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2">
-          <h1 class="text-lg lg:text-xl font-semibold text-theme-text truncate">
+          <h1 class="text-lg lg:text-xl font-semibold text-theme-text leading-tight">
             <slot name="title">Mis Finanzas</slot>
           </h1>
           <!-- Badge (optional) -->

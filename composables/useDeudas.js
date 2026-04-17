@@ -405,24 +405,6 @@ export function useDeudas() {
     filtroEstado.value = 'todos'
   }
 
-  async function mergePersonas(personaPrincipalId, personasSecundariasIds) {
-    try {
-      const result = await apiFetch('/api/deudas/personas/merge', {
-        method: 'POST',
-        body: { personaPrincipalId, personasSecundariasIds },
-      })
-      await Promise.all([fetchResumen(), fetchPersonas()])
-      if (personaSeleccionada.value && personasSecundariasIds.includes(personaSeleccionada.value.id)) {
-        personaSeleccionada.value = null
-        deudasList.value = []
-      }
-      return result
-    } catch (e) {
-      error.value = e.message || 'Error al fusionar personas'
-      throw e
-    }
-  }
-
   return {
     personas, deudasList, pagos, pagosPersona, auditoriaPersona, resumen,
     checkpoints, guardando, restaurando, cargando: cargandoCheckpoints,
@@ -435,7 +417,7 @@ export function useDeudas() {
     fetchCheckpoints, crearCheckpoint, restaurarCheckpoint,
     createDeuda, updateDeuda, deleteDeuda,
     registrarPago, actualizarPago, archivarDeuda, revertirPago,
-    createPersona, deletePersona, desvincularPersona, mergePersonas,
+    createPersona, deletePersona, desvincularPersona,
     seleccionarPersona, volverALista, cambiarTab,
   }
 }

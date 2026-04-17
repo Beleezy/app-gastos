@@ -4,16 +4,6 @@
       <template #title>Deudas y Pagos</template>
       <template #actions>
         <button
-          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-theme-text-sec hover:text-amber-400 transition-colors"
-          title="Fusionar duplicados"
-          @click="showMerge = true"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-          </svg>
-          Merge
-        </button>
-        <button
           class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-theme-text-sec hover:text-emerald-400 transition-colors"
           @click="exportarDeudas"
         >
@@ -130,12 +120,6 @@
       @saved="onDeudaEditada"
     />
 
-    <!-- Merge personas duplicadas -->
-    <DeudasMergePersonas
-      v-if="showMerge"
-      @close="showMerge = false"
-    />
-
     <!-- Form Pago Global Modal -->
     <DeudasFormPagoGlobal
       v-if="showFormPagoGlobal && personaSeleccionada"
@@ -177,7 +161,6 @@ function exportarDeudas() {
   exportarExcel('deudas_resumen', columnas, personas.value || [])
 }
 
-const showMerge = ref(false)
 const showFormDeuda = ref(false)
 const showFormPago = ref(false)
 const showFormEditar = ref(false)
