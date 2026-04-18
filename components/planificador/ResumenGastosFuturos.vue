@@ -21,25 +21,32 @@
 
       <!-- Stats principales -->
       <div class="grid grid-cols-3 gap-2">
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3">
-          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Proyectos</p>
-          <p class="mt-1 text-lg font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
-          <p class="text-[11px] text-theme-text-sec">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
+        <div class="rounded-xl border border-theme-border bg-theme-input p-2.5 min-w-0">
+          <p class="text-[9px] uppercase tracking-[0.15em] text-theme-text-muted truncate">Proyectos</p>
+          <p class="mt-1 text-base font-semibold text-theme-text">{{ resumenFuturos.totalProyectos }}</p>
+          <p class="text-[10px] text-theme-text-sec truncate">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
         </div>
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3 min-w-0">
-          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Promedio</p>
-          <p class="mt-1 text-lg font-semibold text-sky-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}</p>
-          <p class="text-[11px] text-theme-text-sec whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }}</p>
+        <div class="rounded-xl border border-theme-border bg-theme-input p-2.5 min-w-0">
+          <p class="text-[9px] uppercase tracking-[0.15em] text-theme-text-muted truncate">Por proy.</p>
+          <p class="mt-1 text-sm font-semibold text-sky-300 truncate">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
+          <p class="text-[10px] text-theme-text-sec">promedio</p>
         </div>
-        <div class="rounded-xl border border-theme-border bg-theme-input p-3 min-w-0">
-          <p class="text-[10px] uppercase tracking-[0.18em] text-theme-text-muted">Por proy.</p>
-          <p class="mt-1 text-lg font-semibold text-violet-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
-          <p class="text-[11px] text-theme-text-sec">promedio</p>
+        <div class="rounded-xl border border-theme-border bg-theme-input p-2.5 min-w-0">
+          <p class="text-[9px] uppercase tracking-[0.15em] text-theme-text-muted truncate">Ahorro</p>
+          <p class="mt-1 text-sm font-semibold text-emerald-400 truncate">{{ currencySymbol }}&nbsp;{{ formatMonto(ahorroPotencial) }}</p>
+          <p class="text-[10px] text-theme-text-sec">potencial</p>
         </div>
       </div>
 
+      <!-- Inversion total -->
+      <div class="rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 min-w-0">
+        <p class="text-[9px] uppercase tracking-[0.15em] text-theme-text-muted">Inversión estimada</p>
+        <p class="mt-0.5 text-xl font-bold text-theme-text truncate">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}</p>
+        <p class="text-[11px] text-theme-text-sec truncate">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }}</p>
+      </div>
+
       <!-- Ahorro potencial -->
-      <div v-if="ahorroPotencial > 0" class="rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-3 py-2.5">
+      <div v-if="false && ahorroPotencial > 0" class="rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-3 py-2.5">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-2 min-w-0">
             <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15">

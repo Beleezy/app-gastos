@@ -223,6 +223,7 @@ const form = reactive({
 const saving = ref(false)
 const errorMsg = ref('')
 const mostrarAlcance = ref(false)
+useOverlayBack(mostrarAlcance, () => { mostrarAlcance.value = false })
 
 const { currencySymbol } = useCurrency()
 const { success: toastSuccess } = useToast()

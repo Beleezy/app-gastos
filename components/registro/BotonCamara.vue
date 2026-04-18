@@ -142,6 +142,37 @@ const videoEl = ref(null)
 const showCamera = ref(false)
 let stream = null
 
+// useOverlayBack handles the preview overlay (prop-based)
+const showPreviewRef = computed(() => props.showPreview)
+useOverlayBack(showPreviewRef, () => emit('cancel'))
+
+// Camera overlay uses manual history management because closing also stops the media stream
+const cameraHistoryId = ref(null)
+
+function onCameraPopState(event) {
+  if (showCamera.value && event.state?.__overlayId !== cameraHistoryId.value) {
+    cameraHistoryId.value = null
+    stopStream()
+    showCamera.value = false
+  }
+}
+
+onMounted(() => {
+  if (process.client) window.addEventListener('popstate', onCameraPopState)
+})
+
+onUnmounted(() => {
+  if (process.client) window.removeEventListener('popstate', onCameraPopState)
+  stopStream()
+})
+
+function stopStream() {
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop())
+    stream = null
+  }
+}
+
 function openCamera() {
   // On mobile (touch devices), use inline camera to avoid the OS killing the PWA
   const isMobile = navigator.maxTouchPoints > 0
@@ -159,6 +190,10 @@ async function startInlineCamera() {
       audio: false,
     })
     showCamera.value = true
+    const id = `camera-${Math.random().toString(36).slice(2, 9)}`
+    const current = window.history.state && typeof window.history.state === 'object' ? window.history.state : {}
+    window.history.pushState({ ...current, __overlayId: id }, '', window.location.href)
+    cameraHistoryId.value = id
     await nextTick()
     if (videoEl.value) {
       videoEl.value.srcObject = stream
@@ -207,11 +242,16 @@ function captureFrame() {
 }
 
 function closeCamera() {
-  showCamera.value = false
-  if (stream) {
-    stream.getTracks().forEach(t => t.stop())
-    stream = null
+  if (showCamera.value) {
+    showCamera.value = false
+    if (cameraHistoryId.value) {
+      if (window.history.state?.__overlayId === cameraHistoryId.value) {
+        window.history.back()
+      }
+      cameraHistoryId.value = null
+    }
   }
+  stopStream()
 }
 
 function onFileSelected(event) {
@@ -266,10 +306,6 @@ function retake() {
     openCamera()
   })
 }
-
-onUnmounted(() => {
-  closeCamera()
-})
 </script>
 
 <style scoped>

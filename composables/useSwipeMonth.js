@@ -32,10 +32,12 @@ export function useSwipeMonth(onPrev, onNext, options = {}) {
     isTracking = false
 
     const diffX = e.changedTouches[0].clientX - startX
-    const diffY = Math.abs(e.changedTouches[0].clientY - startY)
+    const diffY = e.changedTouches[0].clientY - startY
+    const absDiffX = Math.abs(diffX)
+    const absDiffY = Math.abs(diffY)
 
-    // Ignorar si el gesto fue más vertical que horizontal
-    if (diffY > verticalTolerance) return
+    // Ignorar si el gesto fue más vertical que horizontal, o si el vertical supera la tolerancia
+    if (absDiffY > verticalTolerance || absDiffY > absDiffX) return
 
     if (diffX > threshold) {
       onPrev()

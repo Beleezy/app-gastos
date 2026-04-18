@@ -21,6 +21,14 @@ export default defineNuxtConfig({
       sameSite: 'lax',
       secure: true,
     },
+    clientOptions: {
+      auth: {
+        flowType: 'pkce',
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    },
   },
 
   app: {

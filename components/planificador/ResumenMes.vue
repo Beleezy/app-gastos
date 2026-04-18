@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-0 pt-1 lg:pt-0 pb-2">
+  <div class="px-4 lg:px-0 pt-0 lg:pt-0 pb-2">
     <!-- Month Selector -->
     <SharedMonthSelector
       :label="`${nombreMes} ${anioActual}`"
@@ -262,6 +262,7 @@ const {
 
 const duplicando = ref(false)
 const showSelectorMes = ref(false)
+useOverlayBack(showSelectorMes, () => { showSelectorMes.value = false })
 const { success, error: toastError } = useToast()
 
 const { config, fetchConfig: fetchConfigData } = useConfiguraciones()

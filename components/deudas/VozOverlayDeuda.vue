@@ -114,6 +114,8 @@ const {
   cerrarVozOverlay, cerrarVozOverlaySiInactivo,
   toggleVoz, enviarDraft, startEdit, saveEdit, cancelEdit, regrabar, descartarDraft,
 } = useVoiceDeuda()
+
+useOverlayBack(showVozOverlay, cerrarVozOverlay)
 </script>
 
 <style scoped>

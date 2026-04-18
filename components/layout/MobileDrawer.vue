@@ -116,6 +116,7 @@ import { h } from 'vue'
 const route = useRoute()
 
 const { isOpen, close } = useMobileDrawer()
+useOverlayBack(isOpen, close)
 const { personas } = useDeudas()
 const { resumen: resumenPlan } = usePlanificador()
 const { countPendientes: vinculosPendientes } = useVinculos()

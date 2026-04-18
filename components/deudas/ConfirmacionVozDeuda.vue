@@ -105,6 +105,8 @@ const {
   deudasParseadas, pagosParseados, guardando,
   cerrarConfirmVoz, reintentarParse, confirmarDeudasVoz,
 } = useVoiceDeuda()
+
+useOverlayBack(showConfirmVoz, cerrarConfirmVoz)
 </script>
 
 <style scoped>

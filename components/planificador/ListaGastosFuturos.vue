@@ -253,9 +253,15 @@
               </svg>
               {{ estaExpandido(proyecto.id) ? 'Ocultar detalle' : 'Ver detalle' }}
             </button>
-            <div class="flex items-center gap-4">
-              <button class="text-xs text-theme-text-sec transition-colors hover:text-theme-accent" @click="emit('editar', proyecto)">Editar proyecto</button>
-              <button class="text-xs text-theme-text-sec transition-colors hover:text-red-400" @click="proyectoAEliminar = proyecto">Eliminar</button>
+            <div class="flex items-center gap-2">
+              <button class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-card px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent" @click="emit('editar', proyecto)">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                Editar
+              </button>
+              <button class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-card px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-red-400/50 hover:text-red-400" @click="proyectoAEliminar = proyecto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                Eliminar
+              </button>
             </div>
           </div>
         </div>
@@ -337,15 +343,15 @@
                     <p class="text-[11px] font-medium text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
                     <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
                   </div>
-                  <div v-if="!detalle.estadoDecision" class="flex items-center gap-3">
+                  <div v-if="!detalle.estadoDecision" class="flex items-center gap-1.5">
                     <button
-                      class="text-[11px] text-theme-text-sec transition-colors hover:text-theme-accent"
+                      class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-input px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent"
                       @click="iniciarEdicionDetalle(detalle)"
                     >
                       Editar
                     </button>
                     <button
-                      class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                      class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-input px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-red-400/50 hover:text-red-400"
                       @click="eliminarDetalleInline(proyecto, detalle)"
                     >
                       Eliminar
@@ -885,10 +891,6 @@ const decidiendo = ref(false)
 watch(gastosFuturos, (items) => {
   if (!items.length) {
     expandido.value = {}
-    return
-  }
-  if (!Object.keys(expandido.value).length) {
-    expandido.value = { [items[0].id]: true }
   }
 }, { immediate: true })
 

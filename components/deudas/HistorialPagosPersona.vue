@@ -173,6 +173,9 @@ const pagoRevertiendo = ref(null)
 const revirtiendo = ref(false)
 const pagoEditando = ref(null)
 const guardandoEdicion = ref(false)
+
+const isPagoEditandoOpen = computed(() => pagoEditando.value !== null)
+useOverlayBack(isPagoEditandoOpen, () => { pagoEditando.value = null })
 const { currencySymbol, formatMonto } = useCurrency()
 
 const totalPagos = computed(() =>

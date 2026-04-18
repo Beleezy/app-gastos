@@ -13,7 +13,7 @@
       </div>
     </Transition>
 
-    <div class="px-4 lg:px-0 pt-3 lg:pt-5 lg:max-w-md">
+    <div class="px-4 lg:px-0 pt-1 lg:pt-3 lg:max-w-md">
       <div class="flex items-center gap-1.5">
         <button
           v-for="seccion in secciones"

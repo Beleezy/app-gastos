@@ -75,13 +75,22 @@
       <div v-for="cat in categoriasFiltered" :key="cat.categoriaId" class="mb-5">
         <!-- Category Header -->
         <div class="mb-2.5">
-          <div class="flex items-center gap-2 mb-1">
-            <span class="w-1.5 h-1.5 rounded-full" :style="{ backgroundColor: cat.color }"></span>
-            <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">{{ cat.nombre }}</h3>
-            <span class="text-xs text-theme-text-sec ml-auto">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
-          </div>
+          <button class="w-full flex items-center gap-2 mb-1 text-left" @click="toggleCategoria(cat.categoriaId)">
+            <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: cat.color }"></span>
+            <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider flex-1">{{ cat.nombre }}</h3>
+            <span class="text-xs text-theme-text-sec">{{ cat.gastos.length }} ítem{{ cat.gastos.length !== 1 ? 's' : '' }}</span>
+            <span class="text-xs font-semibold text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200 shrink-0"
+              :class="categoriaColapsada(cat.categoriaId) ? '-rotate-90' : ''"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
           <!-- Real vs Planned mini bar -->
-          <div v-if="cat.totalReal > 0" class="ml-3.5 space-y-1">
+          <div v-if="cat.totalReal > 0 && !categoriaColapsada(cat.categoriaId)" class="ml-3.5 space-y-1">
             <div class="flex items-center gap-2">
               <div class="flex-1 h-1.5 bg-theme-input rounded-full overflow-hidden">
                 <div
@@ -110,6 +119,7 @@
         </div>
 
         <!-- Expense Items -->
+        <template v-if="!categoriaColapsada(cat.categoriaId)">
         <div
           v-for="gasto in cat.gastos"
           :key="gasto.id"
@@ -203,6 +213,7 @@
             </button>
           </div>
         </div>
+        </template>
       </div>
 
       <!-- Bottom spacer for FAB -->
@@ -256,6 +267,22 @@ const { success, show: toastShow } = useToast()
 const filtroActual = ref('todos')
 const busqueda = ref('')
 const ordenActual = ref('fecha')
+
+const categoriasColapsadas = ref(new Set())
+
+function toggleCategoria(categoriaId) {
+  const next = new Set(categoriasColapsadas.value)
+  if (next.has(categoriaId)) {
+    next.delete(categoriaId)
+  } else {
+    next.add(categoriaId)
+  }
+  categoriasColapsadas.value = next
+}
+
+function categoriaColapsada(categoriaId) {
+  return categoriasColapsadas.value.has(categoriaId)
+}
 
 function hoyISO() {
   return useFechaPeru().fechaHoy()
@@ -412,6 +439,8 @@ function formatFecha(fecha) {
 }
 
 const gastoParaEliminar = ref(null)
+const isEliminarOpen = computed(() => gastoParaEliminar.value !== null)
+useOverlayBack(isEliminarOpen, () => { gastoParaEliminar.value = null })
 
 function eliminarGasto(gasto) {
   if (gasto.esRecurrente && gasto.recurrenteGrupoId) {

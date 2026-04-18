@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-0 pt-2 lg:pt-0 pb-2">
+  <div class="px-4 lg:px-0 pt-0 pb-2">
     <SharedMonthSelector
       :label="`${nombreMes} ${anioActual}`"
       :es-actual="esHoy"

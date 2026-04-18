@@ -70,6 +70,9 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'confirm'])
 
 const checkboxChecked = ref(false)
+const isOpen = computed(() => props.modelValue)
+
+useOverlayBack(isOpen, () => emit('update:modelValue', false))
 
 watch(() => props.modelValue, (v) => {
   if (!v) checkboxChecked.value = false
