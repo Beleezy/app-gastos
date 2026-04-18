@@ -262,44 +262,27 @@ export function getModelUsageInfo(model, runtimeConfig) {
 }
 
 /**
- * Selecciona el mejor modelo con capacidad disponible.
- * Prioriza modelos que no estén cerca del límite, luego por menor uso.
+ * Selecciona el primer modelo con capacidad disponible respetando el orden
+ * definido en GEMINI_MODEL. El orden de la variable de entorno es la prioridad.
  * Si ninguno tiene capacidad, retorna null.
  */
 export function selectBestModel(models, runtimeConfig) {
   if (models.length === 0) return null
-  if (models.length === 1) {
-    return hasAvailableCapacity(models[0], runtimeConfig) ? models[0] : null
+
+  // Respetar el orden original: usar el primero que tenga capacidad
+  for (const model of models) {
+    if (hasAvailableCapacity(model, runtimeConfig)) return model
   }
 
-  // Filtrar modelos con capacidad disponible
-  const available = models.filter(m => hasAvailableCapacity(m, runtimeConfig))
-
-  if (available.length === 0) return null
-
-  // Entre los disponibles, elegir el de menor uso por minuto
-  let bestModel = available[0]
-  let bestCount = getRequestCountPerMinute(available[0])
-
-  for (let i = 1; i < available.length; i++) {
-    const count = getRequestCountPerMinute(available[i])
-    if (count < bestCount) {
-      bestCount = count
-      bestModel = available[i]
-    }
-  }
-
-  return bestModel
+  return null
 }
 
 /**
  * Obtiene los modelos restantes para fallback (excluyendo el seleccionado),
- * filtrados por capacidad disponible y ordenados por menor uso.
+ * respetando el orden original de la variable de entorno.
  */
 export function getFallbackModels(models, selectedModel, runtimeConfig) {
-  return models
-    .filter(m => m !== selectedModel && hasAvailableCapacity(m, runtimeConfig))
-    .sort((a, b) => getRequestCountPerMinute(a) - getRequestCountPerMinute(b))
+  return models.filter(m => m !== selectedModel && hasAvailableCapacity(m, runtimeConfig))
 }
 
 /**
