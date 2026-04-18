@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest } from '../../utils/geminiModels.js'
+import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -94,13 +94,17 @@ Reglas:
   const configuredModels = parseModelList(runtimeConfig.geminiModel || 'gemini-2.5-flash')
   const validModels = await getValidModels(configuredModels, apiKey)
 
-  // Filter to models that support vision (most Gemini models do)
-  const primaryModel = selectBestModel(validModels)
-  const fallbackModels = getFallbackModels(validModels, primaryModel)
+  // Seleccionar el modelo con capacidad disponible (no a 1 del límite RPM/RPD)
+  const primaryModel = selectBestModel(validModels, runtimeConfig)
+  if (!primaryModel) {
+    const waitMsg = getWaitMessage(validModels, runtimeConfig)
+    throw createError({ statusCode: 429, message: waitMsg })
+  }
+  const fallbackModels = getFallbackModels(validModels, primaryModel, runtimeConfig)
   const modelsToTry = [primaryModel, ...fallbackModels]
 
-  const MAX_RETRIES = 3
-  const RETRY_DELAYS = [0, 2000, 5000]
+  const MAX_RETRIES = runtimeConfig.geminiMaxRetries || 3
+  const RETRY_DELAYS = Array.from({ length: MAX_RETRIES }, (_, i) => i === 0 ? 0 : Math.min(i * 2000, 10000))
   let lastError = null
   let lastErrorUserFriendly = null
 

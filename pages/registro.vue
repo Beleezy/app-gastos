@@ -78,6 +78,7 @@
               :favoritos="topFavoritos"
               :categorias="categorias"
               @add="onQuickAdd"
+              @remove="eliminarFavorito"
             />
           </div>
 
@@ -444,7 +445,7 @@ const {
 })
 
 // Favoritos (E#1)
-const { topFavoritos, cargar: cargarFavoritos, registrarUsoBulk } = useGastoFavoritos()
+const { topFavoritos, cargar: cargarFavoritos, registrarUsoBulk, eliminarFavorito } = useGastoFavoritos()
 
 // Estado de UI
 const vistaRegistro = ref('historial')

@@ -239,9 +239,9 @@ function getEmoji(nombre) {
 }
 
 function esPasado(dia) {
-  if (anioActual.value < hoy.getFullYear()) return true
-  if (anioActual.value === hoy.getFullYear() && mesActual.value < hoy.getMonth() + 1) return true
-  if (anioActual.value === hoy.getFullYear() && mesActual.value === hoy.getMonth() + 1 && dia < hoy.getDate()) return true
+  if (anioActual.value < hoyAnio) return true
+  if (anioActual.value === hoyAnio && mesActual.value < hoyMes) return true
+  if (anioActual.value === hoyAnio && mesActual.value === hoyMes && dia < hoyDia) return true
   return false
 }
 

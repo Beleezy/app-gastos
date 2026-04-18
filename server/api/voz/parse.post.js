@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest } from '../../utils/geminiModels.js'
+import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -88,9 +88,14 @@ Reglas:
   // Validar cuáles están disponibles para esta API key
   const validModels = await getValidModels(configuredModels, apiKey)
 
-  // Seleccionar el modelo con menos peticiones en el minuto actual
-  const primaryModel = selectBestModel(validModels)
-  const fallbackModels = getFallbackModels(validModels, primaryModel)
+  // Seleccionar el modelo con capacidad disponible (no a 1 del límite RPM/RPD)
+  const primaryModel = selectBestModel(validModels, runtimeConfig)
+  if (!primaryModel) {
+    // Todos los modelos están al límite
+    const waitMsg = getWaitMessage(validModels, runtimeConfig)
+    throw createError({ statusCode: 429, message: waitMsg })
+  }
+  const fallbackModels = getFallbackModels(validModels, primaryModel, runtimeConfig)
   const modelsToTry = [primaryModel, ...fallbackModels]
 
   // Determinar si es parsing de deudas o gastos
@@ -154,8 +159,8 @@ Reglas:
 - Si no puedes interpretar algo, usa concepto "Deuda no especificada" y tipo "me_deben".`
   }
 
-  const MAX_RETRIES = 3
-  const RETRY_DELAYS = [0, 2000, 5000]
+  const MAX_RETRIES = runtimeConfig.geminiMaxRetries || 3
+  const RETRY_DELAYS = Array.from({ length: MAX_RETRIES }, (_, i) => i === 0 ? 0 : Math.min(i * 2000, 10000))
   let lastError = null
   let lastErrorUserFriendly = null
 

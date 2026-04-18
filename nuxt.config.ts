@@ -16,6 +16,11 @@ export default defineNuxtConfig({
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
   supabase: {
     redirect: false, // el middleware propio lo manejará
+    cookieOptions: {
+      maxAge: 60 * 60 * 24 * 365, // 1 año — persistir sesión en PWA
+      sameSite: 'lax',
+      secure: true,
+    },
   },
 
   app: {
@@ -87,6 +92,8 @@ export default defineNuxtConfig({
     databaseUrl: process.env.DATABASE_URL || '',
     geminiApiKey: process.env.GEMINI_API_KEY || '',
     geminiModel: process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite-preview;gemini-2.5-flash',
+    geminiMaxRetries: parseInt(process.env.GEMINI_MAX_RETRIES || '3', 10),
+    geminiRateLimits: process.env.GEMINI_RATE_LIMITS || '',
     supabaseUrl: process.env.SUPABASE_URL || '',
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     public: {
