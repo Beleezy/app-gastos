@@ -81,10 +81,10 @@
         </svg>
       </button>
       <button
-        class="w-14 h-14 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse"
+        class="w-12 h-12 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse"
         @click="showFormDeuda = true"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>
       </button>

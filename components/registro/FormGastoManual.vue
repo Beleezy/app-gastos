@@ -1,5 +1,5 @@
 <template>
-  <SharedBaseBottomSheet :title="editando ? 'Editar gasto' : 'Nuevo gasto'" @close="$emit('close')">
+  <SharedBaseBottomSheet :title="editando ? 'Editar gasto' : (duplicando ? 'Copiar gasto' : 'Nuevo gasto')" @close="$emit('close')">
     <!-- Concepto con autocompletado -->
     <div class="relative">
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
@@ -109,7 +109,7 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
       </svg>
-      {{ saving ? 'Guardando...' : (editando ? 'Actualizar gasto' : 'Registrar gasto') }}
+      {{ saving ? 'Guardando...' : (editando ? 'Actualizar gasto' : (duplicando ? 'Registrar copia' : 'Registrar gasto')) }}
     </button>
   </SharedBaseBottomSheet>
 </template>
@@ -118,21 +118,23 @@
 const props = defineProps({
   categorias: { type: Array, default: () => [] },
   gastoEditar: { type: Object, default: null },
+  gastoDuplicar: { type: Object, default: null },
 })
 
 const emit = defineEmits(['close', 'saved'])
 
 const editando = computed(() => !!props.gastoEditar)
+const duplicando = computed(() => !props.gastoEditar && !!props.gastoDuplicar)
 
 const { fechaHoy, horaActual } = useFechaPeru()
 
 const form = reactive({
-  concepto: props.gastoEditar?.concepto || '',
-  monto: props.gastoEditar?.monto || null,
-  categoriaId: props.gastoEditar?.categoriaId || null,
+  concepto: props.gastoEditar?.concepto || props.gastoDuplicar?.concepto || '',
+  monto: props.gastoEditar?.monto || props.gastoDuplicar?.monto || null,
+  categoriaId: props.gastoEditar?.categoriaId || props.gastoDuplicar?.categoriaId || null,
   fecha: props.gastoEditar?.fecha || fechaHoy(),
   hora: props.gastoEditar?.hora?.substring(0, 5) || horaActual(),
-  notas: props.gastoEditar?.notas || '',
+  notas: props.gastoEditar?.notas || props.gastoDuplicar?.notas || '',
 })
 
 const saving = ref(false)

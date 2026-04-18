@@ -148,6 +148,7 @@ let isSwiping = false
 
 function onTouchStart(e) {
   touchStartX = e.touches[0].clientX
+  touchCurrentX = e.touches[0].clientX
   isSwiping = true
 }
 

@@ -13,20 +13,21 @@
       </div>
     </Transition>
 
-    <div class="px-4 lg:px-0 pt-1 lg:pt-3 lg:max-w-md">
-      <div class="flex items-center gap-1.5">
+    <div class="px-4 lg:px-0 pt-2 pb-1 lg:pt-3 lg:max-w-md">
+      <div class="flex items-center gap-1">
         <button
           v-for="seccion in secciones"
           :key="seccion.value"
-          class="rounded-full px-3 py-1 text-xs font-medium transition-colors"
+          class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors"
           :class="seccionActual === seccion.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-muted hover:text-theme-text-sec'"
           @click="seccionActual = seccion.value"
         >
           {{ seccion.label }}
         </button>
+        <div class="w-px h-4 bg-theme-border mx-1.5 shrink-0"></div>
         <NuxtLink
           to="/ahorros"
-          class="rounded-full px-3 py-1 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+          class="rounded-full px-3.5 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 transition-colors"
         >
           Ahorros
         </NuxtLink>
@@ -87,10 +88,10 @@
     </Transition>
 
     <button
-      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-theme-accent opacity-70 shadow-lg shadow-theme-accent/25 transition-all duration-300 hover:opacity-85 active:scale-90"
+      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-theme-accent opacity-70 shadow-lg shadow-theme-accent/25 transition-all duration-300 hover:opacity-85 active:scale-90"
       @click="abrirFormulario"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
       </svg>
     </button>

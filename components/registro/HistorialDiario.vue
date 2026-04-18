@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4">
+  <div class="px-4" data-no-month-swipe>
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-2">
       <div v-for="i in 3" :key="i" class="space-y-1.5">
@@ -254,27 +254,33 @@
           class="px-2.5 py-1.5 rounded-lg bg-theme-border-md text-theme-text-sec text-[11px] font-medium hover:text-theme-text transition-colors whitespace-nowrap shrink-0"
           @click="toggleSelectAllDia"
         >
-          {{ todosSeleccionadosEnDia ? 'Quitar' : 'Todo dia' }}
+          {{ todosSeleccionadosEnDia ? 'Cancelar' : 'Todo dia' }}
         </button>
+        <!-- Editar: solo ícono en móvil, texto en desktop -->
         <button
-          class="px-3 py-1.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[11px] font-semibold hover:bg-theme-accent-bg active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap shrink-0"
+          class="py-1.5 rounded-lg bg-theme-accent-bg text-theme-accent font-semibold hover:bg-theme-accent-bg active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shrink-0"
+          :class="selectedIds.size === 0 ? 'px-2.5 cursor-not-allowed' : 'px-2.5 lg:px-3'"
           :disabled="selectedIds.size === 0"
+          aria-label="Editar seleccionados"
           @click="solicitarBulkEdit"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
-          Editar
+          <span class="hidden lg:inline text-[11px]">Editar</span>
         </button>
+        <!-- Eliminar: solo ícono en móvil, texto en desktop -->
         <button
-          class="px-3 py-1.5 rounded-lg bg-red-500/15 text-red-400 text-[11px] font-semibold hover:bg-red-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap shrink-0"
+          class="py-1.5 rounded-lg bg-red-500/15 text-red-400 font-semibold hover:bg-red-500/25 active:scale-95 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 shrink-0"
+          :class="selectedIds.size === 0 ? 'px-2.5 cursor-not-allowed' : 'px-2.5 lg:px-3'"
           :disabled="selectedIds.size === 0"
+          aria-label="Eliminar seleccionados"
           @click="solicitarBulkDelete"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          Eliminar
+          <span class="hidden lg:inline text-[11px]">Eliminar</span>
         </button>
       </div>
     </Transition>
@@ -292,7 +298,7 @@ const props = defineProps({
   mostrarVistaSemana: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['edit', 'delete', 'duplicate', 'request-voice', 'request-manual', 'bulk-delete', 'bulk-edit'])
+const emit = defineEmits(['edit', 'delete', 'duplicate', 'request-voice', 'request-manual', 'bulk-delete', 'bulk-edit', 'seleccion-activa'])
 
 const { vibrate } = useHaptic()
 
@@ -343,6 +349,7 @@ const todosSeleccionadosEnDia = computed(() => {
 function activarSeleccionDia(dia) {
   vibrate([15, 30, 15])
   seleccionActiva.value = true
+  emit('seleccion-activa', true)
   diaSeleccionActual.value = dia.fecha
   const nuevo = new Set(diasExpandidos.value)
   nuevo.add(dia.fecha)
@@ -353,6 +360,7 @@ function activarSeleccionDia(dia) {
 function cancelarSeleccion() {
   vibrate(10)
   seleccionActiva.value = false
+  emit('seleccion-activa', false)
   selectedIds.value = new Set()
   diaSeleccionActual.value = null
 }
@@ -369,6 +377,7 @@ function onItemLongPress(gasto) {
   if (seleccionActiva.value) return
   vibrate([20, 40, 20])
   seleccionActiva.value = true
+  emit('seleccion-activa', true)
   diaSeleccionActual.value = gasto.fecha
   selectedIds.value = new Set([gasto.id])
 }
@@ -542,6 +551,29 @@ function getStats(dia) {
 }
 
 const { currencySymbol, formatMonto } = useCurrency()
+
+// Botón atrás del dispositivo cancela la selección en vez de navegar
+function onPopState(e) {
+  if (seleccionActiva.value) {
+    e.preventDefault()
+    cancelarSeleccion()
+    // Restaurar la entrada de historial que se consumió
+    history.pushState(null, '', location.href)
+  }
+}
+
+watch(seleccionActiva, (activa) => {
+  if (activa) {
+    history.pushState(null, '', location.href)
+    window.addEventListener('popstate', onPopState)
+  } else {
+    window.removeEventListener('popstate', onPopState)
+  }
+})
+
+onUnmounted(() => {
+  window.removeEventListener('popstate', onPopState)
+})
 </script>
 
 <style scoped>

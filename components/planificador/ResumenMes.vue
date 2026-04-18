@@ -11,7 +11,7 @@
     />
 
     <!-- Budget Summary Card -->
-    <div class="relative bg-gradient-to-br from-theme-card to-theme-card/90 rounded-2xl p-4 space-y-4 border border-theme-border overflow-hidden">
+    <div class="relative bg-gradient-to-br from-theme-card to-theme-card/90 rounded-2xl px-4 pt-3 pb-4 space-y-3 border border-theme-border overflow-hidden">
       <!-- Decorative accent -->
       <div class="absolute top-0 right-0 w-32 h-32 bg-[var(--color-accent)]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
 

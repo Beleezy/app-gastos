@@ -123,9 +123,41 @@
         <div
           v-for="gasto in cat.gastos"
           :key="gasto.id"
-          class="bg-theme-card rounded-xl p-3.5 mb-2 border transition-all"
-          :class="esVencido(gasto) ? 'border-red-500/40' : (esHoyGasto(gasto) && gasto.estado === 'pendiente' ? 'border-orange-500/40' : 'border-theme-border')"
+          class="swipe-item-wrapper relative overflow-hidden rounded-xl mb-2"
         >
+          <!-- Swipe derecha: Editar -->
+          <div
+            class="swipe-reveal-action swipe-bg-edit absolute inset-y-0 left-0 flex items-center pl-4"
+            :class="(swipeOffsets[gasto.id] || 0) > 20 ? 'opacity-100' : 'opacity-0'"
+          >
+            <div class="flex items-center gap-2 text-theme-accent">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span class="text-xs font-semibold">Editar</span>
+            </div>
+          </div>
+          <!-- Swipe izquierda: Eliminar -->
+          <div
+            class="swipe-reveal-action swipe-bg-delete absolute inset-y-0 right-0 flex items-center pr-4"
+            :class="(swipeOffsets[gasto.id] || 0) < -20 ? 'opacity-100' : 'opacity-0'"
+          >
+            <div class="flex items-center gap-2 text-red-400">
+              <span class="text-xs font-semibold">Eliminar</span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </div>
+          </div>
+          <!-- Card principal con transform -->
+          <div
+            class="bg-theme-card rounded-xl p-3.5 border transition-all"
+            :class="esVencido(gasto) ? 'border-red-500/40' : (esHoyGasto(gasto) && gasto.estado === 'pendiente' ? 'border-orange-500/40' : 'border-theme-border')"
+            :style="{ transform: `translateX(${swipeOffsets[gasto.id] || 0}px)`, transition: swipeDragging[gasto.id] ? 'none' : 'transform 0.25s ease' }"
+            @touchstart.passive="onSwipeTouchStart($event, gasto.id)"
+            @touchmove.passive="onSwipeTouchMove($event, gasto.id)"
+            @touchend="onSwipeTouchEnd($event, gasto)"
+          >
           <div class="flex items-start justify-between">
             <div class="flex items-start gap-3">
               <div
@@ -212,7 +244,8 @@
               Eliminar
             </button>
           </div>
-        </div>
+          </div><!-- /card con transform -->
+        </div><!-- /swipe-item-wrapper -->
         </template>
       </div>
 
@@ -477,4 +510,66 @@ async function marcarPagadoRapido(gasto) {
     // error queda en composable
   }
 }
+
+// ─── Swipe por ítem ──────────────────────────────────────
+const SWIPE_THRESHOLD = 70
+const MAX_SWIPE = 110
+const swipeOffsets = reactive({})
+const swipeDragging = reactive({})
+const swipeBlockFlags = reactive({})
+const swipeStartX = {}
+const swipeStartY = {}
+
+function onSwipeTouchStart(e, id) {
+  const t = e.touches[0]
+  swipeStartX[id] = t.clientX
+  swipeStartY[id] = t.clientY
+  swipeDragging[id] = true
+  swipeBlockFlags[id] = false
+}
+
+function onSwipeTouchMove(e, id) {
+  if (!swipeDragging[id] || swipeBlockFlags[id]) return
+  const t = e.touches[0]
+  const dx = t.clientX - swipeStartX[id]
+  const dy = t.clientY - swipeStartY[id]
+  if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+    swipeBlockFlags[id] = true
+    swipeOffsets[id] = 0
+    return
+  }
+  swipeOffsets[id] = Math.max(-MAX_SWIPE, Math.min(MAX_SWIPE, dx))
+}
+
+function onSwipeTouchEnd(e, gasto) {
+  const id = gasto.id
+  if (!swipeDragging[id]) {
+    swipeOffsets[id] = 0
+    return
+  }
+  swipeDragging[id] = false
+  const offset = swipeOffsets[id] || 0
+  swipeOffsets[id] = 0
+  if (swipeBlockFlags[id]) return
+  if (offset <= -SWIPE_THRESHOLD) {
+    eliminarGasto(gasto)
+  } else if (offset >= SWIPE_THRESHOLD) {
+    emit('editar', gasto)
+  }
+}
 </script>
+
+<style scoped>
+.swipe-item-wrapper {
+  touch-action: pan-y;
+}
+.swipe-reveal-action {
+  transition: opacity 0.2s ease;
+}
+.swipe-bg-edit {
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.15), transparent);
+}
+.swipe-bg-delete {
+  background: linear-gradient(to left, rgba(239, 68, 68, 0.15), transparent);
+}
+</style>

@@ -17,6 +17,12 @@ export function useSwipeMonth(onPrev, onNext, options = {}) {
   function onTouchStart(e) {
     if (isModalOpen.value) return
 
+    // No iniciar swipe de mes si el toque comienza dentro de una zona que maneja su propio swipe
+    if (e.target?.closest?.('[data-no-month-swipe]') || e.target?.closest?.('.swipe-wrapper')) {
+      isTracking = false
+      return
+    }
+
     startX = e.touches[0].clientX
     startY = e.touches[0].clientY
     isTracking = true

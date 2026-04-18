@@ -207,6 +207,7 @@
                   @bulk-delete="onBulkDeleteSolicitado"
                   @request-voice="onStartListening"
                   @request-manual="showFormManual = true"
+                  @seleccion-activa="seleccionMultipleActiva = $event"
                 />
 
                 <Suspense v-else-if="vistaRegistro === 'stats'">
@@ -247,13 +248,14 @@
       </div>
     </div>
 
-    <!-- FAB móvil -->
+    <!-- FAB móvil (oculto cuando selección múltiple activa) -->
     <button
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse lg:hidden"
+      v-if="!seleccionMultipleActiva"
+      class="fixed right-4 bottom-24 z-40 w-12 h-12 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse lg:hidden"
       aria-label="Agregar gasto manual"
       @click="showFormManual = true"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
       </svg>
     </button>
@@ -293,6 +295,7 @@
       v-if="showFormManual"
       :categorias="categorias"
       :gasto-editar="gastoEditar"
+      :gasto-duplicar="gastoDuplicar"
       @close="cerrarFormManual"
       @saved="onGastoManualSaved"
     />
@@ -452,7 +455,9 @@ const vistaRegistro = ref('historial')
 const mostrarFiltros = ref(false)
 const showFormManual = ref(false)
 const gastoEditar = ref(null)
+const gastoDuplicar = ref(null)
 const toastMsg = ref('')
+const seleccionMultipleActiva = ref(false)
 
 const tabsVista = [
   { value: 'historial', label: 'Historial' },
@@ -572,26 +577,11 @@ async function onQuickAdd(chip) {
   }
 }
 
-// Duplicar gasto (E#2)
-async function duplicarGasto(gasto) {
+// Duplicar gasto (E#2) — abre formulario con datos pre-cargados
+function duplicarGasto(gasto) {
   vibrate([10, 30, 10])
-  const hoy = useFechaPeru().fechaHoy()
-  const gastoConId = {
-    concepto: gasto.concepto,
-    monto: Number(gasto.monto),
-    categoriaId: gasto.categoriaId,
-    fecha: hoy,
-  }
-  const tempIds = pushOptimisticGastos([gastoConId])
-  showToast(`Duplicado: ${gasto.concepto}`)
-  try {
-    await createGastosBulk([gastoConId], null, 'manual')
-    registrarUsoBulk([gastoConId])
-    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
-  } catch (e) {
-    rollbackOptimistic(tempIds)
-    toastError(handleApiError(e) || 'No se pudo duplicar')
-  }
+  gastoDuplicar.value = gasto
+  showFormManual.value = true
 }
 
 function showToast(msg) {
@@ -639,6 +629,7 @@ function abrirEdicion(gasto) {
 function cerrarFormManual() {
   showFormManual.value = false
   gastoEditar.value = null
+  gastoDuplicar.value = null
 }
 
 async function onGastoManualSaved(gasto) {
