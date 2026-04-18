@@ -28,17 +28,17 @@
           <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
             <div class="flex items-center gap-1.5 mb-1">
               <span
-                class="text-xs font-semibold px-1.5 py-0.5 rounded-md"
+                class="text-[0.7rem] font-semibold px-1.5 py-0.5 rounded-md"
                 :class="getAccionBadgeClass(entrada.accion)"
               >
                 {{ getAccionLabel(entrada.accion) }}
               </span>
-              <span class="text-[0.625rem] text-theme-text-sec">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
+              <span class="text-[0.65rem] text-theme-text-sec">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
             </div>
-            <p v-if="!tieneDetallesColoreados(entrada)" class="text-xs text-theme-text-sec">{{ entrada.descripcion }}</p>
+            <p v-if="!tieneDetallesColoreados(entrada)" class="text-[0.7rem] text-theme-text-sec">{{ entrada.descripcion }}</p>
             <!-- Detailed changes for edits -->
             <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1 space-y-1">
-              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-xs text-theme-text-sec flex items-center gap-1.5">
+              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[0.7rem] text-theme-text-sec flex items-center gap-1.5">
                 <span class="text-theme-text-muted font-semibold">{{ cambio.label || campo }}:</span>
                 <span class="text-red-400/80 line-through">{{ cambio.antes || '(vacío)' }}</span>
                 <span class="text-theme-text-sec">&rarr;</span>
@@ -47,13 +47,13 @@
             </div>
             <!-- Detailed debts for global payments -->
             <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1.5 space-y-0.5">
-              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[0.625rem] text-theme-text-sec flex items-center gap-1">
+              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[0.65rem] text-theme-text-sec flex items-center gap-1">
                 <span class="text-teal-400/70">S/ {{ dp.monto }}</span>
                 <span class="text-theme-text-muted">&rarr;</span>
                 <span class="text-theme-text-muted">{{ dp.concepto }}</span>
               </div>
             </div>
-            <p class="text-[0.625rem] text-theme-text-muted mt-1">{{ formatFecha(entrada.createdAt) }}</p>
+            <p class="text-[0.65rem] text-theme-text-muted mt-1">{{ formatFecha(entrada.createdAt) }}</p>
           </div>
         </div>
       </div>

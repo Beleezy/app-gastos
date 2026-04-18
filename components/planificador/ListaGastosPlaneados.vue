@@ -39,7 +39,7 @@
         {{ f.label }}
         <span
           class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
-          :class="filtroActual === f.value ? 'bg-white/25 text-white' : 'bg-theme-border-md text-theme-text'"
+          :class="filtroActual === f.value ? 'bg-black/15 text-inherit' : 'bg-theme-border-md text-theme-text'"
         >
           {{ f.count }}
         </span>

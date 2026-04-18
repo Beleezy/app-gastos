@@ -1,4 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+const APP_VERSION = '0.9'
+const APP_NAME = 'Mis Finanzas'
+const APP_SHORT_NAME = 'Finanzas'
+
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
@@ -16,7 +20,7 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: 'Mis Finanzas',
+      title: APP_NAME,
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' },
@@ -24,7 +28,7 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#1a1a2e' },
       ],
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/svg+xml', href: `/favicon.svg?v=${APP_VERSION}` },
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
@@ -39,8 +43,8 @@ export default defineNuxtConfig({
   pwa: {
     registerType: 'autoUpdate',
     manifest: {
-      name: 'Mis Finanzas',
-      short_name: 'Finanzas',
+      name: APP_NAME,
+      short_name: APP_SHORT_NAME,
       description: 'Gestiona tus finanzas personales',
       theme_color: '#1a1a2e',
       background_color: '#0f0f23',
@@ -50,12 +54,12 @@ export default defineNuxtConfig({
       start_url: '/',
       icons: [
         {
-          src: '/icons/icon-192x192.png',
+          src: `/icons/icon-192x192.png?v=${APP_VERSION}`,
           sizes: '192x192',
           type: 'image/png',
         },
         {
-          src: '/icons/icon-512x512.png',
+          src: `/icons/icon-512x512.png?v=${APP_VERSION}`,
           sizes: '512x512',
           type: 'image/png',
           purpose: 'any maskable',
@@ -86,8 +90,8 @@ export default defineNuxtConfig({
     supabaseUrl: process.env.SUPABASE_URL || '',
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
     public: {
-      appName: 'Mis Finanzas',
-      appVersion: '0.8',
+      appName: APP_NAME,
+      appVersion: APP_VERSION,
       supabaseUrl: process.env.SUPABASE_URL || '',
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
     },

@@ -36,31 +36,40 @@
             />
           </div>
 
-          <div class="flex items-start justify-center gap-8 py-4 mb-4 px-4 lg:px-0 lg:mb-0 lg:rounded-2xl lg:border lg:border-theme-border lg:bg-theme-card lg:py-6">
-            <div class="pt-9">
-              <RegistroBotonCamara
-                :show-preview="showPhotoPreview"
-                :photo-preview="photoPreview"
-                @capture="onPhotoCapture"
-                @send="onSendPhoto"
-                @cancel="onCancelPhoto"
-                @retake="onRetakePhoto"
+          <div class="py-4 mb-4 px-4 lg:px-0 lg:mb-0 lg:rounded-2xl lg:border lg:border-theme-border lg:bg-theme-card lg:py-6">
+            <div class="flex items-start justify-center gap-8">
+              <div class="pt-9">
+                <RegistroBotonCamara
+                  :show-preview="showPhotoPreview"
+                  :photo-preview="photoPreview"
+                  @capture="onPhotoCapture"
+                  @send="onSendPhoto"
+                  @cancel="onCancelPhoto"
+                  @retake="onRetakePhoto"
+                />
+              </div>
+              <RegistroBotonMicrofono
+                :is-listening="isListening"
+                :transcript="transcript"
+                :error="voiceError"
+                :is-supported="isSupported"
+                :has-draft="hasDraft"
+                @start="onStartListening"
+                @stop="onStopListening"
+                @continue="onContinueListening"
               />
             </div>
-            <RegistroBotonMicrofono
-              :is-listening="isListening"
-              :transcript="transcript"
-              :error="voiceError"
-              :is-supported="isSupported"
-              :has-draft="hasDraft"
-              @start="onStartListening"
-              @stop="onStopListening"
-              @continue="onContinueListening"
-              @send="onSendDraft"
-              @discard="onDiscardDraft"
-              @overwrite="onOverwriteDraft"
-              @update:transcript="onUpdateTranscript"
-            />
+            <div class="mt-3 px-2">
+              <RegistroDraftVoz
+                :transcript="transcript"
+                :has-draft="hasDraft"
+                :is-listening="isListening"
+                @send="onSendDraft"
+                @discard="onDiscardDraft"
+                @overwrite="onOverwriteDraft"
+                @update:transcript="onUpdateTranscript"
+              />
+            </div>
           </div>
 
           <!-- Quick-add chips (E#1): favoritos frecuentes -->

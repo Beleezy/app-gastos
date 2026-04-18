@@ -14,10 +14,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
           </svg>
         </button>
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-[var(--color-accent)]/25 to-indigo-500/15 flex items-center justify-center border border-[var(--color-accent)]/10">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+        <div class="w-11 h-11 rounded-2xl flex items-center justify-center">
+          <img src="/favicon.svg" alt="Mis Finanzas" class="w-11 h-11" />
         </div>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl font-bold text-gradient-blue">Mis Finanzas</h1>
