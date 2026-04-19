@@ -32,12 +32,48 @@
       </div>
 
       <div class="space-y-4">
-        <AhorrosDesgloseMedios />
-        <AhorrosGraficoAhorroMensual />
-        <AhorrosListaAhorros
-          @editar="editarAhorro"
-          @eliminar="confirmarEliminar"
+        <AhorrosFiltrosBar
+          :model-busqueda="busquedaAhorro"
+          :rango-activo="rangoRapido"
+          :rangos-rapidos="rangosRapidos"
+          :medio-activo="medioFiltro"
+          :medios="medios"
+          :tiene-filtros-activos="tieneFiltrosActivos"
+          :conteo-filtros-activos="conteoFiltrosActivos"
+          @update:busqueda="busquedaAhorro = $event"
+          @update:rango="rangoRapido = $event"
+          @update:medio="medioFiltro = $event"
+          @limpiar="limpiarFiltros"
         />
+
+        <div class="flex items-center gap-2 px-4 lg:px-0">
+          <button
+            v-for="tab in tabs"
+            :key="tab.value"
+            class="flex-1 lg:flex-none lg:px-5 py-2 rounded-xl text-sm font-medium transition-colors"
+            :class="vistaAhorros === tab.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+            @click="cambiarTab(tab.value)"
+          >
+            {{ tab.label }}
+          </button>
+        </div>
+
+        <Transition name="page" mode="out-in">
+          <div :key="vistaAhorros">
+            <AhorrosTabPorMedio
+              v-if="vistaAhorros === 'medios'"
+              :por-medio-filtrado="porMedioFiltrado"
+              :total-filtrado="totalFiltrado"
+              @editar="editarAhorro"
+              @eliminar="confirmarEliminar"
+            />
+            <AhorrosTabSeisMeses
+              v-else
+              @editar="editarAhorro"
+              @eliminar="confirmarEliminar"
+            />
+          </div>
+        </Transition>
       </div>
     </div>
 
@@ -83,16 +119,23 @@
 
 <script setup>
 const {
-  fetchAhorros,
-  fetchMedios,
-  deleteAhorro,
-  mesActual,
-  anioActual,
-  mesSiguiente,
-  mesAnterior,
+  ahorrosList, medios,
+  fetchAhorros, fetchMedios, deleteAhorro,
+  mesActual, anioActual, esHoy,
+  mesSiguiente, mesAnterior,
+  mesSeleccionadoGrafico, fetchAhorrosMes,
 } = useAhorros()
 
+const esMesActual = computed(() => esHoy.value)
+
+const {
+  busquedaAhorro, medioFiltro, rangoRapido, rangosRapidos,
+  porMedioFiltrado, totalFiltrado,
+  tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
+} = useAhorrosFilters({ ahorrosList, esMesActual })
+
 const { success, error: toastError } = useToast()
+const { vibrate } = useHaptic()
 
 const showFormAhorro = ref(false)
 const showFormMedio = ref(false)
@@ -100,6 +143,17 @@ const showFormMeta = ref(false)
 const ahorroEditando = ref(null)
 const ahorroParaEliminar = ref(null)
 const showConfirmDelete = ref(false)
+
+const vistaAhorros = ref('medios')
+const tabs = [
+  { value: 'medios', label: 'Por medio' },
+  { value: 'graficos', label: '6 meses' },
+]
+
+function cambiarTab(v) {
+  vibrate(10)
+  vistaAhorros.value = v
+}
 
 function editarAhorro(ahorro) {
   ahorroEditando.value = ahorro
@@ -120,6 +174,11 @@ async function ejecutarEliminar() {
   if (!ahorroParaEliminar.value) return
   try {
     await deleteAhorro(ahorroParaEliminar.value.id)
+    if (mesSeleccionadoGrafico.value &&
+        (mesSeleccionadoGrafico.value.mes !== mesActual.value ||
+         mesSeleccionadoGrafico.value.anio !== anioActual.value)) {
+      await fetchAhorrosMes(mesSeleccionadoGrafico.value.mes, mesSeleccionadoGrafico.value.anio)
+    }
     success('Ahorro eliminado')
   } catch (e) {
     toastError('Error al eliminar')
@@ -155,3 +214,12 @@ onUnmounted(() => {
   }
 })
 </script>
+
+<style scoped>
+.page-enter-active, .page-leave-active {
+  transition: opacity 0.15s ease;
+}
+.page-enter-from, .page-leave-to {
+  opacity: 0;
+}
+</style>
