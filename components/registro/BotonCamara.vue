@@ -233,7 +233,7 @@ function captureFrame() {
     canvas.width = 0
     canvas.height = 0
 
-    closeCamera()
+    closeCameraForCapture()
     emit('capture', dataUrl)
   } catch (e) {
     console.error('Error capturing frame:', e)
@@ -247,6 +247,25 @@ function closeCamera() {
     if (cameraHistoryId.value) {
       if (window.history.state?.__overlayId === cameraHistoryId.value) {
         window.history.back()
+      }
+      cameraHistoryId.value = null
+    }
+  }
+  stopStream()
+}
+
+// Cierra la cámara sin disparar history.back(): el preview que se abre a
+// continuación gestiona su propio estado de historial. Si llamáramos a
+// history.back() aquí, el popstate diferido se solaparía con el pushState
+// del preview y lo cerraría inmediatamente.
+function closeCameraForCapture() {
+  if (showCamera.value) {
+    showCamera.value = false
+    if (cameraHistoryId.value) {
+      if (window.history.state?.__overlayId === cameraHistoryId.value) {
+        const current = { ...window.history.state }
+        delete current.__overlayId
+        window.history.replaceState(current, '', window.location.href)
       }
       cameraHistoryId.value = null
     }

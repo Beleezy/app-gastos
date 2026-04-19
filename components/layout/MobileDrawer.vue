@@ -51,7 +51,7 @@
             :class="isActive(item.to)
               ? 'bg-theme-accent-bg text-theme-accent font-semibold'
               : 'text-theme-text-sec hover:bg-theme-border-md hover:text-theme-text'"
-            @click="close"
+            @click="onNavClick"
           >
             <span
               class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full transition-all duration-200"
@@ -76,7 +76,7 @@
             :class="isActive(item.to)
               ? 'bg-theme-accent-bg text-theme-accent font-semibold'
               : 'text-theme-text-sec hover:bg-theme-border-md hover:text-theme-text'"
-            @click="close"
+            @click="onNavClick"
           >
             <component :is="item.icon" class="w-5 h-5 shrink-0" />
             <span class="text-sm flex-1 truncate">{{ item.label }}</span>
@@ -142,38 +142,62 @@ function getBadge(path) {
 }
 
 // --- Swipe to close (inside drawer, swipe left to close) ---
+// Activate only when the user clearly swipes horizontally; ignore taps and
+// vertical scrolls so click events on <NuxtLink> are not cancelled by the
+// drawer shifting under the finger.
+const SWIPE_ACTIVATE_PX = 10
 let touchStartX = 0
+let touchStartY = 0
 let touchCurrentX = 0
-let isSwiping = false
+let gestureMode = null // null | 'horizontal' | 'vertical'
 
 function onTouchStart(e) {
   touchStartX = e.touches[0].clientX
-  touchCurrentX = e.touches[0].clientX
-  isSwiping = true
+  touchStartY = e.touches[0].clientY
+  touchCurrentX = touchStartX
+  gestureMode = null
 }
 
 function onTouchMove(e) {
-  if (!isSwiping) return
-  touchCurrentX = e.touches[0].clientX
-  const diff = touchStartX - touchCurrentX
-  if (diff > 0 && drawerRef.value) {
-    drawerRef.value.style.transform = `translateX(${-diff}px)`
+  const cx = e.touches[0].clientX
+  const cy = e.touches[0].clientY
+  const dx = touchStartX - cx // positive = swiping left
+  const dy = cy - touchStartY
+
+  if (!gestureMode) {
+    if (Math.abs(dx) < SWIPE_ACTIVATE_PX && Math.abs(dy) < SWIPE_ACTIVATE_PX) return
+    gestureMode = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical'
+  }
+
+  if (gestureMode !== 'horizontal') return
+
+  touchCurrentX = cx
+  if (dx > 0 && drawerRef.value) {
+    drawerRef.value.style.transform = `translateX(${-dx}px)`
   }
 }
 
 function onTouchEnd() {
-  if (!isSwiping) return
-  const diff = touchStartX - touchCurrentX
-  if (diff > 80) {
-    close()
-    vibrate(10)
+  if (gestureMode === 'horizontal') {
+    const diff = touchStartX - touchCurrentX
+    if (diff > 80) {
+      close()
+      vibrate(10)
+    }
+    if (drawerRef.value) {
+      drawerRef.value.style.transform = ''
+    }
   }
-  if (drawerRef.value) {
-    drawerRef.value.style.transform = ''
-  }
-  isSwiping = false
+  gestureMode = null
   touchStartX = 0
+  touchStartY = 0
   touchCurrentX = 0
+}
+
+// Defer close until after the current click has finished propagating, so
+// NuxtLink navigation completes before the drawer is unmounted by v-if.
+function onNavClick() {
+  nextTick(() => close())
 }
 
 // --- Edge swipe to open (from left edge, swipe right to open) ---
