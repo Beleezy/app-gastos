@@ -13,6 +13,9 @@ export function useAhorros() {
   const progresoMensual = useState('ahorros-progreso-mensual', () => null)
   const progresoGlobal = useState('ahorros-progreso-global', () => null)
   const serie6Meses = useState('ahorros-serie', () => [])
+  const ahorrosMesSeleccionado = useState('ahorros-mes-seleccionado-list', () => [])
+  const mesSeleccionadoGrafico = useState('ahorros-mes-seleccionado-key', () => null)
+  const isLoadingMesGrafico = ref(false)
   const isLoading = ref(false)
   const error = ref(null)
 
@@ -77,6 +80,25 @@ export function useAhorros() {
       error.value = e.message || 'Error al eliminar ahorro'
       throw e
     }
+  }
+
+  async function fetchAhorrosMes(mes, anio) {
+    isLoadingMesGrafico.value = true
+    try {
+      const data = await apiFetch('/api/ahorros/mes', { query: { mes, anio } })
+      ahorrosMesSeleccionado.value = data
+      mesSeleccionadoGrafico.value = { mes, anio }
+    } catch (e) {
+      error.value = e.message || 'Error al cargar mes'
+      throw e
+    } finally {
+      isLoadingMesGrafico.value = false
+    }
+  }
+
+  function limpiarMesSeleccionado() {
+    ahorrosMesSeleccionado.value = []
+    mesSeleccionadoGrafico.value = null
   }
 
   async function fetchMedios() {
@@ -152,8 +174,10 @@ export function useAhorros() {
     metaMensual, metaGlobal, progresoMensual, progresoGlobal,
     serie6Meses, isLoading, error,
     mesActual, anioActual, nombreMes, esHoy,
+    ahorrosMesSeleccionado, mesSeleccionadoGrafico, isLoadingMesGrafico,
     fetchAhorros, createAhorro, updateAhorro, deleteAhorro,
     fetchMedios, createMedio, updateMedio, deleteMedio,
     setMeta, mesSiguiente, mesAnterior,
+    fetchAhorrosMes, limpiarMesSeleccionado,
   }
 }
