@@ -39,7 +39,7 @@
         <div v-if="seccionActual === 'mensual'" class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-4">
           <div class="lg:sticky lg:top-20 lg:self-start">
             <div ref="swipeZone">
-              <PlanificadorResumenMes />
+              <PlanificadorResumenMes @exportar="exportarPlanificador" />
             </div>
           </div>
 
