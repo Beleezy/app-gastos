@@ -51,7 +51,7 @@
             :class="isActive(item.to)
               ? 'bg-theme-accent-bg text-theme-accent font-semibold'
               : 'text-theme-text-sec hover:bg-theme-border-md hover:text-theme-text'"
-            @click="onNavClick"
+            @click.prevent="navigateFromDrawer(item.to)"
           >
             <span
               class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full transition-all duration-200"
@@ -76,7 +76,7 @@
             :class="isActive(item.to)
               ? 'bg-theme-accent-bg text-theme-accent font-semibold'
               : 'text-theme-text-sec hover:bg-theme-border-md hover:text-theme-text'"
-            @click="onNavClick"
+            @click.prevent="navigateFromDrawer(item.to)"
           >
             <component :is="item.icon" class="w-5 h-5 shrink-0" />
             <span class="text-sm flex-1 truncate">{{ item.label }}</span>
@@ -114,6 +114,7 @@
 import { h } from 'vue'
 
 const route = useRoute()
+const router = useRouter()
 
 const { isOpen, close } = useMobileDrawer()
 useOverlayBack(isOpen, close)
@@ -194,10 +195,12 @@ function onTouchEnd() {
   touchCurrentX = 0
 }
 
-// Defer close until after the current click has finished propagating, so
-// NuxtLink navigation completes before the drawer is unmounted by v-if.
-function onNavClick() {
-  nextTick(() => close())
+async function navigateFromDrawer(to) {
+  try {
+    await router.push(to)
+  } finally {
+    close()
+  }
 }
 
 // --- Edge swipe to open (from left edge, swipe right to open) ---
@@ -232,7 +235,7 @@ function onEdgeTouchEnd(e) {
 }
 
 // Close on route change
-watch(() => route.path, () => {
+watch(() => route.fullPath, () => {
   if (isOpen.value) close()
 })
 
