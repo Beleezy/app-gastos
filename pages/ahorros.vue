@@ -1,20 +1,5 @@
 <template>
   <div>
-    <LayoutAppHeader>
-      <template #title>Ahorros</template>
-      <template #actions>
-        <NuxtLink
-          to="/planificador"
-          class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-theme-text-sec hover:text-theme-accent text-xs transition-colors"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-          </svg>
-          Planificador
-        </NuxtLink>
-      </template>
-    </LayoutAppHeader>
-
     <Transition name="ptr">
       <div v-if="isRefreshing" class="flex justify-center py-2">
         <svg class="h-5 w-5 animate-spin text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -118,6 +103,8 @@
 </template>
 
 <script setup>
+definePageMeta({ layout: 'planificador' })
+
 const {
   ahorrosList, medios,
   fetchAhorros, fetchMedios, deleteAhorro,

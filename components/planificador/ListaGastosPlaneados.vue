@@ -1,50 +1,87 @@
 <template>
   <div class="px-4 lg:px-0 py-3">
-    <!-- Search + Sort -->
-    <div class="flex items-center gap-2 mb-3">
-      <div class="relative flex-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-        <input
-          v-model="busqueda"
-          type="text"
-          placeholder="Buscar concepto..."
-          class="w-full pl-9 pr-3 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text placeholder-gray-600 text-xs focus:outline-none focus:border-theme-accent transition-colors"
-        />
+    <!-- Barra unificada: Filtros + Buscar + Ordenar -->
+    <div class="mb-3">
+      <div class="flex items-center gap-2">
+        <!-- Filtros toggle -->
+        <button
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors shrink-0"
+          :class="mostrarFiltros || filtroActual !== 'todos' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-sec border-theme-border'"
+          @click="mostrarFiltros = !mostrarFiltros"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          Filtros
+          <span v-if="filtroActual !== 'todos'" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[9px] flex items-center justify-center font-bold leading-none">1</span>
+        </button>
+
+        <!-- Búsqueda -->
+        <div class="relative flex-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            v-model="busqueda"
+            type="text"
+            placeholder="Buscar..."
+            class="w-full pl-9 pr-8 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text placeholder-gray-600 text-xs focus:outline-none focus:border-theme-accent transition-colors"
+          />
+          <button v-if="busqueda" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-text-sec" @click="busqueda = ''">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Ordenar -->
+        <button
+          class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl bg-theme-card border border-theme-border text-theme-text-muted hover:bg-theme-border-md transition-colors"
+          :title="`Orden: ${ordenLabel}`"
+          @click="ciclarOrden"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+          </svg>
+        </button>
       </div>
-      <button
-        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text-muted text-xs hover:bg-theme-border-md transition-colors"
-        @click="ciclarOrden"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-        </svg>
-        {{ ordenLabel }}
-      </button>
+
+      <!-- Pills de filtro colapsables -->
+      <Transition name="expand">
+        <div v-if="mostrarFiltros" class="mt-2 overflow-hidden">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button
+              v-for="f in filtrosConContador"
+              :key="f.value"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border"
+              :class="[
+                filtroActual === f.value
+                  ? (f.accent || 'bg-theme-accent-bg text-theme-accent border-theme-accent')
+                  : 'bg-theme-card text-theme-text-muted border-theme-border',
+                f.count === 0 && filtroActual !== f.value ? 'opacity-40' : ''
+              ]"
+              @click="filtroActual = f.value"
+            >
+              {{ f.label }}
+              <span
+                class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
+                :class="filtroActual === f.value ? 'bg-black/15 text-inherit' : 'bg-theme-border-md text-theme-text'"
+              >
+                {{ f.count }}
+              </span>
+            </button>
+            <button
+              v-if="filtroActual !== 'todos'"
+              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+              @click="filtroActual = 'todos'"
+            >
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </Transition>
     </div>
 
-    <!-- Filters -->
-    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-      <button
-        v-for="f in filtrosConContador"
-        :key="f.value"
-        class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors"
-        :class="[
-          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-on-accent') : 'bg-theme-card text-theme-text-muted',
-          f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
-        ]"
-        @click="filtroActual = f.value"
-      >
-        {{ f.label }}
-        <span
-          class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
-          :class="filtroActual === f.value ? 'bg-black/15 text-inherit' : 'bg-theme-border-md text-theme-text'"
-        >
-          {{ f.count }}
-        </span>
-      </button>
-    </div>
 
     <!-- Loading state -->
     <div v-if="isLoading" class="space-y-3">
@@ -151,8 +188,13 @@
           </div>
           <!-- Card principal con transform -->
           <div
-            class="bg-theme-card rounded-xl p-3.5 border transition-all"
-            :class="esVencido(gasto) ? 'border-red-500/40' : (esHoyGasto(gasto) && gasto.estado === 'pendiente' ? 'border-orange-500/40' : 'border-theme-border')"
+            class="bg-theme-card rounded-xl p-3.5 border-l-[3px] border border-theme-border transition-all"
+            :class="
+              gasto.estado === 'pagado' ? 'border-l-emerald-500' :
+              esVencido(gasto) ? 'border-l-red-500' :
+              esHoyGasto(gasto) && gasto.estado === 'pendiente' ? 'border-l-orange-500' :
+              'border-l-orange-400/50'
+            "
             :style="{ transform: `translateX(${swipeOffsets[gasto.id] || 0}px)`, transition: swipeDragging[gasto.id] ? 'none' : 'transform 0.25s ease' }"
             @touchstart.passive="onSwipeTouchStart($event, gasto.id)"
             @touchmove.passive="onSwipeTouchMove($event, gasto.id)"
@@ -223,13 +265,13 @@
             </button>
             <button
               class="text-xs transition-colors flex items-center gap-1"
-              :class="gasto.estado === 'pagado' ? 'text-emerald-400 hover:text-emerald-300' : 'text-orange-400 hover:text-orange-300'"
+              :class="gasto.gastoRegistradoFecha ? 'text-emerald-400 hover:text-emerald-300' : 'text-orange-400 hover:text-orange-300'"
               @click="emit('registrar', gasto)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8" />
               </svg>
-              {{ gasto.estado === 'pagado' ? 'Editar registro' : 'Registrar' }}
+              {{ gasto.gastoRegistradoFecha ? 'Editar registro' : 'Registrar' }}
             </button>
             <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -237,7 +279,7 @@
               </svg>
               Editar
             </button>
-            <button class="text-xs text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1" @click="eliminarGasto(gasto)">
+            <button class="text-xs text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1" @click="pedirConfirmarEliminar(gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -253,12 +295,34 @@
       <div class="h-16"></div>
     </div>
 
+    <!-- Confirm delete modal: simple (non-recurrent) -->
+    <SharedConfirmDialog
+      v-model="showConfirmSimple"
+      title="Eliminar gasto"
+      :message="gastoParaEliminar ? `¿Eliminar &quot;${gastoParaEliminar.concepto}&quot;? Tendrás 5 segundos para deshacer.` : ''"
+      confirm-label="Eliminar"
+      variant="danger"
+      @confirm="ejecutarEliminarSimple"
+    >
+      <template #message>
+        <p>¿Eliminar "{{ gastoParaEliminar?.concepto }}"? Tendrás 5 segundos para deshacer.</p>
+        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+          ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
+        </p>
+      </template>
+    </SharedConfirmDialog>
+
     <!-- Confirmation modal for recurring delete -->
-    <div v-if="gastoParaEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="gastoParaEliminar = null"></div>
+    <div v-if="showModalRecurrente && gastoParaEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="gastoParaEliminar = null; showModalRecurrente = false"></div>
       <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
         <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
-        <p class="text-sm text-theme-text-muted mb-5">Este gasto se repite en meses futuros. ¿Qué deseas hacer?</p>
+        <div class="text-sm text-theme-text-muted mb-5">
+          Este gasto se repite en meses futuros. ¿Qué deseas hacer?
+          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+            ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
+          </p>
+        </div>
         <div class="space-y-2">
           <button
             class="w-full py-2.5 rounded-xl bg-red-500/15 text-red-400 text-sm font-medium hover:bg-red-500/25 transition-colors"
@@ -274,7 +338,7 @@
           </button>
           <button
             class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
-            @click="gastoParaEliminar = null"
+            @click="gastoParaEliminar = null; showModalRecurrente = false"
           >
             Cancelar
           </button>
@@ -298,6 +362,7 @@ const {
 const { success, show: toastShow } = useToast()
 
 const filtroActual = ref('todos')
+const mostrarFiltros = ref(false)
 const busqueda = ref('')
 const ordenActual = ref('fecha')
 
@@ -472,14 +537,31 @@ function formatFecha(fecha) {
 }
 
 const gastoParaEliminar = ref(null)
+const showConfirmSimple = ref(false)
+const showModalRecurrente = ref(false)
 const isEliminarOpen = computed(() => gastoParaEliminar.value !== null)
-useOverlayBack(isEliminarOpen, () => { gastoParaEliminar.value = null })
+useOverlayBack(isEliminarOpen, () => { gastoParaEliminar.value = null; showConfirmSimple.value = false; showModalRecurrente.value = false })
 
-function eliminarGasto(gasto) {
+// Punto de entrada: siempre pide confirmación
+function pedirConfirmarEliminar(gasto) {
+  gastoParaEliminar.value = gasto
   if (gasto.esRecurrente && gasto.recurrenteGrupoId) {
-    gastoParaEliminar.value = gasto
-    return
+    showModalRecurrente.value = true
+  } else {
+    showConfirmSimple.value = true
   }
+}
+
+// Para compatibilidad con swipe (mantiene el comportamiento anterior)
+function eliminarGasto(gasto) {
+  pedirConfirmarEliminar(gasto)
+}
+
+function ejecutarEliminarSimple() {
+  const gasto = gastoParaEliminar.value
+  if (!gasto) return
+  showConfirmSimple.value = false
+  gastoParaEliminar.value = null
   const handle = softDeleteGastoPlaneado(gasto.id, 5000)
   if (!handle) return
   toastShow({
@@ -498,6 +580,7 @@ function eliminarGasto(gasto) {
 async function confirmarEliminar(incluirFuturos) {
   const gasto = gastoParaEliminar.value
   if (!gasto) return
+  showModalRecurrente.value = false
   gastoParaEliminar.value = null
   await deleteGastoPlaneado(gasto.id, incluirFuturos)
 }
@@ -571,5 +654,17 @@ function onSwipeTouchEnd(e, gasto) {
 }
 .swipe-bg-delete {
   background: linear-gradient(to left, rgba(239, 68, 68, 0.15), transparent);
+}
+.expand-enter-active, .expand-leave-active {
+  transition: all 0.22s ease;
+  overflow: hidden;
+}
+.expand-enter-from, .expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.expand-enter-to, .expand-leave-from {
+  opacity: 1;
+  max-height: 200px;
 }
 </style>

@@ -1,9 +1,5 @@
 <template>
   <div>
-    <LayoutAppHeader>
-      <template #title>Planificador Mensual</template>
-    </LayoutAppHeader>
-
     <Transition name="ptr">
       <div v-if="isRefreshing" class="flex justify-center py-2">
         <svg class="h-5 w-5 animate-spin text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -12,27 +8,6 @@
         </svg>
       </div>
     </Transition>
-
-    <div class="px-4 lg:px-0 pt-2 pb-1 lg:pt-3 lg:max-w-md">
-      <div class="flex items-center gap-1">
-        <button
-          v-for="seccion in secciones"
-          :key="seccion.value"
-          class="rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors"
-          :class="seccionActual === seccion.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-muted hover:text-theme-text-sec'"
-          @click="seccionActual = seccion.value"
-        >
-          {{ seccion.label }}
-        </button>
-        <div class="w-px h-4 bg-theme-border mx-1.5 shrink-0"></div>
-        <NuxtLink
-          to="/ahorros"
-          class="rounded-full px-3.5 py-1.5 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 transition-colors"
-        >
-          Ahorros
-        </NuxtLink>
-      </div>
-    </div>
 
     <Transition name="page" mode="out-in">
       <div :key="seccionActual">
@@ -44,27 +19,41 @@
           </div>
 
           <div>
-            <div class="mb-2 flex gap-2 px-4 lg:px-0">
-              <div class="flex flex-1 gap-1 rounded-xl border border-theme-border bg-theme-card p-1">
+            <div class="mb-2 px-4 lg:px-0">
+              <div class="flex items-center gap-1 rounded-xl border border-theme-border bg-theme-card p-1">
                 <button
-                  v-for="vista in vistas"
-                  :key="vista.value"
-                  class="flex-1 rounded-lg py-1.5 text-xs font-medium transition-colors"
-                  :class="vistaActual === vista.value ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
-                  @click="vistaActual = vista.value"
+                  class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors"
+                  :class="vistaActual === 'lista' ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
+                  @click="vistaActual = 'lista'"
                 >
-                  {{ vista.label }}
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+                  Lista
+                  <span v-if="vistaActual === 'lista'" class="text-[10px] font-bold bg-theme-accent/20 px-1.5 rounded-full">{{ gastosPlaneados.length }}</span>
+                </button>
+                <button
+                  class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors"
+                  :class="vistaActual === 'calendario' ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
+                  @click="vistaActual = 'calendario'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Calendario
+                </button>
+                <button
+                  class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors"
+                  :class="vistaActual === 'grafico' ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
+                  @click="vistaActual = 'grafico'"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+                  </svg>
+                  Gráfico
                 </button>
               </div>
-              <button
-                class="flex items-center justify-center gap-1.5 rounded-xl border border-theme-border bg-theme-card px-4 py-2.5 text-sm font-medium text-theme-text-sec transition-colors hover:border-emerald-500/30 hover:text-emerald-400"
-                @click="exportarPlanificador"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Excel
-              </button>
             </div>
 
             <Transition name="page" mode="out-in">
@@ -120,6 +109,8 @@
 </template>
 
 <script setup>
+definePageMeta({ layout: 'planificador' })
+
 const {
   fetchPlan,
   fetchCategorias,
@@ -131,10 +122,6 @@ const {
 } = usePlanificador()
 const { exportarExcel } = useExportExcel()
 
-const secciones = [
-  { value: 'mensual', label: 'Plan mensual' },
-  { value: 'futuros', label: 'Gastos futuros' },
-]
 const route = useRoute()
 const seccionActual = ref(route.query.seccion === 'futuros' ? 'futuros' : 'mensual')
 

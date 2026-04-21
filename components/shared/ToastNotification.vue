@@ -1,15 +1,15 @@
 <template>
-  <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center gap-2 w-full max-w-xs px-4 pointer-events-none">
+  <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 w-full max-w-xs px-4 pointer-events-none">
     <TransitionGroup name="toast">
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-xl text-sm font-medium w-full pointer-events-auto"
+        class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-2xl text-sm font-medium w-full pointer-events-auto"
         :class="{
-          'bg-emerald-500/90 text-white': toast.type === 'success',
-          'bg-red-500/90 text-white': toast.type === 'error',
-          'bg-amber-500/90 text-white': toast.type === 'warning',
-          'bg-theme-border-md text-theme-text border border-primary-600/50': toast.type === 'info',
+          'bg-emerald-500 text-white': toast.type === 'success',
+          'bg-red-500 text-white': toast.type === 'error',
+          'bg-amber-500 text-white': toast.type === 'warning',
+          'bg-[#1e2235] text-white border border-white/10': toast.type === 'info',
         }"
       >
         <!-- Icon -->

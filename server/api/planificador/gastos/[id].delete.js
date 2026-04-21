@@ -1,5 +1,5 @@
 import { db } from '../../../utils/db.js'
-import { gastosPlanificados } from '../../../database/schema.js'
+import { gastosPlanificados, gastos } from '../../../database/schema.js'
 import { eliminarRecurrentesFuturos } from '../../../utils/recurrente.js'
 import { eq } from 'drizzle-orm'
 
@@ -23,6 +23,11 @@ export default defineEventHandler(async (event) => {
   if (gasto.esRecurrente && gasto.recurrenteGrupoId && eliminarFuturos) {
     await eliminarRecurrentesFuturos(gasto.recurrenteGrupoId, id)
   }
+
+  // Delete associated real expense if exists
+  await db
+    .delete(gastos)
+    .where(eq(gastos.gastoPlanificadoId, id))
 
   // Delete the current one
   await db

@@ -10,7 +10,11 @@
         </svg>
       </div>
       <h3 class="text-base font-semibold text-theme-text mb-1.5" :class="icon ? 'text-center' : ''">{{ title }}</h3>
-      <p class="text-sm text-theme-text-muted mb-4" :class="icon ? 'text-center' : ''">{{ message }}</p>
+      <div class="text-sm text-theme-text-muted mb-4" :class="icon ? 'text-center' : ''">
+        <slot name="message">
+          <p>{{ message }}</p>
+        </slot>
+      </div>
       <label
         v-if="requireCheckbox"
         class="flex items-start gap-2.5 mb-5 px-3 py-2.5 rounded-xl border cursor-pointer transition-colors"

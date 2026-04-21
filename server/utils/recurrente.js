@@ -189,6 +189,11 @@ export async function eliminarRecurrentesFuturos(grupoId, gastoActualId) {
     // Only delete future months
     if (anioGp < anioActual || (anioGp === anioActual && mesGp < mesActual)) continue
 
+    // Delete associated real expense if exists
+    await db
+      .delete(gastos)
+      .where(eq(gastos.gastoPlanificadoId, gp.id))
+
     await db
       .delete(gastosPlanificados)
       .where(eq(gastosPlanificados.id, gp.id))
