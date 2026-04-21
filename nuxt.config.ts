@@ -11,6 +11,8 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@vite-pwa/nuxt',
     '@nuxtjs/supabase',
+    '@vercel/analytics',
+    '@vercel/speed-insights',
   ],
 
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
