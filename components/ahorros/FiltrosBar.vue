@@ -84,22 +84,41 @@
             {{ m.nombre }}
           </button>
         </div>
+
+        <!-- Ordenar por -->
+        <div class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+          <span class="shrink-0 flex items-center text-xs text-theme-text-sec pr-1">Ordenar:</span>
+          <button
+            v-for="o in opcionesOrden"
+            :key="o.value"
+            class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            :class="ordenActivo === o.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+            @click="$emit('update:orden', o.value)"
+          >
+            {{ o.label }}
+          </button>
+        </div>
       </div>
     </Transition>
   </div>
 </template>
 
 <script setup>
+import { OPCIONES_ORDEN_AHORROS } from '~/composables/useAhorrosFilters'
+
+const opcionesOrden = OPCIONES_ORDEN_AHORROS
+
 defineProps({
   modelBusqueda: { type: String, default: '' },
   rangoActivo: { type: String, required: true },
   rangosRapidos: { type: Array, required: true },
-  medioActivo: { type: Number, default: null },
+  medioActivo: { type: String, default: null },
   medios: { type: Array, default: () => [] },
+  ordenActivo: { type: String, default: 'fecha_desc' },
   tieneFiltrosActivos: { type: Boolean, default: false },
   conteoFiltrosActivos: { type: Number, default: 0 },
 })
-defineEmits(['update:busqueda', 'update:rango', 'update:medio', 'limpiar'])
+defineEmits(['update:busqueda', 'update:rango', 'update:medio', 'update:orden', 'limpiar'])
 
 const { vibrate } = useHaptic()
 const mostrarFiltros = ref(false)

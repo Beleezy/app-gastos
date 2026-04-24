@@ -77,34 +77,34 @@
           class="bg-theme-input rounded-xl border border-theme-border overflow-hidden"
         >
           <!-- Expense header -->
-          <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0"
-                :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '20', color: getCategoriaColor(gasto.categoria) }"
-              >
-                {{ getCategoriaIcono(gasto.categoria) }}
-              </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm font-medium text-theme-text truncate">{{ gasto.concepto }}</p>
-                <p class="text-xs text-theme-text-sec">{{ gasto.categoria }} · {{ formatFecha(gasto.fecha) }}</p>
-              </div>
+          <div class="flex items-start gap-3 px-4 py-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0"
+              :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '20', color: getCategoriaColor(gasto.categoria) }"
+            >
+              {{ getCategoriaIcono(gasto.categoria) }}
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
-              <button class="w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
-                @click="toggleEdit(idx)"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-              <button class="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
-                @click="removeGasto(idx)"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-medium text-theme-text break-words leading-snug">{{ gasto.concepto }}</p>
+              <p class="text-xs text-theme-text-sec mt-0.5">{{ gasto.categoria }} · {{ formatFecha(gasto.fecha) }}</p>
+            </div>
+            <div class="flex flex-col items-end gap-1.5 shrink-0">
+              <span class="text-sm font-semibold text-theme-text whitespace-nowrap">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
+              <div class="flex items-center gap-2">
+                <button class="w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
+                  @click="toggleEdit(idx)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+                <button class="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
+                  @click="removeGasto(idx)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 

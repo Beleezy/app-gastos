@@ -46,7 +46,7 @@
           class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors"
           :class="selected ? 'bg-theme-accent border-theme-accent' : 'border-theme-border-md bg-theme-card'"
         >
-          <svg v-if="selected" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+          <svg v-if="selected" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-theme-on-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>

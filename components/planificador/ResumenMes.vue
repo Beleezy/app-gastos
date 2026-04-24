@@ -138,20 +138,36 @@
       <Transition name="slide-down">
         <div v-if="showVerMas" class="space-y-3 mt-4">
           <!-- Multi-segment progress bar -->
-          <div>
-            <div class="relative w-full h-2 bg-theme-input rounded-full overflow-hidden flex">
-              <div
-                class="h-full rounded-full transition-all duration-700 ease-out"
-                :class="resumen.porcentajeAsignado > 90 ? 'bg-gradient-to-r from-orange-500 to-orange-400' : 'bg-gradient-to-r from-[var(--color-accent-dark)] via-[var(--color-accent)] to-indigo-400'"
-                :style="{ width: Math.min(resumen.porcentajeAsignado, 100) + '%' }"
-              ></div>
+          <div class="space-y-2">
+            <div>
+              <div class="flex items-center justify-between text-[10px] font-medium mb-1">
+                <span class="text-theme-text-sec uppercase tracking-wider">Planificado / Presupuesto</span>
+                <span :class="resumen.porcentajeAsignado > 90 ? 'text-orange-400' : 'text-theme-text-muted'">
+                  {{ resumen.porcentajeAsignado.toFixed(0) }}%
+                </span>
+              </div>
+              <div class="relative w-full h-2 bg-theme-input rounded-full overflow-hidden flex">
+                <div
+                  class="h-full rounded-full transition-all duration-700 ease-out"
+                  :class="resumen.porcentajeAsignado > 90 ? 'bg-gradient-to-r from-orange-500 to-orange-400' : 'bg-gradient-to-r from-[var(--color-accent-dark)] via-[var(--color-accent)] to-indigo-400'"
+                  :style="{ width: Math.min(resumen.porcentajeAsignado, 100) + '%' }"
+                ></div>
+              </div>
             </div>
-            <div class="relative w-full h-2 bg-theme-input rounded-full overflow-hidden mt-1">
-              <div
-                class="absolute inset-y-0 left-0 h-full rounded-full transition-all duration-700 ease-out"
-                :class="resumen.excedeGastoReal ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'"
-                :style="{ width: Math.min(resumen.porcentajeGastadoReal, 100) + '%' }"
-              ></div>
+            <div>
+              <div class="flex items-center justify-between text-[10px] font-medium mb-1">
+                <span class="text-theme-text-sec uppercase tracking-wider">Gastado real / Presupuesto</span>
+                <span :class="resumen.excedeGastoReal ? 'text-red-400' : 'text-emerald-400'">
+                  {{ resumen.porcentajeGastadoReal.toFixed(0) }}%
+                </span>
+              </div>
+              <div class="relative w-full h-2 bg-theme-input rounded-full overflow-hidden">
+                <div
+                  class="absolute inset-y-0 left-0 h-full rounded-full transition-all duration-700 ease-out"
+                  :class="resumen.excedeGastoReal ? 'bg-gradient-to-r from-red-500 to-red-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'"
+                  :style="{ width: Math.min(resumen.porcentajeGastadoReal, 100) + '%' }"
+                ></div>
+              </div>
             </div>
           </div>
 
@@ -206,7 +222,7 @@
               class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-accent/20 bg-theme-accent-bg text-theme-accent text-xs font-semibold hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
               :disabled="duplicando"
               :title="gastosPlaneados.length > 0 ? 'Copiar gastos de otro mes (los duplicados por concepto se omiten)' : 'Copiar gastos de otro mes'"
-              @click="showSelectorMes = true"
+              @click="abrirSelectorMes"
             >
               <svg v-if="!duplicando" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
@@ -302,6 +318,20 @@ async function sincronizarPresupuesto() {
 const origenMes = ref(mesActual.value === 1 ? 12 : mesActual.value - 1)
 const origenAnio = ref(mesActual.value === 1 ? anioActual.value - 1 : anioActual.value)
 
+// Resetea origen al mes inmediatamente anterior al mes visible actual
+// y abre el modal. Sin este reset, los valores quedan desfasados cuando
+// el usuario navega entre meses y reabre el selector.
+function abrirSelectorMes() {
+  if (mesActual.value === 1) {
+    origenMes.value = 12
+    origenAnio.value = anioActual.value - 1
+  } else {
+    origenMes.value = mesActual.value - 1
+    origenAnio.value = anioActual.value
+  }
+  showSelectorMes.value = true
+}
+
 async function ejecutarDuplicar() {
   duplicando.value = true
   try {
@@ -309,7 +339,10 @@ async function ejecutarDuplicar() {
     success(`${result.gastosCopied} gastos copiados correctamente`)
     showSelectorMes.value = false
   } catch (e) {
-    const msg = e?.data?.message || e?.message || 'Error al copiar el mes'
+    const msg = e?.data?.message
+      || e?.statusMessage
+      || e?.message
+      || 'Error al copiar el mes'
     toastError(msg)
   } finally {
     duplicando.value = false

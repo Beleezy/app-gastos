@@ -1,3 +1,5 @@
+import { markCleanupPopPending } from './useModalBack'
+
 /**
  * Handles Android/browser back-button for overlays controlled by a reactive boolean.
  * Unlike useModalBack (which relies on component mount/unmount), this works when the
@@ -35,6 +37,10 @@ export function useOverlayBack(isVisible, closeFn) {
       historyId.value = id
     } else if (!val && oldVal && historyId.value) {
       if (window.history.state?.__overlayId === historyId.value) {
+        // Arm the cleanup window so that a modal mounted right after this
+        // (e.g. overlay → modal transition) isn't closed by the stale popstate
+        // that this history.back() is about to dispatch.
+        markCleanupPopPending()
         window.history.back()
       }
       historyId.value = null

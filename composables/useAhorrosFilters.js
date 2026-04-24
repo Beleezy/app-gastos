@@ -1,9 +1,17 @@
 import { useDebouncedRef } from './useDebounceFn'
 
+export const OPCIONES_ORDEN_AHORROS = [
+  { value: 'fecha_desc', label: 'Más reciente' },
+  { value: 'fecha_asc', label: 'Más antiguo' },
+  { value: 'monto_desc', label: 'Mayor monto' },
+  { value: 'monto_asc', label: 'Menor monto' },
+]
+
 export function useAhorrosFilters({ ahorrosList, esMesActual }) {
   const busquedaAhorro = ref('')
   const medioFiltro = ref(null)
   const rangoRapido = ref('mes')
+  const ordenarPor = ref('fecha_desc')
 
   const busquedaDebounced = useDebouncedRef(busquedaAhorro, 150)
 
@@ -41,12 +49,20 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
 
   const ahorrosFiltrados = computed(() => {
     const q = busquedaDebounced.value.toLowerCase()
-    return ahorrosList.value.filter(a => {
+    const filtered = ahorrosList.value.filter(a => {
       const concepto = (a.concepto || a.medioNombre || '').toLowerCase()
       const matchBusqueda = !q || concepto.includes(q)
       const matchMedio = !medioFiltro.value || a.medioAhorroId === medioFiltro.value
       const matchRango = fechaDentroRango(a.fecha)
       return matchBusqueda && matchMedio && matchRango
+    })
+    return filtered.sort((a, b) => {
+      switch (ordenarPor.value) {
+        case 'fecha_asc': return new Date(a.fecha) - new Date(b.fecha)
+        case 'monto_desc': return Number(b.monto) - Number(a.monto)
+        case 'monto_asc': return Number(a.monto) - Number(b.monto)
+        default: return new Date(b.fecha) - new Date(a.fecha)
+      }
     })
   })
 
@@ -76,7 +92,7 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
   })
 
   const tieneFiltrosActivos = computed(() =>
-    !!busquedaAhorro.value || !!medioFiltro.value || rangoRapido.value !== 'mes'
+    !!busquedaAhorro.value || !!medioFiltro.value || rangoRapido.value !== 'mes' || ordenarPor.value !== 'fecha_desc'
   )
 
   const conteoFiltrosActivos = computed(() => {
@@ -84,6 +100,7 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
     if (busquedaAhorro.value) n++
     if (medioFiltro.value) n++
     if (rangoRapido.value !== 'mes') n++
+    if (ordenarPor.value !== 'fecha_desc') n++
     return n
   })
 
@@ -91,10 +108,12 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
     busquedaAhorro.value = ''
     medioFiltro.value = null
     rangoRapido.value = 'mes'
+    ordenarPor.value = 'fecha_desc'
   }
 
   return {
     busquedaAhorro, medioFiltro, rangoRapido, rangosRapidos,
+    ordenarPor,
     ahorrosFiltrados, totalFiltrado, porMedioFiltrado,
     tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
   }

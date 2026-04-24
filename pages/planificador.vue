@@ -58,8 +58,16 @@
 
             <Transition name="page" mode="out-in">
               <div :key="vistaActual">
-                <PlanificadorGraficoCategoria v-if="vistaActual === 'grafico'" />
-                <PlanificadorCalendarioMensual v-else-if="vistaActual === 'calendario'" />
+                <PlanificadorGraficoCategoria
+                  v-if="vistaActual === 'grafico'"
+                  @editar="editarGastoPlaneado"
+                  @registrar="abrirRegistroPago"
+                />
+                <PlanificadorCalendarioMensual
+                  v-else-if="vistaActual === 'calendario'"
+                  @editar="editarGastoPlaneado"
+                  @registrar="abrirRegistroPago"
+                />
                 <PlanificadorListaGastosPlaneados
                   v-else
                   @editar="editarGastoPlaneado"

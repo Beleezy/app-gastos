@@ -115,18 +115,240 @@
           </div>
         </div>
       </Transition>
+
+      <!-- Lista de gastos de la categoría activa, con acciones -->
+      <Transition name="tooltip-slide">
+        <div
+          v-if="segmentoActivo !== null && gastosDelSegmento.length > 0"
+          class="mt-3 rounded-xl border border-theme-border overflow-hidden"
+        >
+          <div class="px-3 py-2 bg-theme-input border-b border-theme-border">
+            <p class="text-[10px] font-semibold text-theme-text-sec uppercase tracking-wider">
+              Gastos de {{ datosGrafico[segmentoActivo].nombre }} ({{ gastosDelSegmento.length }})
+            </p>
+          </div>
+          <div class="divide-y divide-theme-border">
+            <div
+              v-for="g in gastosDelSegmento"
+              :key="g.id"
+              class="px-3 py-2.5"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="text-xs text-theme-text truncate">{{ g.concepto }}</p>
+                  <p class="text-[10px] text-theme-text-muted truncate">
+                    {{ formatFechaCorta(g.fechaProbablePago) }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                  <span
+                    class="text-[9px] px-1.5 py-0.5 rounded-full"
+                    :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"
+                  >{{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}</span>
+                  <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(g.montoEstimado) }}</span>
+                </div>
+              </div>
+              <div class="flex justify-end gap-x-3 mt-1.5 pt-1.5 border-t border-theme-border">
+                <button
+                  v-if="g.estado === 'pendiente' && !esCategoriaAhorro(g)"
+                  class="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
+                  title="Marcar como pagado"
+                  @click="marcarPagadoRapido(g)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  Pagar
+                </button>
+                <button
+                  class="text-[11px] transition-colors flex items-center gap-1"
+                  :class="g.gastoRegistradoFecha ? 'text-emerald-400 hover:text-emerald-300' : 'text-orange-400 hover:text-orange-300'"
+                  @click="emit('registrar', g)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8" />
+                  </svg>
+                  {{ g.gastoRegistradoFecha ? 'Editar registro' : 'Registrar' }}
+                </button>
+                <button
+                  class="text-[11px] text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1"
+                  @click="emit('editar', g)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Editar
+                </button>
+                <button
+                  class="text-[11px] text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1"
+                  @click="pedirConfirmarEliminar(g)"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- Confirm eliminar (gasto simple) -->
+    <SharedConfirmDialog
+      v-model="showConfirmSimple"
+      title="Eliminar gasto"
+      :message="gastoParaEliminar ? `¿Eliminar &quot;${gastoParaEliminar.concepto}&quot;? Tendrás 5 segundos para deshacer.` : ''"
+      confirm-label="Eliminar"
+      variant="danger"
+      @confirm="ejecutarEliminarSimple"
+    >
+      <template #message>
+        <p>¿Eliminar "{{ gastoParaEliminar?.concepto }}"? Tendrás 5 segundos para deshacer.</p>
+        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+          ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
+        </p>
+      </template>
+    </SharedConfirmDialog>
+
+    <!-- Confirm eliminar (gasto recurrente) -->
+    <div v-if="showModalRecurrente && gastoParaEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarEliminar"></div>
+      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+        <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
+        <div class="text-sm text-theme-text-muted mb-5">
+          Este gasto se repite en meses futuros. ¿Qué deseas hacer?
+          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+            ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
+          </p>
+        </div>
+        <div class="space-y-2">
+          <button
+            class="w-full py-2.5 rounded-xl bg-red-500/15 text-red-400 text-sm font-medium hover:bg-red-500/25 transition-colors"
+            @click="confirmarEliminarRecurrente(true)"
+          >
+            Eliminar este y todos los futuros
+          </button>
+          <button
+            class="w-full py-2.5 rounded-xl bg-theme-border-md text-theme-text-sec text-sm font-medium hover:bg-primary-600 transition-colors"
+            @click="confirmarEliminarRecurrente(false)"
+          >
+            Eliminar solo este mes
+          </button>
+          <button
+            class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
+            @click="cancelarEliminar"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-const { datosGrafico, resumen, gastosPorCategoria } = usePlanificador()
+const emit = defineEmits(['editar', 'registrar'])
+
+const {
+  datosGrafico,
+  resumen,
+  gastosPorCategoria,
+  softDeleteGastoPlaneado,
+  deleteGastoPlaneado,
+  updateGastoPlaneado,
+} = usePlanificador()
 const { currencySymbol, formatMonto } = useCurrency()
+const { success, show: toastShow } = useToast()
 
 const segmentoActivo = ref(null)
 
 function toggleSegmento(idx) {
   segmentoActivo.value = segmentoActivo.value === idx ? null : idx
+}
+
+const gastosDelSegmento = computed(() => {
+  if (segmentoActivo.value === null) return []
+  const cat = gastosPorCategoria.value[segmentoActivo.value]
+  if (!cat) return []
+  // Orden por fecha (los sin fecha al final), luego por monto desc
+  return [...cat.gastos].sort((a, b) => {
+    const fa = a.fechaProbablePago || '9999'
+    const fb = b.fechaProbablePago || '9999'
+    if (fa !== fb) return fa.localeCompare(fb)
+    return (b.montoEstimado || 0) - (a.montoEstimado || 0)
+  })
+})
+
+function formatFechaCorta(fecha) {
+  if (!fecha) return 'Sin fecha'
+  const d = new Date(fecha + 'T00:00:00')
+  const meses = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+  return `${d.getDate()} ${meses[d.getMonth()]}`
+}
+
+function esCategoriaAhorro(gasto) {
+  const nombre = gasto?.categoriaNombre || ''
+  return nombre.toLowerCase() === 'ahorro'
+}
+
+async function marcarPagadoRapido(gasto) {
+  try {
+    await updateGastoPlaneado(gasto.id, { estado: 'pagado' })
+    success(`"${gasto.concepto}" marcado como pagado`)
+  } catch {
+    // error queda en composable
+  }
+}
+
+const gastoParaEliminar = ref(null)
+const showConfirmSimple = ref(false)
+const showModalRecurrente = ref(false)
+const isEliminarOpen = computed(() => gastoParaEliminar.value !== null)
+useOverlayBack(isEliminarOpen, () => { cancelarEliminar() })
+
+function cancelarEliminar() {
+  gastoParaEliminar.value = null
+  showConfirmSimple.value = false
+  showModalRecurrente.value = false
+}
+
+function pedirConfirmarEliminar(gasto) {
+  gastoParaEliminar.value = gasto
+  if (gasto.esRecurrente && gasto.recurrenteGrupoId) {
+    showModalRecurrente.value = true
+  } else {
+    showConfirmSimple.value = true
+  }
+}
+
+function ejecutarEliminarSimple() {
+  const gasto = gastoParaEliminar.value
+  if (!gasto) return
+  showConfirmSimple.value = false
+  gastoParaEliminar.value = null
+  const handle = softDeleteGastoPlaneado(gasto.id, 5000)
+  if (!handle) return
+  toastShow({
+    message: `"${gasto.concepto}" eliminado`,
+    type: 'info',
+    duration: 5000,
+    action: {
+      label: 'Deshacer',
+      onClick: () => {
+        if (handle.undo()) success('Restaurado')
+      },
+    },
+  })
+}
+
+async function confirmarEliminarRecurrente(incluirFuturos) {
+  const gasto = gastoParaEliminar.value
+  if (!gasto) return
+  showModalRecurrente.value = false
+  gastoParaEliminar.value = null
+  await deleteGastoPlaneado(gasto.id, incluirFuturos)
 }
 </script>
 

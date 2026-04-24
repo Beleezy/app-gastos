@@ -15,7 +15,7 @@ function getCleanHistoryState() {
   return currentState
 }
 
-function markCleanupPopPending() {
+export function markCleanupPopPending() {
   cleanupPopDeadline = Date.now() + CLEANUP_SUPPRESS_MS
 
   if (cleanupTimer) clearTimeout(cleanupTimer)

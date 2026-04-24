@@ -23,11 +23,13 @@
           :rangos-rapidos="rangosRapidos"
           :medio-activo="medioFiltro"
           :medios="medios"
+          :orden-activo="ordenarPor"
           :tiene-filtros-activos="tieneFiltrosActivos"
           :conteo-filtros-activos="conteoFiltrosActivos"
           @update:busqueda="busquedaAhorro = $event"
           @update:rango="rangoRapido = $event"
           @update:medio="medioFiltro = $event"
+          @update:orden="ordenarPor = $event"
           @limpiar="limpiarFiltros"
         />
 
@@ -117,6 +119,7 @@ const esMesActual = computed(() => esHoy.value)
 
 const {
   busquedaAhorro, medioFiltro, rangoRapido, rangosRapidos,
+  ordenarPor,
   porMedioFiltrado, totalFiltrado,
   tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
 } = useAhorrosFilters({ ahorrosList, esMesActual })

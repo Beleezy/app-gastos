@@ -6,11 +6,13 @@ import crypto from 'crypto'
 const MESES_FUTUROS = 12
 
 /**
- * Gets or creates a monthly plan for a given user/month/year
+ * Gets or creates a monthly plan for a given user/month/year.
+ * Accepts an optional `dbClient` (e.g. a transaction handle) for callers
+ * that need all reads/writes to participate in the same transaction.
  */
-export async function obtenerOCrearPlan(usuarioId, mes, anio) {
+export async function obtenerOCrearPlan(usuarioId, mes, anio, dbClient = db) {
   // Always try to find first
-  const buscar = () => db
+  const buscar = () => dbClient
     .select()
     .from(planesMensuales)
     .where(and(
@@ -24,7 +26,7 @@ export async function obtenerOCrearPlan(usuarioId, mes, anio) {
   if (plan) return plan
 
   // Get default budget
-  const [config] = await db
+  const [config] = await dbClient
     .select()
     .from(configuraciones)
     .where(eq(configuraciones.usuarioId, usuarioId))
@@ -34,7 +36,7 @@ export async function obtenerOCrearPlan(usuarioId, mes, anio) {
 
   // Try to insert, catch unique constraint violation
   try {
-    const [newPlan] = await db
+    const [newPlan] = await dbClient
       .insert(planesMensuales)
       .values({ usuarioId, mes, anio, montoPresupuesto: presupuesto })
       .returning()

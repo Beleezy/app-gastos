@@ -270,7 +270,7 @@
         <div v-if="estaExpandido(proyecto.id)" class="border-t border-theme-border bg-theme-input/45 px-4 py-4">
           <div class="space-y-3">
             <div
-              v-for="detalle in proyecto.detalles"
+              v-for="detalle in detallesOrdenados(proyecto.detalles)"
               :key="detalle.id"
               class="rounded-2xl border border-theme-border bg-theme-card"
             >
@@ -1282,6 +1282,10 @@ async function confirmarDecision() {
   } finally {
     decidiendo.value = false
   }
+}
+
+function detallesOrdenados(detalles) {
+  return [...detalles].sort((a, b) => (b.prioridad ?? 0) - (a.prioridad ?? 0))
 }
 
 function decisionBadge(detalle) {
