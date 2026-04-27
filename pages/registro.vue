@@ -54,56 +54,23 @@
             @retake="onRetakePhoto"
           />
 
-          <!-- Bloque sidebar desktop: trigger camara + mic grande -->
-          <div class="hidden lg:block lg:rounded-2xl lg:border lg:border-theme-border lg:bg-theme-card lg:py-6">
-            <div class="flex items-start justify-center gap-8">
-              <div class="pt-9 flex flex-col items-center gap-3">
-                <button
-                  class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 bg-gradient-to-br from-amber-500/50 to-orange-600/50 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 backdrop-blur-md"
-                  aria-label="Escanear voucher"
-                  @click="abrirCamara"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                  </svg>
-                </button>
-                <span class="text-xs text-theme-text-sec font-medium">Voucher</span>
-              </div>
-              <RegistroBotonMicrofono
-                :is-listening="isListening"
-                :transcript="transcript"
-                :error="voiceError"
-                :is-supported="isSupported"
-                :has-draft="hasDraft"
-                @start="onStartListening"
-                @stop="onStopListening"
-                @continue="onContinueListening"
-              />
-            </div>
-            <div class="mt-3 px-2">
-              <RegistroDraftVoz
-                :transcript="transcript"
-                :has-draft="hasDraft"
-                :is-listening="isListening"
-                @send="onSendDraft"
-                @discard="onDiscardDraft"
-                @overwrite="onOverwriteDraft"
-                @update:transcript="onUpdateTranscript"
-              />
-            </div>
-          </div>
-
-          <!-- Draft de voz visible en mobile -->
-          <div class="lg:hidden px-4 mb-3">
-            <RegistroDraftVoz
-              :transcript="transcript"
-              :has-draft="hasDraft"
+          <!-- Card de captura: foto + voz + manual (siempre visible) -->
+          <div class="px-4 lg:px-0 mb-4 lg:mb-0">
+            <RegistroCapturaCard
               :is-listening="isListening"
-              @send="onSendDraft"
-              @discard="onDiscardDraft"
-              @overwrite="onOverwriteDraft"
-              @update:transcript="onUpdateTranscript"
+              :transcript="transcript"
+              :voice-error="voiceError"
+              :is-supported="isSupported"
+              :has-draft="hasDraft"
+              @voice-start="onStartListening"
+              @voice-stop="onStopListening"
+              @voice-continue="onContinueListening"
+              @photo="abrirCamara"
+              @manual="showFormManual = true"
+              @draft-send="onSendDraft"
+              @draft-discard="onDiscardDraft"
+              @draft-overwrite="onOverwriteDraft"
+              @draft-update="onUpdateTranscript"
             />
           </div>
 
@@ -283,16 +250,17 @@
       </div>
     </div>
 
-    <!-- FABs mobile: foto, microfono (resaltado), manual -->
-    <RegistroFabsCaptura
+    <!-- FAB mobile: solo agregar manual (acceso rapido) -->
+    <button
       v-if="!seleccionMultipleActiva"
-      :is-listening="isListening"
-      :has-draft="hasDraft"
-      :is-supported="isSupported"
-      @voice-toggle="onVoiceFabToggle"
-      @photo="abrirCamara"
-      @manual="showFormManual = true"
-    />
+      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent shadow-xl shadow-theme-accent/40 flex items-center justify-center text-theme-on-accent active:scale-90 transition-all duration-300 lg:hidden"
+      aria-label="Agregar gasto manual"
+      @click="onManualFab"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+    </button>
 
     <!-- Voice confirmation modal (lazy) -->
     <RegistroConfirmacionVozAsync
@@ -511,14 +479,14 @@ const diasDelMes = computed(() =>
   new Date(anioSeleccionado.value, mesSeleccionado.value, 0).getDate()
 )
 
-// ─── Triggers para FabsCaptura ─────────────────────────
+// ─── Triggers ──────────────────────────────────────────
 function abrirCamara() {
   botonCamaraRef.value?.openCamera()
 }
 
-function onVoiceFabToggle() {
-  if (isListening.value) onStopListening()
-  else onStartListening()
+function onManualFab() {
+  vibrate(20)
+  showFormManual.value = true
 }
 
 const tabsVista = [

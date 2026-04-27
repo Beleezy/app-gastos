@@ -2,25 +2,27 @@
   <div class="relative bg-gradient-to-br from-theme-card/80 to-theme-card/60 rounded-2xl border border-theme-border px-4 py-4 overflow-hidden">
     <div class="absolute -top-8 -right-8 w-32 h-32 bg-theme-accent-bg rounded-full blur-2xl pointer-events-none"></div>
 
-    <!-- Kebab menu (editar presupuesto) -->
-    <div class="absolute top-2 right-2 z-10">
+    <!-- Header con titulo y boton de menu visible -->
+    <div class="relative flex items-center justify-between mb-2.5">
+      <p class="text-[0.65rem] text-theme-text-sec uppercase tracking-wider font-semibold">
+        Resumen del mes
+      </p>
       <button
         ref="kebabBtn"
-        class="w-7 h-7 rounded-lg flex items-center justify-center text-theme-text-sec hover:text-theme-text hover:bg-theme-card transition-colors"
+        class="flex items-center gap-1 px-2 py-1 rounded-lg text-[0.65rem] font-semibold uppercase tracking-wider text-theme-accent bg-theme-accent-bg border border-theme-accent/40 hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
         aria-label="Opciones del resumen"
         @click="toggleMenu"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="5" r="1.6" />
-          <circle cx="12" cy="12" r="1.6" />
-          <circle cx="12" cy="19" r="1.6" />
+        Editar
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
       <Transition name="menu">
         <div
           v-if="showMenu"
           ref="menuEl"
-          class="absolute right-0 top-9 min-w-[180px] rounded-xl bg-theme-card border border-theme-border shadow-xl shadow-black/30 py-1.5 z-20"
+          class="absolute right-0 top-9 min-w-[200px] rounded-xl bg-theme-card border border-theme-border shadow-xl shadow-black/30 py-1.5 z-30"
         >
           <button
             class="w-full px-3 py-2 text-left text-sm text-theme-text hover:bg-theme-input flex items-center gap-2"
@@ -45,37 +47,37 @@
       </Transition>
     </div>
 
-    <!-- Fila superior: Este mes + Hoy -->
-    <div class="relative grid grid-cols-2 gap-3 mb-3">
+    <!-- Fila superior: Este mes (7/12) + Hoy (5/12) -->
+    <div class="relative grid grid-cols-12 gap-2 mb-3">
       <!-- Este mes -->
-      <div class="rounded-xl bg-theme-input/40 border border-theme-border/50 px-3 py-3">
-        <p class="text-[0.65rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-1">Este mes</p>
+      <div class="col-span-7 rounded-xl bg-theme-input/30 px-3 py-2.5">
+        <p class="text-[0.6rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-1">Este mes</p>
         <p class="text-2xl font-bold text-gradient-blue leading-tight tabular-nums">
-          {{ currencySymbol }} {{ formatMonto(totalMes) }}
+          {{ formatMonto(totalMes) }}
         </p>
         <p
           v-if="presupuesto > 0"
           class="text-xs mt-1 font-medium"
           :class="saldo >= 0 ? 'text-emerald-400' : 'text-red-400'"
         >
-          {{ currencySymbol }} {{ formatMonto(Math.abs(saldo)) }} {{ saldo >= 0 ? 'restante' : 'excedido' }}
+          {{ formatMonto(Math.abs(saldo)) }} {{ saldo >= 0 ? 'restante' : 'excedido' }}
         </p>
         <p v-else class="text-xs mt-1 text-theme-text-muted">Sin presupuesto</p>
       </div>
 
-      <!-- Hoy -->
-      <div class="rounded-xl bg-theme-input/40 border border-theme-border/50 px-3 py-3">
-        <p class="text-[0.65rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-1">Hoy</p>
-        <p class="text-2xl font-bold text-theme-text leading-tight tabular-nums">
-          {{ currencySymbol }} {{ formatMonto(totalDia) }}
+      <!-- Hoy (mas pequeno) -->
+      <div class="col-span-5 rounded-xl bg-theme-input/30 px-3 py-2.5">
+        <p class="text-[0.6rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-1">Hoy</p>
+        <p class="text-lg font-bold text-theme-text leading-tight tabular-nums">
+          {{ formatMonto(totalDia) }}
         </p>
-        <p class="text-xs mt-1 text-theme-text-sec">
+        <p class="text-[0.65rem] mt-1 text-theme-text-sec">
           {{ gastosHoyCount }} {{ gastosHoyCount === 1 ? 'gasto' : 'gastos' }}
         </p>
       </div>
     </div>
 
-    <!-- Edit presupuesto inline (cuando se activa desde el menu) -->
+    <!-- Edit presupuesto inline -->
     <div v-if="editando" class="relative mb-3 flex items-center gap-2 px-1">
       <span class="text-xs text-theme-text-sec">Presupuesto:</span>
       <span class="text-sm text-theme-text-muted">{{ currencySymbol }}</span>
@@ -91,7 +93,7 @@
       />
     </div>
 
-    <!-- Barra de progreso -->
+    <!-- Barra de progreso del presupuesto -->
     <div v-if="presupuesto > 0 && !editando" class="relative mb-3">
       <div class="flex items-center justify-between mb-1.5">
         <span class="text-[0.65rem] text-theme-text-sec font-medium">
@@ -113,111 +115,105 @@
       </div>
     </div>
 
-    <!-- Banner de proyeccion -->
-    <div
-      v-if="mostrarProyeccion"
-      class="relative rounded-xl border px-3 py-2.5 mb-3 flex items-start gap-2.5"
-      :class="[
-        excedeProyeccion
-          ? 'border-red-500/30 bg-red-500/8'
-          : vaBien
-            ? 'border-emerald-500/30 bg-emerald-500/8'
-            : 'border-theme-accent/30 bg-theme-accent-bg/40'
-      ]"
-    >
-      <div
-        class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
-        :class="excedeProyeccion ? 'bg-red-500/15 text-red-400' : vaBien ? 'bg-emerald-500/15 text-emerald-400' : 'bg-theme-accent-bg text-theme-accent'"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-        </svg>
-      </div>
-      <div class="min-w-0 flex-1">
-        <p class="text-xs text-theme-text leading-snug">
-          A este ritmo gastarias <span class="font-bold tabular-nums">{{ currencySymbol }} {{ formatMonto(proyeccion) }}</span> este mes.
-        </p>
-        <p
-          v-if="excedeProyeccion"
-          class="text-xs font-semibold text-red-400 mt-0.5"
-        >
-          Excederias el presupuesto.
-        </p>
-        <p
-          v-else-if="vaBien"
-          class="text-xs font-semibold text-emerald-400 mt-0.5"
-        >
-          Vas bien.
-        </p>
-      </div>
-    </div>
-
-    <!-- Por categoria (colapsable) -->
-    <div v-if="categoriasResumen.length > 0" class="relative">
+    <!-- Ver mas (desglozable: proyeccion + categorias) -->
+    <div v-if="puedeMostrarDetalles" class="relative">
       <div class="border-t border-theme-border/40 pt-2.5">
         <button
           class="w-full flex items-center justify-between gap-2 px-1 py-1 rounded-lg hover:bg-theme-input/30 transition-colors"
-          :aria-expanded="categoriasExpandido"
-          @click="toggleCategorias"
+          :aria-expanded="detallesAbierto"
+          @click="toggleDetalles"
         >
-          <span class="text-[0.65rem] uppercase tracking-wider font-semibold text-theme-text-sec">
-            Por categoria
+          <span class="text-[0.65rem] uppercase tracking-wider font-semibold text-theme-accent">
+            {{ detallesAbierto ? 'Ver menos' : 'Ver mas' }}
           </span>
-          <div class="flex items-center gap-1.5">
-            <span class="text-[0.65rem] text-theme-text-muted font-medium">
-              {{ categoriasResumen.length }}
-            </span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="w-3.5 h-3.5 text-theme-text-sec transition-transform duration-200"
-              :class="categoriasExpandido ? 'rotate-180' : ''"
-              fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5 text-theme-accent transition-transform duration-200"
+            :class="detallesAbierto ? 'rotate-180' : ''"
+            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
 
         <Transition name="cat-expand">
-          <ul v-if="categoriasExpandido" class="mt-2 space-y-1.5 overflow-hidden">
-            <li
-              v-for="cat in categoriasTop"
-              :key="cat.nombre"
-              class="flex items-center gap-2.5 px-1 py-1"
+          <div v-if="detallesAbierto" class="mt-2 space-y-3 overflow-hidden">
+            <!-- Ritmo de gasto / proyeccion -->
+            <div
+              v-if="mostrarProyeccion"
+              class="rounded-xl border px-3 py-2.5 flex items-start gap-2.5"
+              :class="[
+                excedeProyeccion
+                  ? 'border-red-500/30 bg-red-500/8'
+                  : vaBien
+                    ? 'border-emerald-500/30 bg-emerald-500/8'
+                    : 'border-theme-accent/30 bg-theme-accent-bg/40'
+              ]"
             >
-              <span class="text-base shrink-0" :style="{ color: cat.color }">{{ cat.icono || '\u25CF' }}</span>
-              <span class="text-xs font-medium text-theme-text shrink-0 min-w-0 truncate max-w-[80px]">
-                {{ cat.nombre }}
-              </span>
-              <div class="flex-1 h-1.5 rounded-full bg-theme-input overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-500"
-                  :style="{ width: Math.min(cat.porcentaje, 100) + '%', backgroundColor: cat.color }"
-                ></div>
+              <div
+                class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center"
+                :class="excedeProyeccion ? 'bg-red-500/15 text-red-400' : vaBien ? 'bg-emerald-500/15 text-emerald-400' : 'bg-theme-accent-bg text-theme-accent'"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
               </div>
-              <span class="text-xs font-semibold text-theme-text tabular-nums shrink-0">
-                {{ currencySymbol }} {{ formatMonto(cat.total) }}
-              </span>
-            </li>
-            <li
-              v-if="categoriasResumen.length > maxCategorias"
-              class="flex items-center gap-2.5 px-1 py-1"
-            >
-              <span class="text-base shrink-0 text-theme-text-muted">{{ '\u25CF' }}</span>
-              <span class="text-xs font-medium text-theme-text-sec shrink-0">
-                Otros
-              </span>
-              <div class="flex-1 h-1.5 rounded-full bg-theme-input overflow-hidden">
-                <div
-                  class="h-full rounded-full bg-theme-text-muted/50 transition-all duration-500"
-                  :style="{ width: Math.min(otrosPorcentaje, 100) + '%' }"
-                ></div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[0.65rem] uppercase tracking-wider font-semibold text-theme-text-sec mb-0.5">
+                  Ritmo de gasto
+                </p>
+                <p class="text-xs text-theme-text leading-snug">
+                  A este ritmo gastarias <span class="font-bold tabular-nums">{{ currencySymbol }} {{ formatMonto(proyeccion) }}</span> este mes.
+                </p>
+                <p
+                  v-if="excedeProyeccion"
+                  class="text-xs font-semibold text-red-400 mt-0.5"
+                >
+                  Excederias el presupuesto.
+                </p>
+                <p
+                  v-else-if="vaBien"
+                  class="text-xs font-semibold text-emerald-400 mt-0.5"
+                >
+                  Vas bien.
+                </p>
               </div>
-              <span class="text-xs font-semibold text-theme-text-sec tabular-nums shrink-0">
-                {{ currencySymbol }} {{ formatMonto(otrosTotal) }}
-              </span>
-            </li>
-          </ul>
+            </div>
+
+            <!-- Por categoria: solo nombre + monto -->
+            <div v-if="categoriasResumen.length > 0">
+              <p class="text-[0.65rem] uppercase tracking-wider font-semibold text-theme-text-sec mb-1.5 px-1">
+                Por categoria
+              </p>
+              <ul class="space-y-0.5">
+                <li
+                  v-for="cat in categoriasTop"
+                  :key="cat.nombre"
+                  class="flex items-center gap-2 px-1 py-1.5 rounded-lg hover:bg-theme-input/30 transition-colors"
+                >
+                  <span class="text-base shrink-0" :style="{ color: cat.color }">{{ cat.icono || '\u25CF' }}</span>
+                  <span class="text-sm font-medium text-theme-text flex-1 min-w-0">
+                    {{ cat.nombre }}
+                  </span>
+                  <span class="text-sm font-semibold text-theme-text tabular-nums shrink-0">
+                    {{ currencySymbol }} {{ formatMonto(cat.total) }}
+                  </span>
+                </li>
+                <li
+                  v-if="categoriasResumen.length > maxCategorias"
+                  class="flex items-center gap-2 px-1 py-1.5"
+                >
+                  <span class="text-base shrink-0 text-theme-text-muted">{{ '\u25CF' }}</span>
+                  <span class="text-sm font-medium text-theme-text-sec flex-1">
+                    Otros ({{ categoriasResumen.length - maxCategorias }})
+                  </span>
+                  <span class="text-sm font-semibold text-theme-text-sec tabular-nums shrink-0">
+                    {{ currencySymbol }} {{ formatMonto(otrosTotal) }}
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
         </Transition>
       </div>
     </div>
@@ -241,7 +237,7 @@ const emit = defineEmits(['update:presupuesto'])
 
 const { currencySymbol, formatMonto } = useCurrency()
 
-const STORAGE_KEY = 'registro:resumen-categorias-expanded'
+const STORAGE_KEY = 'registro:resumen-detalles-expanded'
 const MAX_CATEGORIAS_VISIBLES = 5
 const maxCategorias = MAX_CATEGORIAS_VISIBLES
 
@@ -337,23 +333,27 @@ const vaBien = computed(() =>
   proyeccion.value > 0 && proyeccion.value < props.presupuesto * 0.85
 )
 
-// ─── Categorias colapsable ────────────────────────────────
-const categoriasExpandido = ref(false)
+const puedeMostrarDetalles = computed(() =>
+  mostrarProyeccion.value || props.categoriasResumen.length > 0
+)
+
+// ─── Detalles colapsable ──────────────────────────────────
+const detallesAbierto = ref(false)
 
 onMounted(() => {
   if (process.client) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
-      if (saved !== null) categoriasExpandido.value = saved === 'true'
+      if (saved !== null) detallesAbierto.value = saved === 'true'
     } catch {}
   }
 })
 
-function toggleCategorias() {
-  categoriasExpandido.value = !categoriasExpandido.value
+function toggleDetalles() {
+  detallesAbierto.value = !detallesAbierto.value
   if (process.client) {
     try {
-      localStorage.setItem(STORAGE_KEY, String(categoriasExpandido.value))
+      localStorage.setItem(STORAGE_KEY, String(detallesAbierto.value))
     } catch {}
   }
 }
@@ -368,13 +368,6 @@ const otrosTotal = computed(() => {
     .slice(MAX_CATEGORIAS_VISIBLES)
     .reduce((s, c) => s + (c.total || 0), 0)
 })
-
-const otrosPorcentaje = computed(() => {
-  if (props.categoriasResumen.length <= MAX_CATEGORIAS_VISIBLES) return 0
-  return props.categoriasResumen
-    .slice(MAX_CATEGORIAS_VISIBLES)
-    .reduce((s, c) => s + (c.porcentaje || 0), 0)
-})
 </script>
 
 <style scoped>
@@ -387,7 +380,7 @@ const otrosPorcentaje = computed(() => {
 }
 
 .cat-expand-enter-active, .cat-expand-leave-active {
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
   overflow: hidden;
 }
 .cat-expand-enter-from, .cat-expand-leave-to {
@@ -396,6 +389,6 @@ const otrosPorcentaje = computed(() => {
 }
 .cat-expand-enter-to, .cat-expand-leave-from {
   opacity: 1;
-  max-height: 400px;
+  max-height: 600px;
 }
 </style>
