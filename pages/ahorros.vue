@@ -12,7 +12,12 @@
     <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-4">
       <div class="lg:sticky lg:top-20 lg:self-start">
         <div ref="swipeZone">
-          <AhorrosResumenAhorros @abrir-metas="showFormMeta = true" />
+          <AhorrosResumenAhorros
+            :model-value="vistaAhorros"
+            :tabs="tabs"
+            @abrir-metas="showFormMeta = true"
+            @update:model-value="cambiarTab"
+          />
         </div>
       </div>
 
@@ -32,18 +37,6 @@
           @update:orden="ordenarPor = $event"
           @limpiar="limpiarFiltros"
         />
-
-        <div class="flex items-center gap-2 px-4 lg:px-0">
-          <button
-            v-for="tab in tabs"
-            :key="tab.value"
-            class="flex-1 lg:flex-none lg:px-5 py-2 rounded-xl text-sm font-medium transition-colors"
-            :class="vistaAhorros === tab.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
-            @click="cambiarTab(tab.value)"
-          >
-            {{ tab.label }}
-          </button>
-        </div>
 
         <Transition name="page" mode="out-in">
           <div :key="vistaAhorros">

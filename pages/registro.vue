@@ -30,23 +30,45 @@
           <div class="px-4 lg:px-0 mb-5 lg:mb-0">
             <RegistroResumenMesRegistro
               :total-mes="parseFloat(resumen.totalMes) || 0"
+              :total-dia="totalDiaActual"
+              :gastos-hoy-count="gastosHoyCount"
               :presupuesto="presupuesto"
               :presupuesto-default="presupuestoDefault"
+              :categorias-resumen="gastosPorCategoria"
+              :es-mes-actual="esMesActual"
+              :dias-transcurridos="diasTranscurridos"
+              :dias-del-mes="diasDelMes"
               @update:presupuesto="actualizarPresupuesto"
             />
           </div>
 
-          <div class="py-4 mb-4 px-4 lg:px-0 lg:mb-0 lg:rounded-2xl lg:border lg:border-theme-border lg:bg-theme-card lg:py-6">
+          <!-- BotonCamara unico (headless: solo gestiona preview/teleport modals) -->
+          <RegistroBotonCamara
+            ref="botonCamaraRef"
+            :show-preview="showPhotoPreview"
+            :photo-preview="photoPreview"
+            :headless="true"
+            @capture="onPhotoCapture"
+            @send="onSendPhoto"
+            @cancel="onCancelPhoto"
+            @retake="onRetakePhoto"
+          />
+
+          <!-- Bloque sidebar desktop: trigger camara + mic grande -->
+          <div class="hidden lg:block lg:rounded-2xl lg:border lg:border-theme-border lg:bg-theme-card lg:py-6">
             <div class="flex items-start justify-center gap-8">
-              <div class="pt-9">
-                <RegistroBotonCamara
-                  :show-preview="showPhotoPreview"
-                  :photo-preview="photoPreview"
-                  @capture="onPhotoCapture"
-                  @send="onSendPhoto"
-                  @cancel="onCancelPhoto"
-                  @retake="onRetakePhoto"
-                />
+              <div class="pt-9 flex flex-col items-center gap-3">
+                <button
+                  class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 bg-gradient-to-br from-amber-500/50 to-orange-600/50 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 backdrop-blur-md"
+                  aria-label="Escanear voucher"
+                  @click="abrirCamara"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                  </svg>
+                </button>
+                <span class="text-xs text-theme-text-sec font-medium">Voucher</span>
               </div>
               <RegistroBotonMicrofono
                 :is-listening="isListening"
@@ -70,6 +92,19 @@
                 @update:transcript="onUpdateTranscript"
               />
             </div>
+          </div>
+
+          <!-- Draft de voz visible en mobile -->
+          <div class="lg:hidden px-4 mb-3">
+            <RegistroDraftVoz
+              :transcript="transcript"
+              :has-draft="hasDraft"
+              :is-listening="isListening"
+              @send="onSendDraft"
+              @discard="onDiscardDraft"
+              @overwrite="onOverwriteDraft"
+              @update:transcript="onUpdateTranscript"
+            />
           </div>
 
           <!-- Quick-add chips (E#1): favoritos frecuentes -->
@@ -248,17 +283,16 @@
       </div>
     </div>
 
-    <!-- FAB móvil (oculto cuando selección múltiple activa) -->
-    <button
+    <!-- FABs mobile: foto, microfono (resaltado), manual -->
+    <RegistroFabsCaptura
       v-if="!seleccionMultipleActiva"
-      class="fixed right-4 bottom-24 z-40 w-12 h-12 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse lg:hidden"
-      aria-label="Agregar gasto manual"
-      @click="showFormManual = true"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-    </button>
+      :is-listening="isListening"
+      :has-draft="hasDraft"
+      :is-supported="isSupported"
+      @voice-toggle="onVoiceFabToggle"
+      @photo="abrirCamara"
+      @manual="showFormManual = true"
+    />
 
     <!-- Voice confirmation modal (lazy) -->
     <RegistroConfirmacionVozAsync
@@ -458,6 +492,34 @@ const gastoEditar = ref(null)
 const gastoDuplicar = ref(null)
 const toastMsg = ref('')
 const seleccionMultipleActiva = ref(false)
+const botonCamaraRef = ref(null)
+
+// ─── Datos para ResumenMesRegistro ─────────────────────
+const totalDiaActual = computed(() => parseFloat(resumen.value?.totalDia) || 0)
+
+const gastosHoyCount = computed(() => {
+  const hoy = useFechaPeru().fechaHoy()
+  return gastosMensuales.value.filter(g => g.fecha === hoy).length
+})
+
+const diasTranscurridos = computed(() => {
+  if (!esMesActual.value) return 0
+  return new Date().getDate()
+})
+
+const diasDelMes = computed(() =>
+  new Date(anioSeleccionado.value, mesSeleccionado.value, 0).getDate()
+)
+
+// ─── Triggers para FabsCaptura ─────────────────────────
+function abrirCamara() {
+  botonCamaraRef.value?.openCamera()
+}
+
+function onVoiceFabToggle() {
+  if (isListening.value) onStopListening()
+  else onStartListening()
+}
 
 const tabsVista = [
   { value: 'historial', label: 'Historial' },

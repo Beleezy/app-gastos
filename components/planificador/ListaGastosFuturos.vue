@@ -1,106 +1,62 @@
 <template>
   <div class="px-4 py-3">
-    <!-- Resumen compacto -->
-    <div v-if="gastosFuturos.length" class="mb-4 space-y-3">
-      <!-- Fila principal: monto promedio + rango -->
+    <!-- Resumen denso (header) -->
+    <div v-if="gastosFuturos.length" class="mb-4">
       <div class="relative overflow-hidden rounded-2xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/90 p-4">
         <div class="absolute -top-10 right-0 h-28 w-28 rounded-full bg-sky-500/10 blur-2xl"></div>
-        <div class="relative flex items-end justify-between gap-3 mb-3">
+
+        <!-- Fila top: Inversión (izq) · Proyectos (der) -->
+        <div class="relative flex items-start justify-between gap-3">
           <div class="min-w-0">
-            <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Inversión estimada</p>
-            <p class="text-2xl font-bold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}</p>
-          </div>
-          <div class="text-right shrink-0">
-            <p class="text-[10px] text-theme-text-sec mb-1 uppercase tracking-wider font-medium">Rango</p>
-            <p class="text-sm font-semibold text-theme-text-sec whitespace-nowrap">
-              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }}
+            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Inversión estimada</p>
+            <p class="mt-0.5 truncate text-2xl font-bold text-theme-text leading-tight">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}
+              <span class="text-xs font-normal text-theme-text-sec">promedio</span>
             </p>
-          </div>
-        </div>
-
-        <!-- Stats grid -->
-        <div class="grid grid-cols-3 gap-2 mb-3">
-          <div class="bg-theme-input rounded-xl p-2.5 border border-theme-border/50">
-            <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Proyectos</p>
-            <p class="text-sm font-bold text-theme-text mt-0.5">{{ resumenFuturos.totalProyectos }}</p>
-            <p class="text-[9px] text-theme-text-muted">{{ resumenFuturos.totalDetalles }} det. · {{ resumenFuturos.totalOpciones }} opc.</p>
-          </div>
-          <div class="bg-theme-input rounded-xl p-2.5 border border-theme-border/50 min-w-0">
-            <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Por proy.</p>
-            <p class="text-sm font-bold text-violet-300 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.promedioPorProyecto || 0) }}</p>
-            <p class="text-[9px] text-theme-text-muted">promedio</p>
-          </div>
-          <div class="bg-theme-input rounded-xl p-2.5 border border-emerald-500/10 min-w-0">
-            <p class="text-[9px] text-theme-text-sec uppercase tracking-wider">Ahorro</p>
-            <p class="text-sm font-bold mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis" :class="ahorroPotencial > 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
-              {{ ahorroPotencial > 0 ? `${currencySymbol}\u00a0${formatMonto(ahorroPotencial)}` : '—' }}
+            <p class="mt-0.5 truncate text-[11px] text-theme-text-sec">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} mín. — {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }} máx.
             </p>
-            <p class="text-[9px] text-theme-text-muted">potencial</p>
-          </div>
-        </div>
-
-        <!-- Progreso de decisión -->
-        <div v-if="resumenFuturos.progresoDecision?.total > 0">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decisión</span>
-            <span class="text-[10px] font-semibold" :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
-              {{ resumenFuturos.progresoDecision.decididos }} / {{ resumenFuturos.progresoDecision.total }}
-              · {{ resumenFuturos.progresoDecision.porcentaje }}%
-            </span>
-          </div>
-          <div class="h-1.5 w-full overflow-hidden rounded-full bg-theme-input">
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
-              :style="{ width: resumenFuturos.progresoDecision.porcentaje + '%' }"
-            ></div>
-          </div>
-          <!-- Desglose -->
-          <div class="mt-2 flex items-center gap-3">
-            <div v-if="desglose.compradas > 0" class="flex items-center gap-1.5">
-              <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-              <span class="text-[10px] text-emerald-400">{{ desglose.compradas }} comprada{{ desglose.compradas > 1 ? 's' : '' }}</span>
-            </div>
-            <div v-if="desglose.planificadas > 0" class="flex items-center gap-1.5">
-              <span class="h-2 w-2 rounded-full bg-sky-400"></span>
-              <span class="text-[10px] text-sky-300">{{ desglose.planificadas }} planificada{{ desglose.planificadas > 1 ? 's' : '' }}</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="h-2 w-2 rounded-full bg-gray-500"></span>
-              <span class="text-[10px] text-theme-text-muted">{{ desglose.pendientes }} pendiente{{ desglose.pendientes > 1 ? 's' : '' }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Prioridades -->
-        <div v-if="resumenFuturos.porPrioridad && (resumenFuturos.porPrioridad.alta || resumenFuturos.porPrioridad.media || resumenFuturos.porPrioridad.baja)" class="mt-3 flex items-center gap-2">
-          <span class="text-[10px] text-theme-text-muted uppercase tracking-wider">Prioridad:</span>
-          <div v-if="resumenFuturos.porPrioridad.alta" class="flex items-center gap-1 rounded-full bg-red-500/12 px-2 py-0.5">
-            <span class="h-1.5 w-1.5 rounded-full bg-red-400"></span>
-            <span class="text-[10px] font-medium text-red-400">{{ resumenFuturos.porPrioridad.alta }}</span>
-          </div>
-          <div v-if="resumenFuturos.porPrioridad.media" class="flex items-center gap-1 rounded-full bg-amber-500/12 px-2 py-0.5">
-            <span class="h-1.5 w-1.5 rounded-full bg-amber-400"></span>
-            <span class="text-[10px] font-medium text-amber-300">{{ resumenFuturos.porPrioridad.media }}</span>
-          </div>
-          <div v-if="resumenFuturos.porPrioridad.baja" class="flex items-center gap-1 rounded-full bg-emerald-500/12 px-2 py-0.5">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[10px] font-medium text-emerald-400">{{ resumenFuturos.porPrioridad.baja }}</span>
-          </div>
-        </div>
-
-        <!-- Proyecto más caro -->
-        <div v-if="resumenFuturos.proyectoMasCaro && resumenFuturos.totalProyectos > 1" class="mt-3 flex items-center justify-between rounded-xl bg-amber-500/8 border border-amber-500/15 px-3 py-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-sm">{{ resumenFuturos.proyectoMasCaro.categoriaIcono || '📦' }}</span>
-            <div class="min-w-0">
-              <p class="text-[9px] uppercase tracking-wider text-amber-300/70">Más costoso</p>
-              <p class="truncate text-xs font-medium text-theme-text">{{ resumenFuturos.proyectoMasCaro.tipoGasto }}</p>
-            </div>
           </div>
           <div class="shrink-0 text-right">
-            <p class="text-xs font-semibold text-amber-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.proyectoMasCaro.totalPromedio) }}</p>
-            <p v-if="resumenFuturos.totalPromedio > 0" class="text-[9px] text-amber-300/60">{{ Math.round((resumenFuturos.proyectoMasCaro.totalPromedio / resumenFuturos.totalPromedio) * 100) }}%</p>
+            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Proyectos</p>
+            <p class="mt-0.5 text-2xl font-bold text-theme-text leading-tight">{{ resumenFuturos.totalProyectos }}</p>
+            <p class="text-[11px] text-theme-text-sec whitespace-nowrap">{{ resumenFuturos.totalOpciones }} opc.</p>
+          </div>
+        </div>
+
+        <!-- Progreso de decisión slim + badges de prioridad inline -->
+        <div v-if="resumenFuturos.progresoDecision?.total > 0" class="mt-4 space-y-1.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decisión</p>
+            <div v-if="resumenFuturos.porPrioridad && (resumenFuturos.porPrioridad.alta || resumenFuturos.porPrioridad.media || resumenFuturos.porPrioridad.baja)" class="flex items-center gap-1.5">
+              <span v-if="resumenFuturos.porPrioridad.alta" class="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-medium text-red-400">{{ resumenFuturos.porPrioridad.alta }} alta</span>
+              <span v-if="resumenFuturos.porPrioridad.media" class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-300">{{ resumenFuturos.porPrioridad.media }} media</span>
+              <span v-if="resumenFuturos.porPrioridad.baja" class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400">{{ resumenFuturos.porPrioridad.baja }} baja</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-theme-input">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
+                :style="{ width: resumenFuturos.progresoDecision.porcentaje + '%' }"
+              ></div>
+            </div>
+            <span class="shrink-0 text-[10px] font-semibold whitespace-nowrap" :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
+              {{ resumenFuturos.progresoDecision.decididos }}/{{ resumenFuturos.progresoDecision.total }} · {{ resumenFuturos.progresoDecision.porcentaje }}%
+            </span>
+          </div>
+          <!-- Leyenda -->
+          <div class="flex flex-wrap items-center gap-3 pt-0.5">
+            <span v-if="desglose.compradas > 0" class="flex items-center gap-1 text-[10px] text-emerald-400">
+              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>{{ desglose.compradas }} comprada{{ desglose.compradas > 1 ? 's' : '' }}
+            </span>
+            <span v-if="desglose.planificadas > 0" class="flex items-center gap-1 text-[10px] text-sky-300">
+              <span class="h-1.5 w-1.5 rounded-full bg-sky-400"></span>{{ desglose.planificadas }} planificada{{ desglose.planificadas > 1 ? 's' : '' }}
+            </span>
+            <span v-if="desglose.pendientes > 0" class="flex items-center gap-1 text-[10px] text-theme-text-muted">
+              <span class="h-1.5 w-1.5 rounded-full bg-gray-500"></span>{{ desglose.pendientes }} pendiente{{ desglose.pendientes > 1 ? 's' : '' }}
+            </span>
           </div>
         </div>
       </div>
@@ -177,11 +133,11 @@
         :key="proyecto.id"
         class="overflow-hidden rounded-2xl border border-theme-border bg-theme-card"
       >
-        <!-- Cabecera del proyecto -->
+        <!-- Cabecera del proyecto (compacta) -->
         <div class="p-4">
           <div class="flex min-w-0 gap-3">
             <div
-              class="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
               :style="{ backgroundColor: (proyecto.categoriaColor || '#6b7280') + '22' }"
             >
               <span class="text-lg">{{ proyecto.categoriaIcono || '📦' }}</span>
@@ -191,77 +147,95 @@
                 <h3 class="truncate text-sm font-semibold text-theme-text">{{ proyecto.tipoGasto }}</h3>
                 <span
                   v-if="prioridadBadge(proyecto.prioridad)"
-                  class="rounded-full px-2 py-1 text-[10px] font-medium"
+                  class="rounded-full px-2 py-0.5 text-[10px] font-medium"
                   :class="prioridadBadge(proyecto.prioridad).clases"
                 >
                   {{ prioridadBadge(proyecto.prioridad).label }}
                 </span>
-                <span class="rounded-full bg-theme-input px-2 py-1 text-[10px] text-theme-text-sec">
+                <span class="truncate text-[11px] text-theme-text-sec">
                   {{ proyecto.categoriaNombre || 'Sin categoria' }}
                 </span>
               </div>
-              <div class="mt-1 flex items-baseline justify-between gap-2">
-                <p class="text-[11px] text-theme-text-muted">
-                  {{ proyecto.resumen.totalDetalles }} detalles · {{ proyecto.resumen.totalOpciones }} opciones
-                </p>
-                <p class="shrink-0 text-sm font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
-              </div>
-              <p v-if="proyecto.descripcion" class="mt-1 text-xs text-theme-text-sec">{{ proyecto.descripcion }}</p>
+              <p v-if="proyecto.descripcion" class="mt-0.5 truncate text-[11px] text-theme-text-muted">{{ proyecto.descripcion }}</p>
+            </div>
+            <!-- Decidido X/N en esquina superior derecha -->
+            <div v-if="progresoProyecto(proyecto).total > 0" class="shrink-0 text-right">
+              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Decidido</p>
+              <p class="text-xs font-semibold whitespace-nowrap" :class="progresoProyecto(proyecto).porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
+                {{ progresoProyecto(proyecto).decididos }}/{{ progresoProyecto(proyecto).total }} · {{ progresoProyecto(proyecto).porcentaje }}%
+              </p>
             </div>
           </div>
 
-          <div class="mt-3 grid grid-cols-3 gap-2">
-            <div class="rounded-xl bg-theme-input px-3 py-2 min-w-0">
-              <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Min</p>
-              <p class="mt-1 text-xs font-medium text-emerald-400 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMinimo) }}</p>
+          <!-- Min/Prom/Max densos en una fila -->
+          <div class="mt-3 flex items-stretch rounded-xl bg-theme-input">
+            <div class="min-w-0 flex-1 px-3 py-2">
+              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Mín</p>
+              <p class="mt-0.5 truncate text-xs font-semibold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMinimo) }}</p>
             </div>
-            <div class="rounded-xl bg-theme-input px-3 py-2 min-w-0">
-              <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-              <p class="mt-1 text-xs font-medium text-sky-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
+            <div class="w-px bg-theme-border/60"></div>
+            <div class="min-w-0 flex-1 px-3 py-2">
+              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
+              <p class="mt-0.5 truncate text-xs font-semibold text-sky-300">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
             </div>
-            <div class="rounded-xl bg-theme-input px-3 py-2 min-w-0">
-              <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
-              <p class="mt-1 text-xs font-medium text-amber-300 whitespace-nowrap overflow-hidden text-ellipsis">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
-            </div>
-          </div>
-
-          <!-- Progreso de decisión -->
-          <div v-if="progresoProyecto(proyecto).total > 0" class="mt-3">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decisión</span>
-              <span class="text-[10px] font-semibold" :class="progresoProyecto(proyecto).porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
-                {{ progresoProyecto(proyecto).decididos }} / {{ progresoProyecto(proyecto).total }}
-                · {{ progresoProyecto(proyecto).porcentaje }}%
-              </span>
-            </div>
-            <div class="h-1.5 w-full overflow-hidden rounded-full bg-theme-input">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :class="progresoProyecto(proyecto).porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
-                :style="{ width: progresoProyecto(proyecto).porcentaje + '%' }"
-              ></div>
+            <div class="w-px bg-theme-border/60"></div>
+            <div class="min-w-0 flex-1 px-3 py-2">
+              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Máx</p>
+              <p class="mt-0.5 truncate text-xs font-semibold text-amber-300">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
             </div>
           </div>
 
-          <div class="mt-3 flex items-center justify-between gap-2">
+          <!-- Barra slim de progreso -->
+          <div v-if="progresoProyecto(proyecto).total > 0" class="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-theme-input">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              :class="progresoProyecto(proyecto).porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
+              :style="{ width: progresoProyecto(proyecto).porcentaje + '%' }"
+            ></div>
+          </div>
+
+          <!-- Footer: Ver detalles + kebab -->
+          <div class="mt-3 flex items-center gap-2">
             <button
-              class="inline-flex items-center gap-1 rounded-full bg-theme-input px-3 py-1.5 text-[11px] text-theme-text-sec transition-colors hover:text-theme-text"
+              class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[11px] text-theme-text-sec transition-colors hover:text-theme-text"
               @click="toggleExpandido(proyecto.id)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform" :class="estaExpandido(proyecto.id) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25L12 15.75 4.5 8.25" />
               </svg>
-              {{ estaExpandido(proyecto.id) ? 'Ocultar detalle' : 'Ver detalle' }}
+              {{ estaExpandido(proyecto.id) ? 'Ocultar detalles' : `Ver ${proyecto.resumen.totalDetalles} detalle${proyecto.resumen.totalDetalles !== 1 ? 's' : ''}` }}
             </button>
-            <div class="flex items-center gap-2">
-              <button class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-card px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent" @click="emit('editar', proyecto)">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
-                Editar
+            <div class="relative">
+              <button
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-text"
+                :title="'Más acciones'"
+                @click="toggleMenuProyecto(proyecto.id)"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                  <circle cx="4" cy="10" r="1.6" />
+                  <circle cx="10" cy="10" r="1.6" />
+                  <circle cx="16" cy="10" r="1.6" />
+                </svg>
               </button>
-              <button class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-card px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-red-400/50 hover:text-red-400" @click="proyectoAEliminar = proyecto">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
-                Eliminar
-              </button>
+              <div
+                v-if="menuProyectoAbierto === proyecto.id"
+                class="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
+              >
+                <button
+                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                  @click="emit('editar', proyecto); cerrarMenuProyecto()"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                  Editar
+                </button>
+                <button
+                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-red-400 transition-colors hover:bg-red-500/10"
+                  @click="proyectoAEliminar = proyecto; cerrarMenuProyecto()"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                  Eliminar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -545,6 +519,9 @@
 
       <div class="h-16"></div>
     </div>
+
+    <!-- Overlay para cerrar menú kebab al hacer click fuera -->
+    <div v-if="menuProyectoAbierto !== null" class="fixed inset-0 z-10" @click="cerrarMenuProyecto"></div>
 
     <!-- Modal: confirmar eliminar proyecto -->
     <div v-if="proyectoAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
@@ -846,12 +823,18 @@ const filtrosProyecto = computed(() => {
   return [
     { value: 'todos', label: 'Todos', count: all.length },
     { value: 'alta', label: 'Alta', count: count(p => p.prioridad === 3), accent: 'bg-red-500 text-white' },
-    { value: 'media', label: 'Media', count: count(p => p.prioridad === 2), accent: 'bg-amber-500 text-white' },
-    { value: 'baja', label: 'Baja', count: count(p => p.prioridad === 1), accent: 'bg-emerald-500 text-white' },
     { value: 'pendientes', label: 'Pendientes', count: count(p => !proyectoCompletamenteDecidido(p)) },
     { value: 'decididos', label: 'Decididos', count: count(proyectoTieneDecididos), accent: 'bg-sky-500 text-white' },
   ]
 })
+
+const menuProyectoAbierto = ref(null)
+function toggleMenuProyecto(id) {
+  menuProyectoAbierto.value = menuProyectoAbierto.value === id ? null : id
+}
+function cerrarMenuProyecto() {
+  menuProyectoAbierto.value = null
+}
 
 const expandido = ref({})
 const opcionesVisibles = ref({})

@@ -1,7 +1,8 @@
 <template>
   <div class="flex flex-col items-center gap-3">
-    <!-- Camera button -->
+    <!-- Camera button (hidden when headless: trigger is external via ref) -->
     <button
+      v-if="!headless"
       class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 bg-gradient-to-br from-amber-500/50 to-orange-600/50 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 backdrop-blur-md"
       @click="openCamera"
     >
@@ -10,7 +11,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
       </svg>
     </button>
-    <span class="text-[10px] text-theme-text-sec font-medium">Voucher</span>
+    <span v-if="!headless" class="text-xs text-theme-text-sec font-medium">Voucher</span>
 
     <!-- Hidden file input (fallback for desktop) -->
     <input
@@ -133,6 +134,7 @@
 const props = defineProps({
   showPreview: { type: Boolean, default: false },
   photoPreview: { type: String, default: null },
+  headless: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['capture', 'send', 'cancel', 'retake'])
@@ -325,6 +327,8 @@ function retake() {
     openCamera()
   })
 }
+
+defineExpose({ openCamera })
 </script>
 
 <style scoped>

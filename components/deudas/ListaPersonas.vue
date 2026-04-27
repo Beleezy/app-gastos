@@ -18,15 +18,15 @@
           </svg>
         </button>
       </div>
-      <!-- Orden toggle -->
+      <!-- Orden toggle (icono compacto, label como tooltip) -->
       <button
-        class="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text-muted text-xs hover:bg-theme-border-md transition-colors"
+        class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-theme-card border border-theme-border text-theme-text-muted hover:bg-theme-border-md hover:text-theme-text transition-colors"
+        :title="`Orden: ${ordenLabels[ordenActual]}`"
         @click="ciclarOrden"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
         </svg>
-        {{ ordenLabels[ordenActual] }}
       </button>
     </div>
 
@@ -140,7 +140,13 @@
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-theme-text leading-snug truncate" :title="persona.nombre">{{ persona.nombre }}</p>
+                <div class="flex items-center gap-1.5 min-w-0">
+                  <p class="text-sm font-medium text-theme-text leading-snug truncate min-w-0" :title="persona.nombre">{{ persona.nombre }}</p>
+                  <span v-if="persona.tieneVencidas" class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-semibold bg-red-500/20 text-red-400">
+                    <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
+                    VENCIDA
+                  </span>
+                </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
                   <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-border-md text-theme-text-muted">
                     ORG
@@ -154,14 +160,8 @@
                     {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }}
                   </span>
                 </div>
-                <!-- Due date indicator -->
-                <div v-if="persona.tieneVencidas" class="flex items-center gap-1 mt-1">
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-semibold bg-red-500/20 text-red-400">
-                    <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
-                    VENCIDA
-                  </span>
-                </div>
-                <div v-else-if="persona.fechaProximaVencer" class="flex items-center gap-1 mt-1">
+                <!-- Próxima a vencer (solo si NO está vencida) -->
+                <div v-if="!persona.tieneVencidas && persona.fechaProximaVencer" class="flex items-center gap-1 mt-1">
                   <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-medium bg-amber-500/15 text-amber-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
