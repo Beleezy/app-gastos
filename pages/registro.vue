@@ -242,6 +242,14 @@
                     </div>
                   </template>
                 </Suspense>
+
+                <div v-if="vistaRegistro === 'mapa'" class="px-4 lg:px-0">
+                  <RegistroGastosHeatmap
+                    :gastos="gastosMensuales"
+                    :mes="mesSeleccionado"
+                    :anio="anioSeleccionado"
+                  />
+                </div>
               </div>
             </Transition>
           </div>
@@ -492,6 +500,7 @@ function onManualFab() {
 const tabsVista = [
   { value: 'historial', label: 'Historial' },
   { value: 'categorias', label: 'Categorías' },
+  { value: 'mapa', label: 'Mapa' },
   { value: 'stats', label: 'Comparar' },
 ]
 

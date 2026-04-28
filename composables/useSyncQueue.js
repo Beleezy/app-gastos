@@ -14,40 +14,15 @@
  * sin red, no ser un cliente de sincronización completo.
  */
 
-const STORAGE_KEY = 'gastos.syncQueue.v1'
-
-function readStorage() {
-  if (typeof localStorage === 'undefined') return { pending: [], failed: [] }
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) return { pending: [], failed: [] }
-    const parsed = JSON.parse(raw)
-    return {
-      pending: Array.isArray(parsed.pending) ? parsed.pending : [],
-      failed: Array.isArray(parsed.failed) ? parsed.failed : [],
-    }
-  } catch {
-    return { pending: [], failed: [] }
-  }
-}
-
-function writeStorage(state) {
-  if (typeof localStorage === 'undefined') return
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  } catch {
-    // sin storage (modo privado iOS, cuota llena)
-  }
-}
+const PENDING_KEY = 'gastos.syncQueue.pending.v1'
+const FAILED_KEY = 'gastos.syncQueue.failed.v1'
 
 export function useSyncQueue() {
-  const pending = useState('sync-queue-pending', () => readStorage().pending)
-  const failed = useState('sync-queue-failed', () => readStorage().failed)
+  // Usa useLocalStorage para persistir + sincronizar entre pestañas.
+  // El valor inicial sólo se evalúa en cliente (SSR-safe).
+  const pending = useLocalStorage(PENDING_KEY, [])
+  const failed = useLocalStorage(FAILED_KEY, [])
   const isFlushing = useState('sync-queue-flushing', () => false)
-
-  function persist() {
-    writeStorage({ pending: pending.value, failed: failed.value })
-  }
 
   function enqueue({ endpoint, method = 'POST', body = null, label = '' }) {
     const item = {
@@ -59,39 +34,35 @@ export function useSyncQueue() {
       createdAt: new Date().toISOString(),
       attempts: 0,
     }
-    pending.value = [...pending.value, item]
-    persist()
+    pending.value = [...(pending.value || []), item]
     return item.id
   }
 
   function dropPending(id) {
-    pending.value = pending.value.filter((i) => i.id !== id)
-    persist()
+    pending.value = (pending.value || []).filter((i) => i.id !== id)
   }
 
   function pushFailed(item, error) {
     failed.value = [
-      ...failed.value,
+      ...(failed.value || []),
       { ...item, error: error?.message || String(error), failedAt: new Date().toISOString() },
     ]
-    persist()
   }
 
   function clearFailed() {
     failed.value = []
-    persist()
   }
 
   async function flush(apiFetch) {
     if (isFlushing.value) return
     if (typeof navigator !== 'undefined' && !navigator.onLine) return
-    if (pending.value.length === 0) return
+    const items = pending.value || []
+    if (items.length === 0) return
 
     isFlushing.value = true
     try {
-      // Procesa secuencialmente para mantener orden lógico de creación.
-      const items = [...pending.value]
-      for (const item of items) {
+      const snapshot = [...items]
+      for (const item of snapshot) {
         item.attempts += 1
         try {
           await apiFetch(item.endpoint, { method: item.method, body: item.body })
@@ -106,7 +77,8 @@ export function useSyncQueue() {
             dropPending(item.id)
             pushFailed(item, e)
           } else {
-            persist()
+            // forzar persistencia tocando la ref
+            pending.value = [...(pending.value || [])]
             break // detener para reintentar más tarde
           }
         }
