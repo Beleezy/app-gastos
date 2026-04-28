@@ -304,6 +304,7 @@ const { personas, isLoading, tabActual, filtroEstado, resumen } = useDeudas()
 const { descargarPdf } = useDeudaPdf()
 
 const busqueda = ref('')
+const busquedaDebounced = useDebouncedRef(busqueda, 200)
 const ordenActual = ref('monto') // monto | nombre | antiguo
 const ordenOpciones = ['monto', 'nombre', 'antiguo']
 const ordenLabels = { monto: 'Mayor monto', nombre: 'Nombre A-Z', antiguo: 'Más antiguo' }
@@ -342,9 +343,9 @@ function aplicarFiltros(list) {
     result = result.filter(p => p.tieneVencidas)
   }
 
-  // Filtrar por búsqueda
-  if (busqueda.value.trim()) {
-    const q = busqueda.value.toLowerCase()
+  // Filtrar por búsqueda (debounced para evitar recomputos en cada tecla)
+  if (busquedaDebounced.value?.trim()) {
+    const q = busquedaDebounced.value.toLowerCase()
     result = result.filter(p => p.nombre.toLowerCase().includes(q))
   }
 
