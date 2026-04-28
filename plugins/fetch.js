@@ -1,6 +1,7 @@
 export default defineNuxtPlugin(() => {
   const supabase = useSupabaseClient()
   const toast = useToast()
+  const syncQueue = useSyncQueue()
 
   const apiFetch = $fetch.create({
     onRequest: async ({ options }) => {
@@ -23,6 +24,15 @@ export default defineNuxtPlugin(() => {
       }
     },
   })
+
+  // Flush de la cola offline al volver online (§5.1)
+  if (typeof window !== 'undefined') {
+    window.addEventListener('online', () => {
+      syncQueue.flush(apiFetch).catch(() => {})
+    })
+    // Intento inicial al cargar (por si hay items de una sesión previa)
+    setTimeout(() => syncQueue.flush(apiFetch).catch(() => {}), 1500)
+  }
 
   return { provide: { apiFetch } }
 })

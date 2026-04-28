@@ -60,6 +60,7 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   index('gastos_planificados_plan_idx').on(table.planMensualId),
+  index('gastos_planificados_plan_estado_idx').on(table.planMensualId, table.estado),
 ])
 
 // ── Tabla 5: gastos ──
@@ -201,6 +202,7 @@ export const pagosDeuda = pgTable('pagos_deuda', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   index('pagos_deuda_deuda_idx').on(table.deudaId),
+  index('pagos_deuda_deuda_fecha_idx').on(table.deudaId, table.fechaPago),
 ])
 
 // ── Tabla 10: auditoria_vinculos ──
@@ -296,4 +298,5 @@ export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
 }, (table) => [
   index('solicitudes_vinculo_destinatario_idx').on(table.destinatarioEmail),
   index('solicitudes_vinculo_remitente_idx').on(table.remitenteId),
+  index('solicitudes_vinculo_estado_idx').on(table.estado),
 ])
