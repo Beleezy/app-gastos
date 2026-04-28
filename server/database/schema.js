@@ -301,6 +301,22 @@ export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
   index('solicitudes_vinculo_estado_idx').on(table.estado),
 ])
 
+// ── Tabla 14: plantillas_mes — plantillas reutilizables de plan mensual ──
+// Ver §5.A punto 4 de planifica.md.
+export const plantillasMes = pgTable('plantillas_mes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 150 }).notNull(),
+  montoPresupuesto: decimal('monto_presupuesto', { precision: 12, scale: 2 }),
+  // gastos: JSONB con array de { concepto, montoEstimado, categoriaId, fechaProbablePago, notas }
+  gastos: text('gastos_json').notNull().default('[]'),
+  notas: text('notas'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('plantillas_mes_usuario_idx').on(table.usuarioId),
+])
+
 // ── Tabla 13: uso_llm — tracking de consumo del LLM por usuario y mes ──
 // Ver §1.9 de planifica.md.
 export const usoLlm = pgTable('uso_llm', {

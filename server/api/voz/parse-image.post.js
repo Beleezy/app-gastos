@@ -5,6 +5,7 @@ import { parseModelList, getValidModels, selectBestModel, getFallbackModels, tra
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
+import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 // 8 MB de imagen base64 (~6 MB binario). Más que suficiente para un recibo.
@@ -55,9 +56,7 @@ export default defineEventHandler(async (event) => {
   const categoryList = cats.map(c => c.nombre).join(', ')
 
   // Calculate dates
-  const ahora = new Date(new Date().toLocaleString('en-US', { timeZone: zonaHoraria }))
-  const hoy = ahora.getFullYear() + '-' + String(ahora.getMonth() + 1).padStart(2, '0') + '-' + String(ahora.getDate()).padStart(2, '0')
-  const diaSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][ahora.getDay()]
+  const { fecha: hoy, diaSemana } = hoyConReferencias(zonaHoraria)
 
   const systemPrompt = `Eres un asistente de finanzas personales. El usuario te envía una foto de un voucher, boleta, recibo, ticket o comprobante de pago. Tu tarea es extraer los datos de cada gasto o ítem que aparezca en la imagen.
 
