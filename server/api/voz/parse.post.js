@@ -5,6 +5,7 @@ import { parseModelList, getValidModels, selectBestModel, getFallbackModels, tra
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
 import { sanitizeLlmInput, validateGastosLlm, validateDeudasLlm } from '../../utils/llmSafety.js'
+import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 const MAX_INPUT_CHARS = 2000
@@ -246,6 +247,7 @@ Reglas:
 
         // Registrar petición exitosa para el rate tracking
         trackRequest(currentModel)
+        trackUsoLlm({ usuarioId, endpoint: 'voz/parse' }).catch(() => {})
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()

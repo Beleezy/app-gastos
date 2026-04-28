@@ -4,6 +4,7 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 // 8 MB de imagen base64 (~6 MB binario). Más que suficiente para un recibo.
@@ -189,6 +190,7 @@ Reglas:
         }
 
         trackRequest(currentModel)
+        trackUsoLlm({ usuarioId, endpoint: 'voz/parse-image' }).catch(() => {})
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()

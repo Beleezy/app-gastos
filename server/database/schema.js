@@ -300,3 +300,26 @@ export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
   index('solicitudes_vinculo_remitente_idx').on(table.remitenteId),
   index('solicitudes_vinculo_estado_idx').on(table.estado),
 ])
+
+// ── Tabla 13: uso_llm — tracking de consumo del LLM por usuario y mes ──
+// Ver §1.9 de planifica.md.
+export const usoLlm = pgTable('uso_llm', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  anio: integer('anio').notNull(),
+  mes: integer('mes').notNull(),
+  endpoint: varchar('endpoint', { length: 100 }).notNull(),
+  totalRequests: integer('total_requests').default(0).notNull(),
+  totalTokens: integer('total_tokens').default(0).notNull(),
+  ultimaPeticion: timestamp('ultima_peticion'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('uso_llm_usuario_periodo_uniq').on(
+    table.usuarioId,
+    table.anio,
+    table.mes,
+    table.endpoint,
+  ),
+  index('uso_llm_usuario_idx').on(table.usuarioId),
+])
