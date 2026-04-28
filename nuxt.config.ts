@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@vite-pwa/nuxt',
     '@nuxtjs/supabase',
+    '@pinia/nuxt',
   ],
 
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
