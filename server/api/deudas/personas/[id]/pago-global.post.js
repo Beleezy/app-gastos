@@ -3,6 +3,7 @@ import { deudas, pagosDeuda, personasEntidades } from '../../../../database/sche
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { crearPagoEspejo, registrarAuditoria } from '../../../../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
+import { priorizarDeudasParaPago } from '../../../../utils/pagosMath.js'
 import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -48,22 +49,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'No hay deudas pendientes para esta persona' })
   }
 
-  const sorted = [...deudasActivas].sort((a, b) => {
-    const aFechaPago = a.fechaPago
-    const bFechaPago = b.fechaPago
-    const aVencida = aFechaPago && aFechaPago <= hoy
-    const bVencida = bFechaPago && bFechaPago <= hoy
-    const aSinFecha = !aFechaPago
-    const bSinFecha = !bFechaPago
-
-    if (aVencida && !bVencida) return -1
-    if (!aVencida && bVencida) return 1
-    if (aVencida && bVencida) return aFechaPago < bFechaPago ? -1 : aFechaPago > bFechaPago ? 1 : 0
-    if (aSinFecha && !bSinFecha) return -1
-    if (!aSinFecha && bSinFecha) return 1
-    if (aSinFecha && bSinFecha) return a.fechaCreacion < b.fechaCreacion ? -1 : a.fechaCreacion > b.fechaCreacion ? 1 : 0
-    return aFechaPago < bFechaPago ? -1 : aFechaPago > bFechaPago ? 1 : 0
-  })
+  const sorted = priorizarDeudasParaPago(deudasActivas, hoy)
 
   const result = await db.transaction(async (tx) => {
     let montoRestante = montoTotal

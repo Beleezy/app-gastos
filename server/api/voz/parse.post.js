@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
       .limit(1)
     zonaHoraria = userConfig?.zonaHoraria || 'America/Lima'
   } catch (e) {
-    console.warn('No se pudo leer configuraciones, usando zona horaria por defecto:', e.message)
+    logger.warn('No se pudo leer configuraciones, usando zona horaria por defecto', { error: e })
   }
 
   // Fetch categories from DB
@@ -131,7 +131,7 @@ Reglas:
         .where(eq(personasEntidades.usuarioId, usuarioId))
       personasExistentes = personasDb.map(p => p.nombre)
     } catch (e) {
-      console.warn('No se pudieron cargar personas existentes:', e.message)
+      logger.warn('No se pudieron cargar personas existentes', { error: e })
     }
 
     const listaPersonas = personasExistentes.length > 0

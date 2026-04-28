@@ -64,3 +64,34 @@ export function distribuirPagoGlobal({ deudas, monto, estrategia = 'fifo' } = {}
 
   return { asignaciones, sobrante: Math.max(0, restante) }
 }
+
+/**
+ * Ordena deudas por prioridad de pago al recibir un pago global:
+ *   1. Vencidas (fechaPago <= hoy) por fechaPago asc.
+ *   2. Sin fecha de vencimiento por fechaCreacion asc.
+ *   3. Por vencer por fechaPago asc.
+ *
+ * Replica el orden histórico que estaba inline en pago-global.post.js
+ * y lo expone para tests + reutilización.
+ */
+export function priorizarDeudasParaPago(deudas, hoyIso) {
+  const hoy = hoyIso || ''
+  return [...(deudas || [])].sort((a, b) => {
+    const aFp = a.fechaPago
+    const bFp = b.fechaPago
+    const aVencida = aFp && aFp <= hoy
+    const bVencida = bFp && bFp <= hoy
+    const aSinFecha = !aFp
+    const bSinFecha = !bFp
+
+    if (aVencida && !bVencida) return -1
+    if (!aVencida && bVencida) return 1
+    if (aVencida && bVencida) return aFp < bFp ? -1 : aFp > bFp ? 1 : 0
+    if (aSinFecha && !bSinFecha) return -1
+    if (!aSinFecha && bSinFecha) return 1
+    if (aSinFecha && bSinFecha) {
+      return a.fechaCreacion < b.fechaCreacion ? -1 : a.fechaCreacion > b.fechaCreacion ? 1 : 0
+    }
+    return aFp < bFp ? -1 : aFp > bFp ? 1 : 0
+  })
+}

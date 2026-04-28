@@ -1,6 +1,6 @@
 // Capa de servicios de deudas. Ver §2.1 / §5.C de planifica.md.
 
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { deudas, personasEntidades } from '../database/schema.js'
 import { crearDeudaEspejo, registrarAuditoria } from '../utils/vinculos.js'
@@ -161,4 +161,82 @@ export async function balanceGlobal(usuarioId) {
     balanceNeto: Math.round((totalMeDeben - totalYoDebo) * 100) / 100,
     personas,
   }
+}
+
+/**
+ * Funde varias personas en una sola: reasigna todas las deudas a la
+ * persona destino y elimina las de origen.
+ * Ver §5.C punto 5 de planifica.md.
+ *
+ * @param {object} input
+ * @param {string} input.usuarioId
+ * @param {string} input.destinoId Persona que se conserva.
+ * @param {string[]} input.origenIds Personas que se funden en destino.
+ */
+export async function mergePersonas({ usuarioId, destinoId, origenIds }) {
+  if (!destinoId) {
+    const err = new Error('destinoId requerido')
+    err.statusCode = 400
+    throw err
+  }
+  const ids = (Array.isArray(origenIds) ? origenIds : []).filter((x) => x && x !== destinoId)
+  if (ids.length === 0) {
+    const err = new Error('origenIds vacío')
+    err.statusCode = 400
+    throw err
+  }
+
+  const todas = await db
+    .select()
+    .from(personasEntidades)
+    .where(
+      and(
+        eq(personasEntidades.usuarioId, usuarioId),
+        inArray(personasEntidades.id, [destinoId, ...ids]),
+      ),
+    )
+
+  const destino = todas.find((p) => p.id === destinoId)
+  if (!destino) {
+    const err = new Error('Persona destino no encontrada')
+    err.statusCode = 404
+    throw err
+  }
+  const origenes = todas.filter((p) => ids.includes(p.id))
+  if (origenes.length !== ids.length) {
+    const err = new Error('Alguna persona origen no existe o no pertenece al usuario')
+    err.statusCode = 404
+    throw err
+  }
+  // No fusionar personas vinculadas (mantiene la integridad del par espejado).
+  if (destino.vinculadoUsuarioId || origenes.some((o) => o.vinculadoUsuarioId)) {
+    const err = new Error('No se pueden fusionar personas vinculadas con otras cuentas')
+    err.statusCode = 400
+    throw err
+  }
+
+  const result = await db.transaction(async (tx) => {
+    const upd = await tx
+      .update(deudas)
+      .set({ personaEntidadId: destinoId, updatedAt: new Date() })
+      .where(
+        and(eq(deudas.usuarioId, usuarioId), inArray(deudas.personaEntidadId, ids)),
+      )
+      .returning({ id: deudas.id })
+
+    const del = await tx
+      .delete(personasEntidades)
+      .where(
+        and(eq(personasEntidades.usuarioId, usuarioId), inArray(personasEntidades.id, ids)),
+      )
+      .returning({ id: personasEntidades.id })
+
+    return {
+      destinoId,
+      deudasReasignadas: upd.length,
+      personasEliminadas: del.length,
+    }
+  })
+
+  return result
 }
