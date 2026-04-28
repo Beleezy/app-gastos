@@ -312,6 +312,7 @@ const misCategorias = ref([])
 const mostrarSelectorCategorias = ref(false)
 const tabCategoria = ref('preseleccionadas')
 const busquedaCategoria = ref('')
+const busquedaCategoriaDebounced = useDebouncedRef(busquedaCategoria, 200)
 const guardandoCategoria = ref(false)
 const eliminandoCategoria = ref(false)
 const categoriaAEliminar = ref(null)
@@ -329,8 +330,8 @@ const categoriasExistentes = computed(() => {
 })
 
 const categoriasPreseleccionadasFiltradas = computed(() => {
-  if (!busquedaCategoria.value) return CATEGORIAS_PRESELECCIONADAS
-  const q = busquedaCategoria.value.toLowerCase()
+  if (!busquedaCategoriaDebounced.value) return CATEGORIAS_PRESELECCIONADAS
+  const q = busquedaCategoriaDebounced.value.toLowerCase()
   return CATEGORIAS_PRESELECCIONADAS.filter(c => c.nombre.toLowerCase().includes(q))
 })
 

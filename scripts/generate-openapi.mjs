@@ -182,6 +182,22 @@ const paths = {
   '/api/usuarios/uso-llm': {
     get: { summary: 'Consumo del LLM del mes en curso', responses: { ...ok200, ...standardErrors } },
   },
+  '/api/deudas/personas/merge': {
+    post: { summary: 'Fusiona personas duplicadas en una sola', responses: { ...ok200, ...standardErrors } },
+  },
+  '/api/planificador/plantillas': {
+    get: { summary: 'Lista plantillas de mes del usuario', responses: { ...ok200, ...standardErrors } },
+    post: { summary: 'Crea plantilla manual o desde un plan existente', responses: { ...created201, ...standardErrors } },
+  },
+  '/api/planificador/plantillas/{id}': {
+    delete: { summary: 'Elimina una plantilla', responses: { ...ok200, ...standardErrors } },
+  },
+  '/api/planificador/plantillas/{id}/aplicar': {
+    post: { summary: 'Aplica una plantilla a un plan mensual existente', responses: { ...ok200, ...standardErrors } },
+  },
+  '/api/cron/expirar-solicitudes': {
+    post: { summary: 'Cron: marca solicitudes expiradas (header X-Cron-Secret)', responses: { ...ok200, 401: { description: 'Sin X-Cron-Secret válido' } } },
+  },
 }
 
 const openapi = {

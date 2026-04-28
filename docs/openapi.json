@@ -1019,6 +1019,142 @@
           }
         }
       }
+    },
+    "/api/deudas/personas/merge": {
+      "post": {
+        "summary": "Fusiona personas duplicadas en una sola",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Sin permisos"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "429": {
+            "description": "Rate limit excedido"
+          }
+        }
+      }
+    },
+    "/api/planificador/plantillas": {
+      "get": {
+        "summary": "Lista plantillas de mes del usuario",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Sin permisos"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "429": {
+            "description": "Rate limit excedido"
+          }
+        }
+      },
+      "post": {
+        "summary": "Crea plantilla manual o desde un plan existente",
+        "responses": {
+          "201": {
+            "description": "Recurso creado"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Sin permisos"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "429": {
+            "description": "Rate limit excedido"
+          }
+        }
+      }
+    },
+    "/api/planificador/plantillas/{id}": {
+      "delete": {
+        "summary": "Elimina una plantilla",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Sin permisos"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "429": {
+            "description": "Rate limit excedido"
+          }
+        }
+      }
+    },
+    "/api/planificador/plantillas/{id}/aplicar": {
+      "post": {
+        "summary": "Aplica una plantilla a un plan mensual existente",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "401": {
+            "description": "No autenticado"
+          },
+          "403": {
+            "description": "Sin permisos"
+          },
+          "404": {
+            "description": "No encontrado"
+          },
+          "429": {
+            "description": "Rate limit excedido"
+          }
+        }
+      }
+    },
+    "/api/cron/expirar-solicitudes": {
+      "post": {
+        "summary": "Cron: marca solicitudes expiradas (header X-Cron-Secret)",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Sin X-Cron-Secret válido"
+          }
+        }
+      }
     }
   }
 }
