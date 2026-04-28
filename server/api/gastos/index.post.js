@@ -2,18 +2,14 @@ import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
+import { validateBody } from '../../utils/validate.js'
+import { gastoCreateSchema } from '../../../shared/schemas/gastos.js'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  const body = await validateBody(event, gastoCreateSchema)
 
-  if (!body.concepto?.trim()) {
-    throw createError({ statusCode: 400, message: 'El concepto es obligatorio' })
-  }
-  if (!body.monto || body.monto <= 0) {
-    throw createError({ statusCode: 400, message: 'El monto debe ser mayor a 0' })
-  }
   if (!body.categoriaId) {
     throw createError({ statusCode: 400, message: 'La categoría es obligatoria' })
   }

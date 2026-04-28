@@ -3,21 +3,13 @@ import { deudas, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { crearDeudaEspejo, registrarAuditoria } from '../../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
+import { validateBody } from '../../utils/validate.js'
+import { deudaCreateSchema } from '../../../shared/schemas/deudas.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
-
-  if (!body.concepto?.trim()) {
-    throw createError({ statusCode: 400, message: 'El concepto es obligatorio' })
-  }
-  if (!body.monto || body.monto <= 0) {
-    throw createError({ statusCode: 400, message: 'El monto debe ser mayor a 0' })
-  }
-  if (!body.tipoDeuda) {
-    throw createError({ statusCode: 400, message: 'El tipo de deuda es obligatorio' })
-  }
+  const body = await validateBody(event, deudaCreateSchema)
 
   // Find or create persona
   let personaId = body.personaEntidadId
