@@ -1,7 +1,7 @@
 // Capa de servicios de gastos. Ver §2.1 / §4.7 de planifica.md.
 // Los handlers HTTP delegan aquí toda la lógica de negocio + acceso a DB.
 
-import { eq, and } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { gastos, categorias } from '../database/schema.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
@@ -53,6 +53,52 @@ export async function crearGasto({ usuarioId, body }) {
     categoriaIcono: cat?.icono,
     categoriaColor: cat?.color,
   }
+}
+
+/**
+ * Detecta posibles duplicados al confirmar gastos por voz/foto.
+ * Considera duplicado un gasto del mismo usuario, mismo día y monto en
+ * un rango de ±0.5%, con concepto similar (case-insensitive prefix).
+ *
+ * Ver §5.B punto 3 de planifica.md.
+ *
+ * @param {object} input
+ * @param {string} input.usuarioId
+ * @param {Array<{concepto: string, monto: number, fecha: string}>} input.candidatos
+ * @returns Array<{candidato, duplicados: Array<gasto>}>
+ */
+export async function detectarDuplicados({ usuarioId, candidatos }) {
+  if (!Array.isArray(candidatos) || candidatos.length === 0) return []
+
+  const fechas = [...new Set(candidatos.map((c) => c.fecha).filter(Boolean))]
+  if (fechas.length === 0) return []
+
+  const existentes = await db
+    .select({
+      id: gastos.id,
+      concepto: gastos.concepto,
+      monto: gastos.monto,
+      fecha: gastos.fecha,
+    })
+    .from(gastos)
+    .where(and(eq(gastos.usuarioId, usuarioId), sql`${gastos.fecha} IN (${sql.join(fechas, sql`, `)})`))
+
+  const tolerancia = (m) => Math.max(0.05, Math.abs(parseFloat(m)) * 0.005)
+  const norm = (s) => String(s || '').trim().toLowerCase()
+
+  return candidatos.map((c) => {
+    const cm = parseFloat(c.monto)
+    const tol = tolerancia(cm)
+    const cn = norm(c.concepto)
+    const duplicados = existentes.filter((g) => {
+      if (g.fecha !== c.fecha) return false
+      const gm = parseFloat(g.monto)
+      if (Math.abs(gm - cm) > tol) return false
+      const gn = norm(g.concepto)
+      return gn === cn || gn.startsWith(cn) || cn.startsWith(gn)
+    })
+    return { candidato: c, duplicados }
+  })
 }
 
 /**
