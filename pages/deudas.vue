@@ -30,6 +30,11 @@
       <DeudasNotificacionesVinculo @vinculo-aceptado="onVinculoAceptado" />
     </div>
 
+    <!-- Balance global (vista panorámica de "Me deben" - "Yo debo") -->
+    <div v-if="!personaSeleccionada" class="px-4 lg:px-0 mt-3">
+      <DeudasBalanceGlobal />
+    </div>
+
     <!-- Desktop 2-column grid: sidebar (resumen) + contenido (lista/detalle) -->
     <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6">
       <!-- Sidebar izquierdo (sticky en desktop) -->
