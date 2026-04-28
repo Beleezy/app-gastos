@@ -1,11 +1,16 @@
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 z-40 nav-glass lg:hidden"
-       style="padding-bottom: env(safe-area-inset-bottom, 0px)">
+  <nav
+    class="fixed bottom-0 left-0 right-0 z-40 nav-glass lg:hidden"
+    aria-label="Navegación principal"
+    style="padding-bottom: env(safe-area-inset-bottom, 0px)"
+  >
     <div class="flex justify-around items-center h-16 max-w-lg mx-auto px-2">
       <NuxtLink
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
+        :aria-label="item.ariaLabel || item.label"
+        :aria-current="isActive(item.to) ? 'page' : undefined"
         class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group"
         :class="[
           isActive(item.to)
@@ -78,10 +83,10 @@ const IconMic = makeIcon('M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 
 const IconCreditCard = makeIcon('M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z')
 
 const navItems = [
-  { to: '/', icon: IconHome, label: 'Inicio' },
-  { to: '/planificador', icon: IconClipboard, label: 'Planificador' },
-  { to: '/registro', icon: IconMic, label: 'Registro' },
-  { to: '/deudas', icon: IconCreditCard, label: 'Deudas' },
+  { to: '/', icon: IconHome, label: 'Inicio', ariaLabel: 'Ir a inicio' },
+  { to: '/planificador', icon: IconClipboard, label: 'Planificador', ariaLabel: 'Ir al planificador' },
+  { to: '/registro', icon: IconMic, label: 'Registro', ariaLabel: 'Ir al registro de gastos' },
+  { to: '/deudas', icon: IconCreditCard, label: 'Deudas', ariaLabel: 'Ir a deudas' },
 ]
 
 function isActive(path) {

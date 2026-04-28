@@ -647,6 +647,26 @@ html.colorblind .glow-red {
 
 @layer components {
 
+  /* Accesibilidad: tap-target mínimo WCAG AA (44x44px).
+     Aplicar a botones de icono pequeños sin cambiar el diseño visual:
+     un pseudoelemento absoluto extiende el área táctil. */
+  .tap-target {
+    position: relative;
+  }
+  .tap-target::after {
+    content: '';
+    position: absolute;
+    inset: 50% 50%;
+    width: 44px;
+    height: 44px;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
+  }
+  .tap-target-lg::after {
+    width: 48px;
+    height: 48px;
+  }
+
   /* Glass card effect */
   .glass-card {
     background: var(--glass-bg);
