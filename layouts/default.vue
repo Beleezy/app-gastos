@@ -12,6 +12,7 @@
     </main>
     <LayoutBottomNav />
     <LayoutMobileDrawer />
+    <LayoutPwaUpdatePrompt />
     <SharedToastNotification />
   </div>
 </template>

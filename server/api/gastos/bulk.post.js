@@ -2,11 +2,13 @@ import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
+import { rateLimits } from '../../utils/rateLimit.js'
 import { eq, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  rateLimits.bulkOp(event, usuarioId)
   const metodosPermitidos = new Set(['voz', 'foto', 'manual'])
 
   if (!body.gastos || !Array.isArray(body.gastos) || body.gastos.length === 0) {

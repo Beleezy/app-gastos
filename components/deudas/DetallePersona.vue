@@ -37,8 +37,9 @@
           <!-- Export PDF (only me_deben) -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.625rem] font-medium"
+            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.7rem] font-medium"
             title="Exportar PDF"
+            aria-label="Exportar deudas pendientes a PDF"
             @click="exportarPdf"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -49,8 +50,9 @@
           <!-- Share WhatsApp -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-emerald-400 transition-colors text-[0.625rem] font-medium"
+            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-emerald-400 transition-colors text-[0.7rem] font-medium"
             title="Enviar por WhatsApp"
+            aria-label="Compartir resumen por WhatsApp"
             @click="enviarWhatsapp"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -61,8 +63,9 @@
           <!-- Vincular con usuario -->
           <button
             v-if="!personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.625rem] font-medium"
+            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.7rem] font-medium"
             title="Vincular con usuario"
+            aria-label="Vincular esta persona con otra cuenta"
             @click="showSolicitudVinculo = true"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -73,8 +76,9 @@
           <!-- Desvincular -->
           <button
             v-if="personaSeleccionada.vinculadoUsuarioId"
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-orange-400 transition-colors text-[0.625rem] font-medium"
+            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-orange-400 transition-colors text-[0.7rem] font-medium"
             title="Desvincular"
+            aria-label="Desvincular esta persona"
             @click="showDesvincular = true"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -84,8 +88,9 @@
           </button>
           <!-- Edit persona -->
           <button
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-amber-400 transition-colors text-[0.625rem] font-medium"
+            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-amber-400 transition-colors text-[0.7rem] font-medium"
             title="Editar persona"
+            aria-label="Editar datos de la persona"
             @click="showEditarPersona = true"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -95,7 +100,9 @@
           </button>
           <!-- Delete persona -->
           <button
-            class="h-8 px-2.5 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-red-400 transition-colors text-[0.625rem] font-medium"
+            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-red-400 transition-colors text-[0.7rem] font-medium"
+            title="Eliminar persona"
+            aria-label="Eliminar persona y sus deudas"
             @click="confirmarEliminarPersona"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

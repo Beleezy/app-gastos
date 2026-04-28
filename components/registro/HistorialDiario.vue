@@ -111,10 +111,13 @@
                     <div class="flex items-center gap-1 shrink-0">
                       <span
                         v-if="!seleccionActiva"
-                        class="w-6 h-6 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                        class="tap-target w-6 h-6 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
                         role="button"
-                        aria-label="Seleccionar gastos"
+                        tabindex="0"
+                        aria-label="Seleccionar gastos del día"
                         @click.stop="activarSeleccionDia(dia)"
+                        @keydown.enter.stop.prevent="activarSeleccionDia(dia)"
+                        @keydown.space.stop.prevent="activarSeleccionDia(dia)"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
