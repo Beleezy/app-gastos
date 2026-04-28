@@ -303,6 +303,18 @@ async function confirmar() {
   saveError.value = null
   try {
     await props.onConfirm(editableGastos.value)
+    // Alimentar predictor offline con los pares concepto+categoria
+    // que el usuario confirmó (incluye correcciones manuales).
+    try {
+      const predictor = useCategoryPredictor()
+      for (const g of editableGastos.value) {
+        if (g.concepto && g.categoriaId) {
+          predictor.aprender(g.concepto, g.categoriaId)
+        }
+      }
+    } catch {
+      // ignorar fallos de tracking offline
+    }
   } catch (e) {
     saveError.value = e.message || 'Error al guardar los gastos'
   } finally {

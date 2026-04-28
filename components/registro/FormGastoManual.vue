@@ -140,6 +140,8 @@ const form = reactive({
 const saving = ref(false)
 const errorMsg = ref('')
 const sugerencias = ref([])
+const predictor = useCategoryPredictor()
+const sugerenciaCategoria = ref(null)
 const mostrarSugerencias = ref(false)
 let debounceTimer = null
 
@@ -173,6 +175,28 @@ function seleccionarSugerencia(s) {
 function ocultarSugerencias() {
   setTimeout(() => { mostrarSugerencias.value = false }, 200)
 }
+
+// Predicción offline de categoría: si el usuario aún no eligió una,
+// usar el histórico aprendido para sugerirla.
+watch(() => form.concepto, (concepto) => {
+  if (form.categoriaId) {
+    sugerenciaCategoria.value = null
+    return
+  }
+  if (!concepto || concepto.trim().length < 3) {
+    sugerenciaCategoria.value = null
+    return
+  }
+  const r = predictor.predecir(concepto)
+  sugerenciaCategoria.value = r && r.confianza >= 0.5 ? r : null
+})
+
+watch(() => sugerenciaCategoria.value, (v) => {
+  // Auto-seleccionar la categoría sugerida si el usuario sigue sin elegir.
+  if (v?.categoriaId && !form.categoriaId) {
+    form.categoriaId = v.categoriaId
+  }
+})
 
 async function guardar() {
   errorMsg.value = ''
@@ -219,6 +243,8 @@ async function guardar() {
         notas: form.notas?.trim() || null,
       })
     }
+    // Aprender concepto+categoria para predicción offline futura.
+    try { predictor.aprender(form.concepto.trim(), form.categoriaId) } catch {}
     emit('saved')
     emit('close')
   } catch (e) {
