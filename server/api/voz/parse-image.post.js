@@ -4,6 +4,8 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { trackUsoLlm } from '../../utils/usoLlm.js'
+import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 // 8 MB de imagen base64 (~6 MB binario). Más que suficiente para un recibo.
@@ -42,7 +44,7 @@ export default defineEventHandler(async (event) => {
       .limit(1)
     zonaHoraria = userConfig?.zonaHoraria || 'America/Lima'
   } catch (e) {
-    console.warn('No se pudo leer configuraciones, usando zona horaria por defecto:', e.message)
+    logger.warn('No se pudo leer configuraciones, usando zona horaria por defecto', { error: e })
   }
 
   // Fetch categories
@@ -54,9 +56,7 @@ export default defineEventHandler(async (event) => {
   const categoryList = cats.map(c => c.nombre).join(', ')
 
   // Calculate dates
-  const ahora = new Date(new Date().toLocaleString('en-US', { timeZone: zonaHoraria }))
-  const hoy = ahora.getFullYear() + '-' + String(ahora.getMonth() + 1).padStart(2, '0') + '-' + String(ahora.getDate()).padStart(2, '0')
-  const diaSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][ahora.getDay()]
+  const { fecha: hoy, diaSemana } = hoyConReferencias(zonaHoraria)
 
   const systemPrompt = `Eres un asistente de finanzas personales. El usuario te envía una foto de un voucher, boleta, recibo, ticket o comprobante de pago. Tu tarea es extraer los datos de cada gasto o ítem que aparezca en la imagen.
 
@@ -189,6 +189,7 @@ Reglas:
         }
 
         trackRequest(currentModel)
+        trackUsoLlm({ usuarioId, endpoint: 'voz/parse-image' }).catch(() => {})
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()

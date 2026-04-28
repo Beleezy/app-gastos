@@ -16,6 +16,12 @@
             <div ref="swipeZone">
               <PlanificadorResumenMes @exportar="exportarPlanificador" />
             </div>
+            <div class="mt-3">
+              <PlanificadorSelectorPlantillas
+                :plan-mensual-id="plan?.id || null"
+                @aplicada="onPlantillaAplicada"
+              />
+            </div>
           </div>
 
           <div>
@@ -122,12 +128,18 @@ definePageMeta({ layout: 'planificador' })
 const {
   fetchPlan,
   fetchCategorias,
+  plan,
   gastosPlaneados,
   nombreMes,
   anioActual,
   mesAnterior,
   mesSiguiente,
 } = usePlanificador()
+
+async function onPlantillaAplicada() {
+  // Refresca el plan y los gastos planificados tras aplicar plantilla
+  await fetchPlan()
+}
 const { exportarExcel } = useExportExcel()
 
 const route = useRoute()

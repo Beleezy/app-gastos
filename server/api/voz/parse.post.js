@@ -5,6 +5,8 @@ import { parseModelList, getValidModels, selectBestModel, getFallbackModels, tra
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
 import { sanitizeLlmInput, validateGastosLlm, validateDeudasLlm } from '../../utils/llmSafety.js'
+import { trackUsoLlm } from '../../utils/usoLlm.js'
+import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
 const MAX_INPUT_CHARS = 2000
@@ -43,7 +45,7 @@ export default defineEventHandler(async (event) => {
       .limit(1)
     zonaHoraria = userConfig?.zonaHoraria || 'America/Lima'
   } catch (e) {
-    console.warn('No se pudo leer configuraciones, usando zona horaria por defecto:', e.message)
+    logger.warn('No se pudo leer configuraciones, usando zona horaria por defecto', { error: e })
   }
 
   // Fetch categories from DB
@@ -55,22 +57,7 @@ export default defineEventHandler(async (event) => {
   const categoryList = cats.map(c => c.nombre).join(', ')
 
   // Usar timezone del usuario para evitar inconsistencias
-  const ahora = new Date(new Date().toLocaleString('en-US', { timeZone: zonaHoraria }))
-  const hoy = ahora.getFullYear() + '-' + String(ahora.getMonth() + 1).padStart(2, '0') + '-' + String(ahora.getDate()).padStart(2, '0')
-  const diaSemana = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][ahora.getDay()]
-
-  // Calcular fechas de referencia para ayudar al LLM
-  const fechasReferencia = {}
-  for (let i = 1; i <= 7; i++) {
-    const d = new Date(ahora)
-    d.setDate(d.getDate() - i)
-    const nombreDia = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'][d.getDay()]
-    const fechaStr = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
-    if (!fechasReferencia[nombreDia]) {
-      fechasReferencia[nombreDia] = fechaStr
-    }
-  }
-  const referenciaDias = Object.entries(fechasReferencia).map(([dia, fecha]) => `${dia} pasado = ${fecha}`).join(', ')
+  const { fecha: hoy, diaSemana, referenciasTexto: referenciaDias } = hoyConReferencias(zonaHoraria)
 
   const systemPrompt = `Eres un asistente de finanzas personales. El usuario te va a dar un texto transcrito por voz donde describe uno o varios gastos que realizó. Tu tarea es extraer los datos de cada gasto mencionado.
 
@@ -130,7 +117,7 @@ Reglas:
         .where(eq(personasEntidades.usuarioId, usuarioId))
       personasExistentes = personasDb.map(p => p.nombre)
     } catch (e) {
-      console.warn('No se pudieron cargar personas existentes:', e.message)
+      logger.warn('No se pudieron cargar personas existentes', { error: e })
     }
 
     const listaPersonas = personasExistentes.length > 0
@@ -246,6 +233,7 @@ Reglas:
 
         // Registrar petición exitosa para el rate tracking
         trackRequest(currentModel)
+        trackUsoLlm({ usuarioId, endpoint: 'voz/parse' }).catch(() => {})
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()

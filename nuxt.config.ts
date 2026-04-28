@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@vite-pwa/nuxt',
     '@nuxtjs/supabase',
+    '@pinia/nuxt',
   ],
 
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
@@ -82,6 +83,39 @@ export default defineNuxtConfig({
           sizes: '512x512',
           type: 'image/png',
           purpose: 'any maskable',
+        },
+      ],
+      // Share Target API: permite recibir texto/imágenes desde otras
+      // apps. Ver §5.4 de planifica.md.
+      share_target: {
+        action: '/share',
+        method: 'POST',
+        enctype: 'multipart/form-data',
+        params: {
+          title: 'title',
+          text: 'text',
+          url: 'url',
+          files: [
+            {
+              name: 'image',
+              accept: ['image/*'],
+            },
+          ],
+        },
+      },
+      shortcuts: [
+        {
+          name: 'Registrar gasto',
+          short_name: 'Registrar',
+          description: 'Capturar gasto rápido por voz',
+          url: '/registro',
+          icons: [{ src: `/icons/icon-192x192.png?v=${APP_VERSION}`, sizes: '192x192' }],
+        },
+        {
+          name: 'Deudas',
+          short_name: 'Deudas',
+          url: '/deudas',
+          icons: [{ src: `/icons/icon-192x192.png?v=${APP_VERSION}`, sizes: '192x192' }],
         },
       ],
     },

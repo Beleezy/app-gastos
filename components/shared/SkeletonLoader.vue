@@ -83,7 +83,7 @@ const lineWidthClass = computed(() => {
     '1/2': 'w-1/2',
     '1/3': 'w-1/3',
     '1/4': 'w-1/4',
-  }[props.width])
+  }[props.width]
 })
 
 const avatarSizeClass = computed(() => {

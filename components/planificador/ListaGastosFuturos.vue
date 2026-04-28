@@ -791,6 +791,7 @@ const desglose = computed(() => {
 })
 
 const busqueda = ref('')
+const busquedaDebounced = useDebouncedRef(busqueda, 200)
 const filtroActual = ref('todos')
 const ordenActual = ref('reciente')
 const ordenes = [
@@ -878,7 +879,7 @@ watch(gastosFuturos, (items) => {
 }, { immediate: true })
 
 const gastosFiltrados = computed(() => {
-  const term = busqueda.value.trim().toLowerCase()
+  const term = (busquedaDebounced.value || '').trim().toLowerCase()
   let result = gastosFuturos.value
 
   // Filtro por prioridad/estado

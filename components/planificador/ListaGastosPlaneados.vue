@@ -364,6 +364,7 @@ const { success, show: toastShow } = useToast()
 const filtroActual = ref('todos')
 const mostrarFiltros = ref(false)
 const busqueda = ref('')
+const busquedaDebounced = useDebouncedRef(busqueda, 200)
 const ordenActual = ref('fecha')
 
 const categoriasColapsadas = ref(new Set())
@@ -468,7 +469,7 @@ function pasaFiltro(gasto) {
 }
 
 const categoriasFiltered = computed(() => {
-  const term = busqueda.value.trim().toLowerCase()
+  const term = (busquedaDebounced.value || '').trim().toLowerCase()
   const ordenaPorCategoria = ordenActual.value === 'fecha'
 
   if (ordenaPorCategoria) {

@@ -636,12 +636,90 @@ Para cada cambio relevante, el equipo debe poder:
 - HistorialDiario: tap-target + soporte de teclado en selector.
 - Tests de `useForm`.
 
-**Estado actual de la suite:** 53 tests pasando · build sin errores · 9 commits pusheados a `claude/create-improvement-plan-ETMxj`.
+### ✅ Sprint 9 — Pinia + servicios + UI balance + similitud (commit `34e446b`)
+- `@pinia/nuxt` + store `useUsuarioStore`.
+- `server/services/deudas.service.js` (`crearDeuda`).
+- `server/services/pagos.service.js` (`registrarPago`).
+- `server/utils/stringSimilarity.js` + endpoint `merge-sugerencias`.
+- `composables/useHeatmapData.js` y `usePlanPagos.js`.
+- `components/deudas/BalanceGlobal.vue`.
+- Tests: `stringSimilarity` (10), `planPagos` (5).
+
+### ✅ Sprint 10 — Excel deudas, heatmap, OpenAPI, uso LLM (commit `bbaef73`)
+- `composables/useDeudasExcel.js` (export con dos hojas).
+- `components/registro/GastosHeatmap.vue` (matriz 7×6 con intensidad).
+- `server/services/planificador.service.js` (`crearGastoPlanificado`).
+- Tabla `uso_llm` + migración `0015_uso_llm.sql` + `trackUsoLlm` + endpoint `/api/usuarios/uso-llm`.
+- Hook en `voz/parse*` para registrar consumo.
+- `scripts/generate-openapi.mjs` + `npm run openapi:generate` → `docs/openapi.json` (12 schemas, 12 endpoints).
+
+### ✅ Sprint 11 — Stats comparativas extraídas (commit `7d687a6`)
+- `composables/useStatsComparativas.js` (helpers puros: total, %cambio, agrupar, top, diferencia, promedio diario, generarInsights).
+- Tests: `statsComparativas` (9), `heatmapData` (3).
+
+### ✅ Sprint 12 — Paginación, cron, share-target (commit `051d747`)
+- `server/utils/paginate.js` (cursor-based).
+- `server/api/cron/expirar-solicitudes.post.js` con `X-Cron-Secret`.
+- `manifest.share_target` + `pages/share.vue` + `manifest.shortcuts`.
+- Tests: `paginate` (8).
+
+### ✅ Sprint 13 — Filtros, balance UI, sync badge, pagosMath + bugfix (commit `583e680`)
+- `composables/useFiltrosGastos.js` (rango fechas, categorías, métodos, monto, texto).
+- `BalanceGlobal` integrado en `pages/deudas.vue`.
+- `components/layout/SyncQueueBadge.vue` flotante con flush manual.
+- `server/utils/pagosMath.js` (`calcularSaldoTrasPago`, `distribuirPagoGlobal` FIFO/LIFO).
+- Tests: `pagosMath` (10), `filtrosGastos` (8).
+- Fix: paréntesis extra en `SkeletonLoader.lineWidthClass`.
+
+### ✅ Sprint 14 — Composables base reutilizables (commit `a0adbc1`)
+- `composables/useDebounce.js` (`useDebounceFn`, `useDebouncedRef`, `useThrottleFn` con cleanup en `onScopeDispose`).
+- `composables/useLocalStorage.js` (ref persistido + sync entre tabs vía `storage` event).
+- `components/shared/ExportButton.vue` (menu dropdown reusable PDF/Excel/CSV/JSON con `aria-expanded` y `Escape`).
+- Tests: `debounce` (5).
+
+### ✅ Sprint 15 — Integraciones (commit `64f3432`)
+- `useSyncQueue` migrado a `useLocalStorage` (sync automático entre pestañas).
+- `pages/deudas.vue`: header usa `SharedExportButton`.
+- `pages/registro.vue`: nueva tab "Mapa" con `RegistroGastosHeatmap`.
+
+### ✅ Sprint 16 — Helpers de fecha + clasificación deudas (commit `39d40de`)
+- `composables/useDateUtils.js` (`toIsoDate`, `parseIsoDate`, `addDias`, `diasEntre`, `inicioFinMes`, `nombreDiaSemana`, `nombreMes`, `hoyEnZona`, `ultimosNDias`).
+- `server/utils/deudaEstado.js` (`clasificarDeuda` con urgencia `pagada|vencida|urgente|pronto|normal`, `deudasParaRecordar`).
+- Tests: `dateUtils` (10), `deudaEstado` (8).
+
+### ✅ Sprint 17 — Predictor + featureFlag + merge + priorizar (commit `c6d6885`)
+- `composables/useCategoryPredictor.js` (aprende del histórico con stopwords es y persistencia local).
+- `composables/useFeatureFlag.js` (resolución por precedencia con overrides).
+- `server/services/deudas.service.js` `mergePersonas` + endpoint `merge.post.js`.
+- `server/utils/pagosMath.js` `priorizarDeudasParaPago` extraído del inline.
+- `voz/parse*`: `console.warn` restantes → `logger`.
+- Tests: `categoryPredictor` (5), `priorizarDeudas` (4).
+
+### ✅ Sprint 18 — Plantillas de mes + scoring opciones (commit `80d00f5`)
+- `server/utils/dateLocal.js` `hoyConReferencias` (server-side espejo de useDateUtils).
+- `voz/parse*` consumen `hoyConReferencias` (–16 LOC).
+- Tabla `plantillas_mes` + migración `0016_plantillas_mes.sql`.
+- `server/services/plantillasMes.service.js` (CRUD + `crearDesdePlan` + `aplicarPlantilla`).
+- Endpoints `/api/planificador/plantillas/*`.
+- `composables/useOpcionesScoring.js` `rankearOpciones` (precio 60% + confianza 25% + manual 15%).
+- Tests: `opcionesScoring` (6).
+
+### ✅ Sprint 19 — Integración (commit `c6950b2`)
+- `ListaPersonas` + `ListaGastosPlaneados` + `ListaGastosFuturos` + `pages/categorias.vue`: búsqueda con `useDebouncedRef` (200ms).
+- `composables/usePlantillasMes.js` + `components/planificador/SelectorPlantillas.vue`: UI completa.
+- `composables/useHistorialPdf.js`: PDF de historial completo de pagos por persona.
+
+### ✅ Sprint 20 — Pinia plantillas + OpenAPI (este commit)
+- `stores/plantillas.js`: store Pinia con cargar/crear/aplicar/eliminar y getters.
+- `scripts/generate-openapi.mjs`: añade endpoints `merge`, `plantillas/*` y `cron/expirar-solicitudes` (12 schemas, 17 endpoints).
+- `docs/openapi.json` regenerado.
+
+**Estado actual de la suite:** 146 tests pasando · build sin errores · 20 commits pusheados a `claude/create-improvement-plan-ETMxj`.
 
 ### ⏳ Pendiente (no bloqueante para mergear)
-- Sprint 4 restante: migración a Pinia, refactor de componentes oversized, unificación `GraficoCategoria`/`FormDeuda`/`FormGastoPlaneado`.
-- Sprint 5 restante: streaming SSE del LLM, paginación/virtualización, push notifications.
-- Sprint 6 restante: drag&drop calendario, plantillas de mes, multi-foto, vista heatmap, plan de pagos sugerido, vista global de balance UI.
-- Sprint 7 restante: Playwright E2E, Sentry/pino con redacción, OpenAPI desde Zod.
+- Sprint 4 restante: refactor visual de componentes oversized (`ListaGastosFuturos` 1294 líneas → subcomponentes), unificación `GraficoCategoria`/`FormDeuda`/`FormGastoPlaneado`, stores Pinia para gastos y deudas.
+- Sprint 5 restante: streaming SSE del LLM, virtualización en listas grandes, push notifications.
+- Sprint 6 restante: drag&drop calendario, multi-foto, integrar `SelectorPlantillas` y `BalanceGlobal` en sus páginas si aún no, integrar `useCategoryPredictor` en `FormGastoManual`, integrar `rankearOpciones` en `ListaGastosFuturos`.
+- Sprint 7 restante: Playwright E2E, Sentry/pino con redacción, suite IDOR automatizada.
 
 
