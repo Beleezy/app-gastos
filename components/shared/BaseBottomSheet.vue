@@ -73,38 +73,10 @@ const scrollRef = ref(null)
 const dragOffset = ref(0)
 const isDragging = ref(false)
 const titleId = `bs-title-${Math.random().toString(36).slice(2, 9)}`
-let previousActive = null
 
 const { registerModal, unregisterModal } = useModalLayer()
-
-const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-
-function getFocusable() {
-  if (!sheetRef.value) return []
-  return Array.from(sheetRef.value.querySelectorAll(FOCUSABLE)).filter(
-    (el) => !el.hasAttribute('disabled') && el.offsetParent !== null,
-  )
-}
-
-function onKeydown(e) {
-  if (e.key === 'Escape') {
-    e.stopPropagation()
-    emit('close')
-    return
-  }
-  if (e.key !== 'Tab') return
-  const focusables = getFocusable()
-  if (focusables.length === 0) return
-  const first = focusables[0]
-  const last = focusables[focusables.length - 1]
-  if (e.shiftKey && document.activeElement === first) {
-    e.preventDefault()
-    last.focus()
-  } else if (!e.shiftKey && document.activeElement === last) {
-    e.preventDefault()
-    first.focus()
-  }
-}
+const focusTrap = useFocusTrap(sheetRef, { onEscape: () => emit('close') })
+const onKeydown = focusTrap.onKeydown
 
 let touchStartY = 0
 let dragStartY = 0
@@ -220,19 +192,11 @@ useModalBack(() => emit('close'))
 
 onMounted(() => {
   registerModal()
-  if (typeof document !== 'undefined') {
-    previousActive = document.activeElement
-    nextTick(() => {
-      const focusables = getFocusable()
-      if (focusables.length > 0) focusables[0].focus()
-    })
-  }
+  focusTrap.activate()
 })
 
 onUnmounted(() => {
   unregisterModal()
-  if (previousActive && typeof previousActive.focus === 'function') {
-    previousActive.focus()
-  }
+  focusTrap.deactivate()
 })
 </script>
