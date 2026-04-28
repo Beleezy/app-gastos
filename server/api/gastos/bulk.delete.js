@@ -1,11 +1,13 @@
 import { db } from '../../utils/db.js'
 import { gastos, gastosPlanificados } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { rateLimits } from '../../utils/rateLimit.js'
 import { eq, and, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  rateLimits.bulkOp(event, usuarioId)
 
   if (!Array.isArray(body?.ids) || body.ids.length === 0) {
     throw createError({ statusCode: 400, message: 'Se requiere un array de ids' })

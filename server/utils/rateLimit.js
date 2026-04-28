@@ -1,0 +1,90 @@
+// Rate limiting in-memory.
+// Ver §1.2 de planifica.md.
+//
+// Limitación: este store vive en memoria del proceso. Para despliegues
+// multi-instancia debe sustituirse por Redis (unstorage driver redis/upstash).
+
+import { logger } from './logger.js'
+
+const buckets = new Map()
+const SWEEP_INTERVAL_MS = 5 * 60 * 1000
+let lastSweep = Date.now()
+
+function sweep(now) {
+  if (now - lastSweep < SWEEP_INTERVAL_MS) return
+  lastSweep = now
+  for (const [key, bucket] of buckets) {
+    if (bucket.resetAt <= now) buckets.delete(key)
+  }
+}
+
+function getClientIp(event) {
+  const fwd = getRequestHeader(event, 'x-forwarded-for')
+  if (fwd) return fwd.split(',')[0].trim()
+  const real = getRequestHeader(event, 'x-real-ip')
+  if (real) return real.trim()
+  return event.node?.req?.socket?.remoteAddress || 'unknown'
+}
+
+/**
+ * Aplica rate limit. Lanza 429 cuando se excede.
+ *
+ * @param {object} event Nitro event.
+ * @param {object} options
+ * @param {string} options.key Identificador del bucket (ej. 'voz:parse').
+ * @param {number} options.limit Máximo de requests dentro de la ventana.
+ * @param {number} options.windowMs Ventana en ms.
+ * @param {string} [options.scope] 'ip' (default) o 'user'.
+ * @param {string} [options.userId] requerido si scope='user'.
+ */
+export function rateLimit(event, { key, limit, windowMs, scope = 'ip', userId }) {
+  const now = Date.now()
+  sweep(now)
+
+  const subject = scope === 'user' ? (userId || 'anon') : getClientIp(event)
+  const bucketKey = `${key}:${scope}:${subject}`
+
+  let bucket = buckets.get(bucketKey)
+  if (!bucket || bucket.resetAt <= now) {
+    bucket = { count: 0, resetAt: now + windowMs }
+    buckets.set(bucketKey, bucket)
+  }
+
+  bucket.count += 1
+
+  const remaining = Math.max(0, limit - bucket.count)
+  setResponseHeader(event, 'X-RateLimit-Limit', String(limit))
+  setResponseHeader(event, 'X-RateLimit-Remaining', String(remaining))
+  setResponseHeader(event, 'X-RateLimit-Reset', String(Math.ceil(bucket.resetAt / 1000)))
+
+  if (bucket.count > limit) {
+    const retryAfter = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))
+    setResponseHeader(event, 'Retry-After', String(retryAfter))
+    logger.warn('Rate limit excedido', { key, scope, subject, limit, windowMs })
+    throw createError({
+      statusCode: 429,
+      statusMessage: 'Too Many Requests',
+      message: `Demasiadas peticiones. Intenta de nuevo en ${retryAfter} segundos.`,
+    })
+  }
+}
+
+/**
+ * Helpers preconfigurados según el plan §1.2.
+ */
+export const rateLimits = {
+  vozParse: (event, userId) =>
+    rateLimit(event, { key: 'voz:parse', limit: 20, windowMs: 60_000, scope: 'user', userId }),
+  vozParseHora: (event, userId) =>
+    rateLimit(event, { key: 'voz:parse:hora', limit: 60, windowMs: 60 * 60_000, scope: 'user', userId }),
+  vozParseImage: (event, userId) =>
+    rateLimit(event, { key: 'voz:parse-image', limit: 10, windowMs: 60_000, scope: 'user', userId }),
+  vozParseImageHora: (event, userId) =>
+    rateLimit(event, { key: 'voz:parse-image:hora', limit: 30, windowMs: 60 * 60_000, scope: 'user', userId }),
+  vinculosSolicitar: (event, userId) =>
+    rateLimit(event, { key: 'vinculos:solicitar', limit: 5, windowMs: 60 * 60_000, scope: 'user', userId }),
+  bulkOp: (event, userId) =>
+    rateLimit(event, { key: 'bulk:op', limit: 30, windowMs: 60_000, scope: 'user', userId }),
+  apiDefault: (event) =>
+    rateLimit(event, { key: 'api:default', limit: 120, windowMs: 60_000, scope: 'ip' }),
+}

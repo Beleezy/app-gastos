@@ -2,13 +2,25 @@ import { db } from '../../utils/db.js'
 import { categorias, configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
+import { rateLimits } from '../../utils/rateLimit.js'
+import { logger } from '../../utils/logger.js'
 import { eq, or, isNull } from 'drizzle-orm'
+
+// 8 MB de imagen base64 (~6 MB binario). Más que suficiente para un recibo.
+const MAX_IMAGE_BASE64_BYTES = 8 * 1024 * 1024
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 
   if (!body.image) {
     throw createError({ statusCode: 400, message: 'La imagen es obligatoria' })
+  }
+
+  if (typeof body.image !== 'string' || body.image.length > MAX_IMAGE_BASE64_BYTES) {
+    throw createError({
+      statusCode: 413,
+      message: 'La imagen excede el tamaño máximo permitido (~8 MB).',
+    })
   }
 
   const runtimeConfig = useRuntimeConfig()
@@ -19,6 +31,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const usuarioId = await getUsuarioFromEvent(event)
+  rateLimits.vozParseImage(event, usuarioId)
+  rateLimits.vozParseImageHora(event, usuarioId)
   let zonaHoraria = 'America/Lima'
   try {
     const [userConfig] = await db
@@ -149,12 +163,16 @@ Reglas:
 
         if (!response.ok) {
           const errorText = await response.text()
-          console.error(`Error de Gemini API [${currentModel}] (intento ${attempt + 1}/${MAX_RETRIES}):`, errorText)
-          lastError = errorText
+          logger.error('Error de Gemini API (image)', {
+            model: currentModel,
+            attempt: attempt + 1,
+            status: response.status,
+          })
+          lastError = `gemini ${response.status}`
 
           if (response.status === 429) {
             lastErrorUserFriendly = 'Límite de solicitudes alcanzado. Espera un momento e intenta de nuevo.'
-            const waitMatch = errorText.match(/retry in (\d+)/i)
+            const waitMatch = String(errorText).match(/retry in (\d+)/i)
             const waitTime = waitMatch ? Math.min(parseInt(waitMatch[1]) * 1000, 60000) : 15000
             if (attempt < MAX_RETRIES - 1) {
               await new Promise(resolve => setTimeout(resolve, waitTime))
@@ -184,29 +202,41 @@ Reglas:
         try {
           parsed = JSON.parse(text)
         } catch (jsonErr) {
-          console.error(`JSON inválido del LLM [${currentModel}] (intento ${attempt + 1}/${MAX_RETRIES}):`, text)
+          logger.warn('JSON inválido del LLM (image)', { model: currentModel, attempt: attempt + 1 })
           lastError = 'La respuesta del LLM no es JSON válido'
           continue
         }
 
         if (!parsed.gastos || !Array.isArray(parsed.gastos)) {
-          console.error(`Estructura inesperada del LLM [${currentModel}] (intento ${attempt + 1}/${MAX_RETRIES}):`, parsed)
+          logger.warn('Estructura inesperada del LLM (image)', { model: currentModel, attempt: attempt + 1 })
           lastError = 'La respuesta del LLM no tiene el formato esperado'
           continue
         }
 
-        const totalComprobante = parsed.total_comprobante != null
-          ? Math.round(parseFloat(parsed.total_comprobante) * 100) / 100
+        const rawTotal = parseFloat(parsed.total_comprobante)
+        const totalComprobante = Number.isFinite(rawTotal)
+          ? Math.round(rawTotal * 100) / 100
           : null
 
+        const categoriasValidas = new Set(cats.map((c) => c.nombre))
+        const MAX_MONTO = 100_000
         parsed.gastos = parsed.gastos.filter(g => {
-          return g && parseFloat(g.monto) !== 0 && g.concepto
-        }).map(g => ({
-          concepto: String(g.concepto).substring(0, 50),
-          monto: Math.round(parseFloat(g.monto) * 100) / 100,
-          categoria: g.categoria || 'Otros',
-          fecha: g.fecha || hoy,
-        }))
+          if (!g || !g.concepto) return false
+          const m = parseFloat(g.monto)
+          if (!Number.isFinite(m) || m === 0) return false
+          if (Math.abs(m) > MAX_MONTO) return false
+          return true
+        }).map(g => {
+          const m = Math.round(parseFloat(g.monto) * 100) / 100
+          let categoria = String(g.categoria || 'Otros').substring(0, 50)
+          if (!categoriasValidas.has(categoria)) categoria = 'Otros'
+          return {
+            concepto: String(g.concepto).substring(0, 50),
+            monto: m,
+            categoria,
+            fecha: /^\d{4}-\d{2}-\d{2}$/.test(g.fecha) ? g.fecha : hoy,
+          }
+        })
 
         if (parsed.gastos.length === 0) {
           lastError = 'No se pudieron extraer gastos de la imagen'
@@ -218,11 +248,11 @@ Reglas:
           totalComprobante,
         }
       } catch (e) {
-        console.error(`Error [${currentModel}] en intento ${attempt + 1}/${MAX_RETRIES}:`, e.message)
+        logger.error('Error invocando Gemini (image)', { model: currentModel, attempt: attempt + 1, error: e })
         lastError = e.message
       }
     }
-    console.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos, probando siguiente modelo...`)
+    logger.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos`, { model: currentModel })
   }
 
   const userMessage = lastErrorUserFriendly || 'No se pudo procesar la imagen. Intenta de nuevo con una foto más clara.'

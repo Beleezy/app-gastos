@@ -2,11 +2,13 @@ import { db } from '../../../utils/db.js'
 import { solicitudesVinculo, personasEntidades, usuarios } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { getNombreDisplay } from '../../../utils/vinculos.js'
+import { rateLimits } from '../../../utils/rateLimit.js'
 import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  rateLimits.vinculosSolicitar(event, usuarioId)
 
   const email = body.email?.trim()?.toLowerCase()
   if (!email) {
