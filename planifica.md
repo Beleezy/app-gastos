@@ -580,4 +580,68 @@ Para cada cambio relevante, el equipo debe poder:
 > - El refactor del Sprint 4 paga el resto del roadmap: con Pinia + Zod + servicios, todo lo demás se implementa el doble de rápido.
 > - Las mejoras visuales del Sprint 3 son las que el usuario percibirá inmediatamente, por eso se intercalan temprano.
 
+---
+
+## Changelog de implementación (en rama `claude/create-improvement-plan-ETMxj`)
+
+### ✅ Sprint 1 — Seguridad (commit `33ec01e`)
+- Middleware global de security headers (HSTS, X-Frame-Options DENY, Permissions-Policy, etc.).
+- Rate limit in-memory por usuario/IP en `voz/parse*`, `vinculos/solicitar`, bulk ops.
+- Logger JSON con redacción de api keys de Gemini y JWT.
+- Sanitización de input LLM (`<USER_INPUT>` boundary, max 2 000 chars), max 8 MB en imagen.
+- Validators normalizadores `validateGastosLlm` / `validateDeudasLlm`.
+- 429 capturado en `plugins/fetch.js` con toast amigable.
+
+### ✅ Sprint 2 — Calidad y validación tipada (commit `a370a5b`)
+- `shared/schemas/` con Zod (gastos, deudas, planificador, common).
+- `server/utils/validate.js` (validateBody/Query) y `responses.js`.
+- Endpoints `gastos POST` y `deudas POST` con validación Zod.
+- ESLint flat config + Prettier + `.editorconfig`.
+- Vitest + 37 tests iniciales.
+- GitHub Actions CI (`test` + `build`).
+
+### ✅ Sprint 3 — UX y accesibilidad (commit `1eae519`)
+- Utility `.tap-target` (44 × 48 px) y subida `h-8 → h-10` en `DetallePersona`.
+- `aria-label` en botones de icono críticos (DetallePersona, BottomNav, BaseBottomSheet, PWA prompt).
+- Focus trap + Esc + return focus en `BaseBottomSheet`.
+- `SkeletonLoader` con variantes `line`, `avatar` y prop `count`.
+- `EmptyState.vue` con `variant: empty | error | offline`.
+- `usePwaUpdate` + `PwaUpdatePrompt.vue` para "Nueva versión disponible".
+
+### ✅ Sprint 4 — Arquitectura interna (commit `7e8cc7c`)
+- `useDraftManager` base (parser + AbortController + retry + discard).
+- `useFocusTrap` extraído como composable reusable.
+- `server/services/gastos.service.js` con `crearGasto`, `obtenerGastoPropio`.
+- `gastos POST` delegando 100 % al servicio.
+
+### ✅ Sprint 5 — PWA, offline y performance (commit `62396cc`)
+- Migración `0014_indices_perf.sql` + schema actualizado (4 índices nuevos).
+- `useSyncQueue` (cola offline en localStorage, flush al volver online).
+- `useForm` con Zod (validación por campo, errors/touched/submitted/canSubmit).
+- `meta theme-color` por modo claro/oscuro + apple-mobile-web-app-*.
+
+### ✅ Sprint 6 — Mejoras por módulo (commit `324107c`)
+- `detectarDuplicados` en `gastos.service` + endpoint `/api/gastos/detectar-duplicados`.
+- `balanceGlobal` en `deudas.service` + endpoint `/api/deudas/balance`.
+- `useReminderText` (mensaje formateado para WhatsApp/clipboard).
+
+### ✅ Sprint 7 — Observabilidad (commit `16c230b`)
+- `/api/health` con check DB y latencia.
+- `server/plugins/01.assert-env.js` valida env vars al arrancar.
+- `server/middleware/02.request-log.js` log estructurado por request en prod.
+- Tests de `useReminderText`.
+
+### ✅ Sprint 8 — Pulido (commit `d3e01d8`)
+- `ConfirmDialog`: `role="alertdialog"`, focus trap, foco en confirmar al abrir, min-h 44 px.
+- HistorialDiario: tap-target + soporte de teclado en selector.
+- Tests de `useForm`.
+
+**Estado actual de la suite:** 53 tests pasando · build sin errores · 9 commits pusheados a `claude/create-improvement-plan-ETMxj`.
+
+### ⏳ Pendiente (no bloqueante para mergear)
+- Sprint 4 restante: migración a Pinia, refactor de componentes oversized, unificación `GraficoCategoria`/`FormDeuda`/`FormGastoPlaneado`.
+- Sprint 5 restante: streaming SSE del LLM, paginación/virtualización, push notifications.
+- Sprint 6 restante: drag&drop calendario, plantillas de mes, multi-foto, vista heatmap, plan de pagos sugerido, vista global de balance UI.
+- Sprint 7 restante: Playwright E2E, Sentry/pino con redacción, OpenAPI desde Zod.
+
 
