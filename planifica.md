@@ -709,17 +709,79 @@ Para cada cambio relevante, el equipo debe poder:
 - `composables/usePlantillasMes.js` + `components/planificador/SelectorPlantillas.vue`: UI completa.
 - `composables/useHistorialPdf.js`: PDF de historial completo de pagos por persona.
 
-### ✅ Sprint 20 — Pinia plantillas + OpenAPI (este commit)
+### ✅ Sprint 20 — Pinia plantillas + OpenAPI (commit `2dcb1ed`)
 - `stores/plantillas.js`: store Pinia con cargar/crear/aplicar/eliminar y getters.
 - `scripts/generate-openapi.mjs`: añade endpoints `merge`, `plantillas/*` y `cron/expirar-solicitudes` (12 schemas, 17 endpoints).
 - `docs/openapi.json` regenerado.
 
-**Estado actual de la suite:** 146 tests pasando · build sin errores · 20 commits pusheados a `claude/create-improvement-plan-ETMxj`.
+### ✅ Sprint 21 — Plantillas y predictor activos (commit `ac202e9`)
+- `pages/planificador.vue` integra `SelectorPlantillas`.
+- `FormGastoManual` y `ConfirmacionVoz` alimentan y consumen `useCategoryPredictor`.
+
+### ✅ Sprint 22 — Historial PDF (commit `32df555`)
+- Botón "Historial PDF" en `DetallePersona` que combina deudas + pagos.
+
+### ✅ Sprint 23 — Cobertura de tests (commit `cd7d001`)
+- Tests `dateLocal` (8) y `featureFlag` (7).
+
+### ✅ Sprint 24 — FeatureFlagsConfig + scoring opciones (commit `5e62e4a`)
+- Panel UI de toggles en `pages/configuraciones.vue`.
+- `rankearOpciones` aplicado en `ListaGastosFuturos`.
+
+### ✅ Sprint 25 — Virtualización + streaming (commit `4697f4a`)
+- `useVirtualList` con `calcularRango` puro.
+- `useSseStream` cliente SSE con fetch + ReadableStream.
+- Tests virtualList (5) + sseStream (5).
+
+### ✅ Sprint 26 — Push notifications scaffold (commit `f2e7a53`)
+- Tabla `suscripciones_push` + migración `0017`.
+- `usePushNotifications`, endpoints `/api/notificaciones/{subscribe,unsubscribe}`.
+
+### ✅ Sprint 27 — Composable de gráfico (commit `5c4af69`)
+- `useGraficoCategoriaData` con `calcularGastosPorCategoria` y `compararPlanReal`.
+- Tests (6).
+
+### ✅ Sprint 28 — Form helpers (commit `fd6f64c`)
+- `useDeudaForm` y `useGastoForm` sobre Zod.
+- Tests (5).
+
+### ✅ Sprint 29 — Drag & drop (commit `ad5942c`)
+- `useDragDrop` con state global, `useDraggable`/`useDropTarget`.
+- `reordenar` puro + tests (6).
+
+### ✅ Sprint 30 — Error reporter + assertOwner (commit `7ebeedd`)
+- `useErrorReporter` con sampling + sendBeacon.
+- `assertOwner`/`assertOwnerAll` para anti-IDOR.
+- Tests assertOwner (7).
+
+### ✅ Sprint 31 — Errors endpoint + Playwright smoke (commit `e8efbad`)
+- `/api/errors` para batch del cliente.
+- `playwright.config.js` + `e2e/smoke.spec.js` (4 specs sin credenciales).
+
+### ✅ Sprint 32 — Filtros gastos futuros (commit `5144b2a`)
+- `useGastosFuturosFiltros` extrae 80 LOC de la lógica inline.
+- Tests (8).
+
+### ✅ Sprint 33 — Historial + presupuesto (commit `c65590e`)
+- `useHistorialNavigation` (agruparPorDia/Semana, totalEnRango).
+- `usePresupuestoCalc` con proyección + alertas.
+- Tests (11).
+
+### ✅ Sprint 34 — Mensajes centralizados (commit `bff8689`)
+- `utils/messages.js` (MSG, ETIQUETAS, pluralizar).
+- `useNotificacionLocal` (toast + haptic).
+- Tests messages (6).
+
+### ✅ Sprint 35 — Integración MSG (este commit)
+- `plugins/fetch.js` usa `MSG.errores.rateLimit` y maneja 401.
+
+**Estado actual de la suite:** ~210+ tests pasando · build sin errores · 35 commits pusheados a `claude/create-improvement-plan-ETMxj`.
 
 ### ⏳ Pendiente (no bloqueante para mergear)
-- Sprint 4 restante: refactor visual de componentes oversized (`ListaGastosFuturos` 1294 líneas → subcomponentes), unificación `GraficoCategoria`/`FormDeuda`/`FormGastoPlaneado`, stores Pinia para gastos y deudas.
-- Sprint 5 restante: streaming SSE del LLM, virtualización en listas grandes, push notifications.
-- Sprint 6 restante: drag&drop calendario, multi-foto, integrar `SelectorPlantillas` y `BalanceGlobal` en sus páginas si aún no, integrar `useCategoryPredictor` en `FormGastoManual`, integrar `rankearOpciones` en `ListaGastosFuturos`.
-- Sprint 7 restante: Playwright E2E, Sentry/pino con redacción, suite IDOR automatizada.
+- Refactor visual de componentes oversized: `ListaGastosFuturos`, `ListaGastosPlaneados`, `HistorialDiario`, `StatsComparativas` siguen monolíticos (los composables extraídos están listos para consumirse, falta la división en subcomponentes y la verificación visual en navegador).
+- Backend Web Push (envío real con `web-push` npm + cron) cuando se defina VAPID.
+- Integración SSE end-to-end (servidor `parse-stream` aún no existe; el cliente está listo).
+- Suite IDOR automatizada con `assertOwner` aplicado en todos los services.
+- Sentry / Datadog real (el reporter es barebone — sustituible con un cambio en `useErrorReporter`).
 
 
