@@ -25,3 +25,17 @@ export const conceptoSchema = z.string().trim().min(1, 'Concepto obligatorio').m
 export const notasSchema = z.string().trim().max(1000).optional().nullable()
 
 export const metodoRegistroSchema = z.enum(['voz', 'foto', 'manual'])
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+export const uuidSchema = z.string().regex(UUID_RE, 'UUID inválido')
+
+export const idSchema = z.union([
+  uuidSchema,
+  z.number().int().positive(),
+  z.string().regex(/^\d+$/, 'ID inválido'),
+])
+
+export const paginacionQuerySchema = z.object({
+  cursor: z.string().max(500).optional().nullable(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+})
