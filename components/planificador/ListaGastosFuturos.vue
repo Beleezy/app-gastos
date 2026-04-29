@@ -348,9 +348,12 @@
                 </button>
                 <template v-if="opcionesEstanVisibles(detalle.id)">
                 <div
-                  v-for="opcion in detalle.opciones"
+                  v-for="(opcion, idx) in opcionesRankeadas(detalle.opciones)"
                   :key="opcion.id"
-                  class="rounded-xl border border-theme-border bg-theme-input"
+                  class="rounded-xl border bg-theme-input"
+                  :class="idx === 0 && (detalle.opciones || []).length > 1
+                    ? 'border-emerald-500/40 bg-emerald-500/5'
+                    : 'border-theme-border'"
                 >
                   <!-- Opción: modo edición -->
                   <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
@@ -933,6 +936,14 @@ function toggleOpcionesVisibles(detalleId) {
 
 function opcionesEstanVisibles(detalleId) {
   return opcionesVisibles.value[detalleId] !== false
+}
+
+const { rankearOpciones: rankearOpcionesHelper } = useOpcionesScoring()
+function opcionesRankeadas(opciones) {
+  if (!Array.isArray(opciones) || opciones.length <= 1) return opciones || []
+  // Si todas las opciones tienen el mismo precio (o ninguna), no reordenar.
+  const ranked = rankearOpcionesHelper(opciones)
+  return ranked.length === opciones.length ? ranked : opciones
 }
 
 function prioridadBadge(valor) {
