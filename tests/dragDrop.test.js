@@ -1,4 +1,10 @@
 import { describe, it, expect } from 'vitest'
+import { ref, computed } from 'vue'
+
+// useDragDrop usa ref/computed en su STATE global compartido.
+globalThis.ref = ref
+globalThis.computed = computed
+
 import { reordenar } from '../composables/useDragDrop.js'
 
 describe('reordenar', () => {
