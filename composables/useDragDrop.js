@@ -13,27 +13,35 @@
  * `useDropTarget` y `useDraggable`.
  */
 
-const STATE = {
-  draggingId: ref(null),
-  draggingPayload: ref(null),
-  hoverTargetId: ref(null),
+// State global lazy: se construye al primer uso para evitar
+// dependencia de Vue auto-imports al importar este módulo en tests.
+let STATE = null
+function getState() {
+  if (!STATE) {
+    STATE = {
+      draggingId: ref(null),
+      draggingPayload: ref(null),
+      hoverTargetId: ref(null),
+    }
+  }
+  return STATE
 }
 
 export function useDraggable(getPayload) {
   function onPointerDown(e, id) {
     if (e.button !== undefined && e.button !== 0) return
-    STATE.draggingId.value = id ?? null
-    STATE.draggingPayload.value = typeof getPayload === 'function' ? getPayload() : getPayload
+    getState().draggingId.value = id ?? null
+    getState().draggingPayload.value = typeof getPayload === 'function' ? getPayload() : getPayload
   }
 
   function onPointerCancel() {
-    STATE.draggingId.value = null
-    STATE.draggingPayload.value = null
-    STATE.hoverTargetId.value = null
+    getState().draggingId.value = null
+    getState().draggingPayload.value = null
+    getState().hoverTargetId.value = null
   }
 
   return {
-    isDragging: computed(() => STATE.draggingId.value != null),
+    isDragging: computed(() => getState().draggingId.value != null),
     onPointerDown,
     onPointerCancel,
   }
@@ -41,30 +49,30 @@ export function useDraggable(getPayload) {
 
 export function useDropTarget({ id, onDrop } = {}) {
   function onPointerEnter() {
-    if (STATE.draggingId.value == null) return
-    STATE.hoverTargetId.value = id
+    if (getState().draggingId.value == null) return
+    getState().hoverTargetId.value = id
   }
 
   function onPointerLeave() {
-    if (STATE.hoverTargetId.value === id) STATE.hoverTargetId.value = null
+    if (getState().hoverTargetId.value === id) getState().hoverTargetId.value = null
   }
 
   function onPointerUp() {
-    if (STATE.draggingId.value == null) return
-    if (STATE.hoverTargetId.value !== id) return
+    if (getState().draggingId.value == null) return
+    if (getState().hoverTargetId.value !== id) return
     if (typeof onDrop === 'function') {
       onDrop({
-        sourceId: STATE.draggingId.value,
-        payload: STATE.draggingPayload.value,
+        sourceId: getState().draggingId.value,
+        payload: getState().draggingPayload.value,
         targetId: id,
       })
     }
-    STATE.draggingId.value = null
-    STATE.draggingPayload.value = null
-    STATE.hoverTargetId.value = null
+    getState().draggingId.value = null
+    getState().draggingPayload.value = null
+    getState().hoverTargetId.value = null
   }
 
-  const isHover = computed(() => STATE.hoverTargetId.value === id)
+  const isHover = computed(() => getState().hoverTargetId.value === id)
 
   return { onPointerEnter, onPointerLeave, onPointerUp, isHover }
 }
