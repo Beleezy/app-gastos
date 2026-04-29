@@ -5,6 +5,7 @@ import { db } from '../utils/db.js'
 import { deudas, personasEntidades } from '../database/schema.js'
 import { crearDeudaEspejo, registrarAuditoria } from '../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
+import { assertOwner } from '../utils/assertOwner.js'
 
 /**
  * Resuelve o crea la persona/entidad asociada a una deuda nueva.
@@ -53,11 +54,7 @@ export async function crearDeuda({ usuarioId, body }) {
     .where(eq(personasEntidades.id, personaId))
     .limit(1)
 
-  if (!persona || persona.usuarioId !== usuarioId) {
-    const err = new Error('Persona no encontrada')
-    err.statusCode = 404
-    throw err
-  }
+  assertOwner(persona, usuarioId, { recurso: 'Persona' })
 
   const fechaCreacion = body.fecha || (await getFechaHoraLocalUsuario(usuarioId)).fecha
 

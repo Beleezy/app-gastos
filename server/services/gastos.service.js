@@ -5,6 +5,7 @@ import { eq, and, sql } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { gastos, categorias } from '../database/schema.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
+import { assertOwner } from '../utils/assertOwner.js'
 
 /**
  * Crea un gasto y devuelve la versión enriquecida con datos de categoría.

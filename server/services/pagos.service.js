@@ -5,6 +5,7 @@ import { db } from '../utils/db.js'
 import { pagosDeuda, deudas, personasEntidades } from '../database/schema.js'
 import { crearPagoEspejo, registrarAuditoria } from '../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
+import { assertOwner } from '../utils/assertOwner.js'
 
 /**
  * Registra un pago contra una deuda. Actualiza monto pendiente y estado
@@ -23,11 +24,7 @@ export async function registrarPago({ usuarioId, deudaId, body }) {
     .where(and(eq(deudas.id, deudaId), eq(deudas.usuarioId, usuarioId)))
     .limit(1)
 
-  if (!deuda) {
-    const err = new Error('Deuda no encontrada')
-    err.statusCode = 404
-    throw err
-  }
+  assertOwner(deuda, usuarioId, { recurso: 'Deuda' })
 
   const montoPago = parseFloat(body.monto)
   const pendienteActual = parseFloat(deuda.montoPendiente)
