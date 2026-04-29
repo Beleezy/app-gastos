@@ -1,3 +1,5 @@
+import { MSG } from '~/utils/messages'
+
 export default defineNuxtPlugin(() => {
   const supabase = useSupabaseClient()
   const toast = useToast()
@@ -18,9 +20,12 @@ export default defineNuxtPlugin(() => {
       if (response?.status === 429) {
         const retryAfter = parseInt(response.headers?.get?.('retry-after') || '0', 10)
         const seg = retryAfter > 0 ? ` Intenta en ${retryAfter}s.` : ''
-        const mensaje = response._data?.message
-          || `Demasiadas peticiones.${seg}`
+        const fallback = MSG?.errores?.rateLimit || 'Demasiadas peticiones.'
+        const mensaje = response._data?.message || `${fallback}${seg}`
         toast.warning(mensaje, 5000)
+      } else if (response?.status === 401) {
+        const fallback = MSG?.errores?.sesionExpirada || 'Sesión expirada.'
+        toast.error(response._data?.message || fallback, 4000)
       }
     },
   })

@@ -5,6 +5,7 @@ import { db } from '../utils/db.js'
 import { deudas, personasEntidades } from '../database/schema.js'
 import { crearDeudaEspejo, registrarAuditoria } from '../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
+import { assertOwner } from '../utils/assertOwner.js'
 
 /**
  * Resuelve o crea la persona/entidad asociada a una deuda nueva.
@@ -53,11 +54,7 @@ export async function crearDeuda({ usuarioId, body }) {
     .where(eq(personasEntidades.id, personaId))
     .limit(1)
 
-  if (!persona || persona.usuarioId !== usuarioId) {
-    const err = new Error('Persona no encontrada')
-    err.statusCode = 404
-    throw err
-  }
+  assertOwner(persona, usuarioId, { recurso: 'Persona' })
 
   const fechaCreacion = body.fecha || (await getFechaHoraLocalUsuario(usuarioId)).fecha
 
@@ -112,24 +109,19 @@ export async function crearDeuda({ usuarioId, body }) {
  *
  * @param {string} usuarioId
  */
-export async function balanceGlobal(usuarioId) {
-  const rows = await db
-    .select({
-      personaId: personasEntidades.id,
-      persona: personasEntidades.nombre,
-      tipoDeuda: deudas.tipoDeuda,
-      total: sql`COALESCE(SUM(${deudas.montoPendiente}), 0)`.as('total'),
-    })
-    .from(deudas)
-    .innerJoin(personasEntidades, eq(deudas.personaEntidadId, personasEntidades.id))
-    .where(and(eq(deudas.usuarioId, usuarioId), sql`${deudas.estado} != 'archivado'`))
-    .groupBy(personasEntidades.id, personasEntidades.nombre, deudas.tipoDeuda)
-
+/**
+ * Helper puro: agrega filas tipo
+ *   { personaId, persona, tipoDeuda: 'me_deben'|'yo_debo', total }
+ * en el shape final del balance global.
+ *
+ * Extraído de balanceGlobal para testabilidad sin DB.
+ */
+export function agregarBalance(rows) {
   const porPersona = new Map()
   let totalMeDeben = 0
   let totalYoDebo = 0
 
-  for (const r of rows) {
+  for (const r of rows || []) {
     const total = parseFloat(r.total) || 0
     if (!porPersona.has(r.personaId)) {
       porPersona.set(r.personaId, {
@@ -148,7 +140,9 @@ export async function balanceGlobal(usuarioId) {
       item.yoDebo += total
       totalYoDebo += total
     }
-    item.balance = item.meDeben - item.yoDebo
+    item.balance = Math.round((item.meDeben - item.yoDebo) * 100) / 100
+    item.meDeben = Math.round(item.meDeben * 100) / 100
+    item.yoDebo = Math.round(item.yoDebo * 100) / 100
   }
 
   const personas = [...porPersona.values()].sort(
@@ -161,6 +155,22 @@ export async function balanceGlobal(usuarioId) {
     balanceNeto: Math.round((totalMeDeben - totalYoDebo) * 100) / 100,
     personas,
   }
+}
+
+export async function balanceGlobal(usuarioId) {
+  const rows = await db
+    .select({
+      personaId: personasEntidades.id,
+      persona: personasEntidades.nombre,
+      tipoDeuda: deudas.tipoDeuda,
+      total: sql`COALESCE(SUM(${deudas.montoPendiente}), 0)`.as('total'),
+    })
+    .from(deudas)
+    .innerJoin(personasEntidades, eq(deudas.personaEntidadId, personasEntidades.id))
+    .where(and(eq(deudas.usuarioId, usuarioId), sql`${deudas.estado} != 'archivado'`))
+    .groupBy(personasEntidades.id, personasEntidades.nombre, deudas.tipoDeuda)
+
+  return agregarBalance(rows)
 }
 
 /**

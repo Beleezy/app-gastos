@@ -345,6 +345,8 @@
         </button>
       </template>
 
+      <ConfiguracionesFeatureFlagsConfig class="mt-4" />
+
       <!-- App info -->
       <div class="text-center pt-4 pb-8">
         <p class="text-xs text-theme-text-muted">Mis Finanzas v{{ useRuntimeConfig().public.appVersion }}</p>
