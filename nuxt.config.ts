@@ -1,5 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-const APP_VERSION = '0.9.1'
+const APP_VERSION = '0.9.3'
 const APP_NAME = 'Mis Finanzas'
 const APP_SHORT_NAME = 'Finanzas'
 
