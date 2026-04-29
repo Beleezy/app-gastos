@@ -772,10 +772,38 @@ Para cada cambio relevante, el equipo debe poder:
 - `useNotificacionLocal` (toast + haptic).
 - Tests messages (6).
 
-### ✅ Sprint 35 — Integración MSG (este commit)
+### ✅ Sprint 35 — Integración MSG (commit `ce6beee`)
 - `plugins/fetch.js` usa `MSG.errores.rateLimit` y maneja 401.
 
-**Estado actual de la suite:** ~210+ tests pasando · build sin errores · 35 commits pusheados a `claude/create-improvement-plan-ETMxj`.
+### ✅ Sprint 36 — assertOwner aplicado (commit `62533b0`)
+- `pagos.service` y `deudas.service` usan `assertOwner` para anti-IDOR.
+
+### ✅ Sprint 37 — matchDuplicados puro (commit `8a10741`)
+- Helper extraído de `detectarDuplicados`. 6 tests.
+
+### ✅ Sprint 38 — agregarBalance puro (commit `49a2f98`)
+- Helper extraído de `balanceGlobal` con redondeo a 2 decimales. 4 tests.
+
+### ✅ Sprint 39 — currencyFormat puro (commit `87e14ae`)
+- `utils/currencyFormat.js` con `getSymbol`, `formatMonto`, `parseMonto` (heurística PEN/USD), `formatCompact`. 16 tests + fix dragDrop.
+
+### ✅ Sprint 40 — useExportCsv (commit `ff1e64e`)
+- Generador CSV con BOM UTF-8 y escape estricto. 7 tests.
+
+### ✅ Sprint 41 — useShareLink + extra schemas (commit `dd2115d`)
+- `useShareLink` con fallback clipboard.
+- `uuidSchema`, `idSchema`, `paginacionQuerySchema`. 7 tests.
+
+### ✅ Sprint 42 — useColorPalette + WCAG (commit `b80932e`)
+- Paletas default y daltónica, helpers `relativeLuminance`, `contrastRatio`, `cumpleAA/AAA`, `paraTexto` determinístico. 13 tests.
+
+### ✅ Sprint 43 — useFechaRelativa + lazy STATE (commit `6a088a4`)
+- "ahora", "hace 5 min", "ayer", "mañana", "hace 3 días/semanas/meses/años".
+- `useDragDrop.STATE` ahora lazy para evitar fallar en import sin Vue runtime. 11 tests.
+
+### ✅ Sprint 44 — Changelog final (este commit)
+
+**Estado actual de la suite:** 285 tests pasando · build sin errores · 44 commits pusheados a `claude/create-improvement-plan-ETMxj`.
 
 ### ⏳ Pendiente (no bloqueante para mergear)
 - Refactor visual de componentes oversized: `ListaGastosFuturos`, `ListaGastosPlaneados`, `HistorialDiario`, `StatsComparativas` siguen monolíticos (los composables extraídos están listos para consumirse, falta la división en subcomponentes y la verificación visual en navegador).
