@@ -68,6 +68,33 @@ export async function crearGasto({ usuarioId, body }) {
  * @param {Array<{concepto: string, monto: number, fecha: string}>} input.candidatos
  * @returns Array<{candidato, duplicados: Array<gasto>}>
  */
+/**
+ * Helper puro: dado un set de candidatos y un set de gastos
+ * existentes (mismo formato), devuelve para cada candidato sus
+ * potenciales duplicados aplicando reglas de monto similar y concepto
+ * por prefijo. Extraído de detectarDuplicados para testabilidad.
+ */
+export function matchDuplicados(candidatos, existentes) {
+  if (!Array.isArray(candidatos) || candidatos.length === 0) return []
+  const ex = Array.isArray(existentes) ? existentes : []
+  const tolerancia = (m) => Math.max(0.05, Math.abs(parseFloat(m)) * 0.005)
+  const norm = (s) => String(s || '').trim().toLowerCase()
+
+  return candidatos.map((c) => {
+    const cm = parseFloat(c.monto)
+    const tol = tolerancia(cm)
+    const cn = norm(c.concepto)
+    const duplicados = ex.filter((g) => {
+      if (g.fecha !== c.fecha) return false
+      const gm = parseFloat(g.monto)
+      if (Math.abs(gm - cm) > tol) return false
+      const gn = norm(g.concepto)
+      return gn === cn || gn.startsWith(cn) || cn.startsWith(gn)
+    })
+    return { candidato: c, duplicados }
+  })
+}
+
 export async function detectarDuplicados({ usuarioId, candidatos }) {
   if (!Array.isArray(candidatos) || candidatos.length === 0) return []
 
@@ -84,22 +111,7 @@ export async function detectarDuplicados({ usuarioId, candidatos }) {
     .from(gastos)
     .where(and(eq(gastos.usuarioId, usuarioId), sql`${gastos.fecha} IN (${sql.join(fechas, sql`, `)})`))
 
-  const tolerancia = (m) => Math.max(0.05, Math.abs(parseFloat(m)) * 0.005)
-  const norm = (s) => String(s || '').trim().toLowerCase()
-
-  return candidatos.map((c) => {
-    const cm = parseFloat(c.monto)
-    const tol = tolerancia(cm)
-    const cn = norm(c.concepto)
-    const duplicados = existentes.filter((g) => {
-      if (g.fecha !== c.fecha) return false
-      const gm = parseFloat(g.monto)
-      if (Math.abs(gm - cm) > tol) return false
-      const gn = norm(g.concepto)
-      return gn === cn || gn.startsWith(cn) || cn.startsWith(gn)
-    })
-    return { candidato: c, duplicados }
-  })
+  return matchDuplicados(candidatos, existentes)
 }
 
 /**
