@@ -348,10 +348,10 @@
                 </button>
                 <template v-if="opcionesEstanVisibles(detalle.id)">
                 <div
-                  v-for="(opcion, idx) in opcionesRankeadas(detalle.opciones)"
+                  v-for="(opcion, idx) in detalle.opciones"
                   :key="opcion.id"
                   class="rounded-xl border bg-theme-input"
-                  :class="idx === 0 && (detalle.opciones || []).length > 1
+                  :class="esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
                     ? 'border-emerald-500/40 bg-emerald-500/5'
                     : 'border-theme-border'"
                 >
@@ -939,11 +939,15 @@ function opcionesEstanVisibles(detalleId) {
 }
 
 const { rankearOpciones: rankearOpcionesHelper } = useOpcionesScoring()
-function opcionesRankeadas(opciones) {
-  if (!Array.isArray(opciones) || opciones.length <= 1) return opciones || []
-  // Si todas las opciones tienen el mismo precio (o ninguna), no reordenar.
+// `rankearOpciones` se usa SOLO para identificar la mejor opción
+// (badge visual). NO reordena el array — eso preservaría la
+// flecha "subir/bajar" del usuario.
+function esMejorOpcion(detalle, opcion) {
+  const opciones = detalle?.opciones
+  if (!Array.isArray(opciones) || opciones.length < 2) return false
   const ranked = rankearOpcionesHelper(opciones)
-  return ranked.length === opciones.length ? ranked : opciones
+  if (!ranked.length) return false
+  return ranked[0]?.id === opcion?.id
 }
 
 function prioridadBadge(valor) {

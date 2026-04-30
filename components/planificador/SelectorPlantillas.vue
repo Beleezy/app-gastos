@@ -114,7 +114,13 @@ async function aplicarPlantilla(p) {
   aplicandoId.value = p.id
   try {
     const r = await aplicar({ plantillaId: p.id, planMensualId: props.planMensualId })
-    toast.success(`Aplicada: ${r.creados} gastos creados`)
+    if (!r.creados || r.creados === 0) {
+      toast.warning('La plantilla no creó gastos. Revisa que tenga ítems válidos.')
+    } else if (r.categoriasReemplazadas > 0) {
+      toast.success(`Aplicada: ${r.creados} gastos (${r.categoriasReemplazadas} con categoría reemplazada)`)
+    } else {
+      toast.success(`Aplicada: ${r.creados} gastos creados`)
+    }
     emit('aplicada', r)
   } catch (e) {
     toast.error(e?.data?.message || 'No se pudo aplicar la plantilla')
