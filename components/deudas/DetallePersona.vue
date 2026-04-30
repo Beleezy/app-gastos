@@ -34,19 +34,13 @@
 
         <!-- Action buttons row -->
         <div class="flex items-center gap-1.5 flex-wrap mb-3 pl-1">
-          <!-- Export PDF (only me_deben) -->
-          <button
+          <!-- Export multi-formato (only me_deben) -->
+          <SharedExportButton
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
-            class="min-h-[40px] h-10 px-3 rounded-lg bg-theme-border-md flex items-center gap-1.5 text-theme-text-sec hover:text-theme-accent transition-colors text-[0.7rem] font-medium"
-            title="Exportar PDF"
-            aria-label="Exportar deudas pendientes a PDF"
-            @click="exportarPdf"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            PDF
-          </button>
+            :formats="['pdf', 'excel', 'csv']"
+            label="Exportar"
+            @select="exportarFormato"
+          />
           <!-- Share WhatsApp -->
           <button
             v-if="tabActual === 'me_deben' && totalPendientePersona > 0"
@@ -474,6 +468,44 @@ function esVencida(deuda) {
 
 async function exportarPdf() {
   await descargarPdf(personaSeleccionada.value, deudasActivasPersona.value, deudasSaldadasPersona.value)
+}
+
+const exportandoFormato = ref(false)
+async function exportarFormato(formato) {
+  if (exportandoFormato.value) return
+  exportandoFormato.value = true
+  try {
+    const persona = personaSeleccionada.value
+    if (!persona) return
+    const activas = deudasActivasPersona.value || []
+    const safeName = (persona.nombre || 'deudas').replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase()
+
+    if (formato === 'pdf') {
+      await descargarPdf(persona, activas, deudasSaldadasPersona.value)
+      return
+    }
+    if (formato === 'excel') {
+      const { exportar } = useDeudasExcel()
+      await exportar({ nombreArchivo: `deudas_${safeName}`, deudas: activas, persona })
+      return
+    }
+    if (formato === 'csv') {
+      const { descargar } = useExportCsv()
+      const columnas = [
+        { label: 'Concepto', getValue: (d) => d.concepto },
+        { label: 'Monto pendiente', getValue: (d) => d.montoPendiente },
+        { label: 'Monto original', getValue: (d) => d.montoOriginal ?? d.monto ?? '' },
+        { label: 'Estado', getValue: (d) => d.estado || '' },
+        { label: 'Fecha creación', getValue: (d) => d.fechaCreacion || '' },
+        { label: 'Fecha vencimiento', getValue: (d) => d.fechaVencimiento || '' },
+        { label: 'Notas', getValue: (d) => d.notas || '' },
+      ]
+      descargar({ nombreArchivo: `deudas_${safeName}`, columnas, filas: activas })
+      return
+    }
+  } finally {
+    exportandoFormato.value = false
+  }
 }
 
 async function enviarWhatsapp() {
