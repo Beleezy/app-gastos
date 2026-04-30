@@ -316,12 +316,15 @@ const mesCompararLabel = computed(() => mesCompararObj.value
   : '—'
 )
 
-const totalActual = computed(() => props.gastosActuales.reduce((s, g) => s + g.monto, 0))
-const totalComparar = computed(() => gastosComparar.value.reduce((s, g) => s + g.monto, 0))
+// Helpers compartidos en useStatsComparativas (§4.5 / §11 planifica.md)
+const stats = useStatsComparativas()
+const totalActual = computed(() => stats.totalGastos(props.gastosActuales))
+const totalComparar = computed(() => stats.totalGastos(gastosComparar.value))
 const diferencia = computed(() => totalActual.value - totalComparar.value)
 const porcentajeDiferencia = computed(() => {
-  if (totalComparar.value === 0) return totalActual.value > 0 ? '∞' : '0'
-  return ((diferencia.value / totalComparar.value) * 100).toFixed(1)
+  const pct = stats.porcentajeCambio(totalActual.value, totalComparar.value)
+  if (pct == null) return totalActual.value > 0 ? '∞' : '0'
+  return pct.toFixed(1)
 })
 
 function agrupar(gastos) {
