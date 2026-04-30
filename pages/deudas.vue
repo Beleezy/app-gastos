@@ -4,8 +4,8 @@
       <template #title>Deudas y Pagos</template>
       <template #actions>
         <SharedExportButton
-          :formats="['excel']"
-          label="Excel"
+          :formats="['excel', 'csv']"
+          label="Exportar"
           @select="exportarDeudas"
         />
       </template>
@@ -151,7 +151,7 @@ async function onVinculoAceptado() {
   await Promise.all([fetchResumen(), fetchPersonas()])
 }
 
-function exportarDeudas() {
+function exportarDeudas(formato) {
   const columnas = [
     { label: 'Persona', getValue: p => p.nombre },
     { label: 'Tipo', getValue: p => p.tipoDeuda === 'me_deben' ? 'Me debe' : 'Yo debo' },
@@ -159,7 +159,13 @@ function exportarDeudas() {
     { label: 'Deudas Activas', getValue: p => p.deudasActivas },
     { label: 'Último Movimiento', getValue: p => p.ultimoMovimiento || '' },
   ]
-  exportarExcel('deudas_resumen', columnas, personas.value || [])
+  const filas = personas.value || []
+  if (formato === 'csv') {
+    const { descargar } = useExportCsv()
+    descargar({ nombreArchivo: 'deudas_resumen', columnas, filas })
+    return
+  }
+  exportarExcel('deudas_resumen', columnas, filas)
 }
 
 const showFormDeuda = ref(false)
