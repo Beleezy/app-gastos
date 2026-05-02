@@ -26,7 +26,7 @@ export default defineNuxtConfig({
     cookieOptions: {
       maxAge: 60 * 60 * 24 * 365, // 1 año — persistir sesión en PWA
       sameSite: 'lax',
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
     },
     clientOptions: {
       auth: {
