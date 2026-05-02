@@ -2,6 +2,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Rutas públicas — siempre permitidas
   if (to.path === '/login' || to.path === '/auth/confirm') return
 
+  const config = useRuntimeConfig()
+  if (config.public.devAuthBypass) return
+
   // Si está offline y ya hay sesión en caché de Supabase, dejar pasar
   if (process.client && !navigator.onLine) return
 
