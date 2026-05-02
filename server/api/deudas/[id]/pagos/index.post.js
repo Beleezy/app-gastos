@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { validateBody } from '../../../../utils/validate.js'
 import { registrarPago } from '../../../../services/pagos.service.js'
-import { fechaIso, monto, notasSchema } from '../../../../../shared/schemas/common.js'
+import { fechaIso, monto, notasSchema } from '~/shared/schemas/common.js'
 
 const pagoEndpointSchema = z.object({
   monto,

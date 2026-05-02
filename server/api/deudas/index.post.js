@@ -1,6 +1,6 @@
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
-import { deudaCreateSchema } from '../../../shared/schemas/deudas.js'
+import { deudaCreateSchema } from '~/shared/schemas/deudas.js'
 import { crearDeuda } from '../../services/deudas.service.js'
 
 export default defineEventHandler(async (event) => {
