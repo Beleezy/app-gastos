@@ -4,6 +4,20 @@ import { usuarios } from '../database/schema.js'
 import { eq } from 'drizzle-orm'
 
 export async function getUsuarioFromEvent(event) {
+  // Bypass de auth para tests E2E (server/middleware/03.e2e-auth-bypass.js)
+  if (event.context?.e2eBypass && event.context?.usuario?.id) {
+    const e2eId = event.context.usuario.id
+    const [existe] = await db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.id, e2eId)).limit(1)
+    if (!existe) {
+      await db.insert(usuarios).values({
+        id: e2eId,
+        nombre: 'E2E Test User',
+        email: event.context.usuario.email || 'e2e@test.local',
+      }).onConflictDoNothing()
+    }
+    return e2eId
+  }
+
   const user = await serverSupabaseUser(event)
 
   if (!user) {

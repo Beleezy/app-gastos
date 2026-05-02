@@ -95,7 +95,10 @@
                     </div>
                     <div class="flex-1 min-w-0 text-left">
                       <div class="flex items-center justify-between gap-2">
-                        <p class="text-xs font-medium text-theme-text-sec truncate">{{ formatFechaDia(dia.fecha) }}</p>
+                        <p class="text-xs font-medium text-theme-text-sec truncate">
+                          {{ formatFechaDia(dia.fecha) }}
+                          <span class="text-theme-text-muted font-normal">· {{ formatRelativo(dia.fecha) }}</span>
+                        </p>
                         <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
                       </div>
                       <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
@@ -304,6 +307,7 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete', 'duplicate', 'request-voice', 'request-manual', 'bulk-delete', 'bulk-edit', 'seleccion-activa'])
 
 const { vibrate } = useHaptic()
+const { formatRelativo } = useFechaRelativa()
 
 // Determinar qué vistas mostrar
 const ambasVistas = computed(() => props.mostrarVistaDia && props.mostrarVistaSemana)

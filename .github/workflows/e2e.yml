@@ -1,0 +1,101 @@
+name: E2E
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+  # Cron diario para detectar regresiones
+  schedule:
+    - cron: '0 4 * * *'
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+# Estrategia: levantamos un Postgres en el job, corremos drizzle-kit
+# push, sembramos un usuario E2E y arrancamos el dev server local.
+# NO se despliega a Vercel; los tests corren contra localhost:3000.
+# Esto deja libre tu plan free de Vercel para previews reales.
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gastos_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/gastos_e2e
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: e2e-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: e2e-service-key
+      GEMINI_API_KEY: ''
+      E2E_AUTH_BYPASS: '1'
+      E2E_TEST_TOKEN: ${{ secrets.E2E_TEST_TOKEN || 'e2e-token-default' }}
+      NODE_ENV: development
+      NUXT_PORT: '3000'
+      BASE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply DB schema (idempotente)
+        run: npm run db:apply
+
+      - name: Start dev server
+        run: |
+          npm run dev &
+          echo $! > .nuxt-dev.pid
+          # Esperar a que Nuxt esté listo
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "Server ready"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Run Playwright
+        run: npx playwright test --reporter=html
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f .nuxt-dev.pid ]; then
+            kill $(cat .nuxt-dev.pid) || true
+          fi

@@ -139,24 +139,38 @@ export async function aplicarPlantilla({ usuarioId, plantillaId, planMensualId }
   const items = parseGastosJson(plantilla.gastos)
   if (items.length === 0) return { creados: 0 }
 
-  // Validar que todas las categorías referenciadas existan para el usuario
+  // Validar categorías existentes (predefinidas + del usuario).
+  // Comparamos como string para que UUIDs vs IDs serializados como
+  // string en JSON no rompan el match.
   const categoriasValidas = await db
-    .select({ id: categorias.id })
+    .select({ id: categorias.id, nombre: categorias.nombre })
     .from(categorias)
-  const setValidas = new Set(categoriasValidas.map((c) => c.id))
+  const setValidas = new Set(categoriasValidas.map((c) => String(c.id)))
+  const fallbackCategoriaId =
+    categoriasValidas.find((c) => /otros/i.test(c.nombre))?.id ||
+    categoriasValidas[0]?.id ||
+    null
 
   const ultimoDiaMes = new Date(plan.anio, plan.mes, 0).getDate()
   const valores = []
+  let categoriasReemplazadas = 0
   for (const it of items) {
     if (!it?.concepto) continue
     const monto = parseFloat(it.montoEstimado)
     if (!Number.isFinite(monto) || monto <= 0) continue
-    if (!setValidas.has(it.categoriaId)) continue
+    let categoriaId = it.categoriaId != null ? String(it.categoriaId) : null
+    if (!categoriaId || !setValidas.has(categoriaId)) {
+      // Si la categoría original ya no existe, usamos el fallback en
+      // vez de descartar silenciosamente el ítem.
+      if (!fallbackCategoriaId) continue
+      categoriaId = fallbackCategoriaId
+      categoriasReemplazadas++
+    }
     const dia = Math.max(1, Math.min(ultimoDiaMes, parseInt(it.diaProbable, 10) || 1))
     const fechaProbablePago = `${plan.anio}-${String(plan.mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
     valores.push({
       planMensualId,
-      categoriaId: it.categoriaId,
+      categoriaId,
       concepto: String(it.concepto).slice(0, 200),
       montoEstimado: String(monto),
       fechaProbablePago,
@@ -164,9 +178,9 @@ export async function aplicarPlantilla({ usuarioId, plantillaId, planMensualId }
     })
   }
 
-  if (valores.length === 0) return { creados: 0 }
+  if (valores.length === 0) return { creados: 0, categoriasReemplazadas: 0 }
   const insertados = await db.insert(gastosPlanificados).values(valores).returning({ id: gastosPlanificados.id })
-  return { creados: insertados.length }
+  return { creados: insertados.length, categoriasReemplazadas }
 }
 
 export async function eliminarPlantilla({ usuarioId, plantillaId }) {

@@ -238,19 +238,19 @@ const gastosEfectivos = computed(() =>
 )
 
 // Datos de categoría recalculados
+const { calcularGastosPorCategoria } = useGraficoCategoriaData()
 const datosEfectivos = computed(() => {
   if (mesSeleccionado.value === 'actual') return props.datos
-  // Agrupar gastosOtroMes por categoría
-  const map = {}
-  for (const g of gastosOtroMes.value) {
-    const nombre = g.categoriaNombre || 'Otros'
-    if (!map[nombre]) map[nombre] = { nombre, color: g.categoriaColor || '#6b7280', total: 0, cantidad: 0 }
-    map[nombre].total += g.monto
-    map[nombre].cantidad++
-  }
-  const lista = Object.values(map).sort((a, b) => b.total - a.total)
-  const totalG = lista.reduce((s, c) => s + c.total, 0) || 1
-  return lista.map(c => ({ ...c, porcentaje: (c.total / totalG) * 100 }))
+  // Reusa el helper compartido (ver §4.6 planifica.md): devuelve
+  // items con shape unificado y porcentajes ya calculados.
+  const { items } = calcularGastosPorCategoria(gastosOtroMes.value)
+  return items.map((it) => ({
+    nombre: it.categoria,
+    color: it.color,
+    total: it.total,
+    cantidad: it.count,
+    porcentaje: it.porcentaje,
+  }))
 })
 
 const mesSeleccionadoLabel = computed(() => {

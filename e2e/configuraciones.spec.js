@@ -1,0 +1,36 @@
+// E2E del módulo Configuraciones (FeatureFlags + PushNotifications).
+
+import { test, expect } from '@playwright/test'
+
+test.describe('Configuraciones', () => {
+  test('UI: /configuraciones carga y muestra paneles nuevos', async ({ page }) => {
+    const r = await page.goto('/configuraciones')
+    expect(r.status()).toBeLessThan(500)
+    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/Notificaciones push/i)).toBeVisible()
+  })
+
+  test('UI: toggle de feature flag persiste', async ({ page }) => {
+    await page.goto('/configuraciones')
+    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
+
+    // Encontrar el primer toggle (predictor categoria por orden)
+    const firstToggle = page.locator('input[type="checkbox"]').first()
+    const before = await firstToggle.isChecked()
+    await firstToggle.click()
+    await page.waitForTimeout(200)
+    await page.reload()
+    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
+    const after = await page.locator('input[type="checkbox"]').first().isChecked()
+    expect(after).toBe(!before)
+  })
+
+  test('API: /api/usuarios/uso-llm responde', async ({ request }) => {
+    const r = await request.get('/api/usuarios/uso-llm')
+    expect(r.ok()).toBeTruthy()
+    const json = await r.json()
+    expect(json).toHaveProperty('totalRequests')
+    expect(json).toHaveProperty('totalTokens')
+    expect(Array.isArray(json.porEndpoint)).toBeTruthy()
+  })
+})
