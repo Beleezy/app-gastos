@@ -64,15 +64,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Apply DB schema
-        run: |
-          # Aplicar migraciones SQL planas (no usamos drizzle-kit push aquí
-          # porque depende de la dialect-specific config). Aplicamos los
-          # archivos de server/database/migrations en orden numérico.
-          for f in $(ls server/database/migrations/*.sql 2>/dev/null | sort); do
-            echo "Applying $f"
-            PGPASSWORD=postgres psql -h localhost -U postgres -d gastos_e2e -f "$f" || true
-          done
+      - name: Apply DB schema (idempotente)
+        run: npm run db:apply
 
       - name: Start dev server
         run: |
