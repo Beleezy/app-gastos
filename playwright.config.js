@@ -65,6 +65,7 @@ export default defineConfig({
         timeout: 120_000,
         reuseExistingServer: !process.env.CI,
         env: {
+          ...process.env,
           E2E_AUTH_BYPASS: '1',
           E2E_TEST_TOKEN: process.env.E2E_TEST_TOKEN || 'e2e-token',
           NUXT_PORT: '3000',
