@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { detectarDuplicados } from '../../services/gastos.service.js'
-import { fechaIso } from '../../../shared/schemas/common.js'
+import { fechaIso } from '~/shared/schemas/common.js'
 
 const bodySchema = z.object({
   candidatos: z

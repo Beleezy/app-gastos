@@ -1,6 +1,6 @@
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
-import { gastoCreateSchema } from '../../../shared/schemas/gastos.js'
+import { gastoCreateSchema } from '~/shared/schemas/gastos.js'
 import { crearGasto } from '../../services/gastos.service.js'
 
 export default defineEventHandler(async (event) => {
