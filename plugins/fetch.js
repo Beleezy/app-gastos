@@ -5,15 +5,28 @@ export default defineNuxtPlugin(() => {
   const toast = useToast()
   const syncQueue = useSyncQueue()
 
+  const config = useRuntimeConfig()
+
   const apiFetch = $fetch.create({
     onRequest: async ({ options }) => {
       const { data: { session } } = await supabase.auth.getSession()
+      const headers = { ...(options.headers || {}) }
+
       if (session?.access_token) {
-        options.headers = {
-          ...options.headers,
-          Authorization: `Bearer ${session.access_token}`,
+        headers.Authorization = `Bearer ${session.access_token}`
+      }
+
+      if (config.public.devAuthBypass) {
+        const devUserId = localStorage.getItem('dev_auth_user_id')
+        const devEmail = localStorage.getItem('dev_auth_user_email')
+        if (devUserId && config.public.devAuthToken) {
+          headers['x-dev-auth-token'] = config.public.devAuthToken
+          headers['x-dev-user-id'] = devUserId
+          if (devEmail) headers['x-dev-user-email'] = devEmail
         }
       }
+
+      options.headers = headers
     },
     onResponseError({ response }) {
       // Manejo amigable de rate limit (§1.2 planifica.md)

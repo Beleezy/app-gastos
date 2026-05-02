@@ -7,7 +7,7 @@ test.describe('Configuraciones', () => {
     const r = await page.goto('/configuraciones')
     expect(r.status()).toBeLessThan(500)
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText(/Notificaciones push/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Notificaciones push/i })).toBeVisible()
   })
 
   test('UI: toggle de feature flag persiste', async ({ page }) => {
@@ -16,8 +16,9 @@ test.describe('Configuraciones', () => {
 
     // Encontrar el primer toggle (predictor categoria por orden)
     const firstToggle = page.locator('input[type="checkbox"]').first()
+    const firstToggleLabel = page.locator('label[aria-label^="Alternar"]').first()
     const before = await firstToggle.isChecked()
-    await firstToggle.click()
+    await firstToggleLabel.click({ force: true })
     await page.waitForTimeout(200)
     await page.reload()
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
