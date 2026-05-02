@@ -66,6 +66,10 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         env: {
           ...process.env,
+          // Compatibilidad con @nuxtjs/supabase en SSR durante E2E
+          SUPABASE_KEY: process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '',
+          NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '',
+          NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '',
           E2E_AUTH_BYPASS: '1',
           E2E_TEST_TOKEN: process.env.E2E_TEST_TOKEN || 'e2e-token',
           NUXT_PORT: '3000',

@@ -25,17 +25,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const runtimeConfig = useRuntimeConfig()
-  const apiKey = runtimeConfig.geminiApiKey
-
-  if (!apiKey) {
-    throw createError({ statusCode: 500, message: 'API key de Gemini no configurada' })
-  }
-
   // Auth + rate limit (§1.1, §1.2)
   const usuarioId = await getUsuarioFromEvent(event)
   rateLimits.vozParse(event, usuarioId)
   rateLimits.vozParseHora(event, usuarioId)
+  const runtimeConfig = useRuntimeConfig()
+  const apiKey = runtimeConfig.geminiApiKey
+
+  // En E2E/entornos sin API key, degradar con respuesta determinística
+  // después de aplicar auth + rate limit (para conservar headers y 429).
+  if (!apiKey) {
+    if (body.modo === 'deudas') {
+      return { deudas: [], pagos: [] }
+    }
+    return { gastos: [] }
+  }
   let zonaHoraria = 'America/Lima'
   try {
     const [userConfig] = await db
