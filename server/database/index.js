@@ -7,10 +7,14 @@ let _db = null
 export function getDb() {
   if (!_db) {
     const config = useRuntimeConfig()
+    const databaseUrl = config.databaseUrl
+    const isLocalDatabase = /^postgres(?:ql)?:\/\/(?:[^@/]+@)?(?:localhost|127\.0\.0\.1)(?::\d+)?\//i.test(databaseUrl)
     const client = postgres(config.databaseUrl, {
       max: 1,
       idle_timeout: 20,
-      ssl: 'require',
+      // En CI/E2E local (localhost) Postgres suele correr sin TLS.
+      // Para entornos remotos mantenemos SSL obligatorio.
+      ssl: isLocalDatabase ? false : 'require',
       prepare: false,
     })
     _db = drizzle(client, { schema })
