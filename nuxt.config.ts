@@ -155,6 +155,8 @@ export default defineNuxtConfig({
       appVersion: APP_VERSION,
       supabaseUrl: process.env.SUPABASE_URL || '',
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
+      devAuthBypass: process.env.DEV_AUTH_BYPASS === '1',
+      devAuthToken: process.env.DEV_AUTH_TOKEN || '',
     },
   },
 })
