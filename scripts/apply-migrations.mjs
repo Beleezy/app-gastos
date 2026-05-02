@@ -16,9 +16,11 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { config as loadEnv } from 'dotenv'
 import postgres from 'postgres'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+loadEnv({ path: resolve(__dirname, '..', '.env') })
 const MIGRATIONS_DIR = resolve(__dirname, '..', 'server', 'database', 'migrations')
 
 const IGNORABLE_CODES = new Set([
