@@ -5,7 +5,7 @@ import { getPrimeraCategoria } from './fixtures.js'
 
 test.describe('Planificador', () => {
   test('API: crear plan mensual', async ({ request }) => {
-    const r = await request.post('/api/planificador', {
+    const r = await request.put('/api/planificador', {
       data: { mes: 4, anio: 2026, montoPresupuesto: 1000 },
     })
     // 200 (idempotente sobre UNIQUE) o 201
@@ -24,7 +24,7 @@ test.describe('Planificador', () => {
     test.skip(!categoriaId, 'Sin categorías sembradas')
 
     // Asegura plan
-    const planRes = await request.post('/api/planificador', {
+    const planRes = await request.put('/api/planificador', {
       data: { mes: 5, anio: 2026, montoPresupuesto: 1500 },
     })
     const plan = await planRes.json()
