@@ -16,11 +16,17 @@ export default defineNuxtConfig({
 
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
   supabase: {
+    url: process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL || '',
+    key:
+      process.env.SUPABASE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY ||
+      '',
     redirect: false, // el middleware propio lo manejará
     cookieOptions: {
       maxAge: 60 * 60 * 24 * 365, // 1 año — persistir sesión en PWA
       sameSite: 'lax',
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
     },
     clientOptions: {
       auth: {
@@ -149,6 +155,8 @@ export default defineNuxtConfig({
       appVersion: APP_VERSION,
       supabaseUrl: process.env.SUPABASE_URL || '',
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
+      devAuthBypass: process.env.DEV_AUTH_BYPASS === '1',
+      devAuthToken: process.env.DEV_AUTH_TOKEN || '',
     },
   },
 })

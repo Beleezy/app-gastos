@@ -1,14 +1,30 @@
-// Playwright config minimal para smoke E2E.
-// Ver §6.2 de planifica.md.
+// Playwright config para CI con GitHub Actions y dev local.
+// Ver §6.2 / §55 de planifica.md.
 //
-// Para ejecutar localmente:
-//   BASE_URL=http://localhost:3000 npx playwright test
+// Estrategia para tu plan free de Vercel + GH Actions:
 //
-// En CI lo invocamos con base url y credenciales de test desde GH
-// Actions secrets. Hoy queda como scaffolding listo: corremos solo
-// lo de specs/smoke.spec.js que valida health.
+//  - Tests E2E SIN deploy a Vercel: el workflow levanta el dev
+//    server de Nuxt en un job de Ubuntu de GH Actions y corre
+//    Playwright contra http://localhost:3000.
+//  - DB: usa una Postgres efímera del workflow (servicio docker)
+//    o bien stub server para no consumir Vercel ni Supabase prod.
+//  - Auth: bypass de Supabase con un middleware de test que se
+//    activa solo si E2E_TEST_TOKEN está presente.
+//  - Smoke público (/api/health, headers, manifest) sin login.
+//  - Por módulo: tests de UI con login mock y datos fixture.
+//
+// Variables de entorno aceptadas:
+//   BASE_URL         (default: http://localhost:3000)
+//   E2E_USE_WEBSERVER ('1' para que Playwright arranque `npm run dev`)
+//   DEV_AUTH_BYPASS  ('1' para activar bypass de auth dev en server)
+//   DEV_AUTH_TOKEN   token compartido entre workflow y bypass
+//   E2E_USER_ID      usuario temporal por defecto para tests
+//   E2E_USER_EMAIL   email del usuario temporal por defecto para tests
 
 import { defineConfig, devices } from '@playwright/test'
+
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
+const useWebServer = process.env.E2E_USE_WEBSERVER === '1'
 
 export default defineConfig({
   testDir: './e2e',
@@ -16,20 +32,58 @@ export default defineConfig({
   expect: { timeout: 5000 },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? 'github' : 'list',
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  forbidOnly: !!process.env.CI,
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: BASE_URL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    extraHTTPHeaders:
+      process.env.DEV_AUTH_BYPASS === '1' && process.env.DEV_AUTH_TOKEN
+        ? {
+            'x-dev-auth-token': process.env.DEV_AUTH_TOKEN,
+            'x-dev-user-id': process.env.E2E_USER_ID || '00000000-0000-0000-0000-000000000101',
+            'x-dev-user-email': process.env.E2E_USER_EMAIL || 'demo1@test.local',
+          }
+        : undefined,
   },
   projects: [
     {
-      name: 'chromium-mobile',
+      name: 'smoke',
+      testMatch: /smoke\.spec\.js$/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'mobile',
+      testIgnore: /smoke\.spec\.js$/,
       use: { ...devices['Pixel 5'] },
     },
     {
-      name: 'chromium-desktop',
+      name: 'desktop',
+      testIgnore: /smoke\.spec\.js$/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],
+  webServer: useWebServer
+    ? {
+        command: 'npm run dev',
+        url: BASE_URL,
+        timeout: 120_000,
+        reuseExistingServer: !process.env.CI,
+        env: {
+          ...process.env,
+          // Compatibilidad con @nuxtjs/supabase en SSR durante E2E
+          SUPABASE_KEY: process.env.SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '',
+          SUPABASE_URL: process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL || '',
+          NUXT_SUPABASE_URL: process.env.NUXT_SUPABASE_URL || process.env.SUPABASE_URL || '',
+          NUXT_SUPABASE_KEY: process.env.NUXT_SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '',
+          NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '',
+          NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '',
+          DEV_AUTH_BYPASS: process.env.DEV_AUTH_BYPASS || '1',
+          DEV_AUTH_TOKEN: process.env.DEV_AUTH_TOKEN || 'dev-token',
+          NUXT_PORT: '3000',
+        },
+      }
+    : undefined,
 })

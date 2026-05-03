@@ -305,18 +305,21 @@ onUnmounted(() => {
   if (process.client) document.removeEventListener('click', handleClickOutside)
 })
 
-// ─── Calculados ───────────────────────────────────────────
-const porcentaje = computed(() => {
-  if (props.presupuesto <= 0) return 0
-  return (props.totalMes / props.presupuesto) * 100
-})
+// ─── Calculados (usePresupuestoCalc — §53 planifica.md) ────
+import { calcularPresupuesto } from '~/composables/usePresupuestoCalc'
 
+const calc = computed(() =>
+  calcularPresupuesto({
+    presupuesto: props.presupuesto,
+    gastado: props.totalMes,
+    diasTranscurridos: props.diasTranscurridos,
+    diasMes: props.diasDelMes,
+  }),
+)
+
+const porcentaje = computed(() => calc.value.porcentaje)
 const saldo = computed(() => props.presupuesto - props.totalMes)
-
-const proyeccion = computed(() => {
-  if (props.diasTranscurridos <= 0) return 0
-  return (props.totalMes / props.diasTranscurridos) * props.diasDelMes
-})
+const proyeccion = computed(() => calc.value.proyeccionMes)
 
 const mostrarProyeccion = computed(() =>
   props.esMesActual
@@ -325,9 +328,7 @@ const mostrarProyeccion = computed(() =>
   && props.totalMes > 0
 )
 
-const excedeProyeccion = computed(() =>
-  proyeccion.value > props.presupuesto
-)
+const excedeProyeccion = computed(() => calc.value.proyectadoSobrepaso)
 
 const vaBien = computed(() =>
   proyeccion.value > 0 && proyeccion.value < props.presupuesto * 0.85
