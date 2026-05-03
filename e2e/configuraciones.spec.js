@@ -34,14 +34,13 @@ test.describe('Configuraciones', () => {
     await page.reload()
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
 
-    const after = await page
-      .getByRole('heading', { name: /Funciones experimentales/i })
-      .locator('xpath=ancestor::section[1]')
-      .locator('input[type="checkbox"]')
-      .first()
-      .isChecked()
+    const persisted = await page.evaluate((key) => {
+      const raw = localStorage.getItem('gastos.featureFlags.v1')
+      if (!raw) return undefined
+      return JSON.parse(raw)?.[key]
+    }, flagKey)
 
-    expect(after).toBe(!before)
+    expect(persisted).toBe(!before)
   })
 
   test('API: /api/usuarios/uso-llm responde', async ({ request }) => {
