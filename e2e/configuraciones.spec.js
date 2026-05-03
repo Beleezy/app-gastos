@@ -22,10 +22,8 @@ test.describe('Configuraciones', () => {
 
     // Toggle del primer feature flag dentro del panel de funciones experimentales
     const firstToggle = featureSection.locator('input[type="checkbox"]').first()
-    const firstToggleLabel = featureSection.locator('label[aria-label^="Alternar"]').first()
-
     const before = await firstToggle.isChecked()
-    await firstToggleLabel.click({ force: true })
+    await firstToggle.setChecked(!before, { force: true })
 
     await page.waitForTimeout(250)
     await page.reload()
