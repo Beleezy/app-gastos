@@ -65,5 +65,22 @@ export function useFormatters() {
     return `${MESES[mes - 1]} ${anio}`
   }
 
-  return { formatFecha, formatFechaCorta, formatFechaDia, formatHora, formatMesAnio }
+
+  /**
+   * Formatea monto monetario con símbolo local (PEN por defecto).
+   * @param {number|string} monto
+   * @param {string} locale
+   * @param {string} currency
+   */
+  function formatCurrency(monto, locale = 'es-PE', currency = 'PEN') {
+    const n = Number(monto || 0)
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(Number.isFinite(n) ? n : 0)
+  }
+
+  return { formatFecha, formatFechaCorta, formatFechaDia, formatHora, formatMesAnio, formatCurrency }
 }

@@ -16,8 +16,10 @@
 // Variables de entorno aceptadas:
 //   BASE_URL         (default: http://localhost:3000)
 //   E2E_USE_WEBSERVER ('1' para que Playwright arranque `npm run dev`)
-//   E2E_AUTH_BYPASS  ('1' para activar bypass de auth en server)
-//   E2E_TEST_TOKEN   token compartido entre workflow y bypass
+//   DEV_AUTH_BYPASS  ('1' para activar bypass de auth dev en server)
+//   DEV_AUTH_TOKEN   token compartido entre workflow y bypass
+//   E2E_USER_ID      usuario temporal por defecto para tests
+//   E2E_USER_EMAIL   email del usuario temporal por defecto para tests
 
 import { defineConfig, devices } from '@playwright/test'
 
@@ -37,9 +39,14 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    extraHTTPHeaders: process.env.E2E_TEST_TOKEN
-      ? { 'x-e2e-test-token': process.env.E2E_TEST_TOKEN }
-      : undefined,
+    extraHTTPHeaders:
+      process.env.DEV_AUTH_BYPASS === '1' && process.env.DEV_AUTH_TOKEN
+        ? {
+            'x-dev-auth-token': process.env.DEV_AUTH_TOKEN,
+            'x-dev-user-id': process.env.E2E_USER_ID || '00000000-0000-0000-0000-000000000101',
+            'x-dev-user-email': process.env.E2E_USER_EMAIL || 'demo1@test.local',
+          }
+        : undefined,
   },
   projects: [
     {
@@ -73,8 +80,8 @@ export default defineConfig({
           NUXT_SUPABASE_KEY: process.env.NUXT_SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '',
           NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '',
           NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '',
-          E2E_AUTH_BYPASS: '1',
-          E2E_TEST_TOKEN: process.env.E2E_TEST_TOKEN || 'e2e-token',
+          DEV_AUTH_BYPASS: process.env.DEV_AUTH_BYPASS || '1',
+          DEV_AUTH_TOKEN: process.env.DEV_AUTH_TOKEN || 'dev-token',
           NUXT_PORT: '3000',
         },
       }
