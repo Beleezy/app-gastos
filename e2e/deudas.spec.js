@@ -66,7 +66,7 @@ test.describe('Deudas', () => {
   test('UI: /deudas carga y muestra BalanceGlobal', async ({ page }) => {
     const r = await page.goto('/deudas')
     expect(r.status()).toBeLessThan(500)
-    await expect(page.getByText(/Balance global/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText(/Te deben/i).first()).toBeVisible()
+    await expect(page.getByText(/Deudas y Pagos/i)).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: /Balance global/i })).toBeVisible({ timeout: 10_000 })
   })
 })
