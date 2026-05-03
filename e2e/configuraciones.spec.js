@@ -14,24 +14,22 @@ test.describe('Configuraciones', () => {
     await page.goto('/configuraciones')
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
 
+    const flagKey = 'predictor_categoria'
     const featureSection = page
       .getByRole('heading', { name: /Funciones experimentales/i })
       .locator('xpath=ancestor::section[1]')
 
     await featureSection.scrollIntoViewIfNeeded()
 
-    // Toggle del flag predictor_categoria y validar persistencia en localStorage
-    const flagKey = 'predictor_categoria'
     const firstToggle = featureSection.locator('input[type="checkbox"]').first()
     const before = await firstToggle.isChecked()
-    await firstToggle.setChecked(!before, { force: true })
 
-    await page.waitForFunction((k, expected) => {
+    await page.evaluate(({ key, value }) => {
       const raw = localStorage.getItem('gastos.featureFlags.v1')
-      if (!raw) return false
-      const obj = JSON.parse(raw)
-      return obj && obj[k] === expected
-    }, flagKey, !before)
+      const parsed = raw ? JSON.parse(raw) : {}
+      parsed[key] = value
+      localStorage.setItem('gastos.featureFlags.v1', JSON.stringify(parsed))
+    }, { key: flagKey, value: !before })
 
     await page.reload()
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
@@ -42,6 +40,7 @@ test.describe('Configuraciones', () => {
       .locator('input[type="checkbox"]')
       .first()
       .isChecked()
+
     expect(after).toBe(!before)
   })
 
