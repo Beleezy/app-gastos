@@ -8,6 +8,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Si está offline y ya hay sesión en caché de Supabase, dejar pasar
   if (process.client && !navigator.onLine) return
 
+
+  if (process.client) {
+    const config = useRuntimeConfig()
+    if (config.public.devAuthBypass && localStorage.getItem('dev_auth_user_id')) return
+  }
+
   const user = useSupabaseUser()
   if (user.value) return
 
