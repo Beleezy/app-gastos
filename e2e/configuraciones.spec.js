@@ -7,21 +7,32 @@ test.describe('Configuraciones', () => {
     const r = await page.goto('/configuraciones')
     expect(r.status()).toBeLessThan(500)
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText(/Notificaciones push/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Notificaciones push/i })).toBeVisible()
   })
 
   test('UI: toggle de feature flag persiste', async ({ page }) => {
     await page.goto('/configuraciones')
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
 
-    // Encontrar el primer toggle (predictor categoria por orden)
-    const firstToggle = page.locator('input[type="checkbox"]').first()
+    const featureSection = page
+      .getByRole('heading', { name: /Funciones experimentales/i })
+      .locator('xpath=ancestor::section[1]')
+
+    await featureSection.scrollIntoViewIfNeeded()
+
+    // Toggle del primer feature flag dentro del panel de funciones experimentales
+    const firstToggle = featureSection.locator('input[type="checkbox"]').first()
     const before = await firstToggle.isChecked()
-    await firstToggle.click()
-    await page.waitForTimeout(200)
+    await firstToggle.setChecked(!before, { force: true })
+
+    await page.waitForTimeout(250)
     await page.reload()
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
-    const after = await page.locator('input[type="checkbox"]').first().isChecked()
+
+    const featureSectionAfter = page
+      .getByRole('heading', { name: /Funciones experimentales/i })
+      .locator('xpath=ancestor::section[1]')
+    const after = await featureSectionAfter.locator('input[type="checkbox"]').first().isChecked()
     expect(after).toBe(!before)
   })
 

@@ -23,7 +23,8 @@
     "db:studio": "drizzle-kit studio",
     "db:seed": "node server/database/seed.js",
     "db:seed:test": "node server/database/seed-test-data.js",
-    "db:seed:test:user": "node server/database/seed-test-data.js"
+    "db:seed:test:user": "node server/database/seed-test-data.js",
+    "db:seed:temp-users": "node server/database/seed-temp-users.js"
   },
   "dependencies": {
     "@nuxtjs/supabase": "^2.0.4",
