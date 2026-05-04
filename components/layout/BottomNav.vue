@@ -9,6 +9,7 @@
         v-for="item in navItems"
         :key="item.to"
         :to="item.to"
+        :data-testid="`nav-tab-${item.to === '/' ? 'inicio' : item.to.slice(1)}`"
         :aria-label="item.ariaLabel || item.label"
         :aria-current="isActive(item.to) ? 'page' : undefined"
         class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group"

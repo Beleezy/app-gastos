@@ -62,7 +62,7 @@
 
         <div class="flex-1 min-w-0 py-2.5 pr-2">
           <div class="flex items-start gap-1.5">
-            <p class="text-sm font-medium text-theme-text flex-1 min-w-0 break-words leading-tight">{{ gasto.concepto }}</p>
+            <p class="text-sm font-medium text-theme-text flex-1 min-w-0 break-words leading-tight" data-testid="gasto-concepto">{{ gasto.concepto }}</p>
             <span v-if="badgeLabel"
               class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full shrink-0 leading-none"
             >{{ badgeLabel }}</span>
@@ -70,6 +70,7 @@
           <div class="flex items-center gap-1.5 mt-1 flex-wrap">
             <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none"
               :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '18', color: gasto.categoriaColor || '#6b7280' }"
+              data-testid="gasto-categoria"
             >
               {{ gasto.categoriaNombre || 'Otros' }}
             </span>
@@ -86,7 +87,7 @@
         </div>
 
         <div class="flex flex-col items-end justify-between py-2.5 pr-2.5 pl-1 shrink-0">
-          <p class="text-sm font-bold text-theme-text leading-none whitespace-nowrap">
+          <p class="text-sm font-bold text-theme-text leading-none whitespace-nowrap" data-testid="gasto-monto">
             {{ currencySymbol }} {{ formatMonto(gasto.monto) }}
           </p>
           <div v-if="!selectable" class="flex items-center gap-0.5 mt-1.5">
@@ -102,6 +103,7 @@
             <button
               class="w-6 h-6 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
               aria-label="Editar"
+              data-testid="btn-editar-gasto"
               @click.stop="onEdit"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -111,6 +113,7 @@
             <button
               class="w-6 h-6 flex items-center justify-center rounded-md text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all"
               aria-label="Eliminar"
+              data-testid="btn-eliminar-gasto"
               @click.stop="onDelete"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

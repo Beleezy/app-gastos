@@ -1,0 +1,158 @@
+name: E2E Visual Baseline
+
+# Genera o actualiza los baselines de imagenes para los tests visuales.
+# Pensado para correr enteramente en GitHub Actions — NO requiere ejecucion
+# local. Tras correr, abre un PR con los PNGs nuevos para que los revises
+# desde la interfaz de GitHub.
+#
+# Cuando usar:
+#   - Primera vez (bootstrap): no hay baselines en la rama. Dispara este
+#     workflow para crearlos.
+#   - Despues de reestructurar UI: el job "visual" en e2e.yml fallara
+#     porque las imagenes cambiaron. Dispara este workflow para refrescar
+#     los baselines y aprueba el PR resultante.
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Rama base donde generar/actualizar baselines (default: main)'
+        required: false
+        default: 'main'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-baselines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gastos_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/gastos_e2e
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: e2e-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: e2e-service-key
+      GEMINI_API_KEY: ''
+      DEV_AUTH_BYPASS: '1'
+      DEV_AUTH_TOKEN: ${{ secrets.DEV_AUTH_TOKEN || 'dev-token' }}
+      E2E_USER_ID: 00000000-0000-0000-0000-000000000101
+      E2E_USER_EMAIL: demo1@test.local
+      NODE_ENV: development
+      NUXT_PORT: '3000'
+      BASE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply DB schema
+        run: npm run db:apply
+
+      - name: Seed temporary users
+        run: npm run db:seed:temp-users
+
+      - name: Seed datos realistas
+        run: npm run db:seed:test 00000000-0000-0000-0000-000000000101
+        continue-on-error: true
+
+      - name: Start dev server
+        run: |
+          npm run dev > nuxt-dev.log 2>&1 &
+          echo $! > .nuxt-dev.pid
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "Server ready"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Generate / update visual snapshots
+        run: npx playwright test --project=visual --update-snapshots
+        env:
+          CI: 'true'
+
+      - name: Stop dev server
+        if: always()
+        run: |
+          if [ -f .nuxt-dev.pid ]; then
+            kill $(cat .nuxt-dev.pid) || true
+          fi
+
+      - name: Detectar cambios en snapshots
+        id: changes
+        run: |
+          git add -A e2e/visual
+          if git diff --cached --quiet; then
+            echo "any=false" >> $GITHUB_OUTPUT
+            echo "No hay cambios en snapshots — los baselines actuales coinciden con la UI."
+          else
+            echo "any=true" >> $GITHUB_OUTPUT
+            git diff --cached --stat e2e/visual
+          fi
+
+      - name: Crear PR con baselines actualizados
+        if: steps.changes.outputs.any == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/visual-baselines-${{ github.run_id }}
+          base: ${{ inputs.branch }}
+          commit-message: 'chore(e2e): actualizar baselines visuales'
+          title: 'chore(e2e): actualizar baselines visuales'
+          body: |
+            Actualizacion automatica de los baselines visuales generados por
+            el workflow `E2E Visual Baseline` (run [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})).
+
+            Revisa cada PNG en la pestaña "Files changed" — GitHub muestra
+            comparativas lado a lado de imagenes nuevas vs anteriores.
+
+            Si las nuevas imagenes son las correctas (la UI cambio
+            intencionalmente), aprueba y mergea este PR. Tras el merge, el
+            job `visual` de `e2e.yml` empezara a comparar contra estos
+            baselines.
+          labels: |
+            e2e
+            visual
+            automated
+          add-paths: |
+            e2e/visual/**

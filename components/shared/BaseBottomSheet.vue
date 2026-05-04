@@ -3,6 +3,7 @@
     <div
       class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
       aria-hidden="true"
+      data-testid="bottom-sheet-overlay"
       @click="$emit('close')"
     ></div>
 
@@ -10,6 +11,7 @@
       ref="sheetRef"
       role="dialog"
       aria-modal="true"
+      data-testid="bottom-sheet"
       :aria-labelledby="titleId"
       class="relative flex w-full max-w-lg md:max-w-2xl lg:max-w-3xl flex-col overflow-hidden rounded-t-3xl md:rounded-3xl border-t md:border border-theme-border bg-theme-card animate-slide-up md:animate-dialog-in md:shadow-2xl md:shadow-black/40"
       style="max-height: 90dvh;"
@@ -31,6 +33,7 @@
         <button
           class="tap-target flex h-9 w-9 items-center justify-center rounded-full bg-theme-border-md text-theme-text-sec hover:text-theme-text transition-colors"
           aria-label="Cerrar"
+          data-testid="btn-cerrar-bottom-sheet"
           @click="$emit('close')"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">

@@ -1,25 +1,22 @@
 // Playwright config para CI con GitHub Actions y dev local.
-// Ver §6.2 / §55 de planifica.md.
 //
-// Estrategia para tu plan free de Vercel + GH Actions:
-//
-//  - Tests E2E SIN deploy a Vercel: el workflow levanta el dev
-//    server de Nuxt en un job de Ubuntu de GH Actions y corre
-//    Playwright contra http://localhost:3000.
-//  - DB: usa una Postgres efímera del workflow (servicio docker)
-//    o bien stub server para no consumir Vercel ni Supabase prod.
-//  - Auth: bypass de Supabase con un middleware de test que se
-//    activa solo si E2E_TEST_TOKEN está presente.
-//  - Smoke público (/api/health, headers, manifest) sin login.
-//  - Por módulo: tests de UI con login mock y datos fixture.
+// Estrategia:
+//  - Tests E2E SIN deploy a Vercel: el workflow levanta el dev server de Nuxt
+//    en un job de Ubuntu y corre Playwright contra http://localhost:3000.
+//  - DB: Postgres efimera del workflow (servicio docker).
+//  - Auth: bypass de Supabase con middleware test (DEV_AUTH_BYPASS=1 + token).
+//  - Smoke publico (/api/health, headers, manifest) sin login.
+//  - API tests: validan endpoints HTTP (Zod, CRUD, balances).
+//  - UI tests: navegan la app real y validan formularios + flujos.
+//  - Visual: snapshots con tolerancia 2% para detectar regresiones de diseño.
 //
 // Variables de entorno aceptadas:
-//   BASE_URL         (default: http://localhost:3000)
+//   BASE_URL          (default: http://localhost:3000)
 //   E2E_USE_WEBSERVER ('1' para que Playwright arranque `npm run dev`)
-//   DEV_AUTH_BYPASS  ('1' para activar bypass de auth dev en server)
-//   DEV_AUTH_TOKEN   token compartido entre workflow y bypass
-//   E2E_USER_ID      usuario temporal por defecto para tests
-//   E2E_USER_EMAIL   email del usuario temporal por defecto para tests
+//   DEV_AUTH_BYPASS   ('1' para activar bypass de auth dev en server)
+//   DEV_AUTH_TOKEN    token compartido entre workflow y bypass
+//   E2E_USER_ID       usuario temporal por defecto para tests
+//   E2E_USER_EMAIL    email del usuario temporal por defecto
 
 import { defineConfig, devices } from '@playwright/test'
 
@@ -29,7 +26,10 @@ const useWebServer = process.env.E2E_USE_WEBSERVER === '1'
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
-  expect: { timeout: 5000 },
+  expect: {
+    timeout: 5000,
+    toHaveScreenshot: { maxDiffPixelRatio: 0.02 },
+  },
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
@@ -55,14 +55,25 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      name: 'api',
+      testMatch: /\/api\/.*\.api\.spec\.js$/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'mobile',
-      testIgnore: /smoke\.spec\.js$/,
+      testMatch: /\/ui\/.*\.ui\.spec\.js$/,
       use: { ...devices['Pixel 5'] },
     },
     {
       name: 'desktop',
-      testIgnore: /smoke\.spec\.js$/,
+      testMatch: /\/ui\/.*\.ui\.spec\.js$/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+    },
+    {
+      name: 'visual',
+      testMatch: /\/visual\/.*\.visual\.spec\.js$/,
+      use: { ...devices['Pixel 5'] },
+      // Los snapshots se almacenan junto al spec en e2e/visual/__screenshots__/
     },
   ],
   webServer: useWebServer

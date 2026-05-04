@@ -6,6 +6,7 @@
       <input
         v-model="form.concepto"
         type="text"
+        data-testid="input-concepto"
         placeholder="Ej: Almuerzo, Pasaje, Recibo de luz..."
         class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         @input="buscarConceptos"
@@ -37,6 +38,7 @@
         <input
           v-model="form.monto"
           type="number"
+          data-testid="input-monto"
           step="0.01"
           min="0"
           placeholder="0.00"
@@ -73,6 +75,7 @@
         <input
           v-model="form.fecha"
           type="date"
+          data-testid="input-fecha"
           class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
@@ -81,6 +84,7 @@
         <input
           v-model="form.hora"
           type="time"
+          data-testid="input-hora"
           class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
@@ -91,6 +95,7 @@
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
         v-model="form.notas"
+        data-testid="input-notas"
         rows="2"
         placeholder="Agregar notas o detalles..."
         class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors resize-none"
@@ -103,6 +108,7 @@
       class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
+      data-testid="btn-guardar"
       @click="guardar"
     >
       <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

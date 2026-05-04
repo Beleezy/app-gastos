@@ -5,7 +5,7 @@
 // Requiere E2E_AUTH_BYPASS=1 + E2E_TEST_TOKEN compartido.
 
 import { test, expect } from '@playwright/test'
-import { fixtures, getPrimeraCategoria } from './fixtures.js'
+import { fixtures, getPrimeraCategoria } from '../fixtures.js'
 
 test.describe('Registro de gastos', () => {
   test('API: crear gasto manual válido', async ({ request }) => {

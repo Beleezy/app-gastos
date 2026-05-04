@@ -1,5 +1,5 @@
 <template>
-  <div ref="detalleRoot" class="px-4 py-3">
+  <div ref="detalleRoot" class="px-4 py-3" data-testid="detalle-persona">
     <!-- Back button + Person header -->
     <div class="mb-4">
       <button class="flex items-center gap-1.5 text-theme-text-muted text-sm mb-3 active:text-theme-text transition-colors" @click="volverALista">
@@ -173,7 +173,7 @@
           <span class="text-xs text-theme-text-sec ml-auto">{{ deudasActivasPersona.length }}</span>
         </div>
 
-        <div v-for="deuda in deudasActivasPersona" :key="deuda.id" class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border">
+        <div v-for="deuda in deudasActivasPersona" :key="deuda.id" class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border" data-testid="deuda-item">
           <div class="flex items-start justify-between">
             <div class="flex-1 min-w-0">
               <p class="text-sm font-medium text-theme-text">{{ deuda.concepto }}</p>
@@ -225,6 +225,7 @@
           <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-theme-border">
             <button
               class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
+              data-testid="btn-nuevo-pago"
               @click="emit('registrarPago', deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -234,6 +235,7 @@
             </button>
             <button
               class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:bg-amber-500/30 transition-colors"
+              data-testid="btn-editar-deuda"
               @click="emit('editarDeuda', deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -252,6 +254,7 @@
             </button>
             <button
               class="min-w-[44px] h-11 px-3 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
+              data-testid="btn-eliminar-deuda"
               @click="confirmarEliminarDeuda(deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

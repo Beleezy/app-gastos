@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-0 py-3">
+  <div class="px-4 lg:px-0 py-3" data-testid="lista-planificados">
     <!-- Barra unificada: Filtros + Buscar + Ordenar -->
     <div class="mb-3">
       <div class="flex items-center gap-2">
@@ -161,6 +161,7 @@
           v-for="gasto in cat.gastos"
           :key="gasto.id"
           class="swipe-item-wrapper relative overflow-hidden rounded-xl mb-2"
+          data-testid="planificado-item"
         >
           <!-- Swipe derecha: Editar -->
           <div
@@ -256,6 +257,7 @@
               v-if="gasto.estado === 'pendiente'"
               class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
               :title="esCategoriaAhorro(gasto) ? 'Registrar pago de ahorro' : 'Marcar como pagado con el monto estimado y la fecha de hoy'"
+              data-testid="btn-marcar-pagado"
               @click="esCategoriaAhorro(gasto) ? emit('registrar', gasto) : marcarPagadoRapido(gasto)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -273,13 +275,13 @@
               </svg>
               {{ gasto.gastoRegistradoFecha ? 'Editar registro' : 'Registrar' }}
             </button>
-            <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" @click="emit('editar', gasto)">
+            <button class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1" data-testid="btn-editar-planificado" @click="emit('editar', gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
               Editar
             </button>
-            <button class="text-xs text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1" @click="pedirConfirmarEliminar(gasto)">
+            <button class="text-xs text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1" data-testid="btn-eliminar-planificado" @click="pedirConfirmarEliminar(gasto)">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>

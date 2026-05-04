@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-0 pt-0 lg:pt-0 pb-2">
+  <div class="px-4 lg:px-0 pt-0 lg:pt-0 pb-2" data-testid="resumen-mes">
     <!-- Month Selector (outside card) -->
     <SharedMonthSelector
       :label="`${nombreMes} ${anioActual}`"
@@ -34,7 +34,7 @@
           <div v-else class="flex items-baseline gap-0.5">
             <button class="flex items-baseline gap-0.5 hover:text-theme-accent-light transition-colors" @click="iniciarEdicion">
               <span class="text-2xl font-bold text-theme-text-muted">{{ currencySymbol }}</span>
-              <span class="text-3xl font-extrabold text-theme-text tracking-tight">
+              <span class="text-3xl font-extrabold text-theme-text tracking-tight" data-testid="monto-presupuesto">
                 {{ formatMonto(resumen.presupuesto) }}
               </span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 ml-1 text-theme-text-muted/50 hover:text-theme-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -90,7 +90,7 @@
             <span class="w-2 h-2 rounded-full" :class="resumen.saldoReal >= 0 ? 'bg-blue-400' : 'bg-red-400'"></span>
             <span class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium leading-none">Disponible</span>
           </div>
-          <p class="text-[15px] font-bold truncate leading-tight" :class="resumen.saldoReal >= 0 ? 'text-white' : 'text-red-400'">
+          <p class="text-[15px] font-bold truncate leading-tight" :class="resumen.saldoReal >= 0 ? 'text-white' : 'text-red-400'" data-testid="monto-saldo">
             <span class="text-[11px] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
             {{ formatMonto(resumen.saldoReal) }}
           </p>
@@ -103,7 +103,7 @@
           <span class="w-2 h-2 rounded-full bg-orange-400"></span>
           <span class="text-[10px] text-theme-text-sec uppercase tracking-wider font-medium">Planificado</span>
         </div>
-        <p class="text-[13px] font-bold text-orange-400">
+        <p class="text-[13px] font-bold text-orange-400" data-testid="monto-asignado">
           <span class="text-[10px] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
           {{ formatMonto(resumen.totalPlanificado) }}
         </p>
@@ -222,6 +222,7 @@
               class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-accent/20 bg-theme-accent-bg text-theme-accent text-xs font-semibold hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
               :disabled="duplicando"
               :title="gastosPlaneados.length > 0 ? 'Copiar gastos de otro mes (los duplicados por concepto se omiten)' : 'Copiar gastos de otro mes'"
+              data-testid="btn-copiar-mes"
               @click="abrirSelectorMes"
             >
               <svg v-if="!duplicando" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -249,7 +250,7 @@
   </div>
 
   <!-- Modal: selector de mes origen para duplicar -->
-  <div v-if="showSelectorMes" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+  <div v-if="showSelectorMes" class="fixed inset-0 z-50 flex items-center justify-center px-6" data-testid="modal-selector-mes">
     <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showSelectorMes = false"></div>
     <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
       <h3 class="text-base font-semibold text-theme-text mb-1">Copiar mes</h3>
@@ -273,6 +274,7 @@
         <button
           class="w-full py-2.5 rounded-xl bg-theme-accent-bg text-theme-accent text-sm font-medium hover:bg-theme-accent-bg-hover transition-colors disabled:opacity-50"
           :disabled="duplicando || (origenMes === mesActual && origenAnio === anioActual)"
+          data-testid="btn-confirmar-copiar-mes"
           @click="ejecutarDuplicar"
         >
           {{ duplicando ? 'Copiando...' : 'Copiar' }}

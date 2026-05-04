@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4" data-no-month-swipe>
+  <div class="px-4" data-no-month-swipe data-testid="historial-diario">
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-2">
       <div v-for="i in 3" :key="i" class="space-y-1.5">
@@ -141,6 +141,7 @@
                     <RegistroGastoItem
                       v-for="gasto in dia.gastos"
                       :key="gasto.id"
+                      data-testid="gasto-item"
                       :gasto="gasto"
                       :selectable="seleccionActiva"
                       :selected="selectedIds.has(gasto.id)"
@@ -223,6 +224,7 @@
               <RegistroGastoItem
                 v-for="gasto in dia.gastos"
                 :key="gasto.id"
+                data-testid="gasto-item"
                 :gasto="gasto"
                 :selectable="seleccionActiva"
                 :selected="selectedIds.has(gasto.id)"

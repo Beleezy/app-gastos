@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-end justify-center">
+  <div class="fixed inset-0 z-50 flex items-end justify-center" data-testid="confirmacion-voz">
     <!-- Backdrop -->
     <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('close')"></div>
 
@@ -74,6 +74,7 @@
       <!-- Parsed expenses list -->
       <div v-else class="px-5 pb-6 space-y-3">
         <div v-for="(gasto, idx) in editableGastos" :key="idx"
+          data-testid="confirmacion-item"
           class="bg-theme-input rounded-xl border border-theme-border overflow-hidden"
         >
           <!-- Expense header -->
@@ -194,6 +195,7 @@
         <div v-if="editableGastos.length > 0" class="flex gap-3 pt-2">
           <button
             class="flex-1 py-3 rounded-xl text-theme-text-muted font-medium text-sm border border-theme-border hover:bg-theme-border-md transition-colors"
+            data-testid="btn-descartar-voz"
             @click="$emit('close')"
           >
             Descartar
@@ -202,6 +204,7 @@
             class="flex-1 py-3 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
             :class="saving ? 'bg-[var(--color-accent)]/70 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
             :disabled="saving"
+            data-testid="btn-confirmar-voz"
             @click="confirmar"
           >
             <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

@@ -1,7 +1,7 @@
 // E2E del módulo Planificador.
 
 import { test, expect } from '@playwright/test'
-import { getPrimeraCategoria } from './fixtures.js'
+import { getPrimeraCategoria } from '../fixtures.js'
 
 test.describe('Planificador', () => {
   test('API: crear/actualizar plan mensual', async ({ request }) => {

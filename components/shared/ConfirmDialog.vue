@@ -9,6 +9,7 @@
       ref="dialogRef"
       role="alertdialog"
       aria-modal="true"
+      data-testid="confirm-dialog"
       :aria-labelledby="titleId"
       :aria-describedby="messageId"
       class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border animate-slide-up"
@@ -49,6 +50,7 @@
           class="w-full py-2.5 rounded-xl text-sm font-medium transition-colors min-h-[44px]"
           :class="[confirmClass, (requireCheckbox && !checkboxChecked) ? 'opacity-40 cursor-not-allowed' : '']"
           :disabled="loading || (requireCheckbox && !checkboxChecked)"
+          data-testid="btn-confirm-yes"
           @click="onConfirm"
         >
           <span v-if="loading" class="flex items-center justify-center gap-2">
@@ -62,6 +64,7 @@
         </button>
         <button
           class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text transition-colors min-h-[44px]"
+          data-testid="btn-confirm-no"
           @click="$emit('update:modelValue', false)"
         >
           Cancelar

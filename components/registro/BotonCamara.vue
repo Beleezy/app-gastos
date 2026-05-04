@@ -3,6 +3,7 @@
     <!-- Camera button (hidden when headless: trigger is external via ref) -->
     <button
       v-if="!headless"
+      data-testid="btn-camara"
       class="relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 bg-gradient-to-br from-amber-500/50 to-orange-600/50 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 backdrop-blur-md"
       @click="openCamera"
     >
@@ -18,6 +19,7 @@
       ref="fileInput"
       type="file"
       accept="image/*"
+      data-testid="input-foto-file"
       class="hidden"
       @change="onFileSelected"
     />

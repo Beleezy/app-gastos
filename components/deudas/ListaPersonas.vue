@@ -1,5 +1,5 @@
 <template>
-  <div class="px-4 lg:px-0 py-3 lg:py-5">
+  <div class="px-4 lg:px-0 py-3 lg:py-5" data-testid="lista-personas">
     <!-- Barra de búsqueda y ordenamiento -->
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
@@ -93,6 +93,7 @@
         v-for="persona in personasActivas"
         :key="persona.id"
         class="relative overflow-hidden rounded-xl"
+        data-testid="persona-item"
       >
         <!-- Quick actions revealed by swipe -->
         <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-theme-card">
@@ -235,6 +236,7 @@
           v-for="persona in personasInactivas"
           :key="persona.id"
           class="relative overflow-hidden rounded-xl opacity-60"
+          data-testid="persona-item"
         >
           <!-- Quick actions revealed by swipe -->
           <div class="absolute inset-y-0 right-0 flex items-center gap-1 px-2 bg-theme-card">

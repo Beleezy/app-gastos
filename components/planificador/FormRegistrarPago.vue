@@ -18,6 +18,7 @@
         v-model="form.fechaPago"
         type="date"
         class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:border-theme-accent focus:outline-none focus:ring-1 focus:ring-theme-accent transition-colors"
+        data-testid="input-fecha-pago"
       />
     </div>
 
@@ -53,6 +54,7 @@
         rows="3"
         placeholder="Ej: pagado por transferencia, cuota completa..."
         class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:border-theme-accent focus:outline-none focus:ring-1 focus:ring-theme-accent transition-colors"
+        data-testid="input-notas-pago"
       ></textarea>
     </div>
 
@@ -62,6 +64,7 @@
       class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-theme-on-accent transition-colors"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
+      data-testid="btn-confirmar-pago"
       @click="guardar"
     >
       <svg v-if="saving" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

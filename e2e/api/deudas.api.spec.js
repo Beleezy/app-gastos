@@ -1,7 +1,7 @@
 // E2E del módulo Deudas.
 
 import { test, expect } from '@playwright/test'
-import { fixtures } from './fixtures.js'
+import { fixtures } from '../fixtures.js'
 
 test.describe('Deudas', () => {
   test('API: crear deuda con personaNombre', async ({ request }) => {

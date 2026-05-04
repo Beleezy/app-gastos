@@ -26,3 +26,8 @@ logs
 # md
 mejoras.md
 update.md
+
+# Playwright: ignorar reportes/resultados, mantener snapshots versionados
+test-results/
+playwright-report/
+playwright/.cache/
