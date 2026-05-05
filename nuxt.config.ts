@@ -55,9 +55,18 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: `/favicon.svg?v=${APP_VERSION}` },
+        // Preconnect a Google Fonts para reducir latencia DNS/TLS en el primer paint.
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        // Cargar Inter sin bloquear el render: descargar como `print` y
+        // promover a `all` cuando esté listo. En PWA Android esto evitaba
+        // 1-3 s de splash blanco esperando el CSS de Google Fonts cuando
+        // la red móvil estaba lenta.
         {
           rel: 'stylesheet',
           href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+          media: 'print',
+          onload: "this.media='all'",
         },
       ],
     },
@@ -127,7 +136,14 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: '/',
-      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+      // Excluir assets pesados (fuentes auto-hospedadas, imágenes grandes
+      // y mapas) del precache para que la primera instalación del SW no
+      // descargue 5+ MB antes de servir la app. Lo crítico (JS/CSS/HTML)
+      // se sigue precacheando para offline.
+      globPatterns: ['**/*.{js,css,html,svg,ico}'],
+      cleanupOutdatedCaches: true,
+      clientsClaim: true,
+      skipWaiting: true,
     },
     client: {
       installPrompt: true,

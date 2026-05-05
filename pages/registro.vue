@@ -151,19 +151,28 @@
 
             <Transition name="expand">
               <div v-if="mostrarFiltros" class="mt-2 space-y-2 overflow-hidden">
-                <div class="flex gap-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span
+                    v-if="rangosRapidos.length === 1"
+                    class="text-[10px] uppercase tracking-wider text-theme-text-muted font-semibold shrink-0"
+                  >
+                    Rango:
+                  </span>
                   <button
                     v-for="r in rangosRapidos"
                     :key="r.value"
-                    class="flex-1 lg:flex-none lg:px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                    :class="rangoRapido === r.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+                    class="py-1.5 rounded-lg text-xs font-medium transition-colors"
+                    :class="[
+                      rangosRapidos.length > 1 ? 'flex-1 lg:flex-none lg:px-4' : 'px-4',
+                      rangoRapido === r.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'
+                    ]"
                     @click="onRangoChange(r.value)"
                   >
                     {{ r.label }}
                   </button>
                   <button
                     v-if="tieneFiltrosActivos"
-                    class="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+                    class="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors ml-auto"
                     @click="limpiarFiltros"
                   >
                     Limpiar

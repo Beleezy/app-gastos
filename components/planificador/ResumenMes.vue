@@ -217,7 +217,7 @@
           </div>
 
           <!-- Action buttons -->
-          <div class="grid grid-cols-2 gap-2 pt-1">
+          <div class="grid grid-cols-3 gap-2 pt-1">
             <button
               class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-accent/20 bg-theme-accent-bg text-theme-accent text-xs font-semibold hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
               :disabled="duplicando"
@@ -235,13 +235,24 @@
               Copiar mes
             </button>
             <button
+              class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-border bg-theme-input text-theme-text-sec text-xs font-semibold hover:border-theme-accent/30 hover:text-theme-accent active:scale-95 transition-all"
+              data-testid="btn-abrir-plantillas"
+              title="Plantillas del mes"
+              @click="emit('abrir-plantillas')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2m4-6h6" />
+              </svg>
+              Plantillas
+            </button>
+            <button
               class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-border bg-theme-input text-theme-text-sec text-xs font-semibold hover:border-emerald-500/30 hover:text-emerald-400 active:scale-95 transition-all"
-              @click="$emit('exportar')"
+              @click="emit('exportar')"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              Exportar Excel
+              Excel
             </button>
           </div>
         </div>
@@ -293,7 +304,7 @@
 <script setup>
 import { MESES } from '~/utils/constants'
 
-const emit = defineEmits(['exportar'])
+const emit = defineEmits(['exportar', 'abrir-plantillas'])
 
 const {
   mesActual, anioActual, nombreMes, esHoy,

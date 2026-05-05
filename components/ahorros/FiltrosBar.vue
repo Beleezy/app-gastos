@@ -40,6 +40,19 @@
           </svg>
         </button>
       </div>
+
+      <!-- Ordenar (cicla opciones, label visible como tooltip) -->
+      <button
+        class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl border transition-colors"
+        :class="ordenActivo !== 'fecha_desc' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-muted border-theme-border hover:bg-theme-border-md'"
+        :title="`Orden: ${ordenLabelActual}`"
+        :aria-label="`Orden: ${ordenLabelActual}`"
+        @click="ciclarOrden"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        </svg>
+      </button>
     </div>
 
     <Transition name="expand">
@@ -108,7 +121,7 @@ import { OPCIONES_ORDEN_AHORROS } from '~/composables/useAhorrosFilters'
 
 const opcionesOrden = OPCIONES_ORDEN_AHORROS
 
-defineProps({
+const props = defineProps({
   modelBusqueda: { type: String, default: '' },
   rangoActivo: { type: String, required: true },
   rangosRapidos: { type: Array, required: true },
@@ -118,14 +131,25 @@ defineProps({
   tieneFiltrosActivos: { type: Boolean, default: false },
   conteoFiltrosActivos: { type: Number, default: 0 },
 })
-defineEmits(['update:busqueda', 'update:rango', 'update:medio', 'update:orden', 'limpiar'])
+const emit = defineEmits(['update:busqueda', 'update:rango', 'update:medio', 'update:orden', 'limpiar'])
 
 const { vibrate } = useHaptic()
 const mostrarFiltros = ref(false)
 
+const ordenLabelActual = computed(() =>
+  opcionesOrden.find(o => o.value === props.ordenActivo)?.label || 'Más reciente'
+)
+
 function toggle() {
   vibrate(10)
   mostrarFiltros.value = !mostrarFiltros.value
+}
+
+function ciclarOrden() {
+  vibrate(10)
+  const idx = opcionesOrden.findIndex(o => o.value === props.ordenActivo)
+  const next = opcionesOrden[(idx + 1) % opcionesOrden.length]
+  emit('update:orden', next.value)
 }
 </script>
 

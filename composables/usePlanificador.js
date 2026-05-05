@@ -21,7 +21,10 @@ export function usePlanificador() {
     porCategoria: [],
   }))
   const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
-  const categorias = useState('planificador-categorias', () => [])
+  // Compartimos el estado de categorías con useCategorias/useGastos para que
+  // los iconos/colores estén disponibles desde el primer render del planificador
+  // sin tener que pasar por /registro primero.
+  const categorias = useState('registro-categorias', () => [])
   const mesAnteriorResumen = useState('planificador-mes-anterior', () => null)
   const isLoading = ref(false)
   const error = ref(null)

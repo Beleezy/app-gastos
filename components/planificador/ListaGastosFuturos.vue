@@ -910,15 +910,22 @@ const gastosFiltrados = computed(() => {
     })
   }
 
-  // Ordenamiento
+  // Ordenamiento — la prioridad siempre manda (alta > media > baja > sin def.)
+  // y el modo elegido por el usuario actúa como criterio secundario.
   const sorted = [...result]
+  const cmpPrioridad = (a, b) => (b.prioridad ?? 0) - (a.prioridad ?? 0)
+  let cmpSecundario
   if (ordenActual.value === 'prom_desc') {
-    sorted.sort((a, b) => (b.resumen?.totalPromedio || 0) - (a.resumen?.totalPromedio || 0))
+    cmpSecundario = (a, b) => (b.resumen?.totalPromedio || 0) - (a.resumen?.totalPromedio || 0)
   } else if (ordenActual.value === 'prom_asc') {
-    sorted.sort((a, b) => (a.resumen?.totalPromedio || 0) - (b.resumen?.totalPromedio || 0))
+    cmpSecundario = (a, b) => (a.resumen?.totalPromedio || 0) - (b.resumen?.totalPromedio || 0)
   } else if (ordenActual.value === 'nombre') {
-    sorted.sort((a, b) => (a.tipoGasto || '').localeCompare(b.tipoGasto || ''))
+    cmpSecundario = (a, b) => (a.tipoGasto || '').localeCompare(b.tipoGasto || '')
+  } else {
+    // 'reciente'
+    cmpSecundario = (a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0)
   }
+  sorted.sort((a, b) => cmpPrioridad(a, b) || cmpSecundario(a, b))
   return sorted
 })
 
@@ -1284,7 +1291,13 @@ async function confirmarDecision() {
 }
 
 function detallesOrdenados(detalles) {
-  return [...detalles].sort((a, b) => (b.prioridad ?? 0) - (a.prioridad ?? 0))
+  return [...detalles].sort((a, b) => {
+    const dp = (b.prioridad ?? 0) - (a.prioridad ?? 0)
+    if (dp !== 0) return dp
+    const dorden = (a.orden ?? 0) - (b.orden ?? 0)
+    if (dorden !== 0) return dorden
+    return new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
+  })
 }
 
 function decisionBadge(detalle) {

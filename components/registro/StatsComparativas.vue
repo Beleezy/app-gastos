@@ -217,19 +217,21 @@
           </div>
         </div>
 
-        <!-- Promedio y máximo -->
-        <div class="grid grid-cols-3 gap-2">
-          <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
-            <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Promedio</p>
-            <p class="text-sm font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(promedioTendencia) }}</p>
+        <!-- Máximo / Mínimo (arriba, lado a lado) + Promedio (abajo, full width) -->
+        <div class="space-y-2">
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
+              <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Máximo</p>
+              <p class="text-sm font-bold text-red-400">{{ currencySymbol }} {{ formatMonto(maxTendencia) }}</p>
+            </div>
+            <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
+              <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Mínimo</p>
+              <p class="text-sm font-bold text-emerald-400">{{ currencySymbol }} {{ formatMonto(minTendencia) }}</p>
+            </div>
           </div>
-          <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
-            <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Máximo</p>
-            <p class="text-sm font-bold text-red-400">{{ currencySymbol }} {{ formatMonto(maxTendencia) }}</p>
-          </div>
-          <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
-            <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Mínimo</p>
-            <p class="text-sm font-bold text-emerald-400">{{ currencySymbol }} {{ formatMonto(minTendencia) }}</p>
+          <div class="bg-theme-card rounded-xl p-3 border border-theme-border flex items-center justify-between">
+            <p class="text-[10px] text-theme-text-sec uppercase tracking-wider">Promedio</p>
+            <p class="text-base font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(promedioTendencia) }}</p>
           </div>
         </div>
       </div>

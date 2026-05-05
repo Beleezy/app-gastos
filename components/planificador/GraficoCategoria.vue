@@ -41,13 +41,21 @@
           </div>
         </div>
 
+        <!-- Hint cuando hay filtro activo -->
+        <p v-if="segmentoActivo !== null" class="text-center text-[10px] text-theme-text-muted -mt-2">
+          Toca de nuevo para quitar el filtro
+        </p>
+
         <!-- Legend con barras comparativas real vs planificado -->
         <div class="space-y-2 w-full">
           <button
             v-for="(seg, idx) in datosGrafico"
             :key="seg.nombre"
             class="w-full flex flex-col gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 text-left"
-            :class="segmentoActivo === idx ? 'bg-theme-border-md' : 'hover:bg-theme-border-md'"
+            :class="[
+              segmentoActivo === idx ? 'bg-theme-border-md' : 'hover:bg-theme-border-md',
+              segmentoActivo !== null && segmentoActivo !== idx ? 'opacity-40' : 'opacity-100'
+            ]"
             @click="toggleSegmento(idx)"
           >
             <div class="flex items-center justify-between gap-2">

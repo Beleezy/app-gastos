@@ -78,20 +78,58 @@
           class="bg-theme-input rounded-xl border border-theme-border overflow-hidden"
         >
           <!-- Expense header -->
-          <div class="flex items-start gap-3 px-4 py-3">
-            <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0"
-              :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '20', color: getCategoriaColor(gasto.categoria) }"
-            >
-              {{ getCategoriaIcono(gasto.categoria) }}
+          <div class="px-4 py-3">
+            <!-- Fila superior: ícono + concepto (full width, puede hacer wrap) + monto -->
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0"
+                :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '20', color: getCategoriaColor(gasto.categoria) }"
+              >
+                {{ getCategoriaIcono(gasto.categoria) }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <button
+                  v-if="conceptoEsLargo(gasto.concepto)"
+                  type="button"
+                  class="text-left w-full"
+                  :aria-expanded="conceptosExpandidos[idx] ? 'true' : 'false'"
+                  @click="toggleConcepto(idx)"
+                >
+                  <p
+                    class="text-sm font-medium text-theme-text break-words leading-snug"
+                    :class="conceptosExpandidos[idx] ? '' : 'line-clamp-2'"
+                  >
+                    {{ gasto.concepto }}
+                  </p>
+                  <span class="text-[10px] text-theme-accent font-medium mt-0.5 inline-block">
+                    {{ conceptosExpandidos[idx] ? 'Ver menos' : 'Ver más' }}
+                  </span>
+                </button>
+                <p
+                  v-else
+                  class="text-sm font-medium text-theme-text break-words leading-snug"
+                >
+                  {{ gasto.concepto }}
+                </p>
+              </div>
+              <span class="text-sm font-semibold text-theme-text whitespace-nowrap shrink-0">
+                {{ currencySymbol }} {{ formatMonto(gasto.monto) }}
+              </span>
             </div>
-            <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-theme-text break-words leading-snug">{{ gasto.concepto }}</p>
-              <p class="text-xs text-theme-text-sec mt-0.5">{{ gasto.categoria }} · {{ formatFecha(gasto.fecha) }}</p>
-            </div>
-            <div class="flex flex-col items-end gap-1.5 shrink-0">
-              <span class="text-sm font-semibold text-theme-text whitespace-nowrap">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
-              <div class="flex items-center gap-2">
+
+            <!-- Fila inferior: categoría/fecha (chips) y acciones -->
+            <div class="mt-2 flex items-center justify-between gap-2 flex-wrap pl-12">
+              <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                <span
+                  class="text-[10px] font-medium px-2 py-0.5 rounded-full leading-tight"
+                  :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '18', color: getCategoriaColor(gasto.categoria) }"
+                >
+                  {{ gasto.categoria }}
+                </span>
+                <span class="text-[10px] text-theme-text-sec">· {{ formatFecha(gasto.fecha) }}</span>
+              </div>
+              <div class="flex items-center gap-2 shrink-0 ml-auto">
                 <button class="w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
+                  aria-label="Editar"
                   @click="toggleEdit(idx)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -99,6 +137,7 @@
                   </svg>
                 </button>
                 <button class="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
+                  aria-label="Eliminar"
                   @click="removeGasto(idx)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -245,6 +284,20 @@ const editableGastos = ref([])
 const editingIdx = ref(null)
 const saving = ref(false)
 const fechaGlobal = ref('')
+const conceptosExpandidos = ref({})
+
+// Heurística para mostrar "ver más": > 60 chars o > 1 línea probable
+function conceptoEsLargo(concepto) {
+  if (!concepto) return false
+  return concepto.length > 60
+}
+
+function toggleConcepto(idx) {
+  conceptosExpandidos.value = {
+    ...conceptosExpandidos.value,
+    [idx]: !conceptosExpandidos.value[idx],
+  }
+}
 
 const fechaGlobalDiferente = computed(() => {
   if (!fechaGlobal.value) return false

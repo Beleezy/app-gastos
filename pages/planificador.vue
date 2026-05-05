@@ -14,12 +14,9 @@
         <div v-if="seccionActual === 'mensual'" class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-4">
           <div class="lg:sticky lg:top-20 lg:self-start">
             <div ref="swipeZone">
-              <PlanificadorResumenMes @exportar="exportarPlanificador" />
-            </div>
-            <div class="mt-3">
-              <PlanificadorSelectorPlantillas
-                :plan-mensual-id="plan?.id || null"
-                @aplicada="onPlantillaAplicada"
+              <PlanificadorResumenMes
+                @exportar="exportarPlanificador"
+                @abrir-plantillas="showPlantillas = true"
               />
             </div>
           </div>
@@ -119,6 +116,17 @@
       @close="cerrarFormRegistrarPago"
       @saved="cerrarFormRegistrarPago"
     />
+
+    <SharedBaseBottomSheet
+      v-if="showPlantillas"
+      title="Plantillas del mes"
+      @close="showPlantillas = false"
+    >
+      <PlanificadorSelectorPlantillas
+        :plan-mensual-id="plan?.id || null"
+        @aplicada="onPlantillaAplicadaFromSheet"
+      />
+    </SharedBaseBottomSheet>
   </div>
 </template>
 
@@ -152,6 +160,13 @@ watch(() => route.query.seccion, (val) => {
 const showFormMensual = ref(false)
 const showFormFuturo = ref(false)
 const showFormRegistrarPago = ref(false)
+const showPlantillas = ref(false)
+useOverlayBack(showPlantillas, () => { showPlantillas.value = false })
+
+async function onPlantillaAplicadaFromSheet() {
+  showPlantillas.value = false
+  await onPlantillaAplicada()
+}
 const gastoMensualEditando = ref(null)
 const gastoFuturoEditando = ref(null)
 const gastoParaRegistrar = ref(null)

@@ -5,6 +5,7 @@ export const OPCIONES_ORDEN_AHORROS = [
   { value: 'fecha_asc', label: 'Más antiguo' },
   { value: 'monto_desc', label: 'Mayor monto' },
   { value: 'monto_asc', label: 'Menor monto' },
+  { value: 'concepto_asc', label: 'Concepto (A-Z)' },
 ]
 
 export function useAhorrosFilters({ ahorrosList, esMesActual }) {
@@ -61,6 +62,11 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
         case 'fecha_asc': return new Date(a.fecha) - new Date(b.fecha)
         case 'monto_desc': return Number(b.monto) - Number(a.monto)
         case 'monto_asc': return Number(a.monto) - Number(b.monto)
+        case 'concepto_asc': {
+          const an = (a.concepto || a.medioNombre || '').toLowerCase()
+          const bn = (b.concepto || b.medioNombre || '').toLowerCase()
+          return an.localeCompare(bn)
+        }
         default: return new Date(b.fecha) - new Date(a.fecha)
       }
     })

@@ -67,7 +67,13 @@ export default defineEventHandler(async (event) => {
         idsDecididosVigentes.add(detalle.id)
         await tx
           .update(gastosFuturosDetalles)
-          .set({ orden, updatedAt: new Date() })
+          .set({
+            nombre: detalle.nombre,
+            notas: detalle.notas,
+            prioridad: detalle.prioridad ?? 0,
+            orden,
+            updatedAt: new Date(),
+          })
           .where(eq(gastosFuturosDetalles.id, detalle.id))
         orden++
         continue
@@ -79,6 +85,7 @@ export default defineEventHandler(async (event) => {
           gastoFuturoId: id,
           nombre: detalle.nombre,
           notas: detalle.notas,
+          prioridad: detalle.prioridad ?? 0,
           orden,
         })
         .returning({ id: gastosFuturosDetalles.id })

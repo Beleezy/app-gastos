@@ -91,7 +91,9 @@ const navItems = [
 ]
 
 function isActive(path) {
-  return route.path === path
+  if (route.path !== path) return false
+  if (path === '/planificador' && route.query.seccion === 'futuros') return false
+  return true
 }
 </script>
 

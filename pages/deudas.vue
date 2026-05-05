@@ -31,11 +31,15 @@
       <DeudasBalanceGlobal />
     </div>
 
-    <!-- Desktop 2-column grid: sidebar (resumen) + contenido (lista/detalle) -->
+    <!-- Desktop 2-column grid: sidebar (resumen o persona info) + contenido (lista/detalle) -->
     <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6">
       <!-- Sidebar izquierdo (sticky en desktop) -->
       <div class="lg:sticky lg:top-20 lg:self-start lg:pt-4">
-        <DeudasResumenDeudas />
+        <!-- Vista lista: resumen general "Me deben / Yo debo" -->
+        <DeudasResumenDeudas v-if="!personaSeleccionada" />
+
+        <!-- Vista detalle: card con info de la persona seleccionada -->
+        <DeudasPersonaInfoCard v-else />
 
         <!-- Botón volver a la lista (solo en detalle, desktop) -->
         <div v-if="personaSeleccionada" class="hidden lg:block px-0 mt-2">
