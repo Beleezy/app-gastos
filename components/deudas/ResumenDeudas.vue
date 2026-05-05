@@ -15,6 +15,7 @@
             :class="tabActual === 'me_deben'
               ? 'bg-emerald-500/20 text-emerald-400 shadow-sm'
               : 'text-theme-text-sec hover:text-theme-text-muted'"
+            data-testid="tab-me-deben"
             @click="cambiarTab('me_deben')"
           >
             Me deben
@@ -24,6 +25,7 @@
             :class="tabActual === 'yo_debo'
               ? 'bg-red-500/20 text-red-400 shadow-sm'
               : 'text-theme-text-sec hover:text-theme-text-muted'"
+            data-testid="tab-yo-debo"
             @click="cambiarTab('yo_debo')"
           >
             Yo debo

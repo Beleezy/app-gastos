@@ -24,6 +24,7 @@
       </div>
 
       <button
+        data-testid="btn-microfono"
         class="relative z-10 w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 active:scale-90 mic-btn"
         :class="[
           isListening

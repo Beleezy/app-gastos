@@ -1,15 +1,21 @@
 // E2E del módulo Planificador.
 
 import { test, expect } from '@playwright/test'
-import { getPrimeraCategoria } from './fixtures.js'
+import { getPrimeraCategoria } from '../fixtures.js'
 
 test.describe('Planificador', () => {
-  test('API: crear plan mensual', async ({ request }) => {
-    const r = await request.post('/api/planificador', {
-      data: { mes: 4, anio: 2026, montoPresupuesto: 1000 },
+  test('API: crear/actualizar plan mensual', async ({ request }) => {
+    const base = await request.get('/api/planificador?mes=4&anio=2026')
+    expect(base.ok()).toBeTruthy()
+    const baseJson = await base.json()
+    expect(baseJson.plan?.id).toBeDefined()
+
+    const r = await request.put('/api/planificador', {
+      data: { id: baseJson.plan.id, montoPresupuesto: 1000 },
     })
-    // 200 (idempotente sobre UNIQUE) o 201
-    expect([200, 201]).toContain(r.status())
+    expect(r.ok()).toBeTruthy()
+    const updated = await r.json()
+    expect(Number(updated.montoPresupuesto)).toBe(1000)
   })
 
   test('API: listar plantillas devuelve array', async ({ request }) => {
@@ -24,9 +30,14 @@ test.describe('Planificador', () => {
     test.skip(!categoriaId, 'Sin categorías sembradas')
 
     // Asegura plan
-    const planRes = await request.post('/api/planificador', {
-      data: { mes: 5, anio: 2026, montoPresupuesto: 1500 },
+    const planBase = await request.get('/api/planificador?mes=5&anio=2026')
+    expect(planBase.ok()).toBeTruthy()
+    const planSeed = await planBase.json()
+
+    const planRes = await request.put('/api/planificador', {
+      data: { id: planSeed.plan.id, montoPresupuesto: 1500 },
     })
+    expect(planRes.ok()).toBeTruthy()
     const plan = await planRes.json()
 
     const tplRes = await request.post('/api/planificador/plantillas', {

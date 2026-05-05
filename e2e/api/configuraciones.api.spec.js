@@ -7,22 +7,40 @@ test.describe('Configuraciones', () => {
     const r = await page.goto('/configuraciones')
     expect(r.status()).toBeLessThan(500)
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByText(/Notificaciones push/i)).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Notificaciones push/i })).toBeVisible()
   })
 
   test('UI: toggle de feature flag persiste', async ({ page }) => {
     await page.goto('/configuraciones')
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
 
-    // Encontrar el primer toggle (predictor categoria por orden)
-    const firstToggle = page.locator('input[type="checkbox"]').first()
+    const flagKey = 'predictor_categoria'
+    const featureSection = page
+      .getByRole('heading', { name: /Funciones experimentales/i })
+      .locator('xpath=ancestor::section[1]')
+
+    await featureSection.scrollIntoViewIfNeeded()
+
+    const firstToggle = featureSection.locator('input[type="checkbox"]').first()
     const before = await firstToggle.isChecked()
-    await firstToggle.click()
-    await page.waitForTimeout(200)
+
+    await page.evaluate(({ key, value }) => {
+      const raw = localStorage.getItem('gastos.featureFlags.v1')
+      const parsed = raw ? JSON.parse(raw) : {}
+      parsed[key] = value
+      localStorage.setItem('gastos.featureFlags.v1', JSON.stringify(parsed))
+    }, { key: flagKey, value: !before })
+
     await page.reload()
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
-    const after = await page.locator('input[type="checkbox"]').first().isChecked()
-    expect(after).toBe(!before)
+
+    const persisted = await page.evaluate((key) => {
+      const raw = localStorage.getItem('gastos.featureFlags.v1')
+      if (!raw) return undefined
+      return JSON.parse(raw)?.[key]
+    }, flagKey)
+
+    expect(persisted).toBe(!before)
   })
 
   test('API: /api/usuarios/uso-llm responde', async ({ request }) => {

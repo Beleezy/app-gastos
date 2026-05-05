@@ -180,6 +180,7 @@
               <button
                 v-for="tab in tabsVista"
                 :key="tab.value"
+                :data-testid="`tab-${tab.value}`"
                 class="flex-1 lg:flex-none lg:px-5 py-2 rounded-xl text-sm font-medium transition-colors"
                 :class="vistaRegistro === tab.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
                 @click="onCambiarVista(tab.value)"
@@ -263,6 +264,7 @@
       v-if="!seleccionMultipleActiva"
       class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent shadow-xl shadow-theme-accent/40 flex items-center justify-center text-theme-on-accent active:scale-90 transition-all duration-300 lg:hidden"
       aria-label="Agregar gasto manual"
+      data-testid="btn-registro-manual"
       @click="onManualFab"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

@@ -1,0 +1,7 @@
+# Snapshots de Playwright: tratarlos como binarios para que GitHub los
+# muestre con su visor de imágenes en lugar de como texto basura.
+e2e/visual/__screenshots__/**/*.png binary
+e2e/**/*-snapshots/**/*.png binary
+
+# Línea por defecto LF en archivos de texto cross-platform
+* text=auto eol=lf

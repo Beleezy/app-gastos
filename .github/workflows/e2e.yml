@@ -3,24 +3,36 @@ name: E2E
 on:
   pull_request:
     branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch:
-  # Cron diario para detectar regresiones
   schedule:
-    - cron: '0 4 * * *'
+    # Cron semanal (lunes 8am UTC - 3am PE) — los specs UI son mas pesados que los API
+    - cron: '0 8 * * 1'
 
 concurrency:
   group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
-# Estrategia: levantamos un Postgres en el job, corremos drizzle-kit
-# push, sembramos un usuario E2E y arrancamos el dev server local.
-# NO se despliega a Vercel; los tests corren contra localhost:3000.
-# Esto deja libre tu plan free de Vercel para previews reales.
+# Estrategia:
+#  - Job "fast": api + mobile + desktop UI. Corre en PR y push a main.
+#    No requiere baselines de imagenes — siempre verde si los specs estan OK.
+#  - Job "visual": solo en push a main / cron / dispatch manual. Compara
+#    contra baselines en e2e/visual/__screenshots__/. Si los baselines aun
+#    no existen, este job se salta automaticamente y deja una nota; usa
+#    workflow "E2E Visual Baseline" (workflow_dispatch) para generarlos.
+#
+# Postgres efimera + dev server en localhost:3000 + auth bypass.
 
 jobs:
-  playwright:
+  fast:
+    name: 'E2E fast (project=${{ matrix.project }})'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [api, mobile, desktop]
 
     services:
       postgres:
@@ -43,8 +55,10 @@ jobs:
       SUPABASE_ANON_KEY: e2e-anon-key
       SUPABASE_SERVICE_ROLE_KEY: e2e-service-key
       GEMINI_API_KEY: ''
-      E2E_AUTH_BYPASS: '1'
-      E2E_TEST_TOKEN: ${{ secrets.E2E_TEST_TOKEN || 'e2e-token-default' }}
+      DEV_AUTH_BYPASS: '1'
+      DEV_AUTH_TOKEN: ${{ secrets.DEV_AUTH_TOKEN || 'dev-token' }}
+      E2E_USER_ID: 00000000-0000-0000-0000-000000000101
+      E2E_USER_EMAIL: demo1@test.local
       NODE_ENV: development
       NUXT_PORT: '3000'
       BASE_URL: http://localhost:3000
@@ -61,17 +75,31 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Apply DB schema (idempotente)
+      - name: Apply DB schema
         run: npm run db:apply
+
+      - name: Seed temporary users
+        run: npm run db:seed:temp-users
+
+      - name: Seed datos realistas (gastos / deudas / planes)
+        run: npm run db:seed:test 00000000-0000-0000-0000-000000000101
+        continue-on-error: true
 
       - name: Start dev server
         run: |
-          npm run dev &
+          npm run dev > nuxt-dev.log 2>&1 &
           echo $! > .nuxt-dev.pid
-          # Esperar a que Nuxt esté listo
           for i in $(seq 1 60); do
             if curl -sf http://localhost:3000/api/health > /dev/null; then
               echo "Server ready"
@@ -80,8 +108,8 @@ jobs:
             sleep 2
           done
 
-      - name: Run Playwright
-        run: npx playwright test --reporter=html
+      - name: Run Playwright (project=${{ matrix.project }})
+        run: npx playwright test --project=${{ matrix.project }} --reporter=html
         env:
           CI: 'true'
 
@@ -89,12 +117,150 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.project }}
           path: playwright-report/
+          retention-days: 7
+
+      - name: Upload dev server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxt-dev-log-${{ matrix.project }}
+          path: nuxt-dev.log
           retention-days: 7
 
       - name: Stop dev server
         if: always()
+        run: |
+          if [ -f .nuxt-dev.pid ]; then
+            kill $(cat .nuxt-dev.pid) || true
+          fi
+
+  visual:
+    name: 'E2E visual'
+    # Solo corre en push a main, dispatch manual o cron — no en PRs (los
+    # baselines de imagenes en CI requieren bootstrap via workflow dedicado).
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: gastos_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/gastos_e2e
+      SUPABASE_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: e2e-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: e2e-service-key
+      GEMINI_API_KEY: ''
+      DEV_AUTH_BYPASS: '1'
+      DEV_AUTH_TOKEN: ${{ secrets.DEV_AUTH_TOKEN || 'dev-token' }}
+      E2E_USER_ID: 00000000-0000-0000-0000-000000000101
+      E2E_USER_EMAIL: demo1@test.local
+      NODE_ENV: development
+      NUXT_PORT: '3000'
+      BASE_URL: http://localhost:3000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect existing baselines
+        id: baselines
+        run: |
+          if [ -d "e2e/visual" ] && find e2e/visual -name '*.png' | grep -q .; then
+            echo "exist=true" >> $GITHUB_OUTPUT
+            echo "Baselines encontrados — se ejecuta comparacion."
+          else
+            echo "exist=false" >> $GITHUB_OUTPUT
+            echo "::warning::No hay baselines visuales. Lanza el workflow 'E2E Visual Baseline' (workflow_dispatch) para crearlos."
+          fi
+
+      - name: Setup Node
+        if: steps.baselines.outputs.exist == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        if: steps.baselines.outputs.exist == 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Cache Playwright browsers
+        if: steps.baselines.outputs.exist == 'true'
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install Playwright browsers
+        if: steps.baselines.outputs.exist == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Apply DB schema
+        if: steps.baselines.outputs.exist == 'true'
+        run: npm run db:apply
+
+      - name: Seed temporary users
+        if: steps.baselines.outputs.exist == 'true'
+        run: npm run db:seed:temp-users
+
+      - name: Seed datos realistas
+        if: steps.baselines.outputs.exist == 'true'
+        run: npm run db:seed:test 00000000-0000-0000-0000-000000000101
+        continue-on-error: true
+
+      - name: Start dev server
+        if: steps.baselines.outputs.exist == 'true'
+        run: |
+          npm run dev > nuxt-dev.log 2>&1 &
+          echo $! > .nuxt-dev.pid
+          for i in $(seq 1 60); do
+            if curl -sf http://localhost:3000/api/health > /dev/null; then
+              echo "Server ready"
+              break
+            fi
+            sleep 2
+          done
+
+      - name: Run Playwright visual
+        if: steps.baselines.outputs.exist == 'true'
+        run: npx playwright test --project=visual --reporter=html
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright report
+        if: always() && steps.baselines.outputs.exist == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-visual
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload visual diffs
+        if: failure() && steps.baselines.outputs.exist == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-visual-diffs
+          path: test-results/
+          retention-days: 14
+
+      - name: Stop dev server
+        if: always() && steps.baselines.outputs.exist == 'true'
         run: |
           if [ -f .nuxt-dev.pid ]; then
             kill $(cat .nuxt-dev.pid) || true

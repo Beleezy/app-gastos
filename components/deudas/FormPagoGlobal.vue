@@ -33,6 +33,7 @@
           step="0.01"
           placeholder="0.00"
           class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          data-testid="input-monto-global"
         />
       </div>
       <div class="flex gap-2 mt-2 flex-wrap">
@@ -128,6 +129,7 @@
       class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
       :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
       :disabled="saving"
+      data-testid="btn-distribuir"
       @click="guardar"
     >
       <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
