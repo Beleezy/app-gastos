@@ -1,6 +1,6 @@
 <template>
-  <div v-if="auditoria.length > 0" class="mb-5">
-    <button class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
+  <div v-if="auditoria.length > 0" :class="embedded ? '' : 'mb-5'">
+    <button v-if="!embedded" class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
       <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
       <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Auditoría del vínculo</h3>
       <span class="text-xs text-theme-text-sec">{{ auditoria.length }}</span>
@@ -15,7 +15,7 @@
     </button>
 
     <Transition name="collapse">
-      <div v-if="show" class="relative pl-6">
+      <div v-if="show || embedded" class="relative pl-6">
         <div class="absolute left-2 top-2 bottom-2 w-px bg-theme-border-md"></div>
 
         <div v-for="entrada in auditoria" :key="entrada.id" class="relative mb-3 last:mb-0">
@@ -61,12 +61,12 @@
   </div>
 
   <!-- Estado vacío solo si hay vínculo activo -->
-  <div v-else-if="auditoria.length === 0 && personaId" class="mb-5">
-    <div class="flex items-center gap-2 mb-2">
+  <div v-else-if="auditoria.length === 0 && personaId" :class="embedded ? '' : 'mb-5'">
+    <div v-if="!embedded" class="flex items-center gap-2 mb-2">
       <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
       <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Auditoría del vínculo</h3>
     </div>
-    <p class="text-xs text-theme-text-muted pl-3">Sin actividad registrada aún.</p>
+    <p :class="embedded ? 'text-xs text-theme-text-muted text-center py-4' : 'text-xs text-theme-text-muted pl-3'">Sin actividad registrada aún.</p>
   </div>
 </template>
 
@@ -74,6 +74,7 @@
 defineProps({
   personaId: { type: String, required: true },
   auditoria: { type: Array, default: () => [] },
+  embedded: { type: Boolean, default: false },
 })
 
 const show = ref(false)

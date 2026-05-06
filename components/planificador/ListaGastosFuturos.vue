@@ -287,15 +287,22 @@
                 </button>
               </div>
 
-              <!-- Cabecera detalle: modo lectura (título plano de sección) -->
-              <div v-else class="flex items-center justify-between gap-3">
+              <!-- Cabecera detalle: modo lectura (título de sección) -->
+              <div v-else class="flex items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
-                  <div class="flex flex-wrap items-center gap-2">
+                  <!-- Título: dot + nombre grande -->
+                  <div class="flex items-center gap-2">
                     <span
                       class="h-2 w-2 shrink-0 rounded-full"
                       :class="puntoDetalleColor(detalle)"
                     ></span>
-                    <p class="text-sm font-medium text-theme-text break-words">{{ detalle.nombre }}</p>
+                    <h4 class="text-base font-semibold text-theme-text break-words leading-tight">{{ detalle.nombre }}</h4>
+                  </div>
+                  <!-- Subtítulo: metadata + badges -->
+                  <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 pl-4">
+                    <span class="text-[11px] text-theme-text-muted">
+                      {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
+                    </span>
                     <span
                       v-if="prioridadBadge(detalle.prioridad)"
                       class="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -311,15 +318,12 @@
                       {{ decisionBadge(detalle).label }}
                     </span>
                   </div>
-                  <p v-if="detalle.notas" class="mt-1 text-[11px] text-theme-text-sec">{{ detalle.notas }}</p>
-                  <p class="mt-1 text-[10px] text-theme-text-muted">
-                    {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
-                  </p>
+                  <p v-if="detalle.notas" class="mt-1 pl-4 text-[11px] text-theme-text-sec">{{ detalle.notas }}</p>
                 </div>
-                <div class="flex shrink-0 items-center gap-2">
+                <div class="flex shrink-0 items-start gap-2">
                   <div class="text-right">
-                    <p class="text-[11px] font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
-                    <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
+                    <p class="text-sm font-semibold text-sky-300 whitespace-nowrap leading-tight">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
+                    <p class="mt-0.5 text-[10px] text-theme-text-muted whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.minimoReferencia || 0) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
                   </div>
                   <div v-if="!detalle.estadoDecision" class="relative">
                     <button

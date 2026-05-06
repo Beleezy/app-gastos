@@ -68,7 +68,7 @@ const props = defineProps({
   formats: {
     type: Array,
     default: () => ['pdf', 'excel'],
-    validator: (arr) => arr.every((f) => ['pdf', 'excel', 'csv', 'json'].includes(f)),
+    validator: (arr) => arr.every((f) => ['pdf', 'excel', 'csv', 'json', 'historial-pdf', 'whatsapp'].includes(f)),
   },
   label: { type: String, default: '' },
   loading: { type: Boolean, default: false },
@@ -81,10 +81,12 @@ const menuRef = ref(null)
 
 function formatLabel(f) {
   return {
-    pdf: 'PDF',
+    pdf: 'PDF resumen',
     excel: 'Excel',
     csv: 'CSV',
     json: 'JSON',
+    'historial-pdf': 'PDF historial completo',
+    whatsapp: 'WhatsApp',
   }[f] || f.toUpperCase()
 }
 

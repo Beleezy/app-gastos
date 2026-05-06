@@ -34,11 +34,11 @@
     <!-- Desktop 2-column grid: sidebar (resumen o persona info) + contenido (lista/detalle) -->
     <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6">
       <!-- Sidebar izquierdo (sticky en desktop) -->
-      <div class="lg:sticky lg:top-20 lg:self-start lg:pt-4">
+      <div :class="[personaSeleccionada ? 'hidden lg:block' : '', 'lg:sticky lg:top-20 lg:self-start lg:pt-4']">
         <!-- Vista lista: resumen general "Me deben / Yo debo" -->
         <DeudasResumenDeudas v-if="!personaSeleccionada" />
 
-        <!-- Vista detalle: card con info de la persona seleccionada -->
+        <!-- Vista detalle: card con info de la persona seleccionada (solo desktop; en móvil DetallePersona ya muestra la cabecera) -->
         <DeudasPersonaInfoCard v-else />
 
         <!-- Botón volver a la lista (solo en detalle, desktop) -->

@@ -1,12 +1,13 @@
 <template>
-  <div class="mt-4">
+  <div :class="embedded ? '' : 'mt-4'">
     <!-- Header -->
     <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-2">
+      <div v-if="!embedded" class="flex items-center gap-2">
         <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
         <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Puntos de guardado</h3>
         <span class="text-xs text-theme-text-muted">{{ checkpoints.length }}/5</span>
       </div>
+      <span v-else class="text-xs text-theme-text-muted">{{ checkpoints.length }}/5 puntos</span>
       <button
         class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-violet-500/15 text-violet-400 text-xs font-medium hover:bg-violet-500/25 transition-colors disabled:opacity-40"
         :disabled="guardando"
@@ -272,6 +273,7 @@
 <script setup>
 const props = defineProps({
   personaId: { type: String, required: true },
+  embedded: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['restaurado', 'creado'])
