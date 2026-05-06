@@ -240,16 +240,16 @@
           </div>
         </div>
 
-        <!-- Detalles expandidos -->
-        <div v-if="estaExpandido(proyecto.id)" class="border-t border-theme-border bg-theme-input/45 px-4 py-4">
-          <div class="space-y-3">
+        <!-- Detalles expandidos (jerarquía plana, sin cards anidadas) -->
+        <div v-if="estaExpandido(proyecto.id)" class="border-t border-theme-border px-4 pt-3 pb-4">
+          <div class="space-y-5">
             <div
               v-for="detalle in detallesOrdenados(proyecto.detalles)"
               :key="detalle.id"
-              class="rounded-2xl border border-theme-border bg-theme-card"
+              class="space-y-2"
             >
               <!-- Cabecera detalle: modo edición -->
-              <div v-if="detalleEditando?.detalleId === detalle.id" class="p-3 space-y-2">
+              <div v-if="detalleEditando?.detalleId === detalle.id" class="rounded-xl bg-theme-input p-3 space-y-2">
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-xs font-medium text-theme-text">Editando detalle</p>
                   <button class="text-[11px] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionDetalle">Cancelar</button>
@@ -287,8 +287,8 @@
                 </button>
               </div>
 
-              <!-- Cabecera detalle: modo lectura -->
-              <div v-else class="flex items-center justify-between gap-3 p-3">
+              <!-- Cabecera detalle: modo lectura (título plano de sección) -->
+              <div v-else class="flex items-center justify-between gap-3">
                 <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-2">
                     <span
@@ -357,7 +357,7 @@
               </div>
 
               <!-- Opciones del detalle (siempre visibles dentro del proyecto expandido) -->
-              <div class="border-t border-theme-border/60 px-3 pb-3 pt-2 space-y-2">
+              <div class="space-y-2">
                 <div
                   v-for="(opcion, idx) in detalle.opciones"
                   :key="opcion.id"
