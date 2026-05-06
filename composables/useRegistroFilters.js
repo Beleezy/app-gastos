@@ -1,4 +1,4 @@
-import { useDebouncedRef } from './useDebounceFn'
+import { useDebouncedRef } from './useDebounce'
 
 export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual }) {
   const busquedaGasto = ref('')

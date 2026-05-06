@@ -1,4 +1,4 @@
-import { useDebouncedRef } from './useDebounceFn'
+import { useDebouncedRef } from './useDebounce'
 
 export const OPCIONES_ORDEN_AHORROS = [
   { value: 'fecha_desc', label: 'Más reciente' },
