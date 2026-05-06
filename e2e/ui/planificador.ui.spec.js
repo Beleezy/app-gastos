@@ -2,7 +2,7 @@
 
 import { test, expect } from '../fixtures/index.js'
 import { PlanificadorPage } from '../pages/PlanificadorPage.js'
-import { PLANIFICADOR, SHARED } from '../helpers/selectors.js'
+import { SHARED } from '../helpers/selectors.js'
 
 test.describe('Planificador — UI', () => {
   test.describe('Smoke', () => {
@@ -40,14 +40,4 @@ test.describe('Planificador — UI', () => {
     })
   })
 
-  test.describe('Copiar mes', () => {
-    test('abrir modal de copiar mes muestra el selector', async ({ page }) => {
-      const plan = new PlanificadorPage(page)
-      await plan.goto()
-
-      await plan.abrirCopiarMes()
-      await expect(page.getByTestId(PLANIFICADOR.MODAL_SELECTOR_MES)).toBeVisible()
-      await expect(page.getByTestId(PLANIFICADOR.BTN_CONFIRMAR_COPIAR_MES)).toBeVisible()
-    })
-  })
 })

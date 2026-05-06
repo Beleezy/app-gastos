@@ -69,6 +69,19 @@ export default defineNuxtConfig({
           onload: "this.media='all'",
         },
       ],
+      script: [
+        // Aplicar tema (dark/light + acento + tamaño de fuente + daltónico)
+        // SÍNCRONAMENTE antes de que Vue se monte. main.css define todas las
+        // variables de color sobre `html.dark`/`html.light` + `accent-*`,
+        // así que sin esto el primer paint usa los valores de `:root` por
+        // defecto y al ejecutar `onMounted(initTheme)` el browser hace un
+        // repaint completo — flicker visible y splash percibido más largo.
+        {
+          tagPosition: 'head',
+          tagPriority: 'critical',
+          innerHTML: "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true')d.classList.add('colorblind');}catch(e){}})();",
+        },
+      ],
     },
     pageTransition: { name: 'page', mode: 'out-in' },
   },

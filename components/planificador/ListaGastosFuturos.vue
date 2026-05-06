@@ -288,10 +288,14 @@
               </div>
 
               <!-- Cabecera detalle: modo lectura -->
-              <div v-else class="flex items-start justify-between gap-3 p-3">
-                <div class="min-w-0">
+              <div v-else class="flex items-center justify-between gap-3 p-3">
+                <div class="min-w-0 flex-1">
                   <div class="flex flex-wrap items-center gap-2">
-                    <p class="text-sm font-medium text-theme-text">{{ detalle.nombre }}</p>
+                    <span
+                      class="h-2 w-2 shrink-0 rounded-full"
+                      :class="puntoDetalleColor(detalle)"
+                    ></span>
+                    <p class="text-sm font-medium text-theme-text break-words">{{ detalle.nombre }}</p>
                     <span
                       v-if="prioridadBadge(detalle.prioridad)"
                       class="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -312,48 +316,59 @@
                     {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
                   </p>
                 </div>
-                <div class="flex shrink-0 flex-col items-end gap-2">
+                <div class="flex shrink-0 items-center gap-2">
                   <div class="text-right">
-                    <p class="text-[11px] font-medium text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
+                    <p class="text-[11px] font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
                     <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.minimoReferencia || 0) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
                   </div>
-                  <div v-if="!detalle.estadoDecision" class="flex items-center gap-1.5">
+                  <div v-if="!detalle.estadoDecision" class="relative">
                     <button
-                      class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-input px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent"
-                      @click="iniciarEdicionDetalle(detalle)"
+                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-text"
+                      title="Más acciones"
+                      @click="toggleMenuDetalle(detalle.id)"
                     >
-                      Editar
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <circle cx="4" cy="10" r="1.6" />
+                        <circle cx="10" cy="10" r="1.6" />
+                        <circle cx="16" cy="10" r="1.6" />
+                      </svg>
                     </button>
-                    <button
-                      class="inline-flex items-center gap-1 rounded-full border border-theme-border bg-theme-input px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-red-400/50 hover:text-red-400"
-                      @click="eliminarDetalleInline(proyecto, detalle)"
+                    <div
+                      v-if="menuDetalleAbierto === detalle.id"
+                      class="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
                     >
-                      Eliminar
-                    </button>
+                      <button
+                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                        @click="iniciarEdicionDetalle(detalle); cerrarMenuDetalle()"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                        Editar
+                      </button>
+                      <button
+                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-red-400 transition-colors hover:bg-red-500/10"
+                        @click="eliminarDetalleInline(proyecto, detalle); cerrarMenuDetalle()"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                        Eliminar
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Opciones del detalle -->
+              <!-- Opciones del detalle (siempre visibles dentro del proyecto expandido) -->
               <div class="border-t border-theme-border/60 px-3 pb-3 pt-2 space-y-2">
-                <button
-                  v-if="detalle.opciones.length > 0"
-                  class="flex w-full items-center gap-1.5 py-1 text-[11px] text-theme-text-muted transition-colors hover:text-theme-text-sec"
-                  @click="toggleOpcionesVisibles(detalle.id)"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 transition-transform" :class="opcionesEstanVisibles(detalle.id) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25L12 15.75 4.5 8.25" />
-                  </svg>
-                  {{ opcionesEstanVisibles(detalle.id) ? 'Ocultar opciones' : `Ver ${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
-                </button>
-                <template v-if="opcionesEstanVisibles(detalle.id)">
                 <div
                   v-for="(opcion, idx) in detalle.opciones"
                   :key="opcion.id"
-                  class="rounded-xl border bg-theme-input"
-                  :class="esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                    ? 'border-emerald-500/40 bg-emerald-500/5'
-                    : 'border-theme-border'"
+                  class="rounded-xl border bg-theme-input transition-all"
+                  :class="estaSeleccionada(detalle.id, opcion.id)
+                    ? (esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                        ? 'border-emerald-400/70 bg-emerald-500/10 shadow-sm'
+                        : 'border-sky-400/60 bg-sky-500/5 shadow-sm')
+                    : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                      ? 'border-emerald-500/30'
+                      : 'border-theme-border'"
                 >
                   <!-- Opción: modo edición -->
                   <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
@@ -408,87 +423,145 @@
                     </button>
                   </div>
 
-                  <!-- Opción: modo lectura -->
-                  <div v-else class="px-3 py-3">
-                    <div class="flex gap-3">
+                  <!-- Opción: modo lectura (fila densa, tap-to-reveal) -->
+                  <template v-else>
+                    <div
+                      class="flex items-stretch gap-3 px-3 py-2.5"
+                      :class="!detalle.estadoDecision ? 'cursor-pointer' : ''"
+                      :role="!detalle.estadoDecision ? 'button' : undefined"
+                      :tabindex="!detalle.estadoDecision ? 0 : undefined"
+                      @click="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
+                      @keydown.enter.prevent="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
+                      @keydown.space.prevent="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
+                    >
+                      <!-- Número índice -->
+                      <div
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold"
+                        :class="estaSeleccionada(detalle.id, opcion.id)
+                          ? (esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                              ? 'bg-emerald-500/30 text-emerald-200'
+                              : 'bg-sky-500/25 text-sky-200')
+                          : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                            ? 'bg-emerald-500/15 text-emerald-300'
+                            : 'bg-theme-card text-theme-text-sec'"
+                      >
+                        {{ idx + 1 }}
+                      </div>
+
+                      <!-- Bloque texto principal -->
+                      <div class="min-w-0 flex-1">
+                        <div class="flex items-baseline justify-between gap-3">
+                          <p class="text-sm font-medium text-theme-text break-words">{{ opcion.nombre }}</p>
+                          <p class="shrink-0 text-sm font-semibold text-sky-300 whitespace-nowrap">
+                            {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioPromedio || 0) }}
+                          </p>
+                        </div>
+                        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+                          <span class="text-theme-text-sec whitespace-nowrap">
+                            {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMinimo || 0) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMaximo || 0) }}
+                          </span>
+                          <span
+                            v-if="esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1"
+                            class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300"
+                          >
+                            Mejor precio
+                          </span>
+                          <a
+                            v-if="opcion.referenciaUrl"
+                            :href="opcion.referenciaUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-0.5 text-theme-accent hover:text-theme-accent-light"
+                            @click.stop
+                          >
+                            {{ hostDeUrl(opcion.referenciaUrl) }}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5" />
+                            </svg>
+                          </a>
+                        </div>
+                        <p v-if="opcion.notas" class="mt-1 text-[11px] text-theme-text-muted">{{ opcion.notas }}</p>
+                      </div>
+
+                      <!-- Imagen miniatura -->
                       <img
                         v-if="opcion.imagenUrl"
                         :src="opcion.imagenUrl"
                         :alt="opcion.nombre"
-                        class="h-16 w-16 shrink-0 rounded-xl object-cover"
+                        class="h-12 w-12 shrink-0 self-center rounded-lg object-cover"
                         loading="lazy"
+                        @click.stop
                       />
-                      <div class="min-w-0 flex-1">
-                        <div class="flex items-start justify-between gap-2">
-                          <div class="min-w-0">
-                            <p class="truncate text-sm font-medium text-theme-text">{{ opcion.nombre }}</p>
-                            <a
-                              v-if="opcion.referenciaUrl"
-                              :href="opcion.referenciaUrl"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="mt-1 inline-flex max-w-full items-center gap-1 text-[11px] text-theme-accent hover:text-theme-accent-light"
-                            >
-                              <span class="truncate">{{ hostDeUrl(opcion.referenciaUrl) }}</span>
-                              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5M6 10.5v7.5h7.5" />
-                              </svg>
-                            </a>
-                          </div>
-                          <div class="shrink-0 text-right">
-                            <p class="text-xs font-semibold text-sky-300 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioPromedio || 0) }}</p>
-                            <p class="text-[10px] text-theme-text-sec whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMinimo || 0) }} - {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMaximo || 0) }}</p>
-                          </div>
-                        </div>
-                        <p v-if="opcion.notas" class="mt-1.5 text-[11px] text-theme-text-sec">{{ opcion.notas }}</p>
-                      </div>
                     </div>
-                    <div v-if="!detalle.estadoDecision" class="mt-2.5 flex flex-wrap items-center justify-end gap-1.5">
+
+                    <!-- Acciones reveladas al seleccionar -->
+                    <div
+                      v-if="estaSeleccionada(detalle.id, opcion.id) && !detalle.estadoDecision"
+                      class="flex items-center gap-1.5 border-t border-theme-border/60 px-3 py-2"
+                      @click.stop
+                    >
                       <button
-                        class="rounded-full bg-sky-500/15 px-2.5 py-1 text-[11px] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
+                        class="flex-1 rounded-lg bg-sky-500/15 px-3 py-1.5 text-[11px] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
                         @click="abrirDecision(proyecto, detalle, opcion, 'planificar')"
                       >
                         Planificar
                       </button>
                       <button
-                        class="rounded-full bg-emerald-500/15 px-2.5 py-1 text-[11px] font-medium text-emerald-400 transition-colors hover:bg-emerald-500/25"
+                        class="flex-1 rounded-lg bg-emerald-500/15 px-3 py-1.5 text-[11px] font-medium text-emerald-400 transition-colors hover:bg-emerald-500/25"
                         @click="abrirDecision(proyecto, detalle, opcion, 'comprar')"
                       >
                         Comprar ya
                       </button>
-                      <span class="flex-1"></span>
-                      <div v-if="detalle.opciones.length > 1" class="flex items-center gap-0.5">
+                      <div class="relative">
                         <button
-                          class="rounded-lg border border-theme-border bg-theme-card p-1.5 text-theme-text-muted transition-colors hover:text-theme-text hover:border-theme-accent disabled:opacity-30"
-                          :disabled="detalle.opciones.indexOf(opcion) === 0"
-                          title="Subir"
-                          @click="moverOpcion(proyecto, detalle, opcion, -1)"
+                          class="flex h-8 w-8 items-center justify-center rounded-lg border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-text"
+                          title="Más acciones"
+                          @click.stop="toggleMenuOpcion(opcion.id)"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <circle cx="4" cy="10" r="1.6" />
+                            <circle cx="10" cy="10" r="1.6" />
+                            <circle cx="16" cy="10" r="1.6" />
+                          </svg>
                         </button>
-                        <button
-                          class="rounded-lg border border-theme-border bg-theme-card p-1.5 text-theme-text-muted transition-colors hover:text-theme-text hover:border-theme-accent disabled:opacity-30"
-                          :disabled="detalle.opciones.indexOf(opcion) === detalle.opciones.length - 1"
-                          title="Bajar"
-                          @click="moverOpcion(proyecto, detalle, opcion, 1)"
+                        <div
+                          v-if="menuOpcionAbierto === opcion.id"
+                          class="absolute right-0 bottom-full z-20 mb-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                        </button>
+                          <button
+                            v-if="detalle.opciones.length > 1 && idx > 0"
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                            @click="moverOpcion(proyecto, detalle, opcion, -1); cerrarMenuOpcion()"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                            Subir
+                          </button>
+                          <button
+                            v-if="detalle.opciones.length > 1 && idx < detalle.opciones.length - 1"
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                            @click="moverOpcion(proyecto, detalle, opcion, 1); cerrarMenuOpcion()"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            Bajar
+                          </button>
+                          <button
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                            @click="iniciarEdicionOpcion(opcion); cerrarMenuOpcion()"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                            Editar
+                          </button>
+                          <button
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-red-400 transition-colors hover:bg-red-500/10"
+                            @click="eliminarOpcionInline(proyecto, detalle, opcion); cerrarMenuOpcion()"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                            Eliminar
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        class="rounded-full border border-theme-border bg-theme-card px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-theme-accent hover:border-theme-accent"
-                        @click="iniciarEdicionOpcion(opcion)"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        class="rounded-full border border-theme-border bg-theme-card px-2.5 py-1 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-red-400 hover:border-red-400/50"
-                        @click="eliminarOpcionInline(proyecto, detalle, opcion)"
-                      >
-                        Eliminar
-                      </button>
                     </div>
-                  </div>
+                  </template>
                 </div>
 
                 <!-- Botón agregar opción -->
@@ -502,7 +575,6 @@
                   </svg>
                   Agregar opcion
                 </button>
-                </template>
               </div>
             </div>
 
@@ -523,8 +595,12 @@
       <div class="h-16"></div>
     </div>
 
-    <!-- Overlay para cerrar menú kebab al hacer click fuera -->
-    <div v-if="menuProyectoAbierto !== null" class="fixed inset-0 z-10" @click="cerrarMenuProyecto"></div>
+    <!-- Overlay para cerrar menús kebab al hacer click fuera -->
+    <div
+      v-if="menuProyectoAbierto !== null || menuDetalleAbierto !== null || menuOpcionAbierto !== null"
+      class="fixed inset-0 z-10"
+      @click="cerrarTodosMenus"
+    ></div>
 
     <!-- Modal: confirmar eliminar proyecto -->
     <div v-if="proyectoAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
@@ -833,15 +909,62 @@ const filtrosProyecto = computed(() => {
 })
 
 const menuProyectoAbierto = ref(null)
+const menuDetalleAbierto = ref(null)
+const menuOpcionAbierto = ref(null)
 function toggleMenuProyecto(id) {
   menuProyectoAbierto.value = menuProyectoAbierto.value === id ? null : id
+  menuDetalleAbierto.value = null
+  menuOpcionAbierto.value = null
 }
 function cerrarMenuProyecto() {
   menuProyectoAbierto.value = null
 }
+function toggleMenuDetalle(id) {
+  menuDetalleAbierto.value = menuDetalleAbierto.value === id ? null : id
+  menuProyectoAbierto.value = null
+  menuOpcionAbierto.value = null
+}
+function cerrarMenuDetalle() {
+  menuDetalleAbierto.value = null
+}
+function toggleMenuOpcion(id) {
+  menuOpcionAbierto.value = menuOpcionAbierto.value === id ? null : id
+  menuProyectoAbierto.value = null
+  menuDetalleAbierto.value = null
+}
+function cerrarMenuOpcion() {
+  menuOpcionAbierto.value = null
+}
+function cerrarTodosMenus() {
+  menuProyectoAbierto.value = null
+  menuDetalleAbierto.value = null
+  menuOpcionAbierto.value = null
+}
 
 const expandido = ref({})
-const opcionesVisibles = ref({})
+// Selección "tap-to-reveal" por detalle: { [detalleId]: opcionId }
+const opcionSeleccionadaPorDetalle = ref({})
+function seleccionarOpcion(detalleId, opcionId) {
+  const actual = opcionSeleccionadaPorDetalle.value[detalleId]
+  opcionSeleccionadaPorDetalle.value = {
+    ...opcionSeleccionadaPorDetalle.value,
+    [detalleId]: actual === opcionId ? null : opcionId,
+  }
+  // Cualquier cambio de selección cierra el menú · · · de opción
+  menuOpcionAbierto.value = null
+}
+function estaSeleccionada(detalleId, opcionId) {
+  return opcionSeleccionadaPorDetalle.value[detalleId] === opcionId
+}
+
+function puntoDetalleColor(detalle) {
+  if (detalle.estadoDecision === 'comprada') return 'bg-emerald-400'
+  if (detalle.estadoDecision === 'planificada') return 'bg-sky-400'
+  if (detalle.prioridad === 3) return 'bg-red-400'
+  if (detalle.prioridad === 2) return 'bg-amber-400'
+  if (detalle.prioridad === 1) return 'bg-emerald-400'
+  return 'bg-gray-500'
+}
 const proyectoAEliminar = ref(null)
 const detalleAEliminar = ref(null) // { proyecto, detalle }
 const opcionAEliminar = ref(null) // { proyecto, detalle, opcion }
@@ -878,6 +1001,7 @@ const decidiendo = ref(false)
 watch(gastosFuturos, (items) => {
   if (!items.length) {
     expandido.value = {}
+    opcionSeleccionadaPorDetalle.value = {}
   }
 }, { immediate: true })
 
@@ -935,14 +1059,6 @@ function toggleExpandido(id) {
 
 function estaExpandido(id) {
   return !!expandido.value[id]
-}
-
-function toggleOpcionesVisibles(detalleId) {
-  opcionesVisibles.value = { ...opcionesVisibles.value, [detalleId]: !opcionesVisibles.value[detalleId] }
-}
-
-function opcionesEstanVisibles(detalleId) {
-  return opcionesVisibles.value[detalleId] !== false
 }
 
 const { rankearOpciones: rankearOpcionesHelper } = useOpcionesScoring()

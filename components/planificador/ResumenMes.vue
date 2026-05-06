@@ -217,23 +217,7 @@
           </div>
 
           <!-- Action buttons -->
-          <div class="grid grid-cols-3 gap-2 pt-1">
-            <button
-              class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-accent/20 bg-theme-accent-bg text-theme-accent text-xs font-semibold hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
-              :disabled="duplicando"
-              :title="gastosPlaneados.length > 0 ? 'Copiar gastos de otro mes (los duplicados por concepto se omiten)' : 'Copiar gastos de otro mes'"
-              data-testid="btn-copiar-mes"
-              @click="abrirSelectorMes"
-            >
-              <svg v-if="!duplicando" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-              </svg>
-              <svg v-else class="w-3.5 h-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-              </svg>
-              Copiar mes
-            </button>
+          <div class="grid grid-cols-2 gap-2 pt-1">
             <button
               class="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-border bg-theme-input text-theme-text-sec text-xs font-semibold hover:border-theme-accent/30 hover:text-theme-accent active:scale-95 transition-all"
               data-testid="btn-abrir-plantillas"
@@ -259,46 +243,6 @@
       </Transition>
     </div>
   </div>
-
-  <!-- Modal: selector de mes origen para duplicar -->
-  <div v-if="showSelectorMes" class="fixed inset-0 z-50 flex items-center justify-center px-6" data-testid="modal-selector-mes">
-    <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showSelectorMes = false"></div>
-    <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
-      <h3 class="text-base font-semibold text-theme-text mb-1">Copiar mes</h3>
-      <p class="text-xs text-theme-text-sec mb-4">Elige el mes de origen para copiar los gastos planificados.</p>
-      <div class="flex gap-2 mb-4">
-        <select
-          v-model.number="origenMes"
-          class="flex-1 bg-theme-input border border-theme-border rounded-xl px-3 py-2 text-theme-text text-sm focus:outline-none focus:border-theme-accent"
-        >
-          <option v-for="(m, i) in MESES" :key="i" :value="i + 1">{{ m }}</option>
-        </select>
-        <input
-          v-model.number="origenAnio"
-          type="number"
-          :min="anioActual - 5"
-          :max="anioActual"
-          class="w-24 bg-theme-input border border-theme-border rounded-xl px-3 py-2 text-theme-text text-sm focus:outline-none focus:border-theme-accent"
-        />
-      </div>
-      <div class="space-y-2">
-        <button
-          class="w-full py-2.5 rounded-xl bg-theme-accent-bg text-theme-accent text-sm font-medium hover:bg-theme-accent-bg-hover transition-colors disabled:opacity-50"
-          :disabled="duplicando || (origenMes === mesActual && origenAnio === anioActual)"
-          data-testid="btn-confirmar-copiar-mes"
-          @click="ejecutarDuplicar"
-        >
-          {{ duplicando ? 'Copiando...' : 'Copiar' }}
-        </button>
-        <button
-          class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm hover:text-theme-text-sec transition-colors"
-          @click="showSelectorMes = false"
-        >
-          Cancelar
-        </button>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
@@ -308,14 +252,11 @@ const emit = defineEmits(['exportar', 'abrir-plantillas'])
 
 const {
   mesActual, anioActual, nombreMes, esHoy,
-  resumen, gastosPlaneados, mesSiguiente, mesAnterior, updatePresupuesto, fetchPlan, duplicarMes, totalGastoReal,
+  resumen, mesSiguiente, mesAnterior, updatePresupuesto, fetchPlan, totalGastoReal,
   analitica, fetchMesAnterior,
 } = usePlanificador()
 
-const duplicando = ref(false)
-const showSelectorMes = ref(false)
-useOverlayBack(showSelectorMes, () => { showSelectorMes.value = false })
-const { success, error: toastError } = useToast()
+const { success } = useToast()
 
 const { config, fetchConfig: fetchConfigData } = useConfiguraciones()
 const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
@@ -325,41 +266,6 @@ onMounted(() => { fetchConfigData() })
 async function sincronizarPresupuesto() {
   await updatePresupuesto(presupuestoDefault.value)
   success('Presupuesto sincronizado con configuracion')
-}
-
-// Inicializar origen en el mes anterior al actual
-const origenMes = ref(mesActual.value === 1 ? 12 : mesActual.value - 1)
-const origenAnio = ref(mesActual.value === 1 ? anioActual.value - 1 : anioActual.value)
-
-// Resetea origen al mes inmediatamente anterior al mes visible actual
-// y abre el modal. Sin este reset, los valores quedan desfasados cuando
-// el usuario navega entre meses y reabre el selector.
-function abrirSelectorMes() {
-  if (mesActual.value === 1) {
-    origenMes.value = 12
-    origenAnio.value = anioActual.value - 1
-  } else {
-    origenMes.value = mesActual.value - 1
-    origenAnio.value = anioActual.value
-  }
-  showSelectorMes.value = true
-}
-
-async function ejecutarDuplicar() {
-  duplicando.value = true
-  try {
-    const result = await duplicarMes(origenMes.value, origenAnio.value)
-    success(`${result.gastosCopied} gastos copiados correctamente`)
-    showSelectorMes.value = false
-  } catch (e) {
-    const msg = e?.data?.message
-      || e?.statusMessage
-      || e?.message
-      || 'Error al copiar el mes'
-    toastError(msg)
-  } finally {
-    duplicando.value = false
-  }
 }
 
 const editandoPresupuesto = ref(false)

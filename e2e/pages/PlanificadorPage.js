@@ -64,21 +64,4 @@ export class PlanificadorPage extends BasePage {
     await item.getByTestId(PLANIFICADOR.BTN_ELIMINAR_PLANIFICADO).click()
     await this.confirmarDialogo()
   }
-
-  // ─── Copiar mes ─────────────────────────────────────────
-  async abrirCopiarMes() {
-    // El boton "Copiar mes" vive dentro del bloque "Ver mas" del ResumenMes.
-    // Clickeamos primero "Ver mas" si esta colapsado.
-    const verMas = this.page.getByRole('button', { name: /ver más|ver mas/i }).first()
-    if (await verMas.isVisible().catch(() => false)) {
-      await verMas.click()
-    }
-    await this.page.getByTestId(PLANIFICADOR.BTN_COPIAR_MES).click()
-    await this.page.getByTestId(PLANIFICADOR.MODAL_SELECTOR_MES).waitFor({ state: 'visible' })
-  }
-
-  async confirmarCopiarMes() {
-    await this.page.getByTestId(PLANIFICADOR.BTN_CONFIRMAR_COPIAR_MES).click()
-    await this.page.getByTestId(PLANIFICADOR.MODAL_SELECTOR_MES).waitFor({ state: 'hidden' }).catch(() => {})
-  }
 }

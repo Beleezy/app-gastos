@@ -8,21 +8,30 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Si está offline y ya hay sesión en caché de Supabase, dejar pasar
   if (process.client && !navigator.onLine) return
 
-
-  if (process.client) {
-    const config = useRuntimeConfig()
-    if (config.public.devAuthBypass && localStorage.getItem('dev_auth_user_id')) return
-  }
-
   const user = useSupabaseUser()
   if (user.value) return
 
-  // useSupabaseUser puede no estar listo aún tras el redirect OAuth —
-  // verificar directamente con getSession antes de redirigir al login
+  // Cold start de PWA Android: `useSupabaseUser()` puede no estar hidratado
+  // todavía aunque la cookie de sesión exista. Antes hacíamos
+  // `await supabase.auth.getSession()` aquí, lo que bloqueaba el resolver
+  // de la ruta 1-3 s mientras Supabase leía cookies/localStorage y
+  // eventualmente refrescaba el token — se traducía en splash extendido.
+  //
+  // Ahora confiamos en la presencia de la cookie `sb-*-auth-token` para
+  // dejar pasar sin awaitar. El plugin `auth-restore.client.js` rellena
+  // `useSupabaseUser` en background y `autoRefreshToken` se encarga del
+  // refresh. Si la cookie está realmente expirada e irrecuperable, el
+  // primer fetch a `/api/*` recibirá 401 y el toast handler en
+  // `plugins/fetch.js` ya lo maneja; la siguiente navegación no tendrá
+  // ni user ni cookie y caerá al `navigateTo('/login')` de abajo.
   if (process.client) {
-    const supabase = useSupabaseClient()
-    const { data: { session } } = await supabase.auth.getSession()
-    if (session) return
+    const hasSessionCookie = document.cookie
+      .split(';')
+      .some(c => {
+        const name = c.trim().split('=')[0]
+        return name.startsWith('sb-') && name.includes('auth-token')
+      })
+    if (hasSessionCookie) return
   }
 
   return navigateTo('/login')

@@ -48,9 +48,6 @@ export const PLANIFICADOR = {
   BTN_MARCAR_PAGADO: 'btn-marcar-pagado',
   BTN_EDITAR_PLANIFICADO: 'btn-editar-planificado',
   BTN_ELIMINAR_PLANIFICADO: 'btn-eliminar-planificado',
-  BTN_COPIAR_MES: 'btn-copiar-mes',
-  MODAL_SELECTOR_MES: 'modal-selector-mes',
-  BTN_CONFIRMAR_COPIAR_MES: 'btn-confirmar-copiar-mes',
   // formularios (dentro de bottom-sheet)
   INPUT_CONCEPTO: 'input-concepto',
   INPUT_MONTO: 'input-monto',
