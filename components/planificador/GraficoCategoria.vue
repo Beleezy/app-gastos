@@ -29,7 +29,7 @@
             />
           </svg>
           <!-- Center text -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
             <template v-if="segmentoActivo !== null">
               <span class="text-[9px] text-theme-text-sec leading-tight">{{ datosGrafico[segmentoActivo].nombre }}</span>
               <span class="text-xs font-bold text-theme-text leading-tight">{{ datosGrafico[segmentoActivo].porcentaje }}%</span>

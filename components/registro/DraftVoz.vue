@@ -37,40 +37,42 @@
 
         <!-- Draft actions -->
         <div v-if="!isEditing" class="flex items-center gap-2 mt-3 pt-3 border-t border-theme-border">
-          <!-- Send (desktop only) -->
+          <!-- Send -->
           <button
-            class="hidden lg:flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:bg-emerald-500/35 transition-colors"
+            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:bg-emerald-500/35 transition-colors"
+            aria-label="Enviar"
             @click="$emit('send')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
-            Enviar
+            <span class="hidden sm:inline">Enviar</span>
           </button>
-          <!-- Edit (desktop only) -->
+          <!-- Edit -->
           <button
-            class="hidden lg:flex flex-1 items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-500/15 text-amber-400 text-xs font-medium hover:bg-amber-500/25 active:bg-amber-500/35 transition-colors"
+            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-500/15 text-amber-400 text-xs font-medium hover:bg-amber-500/25 active:bg-amber-500/35 transition-colors"
+            aria-label="Editar"
             @click="startEdit"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
-            Editar
+            <span class="hidden sm:inline">Editar</span>
           </button>
-          <!-- Overwrite (re-record) — visible siempre. Mobile: ícono; Desktop: ícono + label -->
+          <!-- Overwrite (re-record) -->
           <button
-            class="flex-1 lg:flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg-hover active:bg-[var(--color-accent)]/35 transition-colors"
+            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-theme-accent-bg text-theme-accent text-xs font-medium hover:bg-theme-accent-bg-hover active:bg-[var(--color-accent)]/35 transition-colors"
             aria-label="Regrabar"
             @click="$emit('overwrite')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span class="hidden lg:inline">Regrabar</span>
+            <span class="hidden sm:inline">Regrabar</span>
           </button>
-          <!-- Delete — visible siempre. Mobile: ícono; Desktop: ícono pequeño -->
+          <!-- Delete -->
           <button
-            class="flex-1 lg:flex-none lg:w-10 h-10 flex items-center justify-center gap-1.5 rounded-xl bg-red-500/10 text-red-400 text-xs font-medium hover:bg-red-500/20 active:bg-red-500/30 transition-colors shrink-0"
+            class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 active:bg-red-500/30 transition-colors shrink-0"
             aria-label="Eliminar"
             @click="$emit('discard')"
           >

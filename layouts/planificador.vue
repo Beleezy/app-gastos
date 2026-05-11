@@ -26,7 +26,8 @@
             </NuxtLink>
             <NuxtLink
               to="/futuros"
-              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0 text-violet-400 hover:bg-violet-500/10"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
+              :class="activeTab === 'futuros' ? 'bg-violet-500 text-white shadow-md shadow-violet-500/20' : 'text-violet-400 hover:bg-violet-500/10'"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10" />
@@ -78,10 +79,13 @@ const route = useRoute()
 
 const activeTab = computed(() => {
   if (route.path.includes('/ahorros')) return 'ahorros'
+  if (route.path.includes('/futuros')) return 'futuros'
   return 'mensual'
 })
 
 const pageTitle = computed(() => {
-  return activeTab.value === 'ahorros' ? 'Ahorros' : 'Planificador'
+  if (activeTab.value === 'ahorros') return 'Ahorros'
+  if (activeTab.value === 'futuros') return 'Gastos futuros'
+  return 'Planificador'
 })
 </script>

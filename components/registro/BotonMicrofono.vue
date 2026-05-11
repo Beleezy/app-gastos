@@ -58,8 +58,8 @@
     </div>
 
 
-    <!-- Live transcript while recording (no draft yet) -->
-    <div v-if="isListening && transcript" class="w-full max-w-sm">
+    <!-- Live transcript while recording (no draft yet) — se oculta cuando el padre lo controla -->
+    <div v-if="!hideTranscript && isListening && transcript" class="w-full max-w-sm">
       <div class="bg-theme-card rounded-xl px-4 py-3 border border-theme-border">
         <p class="text-sm text-theme-text-sec italic">"{{ transcript }}"</p>
       </div>
@@ -84,6 +84,7 @@ const props = defineProps({
   hasDraft: Boolean,
   isSupported: { type: Boolean, default: true },
   hideStatus: { type: Boolean, default: false },
+  hideTranscript: { type: Boolean, default: false },
 })
 
 const { vibrate } = useHaptic()
