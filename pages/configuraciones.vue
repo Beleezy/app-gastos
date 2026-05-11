@@ -343,6 +343,14 @@
             Cerrar sesion
           </span>
         </button>
+
+        <!-- Integraciones -->
+        <div class="lg:col-span-2">
+          <h2 class="text-sm font-semibold text-theme-text-sec uppercase tracking-wider mb-2 px-1 mt-4">
+            Integraciones
+          </h2>
+        </div>
+        <ConfiguracionesIntegracionGoogleCalendar />
       </template>
 
       <ConfiguracionesPushNotificationsConfig class="mt-4" />
