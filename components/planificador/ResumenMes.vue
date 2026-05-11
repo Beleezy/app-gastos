@@ -239,6 +239,19 @@
               Excel
             </button>
           </div>
+
+            <!-- Sincronizar con Google Calendar (solo si conectado) -->
+            <button
+              v-if="gcalEstado.conectado"
+              class="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-theme-border bg-theme-input text-theme-text-sec text-xs font-semibold hover:border-blue-500/30 hover:text-blue-400 active:scale-95 transition-all disabled:opacity-50 mt-2"
+              :disabled="sincronizandoGcal"
+              @click="onSincronizarGcal"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {{ sincronizandoGcal ? 'Sincronizando...' : 'Sincronizar con Google Calendar' }}
+            </button>
         </div>
       </Transition>
     </div>
@@ -256,12 +269,31 @@ const {
   analitica, fetchMesAnterior,
 } = usePlanificador()
 
-const { success } = useToast()
+const { success, error: toastError } = useToast()
 
 const { config, fetchConfig: fetchConfigData } = useConfiguraciones()
 const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
 
-onMounted(() => { fetchConfigData() })
+// Google Calendar — solo aparece el boton si hay conexion activa
+const { estado: gcalEstado, fetchEstado: fetchGcalEstado, resincronizar: gcalResincronizar } = useGoogleCalendar()
+const sincronizandoGcal = ref(false)
+
+onMounted(() => {
+  fetchConfigData()
+  if (gcalEstado.value.loading) fetchGcalEstado()
+})
+
+async function onSincronizarGcal() {
+  sincronizandoGcal.value = true
+  try {
+    const r = await gcalResincronizar()
+    success(`Sincronizado: ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados`)
+  } catch (e) {
+    toastError('Error al sincronizar: ' + (e?.message || e))
+  } finally {
+    sincronizandoGcal.value = false
+  }
+}
 
 async function sincronizarPresupuesto() {
   await updatePresupuesto(presupuestoDefault.value)
