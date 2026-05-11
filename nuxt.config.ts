@@ -179,6 +179,11 @@ export default defineNuxtConfig({
     geminiRateLimits: process.env.GEMINI_RATE_LIMITS || '',
     supabaseUrl: process.env.SUPABASE_URL || '',
     supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
+    encryptionKey: process.env.ENCRYPTION_KEY || '',
+    googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+    googleOAuthClientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+    googleOAuthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || '',
+    appPublicUrl: process.env.APP_PUBLIC_URL || '',
     public: {
       appName: APP_NAME,
       appVersion: APP_VERSION,
