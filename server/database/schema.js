@@ -1,4 +1,4 @@
-import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique, index, uniqueIndex } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique, index, uniqueIndex, jsonb } from 'drizzle-orm/pg-core'
 
 // ── Enums ──
 export const estadoGastoPlanificado = pgEnum('estado_gasto_planificado', ['pendiente', 'pagado'])
@@ -56,6 +56,7 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
   recurrenteGrupoId: uuid('recurrente_grupo_id'),
   estado: estadoGastoPlanificado('estado').default('pendiente').notNull(),
   notas: text('notas'),
+  googleEventId: varchar('google_event_id', { length: 255 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
@@ -354,4 +355,20 @@ export const usoLlm = pgTable('uso_llm', {
     table.endpoint,
   ),
   index('uso_llm_usuario_idx').on(table.usuarioId),
+])
+
+// ── Integraciones: Google Calendar ──
+export const googleCalendarConexiones = pgTable('google_calendar_conexiones', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  refreshTokenCifrado: text('refresh_token_cifrado').notNull(),
+  calendarId: varchar('calendar_id', { length: 255 }).notNull(),
+  calendarNombre: varchar('calendar_nombre', { length: 255 }).notNull(),
+  recordatoriosConfig: jsonb('recordatorios_config').notNull(),
+  ultimaSync: timestamp('ultima_sync'),
+  ultimoError: text('ultimo_error'),
+  fechaConexion: timestamp('fecha_conexion').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('google_calendar_conexiones_usuario_unique').on(table.usuarioId),
 ])
