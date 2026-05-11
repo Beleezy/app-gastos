@@ -3,6 +3,7 @@ import { gastosPlanificados, planesMensuales, gastos, categorias, ahorros } from
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
+import { syncUpdated } from '../../../../utils/gcalAutoSync.js'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -120,6 +121,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  syncUpdated(usuarioId, gastoPlanificado.id)
   return {
     gasto: {
       ...gastoGuardado,

@@ -8,6 +8,7 @@ import {
   generarGrupoId
 } from '../../../utils/recurrente.js'
 import { eq } from 'drizzle-orm'
+import { syncUpdated } from '../../../utils/gcalAutoSync.js'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -56,6 +57,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
+    syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
   }
 
@@ -79,6 +81,7 @@ export default defineEventHandler(async (event) => {
       notas: updated.notas,
     }, nuevoGrupoId)
 
+    syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
 
   } else if (eraRecurrente && !seraRecurrente) {
@@ -94,6 +97,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
+    syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
 
   } else if (eraRecurrente && seraRecurrente && grupoAnterior) {
@@ -116,6 +120,7 @@ export default defineEventHandler(async (event) => {
       await actualizarRecurrentesFuturos(grupoAnterior, id, datosParaPropagar)
     }
 
+    syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
 
   } else {
@@ -126,6 +131,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
+    syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
   }
 })

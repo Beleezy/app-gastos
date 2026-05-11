@@ -1,10 +1,13 @@
 import { db } from '../../../utils/db.js'
 import { gastosPlanificados, gastos } from '../../../database/schema.js'
 import { eliminarRecurrentesFuturos } from '../../../utils/recurrente.js'
+import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { syncDeleted } from '../../../utils/gcalAutoSync.js'
 import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
+  const usuarioId = await getUsuarioFromEvent(event)
   const query = getQuery(event)
   const eliminarFuturos = query.futuros === 'true'
 
@@ -34,5 +37,6 @@ export default defineEventHandler(async (event) => {
     .delete(gastosPlanificados)
     .where(eq(gastosPlanificados.id, id))
 
+  syncDeleted(usuarioId, gasto.googleEventId)
   return { success: true }
 })
