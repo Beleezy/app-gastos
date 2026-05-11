@@ -1,7 +1,7 @@
 <template>
-  <div class="flex flex-col items-center gap-4">
-    <!-- Status text -->
-    <p class="text-sm h-5 font-medium">
+  <div class="flex flex-col items-center" :class="hideStatus ? 'gap-3' : 'gap-4'">
+    <!-- Status text (oculto cuando se controla externamente) -->
+    <p v-if="!hideStatus" class="text-sm h-5 font-medium">
       <span v-if="isListening" class="text-theme-accent animate-pulse">Escuchando...</span>
       <span v-else-if="hasDraft" class="text-amber-400">Borrador guardado</span>
       <span v-else class="text-theme-text-sec">Toca para registrar un gasto</span>
@@ -83,6 +83,7 @@ const props = defineProps({
   error: String,
   hasDraft: Boolean,
   isSupported: { type: Boolean, default: true },
+  hideStatus: { type: Boolean, default: false },
 })
 
 const { vibrate } = useHaptic()

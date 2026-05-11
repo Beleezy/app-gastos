@@ -32,7 +32,7 @@
           v-model="form.tipoGasto"
           type="text"
           placeholder="Ej: PC nueva, Outfit invierno..."
-          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
         />
       </div>
 
@@ -43,7 +43,7 @@
             v-for="cat in categorias"
             :key="cat.id"
             class="flex flex-col items-center gap-1 rounded-xl border p-2 transition-all"
-            :class="form.categoriaId === cat.id ? 'border-theme-accent bg-theme-accent-bg' : 'border-theme-border bg-theme-input'"
+            :class="form.categoriaId === cat.id ? 'border-violet-500 bg-violet-500/10' : 'border-theme-border bg-theme-input'"
             @click="form.categoriaId = cat.id"
           >
             <div class="flex h-8 w-8 items-center justify-center rounded-lg" :style="{ backgroundColor: (cat.color || '#6b7280') + '26' }">
@@ -76,7 +76,7 @@
           v-model="form.descripcion"
           rows="2"
           placeholder="Objetivo, notas generales, prioridad..."
-          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
         ></textarea>
       </div>
 
@@ -87,7 +87,7 @@
             <p class="text-xs text-theme-text-sec">Toca un detalle para expandirlo y editar sus opciones.</p>
           </div>
           <button
-            class="rounded-full bg-theme-accent-bg px-3 py-1.5 text-xs font-medium text-theme-accent transition-colors hover:bg-theme-accent-bg-hover"
+            class="rounded-full bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-400 transition-colors hover:bg-violet-500/20"
             @click="agregarDetalle"
           >
             + Detalle
@@ -139,14 +139,14 @@
               v-model="detalle.nombre"
               type="text"
               placeholder="Ej: CPU, mouse, jean, casaca..."
-              class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+              class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
             />
 
             <textarea
               v-model="detalle.notas"
               rows="2"
               placeholder="Notas del detalle (opcional)"
-              class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+              class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
             ></textarea>
 
             <div class="space-y-2">
@@ -182,21 +182,21 @@
                     v-model="opcion.nombre"
                     type="text"
                     placeholder="Ej: Ryzen 7 7800X3D, Jean slim..."
-                    class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                    class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   />
 
                   <input
                     v-model="opcion.referenciaUrl"
                     type="url"
                     placeholder="Link de referencia"
-                    class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                    class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   />
 
                   <input
                     v-model="opcion.imagenUrl"
                     type="url"
                     placeholder="Link de imagen (opcional)"
-                    class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                    class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   />
 
                   <div class="grid grid-cols-3 gap-2">
@@ -208,7 +208,7 @@
                         min="0"
                         step="0.01"
                         placeholder="0.00"
-                        class="w-full rounded-xl border border-theme-border bg-theme-card px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                        class="w-full rounded-xl border border-theme-border bg-theme-card px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                       />
                     </div>
                     <div>
@@ -219,7 +219,7 @@
                         min="0"
                         step="0.01"
                         placeholder="Auto"
-                        class="w-full rounded-xl border border-theme-border bg-theme-card px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                        class="w-full rounded-xl border border-theme-border bg-theme-card px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                       />
                     </div>
                     <div>
@@ -230,7 +230,7 @@
                         min="0"
                         step="0.01"
                         placeholder="0.00"
-                        class="w-full rounded-xl border border-theme-border bg-theme-card px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                        class="w-full rounded-xl border border-theme-border bg-theme-card px-3 py-2.5 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -239,7 +239,7 @@
                     v-model="opcion.notas"
                     rows="2"
                     placeholder="Notas de esta opcion (tienda, color, talla, etc.)"
-                    class="w-full resize-none rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+                    class="w-full resize-none rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   ></textarea>
                 </div>
               </div>
@@ -251,8 +251,8 @@
       <p v-if="errorMsg" class="text-xs text-red-400">{{ errorMsg }}</p>
 
       <button
-        class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-theme-on-accent transition-colors"
-        :class="saving ? 'cursor-not-allowed bg-[var(--color-accent)]/70' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
+        class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white transition-colors"
+        :class="saving ? 'cursor-not-allowed bg-violet-500/70' : 'bg-violet-500 hover:bg-violet-600 active:bg-violet-700'"
         :disabled="saving"
         @click="guardar"
       >
@@ -300,9 +300,9 @@ function createDetail(data = {}) {
   }
 }
 
-const { categorias, createGastoFuturo, updateGastoFuturo } = usePlanificador()
+const { createGastoFuturo, updateGastoFuturo } = useGastosFuturos()
+const { categorias, getCategoriaIcono } = useCategorias()
 const { currencySymbol, formatMonto } = useCurrency()
-const { getCategoriaIcono } = useCategorias()
 const { success, error: toastError } = useToast()
 
 const modoEdicion = computed(() => !!props.gastoEditar)

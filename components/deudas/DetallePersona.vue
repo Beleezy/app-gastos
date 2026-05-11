@@ -39,6 +39,7 @@
             v-if="formatosCompartir.length > 0"
             :formats="formatosCompartir"
             label="Compartir"
+            align="left"
             :loading="generandoHistorial"
             @select="onCompartir"
           />
@@ -104,6 +105,32 @@
               {{ currencySymbol }} {{ formatMonto(totalPendientePersona) }}
             </span>
           </div>
+
+          <!-- Progreso de cobro/pago -->
+          <div v-if="totalOriginalPersona > 0" class="mt-2.5">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[0.6875rem] text-theme-text-muted">
+                Progreso de {{ tabActual === 'me_deben' ? 'cobro' : 'pago' }}
+              </span>
+              <span
+                class="text-[0.6875rem] font-medium"
+                :class="porcentajeCobradoPersona > 70 ? 'text-emerald-400' : 'text-theme-accent'"
+              >
+                {{ porcentajeCobradoPersona.toFixed(0) }}%
+              </span>
+            </div>
+            <div class="w-full h-2 bg-theme-card rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-theme-accent to-emerald-400 transition-all duration-500"
+                :style="{ width: porcentajeCobradoPersona + '%' }"
+              ></div>
+            </div>
+            <div class="flex items-center justify-between mt-1">
+              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }} {{ formatMonto(totalCobradoPersona) }} {{ tabActual === 'me_deben' ? 'cobrado' : 'pagado' }}</span>
+              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }} {{ formatMonto(totalOriginalPersona) }} total</span>
+            </div>
+          </div>
+
           <!-- Pago global button -->
           <button
             v-if="deudasActivasPersona.length > 1 && totalPendientePersona > 0"
@@ -123,7 +150,6 @@
     <DeudasStatsPersona
       v-if="!isLoading"
       :deudas-activas="deudasActivasPersona"
-      :deudas-saldadas="deudasSaldadasPersona"
       :tab-actual="tabActual"
     />
 
@@ -194,10 +220,10 @@
             </p>
           </div>
 
-          <!-- Actions (44x44px targets) -->
+          <!-- Actions -->
           <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-theme-border">
             <button
-              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
+              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
               data-testid="btn-nuevo-pago"
               @click="emit('registrarPago', deuda)"
             >
@@ -207,7 +233,7 @@
               Pago
             </button>
             <button
-              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:bg-amber-500/30 transition-colors"
+              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:bg-amber-500/30 transition-colors"
               data-testid="btn-editar-deuda"
               @click="emit('editarDeuda', deuda)"
             >
@@ -217,7 +243,7 @@
               Editar
             </button>
             <button
-              class="min-w-[44px] h-11 px-3 flex items-center justify-center gap-1.5 rounded-xl text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition-colors"
+              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition-colors"
               @click="confirmarSaldar(deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -226,8 +252,9 @@
               Saldar
             </button>
             <button
-              class="min-w-[44px] h-11 px-3 flex items-center justify-center rounded-xl text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:bg-red-500/20 transition-colors"
+              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center rounded-lg text-red-400 bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 transition-colors"
               data-testid="btn-eliminar-deuda"
+              aria-label="Eliminar deuda"
               @click="confirmarEliminarDeuda(deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -490,6 +517,14 @@ const {
 } = useDeudas()
 
 const puntoActual = computed(() => (checkpoints.value || []).find(c => c.tipo === 'actual'))
+
+const todasDeudasPersona = computed(() => [
+  ...(deudasActivasPersona.value || []),
+  ...(deudasSaldadasPersona.value || []),
+])
+const totalOriginalPersona = computed(() => todasDeudasPersona.value.reduce((s, d) => s + d.montoOriginal, 0))
+const totalCobradoPersona = computed(() => todasDeudasPersona.value.reduce((s, d) => s + (d.montoOriginal - d.montoPendiente), 0))
+const porcentajeCobradoPersona = computed(() => totalOriginalPersona.value > 0 ? (totalCobradoPersona.value / totalOriginalPersona.value) * 100 : 0)
 
 function formatFechaHoraCheckpoint(fechaStr) {
   if (!fechaStr) return ''

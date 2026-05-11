@@ -71,7 +71,7 @@
           v-model="busqueda"
           type="text"
           placeholder="Buscar proyecto, detalle u opcion..."
-          class="w-full rounded-xl border border-theme-border bg-theme-card py-2 pl-9 pr-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full rounded-xl border border-theme-border bg-theme-card py-2 pl-9 pr-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
       </div>
       <button
@@ -93,7 +93,7 @@
         :key="f.value"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
         :class="[
-          filtroActual === f.value ? (f.accent || 'bg-theme-accent text-theme-on-accent') : 'bg-theme-card text-theme-text-muted',
+          filtroActual === f.value ? (f.accent || 'bg-violet-500 text-white') : 'bg-theme-card text-theme-text-muted',
           f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
         ]"
         @click="filtroActual = f.value"
@@ -131,7 +131,7 @@
       <article
         v-for="proyecto in gastosFiltrados"
         :key="proyecto.id"
-        class="overflow-hidden rounded-2xl border border-theme-border bg-theme-card"
+        class="rounded-2xl border border-theme-border bg-theme-card"
       >
         <!-- Cabecera del proyecto (compacta) -->
         <div class="p-4">
@@ -207,7 +207,7 @@
             </button>
             <div class="relative">
               <button
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-text"
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
                 :title="'Más acciones'"
                 @click="toggleMenuProyecto(proyecto.id)"
               >
@@ -258,7 +258,7 @@
                   v-model="detalleEditando.nombre"
                   type="text"
                   placeholder="Nombre del detalle *"
-                  class="w-full rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                  class="w-full rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                 />
                 <div class="flex gap-1.5">
                   <button
@@ -276,10 +276,10 @@
                   v-model="detalleEditando.notas"
                   rows="2"
                   placeholder="Notas del detalle (opcional)"
-                  class="w-full resize-none rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                  class="w-full resize-none rounded-lg border border-theme-border bg-theme-input px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                 ></textarea>
                 <button
-                  class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+                  class="w-full rounded-lg bg-violet-500 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-600 disabled:opacity-60"
                   :disabled="guardandoInline"
                   @click="guardarEdicionDetalle(proyecto, detalle)"
                 >
@@ -288,7 +288,7 @@
               </div>
 
               <!-- Cabecera detalle: modo lectura (título de sección) -->
-              <div v-else class="flex items-start justify-between gap-3">
+              <div v-else class="flex items-center gap-2">
                 <div class="min-w-0 flex-1">
                   <!-- Título: dot + nombre grande -->
                   <div class="flex items-center gap-2">
@@ -296,38 +296,38 @@
                       class="h-2 w-2 shrink-0 rounded-full"
                       :class="puntoDetalleColor(detalle)"
                     ></span>
-                    <h4 class="text-base font-semibold text-theme-text break-words leading-tight">{{ detalle.nombre }}</h4>
+                    <h4 class="min-w-0 flex-1 truncate text-base font-semibold text-theme-text leading-tight">{{ detalle.nombre }}</h4>
                   </div>
-                  <!-- Subtítulo: metadata + badges -->
-                  <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 pl-4">
-                    <span class="text-[11px] text-theme-text-muted">
-                      {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
-                    </span>
-                    <span
-                      v-if="prioridadBadge(detalle.prioridad)"
-                      class="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                      :class="prioridadBadge(detalle.prioridad).clases"
-                    >
-                      {{ prioridadBadge(detalle.prioridad).label }}
-                    </span>
-                    <span
-                      v-if="decisionBadge(detalle)"
-                      class="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                      :class="decisionBadge(detalle).clases"
-                    >
-                      {{ decisionBadge(detalle).label }}
-                    </span>
+                  <!-- Descripción (notas): subtítulo full-width que envuelve líneas -->
+                  <p v-if="detalle.notas" class="mt-1 pl-4 text-[11px] text-theme-text-sec break-words leading-snug">{{ detalle.notas }}</p>
+                  <!-- Metadata + precio en fila inferior -->
+                  <div class="mt-1 flex items-center justify-between gap-3 pl-4">
+                    <div class="min-w-0 flex-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span class="text-[11px] text-theme-text-muted">
+                        {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
+                      </span>
+                      <span
+                        v-if="prioridadBadge(detalle.prioridad)"
+                        class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        :class="prioridadBadge(detalle.prioridad).clases"
+                      >
+                        {{ prioridadBadge(detalle.prioridad).label }}
+                      </span>
+                      <span
+                        v-if="decisionBadge(detalle)"
+                        class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        :class="decisionBadge(detalle).clases"
+                      >
+                        {{ decisionBadge(detalle).label }}
+                      </span>
+                    </div>
+                    <p class="shrink-0 text-sm font-semibold text-sky-300 whitespace-nowrap leading-tight">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
                   </div>
-                  <p v-if="detalle.notas" class="mt-1 pl-4 text-[11px] text-theme-text-sec">{{ detalle.notas }}</p>
                 </div>
-                <div class="flex shrink-0 items-start gap-2">
-                  <div class="text-right">
-                    <p class="text-sm font-semibold text-sky-300 whitespace-nowrap leading-tight">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
-                    <p class="mt-0.5 text-[10px] text-theme-text-muted whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.minimoReferencia || 0) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.maximoReferencia || 0) }}</p>
-                  </div>
+                <div class="flex shrink-0 items-center">
                   <div v-if="!detalle.estadoDecision" class="relative">
                     <button
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-text"
+                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
                       title="Más acciones"
                       @click="toggleMenuDetalle(detalle.id)"
                     >
@@ -384,42 +384,42 @@
                       v-model="opcionEditando.nombre"
                       type="text"
                       placeholder="Nombre de la opcion *"
-                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                     />
                     <input
                       v-model="opcionEditando.referenciaUrl"
                       type="url"
                       placeholder="Link de referencia (opcional)"
-                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                     />
                     <input
                       v-model="opcionEditando.imagenUrl"
                       type="url"
                       placeholder="Link de imagen (opcional)"
-                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                     />
                     <div class="grid grid-cols-3 gap-2">
                       <div>
                         <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
-                        <input v-model="opcionEditando.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+                        <input v-model="opcionEditando.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
                       </div>
                       <div>
                         <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
-                        <input v-model="opcionEditando.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+                        <input v-model="opcionEditando.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
                       </div>
                       <div>
                         <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
-                        <input v-model="opcionEditando.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+                        <input v-model="opcionEditando.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
                       </div>
                     </div>
                     <textarea
                       v-model="opcionEditando.notas"
                       rows="2"
                       placeholder="Notas (tienda, color, talla, etc.)"
-                      class="w-full resize-none rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+                      class="w-full resize-none rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                     ></textarea>
                     <button
-                      class="w-full rounded-lg bg-theme-accent py-2 text-sm font-medium text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+                      class="w-full rounded-lg bg-violet-500 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-600 disabled:opacity-60"
                       :disabled="guardandoInline"
                       @click="guardarEdicionOpcion(proyecto, detalle)"
                     >
@@ -475,7 +475,7 @@
                             :href="opcion.referenciaUrl"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-0.5 text-theme-accent hover:text-theme-accent-light"
+                            class="inline-flex items-center gap-0.5 text-violet-400 hover:text-violet-300"
                             @click.stop
                           >
                             {{ hostDeUrl(opcion.referenciaUrl) }}
@@ -518,7 +518,7 @@
                       </button>
                       <div class="relative">
                         <button
-                          class="flex h-8 w-8 items-center justify-center rounded-lg border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-text"
+                          class="flex h-8 w-8 items-center justify-center rounded-lg border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
                           title="Más acciones"
                           @click.stop="toggleMenuOpcion(opcion.id)"
                         >
@@ -571,7 +571,7 @@
                 <!-- Botón agregar opción -->
                 <button
                   v-if="!detalle.estadoDecision"
-                  class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-theme-border bg-theme-input/50 py-2.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent"
+                  class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-theme-border bg-theme-input/50 py-2.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-violet-500 hover:text-violet-400"
                   @click="abrirNuevaOpcion(proyecto, detalle)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -584,7 +584,7 @@
 
             <!-- Botón agregar detalle -->
             <button
-              class="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-theme-border bg-theme-card/60 py-3 text-xs font-medium text-theme-text-sec transition-colors hover:border-theme-accent hover:text-theme-accent"
+              class="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-theme-border bg-theme-card/60 py-3 text-xs font-medium text-theme-text-sec transition-colors hover:border-violet-500 hover:text-violet-400"
               @click="abrirNuevoDetalle(proyecto)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -692,43 +692,43 @@
           v-model="nuevaOpcion.nombre"
           type="text"
           placeholder="Nombre de la opcion *"
-          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
         <input
           v-model="nuevaOpcion.referenciaUrl"
           type="url"
           placeholder="Link de referencia (opcional)"
-          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
         <input
           v-model="nuevaOpcion.imagenUrl"
           type="url"
           placeholder="Link de imagen (opcional)"
-          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
-            <input v-model="nuevaOpcion.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+            <input v-model="nuevaOpcion.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
           </div>
           <div>
             <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
-            <input v-model="nuevaOpcion.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+            <input v-model="nuevaOpcion.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
           </div>
           <div>
             <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
-            <input v-model="nuevaOpcion.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors" />
+            <input v-model="nuevaOpcion.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
           </div>
         </div>
         <textarea
           v-model="nuevaOpcion.notas"
           rows="2"
           placeholder="Notas (tienda, color, talla, etc.)"
-          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         ></textarea>
         <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
         <button
-          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+          class="w-full rounded-xl bg-violet-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-600 disabled:opacity-60"
           :disabled="guardandoInline"
           @click="confirmarNuevaOpcion"
         >
@@ -754,7 +754,7 @@
           v-model="nuevoDetalle.nombre"
           type="text"
           placeholder="Nombre del detalle * (ej: CPU, jean, casaca...)"
-          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
         <div class="flex gap-1.5">
           <button
@@ -772,11 +772,11 @@
           v-model="nuevoDetalle.notas"
           rows="2"
           placeholder="Notas del detalle (opcional)"
-          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         ></textarea>
         <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
         <button
-          class="w-full rounded-xl bg-theme-accent py-3 text-sm font-semibold text-theme-on-accent transition-colors hover:bg-theme-accent-dark disabled:opacity-60"
+          class="w-full rounded-xl bg-violet-500 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-600 disabled:opacity-60"
           :disabled="guardandoInline"
           @click="confirmarNuevoDetalle"
         >
@@ -813,7 +813,7 @@
             type="number"
             min="0"
             step="0.01"
-            class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors"
+            class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
           />
         </div>
         <div>
@@ -823,14 +823,14 @@
           <input
             v-model="decisionForm.fecha"
             type="date"
-            class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:outline-none focus:border-theme-accent transition-colors"
+            class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
           />
         </div>
         <textarea
           v-model="decisionForm.notas"
           rows="2"
           placeholder="Notas (opcional)"
-          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-theme-accent transition-colors"
+          class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         ></textarea>
         <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
         <button
@@ -849,7 +849,7 @@
 <script setup>
 const emit = defineEmits(['editar'])
 
-const { gastosFuturos, resumenFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = usePlanificador()
+const { gastosFuturos, resumenFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = useGastosFuturos()
 const { currencySymbol, formatMonto } = useCurrency()
 const { success, error: toastError } = useToast()
 

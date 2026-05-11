@@ -46,7 +46,8 @@
         v-if="abierto"
         ref="menuRef"
         role="menu"
-        class="absolute right-0 top-11 z-30 min-w-[10rem] rounded-xl border border-theme-border bg-theme-card shadow-xl overflow-hidden"
+        class="absolute top-11 z-30 min-w-[10rem] rounded-xl border border-theme-border bg-theme-card shadow-xl overflow-hidden"
+        :class="align === 'left' ? 'left-0' : 'right-0'"
       >
         <button
           v-for="f in formats"
@@ -72,6 +73,11 @@ const props = defineProps({
   },
   label: { type: String, default: '' },
   loading: { type: Boolean, default: false },
+  align: {
+    type: String,
+    default: 'right',
+    validator: (v) => ['left', 'right'].includes(v),
+  },
 })
 
 const emit = defineEmits(['select'])

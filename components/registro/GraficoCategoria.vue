@@ -26,7 +26,7 @@
           :value="mesGraficoEsAntiguo ? mesSeleccionado : ''"
           @change="onSelectMesGraficoAntiguo($event)"
         >
-          <option value="" disabled>Más...</option>
+          <option value="" disabled>Mes</option>
           <option v-for="m in mesesAntiguosGrafico" :key="m.key" :value="m.key">{{ m.label }}</option>
         </select>
       </div>

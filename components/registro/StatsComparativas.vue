@@ -53,7 +53,7 @@
             :value="mesComparEsAntiguo ? mesComparar : ''"
             @change="onSelectMesAntiguo($event)"
           >
-            <option value="" disabled>Más...</option>
+            <option value="" disabled>Mes</option>
             <option
               v-for="m in mesesAntiguos"
               :key="m.key"

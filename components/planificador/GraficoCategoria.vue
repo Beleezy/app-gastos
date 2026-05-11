@@ -19,11 +19,12 @@
               cx="18" cy="18" r="14"
               fill="none"
               :stroke="seg.color"
-              stroke-width="4"
+              :stroke-width="segmentoActivo === idx ? 5 : 4"
               :stroke-dasharray="seg.dasharray"
               :stroke-dashoffset="seg.dashoffset"
-              class="cursor-pointer transition-all duration-300"
-              :opacity="segmentoActivo === null || segmentoActivo === idx ? 1 : 0.3"
+              stroke-linecap="round"
+              class="cursor-pointer transition-all duration-400"
+              :opacity="segmentoActivo !== null && segmentoActivo !== idx ? 0.2 : 1"
               @click="toggleSegmento(idx)"
             />
           </svg>
@@ -123,19 +124,21 @@
           </div>
         </div>
       </Transition>
+    </div>
 
-      <!-- Lista de gastos de la categoría activa, con detalle completo -->
-      <Transition name="tooltip-slide">
-        <div
-          v-if="segmentoActivo !== null && gastosDelSegmento.length > 0"
-          class="mt-3"
-        >
-          <div class="px-1 mb-2">
-            <p class="text-[10px] font-semibold text-theme-text-sec uppercase tracking-wider">
-              Gastos de {{ datosGrafico[segmentoActivo].nombre }} ({{ gastosDelSegmento.length }})
-            </p>
-          </div>
-          <div class="space-y-2">
+    <!-- Lista de gastos de la categoría activa (fuera del card del gráfico para ancho completo) -->
+    <Transition name="tooltip-slide">
+      <div
+        v-if="segmentoActivo !== null && gastosDelSegmento.length > 0"
+        class="mt-3"
+      >
+        <div class="px-1 mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: datosGrafico[segmentoActivo].color }"></span>
+          <p class="text-[10px] font-semibold text-theme-text-sec uppercase tracking-wider">
+            Gastos de {{ datosGrafico[segmentoActivo].nombre }} ({{ gastosDelSegmento.length }})
+          </p>
+        </div>
+        <div class="space-y-2">
             <div
               v-for="g in gastosDelSegmento"
               :key="g.id"
@@ -196,7 +199,7 @@
                 </div>
               </div>
 
-              <div class="flex justify-end gap-x-3 mt-2 pt-2 border-t border-theme-border">
+              <div class="flex flex-wrap justify-end items-center gap-x-3 gap-y-1.5 mt-2 pt-2 border-t border-theme-border">
                 <button
                   v-if="g.estado === 'pendiente'"
                   class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
@@ -241,7 +244,6 @@
           </div>
         </div>
       </Transition>
-    </div>
 
     <!-- Confirm eliminar (gasto simple) -->
     <SharedConfirmDialog

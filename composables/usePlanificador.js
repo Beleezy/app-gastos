@@ -4,22 +4,6 @@ export function usePlanificador() {
   const { apiFetch } = useApiFetch()
   const plan = useState('planificador-plan', () => null)
   const gastosPlaneados = useState('planificador-gastos', () => [])
-  const gastosFuturos = useState('planificador-futuros', () => [])
-  const resumenFuturos = useState('planificador-futuros-resumen', () => ({
-    totalProyectos: 0,
-    totalDetalles: 0,
-    totalOpciones: 0,
-    proyectosConReferencia: 0,
-    totalMinimo: 0,
-    totalMaximo: 0,
-    totalPromedio: 0,
-    promedioPorProyecto: 0,
-    destacados: [],
-    porPrioridad: { alta: 0, media: 0, baja: 0, sinDefinir: 0 },
-    progresoDecision: { total: 0, decididos: 0, porcentaje: 0 },
-    proyectoMasCaro: null,
-    porCategoria: [],
-  }))
   const gastosRealesPorCategoria = useState('planificador-reales', () => ({}))
   // Compartimos el estado de categorías con useCategorias/useGastos para que
   // los iconos/colores estén disponibles desde el primer render del planificador
@@ -180,18 +164,6 @@ export function usePlanificador() {
       })
       plan.value = data.plan
       gastosPlaneados.value = data.gastos
-      gastosFuturos.value = data.gastosFuturos || []
-      resumenFuturos.value = data.resumenFuturos || {
-        totalProyectos: 0,
-        totalDetalles: 0,
-        totalOpciones: 0,
-        proyectosConReferencia: 0,
-        totalMinimo: 0,
-        totalMaximo: 0,
-        totalPromedio: 0,
-        promedioPorProyecto: 0,
-        destacados: [],
-      }
       gastosRealesPorCategoria.value = data.gastosRealesPorCategoria || {}
     } catch (e) {
       error.value = e.message || 'Error al cargar el plan'
@@ -303,58 +275,6 @@ export function usePlanificador() {
     }
   }
 
-  async function createGastoFuturo(data) {
-    try {
-      await apiFetch('/api/planificador/futuros', {
-        method: 'POST',
-        body: data,
-      })
-      await fetchPlan()
-    } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al crear gasto futuro'
-      throw e
-    }
-  }
-
-  async function updateGastoFuturo(id, data) {
-    try {
-      await apiFetch(`/api/planificador/futuros/${id}`, {
-        method: 'PUT',
-        body: data,
-      })
-      await fetchPlan()
-    } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al actualizar gasto futuro'
-      throw e
-    }
-  }
-
-  async function decidirOpcionFutura(proyectoId, detalleId, data) {
-    try {
-      const result = await apiFetch(`/api/planificador/futuros/${proyectoId}/detalles/${detalleId}/decidir`, {
-        method: 'POST',
-        body: data,
-      })
-      await fetchPlan()
-      return result
-    } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al decidir la opcion'
-      throw e
-    }
-  }
-
-  async function deleteGastoFuturo(id) {
-    try {
-      await apiFetch(`/api/planificador/futuros/${id}`, {
-        method: 'DELETE',
-      })
-      await fetchPlan()
-    } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al eliminar gasto futuro'
-      throw e
-    }
-  }
-
   async function fetchCategorias() {
     try {
       categorias.value = await apiFetch('/api/categorias')
@@ -405,13 +325,12 @@ export function usePlanificador() {
   }
 
   return {
-    plan, gastosPlaneados, gastosFuturos, resumenFuturos, gastosRealesPorCategoria, categorias, isLoading, error,
+    plan, gastosPlaneados, gastosRealesPorCategoria, categorias, isLoading, error,
     mesActual, anioActual, nombreMes, esHoy,
     resumen, gastosPorCategoria, datosGrafico, totalGastoReal, analitica, mesAnteriorResumen, fetchMesAnterior,
     fetchPlan, updatePresupuesto,
     createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado, softDeleteGastoPlaneado,
     toggleEstado, registrarGastoEnRegistro,
-    createGastoFuturo, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura,
     fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,
     duplicarMes,
   }

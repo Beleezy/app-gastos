@@ -25,9 +25,8 @@
               Mensual
             </NuxtLink>
             <NuxtLink
-              to="/planificador?seccion=futuros"
-              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
-              :class="activeTab === 'futuros' ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20' : 'text-theme-text-muted hover:text-theme-text-sec'"
+              to="/futuros"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0 text-violet-400 hover:bg-violet-500/10"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10" />
@@ -79,7 +78,7 @@ const route = useRoute()
 
 const activeTab = computed(() => {
   if (route.path.includes('/ahorros')) return 'ahorros'
-  return route.query.seccion === 'futuros' ? 'futuros' : 'mensual'
+  return 'mensual'
 })
 
 const pageTitle = computed(() => {

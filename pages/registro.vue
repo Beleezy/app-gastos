@@ -24,10 +24,21 @@
         @go-to-current="irAMesActual"
       />
 
+      <!-- Sticky mini-resumen (solo mobile, aparece al salir el resumen del viewport) -->
+      <RegistroResumenSticky
+        :visible="showStickyResumen"
+        :mes-label="mesFormateado"
+        :total-mes="parseFloat(resumen.totalMes) || 0"
+        :presupuesto="presupuesto"
+        :disable-next="esMesActual"
+        @prev="mesAnterior"
+        @next="mesSiguiente"
+      />
+
       <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-2">
         <!-- Sidebar izquierdo -->
         <div class="lg:sticky lg:top-20 lg:self-start lg:space-y-4">
-          <div class="px-4 lg:px-0 mb-5 lg:mb-0">
+          <div ref="resumenWrapperRef" class="px-4 lg:px-0 mb-5 lg:mb-0">
             <RegistroResumenMesRegistro
               :total-mes="parseFloat(resumen.totalMes) || 0"
               :total-dia="totalDiaActual"
@@ -184,7 +195,10 @@
           </div>
 
           <!-- Tabs + export (sticky) -->
-          <div class="sticky top-14 z-20 bg-theme-bg/95 backdrop-blur-sm lg:static lg:bg-transparent">
+          <div
+            class="sticky z-20 bg-theme-bg/95 backdrop-blur-sm lg:static lg:bg-transparent transition-[top] duration-200"
+            :class="showStickyResumen ? 'top-[8.5rem]' : 'top-14'"
+          >
             <div class="flex items-center gap-2 px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
               <button
                 v-for="tab in tabsVista"
@@ -707,6 +721,33 @@ const { isRefreshing } = usePullToRefresh(async () => {
 const historialSwipeZone = ref(null)
 const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(mesAnterior, mesSiguiente)
 
+// ─── Sticky mini-resumen (solo mobile) ──────────────────
+const resumenWrapperRef = ref(null)
+const showStickyResumen = ref(false)
+let resumenObserver = null
+
+function setupResumenObserver() {
+  if (!process.client || !resumenWrapperRef.value) return
+  // Solo mobile: si el viewport es lg+ no activamos el sticky
+  const isDesktop = window.matchMedia('(min-width: 1024px)').matches
+  if (isDesktop) return
+  resumenObserver = new IntersectionObserver(
+    ([entry]) => {
+      // Activamos el sticky cuando el resumen salio totalmente del viewport por arriba
+      showStickyResumen.value = !entry.isIntersecting && entry.boundingClientRect.top < 0
+    },
+    { threshold: 0, rootMargin: '-56px 0px 0px 0px' },
+  )
+  resumenObserver.observe(resumenWrapperRef.value)
+}
+
+function teardownResumenObserver() {
+  if (resumenObserver) {
+    resumenObserver.disconnect()
+    resumenObserver = null
+  }
+}
+
 function aplicarQueryMes() {
   const mes = Number(route.query.mes)
   const anio = Number(route.query.anio)
@@ -719,9 +760,13 @@ onMounted(async () => {
   cargarFavoritos()
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto(), fetchConfig()])
   attachSwipe(historialSwipeZone.value)
+  setupResumenObserver()
 })
 
-onUnmounted(() => detachSwipe(historialSwipeZone.value))
+onUnmounted(() => {
+  detachSwipe(historialSwipeZone.value)
+  teardownResumenObserver()
+})
 </script>
 
 <style scoped>

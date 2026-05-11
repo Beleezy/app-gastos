@@ -1,8 +1,32 @@
 function syncModalDomState(isModalOpen) {
   if (!process.client) return
 
-  document.documentElement.classList.toggle('modal-open', isModalOpen)
-  document.body.dataset.modalOpen = isModalOpen ? 'true' : 'false'
+  const html = document.documentElement
+  const body = document.body
+  const wasOpen = body.dataset.modalOpen === 'true'
+
+  if (isModalOpen && !wasOpen) {
+    const scrollY = window.scrollY || window.pageYOffset || 0
+    body.dataset.scrollY = String(scrollY)
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.width = '100%'
+    html.classList.add('modal-open')
+    body.dataset.modalOpen = 'true'
+  } else if (!isModalOpen && wasOpen) {
+    const scrollY = parseInt(body.dataset.scrollY || '0', 10)
+    body.style.position = ''
+    body.style.top = ''
+    body.style.left = ''
+    body.style.right = ''
+    body.style.width = ''
+    html.classList.remove('modal-open')
+    body.dataset.modalOpen = 'false'
+    delete body.dataset.scrollY
+    window.scrollTo(0, scrollY)
+  }
 }
 
 export function useModalLayer() {

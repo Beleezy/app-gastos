@@ -263,7 +263,7 @@ const navItems = [
   { to: '/planificador', icon: IconClipboard, label: 'Planificador' },
   { to: '/registro', icon: IconMic, label: 'Registro' },
   { to: '/deudas', icon: IconCreditCard, label: 'Deudas' },
-  { to: '/planificador?seccion=futuros', icon: IconSparkles, label: 'Gastos futuros' },
+  { to: '/futuros', icon: IconSparkles, label: 'Gastos futuros' },
   { to: '/ahorros', icon: IconPiggyBank, label: 'Ahorros' },
 ]
 
