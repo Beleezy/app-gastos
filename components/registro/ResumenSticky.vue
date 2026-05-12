@@ -2,7 +2,7 @@
   <Transition name="slide-down">
     <div
       v-if="visible"
-      class="fixed top-14 left-0 right-0 z-30 px-3 pt-2 lg:hidden pointer-events-none"
+      class="fixed top-14 left-0 right-0 z-30 px-3 lg:hidden pointer-events-none"
     >
       <div
         class="relative max-w-lg mx-auto bg-theme-card/95 backdrop-blur-md border border-theme-border rounded-2xl px-4 py-2.5 shadow-lg shadow-black/20 pointer-events-auto overflow-hidden"

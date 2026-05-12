@@ -67,6 +67,9 @@
               class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full shrink-0 leading-none"
             >{{ badgeLabel }}</span>
           </div>
+          <p v-if="gasto.notas" class="mt-1 text-[11px] text-theme-text-muted break-words leading-snug">
+            {{ gasto.notas }}
+          </p>
           <div class="flex items-center gap-1.5 mt-1 flex-wrap">
             <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none"
               :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '18', color: gasto.categoriaColor || '#6b7280' }"
@@ -79,9 +82,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {{ formatHora(gasto.hora) }}
-            </span>
-            <span v-if="gasto.notas" class="text-[10px] text-theme-text-muted truncate max-w-[120px]" :title="gasto.notas">
-              · {{ gasto.notas }}
             </span>
           </div>
         </div>

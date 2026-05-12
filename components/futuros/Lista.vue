@@ -82,7 +82,7 @@
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <h3 class="truncate text-sm font-semibold text-theme-text">{{ proyecto.tipoGasto }}</h3>
+                <h3 class="text-sm font-semibold text-theme-text break-words">{{ proyecto.tipoGasto }}</h3>
                 <span
                   v-if="prioridadBadge(proyecto.prioridad)"
                   class="rounded-full px-2 py-0.5 text-[10px] font-medium"
@@ -234,7 +234,7 @@
                       class="h-2 w-2 shrink-0 rounded-full"
                       :class="puntoDetalleColor(detalle)"
                     ></span>
-                    <h4 class="min-w-0 flex-1 truncate text-base font-semibold text-theme-text leading-tight">{{ detalle.nombre }}</h4>
+                    <h4 class="min-w-0 flex-1 text-base font-semibold text-theme-text leading-tight break-words">{{ detalle.nombre }}</h4>
                   </div>
                   <!-- Descripción (notas): subtítulo full-width que envuelve líneas -->
                   <p v-if="detalle.notas" class="mt-1 pl-4 text-[11px] text-theme-text-sec break-words leading-snug">{{ detalle.notas }}</p>
