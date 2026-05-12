@@ -1,12 +1,11 @@
 <template>
-  <Teleport to="body">
-    <Transition name="slide-down">
+  <Transition name="slide-down">
+    <div
+      v-if="visible"
+      class="lg:hidden px-3 pb-2 border-b border-theme-border bg-theme-card"
+    >
       <div
-        v-if="visible"
-        class="fixed top-14 left-0 right-0 z-30 px-3 lg:hidden pointer-events-none"
-      >
-      <div
-        class="relative max-w-lg mx-auto bg-theme-card/95 backdrop-blur-md border border-theme-border rounded-2xl px-4 py-2.5 shadow-lg shadow-black/20 pointer-events-auto overflow-hidden"
+        class="relative max-w-lg mx-auto bg-theme-input/40 border border-theme-border rounded-xl px-4 py-2 overflow-hidden"
       >
         <!-- Glow decorativo -->
         <div
@@ -76,10 +75,9 @@
             ></div>
           </div>
         </div>
-        </div>
       </div>
-    </Transition>
-  </Teleport>
+    </div>
+  </Transition>
 </template>
 
 <script setup>

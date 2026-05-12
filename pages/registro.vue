@@ -2,6 +2,18 @@
   <div>
     <LayoutAppHeader>
       <template #title>Registro de Gastos</template>
+      <!-- Sticky mini-resumen (solo mobile, aparece al salir el resumen del viewport) -->
+      <template #below>
+        <RegistroResumenSticky
+          :visible="showStickyResumen"
+          :mes-label="mesFormateado"
+          :total-mes="parseFloat(resumen.totalMes) || 0"
+          :presupuesto="presupuesto"
+          :disable-next="esMesActual"
+          @prev="mesAnterior"
+          @next="mesSiguiente"
+        />
+      </template>
     </LayoutAppHeader>
 
     <div class="max-w-lg mx-auto lg:max-w-none lg:mx-0">
@@ -22,17 +34,6 @@
         @prev="mesAnterior"
         @next="mesSiguiente"
         @go-to-current="irAMesActual"
-      />
-
-      <!-- Sticky mini-resumen (solo mobile, aparece al salir el resumen del viewport) -->
-      <RegistroResumenSticky
-        :visible="showStickyResumen"
-        :mes-label="mesFormateado"
-        :total-mes="parseFloat(resumen.totalMes) || 0"
-        :presupuesto="presupuesto"
-        :disable-next="esMesActual"
-        @prev="mesAnterior"
-        @next="mesSiguiente"
       />
 
       <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-2">

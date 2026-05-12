@@ -34,6 +34,8 @@
         <slot name="actions" />
       </div>
     </div>
+    <!-- Optional extension below the main header row (sticky together) -->
+    <slot name="below" />
   </header>
 </template>
 
