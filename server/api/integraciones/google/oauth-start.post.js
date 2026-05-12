@@ -1,7 +1,7 @@
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { signState } from '../../../utils/googleOAuthState.js'
 
-const SCOPE = 'https://www.googleapis.com/auth/calendar'
+const SCOPE = 'https://www.googleapis.com/auth/calendar.app.created'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
