@@ -1,67 +1,5 @@
 <template>
   <div class="px-4 py-3">
-    <!-- Resumen denso (header) -->
-    <div v-if="gastosFuturos.length" class="mb-4">
-      <div class="relative overflow-hidden rounded-2xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/90 p-4">
-        <div class="absolute -top-10 right-0 h-28 w-28 rounded-full bg-sky-500/10 blur-2xl"></div>
-
-        <!-- Fila top: Inversión (izq) · Proyectos (der) -->
-        <div class="relative flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Inversión estimada</p>
-            <p class="mt-0.5 truncate text-2xl font-bold text-theme-text leading-tight">
-              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}
-              <span class="text-xs font-normal text-theme-text-sec">promedio</span>
-            </p>
-            <p class="mt-0.5 truncate text-[11px] text-theme-text-sec">
-              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }} mín. — {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }} máx.
-            </p>
-          </div>
-          <div class="shrink-0 text-right">
-            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Proyectos</p>
-            <p class="mt-0.5 text-2xl font-bold text-theme-text leading-tight">{{ resumenFuturos.totalProyectos }}</p>
-            <p class="text-[11px] text-theme-text-sec whitespace-nowrap">{{ resumenFuturos.totalOpciones }} opc.</p>
-          </div>
-        </div>
-
-        <!-- Progreso de decisión slim + badges de prioridad inline -->
-        <div v-if="resumenFuturos.progresoDecision?.total > 0" class="mt-4 space-y-1.5">
-          <div class="flex items-center justify-between gap-2 flex-wrap">
-            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Progreso de decisión</p>
-            <div v-if="resumenFuturos.porPrioridad && (resumenFuturos.porPrioridad.alta || resumenFuturos.porPrioridad.media || resumenFuturos.porPrioridad.baja)" class="flex items-center gap-1.5">
-              <span v-if="resumenFuturos.porPrioridad.alta" class="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-medium text-red-400">{{ resumenFuturos.porPrioridad.alta }} alta</span>
-              <span v-if="resumenFuturos.porPrioridad.media" class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-medium text-amber-300">{{ resumenFuturos.porPrioridad.media }} media</span>
-              <span v-if="resumenFuturos.porPrioridad.baja" class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-medium text-emerald-400">{{ resumenFuturos.porPrioridad.baja }} baja</span>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <div class="h-1.5 flex-1 overflow-hidden rounded-full bg-theme-input">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
-                :style="{ width: resumenFuturos.progresoDecision.porcentaje + '%' }"
-              ></div>
-            </div>
-            <span class="shrink-0 text-[10px] font-semibold whitespace-nowrap" :class="resumenFuturos.progresoDecision.porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
-              {{ resumenFuturos.progresoDecision.decididos }}/{{ resumenFuturos.progresoDecision.total }} · {{ resumenFuturos.progresoDecision.porcentaje }}%
-            </span>
-          </div>
-          <!-- Leyenda -->
-          <div class="flex flex-wrap items-center gap-3 pt-0.5">
-            <span v-if="desglose.compradas > 0" class="flex items-center gap-1 text-[10px] text-emerald-400">
-              <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>{{ desglose.compradas }} comprada{{ desglose.compradas > 1 ? 's' : '' }}
-            </span>
-            <span v-if="desglose.planificadas > 0" class="flex items-center gap-1 text-[10px] text-sky-300">
-              <span class="h-1.5 w-1.5 rounded-full bg-sky-400"></span>{{ desglose.planificadas }} planificada{{ desglose.planificadas > 1 ? 's' : '' }}
-            </span>
-            <span v-if="desglose.pendientes > 0" class="flex items-center gap-1 text-[10px] text-theme-text-muted">
-              <span class="h-1.5 w-1.5 rounded-full bg-gray-500"></span>{{ desglose.pendientes }} pendiente{{ desglose.pendientes > 1 ? 's' : '' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div class="mb-2 flex items-center gap-2">
       <div class="relative flex-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -849,29 +787,9 @@
 <script setup>
 const emit = defineEmits(['editar'])
 
-const { gastosFuturos, resumenFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = useGastosFuturos()
+const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = useGastosFuturos()
 const { currencySymbol, formatMonto } = useCurrency()
 const { success, error: toastError } = useToast()
-
-const ahorroPotencial = computed(() => {
-  const max = resumenFuturos.value.totalMaximo || 0
-  const min = resumenFuturos.value.totalMinimo || 0
-  return max > min ? Math.round((max - min + Number.EPSILON) * 100) / 100 : 0
-})
-
-const desglose = computed(() => {
-  let compradas = 0
-  let planificadas = 0
-  let pendientes = 0
-  for (const proyecto of gastosFuturos.value) {
-    for (const detalle of proyecto.detalles || []) {
-      if (detalle.estadoDecision === 'comprada') compradas++
-      else if (detalle.estadoDecision === 'planificada') planificadas++
-      else pendientes++
-    }
-  }
-  return { compradas, planificadas, pendientes }
-})
 
 const busqueda = ref('')
 const busquedaDebounced = useDebouncedRef(busqueda, 200)
