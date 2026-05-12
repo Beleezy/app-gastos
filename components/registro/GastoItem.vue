@@ -61,12 +61,7 @@
         </div>
 
         <div class="flex-1 min-w-0 py-2.5 pr-2">
-          <div class="flex items-start gap-1.5">
-            <p class="text-sm font-medium text-theme-text flex-1 min-w-0 break-words leading-tight" data-testid="gasto-concepto">{{ gasto.concepto }}</p>
-            <span v-if="badgeLabel"
-              class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full shrink-0 leading-none"
-            >{{ badgeLabel }}</span>
-          </div>
+          <p class="text-sm font-medium text-theme-text break-words leading-tight" data-testid="gasto-concepto">{{ gasto.concepto }}</p>
           <p v-if="gasto.notas" class="mt-1 text-[11px] text-theme-text-muted break-words leading-snug">
             {{ gasto.notas }}
           </p>
@@ -83,6 +78,7 @@
               </svg>
               {{ formatHora(gasto.hora) }}
             </span>
+            <span v-if="badgeLabel" class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">{{ badgeLabel }}</span>
           </div>
         </div>
 
