@@ -2,7 +2,15 @@ import { z } from 'zod'
 import { fechaIso, monto, conceptoSchema, notasSchema } from './common.js'
 
 export const tipoDeudaSchema = z.enum(['me_deben', 'yo_debo'])
+// NOTA: este schema histórico no coincide 1:1 con el enum real de DB
+// (`persona | organizacion`). Se mantiene para no romper callers que
+// envían 'entidad'/'banco'/'otro'. Para validar el campo en el handler
+// PUT de personas usamos `tipoPersonaEntidadDbSchema` (coincide con DB).
 export const tipoPersonaSchema = z.enum(['persona', 'entidad', 'banco', 'otro'])
+export const tipoPersonaEntidadDbSchema = z.enum(['persona', 'organizacion'])
+
+// estado_deuda enum real en DB (server/database/schema.js:8).
+export const estadoDeudaSchema = z.enum(['pendiente', 'parcial', 'pagado', 'archivado'])
 
 export const personaEntidadCreateSchema = z.object({
   nombre: z.string().trim().min(1, 'Nombre obligatorio').max(150),
@@ -11,6 +19,18 @@ export const personaEntidadCreateSchema = z.object({
   email: z.string().email('Email inválido').optional().nullable(),
   notas: notasSchema,
 })
+
+// Schema de update para el endpoint /api/deudas/personas/[id].put.
+// Acepta cambios parciales y restringe `tipo` al enum real de DB.
+export const personaEntidadUpdateSchema = z
+  .object({
+    nombre: z.string().trim().min(1).max(255),
+    tipo: tipoPersonaEntidadDbSchema,
+    contacto: z.string().trim().max(255).optional().nullable(),
+    notas: notasSchema,
+  })
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 
 const deudaBaseSchema = z.object({
   personaEntidadId: z.union([z.string(), z.number()]).optional().nullable(),
@@ -33,6 +53,24 @@ export const deudaCreateSchema = deudaBaseSchema.refine(
   },
 )
 
+// Schema dedicado para PUT /api/deudas/[id]. Acepta los campos que el
+// handler realmente persiste: estado (enum DB), fechaCreacion/fechaPago,
+// concepto, notas, montoOriginal. NO acepta tipoDeuda/personaEntidadId
+// (no se permiten cambios de propietario via PUT).
+export const deudaUpdateRealSchema = z
+  .object({
+    concepto: conceptoSchema,
+    montoOriginal: monto,
+    fechaCreacion: fechaIso,
+    fechaPago: fechaIso.nullable(),
+    estado: estadoDeudaSchema,
+    notas: notasSchema,
+  })
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
+
+// Schema legacy genérico — se mantiene exportado para no romper imports
+// pero el handler PUT debe usar `deudaUpdateRealSchema`.
 export const deudaUpdateSchema = deudaBaseSchema
   .partial()
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')

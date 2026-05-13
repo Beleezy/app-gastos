@@ -1,12 +1,16 @@
 import { db } from '../../utils/db.js'
 import { ahorros, mediosAhorro } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { ahorroUpdateSchema } from '~/shared/schemas/categorias.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Whitelist + tipos via Zod: rechaza mes/anio del body (se derivan
+  // de fecha) y campos no esperados como `usuarioId` (mass-assignment).
+  const body = await validateBody(event, ahorroUpdateSchema)
 
   const updateData = { updatedAt: new Date() }
   if (body.concepto !== undefined) updateData.concepto = body.concepto?.trim() || null

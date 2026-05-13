@@ -1,12 +1,14 @@
 import { db } from '../../../utils/db.js'
 import { mediosAhorro } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { validateBody } from '../../../utils/validate.js'
+import { medioAhorroUpdateSchema } from '~/shared/schemas/categorias.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  const body = await validateBody(event, medioAhorroUpdateSchema)
 
   const updateData = {}
   if (body.nombre !== undefined) updateData.nombre = body.nombre.trim()

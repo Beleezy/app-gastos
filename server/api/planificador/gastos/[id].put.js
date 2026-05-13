@@ -1,6 +1,8 @@
 import { db } from '../../../utils/db.js'
 import { gastosPlanificados, planesMensuales, categorias } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { validateBody } from '../../../utils/validate.js'
+import { gastoPlanificadoUpdateSchema } from '~/shared/schemas/planificador.js'
 import {
   replicarGastoRecurrente,
   actualizarRecurrentesFuturos,
@@ -29,8 +31,12 @@ async function cargarGastoPropio(id, usuarioId) {
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Whitelist + tipos via Zod: `estado` queda restringido al enum real
+  // (`pendiente | pagado`), monto debe ser finito y positivo, fecha
+  // YYYY-MM-DD estricto. Bloquea mass-assignment de planMensualId o
+  // googleEventId desde el body.
+  const body = await validateBody(event, gastoPlanificadoUpdateSchema)
 
   // Get current state before update (con check de ownership)
   const gastoAnterior = await cargarGastoPropio(id, usuarioId)

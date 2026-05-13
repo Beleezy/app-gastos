@@ -1,7 +1,30 @@
 import { z } from 'zod'
 import { fechaIso, monto, conceptoSchema, notasSchema } from './common.js'
 
+// estado_gasto_planificado enum real de DB (server/database/schema.js:4):
+// solo `pendiente | pagado`. El schema legacy en este archivo aceptaba
+// más valores; mantenemos el legacy para no romper imports.
+export const estadoGastoPlanificadoDbSchema = z.enum(['pendiente', 'pagado'])
 export const estadoPlanificadoSchema = z.enum(['pendiente', 'pagado', 'archivado', 'cancelado'])
+
+// Schema de UPDATE para PUT /api/planificador/gastos/[id]. Restringe
+// `estado` al enum real, valida monto y bloquea campos no esperados que
+// podrían pasar como mass-assignment (planMensualId, googleEventId).
+export const gastoPlanificadoUpdateSchema = z
+  .object({
+    concepto: conceptoSchema,
+    montoEstimado: monto,
+    categoriaId: z.union([z.string(), z.number()]),
+    fechaProbablePago: fechaIso,
+    esRecurrente: z.boolean(),
+    estado: estadoGastoPlanificadoDbSchema,
+    notas: notasSchema,
+    // No persistimos esto pero el handler lo lee; lo dejamos en el
+    // schema para que el body pase la validación.
+    alcanceEdicion: z.enum(['solo', 'futuros']).optional(),
+  })
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 
 export const planMensualSchema = z.object({
   mes: z.number().int().min(1).max(12),
