@@ -18,11 +18,29 @@ function sweep(now) {
   }
 }
 
+// Si la app corre detrás de un proxy de confianza (Vercel, Cloudflare,
+// nginx que strippa el header del cliente) podemos confiar en
+// x-forwarded-for / x-real-ip para identificar la IP real. Sin proxy
+// — `docker run -p 3000:3000` directo, dev tooling, despliegues bare —
+// un atacante puede inyectar el header y rotar IPs por petición para
+// evadir el rate-limit por IP.
+//
+// Activar con env var TRUST_PROXY=1 (o NODE_ENV=production que es el
+// caso típico en Vercel/CF). En dev local y stand-alone se ignora.
+function isProxyTrusted() {
+  if (process.env.TRUST_PROXY === '1') return true
+  if (process.env.TRUST_PROXY === '0') return false
+  // Default: confiar solo en producción (asumimos PaaS típico).
+  return process.env.NODE_ENV === 'production'
+}
+
 function getClientIp(event) {
-  const fwd = getRequestHeader(event, 'x-forwarded-for')
-  if (fwd) return fwd.split(',')[0].trim()
-  const real = getRequestHeader(event, 'x-real-ip')
-  if (real) return real.trim()
+  if (isProxyTrusted()) {
+    const fwd = getRequestHeader(event, 'x-forwarded-for')
+    if (fwd) return fwd.split(',')[0].trim()
+    const real = getRequestHeader(event, 'x-real-ip')
+    if (real) return real.trim()
+  }
   return event.node?.req?.socket?.remoteAddress || 'unknown'
 }
 

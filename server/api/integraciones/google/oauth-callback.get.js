@@ -3,6 +3,7 @@ import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '.
 import { verifyState } from '../../../utils/googleOAuthState.js'
 import { encrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
+import { logger } from '../../../utils/logger.js'
 import { eq, inArray } from 'drizzle-orm'
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -46,7 +47,8 @@ export default defineEventHandler(async (event) => {
     })
     tokens = await tokenRes.json()
   } catch (e) {
-    console.error('[gcal] token exchange fallo', e)
+    // Logger seguro: redacta tokens, AIza..., JWTs antes de imprimir.
+    logger.error('gcal_token_exchange', { error: e })
     return sendRedirect(event, '/configuraciones?gcal=error&motivo=token_exchange')
   }
 
@@ -64,7 +66,7 @@ export default defineEventHandler(async (event) => {
     })
     calendar = await client.createCalendar({ summary: CALENDAR_NOMBRE, timeZone: 'America/Lima' })
   } catch (e) {
-    console.error('[gcal] createCalendar fallo', e)
+    logger.error('gcal_createCalendar', { error: e })
     return sendRedirect(event, '/configuraciones?gcal=error&motivo=crear_calendario')
   }
 

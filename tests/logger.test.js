@@ -62,4 +62,26 @@ describe('logger', () => {
     expect(out.context.error.name).toBe('Error')
     expect(out.context.error.message).toBe('boom')
   })
+
+  it('redacta connection strings con credenciales (postgres/redis/mysql/mongo)', () => {
+    logger.warn('db error: postgresql://admin:s3cret@db.local:5432/app')
+    const out = lastLogged(warnSpy)
+    expect(out.message).toContain('[REDACTED]')
+    expect(out.message).not.toContain('s3cret')
+    expect(out.message).not.toContain('admin')
+  })
+
+  it('redacta Bearer tokens en strings', () => {
+    logger.warn('auth: Bearer abcdefghijklmnopqrstuvwxyz1234567890')
+    const out = lastLogged(warnSpy)
+    expect(out.message).toContain('[REDACTED]')
+    expect(out.message).not.toContain('abcdefghijklmnop')
+  })
+
+  it('redacta GitHub PATs', () => {
+    logger.warn('token leak: ghp_abcdefghijklmnopqrstuvwxyz0123456789')
+    const out = lastLogged(warnSpy)
+    expect(out.message).toContain('[REDACTED]')
+    expect(out.message).not.toContain('ghp_')
+  })
 })

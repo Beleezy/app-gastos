@@ -4,12 +4,17 @@
 // Devuelve 200 con `status: "ok"` si DB responde a SELECT 1.
 // 503 si la DB no responde para que el load balancer pueda excluir
 // la instancia. No requiere autenticación.
+//
+// En producción omitimos `version` y `uptime`: facilitan fingerprinting
+// de la build/deploy (atacante sabe cuándo reiniciaste o qué versión
+// corres). El uptime monitor sólo necesita el código HTTP.
 
 import { sql } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { logger } from '../utils/logger.js'
 
 export default defineEventHandler(async (event) => {
+  const isProd = process.env.NODE_ENV === 'production'
   const checks = { db: 'unknown' }
   const start = Date.now()
 
@@ -20,21 +25,21 @@ export default defineEventHandler(async (event) => {
     checks.db = 'error'
     logger.error('Health check DB falló', { error: e })
     setResponseStatus(event, 503)
-    return {
-      status: 'unhealthy',
-      uptime: process.uptime(),
-      ts: new Date().toISOString(),
-      checks,
-      latencyMs: Date.now() - start,
+    const body = { status: 'unhealthy', checks }
+    if (!isProd) {
+      body.uptime = process.uptime()
+      body.ts = new Date().toISOString()
+      body.latencyMs = Date.now() - start
     }
+    return body
   }
 
-  return {
-    status: 'ok',
-    uptime: process.uptime(),
-    ts: new Date().toISOString(),
-    version: process.env.APP_VERSION || 'unknown',
-    checks,
-    latencyMs: Date.now() - start,
+  const body = { status: 'ok', checks }
+  if (!isProd) {
+    body.uptime = process.uptime()
+    body.ts = new Date().toISOString()
+    body.version = process.env.APP_VERSION || 'unknown'
+    body.latencyMs = Date.now() - start
   }
+  return body
 })

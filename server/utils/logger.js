@@ -22,6 +22,14 @@ const SENSITIVE_PATTERNS = [
   /AIza[0-9A-Za-z\-_]{35}/g,
   /eyJ[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*/g,
   /sk-[A-Za-z0-9]{20,}/g,
+  // Connection strings con credenciales embebidas (postgres/redis/mysql/mongo).
+  // Drizzle/postgres pueden incluirlas en mensajes de error que terminan
+  // en logs si no se redactan.
+  /\b(?:postgres(?:ql)?|redis|mysql|mongodb):\/\/[^@\s]+:[^@\s]+@[^\s'"`]+/gi,
+  // Bearer tokens en headers volcados a logs.
+  /\bBearer\s+[A-Za-z0-9._\-]{20,}/gi,
+  // GitHub PAT / OAuth secrets típicos.
+  /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}/g,
 ]
 
 function redactString(str) {
