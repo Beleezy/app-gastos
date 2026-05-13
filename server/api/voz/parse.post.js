@@ -1,6 +1,8 @@
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { vozParseBodySchema } from '~/shared/schemas/gastos.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
@@ -12,18 +14,8 @@ import { eq, or, isNull } from 'drizzle-orm'
 const MAX_INPUT_CHARS = 2000
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-
-  if (!body.texto?.trim()) {
-    throw createError({ statusCode: 400, message: 'El texto es obligatorio' })
-  }
-
-  if (body.texto.length > MAX_INPUT_CHARS) {
-    throw createError({
-      statusCode: 413,
-      message: `El texto supera el máximo permitido de ${MAX_INPUT_CHARS} caracteres.`,
-    })
-  }
+  // Shape via Zod + sanitización LLM aparte (sanitizeLlmInput).
+  const body = await validateBody(event, vozParseBodySchema)
 
   // Auth + rate limit (§1.1, §1.2)
   const usuarioId = await getUsuarioFromEvent(event)

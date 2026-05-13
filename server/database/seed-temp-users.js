@@ -4,6 +4,17 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import { usuarios } from './schema.js'
 
+// Refuse to seed against a production DB. Ver seed-test-data.js para
+// la explicación. seed.js (categorías predefinidas) sí puede ejecutarse
+// en prod — este script no.
+if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SEED_IN_PRODUCTION !== '1') {
+  console.error(
+    'seed-temp-users.js: NO se ejecuta con NODE_ENV=production. ' +
+      'Si es intencional, establece ALLOW_SEED_IN_PRODUCTION=1.',
+  )
+  process.exit(2)
+}
+
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
   console.error('DATABASE_URL no esta configurada')

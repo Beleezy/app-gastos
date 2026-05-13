@@ -18,6 +18,8 @@ import { eq, or, isNull } from 'drizzle-orm'
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { vozParseBodySchema } from '~/shared/schemas/gastos.js'
 import {
   parseModelList,
   getValidModels,
@@ -40,17 +42,8 @@ function sseFrame(event, data) {
 }
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-
-  if (!body?.texto?.trim()) {
-    throw createError({ statusCode: 400, message: 'El texto es obligatorio' })
-  }
-  if (body.texto.length > MAX_INPUT_CHARS) {
-    throw createError({
-      statusCode: 413,
-      message: `Texto supera el máximo de ${MAX_INPUT_CHARS} caracteres.`,
-    })
-  }
+  // Shape via Zod (texto 1..2000 chars, modo enum opcional).
+  const body = await validateBody(event, vozParseBodySchema)
 
   const runtimeConfig = useRuntimeConfig()
   const apiKey = runtimeConfig.geminiApiKey

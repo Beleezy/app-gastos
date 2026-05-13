@@ -155,11 +155,18 @@ export default defineNuxtConfig({
       // se sigue precacheando para offline.
       globPatterns: ['**/*.{js,css,html,svg,ico}'],
       cleanupOutdatedCaches: true,
-      clientsClaim: true,
-      skipWaiting: true,
+      // Opt-in update: en una app financiera, un SW comprometido
+      // (build/dep poisoning) NO debe propagarse automáticamente. El
+      // usuario decide cuándo recargar al ver el toast de actualización.
+      // Ver components/layout/SwUpdatePrompt.vue.
+      clientsClaim: false,
+      skipWaiting: false,
     },
     client: {
       installPrompt: true,
+      // Exponer hooks para que el componente SwUpdatePrompt detecte
+      // cuando hay un waiting SW y pueda llamar a updateServiceWorker.
+      periodicSyncForUpdates: 60 * 60, // chequea cada hora
     },
     devOptions: {
       enabled: true,
