@@ -71,6 +71,14 @@ export function rateLimit(event, { key, limit, windowMs, scope = 'ip', userId })
 
 /**
  * Helpers preconfigurados según el plan §1.2.
+ *
+ * Convención de límites:
+ * - `apiGlobalIp`: hard cap por IP (anti-abuso anónimo / scrapers).
+ * - `apiPerUserMinute`: tope por usuario autenticado por minuto.
+ *   Llamado desde getUsuarioFromEvent para que todo endpoint con auth
+ *   herede automáticamente la limitación por usuario.
+ * - `apiPerUserHour`: ventana horaria complementaria para frenar abuso
+ *   sostenido sin penalizar bursts puntuales.
  */
 export const rateLimits = {
   vozParse: (event, userId) =>
@@ -87,4 +95,10 @@ export const rateLimits = {
     rateLimit(event, { key: 'bulk:op', limit: 30, windowMs: 60_000, scope: 'user', userId }),
   apiDefault: (event) =>
     rateLimit(event, { key: 'api:default', limit: 120, windowMs: 60_000, scope: 'ip' }),
+  apiGlobalIp: (event) =>
+    rateLimit(event, { key: 'api:global', limit: 300, windowMs: 60_000, scope: 'ip' }),
+  apiPerUserMinute: (event, userId) =>
+    rateLimit(event, { key: 'api:user:min', limit: 120, windowMs: 60_000, scope: 'user', userId }),
+  apiPerUserHour: (event, userId) =>
+    rateLimit(event, { key: 'api:user:hour', limit: 3000, windowMs: 60 * 60_000, scope: 'user', userId }),
 }

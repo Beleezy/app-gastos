@@ -4,6 +4,7 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { sanitizeForSystemPrompt } from '../../utils/llmSafety.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
@@ -53,7 +54,12 @@ export default defineEventHandler(async (event) => {
     .from(categorias)
     .where(or(eq(categorias.esPredefinida, true), eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)))
     .orderBy(categorias.nombre)
-  const categoryList = cats.map(c => c.nombre).join(', ')
+  // Saneamos nombres custom (texto libre del usuario) antes de inyectarlos
+  // al system prompt — evita stored prompt injection.
+  const categoryList = cats
+    .map((c) => sanitizeForSystemPrompt(c.nombre, 50))
+    .filter(Boolean)
+    .join(', ')
 
   // Calculate dates
   const { fecha: hoy, diaSemana } = hoyConReferencias(zonaHoraria)

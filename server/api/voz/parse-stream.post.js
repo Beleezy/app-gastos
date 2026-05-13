@@ -28,7 +28,7 @@ import {
 } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
-import { sanitizeLlmInput, validateGastosLlm } from '../../utils/llmSafety.js'
+import { sanitizeLlmInput, sanitizeForSystemPrompt, validateGastosLlm } from '../../utils/llmSafety.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 
@@ -92,7 +92,12 @@ export default defineEventHandler(async (event) => {
     .from(categorias)
     .where(or(eq(categorias.esPredefinida, true), eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)))
     .orderBy(categorias.nombre)
-  const categoryList = cats.map((c) => c.nombre).join(', ')
+  // Saneamos nombres custom (texto libre del usuario) antes de inyectarlos
+  // al system prompt — evita stored prompt injection.
+  const categoryList = cats
+    .map((c) => sanitizeForSystemPrompt(c.nombre, 50))
+    .filter(Boolean)
+    .join(', ')
   const categoriasValidas = new Set(cats.map((c) => c.nombre))
 
   const { fecha: hoy, diaSemana, referenciasTexto: referenciaDias } = hoyConReferencias(zonaHoraria)

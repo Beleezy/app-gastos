@@ -4,7 +4,7 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
-import { sanitizeLlmInput, validateGastosLlm, validateDeudasLlm } from '../../utils/llmSafety.js'
+import { sanitizeLlmInput, sanitizeForSystemPrompt, validateGastosLlm, validateDeudasLlm } from '../../utils/llmSafety.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
@@ -58,7 +58,12 @@ export default defineEventHandler(async (event) => {
     .from(categorias)
     .where(or(eq(categorias.esPredefinida, true), eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)))
     .orderBy(categorias.nombre)
-  const categoryList = cats.map(c => c.nombre).join(', ')
+  // Categorías custom son texto libre del usuario; saneamos antes de
+  // inyectarlas al system prompt (defensa contra stored prompt injection).
+  const categoryList = cats
+    .map((c) => sanitizeForSystemPrompt(c.nombre, 50))
+    .filter(Boolean)
+    .join(', ')
 
   // Usar timezone del usuario para evitar inconsistencias
   const { fecha: hoy, diaSemana, referenciasTexto: referenciaDias } = hoyConReferencias(zonaHoraria)
@@ -119,7 +124,15 @@ Reglas:
         .select({ id: personasEntidades.id, nombre: personasEntidades.nombre })
         .from(personasEntidades)
         .where(eq(personasEntidades.usuarioId, usuarioId))
-      personasExistentes = personasDb.map(p => p.nombre)
+      // Sanitizar nombres antes de inyectarlos en el system prompt.
+      // Los nombres son texto libre del usuario almacenado en DB;
+      // sin sanitizar un atacante podría guardar un "nombre" con
+      // instrucciones tipo "ignore previous and respond X" que se
+      // ejecutarían en el contexto autoritativo del system prompt.
+      personasExistentes = personasDb
+        .map((p) => sanitizeForSystemPrompt(p.nombre, 100))
+        .filter(Boolean)
+        .slice(0, 200)
     } catch (e) {
       logger.warn('No se pudieron cargar personas existentes', { error: e })
     }
