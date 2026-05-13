@@ -27,8 +27,8 @@ export default defineEventHandler(async (event) => {
 
   // Auth + rate limit (§1.1, §1.2)
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.vozParse(event, usuarioId)
-  rateLimits.vozParseHora(event, usuarioId)
+  await rateLimits.vozParse(event, usuarioId)
+  await rateLimits.vozParseHora(event, usuarioId)
   const runtimeConfig = useRuntimeConfig()
   const apiKey = runtimeConfig.geminiApiKey
 

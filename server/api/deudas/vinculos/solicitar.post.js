@@ -8,7 +8,7 @@ import { eq, and, or } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.vinculosSolicitar(event, usuarioId)
+  await rateLimits.vinculosSolicitar(event, usuarioId)
 
   const email = body.email?.trim()?.toLowerCase()
   if (!email) {

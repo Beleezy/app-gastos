@@ -34,8 +34,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.vozParseImage(event, usuarioId)
-  rateLimits.vozParseImageHora(event, usuarioId)
+  await rateLimits.vozParseImage(event, usuarioId)
+  await rateLimits.vozParseImageHora(event, usuarioId)
   let zonaHoraria = 'America/Lima'
   try {
     const [userConfig] = await db

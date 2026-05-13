@@ -8,7 +8,7 @@ import { eq, inArray } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.bulkOp(event, usuarioId)
+  await rateLimits.bulkOp(event, usuarioId)
   const metodosPermitidos = new Set(['voz', 'foto', 'manual'])
 
   if (!body.gastos || !Array.isArray(body.gastos) || body.gastos.length === 0) {

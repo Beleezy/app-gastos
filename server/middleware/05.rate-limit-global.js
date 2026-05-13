@@ -13,11 +13,11 @@
 
 import { rateLimits } from '../utils/rateLimit.js'
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const url = event.node.req.url || ''
   if (!url.startsWith('/api/')) return
   if (url.startsWith('/api/health')) return
   if (event.context?.e2eBypass) return
 
-  rateLimits.apiGlobalIp(event)
+  await rateLimits.apiGlobalIp(event)
 })

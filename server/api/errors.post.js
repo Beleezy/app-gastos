@@ -28,7 +28,7 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   // Rate limit estricto por IP: 30 req/min, 200 req/hora
-  rateLimit(event, { key: 'errors', limit: 30, windowMs: 60_000, scope: 'ip' })
+  await rateLimit(event, { key: 'errors', limit: 30, windowMs: 60_000, scope: 'ip' })
 
   let body
   try {

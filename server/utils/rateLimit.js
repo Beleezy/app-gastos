@@ -1,22 +1,15 @@
-// Rate limiting in-memory.
+// Rate limiting.
 // Ver §1.2 de planifica.md.
 //
-// Limitación: este store vive en memoria del proceso. Para despliegues
-// multi-instancia debe sustituirse por Redis (unstorage driver redis/upstash).
+// Backend pluggable via server/utils/rateLimitStore.js:
+// - memory (default, in-process)
+// - upstash (Redis REST API, recomendado para serverless)
+//
+// La API es async (a diferencia de versiones anteriores) porque el
+// driver Upstash requiere fetch HTTP. Todos los callers deben await.
 
 import { logger } from './logger.js'
-
-const buckets = new Map()
-const SWEEP_INTERVAL_MS = 5 * 60 * 1000
-let lastSweep = Date.now()
-
-function sweep(now) {
-  if (now - lastSweep < SWEEP_INTERVAL_MS) return
-  lastSweep = now
-  for (const [key, bucket] of buckets) {
-    if (bucket.resetAt <= now) buckets.delete(key)
-  }
-}
+import { incrBucket } from './rateLimitStore.js'
 
 // Si la app corre detrás de un proxy de confianza (Vercel, Cloudflare,
 // nginx que strippa el header del cliente) podemos confiar en
@@ -30,7 +23,6 @@ function sweep(now) {
 function isProxyTrusted() {
   if (process.env.TRUST_PROXY === '1') return true
   if (process.env.TRUST_PROXY === '0') return false
-  // Default: confiar solo en producción (asumimos PaaS típico).
   return process.env.NODE_ENV === 'production'
 }
 
@@ -46,6 +38,7 @@ function getClientIp(event) {
 
 /**
  * Aplica rate limit. Lanza 429 cuando se excede.
+ * IMPORTANTE: la función es async. Los callers deben usar `await`.
  *
  * @param {object} event Nitro event.
  * @param {object} options
@@ -55,28 +48,20 @@ function getClientIp(event) {
  * @param {string} [options.scope] 'ip' (default) o 'user'.
  * @param {string} [options.userId] requerido si scope='user'.
  */
-export function rateLimit(event, { key, limit, windowMs, scope = 'ip', userId }) {
-  const now = Date.now()
-  sweep(now)
-
+export async function rateLimit(event, { key, limit, windowMs, scope = 'ip', userId }) {
   const subject = scope === 'user' ? (userId || 'anon') : getClientIp(event)
   const bucketKey = `${key}:${scope}:${subject}`
 
-  let bucket = buckets.get(bucketKey)
-  if (!bucket || bucket.resetAt <= now) {
-    bucket = { count: 0, resetAt: now + windowMs }
-    buckets.set(bucketKey, bucket)
-  }
+  const { count, resetAt } = await incrBucket(bucketKey, windowMs)
+  const now = Date.now()
 
-  bucket.count += 1
-
-  const remaining = Math.max(0, limit - bucket.count)
+  const remaining = Math.max(0, limit - count)
   setResponseHeader(event, 'X-RateLimit-Limit', String(limit))
   setResponseHeader(event, 'X-RateLimit-Remaining', String(remaining))
-  setResponseHeader(event, 'X-RateLimit-Reset', String(Math.ceil(bucket.resetAt / 1000)))
+  setResponseHeader(event, 'X-RateLimit-Reset', String(Math.ceil(resetAt / 1000)))
 
-  if (bucket.count > limit) {
-    const retryAfter = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000))
+  if (count > limit) {
+    const retryAfter = Math.max(1, Math.ceil((resetAt - now) / 1000))
     setResponseHeader(event, 'Retry-After', String(retryAfter))
     logger.warn('Rate limit excedido', { key, scope, subject, limit, windowMs })
     throw createError({
@@ -97,6 +82,8 @@ export function rateLimit(event, { key, limit, windowMs, scope = 'ip', userId })
  *   herede automáticamente la limitación por usuario.
  * - `apiPerUserHour`: ventana horaria complementaria para frenar abuso
  *   sostenido sin penalizar bursts puntuales.
+ *
+ * Todos los helpers devuelven Promise — el caller debe await.
  */
 export const rateLimits = {
   vozParse: (event, userId) =>

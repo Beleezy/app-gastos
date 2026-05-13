@@ -59,8 +59,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.vozParse(event, usuarioId)
-  rateLimits.vozParseHora(event, usuarioId)
+  await rateLimits.vozParse(event, usuarioId)
+  await rateLimits.vozParseHora(event, usuarioId)
 
   // Configurar headers SSE
   setResponseHeader(event, 'Content-Type', 'text/event-stream; charset=utf-8')

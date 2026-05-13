@@ -7,11 +7,11 @@ import { rateLimits } from './rateLimit.js'
 // Aplica rate limit por usuario (minuto + hora) una sola vez por request.
 // Se invoca aquí en lugar de en cada handler para que TODO endpoint
 // autenticado quede protegido sin tener que recordar añadirlo.
-function aplicarRateLimitUsuario(event, userId) {
+async function aplicarRateLimitUsuario(event, userId) {
   if (event.context?._rateLimitedUser) return
   event.context._rateLimitedUser = true
-  rateLimits.apiPerUserMinute(event, userId)
-  rateLimits.apiPerUserHour(event, userId)
+  await rateLimits.apiPerUserMinute(event, userId)
+  await rateLimits.apiPerUserHour(event, userId)
 }
 
 export async function getUsuarioFromEvent(event) {
@@ -37,7 +37,7 @@ export async function getUsuarioFromEvent(event) {
 
   const userId = user.sub ?? user.id
 
-  aplicarRateLimitUsuario(event, userId)
+  await aplicarRateLimitUsuario(event, userId)
 
   // Auto-provisionar: si el usuario OAuth no existe en la tabla usuarios, crearlo
   const [existe] = await db
