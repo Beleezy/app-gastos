@@ -1,18 +1,24 @@
 import { db } from '../../utils/db.js'
 import { gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, sql, ilike } from 'drizzle-orm'
+import { and, eq, sql, ilike } from 'drizzle-orm'
+import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
+
+const MAX_Q_LEN = 100
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  const { q } = getQuery(event)
 
-  const { q } = query
-
-  // Conceptos más frecuentes del usuario, opcionalmente filtrados
-  let whereConditions = [eq(gastos.usuarioId, usuarioId)]
-  if (q?.trim()) {
-    whereConditions.push(ilike(gastos.concepto, `%${q.trim()}%`))
+  // Sanitizar input antes de cualquier uso: corta a 100 chars, quita
+  // NUL/zero-width, y escapa los comodines de LIKE para que `%` no
+  // matchee todo. El binding de Drizzle ya parametriza el valor, así
+  // que SQL injection clásico está cerrado; esto cierra el caso de
+  // LIKE-as-wildcard.
+  const qSanitizado = sanitizeString(q, MAX_Q_LEN)
+  const conditions = [eq(gastos.usuarioId, usuarioId)]
+  if (qSanitizado) {
+    conditions.push(ilike(gastos.concepto, `%${escapeLikePattern(qSanitizado)}%`))
   }
 
   const result = await db
@@ -22,12 +28,12 @@ export default defineEventHandler(async (event) => {
       count: sql`count(*)`.as('count'),
     })
     .from(gastos)
-    .where(sql`${gastos.usuarioId} = ${usuarioId}${q?.trim() ? sql` AND ${gastos.concepto} ILIKE ${'%' + q.trim() + '%'}` : sql``}`)
+    .where(and(...conditions))
     .groupBy(gastos.concepto, gastos.categoriaId)
     .orderBy(sql`count(*) DESC`)
     .limit(10)
 
-  return result.map(r => ({
+  return result.map((r) => ({
     concepto: r.concepto,
     categoriaId: r.categoriaId,
     count: Number(r.count),

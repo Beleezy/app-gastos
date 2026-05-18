@@ -1,29 +1,22 @@
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { vozParseImageBodySchema } from '~/shared/schemas/gastos.js'
 import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { sanitizeForSystemPrompt } from '../../utils/llmSafety.js'
+import { assertImagePayload } from '../../utils/imageMagic.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
-// 8 MB de imagen base64 (~6 MB binario). Más que suficiente para un recibo.
-const MAX_IMAGE_BASE64_BYTES = 8 * 1024 * 1024
-
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
-
-  if (!body.image) {
-    throw createError({ statusCode: 400, message: 'La imagen es obligatoria' })
-  }
-
-  if (typeof body.image !== 'string' || body.image.length > MAX_IMAGE_BASE64_BYTES) {
-    throw createError({
-      statusCode: 413,
-      message: 'La imagen excede el tamaño máximo permitido (~8 MB).',
-    })
-  }
+  // Shape + tamaño via Zod. La validación de magic bytes es aparte
+  // (assertImagePayload) — un attacker podría enviar un PDF con MIME
+  // image/jpeg que pasa el schema pero no debe llegar al LLM.
+  const body = await validateBody(event, vozParseImageBodySchema)
 
   const runtimeConfig = useRuntimeConfig()
   const apiKey = runtimeConfig.geminiApiKey
@@ -33,8 +26,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.vozParseImage(event, usuarioId)
-  rateLimits.vozParseImageHora(event, usuarioId)
+  await rateLimits.vozParseImage(event, usuarioId)
+  await rateLimits.vozParseImageHora(event, usuarioId)
   let zonaHoraria = 'America/Lima'
   try {
     const [userConfig] = await db
@@ -53,7 +46,12 @@ export default defineEventHandler(async (event) => {
     .from(categorias)
     .where(or(eq(categorias.esPredefinida, true), eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)))
     .orderBy(categorias.nombre)
-  const categoryList = cats.map(c => c.nombre).join(', ')
+  // Saneamos nombres custom (texto libre del usuario) antes de inyectarlos
+  // al system prompt — evita stored prompt injection.
+  const categoryList = cats
+    .map((c) => sanitizeForSystemPrompt(c.nombre, 50))
+    .filter(Boolean)
+    .join(', ')
 
   // Calculate dates
   const { fecha: hoy, diaSemana } = hoyConReferencias(zonaHoraria)
@@ -90,19 +88,10 @@ Reglas:
 - Si la imagen no es un recibo o no puedes extraer gastos, devuelve: {"total_comprobante": null, "gastos": []}
 - Si solo ves el total sin desglose, usa el nombre del establecimiento o "Compra" como concepto.`
 
-  // Parse image data - accept "data:image/...;base64,XXXX" or raw base64
-  let imageBase64 = body.image
-  let mimeType = 'image/jpeg'
-
-  if (imageBase64.startsWith('data:')) {
-    const match = imageBase64.match(/^data:(image\/\w+);base64,(.+)$/)
-    if (match) {
-      mimeType = match[1]
-      imageBase64 = match[2]
-    } else {
-      throw createError({ statusCode: 400, message: 'Formato de imagen inválido' })
-    }
-  }
+  // Valida magic bytes y desempaqueta dataURI. assertImagePayload lanza
+  // 400 si el contenido no es JPEG/PNG/GIF/WEBP/HEIC, o si el MIME
+  // declarado por el cliente no concuerda con el contenido real.
+  const { mimeType, base64: imageBase64 } = assertImagePayload(body.image)
 
   // Model selection (same logic as voice parse)
   const configuredModels = parseModelList(runtimeConfig.geminiModel || 'gemini-2.5-flash')

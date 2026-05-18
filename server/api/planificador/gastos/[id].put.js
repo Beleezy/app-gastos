@@ -1,26 +1,45 @@
 import { db } from '../../../utils/db.js'
 import { gastosPlanificados, planesMensuales, categorias } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { validateBody } from '../../../utils/validate.js'
+import { gastoPlanificadoUpdateSchema } from '~/shared/schemas/planificador.js'
 import {
   replicarGastoRecurrente,
   actualizarRecurrentesFuturos,
   eliminarRecurrentesFuturos,
   generarGrupoId
 } from '../../../utils/recurrente.js'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { syncUpdated } from '../../../utils/gcalAutoSync.js'
+
+// gastosPlanificados no tiene columna usuarioId directa; el ownership se
+// deriva de planMensualId → planesMensuales.usuarioId. Cargar con JOIN
+// y devolver 404 si no pertenece al usuario evita IDOR (cambiar el UUID
+// de la URL para editar/borrar gastos de otros).
+async function cargarGastoPropio(id, usuarioId) {
+  const [row] = await db
+    .select({ gp: gastosPlanificados })
+    .from(gastosPlanificados)
+    .innerJoin(planesMensuales, eq(planesMensuales.id, gastosPlanificados.planMensualId))
+    .where(and(
+      eq(gastosPlanificados.id, id),
+      eq(planesMensuales.usuarioId, usuarioId),
+    ))
+    .limit(1)
+  return row?.gp || null
+}
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Whitelist + tipos via Zod: `estado` queda restringido al enum real
+  // (`pendiente | pagado`), monto debe ser finito y positivo, fecha
+  // YYYY-MM-DD estricto. Bloquea mass-assignment de planMensualId o
+  // googleEventId desde el body.
+  const body = await validateBody(event, gastoPlanificadoUpdateSchema)
 
-  // Get current state before update
-  const [gastoAnterior] = await db
-    .select()
-    .from(gastosPlanificados)
-    .where(eq(gastosPlanificados.id, id))
-    .limit(1)
+  // Get current state before update (con check de ownership)
+  const gastoAnterior = await cargarGastoPropio(id, usuarioId)
 
   if (!gastoAnterior) {
     throw createError({ statusCode: 404, message: 'Gasto planificado no encontrado' })

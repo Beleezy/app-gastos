@@ -55,3 +55,22 @@ jobs:
         env:
           SUPABASE_URL: 'http://localhost'
           SUPABASE_ANON_KEY: 'placeholder'
+
+  # Auditoría no bloqueante: reporta CVEs de severidad alta o crítica
+  # en las dependencias. No falla el pipeline (continue-on-error) porque
+  # los avisos transitorios sin patch disponible no deben bloquear merges.
+  # El reporte queda visible en la pestaña de checks.
+  audit:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high --omit=dev

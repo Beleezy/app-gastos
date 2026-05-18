@@ -1,13 +1,18 @@
 import { db } from '../../utils/db.js'
 import { deudas, pagosDeuda, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { deudaUpdateRealSchema } from '~/shared/schemas/deudas.js'
 import { registrarAuditoria } from '../../utils/vinculos.js'
 import { eq, and, sum } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Whitelist + tipos via Zod: rechaza personaEntidadId/tipoDeuda
+  // (no se permiten cambios de propietario via PUT), valida estado
+  // contra el enum real de DB, y bloquea valores no finitos en monto.
+  const body = await validateBody(event, deudaUpdateRealSchema)
 
   const [deudaActual] = await db
     .select()

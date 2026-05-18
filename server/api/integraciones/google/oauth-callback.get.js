@@ -3,6 +3,7 @@ import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '.
 import { verifyState } from '../../../utils/googleOAuthState.js'
 import { encrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
+import { logger } from '../../../utils/logger.js'
 import { eq, inArray } from 'drizzle-orm'
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -46,7 +47,8 @@ export default defineEventHandler(async (event) => {
     })
     tokens = await tokenRes.json()
   } catch (e) {
-    console.error('[gcal] token exchange fallo', e)
+    // Logger seguro: redacta tokens, AIza..., JWTs antes de imprimir.
+    logger.error('gcal_token_exchange', { error: e })
     return sendRedirect(event, '/configuraciones?gcal=error&motivo=token_exchange')
   }
 
@@ -54,22 +56,30 @@ export default defineEventHandler(async (event) => {
     return sendRedirect(event, '/configuraciones?gcal=error&motivo=sin_refresh_token')
   }
 
+  // Cifrar inmediatamente y borrar el plaintext del objeto tokens.
+  // Entre la creación del calendario y el insert hay llamadas HTTP que
+  // pueden tardar segundos; si el proceso se mata en ese intervalo el
+  // refresh token podría quedar en core-dump / heap snapshots. Cifrar
+  // ahora minimiza la ventana de exposición.
+  const refreshCifrado = encrypt(tokens.refresh_token)
+  const refreshTokenPlaintext = tokens.refresh_token
+  tokens.refresh_token = null
+
   // Crear calendario dedicado
   let calendar
   try {
     const client = createGcalClient({
-      refreshToken: tokens.refresh_token,
+      refreshToken: refreshTokenPlaintext,
       clientId: config.googleOAuthClientId,
       clientSecret: config.googleOAuthClientSecret,
     })
     calendar = await client.createCalendar({ summary: CALENDAR_NOMBRE, timeZone: 'America/Lima' })
   } catch (e) {
-    console.error('[gcal] createCalendar fallo', e)
+    logger.error('gcal_createCalendar', { error: e })
     return sendRedirect(event, '/configuraciones?gcal=error&motivo=crear_calendario')
   }
 
   // Persistir conexion (upsert via delete + insert)
-  const refreshCifrado = encrypt(tokens.refresh_token)
   await db.delete(googleCalendarConexiones).where(eq(googleCalendarConexiones.usuarioId, usuarioId))
   await db.insert(googleCalendarConexiones).values({
     usuarioId,

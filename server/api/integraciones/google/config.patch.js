@@ -3,6 +3,7 @@ import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '.
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { decrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
+import { logger } from '../../../utils/logger.js'
 import { recordatorioToMinutes } from '../../../utils/planificadorToGcalEvent.js'
 import { eq, and, isNotNull } from 'drizzle-orm'
 
@@ -70,7 +71,7 @@ export default defineEventHandler(async (event) => {
       })
       actualizados++
     } catch (e) {
-      console.error('[gcal] config patch fallo para', p.id, e)
+      logger.error('gcal_config_patch', { gastoPlanificadoId: p.id, error: e })
     }
   }
 

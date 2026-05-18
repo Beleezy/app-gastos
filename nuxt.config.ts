@@ -155,11 +155,18 @@ export default defineNuxtConfig({
       // se sigue precacheando para offline.
       globPatterns: ['**/*.{js,css,html,svg,ico}'],
       cleanupOutdatedCaches: true,
-      clientsClaim: true,
-      skipWaiting: true,
+      // Opt-in update: en una app financiera, un SW comprometido
+      // (build/dep poisoning) NO debe propagarse automáticamente. El
+      // usuario decide cuándo recargar al ver el toast de actualización.
+      // Ver components/layout/SwUpdatePrompt.vue.
+      clientsClaim: false,
+      skipWaiting: false,
     },
     client: {
       installPrompt: true,
+      // Exponer hooks para que el componente SwUpdatePrompt detecte
+      // cuando hay un waiting SW y pueda llamar a updateServiceWorker.
+      periodicSyncForUpdates: 60 * 60, // chequea cada hora
     },
     devOptions: {
       enabled: true,
@@ -189,8 +196,17 @@ export default defineNuxtConfig({
       appVersion: APP_VERSION,
       supabaseUrl: process.env.SUPABASE_URL || '',
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
-      devAuthBypass: process.env.DEV_AUTH_BYPASS === '1',
-      devAuthToken: process.env.DEV_AUTH_TOKEN || '',
+      // Bypass de auth para dev/E2E: SOLO se incluye fuera de producción.
+      // Si se filtra al bundle del cliente en una build de prod (preview
+      // deploy mal etiquetado, env var seteada por accidente), cualquier
+      // visitante podría leer el token desde window.__NUXT__ y suplantar
+      // a otros usuarios vía el middleware 04.dev-auth-bypass.
+      ...(process.env.NODE_ENV !== 'production'
+        ? {
+            devAuthBypass: process.env.DEV_AUTH_BYPASS === '1',
+            devAuthToken: process.env.DEV_AUTH_TOKEN || '',
+          }
+        : {}),
     },
   },
 })

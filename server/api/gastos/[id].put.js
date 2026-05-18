@@ -1,12 +1,16 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { gastoUpdateSchema } from '~/shared/schemas/gastos.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Whitelist + tipos via Zod: rechaza campos extra, valida monto finito
+  // y positivo, fecha/hora con regex, metodoRegistro como enum, etc.
+  const body = await validateBody(event, gastoUpdateSchema)
 
   const updateData = { updatedAt: new Date() }
 

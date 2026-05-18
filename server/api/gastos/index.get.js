@@ -2,6 +2,7 @@ import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, between, sql, desc, ilike, asc } from 'drizzle-orm'
+import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -22,9 +23,11 @@ export default defineEventHandler(async (event) => {
     whereConditions.push(between(gastos.fecha, primerDia, ultimaFecha))
   }
 
-  // Búsqueda por concepto
-  if (busqueda?.trim()) {
-    whereConditions.push(ilike(gastos.concepto, `%${busqueda.trim()}%`))
+  // Búsqueda por concepto — escapa `%`/`_` para evitar que un input
+  // como "%" matchee todo y filtra controles/zero-width.
+  const busquedaSan = sanitizeString(busqueda, 100)
+  if (busquedaSan) {
+    whereConditions.push(ilike(gastos.concepto, `%${escapeLikePattern(busquedaSan)}%`))
   }
 
   // Filtro por categoría

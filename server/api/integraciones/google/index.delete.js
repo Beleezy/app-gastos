@@ -3,6 +3,7 @@ import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '.
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { decrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
+import { logger } from '../../../utils/logger.js'
 import { eq, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
       await client.deleteCalendar(conexion.calendarId)
     } catch (e) {
       // No bloquear desconexion si Google falla - el usuario quiere desconectar
-      console.error('[gcal] deleteCalendar fallo', e)
+      logger.error('gcal_deleteCalendar', { error: e })
     }
   }
 

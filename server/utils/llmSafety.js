@@ -3,32 +3,102 @@
 
 // eslint-disable-next-line no-control-regex
 const CONTROL_CHARS = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g
-const PROMPT_BOUNDARY_TAGS = /<\/?(system|user|assistant|tool|user_input)[^>]*>/gi
+// Zero-width + bidi override — vectores frecuentes de obfuscación.
+// U+200B-U+200F, U+202A-U+202E, U+2060-U+206F, U+FEFF.
+const INVISIBLE_CHARS = /[​-‏‪-‮⁠-⁯﻿]/g
+const PROMPT_BOUNDARY_TAGS =
+  /<\/?(system|user|assistant|tool|user_input|instruction|prompt|context|developer)[^>]*>/gi
+// Marcadores tipo ChatML / Llama / Anthropic usados como vector de injection.
+const ROLE_MARKERS = /<\|(?:im_start|im_end|endoftext|start_header_id|end_header_id|eot_id|system|user|assistant)\|>/gi
+// Frases que históricamente disparan jailbreaks. Las neutralizamos
+// reemplazándolas por una marca para que el modelo NO las interprete
+// como instrucción autoritativa proveniente del system prompt.
+const JAILBREAK_PHRASES = [
+  /ignore\s+(?:all\s+|the\s+|previous\s+|above\s+|prior\s+)+(?:instructions|prompts|rules|directives)/gi,
+  /disregard\s+(?:all\s+|the\s+|previous\s+|above\s+|prior\s+)+(?:instructions|prompts|rules)/gi,
+  /forget\s+(?:everything|all\s+previous|the\s+above)/gi,
+  /(?:olvida|ignora|descarta)\s+(?:todo\s+lo\s+anterior|las\s+instrucciones|el\s+prompt)/gi,
+  /(?:act\s+as|you\s+are\s+now|pretend\s+to\s+be|roleplay\s+as)\s+/gi,
+  /(?:actúa|actua|hazte\s+pasar|finge\s+ser|comp[oó]rtate)\s+como\s+/gi,
+  /system\s*[:=]\s*"/gi,
+  /assistant\s*[:=]\s*"/gi,
+  /\bDAN\b|\bjailbreak\b|\bdeveloper\s+mode\b/gi,
+  /\bmodo\s+(?:desarrollador|sin\s+restricciones|libre)\b/gi,
+]
+// Marcadores que algunos parsers downstream interpretan como llamadas a tool.
+const TOOL_MARKERS = /(?:\bfunctions?\.[a-z_]+\s*\(|<tool_call>|<tool_response>|<function_call>)/gi
+// URLs y esquemas peligrosos en texto libre.
+const URL_LIKE = /\b(?:https?:\/\/|data:|javascript:|vbscript:|file:\/\/)\S+/gi
 
 /**
  * Sanitiza un input que se va a enviar al LLM:
- * - elimina caracteres de control
+ * - normaliza Unicode (NFKC) para que los homoglifos no esquiven los filtros
+ * - elimina caracteres de control y zero-width / bidi override
  * - neutraliza intentos de cerrar/abrir bloques de rol del prompt
- * - recorta a maxChars
- * - colapsa newlines repetidos
+ * - neutraliza markers ChatML / "<|...|>"
+ * - reemplaza frases típicas de prompt injection por placeholder
+ * - degrada URLs / data: / javascript: para que no actúen como hipervínculos
+ *   ejecutables si la respuesta se renderiza sin sanear
+ * - recorta a maxChars y colapsa newlines repetidos
  *
- * No es una defensa absoluta contra prompt injection, pero reduce el
- * vector más obvio. La defensa principal sigue siendo el system prompt
- * que instruye a tratar USER_INPUT como dato.
+ * No es defensa absoluta — la defensa principal sigue siendo el system
+ * prompt que delimita USER_INPUT como dato y un validador estricto de
+ * la respuesta del LLM (ver validate*Llm).
  */
 export function sanitizeLlmInput(raw, maxChars = 2000) {
   if (typeof raw !== 'string') return ''
   let text = raw
+    .normalize('NFKC')
     .replace(CONTROL_CHARS, ' ')
+    .replace(INVISIBLE_CHARS, '')
+    .replace(ROLE_MARKERS, '[marker-removido]')
     .replace(PROMPT_BOUNDARY_TAGS, '[etiqueta-removida]')
+    .replace(TOOL_MARKERS, '[tool-removido]')
+    .replace(URL_LIKE, '[url-removida]')
     .replace(/```/g, "'''")
     .replace(/\r\n/g, '\n')
     .replace(/\n{4,}/g, '\n\n\n')
-    .trim()
+
+  for (const re of JAILBREAK_PHRASES) {
+    text = text.replace(re, '[instrucción-removida] ')
+  }
+
+  text = text.trim()
 
   if (text.length > maxChars) {
     text = text.slice(0, maxChars)
   }
+  return text
+}
+
+/**
+ * Sanitiza valores que se van a inyectar dentro del PROPIO system prompt
+ * (no como USER_INPUT). Más estricto que sanitizeLlmInput porque el
+ * modelo trata el system prompt como autoridad: si un atacante logra
+ * insertar texto ahí (ej. a través de un nombre persistido en DB), el
+ * impacto es mayor.
+ *
+ * Uso típico: nombres de personas, categorías custom, etc., que vienen
+ * de DB pero originalmente fueron texto libre del usuario.
+ */
+export function sanitizeForSystemPrompt(raw, maxChars = 200) {
+  if (raw == null) return ''
+  let text = String(raw)
+    .normalize('NFKC')
+    .replace(CONTROL_CHARS, ' ')
+    .replace(INVISIBLE_CHARS, '')
+    .replace(ROLE_MARKERS, '')
+    .replace(PROMPT_BOUNDARY_TAGS, '')
+    .replace(TOOL_MARKERS, '')
+    .replace(URL_LIKE, '')
+    .replace(/```/g, "'''")
+    .replace(/[\r\n]+/g, ' ')
+
+  for (const re of JAILBREAK_PHRASES) {
+    text = text.replace(re, ' ')
+  }
+  text = text.replace(/\s+/g, ' ').trim()
+  if (text.length > maxChars) text = text.slice(0, maxChars)
   return text
 }
 

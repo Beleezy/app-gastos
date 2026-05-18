@@ -15,6 +15,19 @@ import {
   gastos,
 } from './schema.js'
 
+// Refuse to seed against a production DB. El script inserta datos
+// determinísticos / aleatorios destinados a dev y QA; ejecutarlo por
+// error contra prod sobreescribiría datos reales. Si necesitas
+// fixtures en un entorno con NODE_ENV=production (raro), establece
+// ALLOW_SEED_IN_PRODUCTION=1 explícitamente.
+if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SEED_IN_PRODUCTION !== '1') {
+  console.error(
+    'seed-test-data.js: NO se ejecuta con NODE_ENV=production. ' +
+      'Si es intencional, establece ALLOW_SEED_IN_PRODUCTION=1.',
+  )
+  process.exit(2)
+}
+
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
   console.error('DATABASE_URL no esta configurada en .env')

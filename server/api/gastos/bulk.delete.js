@@ -7,7 +7,7 @@ import { eq, and, inArray } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
-  rateLimits.bulkOp(event, usuarioId)
+  await rateLimits.bulkOp(event, usuarioId)
 
   if (!Array.isArray(body?.ids) || body.ids.length === 0) {
     throw createError({ statusCode: 400, message: 'Se requiere un array de ids' })

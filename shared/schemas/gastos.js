@@ -27,3 +27,17 @@ export const gastosBulkCreateSchema = z.object({
 export const gastosBulkIdsSchema = z.object({
   ids: z.array(z.union([z.string(), z.number()])).min(1).max(500),
 })
+
+// Body de /api/voz/parse y /api/voz/parse-stream.
+// El texto se sanitiza posteriormente con sanitizeLlmInput (ver
+// server/utils/llmSafety.js) — este schema solo valida shape y tamaño.
+export const vozParseBodySchema = z.object({
+  texto: z.string().trim().min(1, 'Texto obligatorio').max(2000, 'Máximo 2000 caracteres'),
+  modo: z.enum(['gastos', 'deudas']).optional(),
+})
+
+// Body de /api/voz/parse-image. Aceptamos dataURI (data:image/...;base64,...)
+// o base64 crudo. Límite de longitud equivale a ~6 MB de imagen binaria.
+export const vozParseImageBodySchema = z.object({
+  image: z.string().min(1, 'Imagen obligatoria').max(8 * 1024 * 1024, 'Imagen demasiado grande'),
+})
