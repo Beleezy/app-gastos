@@ -1,23 +1,34 @@
 // Security headers globales aplicados a todas las respuestas.
 // Ver §1.5 de planifica.md.
 //
-// CSP: defensa en profundidad contra XSS y data exfiltration. La app
-// es una PWA de finanzas que pinta texto del usuario y respuestas del
-// LLM; un sanitizador roto downstream no debe traducirse en ejecución
-// de script arbitrario. La lista de orígenes permite:
-// - 'self': scripts/estilos/imagenes de la propia app
-// - fonts.googleapis.com / fonts.gstatic.com: el preconnect/stylesheet
-//   de Inter que se carga desde el HTML (ver nuxt.config.ts).
-// - *.supabase.co: cliente Supabase Auth en el browser.
-// - generativelanguage.googleapis.com: si en el futuro alguna llamada
-//   al LLM se hace desde el cliente (hoy es solo server-side).
-// - data:/https: para img-src para soportar avatares OAuth y QR locales.
-// Tailwind exige 'unsafe-inline' en style-src; eliminar requeriría
-// migrar a nonces, trabajo aparte.
+// CSP: defensa en profundidad contra XSS y data exfiltration.
+//
+// script-src incluye 'unsafe-inline' porque Nuxt 3 + @vite-pwa/nuxt
+// inyectan scripts inline obligatorios:
+//   1. El script sincrónico de tema en <head> (anti-flicker en cold
+//      start, ver nuxt.config.ts:79-83).
+//   2. `window.__NUXT__ = {...}` con el state hidratado del SSR.
+//   3. Event handler inline `onload="this.media='all'"` en el link
+//      de Google Fonts.
+// Sin 'unsafe-inline' el bundle no se ejecuta, Supabase no se inicia
+// y todas las peticiones a /api/* responden 401.
+//
+// Migrar a nonces (experimental.cspNonce + hook en Nitro) es follow-up
+// — requiere generar nonce por request e inyectarlo a TODOS los scripts
+// inline que Nuxt produce, incluido el chunk de SSR state.
+//
+// El resto del CSP sigue activo y aporta defensa real:
+// - script-src sin 'https:' ni dominios externos → bloquea scripts
+//   de origen arbitrario (un XSS no puede meter <script src="evil.com">).
+// - sin 'unsafe-eval' → bloquea eval / new Function.
+// - frame-ancestors 'none' → no clickjacking.
+// - object-src 'none' → no <embed>/<object> con plugins.
+// - base-uri 'self' → no relocación del documento base.
+// - form-action 'self' → form submit no sale del origen.
 
 const CSP = [
   "default-src 'self'",
-  "script-src 'self'",
+  "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: https:",
