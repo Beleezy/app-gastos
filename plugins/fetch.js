@@ -7,13 +7,34 @@ export default defineNuxtPlugin(() => {
 
   const config = useRuntimeConfig()
 
+  // Cache del access_token en memoria. supabase.auth.getSession() lee
+  // cookies + localStorage, lo que añade 10-30ms por request en cold start.
+  // Refrescamos vía onAuthStateChange + TTL conservador (50 min, antes
+  // que expire el token de 1h de Supabase).
+  let cachedToken = null
+  let cachedAt = 0
+  const TOKEN_TTL = 50 * 60 * 1000
+
+  supabase.auth.onAuthStateChange((_event, session) => {
+    cachedToken = session?.access_token || null
+    cachedAt = session ? Date.now() : 0
+  })
+
+  async function getToken() {
+    if (cachedToken && Date.now() - cachedAt < TOKEN_TTL) return cachedToken
+    const { data: { session } } = await supabase.auth.getSession()
+    cachedToken = session?.access_token || null
+    cachedAt = session ? Date.now() : 0
+    return cachedToken
+  }
+
   const apiFetch = $fetch.create({
     onRequest: async ({ options }) => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const token = await getToken()
       const headers = { ...(options.headers || {}) }
 
-      if (session?.access_token) {
-        headers.Authorization = `Bearer ${session.access_token}`
+      if (token) {
+        headers.Authorization = `Bearer ${token}`
       }
 
       if (config.public.devAuthBypass) {

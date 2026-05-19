@@ -14,6 +14,39 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
   ],
 
+  // Flags experimentales que reducen tamaño de payload de hydration y
+  // permiten cargar partes del client-only sin generar markup en SSR.
+  experimental: {
+    payloadExtraction: true,
+    renderJsonPayloads: true,
+    treeshakeClientOnly: true,
+    asyncContext: true,
+  },
+
+  nitro: {
+    // Pre-comprimir assets en build para que el servidor estático pueda
+    // servirlos directamente con Content-Encoding correspondiente.
+    compressPublicAssets: { gzip: true, brotli: true },
+  },
+
+  vite: {
+    build: {
+      cssCodeSplit: true,
+      rollupOptions: {
+        output: {
+          // Aislar libs pesadas (jspdf/xlsx) en chunks separados. Como ya
+          // se importan con `await import(...)` en useDeudaPdf/useExportExcel,
+          // separarlas evita que su código se mezcle con código de la app.
+          manualChunks(id: string) {
+            if (id.includes('node_modules/jspdf')) return 'vendor-jspdf'
+            if (id.includes('node_modules/xlsx')) return 'vendor-xlsx'
+            if (id.includes('node_modules/@supabase')) return 'vendor-supabase'
+          },
+        },
+      },
+    },
+  },
+
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
   supabase: {
     url: process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL || '',
@@ -58,6 +91,11 @@ export default defineNuxtConfig({
         // Preconnect a Google Fonts para reducir latencia DNS/TLS en el primer paint.
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        // Preconnect a Supabase para que el handshake TLS del primer fetch
+        // a /auth y /rest empiece en paralelo con la descarga del JS.
+        ...(process.env.SUPABASE_URL
+          ? [{ rel: 'preconnect', href: process.env.SUPABASE_URL, crossorigin: '' }]
+          : []),
         // Cargar Inter sin bloquear el render: descargar como `print` y
         // promover a `all` cuando esté listo. En PWA Android esto evitaba
         // 1-3 s de splash blanco esperando el CSS de Google Fonts cuando
@@ -161,6 +199,46 @@ export default defineNuxtConfig({
       // Ver components/layout/SwUpdatePrompt.vue.
       clientsClaim: false,
       skipWaiting: false,
+      // Runtime caching: respaldo offline para GETs de API y caché de
+      // fuentes. Workbox no intercepta POST/PUT/DELETE por default, así
+      // que las mutaciones se siguen enviando a red directamente.
+      runtimeCaching: [
+        {
+          // Endpoints "estables" (categorías, configuraciones): SWR para
+          // servir cache instantáneo y revalidar en background.
+          urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean; request: Request }) =>
+            sameOrigin && (
+              url.pathname.startsWith('/api/categorias') ||
+              url.pathname.startsWith('/api/configuraciones')
+            ),
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'api-stable',
+            expiration: { maxEntries: 20, maxAgeSeconds: 3600 },
+          },
+        },
+        {
+          // Resto del API: NetworkFirst con timeout corto. Si la red
+          // tarda más de 3s, se sirve la última respuesta cacheada.
+          urlPattern: ({ url, sameOrigin, request }: { url: URL; sameOrigin: boolean; request: Request }) =>
+            sameOrigin && url.pathname.startsWith('/api/') && request.method === 'GET',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'api-dynamic',
+            networkTimeoutSeconds: 3,
+            expiration: { maxEntries: 80, maxAgeSeconds: 300 },
+          },
+        },
+        {
+          // Webfonts: CacheFirst, viven 1 año.
+          urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'gfonts',
+            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+          },
+        },
+      ],
     },
     client: {
       installPrompt: true,
@@ -176,6 +254,8 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/auth/confirm': { ssr: false },
+    '/auth/**': { ssr: false },
+    '/login': { ssr: false },
   },
 
   runtimeConfig: {

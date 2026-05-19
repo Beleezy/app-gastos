@@ -15,6 +15,11 @@ export default defineEventHandler(async (event) => {
   if (tipo) conditions.push(eq(deudas.tipoDeuda, tipo))
   if (estado) conditions.push(eq(deudas.estado, estado))
 
+  // Paginación: default 200, máx 500. Suficiente para casi todos los
+  // usuarios y evita cargar miles de filas si alguien acumula deudas.
+  const limit = Math.min(parseInt(query.limit) || 200, 500)
+  const offset = Math.max(parseInt(query.offset) || 0, 0)
+
   const deudasRaw = await db
     .select({
       id: deudas.id,
@@ -36,6 +41,8 @@ export default defineEventHandler(async (event) => {
     .leftJoin(personasEntidades, eq(deudas.personaEntidadId, personasEntidades.id))
     .where(and(...conditions))
     .orderBy(sql`${deudas.createdAt} DESC`)
+    .limit(limit)
+    .offset(offset)
 
   return deudasRaw.map(d => ({
     ...d,

@@ -755,10 +755,21 @@ function aplicarQueryMes() {
   if (anio >= 2000 && anio <= 3000) anioSeleccionado.value = anio
 }
 
-onMounted(async () => {
+onMounted(() => {
   aplicarQueryMes()
   cargarFavoritos()
-  await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto(), fetchConfig()])
+  // No bloquear el montaje esperando todos los fetches: cada bloque tiene
+  // su propio skeleton/loading. Lo críticamente visible (HistorialDiario,
+  // resumen) carga su skeleton inmediato y rellena cuando llega data.
+  // `fetchCategorias` y `fetchConfig` están cacheados (SWR) por
+  // useResourceCache y rara vez disparan red en revisitas.
+  Promise.all([
+    fetchGastosMensuales(),
+    fetchResumenMensual(),
+    fetchCategorias(),
+    fetchPresupuesto(),
+    fetchConfig(),
+  ]).catch(() => {})
   attachSwipe(historialSwipeZone.value)
   setupResumenObserver()
 })

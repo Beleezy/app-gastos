@@ -29,7 +29,10 @@ export const categorias = pgTable('categorias', {
   color: varchar('color', { length: 7 }),
   esPredefinida: boolean('es_predefinida').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('categorias_usuario_idx').on(table.usuarioId),
+  index('categorias_usuario_predef_idx').on(table.usuarioId, table.esPredefinida),
+])
 
 // ── Tabla 3: planes_mensuales ──
 export const planesMensuales = pgTable('planes_mensuales', {
@@ -42,6 +45,7 @@ export const planesMensuales = pgTable('planes_mensuales', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   unique('planes_mensuales_usuario_mes_anio').on(table.usuarioId, table.mes, table.anio),
+  index('planes_mensuales_usuario_idx').on(table.usuarioId),
 ])
 
 // ── Tabla 4: gastos_planificados ──
@@ -62,6 +66,7 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
 }, (table) => [
   index('gastos_planificados_plan_idx').on(table.planMensualId),
   index('gastos_planificados_plan_estado_idx').on(table.planMensualId, table.estado),
+  index('gastos_planificados_categoria_idx').on(table.categoriaId),
 ])
 
 // ── Tabla 5: gastos ──
@@ -149,6 +154,8 @@ export const personasEntidades = pgTable('personas_entidades', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   index('personas_entidades_usuario_idx').on(table.usuarioId),
+  index('personas_entidades_usuario_updated_idx').on(table.usuarioId, table.updatedAt),
+  index('personas_entidades_vinculado_idx').on(table.vinculadoUsuarioId),
 ])
 
 // ── Tabla 7: deudas ──
@@ -170,6 +177,8 @@ export const deudas = pgTable('deudas', {
 }, (table) => [
   index('deudas_persona_estado_idx').on(table.personaEntidadId, table.estado),
   index('deudas_usuario_tipo_idx').on(table.usuarioId, table.tipoDeuda),
+  index('deudas_usuario_estado_idx').on(table.usuarioId, table.estado),
+  index('deudas_usuario_updated_idx').on(table.usuarioId, table.updatedAt),
 ])
 
 // ── Tabla 8: configuraciones ──
@@ -269,6 +278,7 @@ export const ahorros = pgTable('ahorros', {
 }, (table) => [
   index('ahorros_usuario_mes_idx').on(table.usuarioId, table.anio, table.mes),
   index('ahorros_medio_idx').on(table.medioAhorroId),
+  index('ahorros_usuario_fecha_idx').on(table.usuarioId, table.fecha),
 ])
 
 // ── Tabla: metas_ahorro ──
@@ -300,6 +310,7 @@ export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
   index('solicitudes_vinculo_destinatario_idx').on(table.destinatarioEmail),
   index('solicitudes_vinculo_remitente_idx').on(table.remitenteId),
   index('solicitudes_vinculo_estado_idx').on(table.estado),
+  index('solicitudes_vinculo_destinatario_estado_idx').on(table.destinatarioEmail, table.estado),
 ])
 
 // ── Tabla 15: suscripciones_push — Web Push API ──

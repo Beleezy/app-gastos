@@ -26,9 +26,14 @@ export function getDb() {
     const isLocalDatabase = isLocalAlias || isPrivateIPv4
     const shouldDisableSsl = sslMode === 'disable' || sslMode === 'allow' || sslMode === 'prefer' || isLocalDatabase
 
+    const poolMax = parseInt(process.env.DB_POOL_MAX || '10', 10)
     const client = postgres(databaseUrl, {
-      max: 1,
+      // Pool de 10 por proceso permite servir requests concurrentes sin
+      // serializar. Supabase pooler (PgBouncer transactional) multiplexa
+      // por debajo, así que este valor es por instancia de la app.
+      max: poolMax,
       idle_timeout: 20,
+      connect_timeout: 10,
       // En CI/E2E local (localhost) Postgres suele correr sin TLS.
       // Para entornos remotos mantenemos SSL obligatorio.
       ssl: shouldDisableSsl ? false : 'require',

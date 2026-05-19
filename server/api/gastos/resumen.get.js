@@ -8,28 +8,48 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const { fecha, mes, anio } = query
 
-  // Total del día
-  let totalDia = 0
-  if (fecha) {
-    const [result] = await db
-      .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
-      .from(gastos)
-      .where(and(eq(gastos.usuarioId, usuarioId), eq(gastos.fecha, fecha)))
-    totalDia = parseFloat(result.total)
-  }
+  // Cache-Control: el resumen del día/mes cambia con cada gasto, pero un
+  // valor cacheado de hasta 30s es aceptable y reduce carga en
+  // navegaciones rápidas. SW (workbox NetworkFirst) lo aprovecha también.
+  setHeader(event, 'Cache-Control', 'private, max-age=30, stale-while-revalidate=120')
 
-  // Total del mes
-  let totalMes = 0
+  // Si hay mes/anio calculamos totalDia + totalMes en UNA sola query con
+  // CASE WHEN para evitar dos round-trips. La fecha del día se inyecta
+  // como literal SQL para que el CASE pueda compararla.
   if (mes && anio) {
     const primerDia = `${anio}-${String(mes).padStart(2, '0')}-01`
     const ultimoDia = new Date(Number(anio), Number(mes), 0).getDate()
     const ultimaFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(ultimoDia).padStart(2, '0')}`
-    const [result] = await db
-      .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
+
+    const totalDiaExpr = fecha
+      ? sql`COALESCE(SUM(CASE WHEN ${gastos.fecha} = ${fecha} THEN ${gastos.monto} END), 0)`
+      : sql`0`
+
+    const [row] = await db
+      .select({
+        totalDia: totalDiaExpr,
+        totalMes: sql`COALESCE(SUM(${gastos.monto}), 0)`,
+      })
       .from(gastos)
-      .where(and(eq(gastos.usuarioId, usuarioId), between(gastos.fecha, primerDia, ultimaFecha)))
-    totalMes = parseFloat(result.total)
+      .where(and(
+        eq(gastos.usuarioId, usuarioId),
+        between(gastos.fecha, primerDia, ultimaFecha),
+      ))
+
+    return {
+      totalDia: parseFloat(row.totalDia),
+      totalMes: parseFloat(row.totalMes),
+    }
   }
 
-  return { totalDia, totalMes }
+  // Fallback: solo total del día.
+  if (fecha) {
+    const [row] = await db
+      .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
+      .from(gastos)
+      .where(and(eq(gastos.usuarioId, usuarioId), eq(gastos.fecha, fecha)))
+    return { totalDia: parseFloat(row.total), totalMes: 0 }
+  }
+
+  return { totalDia: 0, totalMes: 0 }
 })

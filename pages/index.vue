@@ -321,14 +321,17 @@ const porcentajePlanPagado = computed(() => {
   return (countPagados.value / countTotal.value) * 100
 })
 
-onMounted(async () => {
-  // Cargar en paralelo
-  await Promise.allSettled([
-    cargarResumenGastos(),
-    cargarResumenDeudas(),
-    cargarResumenPlan(),
-    cargarResumenAhorros(),
-  ])
+onMounted(() => {
+  // Disparar fetches en paralelo sin esperar: cada card maneja su propio
+  // skeleton/loading. Antes el `await Promise.allSettled` retrasaba el
+  // TTI ~200-300ms en PWA fría hasta que TODAS las requests resolvieran.
+  // Ahora el dashboard se monta inmediato y los datos llenan las cards
+  // a medida que llegan. El menos crítico (ahorros) se difiere para que
+  // no compita con los otros tres por el main thread.
+  cargarResumenGastos().catch(() => {})
+  cargarResumenDeudas().catch(() => {})
+  cargarResumenPlan().catch(() => {})
+  setTimeout(() => cargarResumenAhorros().catch(() => {}), 250)
 })
 
 async function cargarResumenGastos() {

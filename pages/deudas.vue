@@ -102,7 +102,7 @@
     <DeudasConfirmacionVozDeuda />
 
     <!-- Form Deuda Modal -->
-    <DeudasFormDeuda
+    <LazyDeudasFormDeuda
       v-if="showFormDeuda"
       :persona-predefinida="personaSeleccionada"
       @close="showFormDeuda = false"
@@ -110,7 +110,7 @@
     />
 
     <!-- Form Pago Modal -->
-    <DeudasFormPago
+    <LazyDeudasFormPago
       v-if="showFormPago && deudaParaPago"
       :deuda="deudaParaPago"
       @close="cerrarFormPago"
@@ -118,7 +118,7 @@
     />
 
     <!-- Form Editar Deuda Modal -->
-    <DeudasFormEditarDeuda
+    <LazyDeudasFormEditarDeuda
       v-if="showFormEditar && deudaParaEditar"
       :deuda="deudaParaEditar"
       @close="cerrarFormEditar"
@@ -126,7 +126,7 @@
     />
 
     <!-- Form Pago Global Modal -->
-    <DeudasFormPagoGlobal
+    <LazyDeudasFormPagoGlobal
       v-if="showFormPagoGlobal && personaSeleccionada"
       :persona="personaSeleccionada"
       :total-pendiente="totalPendientePersona"

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200" :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'">
     <LayoutOfflineBanner />
-    <LayoutSideNav />
+    <LazyLayoutSideNav />
     <main
       class="flex-1 pb-20 lg:pb-10"
       :class="isModalOpen ? 'overflow-hidden' : 'overflow-y-auto'"
@@ -11,11 +11,11 @@
       </div>
     </main>
     <LayoutBottomNav />
-    <LayoutMobileDrawer />
+    <LazyLayoutMobileDrawer />
     <LayoutSyncQueueBadge />
-    <LayoutPwaUpdatePrompt />
+    <LazyLayoutPwaUpdatePrompt />
     <SharedToastNotification />
-    <OnboardingTourOverlay />
+    <LazyOnboardingTourOverlay />
   </div>
 </template>
 

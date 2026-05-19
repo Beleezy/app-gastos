@@ -290,17 +290,26 @@ export function useDeudas() {
     }
   }
 
-  // Polling for real-time sync with linked users
+  // Polling for real-time sync with linked users.
+  // Pausa cuando el tab no es visible o el navegador está offline para
+  // ahorrar batería/datos (especialmente importante en PWA Android).
   const pollingInterval = ref(null)
   const pollingActivo = ref(false)
+  let pollingVisibilityListener = null
+  let pollingFetchEnCurso = false
 
   function iniciarPolling(personaId) {
     detenerPolling()
-    pollingInterval.value = setInterval(async () => {
+
+    async function tick() {
+      if (typeof document !== 'undefined' && document.hidden) return
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return
       if (!personaSeleccionada.value || personaSeleccionada.value.id !== personaId) {
         detenerPolling()
         return
       }
+      if (pollingFetchEnCurso) return // Evitar solapamiento si la red es lenta.
+      pollingFetchEnCurso = true
       try {
         pollingActivo.value = true
         await Promise.all([
@@ -314,8 +323,18 @@ export function useDeudas() {
         // Silent fail on polling
       } finally {
         pollingActivo.value = false
+        pollingFetchEnCurso = false
       }
-    }, 10000) // Poll every 10 seconds
+    }
+
+    pollingInterval.value = setInterval(tick, 10000)
+
+    if (typeof document !== 'undefined') {
+      // Disparar un tick inmediato cuando el tab vuelve a ser visible
+      // para no esperar hasta 10s tras retomar la PWA.
+      pollingVisibilityListener = () => { if (!document.hidden) tick() }
+      document.addEventListener('visibilitychange', pollingVisibilityListener, { passive: true })
+    }
   }
 
   function detenerPolling() {
@@ -323,6 +342,11 @@ export function useDeudas() {
       clearInterval(pollingInterval.value)
       pollingInterval.value = null
     }
+    if (pollingVisibilityListener && typeof document !== 'undefined') {
+      document.removeEventListener('visibilitychange', pollingVisibilityListener)
+      pollingVisibilityListener = null
+    }
+    pollingFetchEnCurso = false
   }
 
   function seleccionarPersona(persona) {

@@ -14,18 +14,33 @@ async function aplicarRateLimitUsuario(event, userId) {
   await rateLimits.apiPerUserHour(event, userId)
 }
 
+// Cache in-memory de usuarios ya provisionados. Una vez verificado que el
+// UUID existe en `usuarios`, evitamos hacer SELECT + INSERT en cada request
+// autenticado. Reset al reiniciar el proceso (sin coste, se rellena solo).
+const provisionedUsers = new Set()
+
+async function provisionarUsuarioSiHaceFalta(userId, valores) {
+  if (provisionedUsers.has(userId)) return
+  const [existe] = await db
+    .select({ id: usuarios.id })
+    .from(usuarios)
+    .where(eq(usuarios.id, userId))
+    .limit(1)
+  if (!existe) {
+    await db.insert(usuarios).values(valores).onConflictDoNothing()
+  }
+  provisionedUsers.add(userId)
+}
+
 export async function getUsuarioFromEvent(event) {
   // Bypass de auth para tests E2E (server/middleware/03.e2e-auth-bypass.js)
   if (event.context?.e2eBypass && event.context?.usuario?.id) {
     const e2eId = event.context.usuario.id
-    const [existe] = await db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.id, e2eId)).limit(1)
-    if (!existe) {
-      await db.insert(usuarios).values({
-        id: e2eId,
-        nombre: 'E2E Test User',
-        email: event.context.usuario.email || 'e2e@test.local',
-      }).onConflictDoNothing()
-    }
+    await provisionarUsuarioSiHaceFalta(e2eId, {
+      id: e2eId,
+      nombre: 'E2E Test User',
+      email: event.context.usuario.email || 'e2e@test.local',
+    })
     return e2eId
   }
 
@@ -39,20 +54,11 @@ export async function getUsuarioFromEvent(event) {
 
   await aplicarRateLimitUsuario(event, userId)
 
-  // Auto-provisionar: si el usuario OAuth no existe en la tabla usuarios, crearlo
-  const [existe] = await db
-    .select({ id: usuarios.id })
-    .from(usuarios)
-    .where(eq(usuarios.id, userId))
-    .limit(1)
-
-  if (!existe) {
-    await db.insert(usuarios).values({
-      id: userId,
-      nombre: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
-      email: user.email || null,
-    }).onConflictDoNothing()
-  }
+  await provisionarUsuarioSiHaceFalta(userId, {
+    id: userId,
+    nombre: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Usuario',
+    email: user.email || null,
+  })
 
   return userId
 }

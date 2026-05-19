@@ -13,27 +13,23 @@ export default defineEventHandler(async (event) => {
   const mes = parseInt(query.mes) || mesLocal
   const anio = parseInt(query.anio) || anioLocal
 
-  // Find existing plan
-  let [plan] = await db
-    .select()
-    .from(planesMensuales)
-    .where(and(
+  // Buscar plan y config en paralelo (independientes hasta el insert).
+  let [planRows, configRows] = await Promise.all([
+    db.select().from(planesMensuales).where(and(
       eq(planesMensuales.usuarioId, usuarioId),
       eq(planesMensuales.mes, mes),
-      eq(planesMensuales.anio, anio)
-    ))
-    .limit(1)
+      eq(planesMensuales.anio, anio),
+    )).limit(1),
+    db.select({ presupuestoMensualDefault: configuraciones.presupuestoMensualDefault })
+      .from(configuraciones)
+      .where(eq(configuraciones.usuarioId, usuarioId))
+      .limit(1),
+  ])
+  let plan = planRows[0]
 
   // Auto-create plan if not found
   if (!plan) {
-    const [config] = await db
-      .select()
-      .from(configuraciones)
-      .where(eq(configuraciones.usuarioId, usuarioId))
-      .limit(1)
-
-    const presupuesto = config?.presupuestoMensualDefault || '0'
-
+    const presupuesto = configRows[0]?.presupuestoMensualDefault || '0'
     try {
       const [newPlan] = await db
         .insert(planesMensuales)
@@ -58,59 +54,62 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Fetch planned expenses with category data
-  const gastosRaw = await db
-    .select({
-      id: gastosPlanificados.id,
-      planMensualId: gastosPlanificados.planMensualId,
-      categoriaId: gastosPlanificados.categoriaId,
-      concepto: gastosPlanificados.concepto,
-      montoEstimado: gastosPlanificados.montoEstimado,
-      fechaProbablePago: gastosPlanificados.fechaProbablePago,
-      esRecurrente: gastosPlanificados.esRecurrente,
-      recurrenteGrupoId: gastosPlanificados.recurrenteGrupoId,
-      estado: gastosPlanificados.estado,
-      notas: gastosPlanificados.notas,
-      createdAt: gastosPlanificados.createdAt,
-      categoriaNombre: categorias.nombre,
-      categoriaIcono: categorias.icono,
-      categoriaColor: categorias.color,
-      gastoRegistradoId: gastos.id,
-      gastoRegistradoFecha: gastos.fecha,
-      gastoRegistradoHora: gastos.hora,
-      gastoRegistradoNotas: gastos.notas,
-    })
-    .from(gastosPlanificados)
-    .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
-    .leftJoin(gastos, and(
-      eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
-      eq(gastos.usuarioId, usuarioId),
-    ))
-    .where(eq(gastosPlanificados.planMensualId, plan.id))
-    .orderBy(gastosPlanificados.fechaProbablePago)
-
-  // Fetch real expenses for this month grouped by category
+  // Ya con plan resuelto, las siguientes 3 lecturas son independientes.
   const primerDia = `${anio}-${String(mes).padStart(2, '0')}-01`
   const ultimoDia = `${anio}-${String(mes).padStart(2, '0')}-${new Date(anio, mes, 0).getDate()}`
 
-  const gastosRealesRaw = await db
-    .select({
-      categoriaId: gastos.categoriaId,
-      totalReal: sql`COALESCE(SUM(${gastos.monto}), 0)`.as('totalReal'),
-    })
-    .from(gastos)
-    .where(and(
-      eq(gastos.usuarioId, usuarioId),
-      between(gastos.fecha, primerDia, ultimoDia),
-    ))
-    .groupBy(gastos.categoriaId)
+  const [gastosRaw, gastosRealesRaw, portfolio] = await Promise.all([
+    db
+      .select({
+        id: gastosPlanificados.id,
+        planMensualId: gastosPlanificados.planMensualId,
+        categoriaId: gastosPlanificados.categoriaId,
+        concepto: gastosPlanificados.concepto,
+        montoEstimado: gastosPlanificados.montoEstimado,
+        fechaProbablePago: gastosPlanificados.fechaProbablePago,
+        esRecurrente: gastosPlanificados.esRecurrente,
+        recurrenteGrupoId: gastosPlanificados.recurrenteGrupoId,
+        estado: gastosPlanificados.estado,
+        notas: gastosPlanificados.notas,
+        createdAt: gastosPlanificados.createdAt,
+        categoriaNombre: categorias.nombre,
+        categoriaIcono: categorias.icono,
+        categoriaColor: categorias.color,
+        gastoRegistradoId: gastos.id,
+        gastoRegistradoFecha: gastos.fecha,
+        gastoRegistradoHora: gastos.hora,
+        gastoRegistradoNotas: gastos.notas,
+      })
+      .from(gastosPlanificados)
+      .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
+      .leftJoin(gastos, and(
+        eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
+        eq(gastos.usuarioId, usuarioId),
+      ))
+      .where(eq(gastosPlanificados.planMensualId, plan.id))
+      .orderBy(gastosPlanificados.fechaProbablePago),
+
+    db
+      .select({
+        categoriaId: gastos.categoriaId,
+        totalReal: sql`COALESCE(SUM(${gastos.monto}), 0)`.as('totalReal'),
+      })
+      .from(gastos)
+      .where(and(
+        eq(gastos.usuarioId, usuarioId),
+        between(gastos.fecha, primerDia, ultimoDia),
+      ))
+      .groupBy(gastos.categoriaId),
+
+    fetchFuturePortfolio(db, usuarioId),
+  ])
 
   const gastosRealesPorCategoria = {}
   for (const g of gastosRealesRaw) {
     gastosRealesPorCategoria[g.categoriaId] = parseFloat(g.totalReal)
   }
 
-  const { gastosFuturos, resumenFuturos } = await fetchFuturePortfolio(db, usuarioId)
+  const { gastosFuturos, resumenFuturos } = portfolio
 
   return {
     plan: {
