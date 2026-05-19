@@ -3,7 +3,7 @@ import { planesMensuales, gastosPlanificados, categorias, configuraciones, gasto
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { fetchFuturePortfolio } from '../../utils/gastosFuturos.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
-import { eq, and, between, sql } from 'drizzle-orm'
+import { eq, and, between, sql, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -85,6 +85,7 @@ export default defineEventHandler(async (event) => {
       .leftJoin(gastos, and(
         eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
         eq(gastos.usuarioId, usuarioId),
+        isNull(gastos.deletedAt),
       ))
       .where(eq(gastosPlanificados.planMensualId, plan.id))
       .orderBy(gastosPlanificados.fechaProbablePago),
@@ -98,6 +99,7 @@ export default defineEventHandler(async (event) => {
       .where(and(
         eq(gastos.usuarioId, usuarioId),
         between(gastos.fecha, primerDia, ultimoDia),
+        isNull(gastos.deletedAt),
       ))
       .groupBy(gastos.categoriaId),
 

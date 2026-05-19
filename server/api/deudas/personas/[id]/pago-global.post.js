@@ -4,7 +4,7 @@ import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { crearPagoEspejo, registrarAuditoria } from '../../../../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { priorizarDeudasParaPago } from '../../../../utils/pagosMath.js'
-import { eq, and, or } from 'drizzle-orm'
+import { eq, and, or, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const personaId = getRouterParam(event, 'id')
@@ -42,6 +42,7 @@ export default defineEventHandler(async (event) => {
     .where(and(
       eq(deudas.usuarioId, usuarioId),
       eq(deudas.personaEntidadId, personaId),
+      isNull(deudas.deletedAt),
       or(eq(deudas.estado, 'pendiente'), eq(deudas.estado, 'parcial'))
     ))
 
@@ -82,7 +83,7 @@ export default defineEventHandler(async (event) => {
           estado: nuevoEstado,
           updatedAt: new Date(),
         })
-        .where(eq(deudas.id, deuda.id))
+        .where(and(eq(deudas.id, deuda.id), isNull(deudas.deletedAt)))
         .returning()
 
       // Sincronizar con espejo si la deuda está vinculada
@@ -95,7 +96,7 @@ export default defineEventHandler(async (event) => {
             estado: nuevoEstado,
             updatedAt: new Date(),
           })
-          .where(eq(deudas.id, deuda.vinculoDeudaId))
+          .where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
       }
 
       pagosRealizados.push({

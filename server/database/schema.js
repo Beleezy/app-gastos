@@ -82,12 +82,14 @@ export const gastos = pgTable('gastos', {
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
   transcripcionVoz: text('transcripcion_voz'),
   notas: text('notas'),
+  deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
   index('gastos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
   index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
   uniqueIndex('gastos_planificado_unique').on(table.gastoPlanificadoId),
+  index('gastos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
 ])
 
 // ── Tabla 6: personas_entidades ──
@@ -172,6 +174,7 @@ export const deudas = pgTable('deudas', {
   estado: estadoDeuda('estado').default('pendiente').notNull(),
   notas: text('notas'),
   vinculoDeudaId: uuid('vinculo_deuda_id'),
+  deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
@@ -180,6 +183,7 @@ export const deudas = pgTable('deudas', {
   index('deudas_usuario_estado_idx').on(table.usuarioId, table.estado),
   index('deudas_usuario_updated_idx').on(table.usuarioId, table.updatedAt),
   index('deudas_vinculo_deuda_idx').on(table.vinculoDeudaId),
+  index('deudas_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
 ])
 
 // ── Tabla 8: configuraciones ──
@@ -210,11 +214,13 @@ export const pagosDeuda = pgTable('pagos_deuda', {
   metodoPago: varchar('metodo_pago', { length: 100 }),
   notas: text('notas'),
   vinculoPagoId: uuid('vinculo_pago_id'),
+  deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   index('pagos_deuda_deuda_idx').on(table.deudaId),
   index('pagos_deuda_deuda_fecha_idx').on(table.deudaId, table.fechaPago),
   index('pagos_deuda_vinculo_pago_idx').on(table.vinculoPagoId),
+  index('pagos_deuda_deleted_idx').on(table.deletedAt),
 ])
 
 // ── Tabla 10: auditoria_vinculos ──
@@ -247,6 +253,30 @@ export const vinculosCheckpoints = pgTable('vinculos_checkpoints', {
 }, (table) => [
   index('vinculos_checkpoints_persona_a_idx').on(table.personaAId),
   index('vinculos_checkpoints_par_tipo_idx').on(table.personaAId, table.tipo),
+])
+
+// ── Tabla: ingresos ── (módulo de ingresos, espejo simple de gastos)
+// Justifica saldo neto del mes y proyección de flujo de caja. Las
+// categorías de ingreso se distinguen por `tipo_origen` (no se reusan
+// las de gasto para no contaminar listas).
+export const ingresos = pgTable('ingresos', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  concepto: varchar('concepto', { length: 255 }).notNull(),
+  monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
+  fecha: date('fecha').notNull(),
+  origen: varchar('origen', { length: 60 }), // 'salario' | 'freelance' | 'inversion' | 'otro' (libre)
+  esRecurrente: boolean('es_recurrente').default(false).notNull(),
+  recurrenteGrupoId: uuid('recurrente_grupo_id'),
+  metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
+  notas: text('notas'),
+  deletedAt: timestamp('deleted_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('ingresos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
+  index('ingresos_usuario_origen_idx').on(table.usuarioId, table.origen),
+  index('ingresos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
 ])
 
 // ── Tabla: medios_ahorro ──

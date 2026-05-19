@@ -156,6 +156,38 @@
         </template>
       </NuxtLink>
 
+      <!-- Ingresos / Saldo neto -->
+      <NuxtLink
+        to="/ingresos"
+        class="bg-theme-card rounded-2xl p-4 border block active:bg-theme-border-md transition-colors lg:col-span-1"
+        :class="totalIngresosMes > 0 ? 'border-emerald-500/20' : 'border-dashed border-theme-border'"
+      >
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+              <span class="text-base leading-none">💰</span>
+            </div>
+            <span class="text-xs font-semibold text-theme-text">Ingresos</span>
+          </div>
+          <span class="text-[10px] text-emerald-400">{{ totalIngresosMes > 0 ? 'Ver detalle →' : 'Empezar →' }}</span>
+        </div>
+        <template v-if="totalIngresosMes > 0">
+          <p class="text-lg font-bold text-emerald-400">{{ currencySymbol }} {{ formatMonto(totalIngresosMes) }}</p>
+          <div class="mt-2 flex items-center justify-between">
+            <span class="text-[10px] text-theme-text-muted">Saldo neto</span>
+            <span class="text-[11px] font-semibold" :class="saldoNetoMes >= 0 ? 'text-emerald-400' : 'text-red-400'">
+              {{ currencySymbol }} {{ formatMonto(saldoNetoMes) }}
+            </span>
+          </div>
+        </template>
+        <template v-else>
+          <p class="text-[11px] text-theme-text-sec leading-relaxed">
+            Registra ingresos para ver tu saldo neto del mes.
+          </p>
+          <p class="mt-1.5 text-[10px] text-emerald-400 font-medium">Registrar ingreso →</p>
+        </template>
+      </NuxtLink>
+
       <!-- Resumen de ahorros -->
       <NuxtLink
         to="/ahorros"
@@ -298,6 +330,10 @@ const ahorrosMetaMensual = ref(null)
 const ahorrosProgresoMensual = ref(0)
 const ahorrosPorMedio = ref([])
 
+// Ingresos
+const totalIngresosMes = ref(0)
+const saldoNetoMes = ref(0)
+
 // Estados de error por card (A3)
 const errorGastos = ref(false)
 const errorDeudas = ref(false)
@@ -332,6 +368,7 @@ onMounted(() => {
   cargarResumenDeudas().catch(() => {})
   cargarResumenPlan().catch(() => {})
   setTimeout(() => cargarResumenAhorros().catch(() => {}), 250)
+  setTimeout(() => cargarResumenIngresos().catch(() => {}), 350)
 })
 
 async function cargarResumenGastos() {
@@ -385,6 +422,18 @@ async function cargarResumenPlan() {
     console.warn('[dashboard] cargarResumenPlan falló:', e)
   } finally {
     loadingPlan.value = false
+  }
+}
+
+async function cargarResumenIngresos() {
+  try {
+    const data = await $fetch('/api/ingresos/resumen', {
+      query: { mes: mesActualNum, anio: anioActual }
+    })
+    totalIngresosMes.value = parseFloat(data.totalIngresos) || 0
+    saldoNetoMes.value = parseFloat(data.saldoNeto) || 0
+  } catch (e) {
+    console.warn('[dashboard] cargarResumenIngresos falló:', e)
   }
 }
 

@@ -1,7 +1,7 @@
 import { db } from '../../../../utils/db.js'
 import { pagosDeuda, deudas } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const deudaId = getRouterParam(event, 'id')
@@ -14,7 +14,8 @@ export default defineEventHandler(async (event) => {
     .from(deudas)
     .where(and(
       eq(deudas.id, deudaId),
-      eq(deudas.usuarioId, usuarioId)
+      eq(deudas.usuarioId, usuarioId),
+      isNull(deudas.deletedAt)
     ))
     .limit(1)
 
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
   const pagos = await db
     .select()
     .from(pagosDeuda)
-    .where(eq(pagosDeuda.deudaId, deudaId))
+    .where(and(eq(pagosDeuda.deudaId, deudaId), isNull(pagosDeuda.deletedAt)))
     .orderBy(pagosDeuda.fechaPago)
 
   return pagos.map(p => ({

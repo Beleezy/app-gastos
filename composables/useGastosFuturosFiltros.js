@@ -17,13 +17,7 @@
 
 const PRIORIDAD_ORDER = { alta: 0, media: 1, baja: 2, sinDefinir: 3 }
 
-function normalizar(s) {
-  if (s == null) return ''
-  return String(s)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-}
+import { normalizar } from './utils/textNormalize.js'
 
 function precioMin(opciones) {
   if (!Array.isArray(opciones) || opciones.length === 0) return null

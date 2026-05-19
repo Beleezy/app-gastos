@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { and, eq, sql, ilike } from 'drizzle-orm'
+import { and, eq, sql, ilike, isNull } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
 
 const MAX_Q_LEN = 100
@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   // que SQL injection clásico está cerrado; esto cierra el caso de
   // LIKE-as-wildcard.
   const qSanitizado = sanitizeString(q, MAX_Q_LEN)
-  const conditions = [eq(gastos.usuarioId, usuarioId)]
+  const conditions = [eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)]
   if (qSanitizado) {
     conditions.push(ilike(gastos.concepto, `%${escapeLikePattern(qSanitizado)}%`))
   }

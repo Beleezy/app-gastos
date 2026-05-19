@@ -2,7 +2,7 @@ import { db } from '../../utils/db.js'
 import { gastos, gastosPlanificados } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { rateLimits } from '../../utils/rateLimit.js'
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq, and, inArray, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -24,8 +24,9 @@ export default defineEventHandler(async (event) => {
 
   const eliminados = await db.transaction(async (tx) => {
     const borrados = await tx
-      .delete(gastos)
-      .where(and(inArray(gastos.id, ids), eq(gastos.usuarioId, usuarioId)))
+      .update(gastos)
+      .set({ deletedAt: new Date() })
+      .where(and(inArray(gastos.id, ids), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
       .returning({
         id: gastos.id,
         gastoPlanificadoId: gastos.gastoPlanificadoId,

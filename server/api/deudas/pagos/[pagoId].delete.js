@@ -2,7 +2,7 @@ import { db } from '../../../utils/db.js'
 import { deudas, pagosDeuda, personasEntidades } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { registrarAuditoria } from '../../../utils/vinculos.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const pagoId = getRouterParam(event, 'pagoId')
@@ -20,7 +20,9 @@ export default defineEventHandler(async (event) => {
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
     .where(and(
       eq(pagosDeuda.id, pagoId),
-      eq(deudas.usuarioId, usuarioId)
+      eq(deudas.usuarioId, usuarioId),
+      isNull(pagosDeuda.deletedAt),
+      isNull(deudas.deletedAt)
     ))
     .limit(1)
 
@@ -37,7 +39,7 @@ export default defineEventHandler(async (event) => {
       concepto: deudas.concepto,
     })
     .from(deudas)
-    .where(eq(deudas.id, pago.deudaId))
+    .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
     .limit(1)
 
   const montoPagado = parseFloat(pago.montoPagado)
@@ -59,8 +61,8 @@ export default defineEventHandler(async (event) => {
       // Desvincular ambos pagos primero
       await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pago.vinculoPagoId))
       await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pagoId))
-      // Eliminar pago espejo
-      await tx.delete(pagosDeuda).where(eq(pagosDeuda.id, pago.vinculoPagoId))
+      // Soft-eliminar pago espejo
+      await tx.update(pagosDeuda).set({ deletedAt: new Date() }).where(and(eq(pagosDeuda.id, pago.vinculoPagoId), isNull(pagosDeuda.deletedAt)))
       // Actualizar deuda espejo
       await tx
         .update(deudas)
@@ -69,11 +71,11 @@ export default defineEventHandler(async (event) => {
           estado: nuevoEstado,
           updatedAt: new Date(),
         })
-        .where(eq(deudas.id, deuda.vinculoDeudaId))
+        .where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
     }
 
-    // Eliminar pago original y actualizar deuda
-    await tx.delete(pagosDeuda).where(eq(pagosDeuda.id, pagoId))
+    // Soft-eliminar pago original y actualizar deuda
+    await tx.update(pagosDeuda).set({ deletedAt: new Date() }).where(and(eq(pagosDeuda.id, pagoId), isNull(pagosDeuda.deletedAt)))
     await tx
       .update(deudas)
       .set({
@@ -81,7 +83,7 @@ export default defineEventHandler(async (event) => {
         estado: nuevoEstado,
         updatedAt: new Date(),
       })
-      .where(eq(deudas.id, pago.deudaId))
+      .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
 
     // Registrar auditoría si hay vínculo
     if (deuda.vinculoDeudaId && persona?.vinculoParId) {
