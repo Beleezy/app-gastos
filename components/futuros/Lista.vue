@@ -145,7 +145,7 @@
             </button>
             <div class="relative">
               <button
-                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
+                class="tap-target flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
                 :title="'Más acciones'"
                 @click="toggleMenuProyecto(proyecto.id)"
               >
@@ -265,7 +265,7 @@
                 <div class="flex shrink-0 items-center">
                   <div v-if="!detalle.estadoDecision" class="relative">
                     <button
-                      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
+                      class="tap-target flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
                       title="Más acciones"
                       @click="toggleMenuDetalle(detalle.id)"
                     >
@@ -456,7 +456,7 @@
                       </button>
                       <div class="relative">
                         <button
-                          class="flex h-8 w-8 items-center justify-center rounded-lg border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
+                          class="tap-target flex h-8 w-8 items-center justify-center rounded-lg border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
                           title="Más acciones"
                           @click.stop="toggleMenuOpcion(opcion.id)"
                         >

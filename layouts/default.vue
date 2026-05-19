@@ -23,6 +23,10 @@ const router = useRouter()
 const { initTheme } = useTheme()
 const { isModalOpen } = useModalLayer()
 const { collapsed, toggle: toggleSideNav } = useSideNavCollapsed()
+const { isOnline } = useOnlineStatus()
+const { pending, flush } = useSyncQueue()
+const { apiFetch } = useApiFetch()
+const { success } = useToast()
 
 useKeyboardShortcuts({
   'g g': () => router.push('/'),
@@ -31,6 +35,20 @@ useKeyboardShortcuts({
   'g d': () => router.push('/deudas'),
   'g c': () => router.push('/categorias'),
   'mod+b': () => toggleSideNav(),
+})
+
+// Al volver online, drenar cola y avisar al usuario si había pendientes.
+watch(isOnline, async (online, prev) => {
+  if (online && prev === false) {
+    const pendientesAntes = (pending.value || []).length
+    if (pendientesAntes === 0) return
+    await flush(apiFetch).catch(() => {})
+    const pendientesDespues = (pending.value || []).length
+    const sincronizados = pendientesAntes - pendientesDespues
+    if (sincronizados > 0) {
+      success(`✓ Sincronizado ${sincronizados} cambio${sincronizados === 1 ? '' : 's'}`)
+    }
+  }
 })
 
 onMounted(initTheme)
