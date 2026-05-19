@@ -8,7 +8,7 @@ import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
 import { sanitizeForSystemPrompt } from '../../utils/llmSafety.js'
 import { assertImagePayload } from '../../utils/imageMagic.js'
-import { trackUsoLlm } from '../../utils/usoLlm.js'
+import { trackUsoLlm, assertCuotaMensual } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   await rateLimits.vozParseImage(event, usuarioId)
   await rateLimits.vozParseImageHora(event, usuarioId)
+  await assertCuotaMensual(usuarioId)
   let zonaHoraria = 'America/Lima'
   try {
     const [userConfig] = await db

@@ -42,6 +42,9 @@ Recomendadas (algunas features quedan deshabilitadas si faltan):
 | `GEMINI_MODEL` | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`. |
 | `GEMINI_MAX_RETRIES` | Reintentos por modelo. Default `3`. |
 | `GEMINI_RATE_LIMITS` | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`. |
+| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza. |
+| `LLM_CACHE_TTL_SECONDS` | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h). |
+| `CRON_SECRET` | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM). |
 | `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas. |
 
 El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WARN/ERROR si falta alguna.

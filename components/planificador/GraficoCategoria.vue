@@ -12,7 +12,12 @@
       <div v-else class="flex flex-col items-center gap-4">
         <!-- SVG donut -->
         <div class="relative w-32 h-32 shrink-0">
-          <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
+          <svg
+            viewBox="0 0 36 36"
+            class="w-full h-full -rotate-90"
+            role="img"
+            :aria-label="`Gráfico de distribución por categoría: ${datosGrafico.length} categorías, total ${currencySymbol} ${formatMonto(resumen.totalPlanificado)}`"
+          >
             <circle
               v-for="(seg, idx) in datosGrafico"
               :key="idx"

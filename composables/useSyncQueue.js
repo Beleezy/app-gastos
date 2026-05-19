@@ -65,7 +65,15 @@ export function useSyncQueue() {
       for (const item of snapshot) {
         item.attempts += 1
         try {
-          await apiFetch(item.endpoint, { method: item.method, body: item.body })
+          // Idempotency-Key permite al servidor (o a un proxy) detectar
+          // reintentos de la misma mutación y devolver la respuesta
+          // anterior en vez de aplicarla dos veces. El item.id es estable
+          // entre reintentos (se asigna una sola vez en enqueue).
+          await apiFetch(item.endpoint, {
+            method: item.method,
+            body: item.body,
+            headers: { 'Idempotency-Key': item.id },
+          })
           dropPending(item.id)
         } catch (e) {
           // 4xx → permanente, mover a fallidos. 5xx / network → dejar en pending.
