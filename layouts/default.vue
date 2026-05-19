@@ -15,6 +15,7 @@
     <LayoutSyncQueueBadge />
     <LayoutPwaUpdatePrompt />
     <SharedToastNotification />
+    <OnboardingTourOverlay />
   </div>
 </template>
 
@@ -27,6 +28,7 @@ const { isOnline } = useOnlineStatus()
 const { pending, flush } = useSyncQueue()
 const { apiFetch } = useApiFetch()
 const { success } = useToast()
+const { debeMostrarTour, iniciarTour } = useOnboarding()
 
 useKeyboardShortcuts({
   'g g': () => router.push('/'),
@@ -51,5 +53,13 @@ watch(isOnline, async (online, prev) => {
   }
 })
 
-onMounted(initTheme)
+onMounted(() => {
+  initTheme()
+  // Mostrar tour de onboarding sólo si nunca se vio ni se saltó.
+  // Se difiere un tick para no competir con el resto del montaje y para
+  // que la hidratación de localStorage ya haya ocurrido.
+  setTimeout(() => {
+    if (debeMostrarTour()) iniciarTour()
+  }, 600)
+})
 </script>

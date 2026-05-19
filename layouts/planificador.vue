@@ -10,6 +10,14 @@
         
         <LayoutAppHeader>
           <template #title>{{ pageTitle }}</template>
+          <template #subtitle>
+            <p
+              v-if="tabSubtitulo"
+              class="text-[11px] text-theme-text-muted leading-snug"
+            >
+              {{ tabSubtitulo }}
+            </p>
+          </template>
         </LayoutAppHeader>
 
         <div class="px-4 lg:px-0 pt-2 pb-2 lg:pt-3">
@@ -55,6 +63,7 @@
     <LayoutBottomNav />
     <LayoutMobileDrawer />
     <SharedToastNotification />
+    <OnboardingTourOverlay />
   </div>
 </template>
 
@@ -67,6 +76,7 @@ const { isOnline } = useOnlineStatus()
 const { pending, flush } = useSyncQueue()
 const { apiFetch } = useApiFetch()
 const { success } = useToast()
+const { debeMostrarTour, iniciarTour } = useOnboarding()
 
 useKeyboardShortcuts({
   'g g': () => router.push('/'),
@@ -90,7 +100,12 @@ watch(isOnline, async (online, prev) => {
   }
 })
 
-onMounted(initTheme)
+onMounted(() => {
+  initTheme()
+  setTimeout(() => {
+    if (debeMostrarTour()) iniciarTour()
+  }, 600)
+})
 
 const route = useRoute()
 
@@ -104,5 +119,11 @@ const pageTitle = computed(() => {
   if (activeTab.value === 'ahorros') return 'Ahorros'
   if (activeTab.value === 'futuros') return 'Gastos futuros'
   return 'Planificador'
+})
+
+const tabSubtitulo = computed(() => {
+  if (activeTab.value === 'ahorros') return 'Tus metas y depósitos mensuales'
+  if (activeTab.value === 'futuros') return 'Deseos y decisiones pendientes'
+  return 'Tu presupuesto y gastos esperados del mes'
 })
 </script>

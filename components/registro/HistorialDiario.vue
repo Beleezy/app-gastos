@@ -39,22 +39,16 @@
     <!-- Content -->
     <template v-else>
       <!-- Toggle solo si ambas vistas están activas -->
-      <div v-if="ambasVistas" class="flex items-center gap-2 mb-4">
-        <button
-          class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaActiva === 'semana' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
-          @click="cambiarVista('semana')"
-        >
-          Por semana
-        </button>
-        <button
-          class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
-          :class="vistaActiva === 'dia' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
-          @click="cambiarVista('dia')"
-        >
-          Por dia
-        </button>
-      </div>
+      <SharedTabBar
+        v-if="ambasVistas"
+        :model-value="vistaActiva"
+        :tabs="vistasTabs"
+        variant="card"
+        size="md"
+        aria-label="Vista de historial"
+        container-class="grid grid-cols-2 gap-2 mb-4"
+        @change="cambiarVista"
+      />
 
       <!-- Vista por semana -->
       <div v-if="mostrarSemana" class="space-y-3" :class="{ 'mb-6': ambasVistas && vistaActiva === 'semana' }">
@@ -318,6 +312,11 @@ const soloDia = computed(() => props.mostrarVistaDia && !props.mostrarVistaSeman
 
 // Vista activa cuando ambas están habilitadas (toggle)
 const vistaActiva = ref('dia')
+
+const vistasTabs = [
+  { value: 'semana', label: 'Por semana' },
+  { value: 'dia', label: 'Por día' },
+]
 
 // Qué vista se renderiza ahora
 const mostrarDia = computed(() => {

@@ -79,14 +79,13 @@
       </div>
     </div>
 
-    <button
-      class="fab-pulse fixed bottom-24 right-4 lg:bottom-8 lg:right-8 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-theme-accent opacity-70 shadow-lg shadow-theme-accent/25 transition-all duration-300 hover:opacity-85 active:scale-90"
-      @click="abrirFormulario"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-    </button>
+    <SharedFloatingActionStack>
+      <SharedFloatingActionButton
+        tone="accent"
+        aria-label="Agregar gasto planificado"
+        @click="abrirFormulario"
+      />
+    </SharedFloatingActionStack>
 
     <PlanificadorFormGastoPlaneado
       v-if="showFormMensual"
