@@ -8,11 +8,14 @@
         type="text"
         data-testid="input-concepto"
         placeholder="Ej: Almuerzo, Pasaje, Recibo de luz..."
-        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+        class="w-full px-4 py-3 rounded-xl bg-theme-input border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:ring-1 transition-colors"
+        :class="errores.concepto
+          ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500'
+          : 'border-theme-border focus:border-theme-accent focus:ring-theme-accent'"
+        autocomplete="off"
         @input="buscarConceptos"
         @focus="mostrarSugerencias = true"
-        @blur="ocultarSugerencias"
-        autocomplete="off"
+        @blur="onBlurConcepto"
       />
       <div
         v-if="mostrarSugerencias && sugerencias.length > 0 && form.concepto.length >= 2"
@@ -28,6 +31,10 @@
           <span class="text-xs text-theme-text-sec">{{ s.count }}x</span>
         </button>
       </div>
+      <p v-if="errores.concepto" class="mt-1 text-[11px] text-red-400 flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        {{ errores.concepto }}
+      </p>
     </div>
 
     <!-- Monto -->
@@ -42,30 +49,56 @@
           step="0.01"
           min="0"
           placeholder="0.00"
-          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
+          class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:ring-1 transition-colors"
+          :class="errores.monto
+            ? 'border-red-500/60 focus:border-red-500 focus:ring-red-500'
+            : 'border-theme-border focus:border-theme-accent focus:ring-theme-accent'"
+          @blur="validarMonto"
+          @input="errores.monto && validarMonto()"
         />
       </div>
+      <p v-if="errores.monto" class="mt-1 text-[11px] text-red-400 flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        {{ errores.monto }}
+      </p>
     </div>
 
     <!-- Categoría -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Categoría</label>
+      <div class="flex items-center justify-between mb-1.5">
+        <label class="block text-sm font-medium text-theme-text-muted">Categoría</label>
+        <span
+          v-if="categoriaFueSugerida && form.categoriaId"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-theme-accent-bg text-theme-accent text-[10px] font-semibold"
+          title="Sugerida automáticamente según tus gastos anteriores"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5L18.2 22 12 17.3 5.8 22l2.4-8.1L2 9.4h7.6z"/></svg>
+          Sugerida
+        </span>
+      </div>
       <div class="grid grid-cols-3 gap-2">
         <button
           v-for="cat in categorias"
           :key="cat.id"
           class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border text-xs transition-all"
-          :class="form.categoriaId === cat.id
-            ? 'border-theme-accent bg-theme-accent-bg'
-            : 'border-theme-border bg-theme-input hover:border-primary-600'"
-          @click="form.categoriaId = cat.id"
+          :class="[
+            form.categoriaId === cat.id
+              ? 'border-theme-accent bg-theme-accent-bg'
+              : (errores.categoria ? 'border-red-500/30 bg-theme-input' : 'border-theme-border bg-theme-input hover:border-primary-600')
+          ]"
+          @click="elegirCategoria(cat.id)"
         >
           <span class="text-base">{{ cat.icono || '📦' }}</span>
-          <span class="truncate w-full text-center"
+          <span
+            class="truncate w-full text-center"
             :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
           >{{ cat.nombre }}</span>
         </button>
       </div>
+      <p v-if="errores.categoria" class="mt-1 text-[11px] text-red-400 flex items-center gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        {{ errores.categoria }}
+      </p>
     </div>
 
     <!-- Fecha y Hora -->
@@ -105,9 +138,11 @@
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
-      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-      :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
-      :disabled="saving"
+      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-all mt-2 flex items-center justify-center gap-2"
+      :class="(saving || !formularioValido)
+        ? 'bg-theme-accent/40 cursor-not-allowed'
+        : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark active:scale-[0.98]'"
+      :disabled="saving || !formularioValido"
       data-testid="btn-guardar"
       @click="guardar"
     >
@@ -149,12 +184,41 @@ const sugerencias = ref([])
 const predictor = useCategoryPredictor()
 const sugerenciaCategoria = ref(null)
 const mostrarSugerencias = ref(false)
+const categoriaFueSugerida = ref(false)
+const errores = reactive({ concepto: '', monto: '', categoria: '' })
 let debounceTimer = null
 
 const { currencySymbol } = useCurrency()
 const { createGasto, updateGasto } = useGastos()
 
+const formularioValido = computed(() => {
+  const c = String(form.concepto || '').trim()
+  const m = parseFloat(form.monto)
+  return c.length >= 2 && !isNaN(m) && m > 0 && !!form.categoriaId
+})
+
+function validarConcepto() {
+  const c = String(form.concepto || '').trim()
+  errores.concepto = c.length === 0
+    ? 'Indica un concepto'
+    : (c.length < 2 ? 'Al menos 2 caracteres' : '')
+}
+
+function validarMonto() {
+  const m = parseFloat(form.monto)
+  errores.monto = (!form.monto || isNaN(m) || m <= 0)
+    ? 'Ingresa un monto mayor a 0'
+    : ''
+}
+
+function elegirCategoria(id) {
+  form.categoriaId = id
+  categoriaFueSugerida.value = false
+  errores.categoria = ''
+}
+
 function buscarConceptos() {
+  if (errores.concepto) validarConcepto()
   clearTimeout(debounceTimer)
   if (form.concepto.length < 2) {
     sugerencias.value = []
@@ -173,19 +237,22 @@ function seleccionarSugerencia(s) {
   form.concepto = s.concepto
   if (s.categoriaId && !form.categoriaId) {
     form.categoriaId = s.categoriaId
+    categoriaFueSugerida.value = true
   }
   sugerencias.value = []
   mostrarSugerencias.value = false
+  errores.concepto = ''
 }
 
-function ocultarSugerencias() {
+function onBlurConcepto() {
+  validarConcepto()
   setTimeout(() => { mostrarSugerencias.value = false }, 200)
 }
 
 // Predicción offline de categoría: si el usuario aún no eligió una,
 // usar el histórico aprendido para sugerirla.
 watch(() => form.concepto, (concepto) => {
-  if (form.categoriaId) {
+  if (form.categoriaId && !categoriaFueSugerida.value) {
     sugerenciaCategoria.value = null
     return
   }
@@ -199,24 +266,20 @@ watch(() => form.concepto, (concepto) => {
 
 watch(() => sugerenciaCategoria.value, (v) => {
   // Auto-seleccionar la categoría sugerida si el usuario sigue sin elegir.
-  if (v?.categoriaId && !form.categoriaId) {
+  if (v?.categoriaId && (!form.categoriaId || categoriaFueSugerida.value)) {
     form.categoriaId = v.categoriaId
+    categoriaFueSugerida.value = true
+    errores.categoria = ''
   }
 })
 
 async function guardar() {
   errorMsg.value = ''
+  validarConcepto()
+  validarMonto()
+  errores.categoria = form.categoriaId ? '' : 'Selecciona una categoría'
 
-  if (!form.concepto?.trim()) {
-    errorMsg.value = 'El concepto es obligatorio'
-    return
-  }
-  if (!form.monto || form.monto <= 0) {
-    errorMsg.value = 'Ingresa un monto válido'
-    return
-  }
-  if (!form.categoriaId) {
-    errorMsg.value = 'Selecciona una categoría'
+  if (errores.concepto || errores.monto || errores.categoria) {
     return
   }
   const fechaIngresada = new Date(form.fecha + 'T00:00:00')

@@ -27,9 +27,9 @@
             <NuxtLink
               to="/futuros"
               class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
-              :class="activeTab === 'futuros' ? 'bg-violet-500 text-white shadow-md shadow-violet-500/20' : 'text-violet-400 hover:bg-violet-500/10'"
+              :class="activeTab === 'futuros' ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20' : 'text-theme-text-muted hover:text-theme-text-sec'"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'futuros' ? '' : 'text-violet-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
               </svg>
@@ -38,9 +38,9 @@
             <NuxtLink
               to="/ahorros"
               class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
-              :class="activeTab === 'ahorros' ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-emerald-400 hover:bg-emerald-500/10'"
+              :class="activeTab === 'ahorros' ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20' : 'text-theme-text-muted hover:text-theme-text-sec'"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'ahorros' ? '' : 'text-emerald-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
               Ahorros
@@ -63,6 +63,10 @@ const router = useRouter()
 const { initTheme } = useTheme()
 const { isModalOpen } = useModalLayer()
 const { collapsed, toggle: toggleSideNav } = useSideNavCollapsed()
+const { isOnline } = useOnlineStatus()
+const { pending, flush } = useSyncQueue()
+const { apiFetch } = useApiFetch()
+const { success } = useToast()
 
 useKeyboardShortcuts({
   'g g': () => router.push('/'),
@@ -71,6 +75,19 @@ useKeyboardShortcuts({
   'g d': () => router.push('/deudas'),
   'g c': () => router.push('/categorias'),
   'mod+b': () => toggleSideNav(),
+})
+
+watch(isOnline, async (online, prev) => {
+  if (online && prev === false) {
+    const pendientesAntes = (pending.value || []).length
+    if (pendientesAntes === 0) return
+    await flush(apiFetch).catch(() => {})
+    const pendientesDespues = (pending.value || []).length
+    const sincronizados = pendientesAntes - pendientesDespues
+    if (sincronizados > 0) {
+      success(`✓ Sincronizado ${sincronizados} cambio${sincronizados === 1 ? '' : 's'}`)
+    }
+  }
 })
 
 onMounted(initTheme)

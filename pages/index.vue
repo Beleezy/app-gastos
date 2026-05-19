@@ -105,9 +105,9 @@
 
       <!-- Gastos futuros -->
       <NuxtLink
-        v-if="futureProjects > 0"
-        to="/planificador"
-        class="bg-theme-card rounded-2xl p-4 border border-sky-500/20 block active:bg-theme-border-md transition-colors lg:col-span-1"
+        to="/futuros"
+        class="bg-theme-card rounded-2xl p-4 border block active:bg-theme-border-md transition-colors lg:col-span-1"
+        :class="futureProjects > 0 ? 'border-sky-500/20' : 'border-dashed border-theme-border'"
       >
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
@@ -118,38 +118,49 @@
             </div>
             <span class="text-xs font-semibold text-theme-text">Gastos futuros</span>
           </div>
-          <span class="text-[10px] text-sky-400">{{ futureProjects }} proyecto{{ futureProjects !== 1 ? 's' : '' }} →</span>
+          <span v-if="futureProjects > 0" class="text-[10px] text-sky-400">{{ futureProjects }} proyecto{{ futureProjects !== 1 ? 's' : '' }} →</span>
+          <span v-else class="text-[10px] text-sky-400">Comenzar →</span>
         </div>
-        <div class="grid grid-cols-3 gap-2">
-          <div class="rounded-xl bg-theme-input px-3 py-2">
-            <p class="text-[10px] text-theme-text-muted">Min</p>
-            <p class="mt-0.5 text-xs font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(futureMin) }}</p>
+        <template v-if="futureProjects > 0">
+          <div class="grid grid-cols-3 gap-2">
+            <div class="rounded-xl bg-theme-input px-3 py-2">
+              <p class="text-[10px] text-theme-text-muted">Min</p>
+              <p class="mt-0.5 text-xs font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(futureMin) }}</p>
+            </div>
+            <div class="rounded-xl bg-sky-500/10 px-3 py-2">
+              <p class="text-[10px] text-sky-300/70">Promedio</p>
+              <p class="mt-0.5 text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(futureAverage) }}</p>
+            </div>
+            <div class="rounded-xl bg-theme-input px-3 py-2">
+              <p class="text-[10px] text-theme-text-muted">Max</p>
+              <p class="mt-0.5 text-xs font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(futureMax) }}</p>
+            </div>
           </div>
-          <div class="rounded-xl bg-sky-500/10 px-3 py-2">
-            <p class="text-[10px] text-sky-300/70">Promedio</p>
-            <p class="mt-0.5 text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(futureAverage) }}</p>
+          <div v-if="futureHighlights.length" class="mt-2.5 flex flex-wrap gap-1.5">
+            <span
+              v-for="item in futureHighlights"
+              :key="item.id"
+              class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec"
+            >
+              {{ item.tipoGasto }}
+            </span>
           </div>
-          <div class="rounded-xl bg-theme-input px-3 py-2">
-            <p class="text-[10px] text-theme-text-muted">Max</p>
-            <p class="mt-0.5 text-xs font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(futureMax) }}</p>
-          </div>
-        </div>
-        <div v-if="futureHighlights.length" class="mt-2.5 flex flex-wrap gap-1.5">
-          <span
-            v-for="item in futureHighlights"
-            :key="item.id"
-            class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec"
-          >
-            {{ item.tipoGasto }}
-          </span>
-        </div>
+        </template>
+        <template v-else>
+          <p class="text-[11px] text-theme-text-sec leading-relaxed">
+            Planifica tus deseos y compara opciones antes de decidir.
+          </p>
+          <p class="mt-1.5 text-[10px] text-sky-400 font-medium">
+            Agrega tu primer proyecto →
+          </p>
+        </template>
       </NuxtLink>
 
       <!-- Resumen de ahorros -->
       <NuxtLink
-        v-if="!loadingAhorros && (ahorrosTotalGlobal > 0 || ahorrosTotalMes > 0)"
         to="/ahorros"
-        class="bg-theme-card rounded-2xl p-4 border border-emerald-500/20 block active:bg-theme-border-md transition-colors lg:col-span-1"
+        class="bg-theme-card rounded-2xl p-4 border block active:bg-theme-border-md transition-colors lg:col-span-1"
+        :class="(ahorrosTotalGlobal > 0 || ahorrosTotalMes > 0) ? 'border-emerald-500/20' : 'border-dashed border-theme-border'"
       >
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
@@ -160,40 +171,52 @@
             </div>
             <span class="text-xs font-semibold text-theme-text">Ahorros</span>
           </div>
-          <span class="text-[10px] text-emerald-400">Ver detalle →</span>
+          <span v-if="ahorrosTotalGlobal > 0 || ahorrosTotalMes > 0" class="text-[10px] text-emerald-400">Ver detalle →</span>
+          <span v-else class="text-[10px] text-emerald-400">Empezar →</span>
         </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="rounded-xl bg-theme-input px-3 py-2">
-            <p class="text-[10px] text-theme-text-muted">Este mes</p>
-            <p class="mt-0.5 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(ahorrosTotalMes) }}</p>
+        <template v-if="!loadingAhorros && (ahorrosTotalGlobal > 0 || ahorrosTotalMes > 0)">
+          <div class="grid grid-cols-2 gap-2">
+            <div class="rounded-xl bg-theme-input px-3 py-2">
+              <p class="text-[10px] text-theme-text-muted">Este mes</p>
+              <p class="mt-0.5 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(ahorrosTotalMes) }}</p>
+            </div>
+            <div class="rounded-xl bg-emerald-500/10 px-3 py-2">
+              <p class="text-[10px] text-emerald-300/70">Total acumulado</p>
+              <p class="mt-0.5 text-sm font-semibold text-emerald-300">{{ currencySymbol }} {{ formatMonto(ahorrosTotalGlobal) }}</p>
+            </div>
           </div>
-          <div class="rounded-xl bg-emerald-500/10 px-3 py-2">
-            <p class="text-[10px] text-emerald-300/70">Total acumulado</p>
-            <p class="mt-0.5 text-sm font-semibold text-emerald-300">{{ currencySymbol }} {{ formatMonto(ahorrosTotalGlobal) }}</p>
+          <div v-if="ahorrosMetaMensual && ahorrosTotalMes > 0" class="mt-2.5">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-[10px] text-theme-text-muted">Meta mensual</span>
+              <span class="text-[10px] text-emerald-400">{{ ahorrosProgresoMensual.toFixed(0) }}%</span>
+            </div>
+            <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
+                :style="{ width: Math.min(ahorrosProgresoMensual, 100) + '%' }"
+              ></div>
+            </div>
           </div>
-        </div>
-        <div v-if="ahorrosMetaMensual && ahorrosTotalMes > 0" class="mt-2.5">
-          <div class="flex items-center justify-between mb-1">
-            <span class="text-[10px] text-theme-text-muted">Meta mensual</span>
-            <span class="text-[10px] text-emerald-400">{{ ahorrosProgresoMensual.toFixed(0) }}%</span>
+          <div v-if="ahorrosPorMedio.length" class="mt-2.5 flex flex-wrap gap-1.5">
+            <span
+              v-for="medio in ahorrosPorMedio"
+              :key="medio.medioAhorroId"
+              class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec flex items-center gap-1"
+            >
+              <span v-if="medio.medioIcono">{{ medio.medioIcono }}</span>
+              {{ medio.medioNombre }}: {{ currencySymbol }} {{ formatMonto(medio.total) }}
+            </span>
           </div>
-          <div class="w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
-            <div
-              class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-700"
-              :style="{ width: Math.min(ahorrosProgresoMensual, 100) + '%' }"
-            ></div>
-          </div>
-        </div>
-        <div v-if="ahorrosPorMedio.length" class="mt-2.5 flex flex-wrap gap-1.5">
-          <span
-            v-for="medio in ahorrosPorMedio"
-            :key="medio.medioAhorroId"
-            class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec flex items-center gap-1"
-          >
-            <span v-if="medio.medioIcono">{{ medio.medioIcono }}</span>
-            {{ medio.medioNombre }}: {{ currencySymbol }} {{ formatMonto(medio.total) }}
-          </span>
-        </div>
+        </template>
+        <template v-else-if="!loadingAhorros">
+          <p class="text-[11px] text-theme-text-sec leading-relaxed">
+            Aparta dinero para tus metas mes a mes y mira tu progreso.
+          </p>
+          <p class="mt-1.5 text-[10px] text-emerald-400 font-medium">
+            Crea tu primera meta →
+          </p>
+        </template>
+        <div v-else class="h-12 w-full rounded-xl bg-theme-border-md shimmer"></div>
       </NuxtLink>
     </div>
 

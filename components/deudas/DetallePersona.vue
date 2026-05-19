@@ -223,7 +223,7 @@
           <!-- Actions -->
           <div class="flex items-center justify-end gap-1 mt-2 pt-2 border-t border-theme-border">
             <button
-              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
+              class="min-w-[44px] min-h-[44px] h-11 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-theme-accent bg-theme-accent-bg hover:bg-theme-accent-bg active:bg-theme-accent-bg transition-colors"
               data-testid="btn-nuevo-pago"
               @click="emit('registrarPago', deuda)"
             >
@@ -233,7 +233,7 @@
               Pago
             </button>
             <button
-              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:bg-amber-500/30 transition-colors"
+              class="min-w-[44px] min-h-[44px] h-11 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:bg-amber-500/30 transition-colors"
               data-testid="btn-editar-deuda"
               @click="emit('editarDeuda', deuda)"
             >
@@ -243,7 +243,7 @@
               Editar
             </button>
             <button
-              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition-colors"
+              class="min-w-[44px] min-h-[44px] h-11 px-2.5 flex items-center justify-center gap-1.5 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 active:bg-emerald-500/30 transition-colors"
               @click="confirmarSaldar(deuda)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -252,7 +252,7 @@
               Saldar
             </button>
             <button
-              class="min-w-[44px] h-9 px-2.5 flex items-center justify-center rounded-lg text-red-400 bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 transition-colors"
+              class="min-w-[44px] min-h-[44px] h-11 px-2.5 flex items-center justify-center rounded-lg text-red-400 bg-red-500/10 hover:bg-red-500/20 active:bg-red-500/30 transition-colors"
               data-testid="btn-eliminar-deuda"
               aria-label="Eliminar deuda"
               @click="confirmarEliminarDeuda(deuda)"
