@@ -81,6 +81,7 @@ export const gastos = pgTable('gastos', {
   hora: time('hora').notNull(),
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
   transcripcionVoz: text('transcripcion_voz'),
+  cuentaId: uuid('cuenta_id'),
   notas: text('notas'),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -90,6 +91,7 @@ export const gastos = pgTable('gastos', {
   index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
   uniqueIndex('gastos_planificado_unique').on(table.gastoPlanificadoId),
   index('gastos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
+  index('gastos_cuenta_idx').on(table.cuentaId),
 ])
 
 // ── Tabla 6: personas_entidades ──
@@ -255,6 +257,53 @@ export const vinculosCheckpoints = pgTable('vinculos_checkpoints', {
   index('vinculos_checkpoints_par_tipo_idx').on(table.personaAId, table.tipo),
 ])
 
+// ── Tabla: cuentas ── (billeteras / cuentas del usuario)
+// Permite separar movimientos entre efectivo, débito, crédito, etc. El
+// `saldoInicial` se usa para calcular saldo actual = saldoInicial +
+// SUM(ingresos.monto) - SUM(gastos.monto) + transferencias_in - out.
+// El cálculo NO se materializa: se computa en API on-demand para evitar
+// inconsistencias por retries o soft-deletes/restores.
+export const cuentas = pgTable('cuentas', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 80 }).notNull(),
+  tipo: varchar('tipo', { length: 30 }).notNull(), // efectivo|debito|credito|ahorros|otro
+  moneda: varchar('moneda', { length: 10 }).default('PEN').notNull(),
+  saldoInicial: decimal('saldo_inicial', { precision: 12, scale: 2 }).default('0').notNull(),
+  icono: varchar('icono', { length: 16 }),
+  color: varchar('color', { length: 16 }),
+  orden: integer('orden').default(0).notNull(),
+  archivada: boolean('archivada').default(false).notNull(),
+  esPredeterminada: boolean('es_predeterminada').default(false).notNull(),
+  notas: text('notas'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('cuentas_usuario_idx').on(table.usuarioId),
+  index('cuentas_usuario_archivada_idx').on(table.usuarioId, table.archivada),
+])
+
+// ── Tabla: transferencias ── (movimientos entre cuentas)
+// No afectan al total de gastos ni ingresos del usuario. Solo
+// redistribuyen saldo. Si el usuario quiere registrar comisión/spread
+// del banco, debe crear un gasto adicional.
+export const transferencias = pgTable('transferencias', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  cuentaOrigenId: uuid('cuenta_origen_id').references(() => cuentas.id, { onDelete: 'restrict' }).notNull(),
+  cuentaDestinoId: uuid('cuenta_destino_id').references(() => cuentas.id, { onDelete: 'restrict' }).notNull(),
+  monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
+  fecha: date('fecha').notNull(),
+  concepto: varchar('concepto', { length: 200 }),
+  notas: text('notas'),
+  deletedAt: timestamp('deleted_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('transferencias_usuario_fecha_idx').on(table.usuarioId, table.fecha),
+  index('transferencias_origen_idx').on(table.cuentaOrigenId),
+  index('transferencias_destino_idx').on(table.cuentaDestinoId),
+])
+
 // ── Tabla: ingresos ── (módulo de ingresos, espejo simple de gastos)
 // Justifica saldo neto del mes y proyección de flujo de caja. Las
 // categorías de ingreso se distinguen por `tipo_origen` (no se reusan
@@ -269,6 +318,7 @@ export const ingresos = pgTable('ingresos', {
   esRecurrente: boolean('es_recurrente').default(false).notNull(),
   recurrenteGrupoId: uuid('recurrente_grupo_id'),
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
+  cuentaId: uuid('cuenta_id'),
   notas: text('notas'),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -277,6 +327,7 @@ export const ingresos = pgTable('ingresos', {
   index('ingresos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
   index('ingresos_usuario_origen_idx').on(table.usuarioId, table.origen),
   index('ingresos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
+  index('ingresos_cuenta_idx').on(table.cuentaId),
 ])
 
 // ── Tabla: medios_ahorro ──
