@@ -59,10 +59,13 @@ function getKey(item, idx) {
   return item?.[props.keyField] ?? idx
 }
 
+const sourceRef = computed(() => props.source)
+const maxHeightRef = computed(() => props.maxHeight)
+
 const { items: visibleItems, totalHeight, offsetY, onScroll } = useVirtualList({
-  source: () => props.source,
+  source: sourceRef,
   itemHeight: props.itemHeight,
-  containerHeight: () => props.maxHeight,
+  containerHeight: maxHeightRef,
   overscan: props.overscan,
   getKey,
 })

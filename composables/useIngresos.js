@@ -88,6 +88,31 @@ export function useIngresos() {
     fetchResumen()
   }
 
+  function mesAnterior() {
+    let m = mesSeleccionado.value - 1
+    let a = anioSeleccionado.value
+    if (m < 1) { m = 12; a-- }
+    cambiarMes(m, a)
+  }
+
+  function mesSiguiente() {
+    let m = mesSeleccionado.value + 1
+    let a = anioSeleccionado.value
+    if (m > 12) { m = 1; a++ }
+    cambiarMes(m, a)
+  }
+
+  function irAMesActual() {
+    const hoy = new Date()
+    cambiarMes(hoy.getMonth() + 1, hoy.getFullYear())
+  }
+
+  const esMesActual = computed(() => {
+    const hoy = new Date()
+    return mesSeleccionado.value === hoy.getMonth() + 1
+      && anioSeleccionado.value === hoy.getFullYear()
+  })
+
   return {
     ingresos,
     resumen,
@@ -96,6 +121,7 @@ export function useIngresos() {
     mesSeleccionado,
     anioSeleccionado,
     mesLabel,
+    esMesActual,
     totalMes,
     porOrigen,
     fetchIngresos,
@@ -104,5 +130,8 @@ export function useIngresos() {
     actualizarIngreso,
     eliminarIngreso,
     cambiarMes,
+    mesAnterior,
+    mesSiguiente,
+    irAMesActual,
   }
 }
