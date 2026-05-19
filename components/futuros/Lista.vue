@@ -102,6 +102,13 @@
               <p class="text-xs font-semibold whitespace-nowrap" :class="progresoProyecto(proyecto).porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
                 {{ progresoProyecto(proyecto).decididos }}/{{ progresoProyecto(proyecto).total }} · {{ progresoProyecto(proyecto).porcentaje }}%
               </p>
+              <span
+                v-if="progresoProyecto(proyecto).decididos === 0 && !estaExpandido(proyecto.id)"
+                class="mt-0.5 inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[9px] font-medium text-violet-300"
+              >
+                <span class="h-1 w-1 rounded-full bg-violet-400 animate-pulse"></span>
+                Por decidir
+              </span>
             </div>
           </div>
 
@@ -298,6 +305,14 @@
                 </div>
               </div>
 
+              <!-- Hint educativo cuando hay opciones por decidir -->
+              <p
+                v-if="!detalle.estadoDecision && detalle.opciones.length > 1 && !haySeleccionEnDetalle(detalle.id)"
+                class="pl-4 text-[10px] text-theme-text-muted italic"
+              >
+                💡 Toca una opción para comparar y decidir
+              </p>
+
               <!-- Opciones del detalle (siempre visibles dentro del proyecto expandido) -->
               <div class="space-y-2">
                 <div
@@ -436,9 +451,9 @@
                       />
                     </div>
 
-                    <!-- Acciones reveladas al seleccionar -->
+                    <!-- Acciones reveladas al seleccionar (o automáticas si hay solo 1 opción) -->
                     <div
-                      v-if="estaSeleccionada(detalle.id, opcion.id) && !detalle.estadoDecision"
+                      v-if="(estaSeleccionada(detalle.id, opcion.id) || detalle.opciones.length === 1) && !detalle.estadoDecision"
                       class="flex items-center gap-1.5 border-t border-theme-border/60 px-3 py-2"
                       @click.stop
                     >
@@ -877,6 +892,10 @@ function seleccionarOpcion(detalleId, opcionId) {
 }
 function estaSeleccionada(detalleId, opcionId) {
   return opcionSeleccionadaPorDetalle.value[detalleId] === opcionId
+}
+
+function haySeleccionEnDetalle(detalleId) {
+  return !!opcionSeleccionadaPorDetalle.value[detalleId]
 }
 
 function puntoDetalleColor(detalle) {
