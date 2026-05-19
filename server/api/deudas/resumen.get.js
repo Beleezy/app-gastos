@@ -8,6 +8,10 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const { fecha: hoy } = await getFechaHoraLocalUsuario(usuarioId)
 
+  // SWR corto: el resumen cambia con cada pago/deuda; 60s permite que
+  // navegaciones rápidas y el SW sirvan cache, sin desfasar más de 1 min.
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
+
   const [resumen] = await db
     .select({
       totalMeDeben: sql`COALESCE(SUM(CASE WHEN ${deudas.tipoDeuda} = 'me_deben' AND ${deudas.estado} IN ('pendiente', 'parcial') THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as('total_me_deben'),

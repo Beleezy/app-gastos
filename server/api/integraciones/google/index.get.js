@@ -5,6 +5,8 @@ import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
+  // Estado de conexión Google cambia muy raramente.
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
   const [conexion] = await db
     .select({
       calendarNombre: googleCalendarConexiones.calendarNombre,

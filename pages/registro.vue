@@ -268,7 +268,7 @@
                 </Suspense>
 
                 <div v-if="vistaRegistro === 'mapa'" class="px-4 lg:px-0">
-                  <RegistroGastosHeatmap
+                  <LazyRegistroGastosHeatmap
                     :gastos="gastosMensuales"
                     :mes="mesSeleccionado"
                     :anio="anioSeleccionado"

@@ -5,6 +5,7 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
   const ahora = new Date()
   const anio = ahora.getFullYear()
   const mes = ahora.getMonth() + 1

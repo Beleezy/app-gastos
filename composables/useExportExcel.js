@@ -1,31 +1,28 @@
 export function useExportExcel() {
+  // Migrado de `xlsx` (CVE high sin fix, ~800 KB) a `write-excel-file`
+  // (~150 KB, sin CVEs). Misma API expuesta hacia los consumidores.
   async function exportarExcel(nombreArchivo, columnas, filas) {
-    const XLSX = await import('xlsx')
+    const writeXlsxFile = (await import('write-excel-file/browser')).default
 
-    const datos = filas.map(fila => {
-      const obj = {}
-      columnas.forEach(c => {
-        obj[c.label] = c.getValue(fila) ?? ''
-      })
-      return obj
-    })
-
-    const ws = XLSX.utils.json_to_sheet(datos)
-
-    // Auto-ajustar ancho de columnas
-    const anchos = columnas.map(c => {
-      const maxLen = Math.max(
+    // Schema: una columna por cada entrada de `columnas`.
+    const schema = columnas.map(c => ({
+      column: c.label,
+      type: String,
+      value: (fila) => {
+        const v = c.getValue(fila)
+        return v == null ? '' : String(v)
+      },
+      width: Math.min(Math.max(
         c.label.length,
-        ...filas.map(f => String(c.getValue(f) ?? '').length)
-      )
-      return { wch: Math.min(maxLen + 2, 40) }
+        ...filas.map(f => String(c.getValue(f) ?? '').length),
+      ) + 2, 40),
+    }))
+
+    await writeXlsxFile(filas, {
+      schema,
+      sheet: 'Datos',
+      fileName: `${nombreArchivo}.xlsx`,
     })
-    ws['!cols'] = anchos
-
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Datos')
-
-    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`)
   }
 
   return { exportarExcel }

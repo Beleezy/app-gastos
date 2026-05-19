@@ -182,8 +182,9 @@ watch([mesActual, anioActual], () => {
   fetchAhorros()
 })
 
-onMounted(async () => {
-  await Promise.all([fetchAhorros(), fetchMedios()])
+onMounted(() => {
+  // No bloquear: cada bloque tiene skeleton. SWIPE no depende de datos.
+  Promise.all([fetchAhorros(), fetchMedios()]).catch(() => {})
   if (swipeZone.value) {
     attachSwipe(swipeZone.value)
     attachedSwipeEl.value = swipeZone.value

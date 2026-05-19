@@ -5,6 +5,7 @@ import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
 
   // Obtener email del usuario actual
   const [usuario] = await db

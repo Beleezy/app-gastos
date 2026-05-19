@@ -58,12 +58,30 @@ export function useTheme() {
     applyFontSize(id)
   }
 
+  // El CSS del modo daltónico (~5 KB gz) está en /public/colorblind.css.
+  // Se inyecta dinámicamente solo cuando el usuario lo activa, para no
+  // pagar el coste en cada visita.
+  function ensureColorblindStylesheet() {
+    if (document.getElementById('colorblind-css')) return
+    const link = document.createElement('link')
+    link.id = 'colorblind-css'
+    link.rel = 'stylesheet'
+    link.href = '/colorblind.css'
+    document.head.appendChild(link)
+  }
+  function removeColorblindStylesheet() {
+    const link = document.getElementById('colorblind-css')
+    if (link) link.remove()
+  }
+
   function applyColorblind(enabled) {
     if (!process.client) return
     if (enabled) {
+      ensureColorblindStylesheet()
       document.documentElement.classList.add('colorblind')
     } else {
       document.documentElement.classList.remove('colorblind')
+      removeColorblindStylesheet()
     }
     localStorage.setItem('colorblind-mode', enabled ? 'true' : 'false')
   }
