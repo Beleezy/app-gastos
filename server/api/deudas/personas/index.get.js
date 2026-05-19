@@ -2,7 +2,7 @@ import { db } from '../../../utils/db.js'
 import { personasEntidades, deudas } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../utils/fechaLocal.js'
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and, sql, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -34,6 +34,7 @@ export default defineEventHandler(async (event) => {
     .from(personasEntidades)
     .leftJoin(deudas, and(
       eq(deudas.personaEntidadId, personasEntidades.id),
+      isNull(deudas.deletedAt),
       tipo ? eq(deudas.tipoDeuda, tipo) : undefined
     ))
     .where(eq(personasEntidades.usuarioId, usuarioId))

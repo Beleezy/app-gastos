@@ -35,6 +35,13 @@ export function useSyncQueue() {
       attempts: 0,
     }
     pending.value = [...(pending.value || []), item]
+    // Background Sync: registra tag para que el browser despierte la app
+    // al volver la red. Fail-silent si la API no está disponible (Safari,
+    // etc.) — el listener 'online' de plugins/fetch.js sigue cubriendo.
+    try {
+      const { requestSync } = useBackgroundSync()
+      requestSync()
+    } catch {}
     return item.id
   }
 

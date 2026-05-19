@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, between, sql, desc, ilike, asc } from 'drizzle-orm'
+import { eq, and, between, sql, desc, ilike, asc, isNull } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
 
 export default defineEventHandler(async (event) => {
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   const { fecha, fechaDesde, fechaHasta, mes, anio, busqueda, categoriaId, limit, offset, orden } = query
 
-  let whereConditions = [eq(gastos.usuarioId, usuarioId)]
+  let whereConditions = [eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)]
 
   if (fecha) {
     whereConditions.push(eq(gastos.fecha, fecha))

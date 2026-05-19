@@ -1,7 +1,7 @@
 import { db } from '../../../../utils/db.js'
 import { deudas, pagosDeuda, personasEntidades } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
-import { eq, and, desc } from 'drizzle-orm'
+import { eq, and, desc, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const personaId = getRouterParam(event, 'id')
@@ -39,7 +39,9 @@ export default defineEventHandler(async (event) => {
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
     .where(and(
       eq(deudas.personaEntidadId, personaId),
-      eq(deudas.usuarioId, usuarioId)
+      eq(deudas.usuarioId, usuarioId),
+      isNull(deudas.deletedAt),
+      isNull(pagosDeuda.deletedAt)
     ))
     .orderBy(desc(pagosDeuda.createdAt))
 

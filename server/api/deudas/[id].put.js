@@ -4,7 +4,7 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { deudaUpdateRealSchema } from '~/shared/schemas/deudas.js'
 import { registrarAuditoria } from '../../utils/vinculos.js'
-import { eq, and, sum } from 'drizzle-orm'
+import { eq, and, sum, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const [deudaActual] = await db
     .select()
     .from(deudas)
-    .where(and(eq(deudas.id, id), eq(deudas.usuarioId, usuarioId)))
+    .where(and(eq(deudas.id, id), eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
     .limit(1)
 
   if (!deudaActual) {
@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     const [result] = await db
       .select({ total: sum(pagosDeuda.montoPagado) })
       .from(pagosDeuda)
-      .where(eq(pagosDeuda.deudaId, id))
+      .where(and(eq(pagosDeuda.deudaId, id), isNull(pagosDeuda.deletedAt)))
 
     const totalPagado = parseFloat(result?.total || 0)
     const nuevoPendiente = Math.max(0, nuevoMontoOriginal - totalPagado)
@@ -59,7 +59,8 @@ export default defineEventHandler(async (event) => {
     .set(updateData)
     .where(and(
       eq(deudas.id, id),
-      eq(deudas.usuarioId, usuarioId)
+      eq(deudas.usuarioId, usuarioId),
+      isNull(deudas.deletedAt)
     ))
     .returning()
 
@@ -77,7 +78,7 @@ export default defineEventHandler(async (event) => {
     await db
       .update(deudas)
       .set(espejoData)
-      .where(eq(deudas.id, deudaActual.vinculoDeudaId))
+      .where(and(eq(deudas.id, deudaActual.vinculoDeudaId), isNull(deudas.deletedAt)))
 
     // Registrar auditoría
     const [persona] = await db

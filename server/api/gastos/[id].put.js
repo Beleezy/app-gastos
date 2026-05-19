@@ -3,7 +3,7 @@ import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { gastoUpdateSchema } from '~/shared/schemas/gastos.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
   const [updated] = await db
     .update(gastos)
     .set(updateData)
-    .where(and(eq(gastos.id, id), eq(gastos.usuarioId, usuarioId)))
+    .where(and(eq(gastos.id, id), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
     .returning()
 
   if (!updated) {

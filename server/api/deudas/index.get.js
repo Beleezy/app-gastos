@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { deudas, personasEntidades, pagosDeuda } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and, sql, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const tipo = query.tipo // 'me_deben' | 'yo_debo'
   const estado = query.estado // 'pendiente' | 'parcial' | 'pagado' | 'archivado'
 
-  const conditions = [eq(deudas.usuarioId, usuarioId)]
+  const conditions = [eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)]
   if (personaId) conditions.push(eq(deudas.personaEntidadId, personaId))
   if (tipo) conditions.push(eq(deudas.tipoDeuda, tipo))
   if (estado) conditions.push(eq(deudas.estado, estado))

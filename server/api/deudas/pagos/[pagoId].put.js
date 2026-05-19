@@ -2,7 +2,7 @@ import { db } from '../../../utils/db.js'
 import { deudas, pagosDeuda, personasEntidades } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { registrarAuditoria } from '../../../utils/vinculos.js'
-import { eq, and, sum } from 'drizzle-orm'
+import { eq, and, sum, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const pagoId = getRouterParam(event, 'pagoId')
@@ -24,7 +24,9 @@ export default defineEventHandler(async (event) => {
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
     .where(and(
       eq(pagosDeuda.id, pagoId),
-      eq(deudas.usuarioId, usuarioId)
+      eq(deudas.usuarioId, usuarioId),
+      isNull(pagosDeuda.deletedAt),
+      isNull(deudas.deletedAt)
     ))
     .limit(1)
 
@@ -50,7 +52,7 @@ export default defineEventHandler(async (event) => {
     const [deudaActual] = await db
       .select()
       .from(deudas)
-      .where(eq(deudas.id, pago.deudaId))
+      .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
       .limit(1)
 
     const [result] = await db
@@ -58,6 +60,7 @@ export default defineEventHandler(async (event) => {
       .from(pagosDeuda)
       .where(and(
         eq(pagosDeuda.deudaId, pago.deudaId),
+        isNull(pagosDeuda.deletedAt),
         // Excluir el pago actual del cálculo (se reemplaza por el nuevo monto)
       ))
 
@@ -67,7 +70,8 @@ export default defineEventHandler(async (event) => {
       .from(pagosDeuda)
       .where(and(
         eq(pagosDeuda.deudaId, pago.deudaId),
-        eq(pagosDeuda.id, pagoId)
+        eq(pagosDeuda.id, pagoId),
+        isNull(pagosDeuda.deletedAt)
       ))
 
     const pagosOtros = await db
@@ -75,14 +79,15 @@ export default defineEventHandler(async (event) => {
       .from(pagosDeuda)
       .where(and(
         eq(pagosDeuda.deudaId, pago.deudaId),
-        eq(pagosDeuda.id, pagoId)
+        eq(pagosDeuda.id, pagoId),
+        isNull(pagosDeuda.deletedAt)
       ))
 
     // Calcular total pagado (excluyendo este pago) + nuevo monto
     const [resultOtros] = await db
       .select({ total: sum(pagosDeuda.montoPagado) })
       .from(pagosDeuda)
-      .where(eq(pagosDeuda.deudaId, pago.deudaId))
+      .where(and(eq(pagosDeuda.deudaId, pago.deudaId), isNull(pagosDeuda.deletedAt)))
 
     const totalActualIncluyendo = parseFloat(resultOtros?.total || 0)
     const totalSinEstePago = totalActualIncluyendo - parseFloat(pago.montoPagado)
@@ -114,7 +119,7 @@ export default defineEventHandler(async (event) => {
       concepto: deudas.concepto,
     })
     .from(deudas)
-    .where(eq(deudas.id, pago.deudaId))
+    .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
     .limit(1)
 
   const [persona] = await db
@@ -128,7 +133,7 @@ export default defineEventHandler(async (event) => {
     const [updated] = await tx
       .update(pagosDeuda)
       .set(updateData)
-      .where(eq(pagosDeuda.id, pagoId))
+      .where(and(eq(pagosDeuda.id, pagoId), isNull(pagosDeuda.deletedAt)))
       .returning()
 
     // Actualizar deuda si cambia el monto
@@ -140,7 +145,7 @@ export default defineEventHandler(async (event) => {
           estado: deudaActualizada.estado,
           updatedAt: new Date(),
         })
-        .where(eq(deudas.id, pago.deudaId))
+        .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
     }
 
     // Sincronizar con pago espejo si existe
@@ -148,7 +153,7 @@ export default defineEventHandler(async (event) => {
       await tx
         .update(pagosDeuda)
         .set(updateData)
-        .where(eq(pagosDeuda.id, pago.vinculoPagoId))
+        .where(and(eq(pagosDeuda.id, pago.vinculoPagoId), isNull(pagosDeuda.deletedAt)))
 
       // Actualizar deuda espejo si cambia el monto
       if (deudaActualizada?.vinculoDeudaId) {
@@ -159,7 +164,7 @@ export default defineEventHandler(async (event) => {
             estado: deudaActualizada.estado,
             updatedAt: new Date(),
           })
-          .where(eq(deudas.id, deudaActualizada.vinculoDeudaId))
+          .where(and(eq(deudas.id, deudaActualizada.vinculoDeudaId), isNull(deudas.deletedAt)))
       }
     }
 

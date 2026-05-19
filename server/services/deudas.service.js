@@ -1,6 +1,6 @@
 // Capa de servicios de deudas. Ver §2.1 / §5.C de planifica.md.
 
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, sql, isNull } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { deudas, personasEntidades } from '../database/schema.js'
 import { crearDeudaEspejo, registrarAuditoria } from '../utils/vinculos.js'
@@ -167,7 +167,7 @@ export async function balanceGlobal(usuarioId) {
     })
     .from(deudas)
     .innerJoin(personasEntidades, eq(deudas.personaEntidadId, personasEntidades.id))
-    .where(and(eq(deudas.usuarioId, usuarioId), sql`${deudas.estado} != 'archivado'`))
+    .where(and(eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt), sql`${deudas.estado} != 'archivado'`))
     .groupBy(personasEntidades.id, personasEntidades.nombre, deudas.tipoDeuda)
 
   return agregarBalance(rows)
@@ -230,7 +230,7 @@ export async function mergePersonas({ usuarioId, destinoId, origenIds }) {
       .update(deudas)
       .set({ personaEntidadId: destinoId, updatedAt: new Date() })
       .where(
-        and(eq(deudas.usuarioId, usuarioId), inArray(deudas.personaEntidadId, ids)),
+        and(eq(deudas.usuarioId, usuarioId), inArray(deudas.personaEntidadId, ids), isNull(deudas.deletedAt)),
       )
       .returning({ id: deudas.id })
 

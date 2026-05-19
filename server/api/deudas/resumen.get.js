@@ -2,7 +2,7 @@ import { db } from '../../utils/db.js'
 import { deudas } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
       countVencidasYoDebo: sql`COUNT(CASE WHEN ${deudas.tipoDeuda} = 'yo_debo' AND ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN 1 END)`.as('count_vencidas_yo_debo'),
     })
     .from(deudas)
-    .where(eq(deudas.usuarioId, usuarioId))
+    .where(and(eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
 
   const totalMeDeben = parseFloat(resumen.totalMeDeben)
   const totalYoDebo = parseFloat(resumen.totalYoDebo)
