@@ -59,7 +59,9 @@ const { isRefreshing } = usePullToRefresh(async () => {
   await fetchGastosFuturos()
 })
 
-onMounted(async () => {
-  await Promise.all([fetchGastosFuturos(), fetchCategorias()])
+onMounted(() => {
+  // Fire-and-forget: ambos composables tienen SWR cache, así que en
+  // revisitas dentro del TTL no disparan red.
+  Promise.all([fetchGastosFuturos(), fetchCategorias()]).catch(() => {})
 })
 </script>

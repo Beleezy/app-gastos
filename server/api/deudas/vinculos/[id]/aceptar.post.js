@@ -1,7 +1,7 @@
 import { db } from '../../../../utils/db.js'
 import { solicitudesVinculo, personasEntidades, deudas, pagosDeuda, usuarios } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
-import { crearDeudaEspejo, crearPagoEspejo, registrarAuditoria, getNombreDisplay, normalizarParPersonas, crearCheckpoint } from '../../../../utils/vinculos.js'
+import { crearDeudasEspejoBulk, crearPagosEspejoBulk, registrarAuditoria, getNombreDisplay, normalizarParPersonas, crearCheckpoint } from '../../../../utils/vinculos.js'
 import { eq, and, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -112,20 +112,22 @@ export default defineEventHandler(async (event) => {
         inArray(deudas.estado, ['pendiente', 'parcial'])
       ))
 
-    let pagosSincronizados = 0
-    for (const deuda of deudasActivas) {
-      const deudaEspejo = await crearDeudaEspejo(tx, deuda, personaEspejo.id, usuarioId)
+    // 4b. Espejar deudas en bulk: 1 INSERT batch (vs N INSERTs anteriores).
+    const deudaEspejoMap = await crearDeudasEspejoBulk(tx, deudasActivas, personaEspejo.id, usuarioId)
 
-      // 5. Espejar pagos de cada deuda
-      const pagos = await tx
+    // 5. Espejar pagos en bulk: 1 SELECT (todos los pagos) + 1 INSERT batch.
+    let pagosSincronizados = 0
+    if (deudasActivas.length > 0) {
+      const pagosTodos = await tx
         .select()
         .from(pagosDeuda)
-        .where(eq(pagosDeuda.deudaId, deuda.id))
+        .where(inArray(pagosDeuda.deudaId, deudasActivas.map(d => d.id)))
 
-      for (const pago of pagos) {
-        await crearPagoEspejo(tx, pago, deudaEspejo.id)
-        pagosSincronizados++
-      }
+      const pagosConEspejo = pagosTodos
+        .map(p => ({ pago: p, deudaEspejoId: deudaEspejoMap.get(p.deudaId) }))
+        .filter(x => x.deudaEspejoId)
+
+      pagosSincronizados = await crearPagosEspejoBulk(tx, pagosConEspejo)
     }
 
     // 6. Marcar solicitud como aceptada

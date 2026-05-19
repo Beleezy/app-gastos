@@ -1,0 +1,210 @@
+/* ── Modo Daltónico ──
+ * Estilos que solo aplican cuando html tiene la clase .colorblind.
+ * Se carga dinámicamente (no en el bundle inicial) desde useTheme.js
+ * cuando el usuario activa el modo en /configuraciones.
+ *
+ * Carga: <link rel="stylesheet" id="colorblind-css" href="/colorblind.css">
+ * inyectado por composables/useTheme.js y por el script crítico de
+ * nuxt.config.ts (anti-flicker en cold start).
+ */
+html.colorblind {
+  --cb-positive: #2563eb;
+  --cb-positive-light: #3b82f6;
+  --cb-positive-bg: rgba(37, 99, 235, 0.12);
+  --cb-positive-bg-hover: rgba(37, 99, 235, 0.22);
+  --cb-negative: #dc2626;
+  --cb-negative-light: #ef4444;
+  --cb-negative-bg: rgba(220, 38, 38, 0.12);
+  --cb-negative-bg-hover: rgba(220, 38, 38, 0.22);
+  --cb-warning: #d97706;
+  --cb-warning-light: #f59e0b;
+  --cb-warning-bg: rgba(217, 119, 6, 0.12);
+  --cb-warning-bg-hover: rgba(217, 119, 6, 0.22);
+}
+
+/* Atenuar el impacto del acento cuando colorblind está activo */
+html.colorblind {
+  --color-accent-bg: rgba(128, 128, 128, 0.06);
+  --color-accent-bg-hover: rgba(128, 128, 128, 0.12);
+  --color-accent-ring: rgba(128, 128, 128, 0.3);
+}
+
+/* ── Overrides: colores semánticos positivos → azul ── */
+/* emerald, green, teal (éxito/pagado/creado) */
+html.colorblind .bg-emerald-500\/5,
+html.colorblind .bg-emerald-500\/8,
+html.colorblind .bg-emerald-500\/10,
+html.colorblind .bg-emerald-500\/15,
+html.colorblind .bg-emerald-500\/20,
+html.colorblind .bg-emerald-500\/25 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .bg-emerald-500\/90 { background-color: rgba(37, 99, 235, 0.9) !important; }
+html.colorblind .bg-emerald-500 { background-color: var(--cb-positive) !important; }
+html.colorblind .bg-emerald-400 { background-color: var(--cb-positive-light) !important; }
+html.colorblind .text-emerald-400,
+html.colorblind .text-emerald-300 { color: var(--cb-positive-light) !important; }
+html.colorblind .text-emerald-500 { color: var(--cb-positive) !important; }
+html.colorblind .border-emerald-500\/20,
+html.colorblind .border-emerald-400\/20 { border-color: rgba(37, 99, 235, 0.2) !important; }
+html.colorblind .hover\:bg-emerald-500\/15:hover,
+html.colorblind .hover\:bg-emerald-500\/20:hover,
+html.colorblind .hover\:bg-emerald-500\/25:hover { background-color: var(--cb-positive-bg-hover) !important; }
+html.colorblind .shadow-emerald-500\/20,
+html.colorblind .shadow-emerald-500\/25 { --tw-shadow-color: rgba(37, 99, 235, 0.25) !important; }
+
+html.colorblind .bg-green-500\/15,
+html.colorblind .bg-green-500\/20 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .bg-green-500 { background-color: var(--cb-positive) !important; }
+html.colorblind .text-green-400,
+html.colorblind .text-green-300 { color: var(--cb-positive-light) !important; }
+html.colorblind .text-green-500 { color: var(--cb-positive) !important; }
+
+html.colorblind .bg-teal-500\/8,
+html.colorblind .bg-teal-500\/10,
+html.colorblind .bg-teal-500\/15,
+html.colorblind .bg-teal-500\/20 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .bg-teal-500 { background-color: var(--cb-positive) !important; }
+html.colorblind .bg-teal-400 { background-color: var(--cb-positive-light) !important; }
+html.colorblind .text-teal-400,
+html.colorblind .text-teal-300 { color: var(--cb-positive-light) !important; }
+
+/* violet, indigo, purple, sky (info/checkpoint) → azul */
+html.colorblind .bg-violet-500\/8,
+html.colorblind .bg-violet-500\/15,
+html.colorblind .bg-violet-500\/20,
+html.colorblind .bg-violet-500\/25 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .bg-violet-500 { background-color: var(--cb-positive) !important; }
+html.colorblind .bg-violet-400 { background-color: var(--cb-positive-light) !important; }
+html.colorblind .text-violet-400,
+html.colorblind .text-violet-300 { color: var(--cb-positive-light) !important; }
+html.colorblind .hover\:bg-violet-500\/25:hover { background-color: var(--cb-positive-bg-hover) !important; }
+
+html.colorblind .bg-indigo-500\/15,
+html.colorblind .bg-indigo-500\/20 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .bg-indigo-500 { background-color: var(--cb-positive) !important; }
+html.colorblind .text-indigo-400,
+html.colorblind .text-indigo-300 { color: var(--cb-positive-light) !important; }
+
+html.colorblind .bg-purple-500\/10,
+html.colorblind .bg-purple-500\/15,
+html.colorblind .bg-purple-500\/20 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .bg-purple-500 { background-color: var(--cb-positive) !important; }
+html.colorblind .bg-purple-600 { background-color: var(--cb-positive) !important; }
+html.colorblind .bg-purple-400 { background-color: var(--cb-positive-light) !important; }
+html.colorblind .text-purple-400,
+html.colorblind .text-purple-300 { color: var(--cb-positive-light) !important; }
+html.colorblind .hover\:bg-purple-500\/25:hover,
+html.colorblind .hover\:bg-purple-600:hover { background-color: var(--cb-positive-bg-hover) !important; }
+html.colorblind .shadow-purple-500\/25,
+html.colorblind .shadow-purple-500\/40 { --tw-shadow-color: rgba(37, 99, 235, 0.25) !important; }
+
+html.colorblind .bg-sky-500\/8,
+html.colorblind .bg-sky-500\/10,
+html.colorblind .bg-sky-500\/12,
+html.colorblind .bg-sky-500\/15 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .border-sky-500\/15 { border-color: rgba(37, 99, 235, 0.15) !important; }
+html.colorblind .text-sky-400,
+html.colorblind .text-sky-300 { color: var(--cb-positive-light) !important; }
+
+/* cyan → azul */
+html.colorblind .bg-cyan-500\/15,
+html.colorblind .bg-cyan-500\/20 { background-color: var(--cb-positive-bg) !important; }
+html.colorblind .text-cyan-400,
+html.colorblind .text-cyan-300 { color: var(--cb-positive-light) !important; }
+
+/* blue (acción primaria) → se mantiene como está, ya es azul */
+
+/* ── Overrides: colores semánticos negativos → rojo ── */
+/* red, rose (eliminar/vencido/revertido) */
+html.colorblind .bg-red-500\/8,
+html.colorblind .bg-red-500\/10,
+html.colorblind .bg-red-500\/15,
+html.colorblind .bg-red-500\/20,
+html.colorblind .bg-red-500\/25,
+html.colorblind .bg-red-500\/30 { background-color: var(--cb-negative-bg) !important; }
+html.colorblind .bg-red-500\/90,
+html.colorblind .bg-red-500\/95 { background-color: rgba(220, 38, 38, 0.9) !important; }
+html.colorblind .bg-red-500 { background-color: var(--cb-negative) !important; }
+html.colorblind .bg-red-400 { background-color: var(--cb-negative-light) !important; }
+html.colorblind .text-red-400,
+html.colorblind .text-red-300 { color: var(--cb-negative-light) !important; }
+html.colorblind .text-red-500 { color: var(--cb-negative) !important; }
+html.colorblind .border-red-500\/20,
+html.colorblind .border-red-500\/30,
+html.colorblind .border-red-500\/40 { border-color: rgba(220, 38, 38, 0.2) !important; }
+html.colorblind .hover\:bg-red-500\/10:hover { background-color: var(--cb-negative-bg) !important; }
+html.colorblind .hover\:bg-red-500\/20:hover,
+html.colorblind .hover\:bg-red-500\/25:hover { background-color: var(--cb-negative-bg-hover) !important; }
+html.colorblind .hover\:bg-red-600:hover { background-color: #b91c1c !important; }
+html.colorblind .hover\:text-red-400:hover { color: var(--cb-negative-light) !important; }
+html.colorblind .shadow-red-500\/40 { --tw-shadow-color: rgba(220, 38, 38, 0.4) !important; }
+
+/* ── Overrides: colores semánticos advertencia → ámbar ── */
+/* amber, yellow, orange (pendiente/editado/parcial) */
+html.colorblind .bg-amber-500\/10,
+html.colorblind .bg-amber-500\/15,
+html.colorblind .bg-amber-500\/20,
+html.colorblind .bg-amber-500\/25,
+html.colorblind .bg-amber-500\/30 { background-color: var(--cb-warning-bg) !important; }
+html.colorblind .bg-amber-500\/90 { background-color: rgba(217, 119, 6, 0.9) !important; }
+html.colorblind .bg-amber-500 { background-color: var(--cb-warning) !important; }
+html.colorblind .bg-amber-400 { background-color: var(--cb-warning-light) !important; }
+html.colorblind .text-amber-400,
+html.colorblind .text-amber-300 { color: var(--cb-warning-light) !important; }
+html.colorblind .border-amber-500\/40 { border-color: rgba(217, 119, 6, 0.4) !important; }
+html.colorblind .hover\:bg-amber-500\/20:hover,
+html.colorblind .hover\:bg-amber-500\/25:hover,
+html.colorblind .hover\:bg-amber-500\/30:hover { background-color: var(--cb-warning-bg-hover) !important; }
+
+html.colorblind .bg-orange-500\/8,
+html.colorblind .bg-orange-500\/10,
+html.colorblind .bg-orange-500\/15,
+html.colorblind .bg-orange-500\/20,
+html.colorblind .bg-orange-500\/25 { background-color: var(--cb-warning-bg) !important; }
+html.colorblind .bg-orange-500 { background-color: var(--cb-warning) !important; }
+html.colorblind .bg-orange-400 { background-color: var(--cb-warning-light) !important; }
+html.colorblind .text-orange-400,
+html.colorblind .text-orange-300 { color: var(--cb-warning-light) !important; }
+html.colorblind .hover\:bg-orange-500\/25:hover { background-color: var(--cb-warning-bg-hover) !important; }
+
+html.colorblind .bg-yellow-500\/15,
+html.colorblind .bg-yellow-500\/20 { background-color: var(--cb-warning-bg) !important; }
+html.colorblind .bg-yellow-500 { background-color: var(--cb-warning) !important; }
+html.colorblind .text-yellow-400,
+html.colorblind .text-yellow-300 { color: var(--cb-warning-light) !important; }
+
+/* ── Overrides: active de colores semánticos ── */
+html.colorblind .active\:bg-emerald-500\/30:active,
+html.colorblind .active\:bg-emerald-500\/35:active { background-color: var(--cb-positive-bg-hover) !important; }
+html.colorblind .active\:bg-amber-500\/30:active,
+html.colorblind .active\:bg-amber-500\/35:active { background-color: var(--cb-warning-bg-hover) !important; }
+html.colorblind .active\:bg-red-500\/20:active,
+html.colorblind .active\:bg-red-500\/30:active { background-color: var(--cb-negative-bg-hover) !important; }
+
+/* ── Overrides: hover text/border de colores semánticos ── */
+html.colorblind .hover\:text-emerald-400:hover,
+html.colorblind .hover\:text-emerald-300:hover { color: var(--cb-positive-light) !important; }
+html.colorblind .hover\:border-emerald-500\/30:hover { border-color: rgba(37, 99, 235, 0.3) !important; }
+html.colorblind .hover\:bg-emerald-500\/10:hover { background-color: var(--cb-positive-bg) !important; }
+
+html.colorblind .hover\:text-orange-400:hover,
+html.colorblind .hover\:text-orange-300:hover { color: var(--cb-warning-light) !important; }
+html.colorblind .hover\:bg-orange-500\/10:hover { background-color: var(--cb-warning-bg) !important; }
+
+html.colorblind .hover\:text-amber-400:hover { color: var(--cb-warning-light) !important; }
+html.colorblind .hover\:bg-amber-500\/10:hover { background-color: var(--cb-warning-bg) !important; }
+
+html.colorblind .hover\:text-violet-400:hover { color: var(--cb-positive-light) !important; }
+
+/* ── Gradientes semánticos atenuados ── */
+html.colorblind .text-gradient-emerald {
+  background: linear-gradient(135deg, var(--cb-positive-light), var(--cb-positive)) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+}
+html.colorblind .glow-emerald {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.15), 0 0 60px rgba(37, 99, 235, 0.05) !important;
+}
+html.colorblind .glow-red {
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.15), 0 0 60px rgba(220, 38, 38, 0.05) !important;
+}

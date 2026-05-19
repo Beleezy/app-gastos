@@ -10,6 +10,8 @@ export default defineEventHandler(async (event) => {
   const tipo = query.tipo // 'me_deben' | 'yo_debo' | undefined (all)
   const { fecha: hoy } = await getFechaHoraLocalUsuario(usuarioId)
 
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
+
   // Get personas with aggregated debt totals
   const personasRaw = await db
     .select({

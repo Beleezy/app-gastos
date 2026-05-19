@@ -39,7 +39,7 @@ export default defineNuxtConfig({
           // separarlas evita que su código se mezcle con código de la app.
           manualChunks(id: string) {
             if (id.includes('node_modules/jspdf')) return 'vendor-jspdf'
-            if (id.includes('node_modules/xlsx')) return 'vendor-xlsx'
+            if (id.includes('node_modules/write-excel-file')) return 'vendor-excel'
             if (id.includes('node_modules/@supabase')) return 'vendor-supabase'
           },
         },
@@ -117,7 +117,7 @@ export default defineNuxtConfig({
         {
           tagPosition: 'head',
           tagPriority: 'critical',
-          innerHTML: "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true')d.classList.add('colorblind');}catch(e){}})();",
+          innerHTML: "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true'){d.classList.add('colorblind');var l=document.createElement('link');l.id='colorblind-css';l.rel='stylesheet';l.href='/colorblind.css';document.head.appendChild(l);}}catch(e){}})();",
         },
       ],
     },

@@ -4,7 +4,6 @@ export function useAhorros() {
   const { apiFetch } = useApiFetch()
 
   const ahorrosList = useState('ahorros-list', () => [])
-  const medios = useState('ahorros-medios', () => [])
   const totalMes = useState('ahorros-total-mes', () => 0)
   const totalGlobal = useState('ahorros-total-global', () => 0)
   const porMedio = useState('ahorros-por-medio', () => [])
@@ -101,9 +100,16 @@ export function useAhorros() {
     mesSeleccionadoGrafico.value = null
   }
 
-  async function fetchMedios() {
+  // Cache SWR para medios de ahorro: cambian raramente.
+  const mediosCache = useResourceCache(
+    'ahorros-medios',
+    () => apiFetch('/api/ahorros/medios'),
+    { ttl: 5 * 60 * 1000, initial: [] },
+  )
+
+  async function fetchMedios(force = false) {
     try {
-      medios.value = await apiFetch('/api/ahorros/medios')
+      await mediosCache.refresh(force)
     } catch (e) {
       error.value = e.message || 'Error al cargar medios'
     }
@@ -112,7 +118,7 @@ export function useAhorros() {
   async function createMedio(data) {
     try {
       const medio = await apiFetch('/api/ahorros/medios', { method: 'POST', body: data })
-      medios.value = [...medios.value, medio]
+      mediosCache.set([...(mediosCache.data.value || []), medio])
       return medio
     } catch (e) {
       error.value = e.message || 'Error al crear medio'
@@ -123,7 +129,7 @@ export function useAhorros() {
   async function updateMedio(id, data) {
     try {
       const medio = await apiFetch(`/api/ahorros/medios/${id}`, { method: 'PUT', body: data })
-      medios.value = medios.value.map(m => m.id === id ? medio : m)
+      mediosCache.set((mediosCache.data.value || []).map(m => m.id === id ? medio : m))
       return medio
     } catch (e) {
       error.value = e.message || 'Error al actualizar medio'
@@ -134,7 +140,7 @@ export function useAhorros() {
   async function deleteMedio(id) {
     try {
       await apiFetch(`/api/ahorros/medios/${id}`, { method: 'DELETE' })
-      medios.value = medios.value.filter(m => m.id !== id)
+      mediosCache.set((mediosCache.data.value || []).filter(m => m.id !== id))
     } catch (e) {
       error.value = e.message || 'Error al eliminar medio'
       throw e
@@ -168,6 +174,8 @@ export function useAhorros() {
       mesActual.value--
     }
   }
+
+  const medios = mediosCache.data
 
   return {
     ahorrosList, medios, totalMes, totalGlobal, porMedio,
