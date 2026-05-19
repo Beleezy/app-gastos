@@ -201,11 +201,22 @@ export function usePlanificador() {
   async function createGastoPlaneado(data) {
     if (!plan.value) return
     try {
-      await apiFetch('/api/planificador/gastos', {
+      const creado = await apiFetch('/api/planificador/gastos', {
         method: 'POST',
         body: { ...data, planMensualId: plan.value.id }
       })
-      await fetchPlan()
+      // Optimistic update: si es un único gasto (no recurrente), basta
+      // con añadirlo al array local. Si es recurrente, el endpoint creó
+      // varias instancias en meses futuros y necesitamos re-fetch para
+      // mantener `gastosPlaneados` consistente con el mes actual.
+      if (creado && !data.esRecurrente) {
+        gastosPlaneados.value = [...gastosPlaneados.value, {
+          ...creado,
+          montoEstimado: parseFloat(creado.montoEstimado),
+        }]
+      } else {
+        await fetchPlan()
+      }
     } catch (e) {
       error.value = e.message || 'Error al crear gasto'
       throw e
@@ -215,11 +226,22 @@ export function usePlanificador() {
   async function updateGastoPlaneado(id, data) {
     try {
       // data puede incluir alcanceEdicion: 'solo' | 'futuros' para recurrentes
-      await apiFetch(`/api/planificador/gastos/${id}`, {
+      const actualizado = await apiFetch(`/api/planificador/gastos/${id}`, {
         method: 'PUT',
         body: data
       })
-      await fetchPlan()
+      // Optimistic update: si alcanceEdicion='solo' (o no es recurrente),
+      // basta con reemplazar el item local. Para 'futuros' tocó otros
+      // meses, así que conservador re-fetch.
+      if (actualizado && data.alcanceEdicion !== 'futuros') {
+        gastosPlaneados.value = gastosPlaneados.value.map(g =>
+          g.id === id
+            ? { ...g, ...actualizado, montoEstimado: parseFloat(actualizado.montoEstimado) }
+            : g
+        )
+      } else {
+        await fetchPlan()
+      }
     } catch (e) {
       error.value = e.message || 'Error al actualizar gasto'
     }

@@ -42,6 +42,11 @@ export default defineEventHandler(async (event) => {
   else if (orden === 'concepto_asc') orderBy = [asc(gastos.concepto)]
   else if (orden === 'fecha_asc') orderBy = [asc(gastos.fecha), asc(gastos.hora)]
 
+  // NOTA: NO devolvemos `transcripcionVoz` aquí. Es un text largo (200-500
+  // chars típico) que ningún componente del listado consume; solo se usa
+  // al editar un gasto puntual. Excluirlo ahorra ~40 KB por response en
+  // un mes con 200+ gastos por voz. El endpoint PUT preserva el valor en
+  // BD porque no lo toca, así que la edición sigue funcionando.
   let queryBuilder = db
     .select({
       id: gastos.id,
@@ -50,7 +55,6 @@ export default defineEventHandler(async (event) => {
       fecha: gastos.fecha,
       hora: gastos.hora,
       metodoRegistro: gastos.metodoRegistro,
-      transcripcionVoz: gastos.transcripcionVoz,
       notas: gastos.notas,
       gastoPlanificadoId: gastos.gastoPlanificadoId,
       categoriaId: gastos.categoriaId,
