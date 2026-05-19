@@ -179,6 +179,7 @@ export const deudas = pgTable('deudas', {
   index('deudas_usuario_tipo_idx').on(table.usuarioId, table.tipoDeuda),
   index('deudas_usuario_estado_idx').on(table.usuarioId, table.estado),
   index('deudas_usuario_updated_idx').on(table.usuarioId, table.updatedAt),
+  index('deudas_vinculo_deuda_idx').on(table.vinculoDeudaId),
 ])
 
 // ── Tabla 8: configuraciones ──
@@ -213,6 +214,7 @@ export const pagosDeuda = pgTable('pagos_deuda', {
 }, (table) => [
   index('pagos_deuda_deuda_idx').on(table.deudaId),
   index('pagos_deuda_deuda_fecha_idx').on(table.deudaId, table.fechaPago),
+  index('pagos_deuda_vinculo_pago_idx').on(table.vinculoPagoId),
 ])
 
 // ── Tabla 10: auditoria_vinculos ──
@@ -228,6 +230,8 @@ export const auditoriaVinculos = pgTable('auditoria_vinculos', {
 }, (table) => [
   index('auditoria_vinculos_persona_a_idx').on(table.personaAId),
   index('auditoria_vinculos_persona_b_idx').on(table.personaBId),
+  index('auditoria_vinculos_created_at_idx').on(table.createdAt),
+  index('auditoria_vinculos_usuario_created_idx').on(table.usuarioId, table.createdAt),
 ])
 
 // ── Tabla 11: vinculos_checkpoints ──
@@ -366,6 +370,34 @@ export const usoLlm = pgTable('uso_llm', {
     table.endpoint,
   ),
   index('uso_llm_usuario_idx').on(table.usuarioId),
+])
+
+// ── Tabla: llm_cache — caché de respuestas del LLM ──
+// Guarda el JSON parseado devuelto por Gemini para una entrada idéntica
+// (modelo + usuario + endpoint + hash del prompt normalizado). Evita
+// pagar tokens cuando el usuario repite la misma transcripción/foto.
+//
+// El usuarioId está incluido en el hash para aislar entre usuarios:
+// dos usuarios pueden tener prompts iguales pero categorías distintas,
+// así que la respuesta no es compartible.
+export const llmCache = pgTable('llm_cache', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  endpoint: varchar('endpoint', { length: 100 }).notNull(),
+  modelo: varchar('modelo', { length: 100 }).notNull(),
+  inputHash: varchar('input_hash', { length: 64 }).notNull(),
+  responseJson: text('response_json').notNull(),
+  hits: integer('hits').default(0).notNull(),
+  expiresAt: timestamp('expires_at').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('llm_cache_lookup_uniq').on(
+    table.usuarioId,
+    table.endpoint,
+    table.modelo,
+    table.inputHash,
+  ),
+  index('llm_cache_expires_idx').on(table.expiresAt),
 ])
 
 // ── Integraciones: Google Calendar ──
