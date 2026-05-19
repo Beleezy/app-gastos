@@ -76,25 +76,24 @@
     </div>
 
     <!-- FABs: Voz + Manual (hidden when voice overlay is active) -->
-    <div v-if="!showVozOverlay" class="fixed right-4 bottom-24 lg:right-8 lg:bottom-8 z-40 flex flex-col gap-3 items-center">
-      <button
-        class="w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 active:scale-90 bg-purple-600 opacity-70 hover:opacity-85 shadow-purple-500/25"
+    <SharedFloatingActionStack :visible="!showVozOverlay">
+      <SharedFloatingActionButton
+        tone="purple"
+        :pulse="false"
+        aria-label="Registrar deuda por voz"
         @click="abrirVozOverlay"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
         </svg>
-      </button>
-      <button
-        class="w-12 h-12 rounded-full bg-theme-accent opacity-70 hover:opacity-85 active:scale-90 shadow-lg shadow-theme-accent/25 flex items-center justify-center transition-all duration-300 fab-pulse"
+      </SharedFloatingActionButton>
+      <SharedFloatingActionButton
+        tone="accent"
+        aria-label="Agregar nueva deuda"
         data-testid="btn-nueva-deuda"
         @click="showFormDeuda = true"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
-    </div>
+      />
+    </SharedFloatingActionStack>
 
     <!-- Voice overlay -->
     <DeudasVozOverlayDeuda />

@@ -49,7 +49,13 @@
       <!-- Donut chart -->
       <div class="flex justify-center mb-5">
         <div class="relative w-44 h-44">
-          <svg viewBox="0 0 100 100" class="w-full h-full -rotate-90" v-if="datosEfectivos.length > 0">
+          <svg
+            v-if="datosEfectivos.length > 0"
+            viewBox="0 0 100 100"
+            class="w-full h-full -rotate-90"
+            role="img"
+            :aria-label="`Gráfico de gastos por categoría. ${datosEfectivos.length} ${datosEfectivos.length === 1 ? 'categoría' : 'categorías'}. Total ${currencySymbol} ${formatMonto(totalGeneral)}`"
+          >
             <circle
               v-for="(seg, i) in segmentos"
               :key="i"
@@ -62,7 +68,10 @@
               stroke-linecap="round"
               :opacity="seleccionada && seleccionada !== seg.nombre ? 0.2 : 1"
               class="transition-all duration-400 cursor-pointer"
+              :aria-label="`${seg.nombre}: ${currencySymbol} ${formatMonto(seg.total || 0)}`"
+              tabindex="0"
               @click="toggleSeleccion(seg.nombre)"
+              @keydown.enter.space.prevent="toggleSeleccion(seg.nombre)"
             />
           </svg>
           <!-- Center text -->
@@ -337,6 +346,7 @@ const segmentos = computed(() => {
     segs.push({
       nombre: cat.nombre,
       color: cat.color,
+      total: cat.total,
       dash: `${porcionConGap} ${CIRCUNFERENCIA - porcionConGap}`,
       offset: -acumulado,
     })

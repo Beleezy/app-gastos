@@ -1,11 +1,11 @@
 <template>
   <div class="px-4 lg:px-0 space-y-2">
-    <div v-if="porMedioFiltrado.length === 0" class="text-center py-8">
-      <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-        <span class="text-2xl">💰</span>
-      </div>
-      <p class="text-sm font-medium text-theme-text-muted">Sin ahorros que coincidan</p>
-    </div>
+    <SharedEmptyState
+      v-if="porMedioFiltrado.length === 0"
+      icon="💰"
+      title="Sin ahorros que coincidan"
+      compact
+    />
 
     <div
       v-for="item in porMedioFiltrado"

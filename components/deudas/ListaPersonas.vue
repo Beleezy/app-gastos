@@ -68,24 +68,14 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="personasActivas.length === 0 && personasInactivas.length === 0" class="text-center py-12">
-      <div class="w-16 h-16 rounded-full bg-theme-card flex items-center justify-center mx-auto mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </div>
-      <p class="text-theme-text-sec text-sm">
-        {{ emptyStateMsg }}
-      </p>
-      <p v-if="filtroEstado === 'todos'" class="text-theme-text-muted text-xs mt-1">Agrega una nueva deuda con el boton +</p>
-      <button
-        v-else
-        class="mt-3 px-3 py-1.5 rounded-full text-xs font-medium bg-theme-card border border-theme-border text-theme-text-sec hover:text-theme-text transition-colors"
-        @click="filtroEstado = 'todos'"
-      >
-        Ver todas
-      </button>
-    </div>
+    <SharedEmptyState
+      v-else-if="personasActivas.length === 0 && personasInactivas.length === 0"
+      icon="👥"
+      :title="emptyStateMsg"
+      :message="filtroEstado === 'todos' ? 'Agrega una nueva deuda con el botón +' : ''"
+      :action-label="filtroEstado === 'todos' ? '' : 'Ver todas'"
+      @action="filtroEstado = 'todos'"
+    />
 
     <!-- Personas List -->
     <div v-else class="space-y-2.5 xl:space-y-0 xl:grid xl:grid-cols-2 xl:gap-3">

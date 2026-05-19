@@ -200,17 +200,16 @@
             class="sticky z-20 bg-theme-bg/95 backdrop-blur-sm lg:static lg:bg-transparent transition-[top] duration-200"
             :class="showStickyResumen ? 'top-[8.5rem]' : 'top-14'"
           >
-            <div class="flex items-center gap-2 px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
-              <button
-                v-for="tab in tabsVista"
-                :key="tab.value"
-                :data-testid="`tab-${tab.value}`"
-                class="flex-1 lg:flex-none lg:px-5 py-2 rounded-xl text-sm font-medium transition-colors"
-                :class="vistaRegistro === tab.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
-                @click="onCambiarVista(tab.value)"
-              >
-                {{ tab.label }}
-              </button>
+            <div class="px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
+              <SharedTabBar
+                :model-value="vistaRegistro"
+                :tabs="tabsVista"
+                variant="card"
+                size="md"
+                aria-label="Vista del registro"
+                container-class="grid grid-cols-4 gap-2 lg:flex lg:items-center"
+                @change="onCambiarVista"
+              />
             </div>
           </div>
 
