@@ -10,6 +10,10 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const { q } = getQuery(event)
 
+  // Autocompletado de conceptos: cambia muy lentamente (después de crear
+  // gastos nuevos). 5 min con SWR largo es seguro.
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
+
   // Sanitizar input antes de cualquier uso: corta a 100 chars, quita
   // NUL/zero-width, y escapa los comodines de LIKE para que `%` no
   // matchee todo. El binding de Drizzle ya parametriza el valor, así

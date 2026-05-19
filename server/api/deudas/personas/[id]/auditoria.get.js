@@ -6,6 +6,7 @@ import { eq, and, or, desc } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const personaId = getRouterParam(event, 'id')
   const usuarioId = await getUsuarioFromEvent(event)
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
 
   // Verificar que la persona pertenece al usuario
   const [persona] = await db

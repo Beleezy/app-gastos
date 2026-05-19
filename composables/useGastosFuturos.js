@@ -20,18 +20,36 @@ export function useGastosFuturos() {
   const isLoading = ref(false)
   const error = ref(null)
 
-  async function fetchGastosFuturos() {
+  // SWR para futuros: el dato no es crítico minuto-a-minuto.
+  const _fetchedAt = useState('futuros-fetched-at', () => 0)
+  const FUTUROS_TTL = 2 * 60 * 1000
+  let _inFlight = null
+
+  async function fetchGastosFuturos(force = false) {
+    if (!force && _fetchedAt.value > 0 && Date.now() - _fetchedAt.value < FUTUROS_TTL) {
+      return
+    }
+    if (_inFlight) return _inFlight
     isLoading.value = true
     error.value = null
-    try {
-      const data = await apiFetch('/api/futuros')
-      gastosFuturos.value = data.gastosFuturos || []
-      resumenFuturos.value = data.resumenFuturos || resumenFuturos.value
-    } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al cargar gastos futuros'
-    } finally {
-      isLoading.value = false
-    }
+    _inFlight = (async () => {
+      try {
+        const data = await apiFetch('/api/futuros')
+        gastosFuturos.value = data.gastosFuturos || []
+        resumenFuturos.value = data.resumenFuturos || resumenFuturos.value
+        _fetchedAt.value = Date.now()
+      } catch (e) {
+        error.value = e.data?.message || e.message || 'Error al cargar gastos futuros'
+      } finally {
+        isLoading.value = false
+        _inFlight = null
+      }
+    })()
+    return _inFlight
+  }
+
+  function invalidateGastosFuturos() {
+    _fetchedAt.value = 0
   }
 
   async function createGastoFuturo(data) {
@@ -40,7 +58,7 @@ export function useGastosFuturos() {
         method: 'POST',
         body: data,
       })
-      await fetchGastosFuturos()
+      await fetchGastosFuturos(true)
     } catch (e) {
       error.value = e.data?.message || e.message || 'Error al crear gasto futuro'
       throw e
@@ -53,7 +71,7 @@ export function useGastosFuturos() {
         method: 'PUT',
         body: data,
       })
-      await fetchGastosFuturos()
+      await fetchGastosFuturos(true)
     } catch (e) {
       error.value = e.data?.message || e.message || 'Error al actualizar gasto futuro'
       throw e
@@ -65,7 +83,7 @@ export function useGastosFuturos() {
       await apiFetch(`/api/planificador/futuros/${id}`, {
         method: 'DELETE',
       })
-      await fetchGastosFuturos()
+      await fetchGastosFuturos(true)
     } catch (e) {
       error.value = e.data?.message || e.message || 'Error al eliminar gasto futuro'
       throw e
@@ -78,7 +96,7 @@ export function useGastosFuturos() {
         method: 'POST',
         body: data,
       })
-      await fetchGastosFuturos()
+      await fetchGastosFuturos(true)
       return result
     } catch (e) {
       error.value = e.data?.message || e.message || 'Error al decidir la opcion'
@@ -88,7 +106,7 @@ export function useGastosFuturos() {
 
   return {
     gastosFuturos, resumenFuturos, isLoading, error,
-    fetchGastosFuturos,
+    fetchGastosFuturos, invalidateGastosFuturos,
     createGastoFuturo, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura,
   }
 }

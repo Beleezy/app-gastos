@@ -6,6 +6,7 @@ import { eq, and } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   const usuarioId = await getUsuarioFromEvent(event)
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
 
   const [deuda] = await db
     .select({

@@ -1,9 +1,9 @@
 /**
  * Exportación a Excel de deudas, con dos hojas: "Deudas" y "Pagos".
- * Ver §5.C punto 6 de planifica.md.
  *
- * Reutiliza el mismo patrón de import dinámico de XLSX que
- * useExportExcel para no inflar el bundle inicial.
+ * Migrado de `xlsx` (CVE high sin fix, ~800 KB) a `write-excel-file`
+ * (~150 KB, sin CVEs). El import sigue siendo dinámico para no inflar
+ * el bundle inicial.
  */
 
 import { useFormatters } from './useFormatters'
@@ -12,7 +12,7 @@ export function useDeudasExcel() {
   const { formatCurrency, formatDate } = useFormatters()
 
   async function exportar({ nombreArchivo = 'deudas', deudas = [], pagos = [], persona = null } = {}) {
-    const XLSX = await import('xlsx')
+    const writeXlsxFile = (await import('write-excel-file/browser')).default
 
     const filasDeudas = deudas.map((d) => ({
       Persona: d.personaNombre || persona?.nombre || '',
@@ -34,34 +34,50 @@ export function useDeudasExcel() {
       Notas: p.notas || '',
     }))
 
-    const wb = XLSX.utils.book_new()
-
+    const hojas = []
     if (filasDeudas.length > 0) {
-      const ws1 = XLSX.utils.json_to_sheet(filasDeudas)
-      ws1['!cols'] = computeColWidths(filasDeudas)
-      XLSX.utils.book_append_sheet(wb, ws1, 'Deudas')
+      hojas.push({
+        data: filasDeudas,
+        sheet: 'Deudas',
+        schema: schemaPorFila(filasDeudas),
+      })
     }
     if (filasPagos.length > 0) {
-      const ws2 = XLSX.utils.json_to_sheet(filasPagos)
-      ws2['!cols'] = computeColWidths(filasPagos)
-      XLSX.utils.book_append_sheet(wb, ws2, 'Pagos')
+      hojas.push({
+        data: filasPagos,
+        sheet: 'Pagos',
+        schema: schemaPorFila(filasPagos),
+      })
     }
-    if (filasDeudas.length === 0 && filasPagos.length === 0) {
-      const ws = XLSX.utils.aoa_to_sheet([['Sin datos para exportar']])
-      XLSX.utils.book_append_sheet(wb, ws, 'Vacío')
+    if (hojas.length === 0) {
+      hojas.push({
+        data: [{ Mensaje: 'Sin datos para exportar' }],
+        sheet: 'Vacío',
+        schema: [{ column: 'Mensaje', type: String, value: (r) => r.Mensaje, width: 30 }],
+      })
     }
 
-    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`)
+    if (hojas.length === 1) {
+      const { data, sheet, schema } = hojas[0]
+      await writeXlsxFile(data, { schema, sheet, fileName: `${nombreArchivo}.xlsx` })
+    } else {
+      await writeXlsxFile(
+        hojas.map(h => ({ data: h.data, sheet: h.sheet, schema: h.schema })),
+        { fileName: `${nombreArchivo}.xlsx` },
+      )
+    }
   }
 
   return { exportar }
 }
 
-function computeColWidths(filas) {
+function schemaPorFila(filas) {
   if (!filas.length) return []
   const cols = Object.keys(filas[0])
-  return cols.map((c) => {
-    const maxLen = Math.max(c.length, ...filas.map((f) => String(f[c] ?? '').length))
-    return { wch: Math.min(maxLen + 2, 40) }
-  })
+  return cols.map((c) => ({
+    column: c,
+    type: String,
+    value: (fila) => (fila[c] == null ? '' : String(fila[c])),
+    width: Math.min(Math.max(c.length, ...filas.map((f) => String(f[c] ?? '').length)) + 2, 40),
+  }))
 }
