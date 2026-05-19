@@ -1,33 +1,28 @@
 import { db } from '../../utils/db.js'
 import { categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, or, isNull } from 'drizzle-orm'
+import { eq, or, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
 
-  // Verificar si el usuario ya fue provisionado (tiene categorías propias)
-  const userCats = await db
-    .select({ id: categorias.id })
-    .from(categorias)
-    .where(eq(categorias.usuarioId, usuarioId))
-    .limit(1)
+  // Cache-Control: las categorías cambian rara vez. El cliente puede
+  // confiar en una caché de 5 min con SWR para no re-fetchear en cada
+  // navegación. Workbox NetworkFirst para `/api/categorias` lo aprovecha.
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=600')
 
-  if (userCats.length > 0) {
-    // Usuario provisionado: retornar solo sus categorías
-    return await db
-      .select()
-      .from(categorias)
-      .where(eq(categorias.usuarioId, usuarioId))
-      .orderBy(categorias.nombre)
-  }
-
-  // Usuario no provisionado: retornar predefinidas (comportamiento original)
-  const result = await db
+  // Una sola consulta que trae las del usuario + predefinidas. Si el
+  // usuario ya tiene categorías propias (provisionado), devolvemos solo
+  // esas; si no, devolvemos las predefinidas globales.
+  const cats = await db
     .select()
     .from(categorias)
-    .where(or(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)))
+    .where(or(
+      eq(categorias.usuarioId, usuarioId),
+      and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
+    ))
     .orderBy(categorias.nombre)
 
-  return result
+  const propias = cats.filter(c => c.usuarioId === usuarioId)
+  return propias.length > 0 ? propias : cats
 })

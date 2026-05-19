@@ -59,12 +59,12 @@
 
         <Transition name="page" mode="out-in">
           <div :key="vistaActual">
-            <PlanificadorGraficoCategoria
+            <LazyPlanificadorGraficoCategoria
               v-if="vistaActual === 'grafico'"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
-            <PlanificadorCalendarioMensual
+            <LazyPlanificadorCalendarioMensual
               v-else-if="vistaActual === 'calendario'"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
@@ -87,14 +87,14 @@
       />
     </SharedFloatingActionStack>
 
-    <PlanificadorFormGastoPlaneado
+    <LazyPlanificadorFormGastoPlaneado
       v-if="showFormMensual"
       :gasto-editar="gastoMensualEditando"
       @close="cerrarFormMensual"
       @saved="cerrarFormMensual"
     />
 
-    <PlanificadorFormRegistrarPago
+    <LazyPlanificadorFormRegistrarPago
       v-if="showFormRegistrarPago && gastoParaRegistrar"
       :gasto="gastoParaRegistrar"
       @close="cerrarFormRegistrarPago"
@@ -106,7 +106,7 @@
       title="Plantillas del mes"
       @close="showPlantillas = false"
     >
-      <PlanificadorSelectorPlantillas
+      <LazyPlanificadorSelectorPlantillas
         :plan-mensual-id="plan?.id || null"
         @aplicada="onPlantillaAplicadaFromSheet"
       />

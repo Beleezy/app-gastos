@@ -5,6 +5,11 @@ import { eq } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
+
+  // La configuración del usuario cambia rara vez. Permitimos cache cliente
+  // y SW por 5 min con SWR para evitar re-fetch en cada arranque.
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=600')
+
   const [config] = await db
     .select()
     .from(configuraciones)

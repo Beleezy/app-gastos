@@ -8,8 +8,12 @@ export function usePlanificador() {
   // Compartimos el estado de categorías con useCategorias/useGastos para que
   // los iconos/colores estén disponibles desde el primer render del planificador
   // sin tener que pasar por /registro primero.
-  const categorias = useState('registro-categorias', () => [])
+  const { categorias, fetchCategorias: fetchCategoriasShared } = useCategorias()
   const mesAnteriorResumen = useState('planificador-mes-anterior', () => null)
+  // Cache del resumen del mes anterior: el dato del mes pasado es prácticamente
+  // inmutable (5 min de TTL es seguro).
+  const mesAnteriorFetchedAt = useState('planificador-mes-anterior-ts', () => 0)
+  const MES_ANTERIOR_TTL = 5 * 60 * 1000
   const isLoading = ref(false)
   const error = ref(null)
 
@@ -139,6 +143,14 @@ export function usePlanificador() {
     let m = mesActual.value - 1
     let a = anioActual.value
     if (m === 0) { m = 12; a -= 1 }
+    // SWR: si el resumen cacheado es del mismo (m, a) y aún es fresco,
+    // no pedimos otra vez al backend. Datos de meses pasados son
+    // efectivamente inmutables salvo edición manual.
+    const cached = mesAnteriorResumen.value
+    if (cached && cached.mes === m && cached.anio === a &&
+        Date.now() - mesAnteriorFetchedAt.value < MES_ANTERIOR_TTL) {
+      return
+    }
     try {
       const data = await apiFetch('/api/planificador', { query: { mes: m, anio: a } })
       const real = Object.values(data.gastosRealesPorCategoria || {}).reduce((s, v) => s + v, 0)
@@ -150,6 +162,7 @@ export function usePlanificador() {
         totalPlanificado: planificado,
         presupuesto: data.plan?.montoPresupuesto || 0,
       }
+      mesAnteriorFetchedAt.value = Date.now()
     } catch (e) {
       mesAnteriorResumen.value = null
     }
@@ -275,9 +288,9 @@ export function usePlanificador() {
     }
   }
 
-  async function fetchCategorias() {
+  async function fetchCategorias(force = false) {
     try {
-      categorias.value = await apiFetch('/api/categorias')
+      await fetchCategoriasShared(force)
     } catch (e) {
       error.value = e.message || 'Error al cargar categorías'
     }

@@ -2,9 +2,12 @@ import { DIAS_SEMANA, MESES } from '~/utils/constants'
 
 export function useGastos() {
   const { apiFetch } = useApiFetch()
+  // Compartimos el estado de categorías con useCategorias / usePlanificador
+  // bajo la misma key 'registro-categorias' para que un solo fetch sirva
+  // a todas las páginas y se beneficie del SWR de useResourceCache.
+  const { categorias, fetchCategorias: fetchCategoriasShared } = useCategorias()
   const gastos = useState('registro-gastos', () => [])
   const gastosMensuales = useState('registro-gastos-mensuales', () => [])
-  const categorias = useState('registro-categorias', () => [])
   const resumen = useState('registro-resumen', () => ({ totalDia: 0, totalMes: 0 }))
   const isLoading = ref(false)
   const isLoadingMensual = ref(false)
@@ -77,9 +80,9 @@ export function useGastos() {
     }
   }
 
-  async function fetchCategorias() {
+  async function fetchCategorias(force = false) {
     try {
-      categorias.value = await apiFetch('/api/categorias')
+      await fetchCategoriasShared(force)
     } catch (e) {
       error.value = e.message || 'Error al cargar categorías'
     }
@@ -214,8 +217,23 @@ export function useGastos() {
     return mesSeleccionado.value === hoy.getMonth() + 1 && anioSeleccionado.value === hoy.getFullYear()
   })
 
+  // Hash barato del array que identifica si cambió: longitud + último id +
+  // updatedAt agregado. Evita recalcular agrupaciones costosas cuando el
+  // array no cambió (re-renders por otros estados).
+  function _hashGastosMensuales() {
+    const arr = gastosMensuales.value
+    if (!arr.length) return '0'
+    return `${arr.length}:${arr[0]?.id || ''}:${arr[arr.length - 1]?.id || ''}:${arr[0]?.updatedAt || ''}`
+  }
+
+  const _diaCache = shallowRef({ key: '', data: [] })
+  const _semanaCache = shallowRef({ key: '', data: [] })
+  const _categoriaCache = shallowRef({ key: '', data: [] })
+
   // Agrupa gastos mensuales por día
   const gastosPorDia = computed(() => {
+    const key = _hashGastosMensuales()
+    if (_diaCache.value.key === key) return _diaCache.value.data
     const agrupado = {}
     for (const g of gastosMensuales.value) {
       if (!agrupado[g.fecha]) {
@@ -224,12 +242,15 @@ export function useGastos() {
       agrupado[g.fecha].gastos.push(g)
       agrupado[g.fecha].total += parseFloat(g.monto) || 0
     }
-    // Ordenar por fecha descendente
-    return Object.values(agrupado).sort((a, b) => b.fecha.localeCompare(a.fecha))
+    const data = Object.values(agrupado).sort((a, b) => b.fecha.localeCompare(a.fecha))
+    _diaCache.value = { key, data }
+    return data
   })
 
   // Agrupa gastos mensuales por semana
   const gastosPorSemana = computed(() => {
+    const key = _hashGastosMensuales()
+    if (_semanaCache.value.key === key) return _semanaCache.value.data
     const semanas = {}
     for (const g of gastosMensuales.value) {
       const [anio, mes, dia] = g.fecha.split('-').map(Number)
@@ -261,37 +282,42 @@ export function useGastos() {
       semanas[lunesKey].diasConGastos[g.fecha].gastos.push(g)
       semanas[lunesKey].diasConGastos[g.fecha].total += parseFloat(g.monto) || 0
     }
-    // Convertir diasConGastos a array ordenado y ordenar semanas desc
-    return Object.values(semanas)
+    const data = Object.values(semanas)
       .map(s => ({
         ...s,
         dias: Object.values(s.diasConGastos).sort((a, b) => b.fecha.localeCompare(a.fecha)),
       }))
       .sort((a, b) => b.key.localeCompare(a.key))
+    _semanaCache.value = { key, data }
+    return data
   })
 
   const gastosPorCategoria = computed(() => {
+    const key = _hashGastosMensuales()
+    if (_categoriaCache.value.key === key) return _categoriaCache.value.data
     const agrupado = {}
     for (const g of gastosMensuales.value) {
-      const key = g.categoriaNombre || 'Otros'
-      if (!agrupado[key]) {
-        agrupado[key] = {
-          nombre: key,
+      const k = g.categoriaNombre || 'Otros'
+      if (!agrupado[k]) {
+        agrupado[k] = {
+          nombre: k,
           color: g.categoriaColor || '#6b7280',
           icono: g.categoriaIcono || null,
           total: 0,
           cantidad: 0,
         }
       }
-      agrupado[key].total += parseFloat(g.monto) || 0
-      agrupado[key].cantidad++
+      agrupado[k].total += parseFloat(g.monto) || 0
+      agrupado[k].cantidad++
     }
     const lista = Object.values(agrupado).sort((a, b) => b.total - a.total)
     const totalGeneral = lista.reduce((sum, c) => sum + c.total, 0)
-    return lista.map(c => ({
+    const data = lista.map(c => ({
       ...c,
       porcentaje: totalGeneral > 0 ? (c.total / totalGeneral) * 100 : 0,
     }))
+    _categoriaCache.value = { key, data }
+    return data
   })
 
   function mesAnterior() {
