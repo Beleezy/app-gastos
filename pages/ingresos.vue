@@ -54,10 +54,13 @@
 
     <!-- Selector de mes -->
     <div class="px-5 mb-4">
-      <MonthSelector
-        :mes="mesSeleccionado"
-        :anio="anioSeleccionado"
-        @change="cambiarMes"
+      <SharedMonthSelector
+        :label="mesLabel"
+        :es-actual="esMesActual"
+        :disable-next="esMesActual"
+        @prev="mesAnterior"
+        @next="mesSiguiente"
+        @go-to-current="irAMesActual"
       />
     </div>
 
@@ -77,7 +80,7 @@
 
     <div v-if="mostrarForm" class="px-5 mb-6">
       <div class="bg-theme-card border border-theme-border rounded-2xl p-4">
-        <FormIngreso :editing="editando" @saved="onSaved" @cancel="cancelarEdicion" />
+        <IngresosFormIngreso :editing="editando" @saved="onSaved" @cancel="cancelarEdicion" />
       </div>
     </div>
 
@@ -159,7 +162,6 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: 'auth' })
 useHead({ title: 'Ingresos · Mis Finanzas' })
 
 const ORIGENES_MAP = {
@@ -174,9 +176,10 @@ const ORIGENES_MAP = {
 const { currencySymbol, formatMonto } = useCurrency()
 const {
   ingresos, resumen, isLoading,
-  mesSeleccionado, anioSeleccionado, mesLabel,
+  mesLabel, esMesActual,
   porOrigen,
-  fetchIngresos, fetchResumen, cambiarMes,
+  fetchIngresos, fetchResumen,
+  mesAnterior, mesSiguiente, irAMesActual,
   eliminarIngreso,
 } = useIngresos()
 

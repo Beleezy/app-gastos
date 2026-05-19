@@ -127,7 +127,6 @@
 </template>
 
 <script setup>
-definePageMeta({ middleware: 'auth' })
 useHead({ title: 'Familia · Mis Finanzas' })
 
 const ROL_LABEL = { dueno: 'Dueño', editor: 'Editor', lector: 'Lector' }
