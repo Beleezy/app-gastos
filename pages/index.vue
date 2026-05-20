@@ -271,6 +271,24 @@
       </NuxtLink>
     </div>
 
+    <!-- Métricas (nuevo módulo) -->
+    <div class="px-5 lg:px-0 mb-2 lg:mb-3">
+      <NuxtLink
+        to="/metricas"
+        class="flex items-center gap-2.5 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
+      >
+        <div class="w-8 h-8 rounded-lg bg-sky-500/15 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-5" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-theme-text">Métricas</p>
+          <p class="text-[10px] text-theme-text-muted truncate">Histórico mensual de tus finanzas</p>
+        </div>
+      </NuxtLink>
+    </div>
+
     <!-- Información -->
     <div class="px-5 lg:px-0 mb-5">
       <NuxtLink
