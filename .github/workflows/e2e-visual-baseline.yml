@@ -51,7 +51,7 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: e2e-service-key
       GEMINI_API_KEY: ''
       DEV_AUTH_BYPASS: '1'
-      DEV_AUTH_TOKEN: ${{ secrets.DEV_AUTH_TOKEN || 'dev-token' }}
+      DEV_AUTH_TOKEN: ${{ secrets.DEV_AUTH_TOKEN || 'dev-token-e2e-DO-NOT-USE-IN-PROD' }}
       E2E_USER_ID: 00000000-0000-0000-0000-000000000101
       E2E_USER_EMAIL: demo1@test.local
       NODE_ENV: development
