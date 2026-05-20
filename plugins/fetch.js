@@ -69,8 +69,22 @@ export default defineNuxtPlugin(() => {
     window.addEventListener('online', () => {
       syncQueue.flush(apiFetch).catch(() => {})
     })
-    // Intento inicial al cargar (por si hay items de una sesión previa)
-    setTimeout(() => syncQueue.flush(apiFetch).catch(() => {}), 1500)
+    // Intento inicial al cargar (por si hay items de una sesión previa).
+    // Antes era `setTimeout(..., 1500)` ciego, que se ejecutaba en plena
+    // TTI y competía con los fetches de la primera página. Ahora esperamos
+    // a que el browser tenga idle real (requestIdleCallback) y la app esté
+    // pintada; en navegadores sin soporte caemos a un setTimeout corto
+    // pero ya disparado tras `load`, no en pleno arranque.
+    const flushIdle = () => syncQueue.flush(apiFetch).catch(() => {})
+    const scheduleFlush = () => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(flushIdle, { timeout: 4000 })
+      } else {
+        setTimeout(flushIdle, 800)
+      }
+    }
+    if (document.readyState === 'complete') scheduleFlush()
+    else window.addEventListener('load', scheduleFlush, { once: true })
   }
 
   return { provide: { apiFetch } }

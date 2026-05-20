@@ -63,11 +63,14 @@ watch(isOnline, async (online, prev) => {
 
 onMounted(() => {
   initTheme()
-  // Mostrar tour de onboarding sólo si nunca se vio ni se saltó.
-  // Se difiere un tick para no competir con el resto del montaje y para
-  // que la hidratación de localStorage ya haya ocurrido.
-  setTimeout(() => {
-    if (debeMostrarTour()) iniciarTour()
-  }, 600)
+  // Tour de onboarding: baja prioridad. Antes setTimeout(600) duro; ahora
+  // esperamos idle real para no competir con TTI ni con los fetches del
+  // dashboard.
+  const tarea = () => { if (debeMostrarTour()) iniciarTour() }
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(tarea, { timeout: 2500 })
+  } else {
+    setTimeout(tarea, 800)
+  }
 })
 </script>

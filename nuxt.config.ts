@@ -40,9 +40,14 @@ export default defineNuxtConfig({
           // se importan con `await import(...)` en useDeudaPdf/useExportExcel,
           // separarlas evita que su código se mezcle con código de la app.
           manualChunks(id: string) {
+            // Vendors pesados: aislar para que el cache del navegador no se
+            // invalide cuando solo cambia código de la app, y para no
+            // mezclarlos con código crítico de la primera página.
             if (id.includes('node_modules/jspdf')) return 'vendor-jspdf'
             if (id.includes('node_modules/exceljs')) return 'vendor-exceljs'
             if (id.includes('node_modules/@supabase')) return 'vendor-supabase'
+            if (id.includes('node_modules/pinia')) return 'vendor-pinia'
+            if (id.includes('node_modules/zod')) return 'vendor-zod'
           },
         },
       },

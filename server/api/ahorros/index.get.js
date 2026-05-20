@@ -12,6 +12,10 @@ export default defineEventHandler(async (event) => {
   const mes = parseInt(query.mes) || mesLocal
   const anio = parseInt(query.anio) || anioLocal
 
+  // SWR: ahorros cambian con cada depósito; 60s permite cache cross-tab
+  // y PWA SW. Las mutaciones invalidan vía el composable.
+  setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
+
   // Construir lista (mes, anio) de los últimos 6 meses para la serie.
   const periodos = []
   {
