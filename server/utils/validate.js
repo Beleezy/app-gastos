@@ -20,10 +20,19 @@ export function validate(schema, data) {
     return schema.parse(data)
   } catch (e) {
     if (e instanceof ZodError) {
+      // 413 Payload Too Large cuando toda la falla es un límite de tamaño
+      // (longitud de string o conteo de array). Es lo correcto a nivel
+      // HTTP — un texto/imagen sobre el cap del schema es payload too
+      // large, no un "bad request" genérico.
+      const allTooBig =
+        e.issues.length > 0 &&
+        e.issues.every(
+          (i) => i.code === 'too_big' && (i.origin === 'string' || i.origin === 'array')
+        )
       throw createError({
-        statusCode: 400,
-        statusMessage: 'Validation Error',
-        message: 'Datos inválidos',
+        statusCode: allTooBig ? 413 : 400,
+        statusMessage: allTooBig ? 'Payload Too Large' : 'Validation Error',
+        message: allTooBig ? 'Payload demasiado grande' : 'Datos inválidos',
         data: { issues: formatZodError(e) },
       })
     }
