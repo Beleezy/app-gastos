@@ -1,32 +1,43 @@
 export function useExportExcel() {
   async function exportarExcel(nombreArchivo, columnas, filas) {
-    const XLSX = await import('xlsx')
+    const ExcelJS = (await import('exceljs')).default || (await import('exceljs'))
 
-    const datos = filas.map(fila => {
-      const obj = {}
-      columnas.forEach(c => {
-        obj[c.label] = c.getValue(fila) ?? ''
-      })
-      return obj
-    })
+    const wb = new ExcelJS.Workbook()
+    const ws = wb.addWorksheet('Datos')
 
-    const ws = XLSX.utils.json_to_sheet(datos)
-
-    // Auto-ajustar ancho de columnas
-    const anchos = columnas.map(c => {
+    ws.columns = columnas.map((c) => {
       const maxLen = Math.max(
         c.label.length,
-        ...filas.map(f => String(c.getValue(f) ?? '').length)
+        ...filas.map((f) => String(c.getValue(f) ?? '').length),
       )
-      return { wch: Math.min(maxLen + 2, 40) }
+      return { header: c.label, key: c.label, width: Math.min(maxLen + 2, 40) }
     })
-    ws['!cols'] = anchos
 
-    const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, 'Datos')
+    filas.forEach((fila) => {
+      const row = {}
+      columnas.forEach((c) => {
+        row[c.label] = c.getValue(fila) ?? ''
+      })
+      ws.addRow(row)
+    })
 
-    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`)
+    const buffer = await wb.xlsx.writeBuffer()
+    descargar(buffer, `${nombreArchivo}.xlsx`)
   }
 
   return { exportarExcel }
+}
+
+function descargar(buffer, nombre) {
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = nombre
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }

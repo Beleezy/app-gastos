@@ -15,7 +15,7 @@ export const horaHhmm = z
   .regex(HORA_HHMM, 'Hora inválida (esperado HH:mm)')
 
 export const monto = z
-  .number({ invalid_type_error: 'Monto debe ser numérico' })
+  .number({ error: 'Monto debe ser numérico' })
   .finite()
   .positive('El monto debe ser mayor a 0')
   .max(10_000_000, 'Monto fuera de rango')

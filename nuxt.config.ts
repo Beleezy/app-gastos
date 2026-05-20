@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from '@tailwindcss/vite'
+
 const APP_VERSION = '0.9.4'
 const APP_NAME = 'Mis Finanzas'
 const APP_SHORT_NAME = 'Finanzas'
@@ -8,7 +10,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
 
   modules: [
-    '@nuxtjs/tailwindcss',
     '@vite-pwa/nuxt',
     '@nuxtjs/supabase',
     '@pinia/nuxt',
@@ -30,6 +31,7 @@ export default defineNuxtConfig({
   },
 
   vite: {
+    plugins: [tailwindcss()],
     build: {
       cssCodeSplit: true,
       rollupOptions: {
@@ -39,7 +41,7 @@ export default defineNuxtConfig({
           // separarlas evita que su código se mezcle con código de la app.
           manualChunks(id: string) {
             if (id.includes('node_modules/jspdf')) return 'vendor-jspdf'
-            if (id.includes('node_modules/xlsx')) return 'vendor-xlsx'
+            if (id.includes('node_modules/exceljs')) return 'vendor-exceljs'
             if (id.includes('node_modules/@supabase')) return 'vendor-supabase'
           },
         },

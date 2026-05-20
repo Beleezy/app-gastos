@@ -2,8 +2,8 @@
  * Exportación a Excel de deudas, con dos hojas: "Deudas" y "Pagos".
  * Ver §5.C punto 6 de planifica.md.
  *
- * Reutiliza el mismo patrón de import dinámico de XLSX que
- * useExportExcel para no inflar el bundle inicial.
+ * Reutiliza el mismo patrón de import dinámico que useExportExcel para no
+ * inflar el bundle inicial.
  */
 
 import { useFormatters } from './useFormatters'
@@ -12,7 +12,7 @@ export function useDeudasExcel() {
   const { formatCurrency, formatDate } = useFormatters()
 
   async function exportar({ nombreArchivo = 'deudas', deudas = [], pagos = [], persona = null } = {}) {
-    const XLSX = await import('xlsx')
+    const ExcelJS = (await import('exceljs')).default || (await import('exceljs'))
 
     const filasDeudas = deudas.map((d) => ({
       Persona: d.personaNombre || persona?.nombre || '',
@@ -34,34 +34,46 @@ export function useDeudasExcel() {
       Notas: p.notas || '',
     }))
 
-    const wb = XLSX.utils.book_new()
+    const wb = new ExcelJS.Workbook()
 
     if (filasDeudas.length > 0) {
-      const ws1 = XLSX.utils.json_to_sheet(filasDeudas)
-      ws1['!cols'] = computeColWidths(filasDeudas)
-      XLSX.utils.book_append_sheet(wb, ws1, 'Deudas')
+      agregarHoja(wb, 'Deudas', filasDeudas)
     }
     if (filasPagos.length > 0) {
-      const ws2 = XLSX.utils.json_to_sheet(filasPagos)
-      ws2['!cols'] = computeColWidths(filasPagos)
-      XLSX.utils.book_append_sheet(wb, ws2, 'Pagos')
+      agregarHoja(wb, 'Pagos', filasPagos)
     }
     if (filasDeudas.length === 0 && filasPagos.length === 0) {
-      const ws = XLSX.utils.aoa_to_sheet([['Sin datos para exportar']])
-      XLSX.utils.book_append_sheet(wb, ws, 'Vacío')
+      const ws = wb.addWorksheet('Vacío')
+      ws.addRow(['Sin datos para exportar'])
     }
 
-    XLSX.writeFile(wb, `${nombreArchivo}.xlsx`)
+    const buffer = await wb.xlsx.writeBuffer()
+    descargar(buffer, `${nombreArchivo}.xlsx`)
   }
 
   return { exportar }
 }
 
-function computeColWidths(filas) {
-  if (!filas.length) return []
+function agregarHoja(wb, nombre, filas) {
+  const ws = wb.addWorksheet(nombre)
   const cols = Object.keys(filas[0])
-  return cols.map((c) => {
+  ws.columns = cols.map((c) => {
     const maxLen = Math.max(c.length, ...filas.map((f) => String(f[c] ?? '').length))
-    return { wch: Math.min(maxLen + 2, 40) }
+    return { header: c, key: c, width: Math.min(maxLen + 2, 40) }
   })
+  filas.forEach((f) => ws.addRow(f))
+}
+
+function descargar(buffer, nombre) {
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = nombre
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
