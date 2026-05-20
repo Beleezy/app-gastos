@@ -7,7 +7,13 @@ const APP_SHORT_NAME = 'Finanzas'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  // En CI / E2E el inspector solo añade dependencias (vue-devtools-core/kit)
+  // que Vite descubre en runtime, dispara una rebundle y un HMR a media
+  // request — eso vacía `nuxtApp.$pinia` y el hook `app:rendered` de
+  // @pinia/nuxt revienta con "Cannot read properties of undefined (reading
+  // 'state')". Headless no usa el inspector, así que lo apagamos cuando
+  // CI=true o NODE_ENV=test.
+  devtools: { enabled: !process.env.CI && process.env.NODE_ENV !== 'test' },
 
   modules: [
     '@vite-pwa/nuxt',
@@ -32,6 +38,13 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    // Pre-bundlear las deps que Vite encontraba en runtime: `workbox-window`
+    // viene de @vite-pwa/nuxt y los `@vue/devtools-*` del inspector. Sin
+    // esto la primera request del dev server dispara un rebundle + HMR que
+    // vacía `$pinia` y rompe SSR (ver nota sobre `devtools.enabled`).
+    optimizeDeps: {
+      include: ['@vue/devtools-core', '@vue/devtools-kit', 'workbox-window'],
+    },
     build: {
       cssCodeSplit: true,
       rollupOptions: {
