@@ -44,9 +44,17 @@
 
       <div
         ref="scrollRef"
-        class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 md:px-6 pb-8 md:pb-6 space-y-4"
+        class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 md:px-6 space-y-4"
+        :class="$slots.footer ? 'pb-4' : 'pb-8 md:pb-6'"
       >
         <slot />
+      </div>
+
+      <div
+        v-if="$slots.footer"
+        class="shrink-0 sheet-footer-sticky"
+      >
+        <slot name="footer" />
       </div>
     </div>
   </div>

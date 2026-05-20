@@ -12,7 +12,8 @@
     <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-4">
       <div class="lg:sticky lg:top-20 lg:self-start">
         <div ref="swipeZone">
-          <PlanificadorResumenMes
+          <component
+            :is="isPreviewV2 ? PlanificadorResumenMesV2 : PlanificadorResumenMes"
             @exportar="exportarPlanificador"
             @abrir-plantillas="showPlantillas = true"
           />
@@ -115,8 +116,12 @@
 </template>
 
 <script setup>
+import PlanificadorResumenMes from '~/components/planificador/ResumenMes.vue'
+import PlanificadorResumenMesV2 from '~/components/planificador/ResumenMesV2.vue'
+
 definePageMeta({ layout: 'planificador' })
 
+const { isPreviewV2 } = useUiPreview()
 const route = useRoute()
 
 if (route.query.seccion === 'futuros') {

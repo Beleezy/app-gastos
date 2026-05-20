@@ -188,6 +188,52 @@
           </div>
         </div>
 
+        <!-- Nueva interfaz V2 (Beta) -->
+        <div
+          class="rounded-2xl p-5 border lg:col-span-2"
+          :class="isPreviewV2 ? 'bg-theme-accent-bg border-theme-accent/40' : 'bg-theme-card border-theme-accent/30'"
+          data-testid="toggle-ui-preview-v2"
+        >
+          <div class="flex items-start gap-3">
+            <div class="w-11 h-11 rounded-xl bg-theme-accent/15 flex items-center justify-center text-theme-accent shrink-0 text-xl">
+              ✨
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 class="font-semibold text-theme-text">Nueva interfaz</h3>
+                <span class="px-2 py-0.5 rounded-full bg-theme-accent text-theme-on-accent text-[10px] font-bold uppercase tracking-wider">
+                  Beta V2
+                </span>
+              </div>
+              <p class="text-sm text-theme-text-sec leading-relaxed">
+                Rediseño mobile-first con tipografía más grande, jerarquía visual clara y CTAs siempre visibles. Puedes volver a la versión clásica cuando quieras — sin afectar tus datos.
+              </p>
+              <div class="mt-4 flex items-center justify-between gap-3">
+                <span class="text-sm font-medium" :class="isPreviewV2 ? 'text-emerald-400' : 'text-theme-text-muted'">
+                  <span v-if="isPreviewV2">● Activada</span>
+                  <span v-else>○ Desactivada</span>
+                </span>
+                <button
+                  type="button"
+                  class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0 tap-44"
+                  :class="isPreviewV2 ? 'bg-theme-accent' : 'bg-theme-border-md'"
+                  :aria-pressed="isPreviewV2"
+                  aria-label="Activar nueva interfaz"
+                  @click="toggleUiPreview"
+                >
+                  <span
+                    class="inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200"
+                    :class="isPreviewV2 ? 'translate-x-6' : 'translate-x-1'"
+                  />
+                </button>
+              </div>
+              <div v-if="isPreviewV2" class="mt-3 pt-3 border-t border-theme-accent/20 text-xs text-theme-text-sec leading-relaxed">
+                💡 Estás viendo la nueva versión. Tu feedback ayuda a decidir si se vuelve la versión oficial.
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Tamaño de letra -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
@@ -371,6 +417,7 @@ const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
 const { accentColor, setAccentColor, ACCENT_COLORS, fontSize, setFontSize, FONT_SIZES, isColorblind, setColorblindMode } = useTheme()
 const { logout } = useAuth()
+const { isPreviewV2, toggle: toggleUiPreview } = useUiPreview()
 
 
 async function cerrarSesion() {
