@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, between, sql, desc, ilike, asc } from 'drizzle-orm'
+import { eq, and, between, sql, desc, ilike, asc, isNull } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
 
 export default defineEventHandler(async (event) => {
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   const { fecha, fechaDesde, fechaHasta, mes, anio, busqueda, categoriaId, limit, offset, orden } = query
 
-  let whereConditions = [eq(gastos.usuarioId, usuarioId)]
+  let whereConditions = [eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)]
 
   if (fecha) {
     whereConditions.push(eq(gastos.fecha, fecha))
@@ -42,6 +42,11 @@ export default defineEventHandler(async (event) => {
   else if (orden === 'concepto_asc') orderBy = [asc(gastos.concepto)]
   else if (orden === 'fecha_asc') orderBy = [asc(gastos.fecha), asc(gastos.hora)]
 
+  // NOTA: NO devolvemos `transcripcionVoz` aquí. Es un text largo (200-500
+  // chars típico) que ningún componente del listado consume; solo se usa
+  // al editar un gasto puntual. Excluirlo ahorra ~40 KB por response en
+  // un mes con 200+ gastos por voz. El endpoint PUT preserva el valor en
+  // BD porque no lo toca, así que la edición sigue funcionando.
   let queryBuilder = db
     .select({
       id: gastos.id,
@@ -50,7 +55,6 @@ export default defineEventHandler(async (event) => {
       fecha: gastos.fecha,
       hora: gastos.hora,
       metodoRegistro: gastos.metodoRegistro,
-      transcripcionVoz: gastos.transcripcionVoz,
       notas: gastos.notas,
       gastoPlanificadoId: gastos.gastoPlanificadoId,
       categoriaId: gastos.categoriaId,

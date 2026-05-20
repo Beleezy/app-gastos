@@ -3,11 +3,17 @@ import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { rateLimits } from '../../utils/rateLimit.js'
-import { eq, inArray } from 'drizzle-orm'
+import { tryIdempotentReplay, rememberIdempotent } from '../../utils/idempotency.js'
+import { inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Si el cliente reintenta esta misma mutación (Idempotency-Key igual,
+  // típico desde la cola offline), devolvemos la respuesta original sin
+  // insertar gastos duplicados.
+  const replay = tryIdempotentReplay(event, usuarioId)
+  if (replay) return replay
   await rateLimits.bulkOp(event, usuarioId)
   const metodosPermitidos = new Set(['voz', 'foto', 'manual'])
 
@@ -48,11 +54,13 @@ export default defineEventHandler(async (event) => {
   const cats = await db.select().from(categorias).where(inArray(categorias.id, catIds))
   const catMap = Object.fromEntries(cats.map(c => [c.id, c]))
 
-  return insertados.map(g => ({
+  const respuesta = insertados.map(g => ({
     ...g,
     monto: parseFloat(g.monto),
     categoriaNombre: catMap[g.categoriaId]?.nombre,
     categoriaIcono: catMap[g.categoriaId]?.icono,
     categoriaColor: catMap[g.categoriaId]?.color,
   }))
+  rememberIdempotent(event, usuarioId, respuesta)
+  return respuesta
 })

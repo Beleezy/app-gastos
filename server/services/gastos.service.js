@@ -1,7 +1,7 @@
 // Capa de servicios de gastos. Ver §2.1 / §4.7 de planifica.md.
 // Los handlers HTTP delegan aquí toda la lógica de negocio + acceso a DB.
 
-import { eq, and, sql } from 'drizzle-orm'
+import { eq, and, sql, isNull } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { gastos, categorias } from '../database/schema.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
@@ -109,7 +109,7 @@ export async function detectarDuplicados({ usuarioId, candidatos }) {
       fecha: gastos.fecha,
     })
     .from(gastos)
-    .where(and(eq(gastos.usuarioId, usuarioId), sql`${gastos.fecha} IN (${sql.join(fechas, sql`, `)})`))
+    .where(and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), sql`${gastos.fecha} IN (${sql.join(fechas, sql`, `)})`))
 
   return matchDuplicados(candidatos, existentes)
 }
@@ -122,7 +122,7 @@ export async function obtenerGastoPropio({ usuarioId, gastoId }) {
   const [gasto] = await db
     .select()
     .from(gastos)
-    .where(and(eq(gastos.id, gastoId), eq(gastos.usuarioId, usuarioId)))
+    .where(and(eq(gastos.id, gastoId), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
     .limit(1)
 
   if (!gasto) return null

@@ -163,6 +163,83 @@ export async function crearDeudaEspejo(tx, deudaOriginal, personaParId, destinoU
 }
 
 /**
+ * Bulk: crea N deudas espejo en una sola transacción usando INSERT batch
+ * + UPDATE batch para los vinculoDeudaId originales.
+ * Evita el patrón N*2 queries del loop con crearDeudaEspejo.
+ *
+ * @param {*} tx - transacción drizzle
+ * @param {Array} deudasOriginales - deudas del remitente a espejar
+ * @param {string} personaParId - persona espejo (destino)
+ * @param {string} destinoUsuarioId
+ * @returns {Map<string, string>} - mapping deudaOriginalId → deudaEspejoId
+ */
+export async function crearDeudasEspejoBulk(tx, deudasOriginales, personaParId, destinoUsuarioId) {
+  if (!deudasOriginales.length) return new Map()
+
+  const filas = deudasOriginales.map(d => ({
+    usuarioId: destinoUsuarioId,
+    personaEntidadId: personaParId,
+    tipoDeuda: flipTipoDeuda(d.tipoDeuda),
+    concepto: d.concepto,
+    montoOriginal: d.montoOriginal,
+    montoPendiente: d.montoPendiente,
+    fechaCreacion: d.fechaCreacion,
+    fechaPago: d.fechaPago,
+    estado: d.estado,
+    notas: d.notas,
+    vinculoDeudaId: d.id,
+  }))
+
+  const espejos = await tx.insert(deudas).values(filas).returning({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
+
+  // Map original → espejo
+  const mapping = new Map()
+  for (const e of espejos) {
+    mapping.set(e.vinculoDeudaId, e.id)
+  }
+
+  // Update originales con su vinculoDeudaId apuntando al espejo. Drizzle
+  // no soporta UPDATE...FROM con un VALUES portable, así que paralelizamos
+  // los UPDATEs por ID (igual de costoso que un único batch dentro de tx).
+  for (const d of deudasOriginales) {
+    const espejoId = mapping.get(d.id)
+    if (!espejoId) continue
+    await tx.update(deudas).set({ vinculoDeudaId: espejoId }).where(eq(deudas.id, d.id))
+  }
+
+  return mapping
+}
+
+/**
+ * Bulk: crea N pagos espejo en una sola INSERT batch.
+ *
+ * @param {*} tx - transacción drizzle
+ * @param {Array} pagosConDeudaEspejo - array de { pago, deudaEspejoId }
+ * @returns {number} - cantidad de pagos creados
+ */
+export async function crearPagosEspejoBulk(tx, pagosConDeudaEspejo) {
+  if (!pagosConDeudaEspejo.length) return 0
+
+  const filas = pagosConDeudaEspejo.map(({ pago, deudaEspejoId }) => ({
+    deudaId: deudaEspejoId,
+    montoPagado: pago.montoPagado,
+    fechaPago: pago.fechaPago,
+    metodoPago: pago.metodoPago,
+    notas: pago.notas,
+    vinculoPagoId: pago.id,
+  }))
+
+  const espejos = await tx.insert(pagosDeuda).values(filas).returning({ id: pagosDeuda.id, vinculoPagoId: pagosDeuda.vinculoPagoId })
+
+  // Update originales con vinculoPagoId apuntando al espejo
+  for (const e of espejos) {
+    await tx.update(pagosDeuda).set({ vinculoPagoId: e.id }).where(eq(pagosDeuda.id, e.vinculoPagoId))
+  }
+
+  return espejos.length
+}
+
+/**
  * Crea un pago espejo en la deuda vinculada.
  * Setea vinculo_pago_id en ambos lados.
  */

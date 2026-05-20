@@ -119,7 +119,7 @@ export default defineNuxtConfig({
         {
           tagPosition: 'head',
           tagPriority: 'critical',
-          innerHTML: "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true')d.classList.add('colorblind');}catch(e){}})();",
+          innerHTML: "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true'){d.classList.add('colorblind');var l=document.createElement('link');l.id='colorblind-css';l.rel='stylesheet';l.href='/colorblind.css';document.head.appendChild(l);}}catch(e){}})();",
         },
       ],
     },
@@ -278,6 +278,10 @@ export default defineNuxtConfig({
       appVersion: APP_VERSION,
       supabaseUrl: process.env.SUPABASE_URL || '',
       supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
+      // VAPID public key — necesaria para que el cliente se suscriba al
+      // PushManager. La private key NO se expone (queda en server runtimeConfig
+      // implícito vía process.env y solo se lee desde webPushSender.js).
+      vapidPublicKey: process.env.VAPID_PUBLIC_KEY || '',
       // Bypass de auth para dev/E2E: SOLO se incluye fuera de producción.
       // Si se filtra al bundle del cliente en una build de prod (preview
       // deploy mal etiquetado, env var seteada por accidente), cualquier

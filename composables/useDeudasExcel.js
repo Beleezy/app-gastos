@@ -1,6 +1,5 @@
 /**
  * Exportación a Excel de deudas, con dos hojas: "Deudas" y "Pagos".
- * Ver §5.C punto 6 de planifica.md.
  *
  * Reutiliza el mismo patrón de import dinámico que useExportExcel para no
  * inflar el bundle inicial.

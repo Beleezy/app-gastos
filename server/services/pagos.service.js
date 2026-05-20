@@ -1,6 +1,6 @@
 // Capa de servicios para pagos de deudas. Ver §2.1 / §4.7 de planifica.md.
 
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { pagosDeuda, deudas, personasEntidades } from '../database/schema.js'
 import { crearPagoEspejo, registrarAuditoria } from '../utils/vinculos.js'
@@ -21,7 +21,7 @@ export async function registrarPago({ usuarioId, deudaId, body }) {
   const [deuda] = await db
     .select()
     .from(deudas)
-    .where(and(eq(deudas.id, deudaId), eq(deudas.usuarioId, usuarioId)))
+    .where(and(eq(deudas.id, deudaId), eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
     .limit(1)
 
   assertOwner(deuda, usuarioId, { recurso: 'Deuda' })
@@ -65,7 +65,7 @@ export async function registrarPago({ usuarioId, deudaId, body }) {
         estado: nuevoEstado,
         updatedAt: new Date(),
       })
-      .where(eq(deudas.id, deudaId))
+      .where(and(eq(deudas.id, deudaId), isNull(deudas.deletedAt)))
       .returning()
 
     if (deuda.vinculoDeudaId) {
@@ -77,7 +77,7 @@ export async function registrarPago({ usuarioId, deudaId, body }) {
           estado: nuevoEstado,
           updatedAt: new Date(),
         })
-        .where(eq(deudas.id, deuda.vinculoDeudaId))
+        .where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
 
       if (persona?.vinculoParId) {
         await registrarAuditoria(tx, {

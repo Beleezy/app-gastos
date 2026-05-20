@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, between, sql } from 'drizzle-orm'
+import { eq, and, between, sql, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -33,6 +33,7 @@ export default defineEventHandler(async (event) => {
       .from(gastos)
       .where(and(
         eq(gastos.usuarioId, usuarioId),
+        isNull(gastos.deletedAt),
         between(gastos.fecha, primerDia, ultimaFecha),
       ))
 
@@ -47,7 +48,7 @@ export default defineEventHandler(async (event) => {
     const [row] = await db
       .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
       .from(gastos)
-      .where(and(eq(gastos.usuarioId, usuarioId), eq(gastos.fecha, fecha)))
+      .where(and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), eq(gastos.fecha, fecha)))
     return { totalDia: parseFloat(row.total), totalMes: 0 }
   }
 

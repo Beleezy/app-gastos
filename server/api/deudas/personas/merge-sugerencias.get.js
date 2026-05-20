@@ -6,6 +6,8 @@ import { clusterizarSugerencias } from '../../../utils/stringSimilarity.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
+  // Detección de duplicados es estable (depende del set de personas).
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
 
   const personas = await db
     .select({ id: personasEntidades.id, nombre: personasEntidades.nombre, tipo: personasEntidades.tipo })

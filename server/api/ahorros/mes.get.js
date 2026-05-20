@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const mes = parseInt(query.mes)
   const anio = parseInt(query.anio)
+  setHeader(event, 'Cache-Control', 'private, max-age=30, stale-while-revalidate=180')
 
   if (!mes || mes < 1 || mes > 12 || !anio || anio < 2000 || anio > 3000) {
     throw createError({ statusCode: 400, statusMessage: 'Parámetros mes/anio inválidos' })

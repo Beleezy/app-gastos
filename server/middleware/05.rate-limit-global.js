@@ -17,6 +17,10 @@ export default defineEventHandler(async (event) => {
   const url = event.node.req.url || ''
   if (!url.startsWith('/api/')) return
   if (url.startsWith('/api/health')) return
+  // /api/csp-report es generado por el browser sin control del usuario
+  // (cada violación dispara un POST). Aplicar rate-limit aquí silencia
+  // la observabilidad cuando más la necesitamos.
+  if (url.startsWith('/api/csp-report')) return
   if (event.context?.e2eBypass) return
 
   await rateLimits.apiGlobalIp(event)

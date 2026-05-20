@@ -35,6 +35,13 @@ export function useSyncQueue() {
       attempts: 0,
     }
     pending.value = [...(pending.value || []), item]
+    // Background Sync: registra tag para que el browser despierte la app
+    // al volver la red. Fail-silent si la API no está disponible (Safari,
+    // etc.) — el listener 'online' de plugins/fetch.js sigue cubriendo.
+    try {
+      const { requestSync } = useBackgroundSync()
+      requestSync()
+    } catch {}
     return item.id
   }
 
@@ -65,7 +72,15 @@ export function useSyncQueue() {
       for (const item of snapshot) {
         item.attempts += 1
         try {
-          await apiFetch(item.endpoint, { method: item.method, body: item.body })
+          // Idempotency-Key permite al servidor (o a un proxy) detectar
+          // reintentos de la misma mutación y devolver la respuesta
+          // anterior en vez de aplicarla dos veces. El item.id es estable
+          // entre reintentos (se asigna una sola vez en enqueue).
+          await apiFetch(item.endpoint, {
+            method: item.method,
+            body: item.body,
+            headers: { 'Idempotency-Key': item.id },
+          })
           dropPending(item.id)
         } catch (e) {
           // 4xx → permanente, mover a fallidos. 5xx / network → dejar en pending.

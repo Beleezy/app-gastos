@@ -2,7 +2,7 @@ import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { rateLimits } from '../../utils/rateLimit.js'
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq, and, inArray, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
     const updated = await tx
       .update(gastos)
       .set(updateData)
-      .where(and(inArray(gastos.id, ids), eq(gastos.usuarioId, usuarioId)))
+      .where(and(inArray(gastos.id, ids), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
       .returning()
 
     return updated

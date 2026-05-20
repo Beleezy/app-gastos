@@ -13,6 +13,9 @@ const MEDIOS_DEFAULT = [
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
 
+  // Medios de ahorro cambian muy raramente (cuando el usuario los configura).
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
+
   let medios = await db
     .select()
     .from(mediosAhorro)

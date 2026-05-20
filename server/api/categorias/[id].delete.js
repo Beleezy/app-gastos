@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { categorias, gastos, gastosPlanificados, gastosFuturos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -18,11 +18,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Categoría no encontrada o es predefinida' })
   }
 
-  // Verificar que no tenga gastos asociados
+  // Verificar que no tenga gastos asociados (ignorando soft-deleted)
   const gastosAsociados = await db
     .select({ id: gastos.id })
     .from(gastos)
-    .where(eq(gastos.categoriaId, id))
+    .where(and(eq(gastos.categoriaId, id), isNull(gastos.deletedAt)))
     .limit(1)
 
   if (gastosAsociados.length > 0) {

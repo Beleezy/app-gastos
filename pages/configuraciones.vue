@@ -354,6 +354,7 @@
       </template>
 
       <ConfiguracionesPushNotificationsConfig class="mt-4" />
+      <ConfiguracionesUsoLlm class="mt-4" />
       <ConfiguracionesFeatureFlagsConfig class="mt-4" />
 
       <!-- App info -->
@@ -473,6 +474,8 @@ function toggleVistaSemana() {
 }
 
 onMounted(async () => {
+  // fetchConfig usa SWR cache (5 min). loadFromConfig sí necesita el dato
+  // listo, así que sí esperamos. En revisitas el cache responde instant.
   await fetchConfig()
   loadFromConfig()
 })

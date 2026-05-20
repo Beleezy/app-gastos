@@ -7,7 +7,8 @@ import { parseModelList, getValidModels, selectBestModel, getFallbackModels, tra
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
 import { sanitizeLlmInput, sanitizeForSystemPrompt, validateGastosLlm, validateDeudasLlm } from '../../utils/llmSafety.js'
-import { trackUsoLlm } from '../../utils/usoLlm.js'
+import { trackUsoLlm, assertCuotaMensual } from '../../utils/usoLlm.js'
+import { getCached, setCached, hashInput } from '../../utils/llmCache.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 import { eq, or, isNull } from 'drizzle-orm'
 
@@ -17,10 +18,11 @@ export default defineEventHandler(async (event) => {
   // Shape via Zod + sanitización LLM aparte (sanitizeLlmInput).
   const body = await validateBody(event, vozParseBodySchema)
 
-  // Auth + rate limit (§1.1, §1.2)
+  // Auth + rate limit (§1.1, §1.2) + cuota mensual (§A1)
   const usuarioId = await getUsuarioFromEvent(event)
   await rateLimits.vozParse(event, usuarioId)
   await rateLimits.vozParseHora(event, usuarioId)
+  await assertCuotaMensual(usuarioId)
   const runtimeConfig = useRuntimeConfig()
   const apiKey = runtimeConfig.geminiApiKey
 
@@ -107,6 +109,15 @@ Reglas:
   // Sanitizar input para mitigar prompt injection (§1.4)
   const promptUsuario = sanitizeLlmInput(body.texto, MAX_INPUT_CHARS)
 
+  // Caché: si el mismo usuario ya pidió este texto exacto recientemente,
+  // devolvemos la respuesta sin volver a llamar al LLM. El hash incluye
+  // categorías visibles para invalidar cuando el usuario edita su lista.
+  const cacheEndpoint = `voz/parse:${modo}`
+  const inputHash = hashInput({
+    texto: promptUsuario,
+    extra: `${modo}|${hoy}|${categoryList}`,
+  })
+
   let finalSystemPrompt = systemPrompt
   if (modo === 'deudas') {
     // Fetch existing person names to help the LLM match spoken names
@@ -178,6 +189,21 @@ Reglas:
   const RETRY_DELAYS = Array.from({ length: MAX_RETRIES }, (_, i) => i === 0 ? 0 : Math.min(i * 2000, 10000))
   let lastError = null
   let lastErrorUserFriendly = null
+
+  // Intentar resolver por caché antes de consumir tokens. Reservamos el
+  // lookup al primer modelo de la lista — los fallbacks suelen producir
+  // outputs equivalentes pero pagaríamos por re-validar.
+  const cached = await getCached({
+    usuarioId,
+    endpoint: cacheEndpoint,
+    modelo: modelsToTry[0],
+    inputHash,
+  })
+  if (cached) {
+    setResponseHeader(event, 'X-LLM-Cache', 'HIT')
+    return cached
+  }
+  setResponseHeader(event, 'X-LLM-Cache', 'MISS')
 
   for (const currentModel of modelsToTry) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
@@ -277,6 +303,13 @@ Reglas:
             lastError = 'No se pudieron extraer deudas o pagos del texto'
             continue
           }
+          setCached({
+            usuarioId,
+            endpoint: cacheEndpoint,
+            modelo: modelsToTry[0],
+            inputHash,
+            response: validados,
+          }).catch(() => {})
           return validados
         }
 
@@ -301,6 +334,13 @@ Reglas:
           continue
         }
 
+        setCached({
+          usuarioId,
+          endpoint: cacheEndpoint,
+          modelo: modelsToTry[0],
+          inputHash,
+          response: validados,
+        }).catch(() => {})
         return validados
       } catch (e) {
         logger.error('Error invocando Gemini', { model: currentModel, attempt: attempt + 1, error: e })

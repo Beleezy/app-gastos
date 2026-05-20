@@ -7,6 +7,7 @@ import { eq, and, or, gte, lt, asc } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const { personaId } = getQuery(event)
+  setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
 
   if (!personaId) {
     throw createError({ statusCode: 400, message: 'personaId requerido' })

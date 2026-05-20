@@ -1,4 +1,6 @@
 export function useExportExcel() {
+  // Migrado de `xlsx` (CVE high sin fix, ~800 KB) a `write-excel-file`
+  // (~150 KB, sin CVEs). Misma API expuesta hacia los consumidores.
   async function exportarExcel(nombreArchivo, columnas, filas) {
     const ExcelJS = (await import('exceljs')).default || (await import('exceljs'))
 

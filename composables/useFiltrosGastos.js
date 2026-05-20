@@ -14,13 +14,7 @@
  *   - texto:       coincidencia en concepto/notas (case-insensitive)
  */
 
-function normalizar(s) {
-  if (s == null) return ''
-  return String(s)
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-}
+import { normalizar } from './utils/textNormalize.js'
 
 export function aplicarFiltros(gastos, filtros = {}) {
   if (!Array.isArray(gastos)) return []

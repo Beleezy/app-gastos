@@ -3,45 +3,78 @@
 //
 // CSP: defensa en profundidad contra XSS y data exfiltration.
 //
-// script-src incluye 'unsafe-inline' porque Nuxt 3 + @vite-pwa/nuxt
-// inyectan scripts inline obligatorios:
-//   1. El script sincrónico de tema en <head> (anti-flicker en cold
-//      start, ver nuxt.config.ts:79-83).
-//   2. `window.__NUXT__ = {...}` con el state hidratado del SSR.
-//   3. Event handler inline `onload="this.media='all'"` en el link
-//      de Google Fonts.
-// Sin 'unsafe-inline' el bundle no se ejecuta, Supabase no se inicia
-// y todas las peticiones a /api/* responden 401.
+// El header ACTIVO usa 'unsafe-inline' EXCLUSIVAMENTE — sin nonce ni
+// hash. Esto es crítico: la spec CSP3 estipula que si hay un nonce o
+// hash, el browser IGNORA 'unsafe-inline' (es opt-out implícito de la
+// política antigua). Como Nuxt 3 + @vite-pwa/nuxt inyectan scripts
+// inline que no podemos marcar (script de tema, __NUXT__, onload de
+// Google Fonts), un nonce en el header activo rompe la hidratación.
 //
-// Migrar a nonces (experimental.cspNonce + hook en Nitro) es follow-up
-// — requiere generar nonce por request e inyectarlo a TODOS los scripts
-// inline que Nuxt produce, incluido el chunk de SSR state.
+// El nonce solo aparece en el canal Report-Only para observabilidad:
+// los browsers reportan violaciones a la política estricta sin
+// bloquearlas. Cuando todos los scripts inline lleven nonce
+// (vía plugin Nuxt + custom SSR), se puede mover la política estricta
+// al header activo.
 //
-// El resto del CSP sigue activo y aporta defensa real:
-// - script-src sin 'https:' ni dominios externos → bloquea scripts
-//   de origen arbitrario (un XSS no puede meter <script src="evil.com">).
-// - sin 'unsafe-eval' → bloquea eval / new Function.
-// - frame-ancestors 'none' → no clickjacking.
-// - object-src 'none' → no <embed>/<object> con plugins.
-// - base-uri 'self' → no relocación del documento base.
-// - form-action 'self' → form submit no sale del origen.
+// El nonce se expone como `event.context.cspNonce` para uso futuro
+// (plugin que inyecte scripts dinámicos con nonce).
 
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com data:",
-  "img-src 'self' data: https:",
-  "connect-src 'self' https://*.supabase.co https://generativelanguage.googleapis.com",
-  "media-src 'self' blob:",
-  "worker-src 'self' blob:",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
-].join('; ')
+import { randomBytes } from 'node:crypto'
+
+function generateNonce() {
+  return randomBytes(16).toString('base64')
+}
+
+const COMMON_DIRECTIVES = {
+  'default-src': ["'self'"],
+  'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+  'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+  'img-src': ["'self'", 'data:', 'https:'],
+  'connect-src': [
+    "'self'",
+    'https://*.supabase.co',
+    'https://generativelanguage.googleapis.com',
+  ],
+  'media-src': ["'self'", 'blob:'],
+  'worker-src': ["'self'", 'blob:'],
+  'frame-ancestors': ["'none'"],
+  'base-uri': ["'self'"],
+  'form-action': ["'self'"],
+  'object-src': ["'none'"],
+}
+
+function serialize(directives) {
+  return Object.entries(directives)
+    .map(([d, vals]) => `${d} ${vals.join(' ')}`)
+    .join('; ')
+}
+
+function buildActiveCsp() {
+  // Política activa: 'unsafe-inline' sin nonce. Idéntica a la
+  // pre-#37 — no rompe ningún script inline.
+  return serialize({
+    ...COMMON_DIRECTIVES,
+    'script-src': ["'self'", "'unsafe-inline'"],
+  })
+}
+
+function buildReportOnlyCsp({ nonce, reportUri }) {
+  // Política estricta: solo nonce o cargado dinámicamente desde un
+  // script con nonce. Sin 'unsafe-inline'. SOLO se aplica en modo
+  // Report-Only — no bloquea, solo reporta.
+  return serialize({
+    ...COMMON_DIRECTIVES,
+    'script-src': ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
+    ...(reportUri
+      ? { 'report-uri': [reportUri], 'report-to': ['csp-endpoint'] }
+      : {}),
+  })
+}
 
 export default defineEventHandler((event) => {
+  const nonce = generateNonce()
+  event.context.cspNonce = nonce
+
   const headers = {
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
@@ -50,11 +83,17 @@ export default defineEventHandler((event) => {
       'camera=(self), microphone=(self), geolocation=(), payment=(), interest-cohort=(), browsing-topics=()',
     'X-DNS-Prefetch-Control': 'off',
     'Cross-Origin-Opener-Policy': 'same-origin',
-    // CORP same-origin: el browser bloquea cargas cross-origin de los
-    // recursos servidos por la app. Para una PWA esto es lo deseado —
-    // no exponemos APIs ni assets a sitios terceros.
     'Cross-Origin-Resource-Policy': 'same-origin',
-    'Content-Security-Policy': CSP,
+    'Content-Security-Policy': buildActiveCsp(),
+    'Content-Security-Policy-Report-Only': buildReportOnlyCsp({
+      nonce,
+      reportUri: '/api/csp-report',
+    }),
+    'Report-To': JSON.stringify({
+      group: 'csp-endpoint',
+      max_age: 10886400,
+      endpoints: [{ url: '/api/csp-report' }],
+    }),
   }
 
   if (process.env.NODE_ENV === 'production') {
