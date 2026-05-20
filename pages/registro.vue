@@ -40,7 +40,8 @@
         <!-- Sidebar izquierdo -->
         <div class="lg:sticky lg:top-20 lg:self-start lg:space-y-4">
           <div ref="resumenWrapperRef" class="px-4 lg:px-0 mb-5 lg:mb-0">
-            <RegistroResumenMesRegistro
+            <component
+              :is="isPreviewV2 ? RegistroResumenMesRegistroV2 : RegistroResumenMesRegistro"
               :total-mes="parseFloat(resumen.totalMes) || 0"
               :total-dia="totalDiaActual"
               :gastos-hoy-count="gastosHoyCount"
@@ -325,9 +326,10 @@
       @retry="reintentarParseImage"
     />
 
-    <!-- Manual form modal (lazy) -->
-    <RegistroFormGastoManualAsync
+    <!-- Manual form modal (lazy, V1 o V2 según toggle) -->
+    <component
       v-if="showFormManual"
+      :is="isPreviewV2 ? RegistroFormGastoManualV2Async : RegistroFormGastoManualAsync"
       :categorias="categorias"
       :gasto-editar="gastoEditar"
       :gasto-duplicar="gastoDuplicar"
@@ -398,6 +400,9 @@
 </template>
 
 <script setup>
+import RegistroResumenMesRegistro from '~/components/registro/ResumenMesRegistro.vue'
+import RegistroResumenMesRegistroV2 from '~/components/registro/ResumenMesRegistroV2.vue'
+
 // Lazy-loaded heavy components
 const RegistroStatsComparativasAsync = defineAsyncComponent(() =>
   import('~/components/registro/StatsComparativas.vue')
@@ -411,9 +416,15 @@ const RegistroConfirmacionVozAsync = defineAsyncComponent(() =>
 const RegistroFormGastoManualAsync = defineAsyncComponent(() =>
   import('~/components/registro/FormGastoManual.vue')
 )
+const RegistroFormGastoManualV2Async = defineAsyncComponent(() =>
+  import('~/components/registro/FormGastoManualV2.vue')
+)
 const RegistroFormBulkEditAsync = defineAsyncComponent(() =>
   import('~/components/registro/FormBulkEdit.vue')
 )
+
+// UI Preview toggle (V1 vs V2)
+const { isPreviewV2 } = useUiPreview()
 
 const {
   gastosMensuales, categorias, resumen, isLoadingMensual,

@@ -36,7 +36,10 @@
       <!-- Sidebar izquierdo (sticky en desktop) -->
       <div :class="[personaSeleccionada ? 'hidden lg:block' : '', 'lg:sticky lg:top-20 lg:self-start lg:pt-4']">
         <!-- Vista lista: resumen general "Me deben / Yo debo" -->
-        <DeudasResumenDeudas v-if="!personaSeleccionada" />
+        <component
+          v-if="!personaSeleccionada"
+          :is="isPreviewV2 ? DeudasResumenDeudasV2 : DeudasResumenDeudas"
+        />
 
         <!-- Vista detalle: card con info de la persona seleccionada (solo desktop; en móvil DetallePersona ya muestra la cabecera) -->
         <DeudasPersonaInfoCard v-else />
@@ -59,15 +62,17 @@
       <div>
         <Transition name="page" mode="out-in">
           <div :key="personaSeleccionada ? 'detalle' : 'lista'">
-            <DeudasDetallePersona
+            <component
               v-if="personaSeleccionada"
+              :is="isPreviewV2 ? DeudasDetallePersonaV2 : DeudasDetallePersona"
               @registrar-pago="abrirFormPago"
               @agregar-deuda="showFormDeuda = true"
               @editar-deuda="abrirFormEditar"
               @pago-global="showFormPagoGlobal = true"
             />
-            <DeudasListaPersonas
+            <component
               v-else
+              :is="isPreviewV2 ? DeudasListaPersonasV2 : DeudasListaPersonas"
               @seleccionar="onSeleccionarPersona"
             />
           </div>
@@ -138,6 +143,15 @@
 </template>
 
 <script setup>
+import DeudasResumenDeudas from '~/components/deudas/ResumenDeudas.vue'
+import DeudasResumenDeudasV2 from '~/components/deudas/ResumenDeudasV2.vue'
+import DeudasListaPersonas from '~/components/deudas/ListaPersonas.vue'
+import DeudasListaPersonasV2 from '~/components/deudas/ListaPersonasV2.vue'
+import DeudasDetallePersona from '~/components/deudas/DetallePersona.vue'
+import DeudasDetallePersonaV2 from '~/components/deudas/DetallePersonaV2.vue'
+
+const { isPreviewV2 } = useUiPreview()
+
 const {
   fetchResumen, fetchPersonas, personas,
   personaSeleccionada, seleccionarPersona,

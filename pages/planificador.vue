@@ -65,13 +65,15 @@
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
-            <LazyPlanificadorCalendarioMensual
+            <component
               v-else-if="vistaActual === 'calendario'"
+              :is="isPreviewV2 ? PlanificadorCalendarioMensualV2 : LazyPlanificadorCalendarioMensual"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
-            <PlanificadorListaGastosPlaneados
+            <component
               v-else
+              :is="isPreviewV2 ? PlanificadorListaGastosPlaneadosV2 : PlanificadorListaGastosPlaneados"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
@@ -118,6 +120,17 @@
 <script setup>
 import PlanificadorResumenMes from '~/components/planificador/ResumenMes.vue'
 import PlanificadorResumenMesV2 from '~/components/planificador/ResumenMesV2.vue'
+import PlanificadorListaGastosPlaneados from '~/components/planificador/ListaGastosPlaneados.vue'
+import PlanificadorListaGastosPlaneadosV2 from '~/components/planificador/ListaGastosPlaneadosV2.vue'
+
+// Calendario y formularios lazy: el V2 también, pero lo importamos sincrono porque
+// componente :is necesita la referencia directa (no LazyXxx)
+const LazyPlanificadorCalendarioMensual = defineAsyncComponent(() =>
+  import('~/components/planificador/CalendarioMensual.vue')
+)
+const PlanificadorCalendarioMensualV2 = defineAsyncComponent(() =>
+  import('~/components/planificador/CalendarioMensualV2.vue')
+)
 
 definePageMeta({ layout: 'planificador' })
 

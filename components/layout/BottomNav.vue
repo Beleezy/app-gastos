@@ -29,7 +29,7 @@
         <!-- Icon container -->
         <div class="relative">
           <div
-            class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-300 mb-0.5"
+            class="flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-300 mb-0.5"
             :class="isActive(item.to) ? 'bg-theme-accent-bg scale-105' : 'group-hover:bg-theme-border-md'"
           >
             <component :is="item.icon" class="w-6 h-6 transition-transform duration-300" :class="isActive(item.to) ? 'scale-110' : ''" />
@@ -37,12 +37,12 @@
           <!-- Badge -->
           <span
             v-if="getBadge(item.to) > 0"
-            class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none"
+            class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none"
           >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span>
         </div>
 
         <span
-          class="text-[10px] font-semibold transition-all duration-300 leading-none"
+          class="text-xs font-semibold transition-all duration-300 leading-none"
           :class="isActive(item.to) ? 'text-theme-accent opacity-100' : 'opacity-70'"
         >{{ item.label }}</span>
       </NuxtLink>
