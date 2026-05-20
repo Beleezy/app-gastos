@@ -16,6 +16,8 @@ const gastoBaseSchema = z.object({
 export const gastoCreateSchema = gastoBaseSchema
 
 export const gastoUpdateSchema = gastoBaseSchema
+  .omit({ metodoRegistro: true })
+  .extend({ metodoRegistro: metodoRegistroSchema.optional() })
   .partial()
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 

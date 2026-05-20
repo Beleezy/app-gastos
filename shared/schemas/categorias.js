@@ -40,7 +40,7 @@ export const medioAhorroUpdateSchema = medioAhorroBase
 const ahorroBase = z.object({
   concepto: z.string().trim().max(200).optional().nullable(),
   monto: z
-    .number({ invalid_type_error: 'Monto debe ser numérico' })
+    .number({ error: 'Monto debe ser numérico' })
     .finite()
     .positive('El monto debe ser mayor a 0')
     .max(10_000_000, 'Monto fuera de rango'),
