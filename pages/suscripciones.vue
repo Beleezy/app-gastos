@@ -303,8 +303,20 @@ const { currencySymbol, formatMonto } = useCurrency()
 const { toggle: toggleDrawer } = useMobileDrawer()
 const {
   items, activas, totalMensual, totalAnual, proximos30Dias,
-  crear, actualizar, eliminar, pausarReanudar,
+  fetchItems, crear, actualizar, eliminar, pausarReanudar,
+  migrarLocalStorageSiHaceFalta,
 } = useSuscripciones()
+
+const cargandoLista = ref(true)
+
+onMounted(async () => {
+  try {
+    await migrarLocalStorageSiHaceFalta()
+    await fetchItems(true)
+  } finally {
+    cargandoLista.value = false
+  }
+})
 
 const ICONOS = ['🔁', '🎬', '🎵', '📺', '📰', '🎮', '🏋️', '☁️', '🌐', '📱', '💪', '📚']
 const COLORES = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']

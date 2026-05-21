@@ -56,6 +56,10 @@ const route = useRoute()
 const { personas } = useDeudas()
 const { resumen: resumenPlan } = usePlanificador()
 const { countPendientes: vinculosPendientes } = useVinculos()
+// Presupuestos: badge en /registro cuando alguna categoría está en estado
+// crítico (>=100% del límite). Lee del cache del composable; el plugin
+// prefetch.client.js puede pre-cargarlo en idle.
+const { countCriticas: presupuestosCriticos } = usePresupuestosCategoria()
 
 const deudasVencidas = computed(() =>
   personas.value.filter(p => p.tieneVencidas).length
@@ -64,6 +68,7 @@ const deudasVencidas = computed(() =>
 function getBadge(path) {
   if (path === '/deudas') return deudasVencidas.value + vinculosPendientes.value
   if (path === '/planificador') return resumenPlan.value.countPendientes
+  if (path === '/registro') return presupuestosCriticos.value
   return 0
 }
 

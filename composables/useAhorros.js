@@ -65,6 +65,29 @@ export function useAhorros() {
         totalGlobal.value += m
       }
       fetchAhorros().catch(() => {})
+      // Auto-tracking de metas (submódulo metas): si hay una meta de tipo
+      // ahorro cuyo nombre coincide con el concepto del ahorro, registrar
+      // movimiento. Fail-silent — no debe romper la creación del ahorro.
+      try {
+        const { items: metasItems, registrarMovimiento } = useMetas()
+        if (metasItems.value?.length) {
+          const m = metasItems.value.find(x =>
+            x.tipo === 'ahorro'
+            && !x.archivada
+            && String(x.nombre || '').trim().toLowerCase()
+              === String(creado.concepto || '').trim().toLowerCase(),
+          )
+          if (m) {
+            registrarMovimiento(m.id, {
+              monto: parseFloat(creado.monto),
+              fecha: creado.fecha,
+              nota: `Auto desde ahorro`,
+              origenTipo: 'ahorro',
+              origenId: creado.id,
+            }).catch(() => {})
+          }
+        }
+      } catch {}
     } catch (e) {
       error.value = e.message || 'Error al crear ahorro'
       throw e
