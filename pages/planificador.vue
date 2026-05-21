@@ -12,7 +12,8 @@
     <div class="lg:grid lg:grid-cols-[380px_1fr] xl:grid-cols-[420px_1fr] lg:gap-6 lg:mt-4">
       <div class="lg:sticky lg:top-20 lg:self-start">
         <div ref="swipeZone">
-          <PlanificadorResumenMes
+          <component
+            :is="isPreviewV2 ? PlanificadorResumenMesV2 : PlanificadorResumenMes"
             @exportar="exportarPlanificador"
             @abrir-plantillas="showPlantillas = true"
           />
@@ -64,13 +65,15 @@
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
-            <LazyPlanificadorCalendarioMensual
+            <component
               v-else-if="vistaActual === 'calendario'"
+              :is="isPreviewV2 ? PlanificadorCalendarioMensualV2 : LazyPlanificadorCalendarioMensual"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
-            <PlanificadorListaGastosPlaneados
+            <component
               v-else
+              :is="isPreviewV2 ? PlanificadorListaGastosPlaneadosV2 : PlanificadorListaGastosPlaneados"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
@@ -115,8 +118,23 @@
 </template>
 
 <script setup>
+import PlanificadorResumenMes from '~/components/planificador/ResumenMes.vue'
+import PlanificadorResumenMesV2 from '~/components/planificador/ResumenMesV2.vue'
+import PlanificadorListaGastosPlaneados from '~/components/planificador/ListaGastosPlaneados.vue'
+import PlanificadorListaGastosPlaneadosV2 from '~/components/planificador/ListaGastosPlaneadosV2.vue'
+
+// Calendario y formularios lazy: el V2 también, pero lo importamos sincrono porque
+// componente :is necesita la referencia directa (no LazyXxx)
+const LazyPlanificadorCalendarioMensual = defineAsyncComponent(() =>
+  import('~/components/planificador/CalendarioMensual.vue')
+)
+const PlanificadorCalendarioMensualV2 = defineAsyncComponent(() =>
+  import('~/components/planificador/CalendarioMensualV2.vue')
+)
+
 definePageMeta({ layout: 'planificador' })
 
+const { isPreviewV2 } = useUiPreview()
 const route = useRoute()
 
 if (route.query.seccion === 'futuros') {

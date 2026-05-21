@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Gastos — Rediseno UI Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070d1e;
+    --card: #131c36;
+    --card-2: #1c274b;
+    --border: rgba(96,165,250,0.15);
+    --border-md: rgba(96,165,250,0.25);
+    --text: #f8fafc;
+    --text-sec: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-soft: rgba(59,130,246,0.15);
+    --success: #10b981;
+    --success-soft: rgba(16,185,129,0.15);
+    --warning: #f59e0b;
+    --warning-soft: rgba(245,158,11,0.15);
+    --danger: #ef4444;
+    --danger-soft: rgba(239,68,68,0.15);
+    --on-accent: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 18px; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #04060f;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1.page-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
+  p.page-sub { color: var(--text-muted); margin-bottom: 32px; font-size: 0.9rem; max-width: 900px; }
+  .frame-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .frame-label {
+    font-size: 0.85rem; color: var(--text-muted); text-align: center;
+    background: rgba(255,255,255,0.04); padding: 6px 14px; border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .frame-label.after { color: #34d399; border-color: rgba(52,211,153,0.3); }
+  .phone {
+    width: 390px; height: 844px;
+    background: var(--bg);
+    border-radius: 44px; border: 8px solid #0d1117;
+    box-shadow: 0 30px 70px rgba(0,0,0,0.5);
+    overflow: hidden; position: relative;
+    display: flex; flex-direction: column;
+  }
+  .phone::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 28px; background: #0d1117;
+    border-radius: 0 0 18px 18px; z-index: 50;
+  }
+  .status-bar {
+    height: 44px; padding: 0 28px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.78rem; font-weight: 600; flex-shrink: 0;
+  }
+  .app-header {
+    padding: 8px 20px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .app-header h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; }
+  .app-header .header-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-sec);
+  }
+  .scroll-area { flex: 1; overflow-y: auto; padding: 0 20px 100px; }
+  .scroll-area::-webkit-scrollbar { width: 0; }
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(7,13,30,0.92);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid var(--border);
+    height: 76px; padding-bottom: 12px;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    z-index: 40;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px; color: var(--text-muted); font-size: 0.72rem; font-weight: 600;
+    position: relative;
+  }
+  .nav-item.active { color: var(--accent); }
+  .nav-item.active::before {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 32px; height: 3px; background: var(--accent); border-radius: 0 0 999px 999px;
+  }
+  .nav-item .nav-ico {
+    width: 44px; height: 44px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nav-item.active .nav-ico { background: var(--accent-soft); }
+  .nav-item .badge {
+    position: absolute; top: 6px; right: 36%;
+    background: var(--danger); color: white; font-size: 0.6rem; font-weight: 700;
+    min-width: 18px; height: 18px; padding: 0 5px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 999px; border: 2px solid var(--card);
+  }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 18px; margin-bottom: 14px;
+  }
+  .card.accent-glow {
+    background: linear-gradient(135deg, var(--card) 0%, rgba(59,130,246,0.06) 100%);
+    border-color: rgba(59,130,246,0.25);
+  }
+  .hero-label { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+  .hero-amount { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin-top: 4px; }
+  .hero-amount .currency { font-size: 1.2rem; color: var(--text-muted); margin-right: 4px; font-weight: 500; }
+  .hero-amount.success { color: var(--success); }
+  .hero-amount.danger { color: var(--danger); }
+  .hero-sub { color: var(--text-sec); font-size: 0.9rem; margin-top: 6px; }
+  .delta-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: var(--success-soft); color: var(--success);
+    padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600;
+    margin-top: 8px;
+  }
+  .progress { height: 8px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; margin: 14px 0 10px; }
+  .progress > span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+  .progress > span.success { background: var(--success); }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px; }
+  .stat-pill {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 14px; padding: 10px 8px; text-align: center;
+  }
+  .stat-pill .label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .stat-pill .value { font-size: 0.95rem; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .insights { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .insights .insight { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--text-sec); }
+  .insights .insight strong { color: var(--text); font-weight: 600; }
+  .section-title {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 0.95rem; font-weight: 600; margin: 20px 4px 10px;
+  }
+  .section-title .count { color: var(--text-muted); font-weight: 500; font-size: 0.85rem; }
+  .section-title a { color: var(--accent); font-size: 0.8rem; font-weight: 600; text-decoration: none; }
+  .chip-scroll { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0; margin: 0 -20px; padding-left: 20px; padding-right: 20px; scrollbar-width: none; }
+  .chip-scroll::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px;
+    background: var(--card); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 999px;
+    font-size: 0.85rem; font-weight: 500; color: var(--text-sec);
+    min-height: 44px;
+  }
+  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .chip .count { font-size: 0.75rem; opacity: 0.7; font-weight: 600; }
+  .gasto {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; margin-bottom: 8px;
+  }
+  .gasto .avatar {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; flex-shrink: 0;
+  }
+  .gasto .info { flex: 1; min-width: 0; }
+  .gasto .info .name { font-size: 1rem; font-weight: 600; }
+  .gasto .info .meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+  .gasto .right { text-align: right; }
+  .gasto .right .amount { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .gasto .right .status { font-size: 0.7rem; margin-top: 4px; }
+  .gasto .chevron { color: var(--text-muted); margin-left: 4px; }
+  .badge-sm { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; }
+  .badge-sm.success { background: var(--success-soft); color: var(--success); }
+  .badge-sm.warning { background: var(--warning-soft); color: var(--warning); }
+  .badge-sm.danger { background: var(--danger-soft); color: var(--danger); }
+  .badge-sm.neutral { background: rgba(255,255,255,0.06); color: var(--text-sec); }
+  .capture-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+  .capture-btn {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 14px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    min-height: 84px;
+  }
+  .capture-btn.primary { background: linear-gradient(135deg, var(--accent), #2563eb); border: none; color: white; }
+  .capture-btn .ico { font-size: 1.4rem; }
+  .capture-btn .label { font-size: 0.78rem; font-weight: 600; }
+  .search-pill {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1px solid var(--border);
+    padding: 0 14px; height: 48px; border-radius: 16px; margin-top: 4px;
+  }
+  .search-pill input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: var(--text); font-family: inherit; font-size: 0.95rem;
+  }
+  .search-pill input::placeholder { color: var(--text-muted); }
+  .search-pill .ico-action { color: var(--text-muted); font-size: 1.1rem; }
+  .calendar { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 14px; }
+  .calendar .week-head { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
+  .calendar .week-head div { text-align: center; font-size: 0.72rem; color: var(--text-muted); font-weight: 600; padding: 4px 0; }
+  .calendar .grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .day {
+    min-height: 64px; border-radius: 12px; padding: 6px 4px;
+    background: rgba(255,255,255,0.02);
+    display: flex; flex-direction: column; align-items: stretch;
+    border: 1px solid transparent; position: relative;
+  }
+  .day .num { font-size: 0.85rem; font-weight: 600; text-align: center; color: var(--text-sec); }
+  .day .total { font-size: 0.7rem; font-weight: 700; text-align: center; margin-top: 2px; font-variant-numeric: tabular-nums; color: var(--text); }
+  .day .cat-bar { height: 4px; border-radius: 999px; margin-top: auto; }
+  .day.today { border-color: var(--accent); background: var(--accent-soft); }
+  .day.today .num { color: var(--accent); }
+  .day.muted { opacity: 0.4; }
+  .day.has-events { background: rgba(255,255,255,0.04); }
+  .persona {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 18px; padding: 14px; margin-bottom: 8px; min-height: 96px;
+  }
+  .persona .row-1 { display: flex; align-items: center; gap: 12px; }
+  .persona .avatar-init {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--accent-soft); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 1.05rem; flex-shrink: 0;
+  }
+  .persona .name-block { flex: 1; min-width: 0; }
+  .persona .name { font-size: 1rem; font-weight: 600; }
+  .persona .sub-line { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+  .persona .amount-block { text-align: right; }
+  .persona .amount-block .amt { font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .persona.success .amount-block .amt { color: var(--success); }
+  .persona.danger .amount-block .amt { color: var(--danger); }
+  .persona .row-2 { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; }
+  .urgent-banner {
+    background: linear-gradient(135deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 16px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+  }
+  .urgent-banner .ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(239,68,68,0.2); color: var(--danger);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 1.05rem;
+  }
+  .urgent-banner .text { flex: 1; }
+  .urgent-banner .text .t1 { font-size: 0.9rem; font-weight: 600; }
+  .urgent-banner .text .t2 { font-size: 0.78rem; color: var(--text-sec); margin-top: 1px; }
+  .urgent-banner button {
+    padding: 8px 14px; border-radius: 12px; background: var(--danger); color: white;
+    font-weight: 600; font-size: 0.78rem; border: none; min-height: 44px;
+  }
+  .seg {
+    display: grid; grid-template-columns: 1fr 1fr;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 16px; padding: 4px; margin-bottom: 14px;
+  }
+  .seg button {
+    padding: 12px; border-radius: 12px; border: none;
+    background: transparent; color: var(--text-muted);
+    font-weight: 600; font-family: inherit; font-size: 0.88rem;
+    min-height: 44px;
+  }
+  .seg button.active { background: var(--accent); color: var(--on-accent); }
+  .fab {
+    position: absolute; right: 20px; bottom: 96px;
+    width: 60px; height: 60px; border-radius: 18px;
+    background: var(--accent); color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; box-shadow: 0 8px 24px rgba(59,130,246,0.4);
+    z-index: 39;
+  }
+  .sheet-overlay {
+    position: absolute; inset: 0;
+    background: rgba(7,13,30,0.7); backdrop-filter: blur(6px);
+    display: flex; align-items: flex-end;
+    z-index: 60;
+  }
+  .sheet {
+    background: var(--card); border-top: 1px solid var(--border);
+    border-radius: 28px 28px 0 0; width: 100%;
+    max-height: 92%; display: flex; flex-direction: column;
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.4);
+  }
+  .sheet-handle { width: 48px; height: 4px; background: var(--border-md); border-radius: 999px; margin: 12px auto 4px; }
+  .sheet-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px 4px;
+  }
+  .sheet-head h3 { font-size: 1.15rem; font-weight: 600; }
+  .sheet-head .close {
+    width: 36px; height: 36px; border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center; color: var(--text-sec);
+  }
+  .sheet-body { padding: 16px 20px 12px; overflow-y: auto; flex: 1; }
+  .sheet-footer {
+    padding: 14px 20px 20px;
+    background: linear-gradient(180deg, transparent 0%, var(--card) 35%);
+    border-top: 1px solid var(--border);
+    position: sticky; bottom: 0;
+  }
+  .sheet-footer button {
+    width: 100%; padding: 16px; border-radius: 16px;
+    background: var(--accent); color: var(--on-accent); border: none;
+    font-family: inherit; font-weight: 700; font-size: 1rem; min-height: 56px;
+  }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+  .field input, .field textarea, .field select {
+    width: 100%; padding: 0 16px; height: 52px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 14px; color: var(--text); font-family: inherit; font-size: 1rem;
+    outline: none;
+  }
+  .field input:focus { border-color: var(--accent); }
+  .field textarea { height: auto; padding: 14px 16px; min-height: 80px; }
+  .field .input-prefix { position: relative; }
+  .field .input-prefix .pf { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+  .field .input-prefix input { padding-left: 38px; }
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cat-btn {
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    min-height: 72px;
+  }
+  .cat-btn .e { font-size: 1.5rem; }
+  .cat-btn .l { font-size: 0.78rem; font-weight: 500; }
+  .cat-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .quick-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .quick-chip {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; min-height: 44px;
+    color: var(--text-sec); font-family: inherit;
+  }
+  .quick-chip.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .compare-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 32px;
+    margin-bottom: 64px; align-items: start;
+  }
+  .section-h {
+    font-size: 1.15rem; font-weight: 700; margin: 0 0 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-h .num {
+    width: 32px; height: 32px; border-radius: 10px;
+    background: var(--accent); color: var(--on-accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; font-weight: 700;
+  }
+  .section-d { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 24px; max-width: 800px; }
+  .preview-banner {
+    position: sticky; top: 16px;
+    background: linear-gradient(135deg, var(--accent), #2563eb);
+    color: white; padding: 14px 20px; border-radius: 16px;
+    margin-bottom: 32px; display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 12px 30px rgba(59,130,246,0.35);
+    z-index: 100;
+  }
+  .preview-banner strong { font-weight: 700; }
+  .preview-banner .info { font-size: 0.85rem; opacity: 0.95; }
+</style>
+</head>
+<body>
+
+<div class="preview-banner">
+  <span style="font-size:1.6rem;">✨</span>
+  <div class="info">
+    <strong>Mockup visual del rediseño UI V2</strong><br>
+    Tema oscuro + accent azul · Font-size Grande (18px root) · iPhone 12/13/14 (390x844) · Tap targets &ge; 44px
+  </div>
+</div>
+
+<h1 class="page-title">🎨 Rediseño UI — App Gastos (Mobile)</h1>
+<p class="page-sub">Esta es la propuesta visual de cómo se vería la app con la "Nueva interfaz V2" activada en Configuraciones. Cada pantalla mantiene la misma lógica, datos y endpoints de la versión actual — solo cambian template y estilos.</p>
+
+<h2 class="section-h"><span class="num">1</span> Planificador</h2>
+<p class="section-d">Hero único de presupuesto con barra de progreso continua, tres chips de stats (Planificado · Pagados · Pendientes) y un footer de insights siempre visible (Ritmo · Proyección · vs mes anterior). Calendario rediseñado con celdas de 64px y barra de categoría dominante inferior.</p>
+
+<div class="compare-row">
+  <div class="frame-wrap">
+    <div class="frame-label after">Planificador V2 — Vista Lista</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-header">
+        <h2>Mayo 2026</h2>
+        <div class="header-actions"><div class="icon-btn">‹</div><div class="icon-btn">›</div></div>
+      </div>
+      <div class="scroll-area">
+        <div class="card accent-glow">
+          <div class="hero-label">Presupuesto del mes</div>
+          <div class="hero-amount"><span class="currency">S/</span>5 000</div>
+          <div class="hero-sub">Gastado <strong style="color:var(--text);">S/2 500</strong> · Disponible <strong style="color:var(--success);">S/2 500</strong></div>
+          <div class="progress"><span style="width: 50%;"></span></div>
+          <div class="stat-row">
+            <div class="stat-pill"><div class="label">Planificado</div><div class="value">S/3 200</div></div>
+            <div class="stat-pill"><div class="label">Pagados</div><div class="value" style="color:var(--success);">5</div></div>
+            <div class="stat-pill"><div class="label">Pendientes</div><div class="value" style="color:var(--warning);">3</div></div>
+          </div>
+          <div class="insights">
+            <span class="insight">⚡ Ritmo: <strong>S/83/día</strong></span>
+            <span class="insight">📊 Proyección: <strong>S/4 100</strong></span>
+            <span class="insight" style="color:var(--success);">↓ 12% vs abril</span>
+          </div>
+        </div>
+
+        <div class="chip-scroll">
+          <div class="chip active">Todos <span class="count">14</span></div>
+          <div class="chip" style="color:var(--danger);">⚠ Vencidos <span class="count">2</span></div>
+          <div class="chip">Hoy <span class="count">1</span></div>
+          <div class="chip">Pendientes <span class="count">3</span></div>
+        </div>
+
+        <div class="section-title">Vivienda <span class="count">3 · S/12 500</span></div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🏠</div>
+          <div class="info"><div class="name">Alquiler</div><div class="meta">Hoy · Recurrente</div></div>
+          <div class="right"><div class="amount">S/5 000</div><div class="status"><span class="badge-sm success">Pagado</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(245,158,11,0.15);color:#f59e0b;">💡</div>
+          <div class="info"><div class="name">Servicios</div><div class="meta">Mañana · Luz + Agua</div></div>
+          <div class="right"><div class="amount">S/2 500</div><div class="status"><span class="badge-sm warning">Pendiente</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🔧</div>
+          <div class="info"><div class="name">Mantenimiento</div><div class="meta" style="color:var(--danger);">Vencido hace 3 días</div></div>
+          <div class="right"><div class="amount">S/5 000</div><div class="status"><span class="badge-sm danger">Atrasado</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+
+        <div class="section-title">Alimentación <span class="count">2 · S/1 200</span></div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444;">🍔</div>
+          <div class="info"><div class="name">Mercado semanal</div><div class="meta">Cada sábado</div></div>
+          <div class="right"><div class="amount">S/600</div><div class="status"><span class="badge-sm warning">Pendiente</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+      </div>
+      <div class="fab">+</div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-ico">🏠</div>Inicio</div>
+        <div class="nav-item active"><div class="nav-ico">📅</div>Planificador</div>
+        <div class="nav-item"><div class="nav-ico">📝</div>Registro</div>
+        <div class="nav-item"><div class="nav-ico">💸</div>Deudas<span class="badge">3</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="frame-label after">Planificador V2 — Calendario</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-header">
+        <h2>Mayo 2026</h2>
+        <div class="header-actions"><div class="icon-btn">‹</div><div class="icon-btn">›</div></div>
+      </div>
+      <div class="scroll-area">
+        <div class="seg" style="grid-template-columns: repeat(3,1fr);">
+          <button>Lista</button>
+          <button class="active">Calendario</button>
+          <button>Gráfico</button>
+        </div>
+        <div class="calendar">
+          <div class="week-head"><div>LU</div><div>MA</div><div>MI</div><div>JU</div><div>VI</div><div>SÁ</div><div>DO</div></div>
+          <div class="grid">
+            <div class="day muted"><div class="num">28</div></div>
+            <div class="day muted"><div class="num">29</div></div>
+            <div class="day muted"><div class="num">30</div></div>
+            <div class="day has-events"><div class="num">1</div><div class="total">S/500</div><div class="cat-bar" style="background:#f59e0b;"></div></div>
+            <div class="day"><div class="num">2</div></div>
+            <div class="day has-events"><div class="num">3</div><div class="total">S/120</div><div class="cat-bar" style="background:#ef4444;"></div></div>
+            <div class="day"><div class="num">4</div></div>
+            <div class="day has-events"><div class="num">5</div><div class="total">S/5 000</div><div class="cat-bar" style="background:#f59e0b;"></div></div>
+            <div class="day"><div class="num">6</div></div>
+            <div class="day"><div class="num">7</div></div>
+            <div class="day has-events"><div class="num">8</div><div class="total">S/350</div><div class="cat-bar" style="background:linear-gradient(90deg,#ef4444 50%,#3b82f6 50%);"></div></div>
+            <div class="day has-events"><div class="num">9</div><div class="total">S/200</div><div class="cat-bar" style="background:#3b82f6;"></div></div>
+            <div class="day"><div class="num">10</div></div>
+            <div class="day"><div class="num">11</div></div>
+            <div class="day"><div class="num">12</div></div>
+            <div class="day has-events"><div class="num">13</div><div class="total">S/80</div><div class="cat-bar" style="background:#10b981;"></div></div>
+            <div class="day"><div class="num">14</div></div>
+            <div class="day today"><div class="num">15</div><div class="total">S/2 500</div><div class="cat-bar" style="background:linear-gradient(90deg,#f59e0b 70%,#ef4444 70%);"></div></div>
+            <div class="day"><div class="num">16</div></div>
+            <div class="day"><div class="num">17</div></div>
+            <div class="day"><div class="num">18</div></div>
+            <div class="day"><div class="num">19</div></div>
+            <div class="day has-events"><div class="num">20</div><div class="total">S/600</div><div class="cat-bar" style="background:#ef4444;"></div></div>
+            <div class="day"><div class="num">21</div></div>
+            <div class="day"><div class="num">22</div></div>
+            <div class="day"><div class="num">23</div></div>
+            <div class="day"><div class="num">24</div></div>
+            <div class="day"><div class="num">25</div></div>
+            <div class="day"><div class="num">26</div></div>
+            <div class="day"><div class="num">27</div></div>
+            <div class="day"><div class="num">28</div></div>
+            <div class="day"><div class="num">29</div></div>
+            <div class="day"><div class="num">30</div></div>
+            <div class="day"><div class="num">31</div></div>
+          </div>
+        </div>
+        <div class="section-title">Jueves 15 de mayo <span class="count">2 gastos · S/2 500</span></div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🏠</div>
+          <div class="info"><div class="name">Alquiler</div><div class="meta">Vivienda · Recurrente</div></div>
+          <div class="right"><div class="amount">S/2 000</div><div class="status"><span class="badge-sm success">Pagado</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444;">🍔</div>
+          <div class="info"><div class="name">Cena familiar</div><div class="meta">Alimentación</div></div>
+          <div class="right"><div class="amount">S/500</div><div class="status"><span class="badge-sm warning">Pendiente</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+      </div>
+      <div class="fab">+</div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-ico">🏠</div>Inicio</div>
+        <div class="nav-item active"><div class="nav-ico">📅</div>Planificador</div>
+        <div class="nav-item"><div class="nav-ico">📝</div>Registro</div>
+        <div class="nav-item"><div class="nav-ico">💸</div>Deudas<span class="badge">3</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="section-h"><span class="num">2</span> Registro de Gastos</h2>
+<p class="section-d">Hero compacto con monto gastado, barra de progreso y chip de proyección. Capture Bar de 3 botones grandes para voz/foto/manual. Historial con 2 niveles (día > gastos) y selector de semana en chips horizontales.</p>
+
+<div class="compare-row">
+  <div class="frame-wrap">
+    <div class="frame-label after">Registro V2 — Home</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-header">
+        <h2>Registro</h2>
+        <div class="header-actions"><div class="icon-btn">📊</div><div class="icon-btn">⋮</div></div>
+      </div>
+      <div class="scroll-area">
+        <div class="card accent-glow">
+          <div class="hero-label">Gastado en mayo</div>
+          <div class="hero-amount danger"><span class="currency">S/</span>2 345</div>
+          <div class="hero-sub">de S/5 000 · <strong style="color:var(--success);">S/2 655 restante</strong></div>
+          <div class="progress"><span style="width:47%;background:var(--accent);"></span></div>
+          <span class="delta-chip">📊 Proyección S/4 100</span>
+        </div>
+        <div class="capture-bar">
+          <button class="capture-btn primary"><div class="ico">🎙</div><div class="label">Voz</div></button>
+          <button class="capture-btn"><div class="ico">📷</div><div class="label">Foto</div></button>
+          <button class="capture-btn"><div class="ico">✍️</div><div class="label">Manual</div></button>
+        </div>
+        <div style="height: 14px;"></div>
+        <div class="search-pill">
+          <span class="ico-action">🔍</span>
+          <input placeholder="Buscar gasto, categoría...">
+          <span class="ico-action">⚙</span>
+        </div>
+        <div class="section-title">Mayo · semana del 11</div>
+        <div class="chip-scroll">
+          <div class="chip">L 11<span class="count">S/120</span></div>
+          <div class="chip">M 12<span class="count">S/80</span></div>
+          <div class="chip">M 13<span class="count">—</span></div>
+          <div class="chip">J 14<span class="count">S/350</span></div>
+          <div class="chip active">V 15<span class="count">S/250</span></div>
+          <div class="chip">S 16<span class="count">—</span></div>
+          <div class="chip">D 17<span class="count">—</span></div>
+        </div>
+        <div class="section-title">Viernes 15 · S/250 <a href="#">2 gastos</a></div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444;">🍔</div>
+          <div class="info"><div class="name">Almuerzo</div><div class="meta">Alimentación · 13:20 · 🎙 Voz</div></div>
+          <div class="right"><div class="amount">S/120</div></div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(59,130,246,0.15);color:#3b82f6;">🚗</div>
+          <div class="info"><div class="name">Uber al trabajo</div><div class="meta">Transporte · 08:45</div></div>
+          <div class="right"><div class="amount">S/130</div></div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="section-title">Jueves 14 · S/350</div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(6,182,212,0.15);color:#06b6d4;">💧</div>
+          <div class="info"><div class="name">Recibo agua</div><div class="meta">Servicios</div></div>
+          <div class="right"><div class="amount">S/350</div></div>
+          <div class="chevron">›</div>
+        </div>
+      </div>
+      <div class="fab">+</div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-ico">🏠</div>Inicio</div>
+        <div class="nav-item"><div class="nav-ico">📅</div>Planificador</div>
+        <div class="nav-item active"><div class="nav-ico">📝</div>Registro</div>
+        <div class="nav-item"><div class="nav-ico">💸</div>Deudas<span class="badge">3</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="frame-label after">Registro V2 — Modal Voz</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scroll-area" style="filter:blur(2px);opacity:0.4;padding-top:0;">
+        <div class="app-header"><h2>Registro</h2></div>
+      </div>
+      <div class="sheet-overlay">
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-head">
+            <h3>🎙 Confirmar gastos detectados</h3>
+            <div class="close">✕</div>
+          </div>
+          <div class="sheet-body">
+            <div style="background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:12px;font-size:0.82rem;color:var(--text-sec);margin-bottom:14px;">
+              <strong style="color:var(--accent);">Transcripción:</strong> "ayer gasté 25 soles en taxi y 18 en almuerzo"
+            </div>
+            <div class="gasto" style="background:rgba(255,255,255,0.03);">
+              <div class="avatar" style="background:rgba(59,130,246,0.15);color:#3b82f6;">🚗</div>
+              <div class="info"><div class="name">Taxi</div><div class="meta">Transporte · Ayer 14 may</div></div>
+              <div class="right"><div class="amount">S/25</div></div>
+            </div>
+            <div class="gasto" style="background:rgba(255,255,255,0.03);">
+              <div class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444;">🍔</div>
+              <div class="info"><div class="name">Almuerzo</div><div class="meta">Alimentación · Ayer 14 may</div></div>
+              <div class="right"><div class="amount">S/18</div></div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button class="quick-chip">+ Otro</button>
+              <button class="quick-chip">🎙 Redictar</button>
+            </div>
+          </div>
+          <div class="sheet-footer">
+            <button>✓ Guardar 2 gastos · S/43</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="section-h"><span class="num">3</span> Deudas</h2>
+<p class="section-d">Toggle segmentado superior (Me deben / Yo debo). Hero único según pestaña activa con monto opuesto como insight secundario. Banner sticky de deudas vencidas. Cards de persona en 96px con info clara y CTA explícito.</p>
+
+<div class="compare-row">
+  <div class="frame-wrap">
+    <div class="frame-label after">Deudas V2 — Lista</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-header">
+        <h2>Deudas</h2>
+        <div class="header-actions"><div class="icon-btn">📤</div><div class="icon-btn">⋮</div></div>
+      </div>
+      <div class="scroll-area">
+        <div class="seg">
+          <button class="active">💚 Me deben</button>
+          <button>💸 Yo debo</button>
+        </div>
+        <div class="card accent-glow" style="background: linear-gradient(135deg, var(--card) 0%, rgba(16,185,129,0.06) 100%); border-color: rgba(16,185,129,0.2);">
+          <div class="hero-label">Total por cobrar</div>
+          <div class="hero-amount success"><span class="currency">S/</span>12 500</div>
+          <div class="hero-sub">3 personas · 5 deudas pendientes</div>
+          <div class="progress"><span class="success" style="width: 75%;"></span></div>
+          <div class="insights">
+            <span class="insight">💸 Yo debo: <strong>S/5 000</strong> ›</span>
+            <span class="insight">📊 Balance: <strong style="color:var(--success);">+S/7 500</strong></span>
+          </div>
+        </div>
+        <div class="urgent-banner">
+          <div class="ico">⚠</div>
+          <div class="text">
+            <div class="t1">3 deudas vencidas</div>
+            <div class="t2">Juan, María y Carlos · S/4 500</div>
+          </div>
+          <button>Ver</button>
+        </div>
+        <div class="search-pill" style="margin-bottom: 8px;">
+          <span class="ico-action">🔍</span>
+          <input placeholder="Buscar persona...">
+        </div>
+        <div class="chip-scroll" style="margin-bottom: 4px;">
+          <div class="chip active">Todos <span class="count">8</span></div>
+          <div class="chip">Pendientes <span class="count">5</span></div>
+          <div class="chip" style="color:var(--danger);">Vencidas <span class="count">3</span></div>
+          <div class="chip">Saldadas</div>
+        </div>
+        <div class="persona danger">
+          <div class="row-1">
+            <div class="avatar-init" style="background:rgba(239,68,68,0.15);color:var(--danger);">JD</div>
+            <div class="name-block">
+              <div class="name">Juan Díaz</div>
+              <div class="sub-line">3 deudas · últ. mov. hace 5 días</div>
+            </div>
+            <div class="amount-block"><div class="amt">S/2 500</div></div>
+            <div class="chevron">›</div>
+          </div>
+          <div class="row-2">
+            <span class="badge-sm danger">⚠ 2 vencidas</span>
+            <span class="badge-sm neutral">🔗 Vinculado</span>
+          </div>
+        </div>
+        <div class="persona success">
+          <div class="row-1">
+            <div class="avatar-init">MR</div>
+            <div class="name-block">
+              <div class="name">María Ramos</div>
+              <div class="sub-line">1 deuda · próx. pago en 3 días</div>
+            </div>
+            <div class="amount-block"><div class="amt">S/8 000</div></div>
+            <div class="chevron">›</div>
+          </div>
+          <div class="row-2">
+            <span class="badge-sm warning">Pendiente</span>
+            <span class="badge-sm neutral">📝 Préstamo</span>
+          </div>
+        </div>
+        <div class="persona success">
+          <div class="row-1">
+            <div class="avatar-init">CT</div>
+            <div class="name-block">
+              <div class="name">Carlos Torres</div>
+              <div class="sub-line">1 deuda pendiente</div>
+            </div>
+            <div class="amount-block"><div class="amt">S/2 000</div></div>
+            <div class="chevron">›</div>
+          </div>
+          <div class="row-2"><span class="badge-sm success">Al día</span></div>
+        </div>
+      </div>
+      <div class="fab">+</div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-ico">🏠</div>Inicio</div>
+        <div class="nav-item"><div class="nav-ico">📅</div>Planificador</div>
+        <div class="nav-item"><div class="nav-ico">📝</div>Registro</div>
+        <div class="nav-item active"><div class="nav-ico">💸</div>Deudas<span class="badge">3</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="frame-label after">Deudas V2 — Detalle</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-header">
+        <h2 style="font-size:1.1rem;">‹ Personas</h2>
+        <div class="header-actions"><div class="icon-btn">📤</div><div class="icon-btn">⋮</div></div>
+      </div>
+      <div class="scroll-area">
+        <div class="card accent-glow" style="background: linear-gradient(135deg, var(--card) 0%, rgba(239,68,68,0.08) 100%); border-color: rgba(239,68,68,0.2);">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+            <div class="avatar-init" style="width:64px;height:64px;font-size:1.4rem;background:rgba(239,68,68,0.15);color:var(--danger);">JD</div>
+            <div style="flex:1;">
+              <div style="font-size:1.2rem;font-weight:700;">Juan Díaz</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);">juan@email.com</div>
+              <div style="margin-top:4px;"><span class="badge-sm success">🔗 Vinculado</span></div>
+            </div>
+          </div>
+          <div class="hero-label">Total pendiente</div>
+          <div class="hero-amount danger"><span class="currency">S/</span>2 500</div>
+          <div class="hero-sub">en 2 deudas activas · vencido hace 5 días</div>
+          <button style="width:100%;margin-top:14px;padding:14px;border-radius:14px;background:var(--accent);color:white;border:none;font-family:inherit;font-weight:700;font-size:0.95rem;min-height:52px;">
+            💰 Registrar pago
+          </button>
+        </div>
+        <div class="seg">
+          <button class="active">Deudas <span style="opacity:0.8;font-weight:500;">(2)</span></button>
+          <button>Pagos <span style="opacity:0.7;font-weight:500;">(4)</span></button>
+        </div>
+        <div class="gasto" style="background:rgba(239,68,68,0.04);border-color:rgba(239,68,68,0.2);">
+          <div class="avatar" style="background:rgba(239,68,68,0.15);color:#ef4444;">📋</div>
+          <div class="info"><div class="name">Préstamo abril</div><div class="meta" style="color:var(--danger);">Venció hace 8 días</div></div>
+          <div class="right"><div class="amount">S/2 000</div><div class="status"><span class="badge-sm danger">Vencida</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+        <div class="gasto">
+          <div class="avatar" style="background:rgba(245,158,11,0.15);color:#f59e0b;">🍽️</div>
+          <div class="info"><div class="name">Cena restaurante</div><div class="meta">15 may · pago 25 may</div></div>
+          <div class="right"><div class="amount">S/500</div><div class="status"><span class="badge-sm warning">Pendiente</span></div></div>
+          <div class="chevron">›</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-ico">🏠</div>Inicio</div>
+        <div class="nav-item"><div class="nav-ico">📅</div>Planificador</div>
+        <div class="nav-item"><div class="nav-ico">📝</div>Registro</div>
+        <div class="nav-item active"><div class="nav-ico">💸</div>Deudas<span class="badge">3</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="section-h"><span class="num">4</span> Formularios — BottomSheet con footer sticky</h2>
+<p class="section-d">Inputs estandarizados a 52px. Grid de categorías 3 columnas. CTA persistente al final con backdrop blur. Quick-chips Hoy/Ayer reemplazan los grid-cols-7 enormes.</p>
+
+<div class="compare-row">
+  <div class="frame-wrap">
+    <div class="frame-label after">Form Gasto Manual</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scroll-area" style="filter:blur(2px);opacity:0.4;padding-top:0;">
+        <div class="app-header"><h2>Registro</h2></div>
+      </div>
+      <div class="sheet-overlay">
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-head">
+            <h3>Nuevo gasto manual</h3>
+            <div class="close">✕</div>
+          </div>
+          <div class="sheet-body">
+            <div class="field">
+              <label>Concepto</label>
+              <input value="Almuerzo en La Florida" placeholder="¿En qué gastaste?">
+            </div>
+            <div class="field">
+              <label>Monto</label>
+              <div class="input-prefix">
+                <span class="pf">S/</span>
+                <input value="45.00" placeholder="0.00">
+              </div>
+            </div>
+            <div class="field">
+              <label>Categoría</label>
+              <div class="cat-grid">
+                <div class="cat-btn active"><div class="e">🍔</div><div class="l">Alimentación</div></div>
+                <div class="cat-btn"><div class="e">🚗</div><div class="l">Transporte</div></div>
+                <div class="cat-btn"><div class="e">🏠</div><div class="l">Vivienda</div></div>
+                <div class="cat-btn"><div class="e">💊</div><div class="l">Salud</div></div>
+                <div class="cat-btn"><div class="e">🎮</div><div class="l">Ocio</div></div>
+                <div class="cat-btn"><div class="e">⋯</div><div class="l">Más</div></div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Fecha</label>
+              <div class="quick-chips">
+                <button class="quick-chip active">Hoy</button>
+                <button class="quick-chip">Ayer</button>
+                <button class="quick-chip">📅 Otra fecha</button>
+              </div>
+            </div>
+          </div>
+          <div class="sheet-footer">
+            <button>✓ Guardar gasto · S/45</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="frame-label after">Form Pago Global (Deudas)</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="scroll-area" style="filter:blur(2px);opacity:0.4;padding-top:0;">
+        <div class="app-header"><h2>Deudas</h2></div>
+      </div>
+      <div class="sheet-overlay">
+        <div class="sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-head">
+            <h3>Distribuir pago</h3>
+            <div class="close">✕</div>
+          </div>
+          <div class="sheet-body">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:14px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="avatar-init" style="background:rgba(239,68,68,0.15);color:var(--danger);">JD</div>
+                <div style="flex:1;">
+                  <div style="font-weight:600;">Juan Díaz</div>
+                  <div style="font-size:0.78rem;color:var(--text-muted);">2 deudas · S/2 500 pendiente</div>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Monto recibido</label>
+              <div class="input-prefix">
+                <span class="pf">S/</span>
+                <input value="1 200" placeholder="0.00">
+              </div>
+              <div class="quick-chips">
+                <button class="quick-chip">Mitad</button>
+                <button class="quick-chip">Total</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>Método</label>
+              <div class="quick-chips">
+                <button class="quick-chip active">💵 Efectivo</button>
+                <button class="quick-chip">📱 Yape</button>
+                <button class="quick-chip">🏦 Banco</button>
+              </div>
+            </div>
+            <div style="background:var(--accent-soft);border:1px solid rgba(59,130,246,0.3);border-radius:14px;padding:14px;">
+              <div style="font-size:0.78rem;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Distribución automática</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.88rem;">
+                <span>📋 Préstamo abril</span>
+                <span style="color:var(--success);font-weight:600;">−S/1 000 ✓</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.88rem;border-top:1px solid var(--border);">
+                <span>🍽️ Cena restaurante</span>
+                <span style="color:var(--warning);font-weight:600;">−S/200</span>
+              </div>
+            </div>
+          </div>
+          <div class="sheet-footer">
+            <button>💰 Distribuir S/1 200</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2 class="section-h"><span class="num">5</span> Configuraciones — Toggle Nueva Interfaz</h2>
+<p class="section-d">Card destacada en la sección de apariencia con switch para activar/desactivar la versión V2 en cualquier momento. Persistencia en localStorage. Acceso inmediato sin recargar.</p>
+
+<div class="compare-row" style="grid-template-columns: 1fr;">
+  <div class="frame-wrap">
+    <div class="frame-label after">Configuraciones — Card del Toggle</div>
+    <div class="phone">
+      <div class="status-bar"><span>9:41</span><span>● ● ●</span></div>
+      <div class="app-header"><h2>Configuraciones</h2></div>
+      <div class="scroll-area">
+        <div style="background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1px solid rgba(59,130,246,0.35); border-radius: 20px; padding: 18px; margin-bottom: 14px;">
+          <div style="display:flex;align-items:start;gap:12px;">
+            <div style="width:44px;height:44px;border-radius:14px;background:rgba(59,130,246,0.2);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">✨</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                <h3 style="font-size:1rem;font-weight:600;">Nueva interfaz</h3>
+                <span style="padding:2px 8px;border-radius:999px;background:var(--accent);color:white;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Beta V2</span>
+              </div>
+              <p style="font-size:0.85rem;color:var(--text-muted);line-height:1.5;margin-bottom:14px;">
+                Rediseño mobile-first con tipografía más grande, jerarquía visual clara y CTAs siempre visibles. Puedes volver a la versión clásica cuando quieras.
+              </p>
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:0.9rem;font-weight:500;color:var(--success);">● Activada</span>
+                <div style="width:52px;height:30px;border-radius:999px;background:var(--accent);position:relative;">
+                  <span style="position:absolute;top:3px;right:3px;width:24px;height:24px;border-radius:999px;background:white;box-shadow:0 2px 6px rgba(0,0,0,0.2);"></span>
+                </div>
+              </div>
+              <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(59,130,246,0.2);font-size:0.78rem;color:var(--text-sec);">
+                💡 Estás viendo la nueva versión. Tu feedback ayuda a decidir si se convierte en la versión oficial.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="color:var(--accent);">🎨</span>
+            <strong>Color del tema</strong>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px;">
+            <div style="aspect-ratio:1;border-radius:14px;background:#6b7280;border:2px solid transparent;"></div>
+            <div style="aspect-ratio:1;border-radius:14px;background:#3b82f6;border:2px solid white;box-shadow:0 0 0 4px rgba(255,255,255,0.1);"></div>
+            <div style="aspect-ratio:1;border-radius:14px;background:#06b6d4;border:2px solid transparent;"></div>
+            <div style="aspect-ratio:1;border-radius:14px;background:#8b5cf6;border:2px solid transparent;"></div>
+            <div style="aspect-ratio:1;border-radius:14px;background:#ec4899;border:2px solid transparent;"></div>
+            <div style="aspect-ratio:1;border-radius:14px;background:#10b981;border:2px solid transparent;"></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="color:var(--accent);">Aa</span>
+            <strong>Tamaño de letra</strong>
+          </div>
+          <div class="quick-chips">
+            <button class="quick-chip">Normal (16px)</button>
+            <button class="quick-chip active">Grande (18px)</button>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-ico">🏠</div>Inicio</div>
+        <div class="nav-item"><div class="nav-ico">📅</div>Planificador</div>
+        <div class="nav-item"><div class="nav-ico">📝</div>Registro</div>
+        <div class="nav-item"><div class="nav-ico">💸</div>Deudas<span class="badge">3</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-top:48px;line-height:1.6;">
+  Mockup estático con tokens reales del sistema (var --color-bg, --color-card, --color-accent) · Font-size 18px · Inter<br>
+  En la app real, activa <strong>Configuraciones → Apariencia → Nueva interfaz (Beta V2)</strong> para ver estos cambios con tus propios datos.
+</p>
+
+</body>
+</html>
