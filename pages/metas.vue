@@ -271,10 +271,23 @@ const { toggle: toggleDrawer } = useMobileDrawer()
 const {
   items, activas, archivadas,
   totalObjetivo, totalProgreso,
+  fetchItems, fetchMovimientos,
   crear, actualizar, eliminar,
   registrarMovimiento, eliminarMovimiento,
   movimientosDe, progresoActual, porcentajeProgreso, diasRestantes, estaCompletada,
+  migrarLocalStorageSiHaceFalta,
 } = useMetas()
+
+const cargandoLista = ref(true)
+
+onMounted(async () => {
+  try {
+    await migrarLocalStorageSiHaceFalta()
+    await fetchItems(true)
+  } finally {
+    cargandoLista.value = false
+  }
+})
 
 const ICONOS = ['🎯', '💰', '🏠', '🚗', '✈️', '📚', '💻', '💍', '🏥', '🎓', '🛒', '🎁']
 const COLORES = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316']
@@ -340,16 +353,18 @@ const metaSel = ref(null)
 const aporte = ref({ monto: 0, fecha: new Date().toISOString().slice(0, 10), nota: '' })
 const movsActuales = computed(() => metaSel.value ? movimientosDe(metaSel.value.id) : [])
 
-function abrirMovs(m) {
+async function abrirMovs(m) {
   metaSel.value = m
   aporte.value = { monto: 0, fecha: new Date().toISOString().slice(0, 10), nota: '' }
+  // Cargar movimientos del backend para esta meta (cache local en el composable).
+  try { await fetchMovimientos(m.id) } catch (e) { console.warn(e) }
 }
 function abrirAporte(m) {
   abrirMovs(m)
 }
-function enviarAporte() {
+async function enviarAporte() {
   if (!metaSel.value || !aporte.value.monto) return
-  registrarMovimiento(metaSel.value.id, aporte.value)
+  await registrarMovimiento(metaSel.value.id, aporte.value)
   aporte.value = { monto: 0, fecha: new Date().toISOString().slice(0, 10), nota: '' }
 }
 function eliminarMov(id) {

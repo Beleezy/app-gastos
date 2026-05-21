@@ -1,22 +1,8 @@
-// Submódulo Etiquetas — etiquetas personalizadas reutilizables.
-//
-// A diferencia de "categorías", una etiqueta puede aplicarse a varios
-// recursos (gasto, ingreso, planificado) y un mismo recurso puede tener
-// múltiples. Sirve para cortes transversales (#viaje, #regalo, #urgente).
-//
-// Persistencia:
-//   - etiquetas (catálogo): `etq.items.v1`
-//   - asignaciones (recurso ↔ etiqueta): `etq.asign.v1`
-//
-// Hasta que se integre con la BD, las asignaciones viven aquí y los
-// componentes de /registro y /futuros pueden leerlas vía `etiquetasDe(id)`.
+// Submódulo Etiquetas — integrado con backend (0026).
+// API pública compatible con la versión localStorage.
 
-const STORAGE_ITEMS = 'etq.items.v1'
-const STORAGE_ASIGN = 'etq.asign.v1'
-
-function nuevoId() {
-  return `etq_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-}
+const STORAGE_ITEMS_LEGACY = 'etq.items.v1'
+const STORAGE_ASIGN_LEGACY = 'etq.asign.v1'
 
 export const COLORES_ETIQUETA = [
   '#ef4444', '#f97316', '#f59e0b', '#eab308',
@@ -25,37 +11,60 @@ export const COLORES_ETIQUETA = [
 ]
 
 export function useEtiquetas() {
-  const items = useLocalStorage(STORAGE_ITEMS, [])
-  // asignaciones: { [recursoTipo]: { [recursoId]: [etiquetaId, ...] } }
-  // recursoTipo: 'gasto' | 'planificado' | 'futuro' | 'libre'
-  const asignaciones = useLocalStorage(STORAGE_ASIGN, {})
+  const { apiFetch } = useApiFetch()
 
-  function crear({ nombre, color = '#3b82f6' }) {
-    const limpio = String(nombre || '').trim().replace(/^#/, '')
-    if (!limpio) return null
-    if (items.value.some(e => e.nombre.toLowerCase() === limpio.toLowerCase())) return null
-    const etq = {
-      id: nuevoId(),
-      nombre: limpio,
-      color,
-      createdAt: new Date().toISOString(),
+  const cache = useResourceCache(
+    'etiquetas',
+    () => apiFetch('/api/etiquetas'),
+    { ttl: 120_000, initial: [] },
+  )
+  const items = cache.data
+
+  // Asignaciones indexadas por (recursoTipo, recursoId).
+  // Estructura: { gasto: { [id]: [etiquetaId...] }, planificado: {}, futuro: {} }
+  const asignaciones = useState('etiquetas-asign', () => ({ gasto: {}, planificado: {}, futuro: {} }))
+  const ultimoFetchAsign = useState('etiquetas-asign-ts', () => 0)
+
+  async function fetchItems(force = false) {
+    return cache.refresh(force)
+  }
+
+  async function fetchAsignaciones(force = false) {
+    if (!force && Date.now() - ultimoFetchAsign.value < 60_000) return asignaciones.value
+    const data = await apiFetch('/api/etiquetas/asignaciones')
+    asignaciones.value = data || { gasto: {}, planificado: {}, futuro: {} }
+    ultimoFetchAsign.value = Date.now()
+    return asignaciones.value
+  }
+
+  async function crear({ nombre, color = '#3b82f6' }) {
+    try {
+      const nueva = await apiFetch('/api/etiquetas', {
+        method: 'POST',
+        body: { nombre, color },
+      })
+      cache.set([nueva, ...items.value])
+      return nueva
+    } catch (e) {
+      if (e?.response?.status === 409 || e?.statusCode === 409) return null
+      throw e
     }
-    items.value = [...items.value, etq]
-    return etq
   }
 
-  function actualizar(id, parche) {
-    items.value = items.value.map(e => e.id === id ? { ...e, ...parche, id } : e)
+  async function actualizar(id, parche) {
+    const updated = await apiFetch(`/api/etiquetas/${id}`, { method: 'PUT', body: parche })
+    cache.set(items.value.map(e => e.id === id ? { ...e, ...updated } : e))
   }
 
-  function eliminar(id) {
-    items.value = items.value.filter(e => e.id !== id)
-    // Limpiar asignaciones
+  async function eliminar(id) {
+    await apiFetch(`/api/etiquetas/${id}`, { method: 'DELETE' })
+    cache.set(items.value.filter(e => e.id !== id))
+    // Limpiar asignaciones cacheadas localmente.
     const copia = { ...asignaciones.value }
     for (const tipo of Object.keys(copia)) {
-      for (const rid of Object.keys(copia[tipo])) {
+      for (const rid of Object.keys(copia[tipo] || {})) {
         copia[tipo][rid] = (copia[tipo][rid] || []).filter(eid => eid !== id)
-        if (copia[tipo][rid].length === 0) delete copia[tipo][rid]
+        if (!copia[tipo][rid].length) delete copia[tipo][rid]
       }
     }
     asignaciones.value = copia
@@ -68,7 +77,11 @@ export function useEtiquetas() {
     return ids.map(id => porId(id)).filter(Boolean)
   }
 
-  function asignar(tipo, recursoId, etiquetaId) {
+  async function asignar(tipo, recursoId, etiquetaId) {
+    await apiFetch('/api/etiquetas/asignar', {
+      method: 'POST',
+      body: { etiquetaId, recursoTipo: tipo, recursoId },
+    })
     const copia = { ...asignaciones.value }
     if (!copia[tipo]) copia[tipo] = {}
     const actuales = new Set(copia[tipo][recursoId] || [])
@@ -77,34 +90,87 @@ export function useEtiquetas() {
     asignaciones.value = copia
   }
 
-  function desasignar(tipo, recursoId, etiquetaId) {
+  async function desasignar(tipo, recursoId, etiquetaId) {
+    await apiFetch('/api/etiquetas/desasignar', {
+      method: 'POST',
+      body: { etiquetaId, recursoTipo: tipo, recursoId },
+    })
     const copia = { ...asignaciones.value }
     if (!copia[tipo] || !copia[tipo][recursoId]) return
     copia[tipo][recursoId] = copia[tipo][recursoId].filter(id => id !== etiquetaId)
-    if (copia[tipo][recursoId].length === 0) delete copia[tipo][recursoId]
+    if (!copia[tipo][recursoId].length) delete copia[tipo][recursoId]
     asignaciones.value = copia
   }
 
   function conteoAsignacionesEtiqueta(etiquetaId) {
-    let count = 0
-    for (const tipo of Object.keys(asignaciones.value || {})) {
-      for (const ids of Object.values(asignaciones.value[tipo] || {})) {
-        if (ids.includes(etiquetaId)) count++
-      }
-    }
-    return count
+    return porId(etiquetaId)?.conteo ?? 0
   }
 
   const conteoPorEtiqueta = computed(() => {
     const map = {}
-    for (const e of items.value) map[e.id] = conteoAsignacionesEtiqueta(e.id)
+    for (const e of items.value) map[e.id] = e.conteo ?? 0
     return map
   })
 
+  // Migración localStorage → backend (catálogo + asignaciones).
+  async function migrarLocalStorageSiHaceFalta() {
+    if (typeof localStorage === 'undefined') return
+    const rawI = localStorage.getItem(STORAGE_ITEMS_LEGACY)
+    if (!rawI) return
+    let legacy
+    try { legacy = JSON.parse(rawI) } catch { return }
+    if (!Array.isArray(legacy) || legacy.length === 0) {
+      localStorage.removeItem(STORAGE_ITEMS_LEGACY)
+      localStorage.removeItem(STORAGE_ASIGN_LEGACY)
+      return
+    }
+    await fetchItems(true)
+    if (items.value.length > 0) {
+      localStorage.removeItem(STORAGE_ITEMS_LEGACY)
+      localStorage.removeItem(STORAGE_ASIGN_LEGACY)
+      return
+    }
+    const oldIdToNewId = {}
+    let okCount = 0
+    for (const e of legacy) {
+      try {
+        const nueva = await crear({ nombre: e.nombre, color: e.color })
+        if (nueva) {
+          oldIdToNewId[e.id] = nueva.id
+          okCount++
+        }
+      } catch (err) {
+        console.warn('[etiquetas] migración item falló', err)
+      }
+    }
+    // Migrar asignaciones legacy si existen.
+    let rawA
+    try { rawA = JSON.parse(localStorage.getItem(STORAGE_ASIGN_LEGACY) || '{}') } catch { rawA = {} }
+    for (const tipo of Object.keys(rawA || {})) {
+      for (const recursoId of Object.keys(rawA[tipo] || {})) {
+        for (const oldEtqId of rawA[tipo][recursoId]) {
+          const newId = oldIdToNewId[oldEtqId]
+          if (!newId) continue
+          try {
+            await asignar(tipo, recursoId, newId)
+          } catch (err) {
+            // ignorar (puede ser que el recurso ya no exista)
+          }
+        }
+      }
+    }
+    if (okCount === legacy.length) {
+      localStorage.removeItem(STORAGE_ITEMS_LEGACY)
+      localStorage.removeItem(STORAGE_ASIGN_LEGACY)
+    }
+  }
+
   return {
     items, asignaciones,
+    fetchItems, fetchAsignaciones,
     crear, actualizar, eliminar, porId,
     etiquetasDe, asignar, desasignar,
     conteoAsignacionesEtiqueta, conteoPorEtiqueta,
+    migrarLocalStorageSiHaceFalta,
   }
 }

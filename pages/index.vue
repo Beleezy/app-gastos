@@ -271,6 +271,41 @@
       </NuxtLink>
     </div>
 
+    <!-- Metas activas (submódulo metas) -->
+    <NuxtLink
+      v-if="metasActivasTop.length"
+      to="/metas"
+      class="mx-5 lg:mx-0 mb-2 lg:mb-3 flex flex-col gap-2 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
+    >
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+            </svg>
+          </div>
+          <p class="text-xs font-semibold text-theme-text">Mis metas</p>
+        </div>
+        <span class="text-[10px] text-emerald-400">Ver todas →</span>
+      </div>
+      <div class="space-y-1.5">
+        <div v-for="m in metasActivasTop" :key="m.id">
+          <div class="flex items-center justify-between mb-0.5">
+            <span class="text-[11px] font-medium text-theme-text truncate">{{ m.icono }} {{ m.nombre }}</span>
+            <span class="text-[10px] text-theme-text-muted">{{ metasPctFn(m).toFixed(0) }}%</span>
+          </div>
+          <div class="w-full h-1 bg-theme-input rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all duration-500"
+              :style="{ width: Math.min(metasPctFn(m), 100) + '%', backgroundColor: m.color }"
+            ></div>
+          </div>
+        </div>
+      </div>
+    </NuxtLink>
+
     <!-- Métricas (nuevo módulo) -->
     <div class="px-5 lg:px-0 mb-2 lg:mb-3">
       <NuxtLink
@@ -315,6 +350,15 @@ const { formatMesAnio } = useFormatters()
 const { toggle: toggleDrawer } = useMobileDrawer()
 
 const { ahora: ahoraPeru } = useFechaPeru()
+
+// Submódulo metas: top 3 metas activas (no archivadas, no completadas).
+// El plugin prefetch.client.js las pre-carga en idle; mostramos cache local.
+const { activas: metasActivas, porcentajeProgreso: metasPctFn } = useMetas()
+const metasActivasTop = computed(() =>
+  metasActivas.value
+    .filter(m => metasPctFn(m) < 100)
+    .slice(0, 3),
+)
 
 // Saludo dinámico
 const saludo = computed(() => {

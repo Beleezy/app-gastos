@@ -1,15 +1,11 @@
-// Submódulo Suscripciones — gestor independiente de servicios recurrentes
-// (Netflix, Spotify, gimnasio, hosting, etc.).
+// Submódulo Suscripciones — gestor de servicios recurrentes.
 //
-// Persistencia: localStorage (clave `subs.items.v1`). No depende de BD ni
-// de endpoints del backend. Diseñado para ser self-contained y fácil de
-// migrar a Postgres en una integración posterior; ver
-// `docs/INTEGRACION-SUBMODULOS.md` para el schema y el upgrade path.
+// Integrado con backend desde la migración 0026. Mantiene la API pública
+// del composable que usaba localStorage para no romper /suscripciones ni
+// /calendario.
 
-const STORAGE_KEY = 'subs.items.v1'
+const STORAGE_KEY_LEGACY = 'subs.items.v1'
 
-// Periodicidades válidas. Si añades una nueva, actualizar diasHasta()
-// y proyeccionAnual().
 export const PERIODICIDADES = [
   { valor: 'semanal', etiqueta: 'Semanal', mesesPorAnio: 52, diasMedios: 7 },
   { valor: 'quincenal', etiqueta: 'Quincenal', mesesPorAnio: 26, diasMedios: 14 },
@@ -20,20 +16,12 @@ export const PERIODICIDADES = [
   { valor: 'anual', etiqueta: 'Anual', mesesPorAnio: 1, diasMedios: 365 },
 ]
 
-function nuevoId() {
-  return `sub_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
-}
-
 function _hoy() {
   const d = new Date()
   d.setHours(0, 0, 0, 0)
   return d
 }
 
-// Calcula la próxima fecha de cobro a partir de una suscripción.
-// Algoritmo: arranca de `fechaInicio`, suma `diasMedios` hasta que la
-// próxima caiga >= hoy. Para periodicidades >= mensual, además ajusta al
-// día del mes original cuando aplica.
 export function proximaFechaCobro(sub, hoyDate = _hoy()) {
   if (!sub?.fechaInicio) return null
   const periodo = PERIODICIDADES.find(p => p.valor === sub.periodicidad)
@@ -76,7 +64,19 @@ export function proyeccionAnual(sub) {
 }
 
 export function useSuscripciones() {
-  const items = useLocalStorage(STORAGE_KEY, [])
+  const { apiFetch } = useApiFetch()
+
+  // SWR: el resumen es estable. Cualquier mutación invalida vía el cache.
+  const cache = useResourceCache(
+    'suscripciones-servicios',
+    () => apiFetch('/api/suscripciones-servicios'),
+    { ttl: 60_000, initial: [] },
+  )
+  const items = cache.data
+
+  async function fetchItems(force = false) {
+    return cache.refresh(force)
+  }
 
   const activas = computed(() => items.value.filter(s => s.activa !== false))
   const inactivas = computed(() => items.value.filter(s => s.activa === false))
@@ -88,61 +88,107 @@ export function useSuscripciones() {
     activas.value.reduce((sum, s) => sum + proyeccionAnual(s), 0),
   )
 
-  // Próximos 30 días: lista de cobros futuros ordenados por fecha.
   const proximos30Dias = computed(() => {
     const hoy = _hoy()
     return activas.value
-      .map(s => ({
-        ...s,
-        proxima: proximaFechaCobro(s, hoy),
-      }))
+      .map(s => ({ ...s, proxima: proximaFechaCobro(s, hoy) }))
       .filter(s => s.proxima)
-      .map(s => ({
-        ...s,
-        diasRestantes: diasHasta(s.proxima, hoy),
-      }))
+      .map(s => ({ ...s, diasRestantes: diasHasta(s.proxima, hoy) }))
       .filter(s => s.diasRestantes >= 0 && s.diasRestantes <= 30)
       .sort((a, b) => a.diasRestantes - b.diasRestantes)
   })
 
-  function crear(data) {
-    const item = {
-      id: nuevoId(),
-      nombre: String(data.nombre || '').trim(),
-      monto: Number(data.monto) || 0,
-      periodicidad: data.periodicidad || 'mensual',
-      fechaInicio: data.fechaInicio || new Date().toISOString().slice(0, 10),
-      categoria: data.categoria || null,
-      icono: data.icono || '🔁',
-      color: data.color || '#3b82f6',
-      url: data.url || null,
-      notas: data.notas || null,
-      activa: data.activa !== false,
-      createdAt: new Date().toISOString(),
-    }
-    items.value = [...items.value, item]
-    return item
+  async function crear(data) {
+    const nuevo = await apiFetch('/api/suscripciones-servicios', {
+      method: 'POST',
+      body: {
+        nombre: data.nombre,
+        monto: data.monto,
+        periodicidad: data.periodicidad || 'mensual',
+        fechaInicio: data.fechaInicio,
+        categoriaId: data.categoriaId || null,
+        icono: data.icono || '🔁',
+        color: data.color || '#3b82f6',
+        url: data.url || null,
+        notas: data.notas || null,
+        activa: data.activa !== false,
+      },
+    })
+    cache.set([...items.value, nuevo])
+    return nuevo
   }
 
-  function actualizar(id, parche) {
-    items.value = items.value.map(s => s.id === id ? { ...s, ...parche, id } : s)
+  async function actualizar(id, parche) {
+    const updated = await apiFetch(`/api/suscripciones-servicios/${id}`, {
+      method: 'PUT',
+      body: parche,
+    })
+    cache.set(items.value.map(s => s.id === id ? updated : s))
+    return updated
   }
 
-  function eliminar(id) {
-    items.value = items.value.filter(s => s.id !== id)
+  async function eliminar(id) {
+    await apiFetch(`/api/suscripciones-servicios/${id}`, { method: 'DELETE' })
+    cache.set(items.value.filter(s => s.id !== id))
   }
 
-  function pausarReanudar(id) {
-    items.value = items.value.map(s => s.id === id ? { ...s, activa: s.activa === false } : s)
+  async function pausarReanudar(id) {
+    const s = items.value.find(x => x.id === id)
+    if (!s) return
+    return actualizar(id, { activa: s.activa === false })
   }
 
   function porId(id) {
     return items.value.find(s => s.id === id) || null
   }
 
+  // Migración localStorage → backend: corre una sola vez por usuario/sesión.
+  // Lee la clave legacy, POSTea cada item, y borra la clave en éxito total.
+  async function migrarLocalStorageSiHaceFalta() {
+    if (typeof localStorage === 'undefined') return
+    const raw = localStorage.getItem(STORAGE_KEY_LEGACY)
+    if (!raw) return
+    let legacy
+    try { legacy = JSON.parse(raw) } catch { return }
+    if (!Array.isArray(legacy) || legacy.length === 0) {
+      localStorage.removeItem(STORAGE_KEY_LEGACY)
+      return
+    }
+    // No duplicar: si el backend ya tiene items, asumimos que migración previa
+    // completó pero quedó la clave; borrarla.
+    await fetchItems(true)
+    if (items.value.length > 0) {
+      localStorage.removeItem(STORAGE_KEY_LEGACY)
+      return
+    }
+    let okCount = 0
+    for (const it of legacy) {
+      try {
+        await crear({
+          nombre: it.nombre,
+          monto: it.monto,
+          periodicidad: it.periodicidad,
+          fechaInicio: it.fechaInicio,
+          icono: it.icono,
+          color: it.color,
+          url: it.url,
+          notas: it.notas,
+          activa: it.activa !== false,
+        })
+        okCount++
+      } catch (e) {
+        console.warn('[suscripciones] migración item falló', e)
+      }
+    }
+    if (okCount === legacy.length) {
+      localStorage.removeItem(STORAGE_KEY_LEGACY)
+    }
+  }
+
   return {
     items, activas, inactivas,
     totalMensual, totalAnual, proximos30Dias,
-    crear, actualizar, eliminar, pausarReanudar, porId,
+    fetchItems, crear, actualizar, eliminar, pausarReanudar, porId,
+    migrarLocalStorageSiHaceFalta,
   }
 }

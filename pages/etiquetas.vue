@@ -139,7 +139,19 @@
 import { COLORES_ETIQUETA } from '~/composables/useEtiquetas'
 
 const { toggle: toggleDrawer } = useMobileDrawer()
-const { items, crear, actualizar, eliminar, conteoPorEtiqueta } = useEtiquetas()
+const {
+  items, fetchItems, fetchAsignaciones,
+  crear, actualizar, eliminar, conteoPorEtiqueta,
+  migrarLocalStorageSiHaceFalta,
+} = useEtiquetas()
+
+onMounted(async () => {
+  try {
+    await migrarLocalStorageSiHaceFalta()
+    await fetchItems(true)
+    await fetchAsignaciones(true)
+  } catch (e) { console.warn('[etiquetas]', e) }
+})
 
 const nuevoNombre = ref('')
 const nuevoColor = ref(COLORES_ETIQUETA[8])

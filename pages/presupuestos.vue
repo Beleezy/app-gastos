@@ -155,8 +155,10 @@ const cargandoCons = ref(false)
 const {
   items: presupuestos,
   totalPresupuestado, totalConsumido,
+  fetchItems: fetchPresupuestos,
   setPresupuesto, eliminarPresupuesto, porCategoria,
   cargarConsumo, consumoDe, porcentajeUsado, estadoSemaforo,
+  migrarLocalStorageSiHaceFalta,
 } = usePresupuestosCategoria()
 
 const hoy = new Date()
@@ -212,20 +214,21 @@ function textoSemaforo(id) {
   return 'text-emerald-400'
 }
 
-function guardar(catId) {
+async function guardar(catId) {
   const v = inputsLimite.value[catId]
   if (v == null || v === '') return
   if (Number(v) === 0) {
-    eliminarPresupuesto(catId)
+    await eliminarPresupuesto(catId)
     inputsLimite.value[catId] = ''
     return
   }
-  setPresupuesto({ categoriaId: catId, montoMensual: v })
+  await setPresupuesto({ categoriaId: catId, montoMensual: v })
+  await cargarConsumo(mesActual, anioActual)
 }
 
-function quitar(catId) {
+async function quitar(catId) {
   if (!confirm('¿Quitar el presupuesto de esta categoría?')) return
-  eliminarPresupuesto(catId)
+  await eliminarPresupuesto(catId)
   inputsLimite.value[catId] = ''
 }
 
@@ -235,9 +238,16 @@ onMounted(async () => {
   } finally {
     cargandoCat.value = false
   }
+  // Cargar presupuestos del backend + migrar legacy en paralelo con consumo.
   cargandoCons.value = true
   try {
-    await cargarConsumo(mesActual, anioActual)
+    await Promise.all([
+      (async () => {
+        await migrarLocalStorageSiHaceFalta()
+        await fetchPresupuestos(true)
+      })(),
+      cargarConsumo(mesActual, anioActual),
+    ])
   } finally {
     cargandoCons.value = false
   }

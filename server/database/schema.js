@@ -552,3 +552,102 @@ export const googleCalendarConexiones = pgTable('google_calendar_conexiones', {
 }, (table) => [
   uniqueIndex('google_calendar_conexiones_usuario_unique').on(table.usuarioId),
 ])
+
+// ──────────────────────────────────────────────────────────────────
+// Submódulos integrados (migración 0026)
+// ──────────────────────────────────────────────────────────────────
+
+export const periodicidadSuscripcion = pgEnum('periodicidad_suscripcion', [
+  'semanal', 'quincenal', 'mensual', 'bimestral',
+  'trimestral', 'semestral', 'anual',
+])
+
+export const tipoMeta = pgEnum('tipo_meta', ['ahorro', 'deuda', 'gasto_limite'])
+
+// Suscripciones a servicios (Netflix, Spotify, gym, etc.).
+// NO confundir con `suscripciones_push` (que es para Web Push API).
+export const suscripcionesServicios = pgTable('suscripciones_servicios', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 120 }).notNull(),
+  monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
+  periodicidad: periodicidadSuscripcion('periodicidad').notNull().default('mensual'),
+  fechaInicio: date('fecha_inicio').notNull(),
+  categoriaId: uuid('categoria_id').references(() => categorias.id, { onDelete: 'set null' }),
+  icono: varchar('icono', { length: 16 }).default('🔁'),
+  color: varchar('color', { length: 16 }).default('#3b82f6'),
+  url: text('url'),
+  notas: text('notas'),
+  activa: boolean('activa').notNull().default(true),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
+}, (table) => [
+  index('subs_servicios_usuario_idx').on(table.usuarioId, table.activa),
+])
+
+export const metas = pgTable('metas', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 120 }).notNull(),
+  tipo: tipoMeta('tipo').notNull(),
+  montoObjetivo: decimal('monto_objetivo', { precision: 12, scale: 2 }).notNull(),
+  fechaLimite: date('fecha_limite'),
+  icono: varchar('icono', { length: 16 }).default('🎯'),
+  color: varchar('color', { length: 16 }).default('#10b981'),
+  archivada: boolean('archivada').notNull().default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  deletedAt: timestamp('deleted_at'),
+}, (table) => [
+  index('metas_usuario_idx').on(table.usuarioId, table.archivada),
+])
+
+export const metaMovimientos = pgTable('meta_movimientos', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  metaId: uuid('meta_id').references(() => metas.id, { onDelete: 'cascade' }).notNull(),
+  monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
+  fecha: date('fecha').notNull(),
+  nota: text('nota'),
+  // Origen opcional: enlaza al recurso real que lo generó.
+  origenTipo: varchar('origen_tipo', { length: 24 }), // 'ahorro' | 'pago_deuda' | 'gasto' | 'manual'
+  origenId: uuid('origen_id'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('meta_movs_meta_idx').on(table.metaId, table.fecha),
+  index('meta_movs_origen_idx').on(table.origenTipo, table.origenId),
+])
+
+export const presupuestosCategoria = pgTable('presupuestos_categoria', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  categoriaId: uuid('categoria_id').references(() => categorias.id, { onDelete: 'cascade' }).notNull(),
+  montoMensual: decimal('monto_mensual', { precision: 12, scale: 2 }).notNull(),
+  alertaUmbral: integer('alerta_umbral').notNull().default(80), // % 0-100
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('pcat_usuario_categoria_uq').on(table.usuarioId, table.categoriaId),
+])
+
+export const etiquetas = pgTable('etiquetas', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  nombre: varchar('nombre', { length: 40 }).notNull(),
+  color: varchar('color', { length: 16 }).notNull().default('#3b82f6'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('etq_usuario_nombre_uq').on(table.usuarioId, table.nombre),
+])
+
+// Tabla polimórfica: la asignación apunta a gasto, planificado o futuro.
+export const etiquetasAsign = pgTable('etiquetas_asign', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  etiquetaId: uuid('etiqueta_id').references(() => etiquetas.id, { onDelete: 'cascade' }).notNull(),
+  recursoTipo: varchar('recurso_tipo', { length: 24 }).notNull(),
+  recursoId: uuid('recurso_id').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('etq_asign_uq').on(table.etiquetaId, table.recursoTipo, table.recursoId),
+  index('etq_asign_recurso_idx').on(table.recursoTipo, table.recursoId),
+])

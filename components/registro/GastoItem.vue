@@ -72,6 +72,13 @@
             >
               {{ gasto.categoriaNombre || 'Otros' }}
             </span>
+            <span
+              v-for="etq in etiquetasDeEsteGasto"
+              :key="etq.id"
+              class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full leading-none text-white"
+              :style="{ backgroundColor: etq.color }"
+              data-testid="gasto-etiqueta"
+            >#{{ etq.nombre }}</span>
             <span class="text-[10px] text-theme-text-muted flex items-center gap-0.5">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -135,6 +142,12 @@ const props = defineProps({
 const emit = defineEmits(['edit', 'delete', 'duplicate', 'toggle-select', 'long-press'])
 
 const { vibrate } = useHaptic()
+
+// Chips de etiquetas para este gasto (submódulo etiquetas).
+// `etiquetasDe` lee del cache compartido en useEtiquetas; el snapshot lo
+// pre-carga el plugin de prefetch al iniciar sesión.
+const { etiquetasDe } = useEtiquetas()
+const etiquetasDeEsteGasto = computed(() => etiquetasDe('gasto', props.gasto.id))
 
 function onDelete() {
   if (props.gasto.pendiente) return
