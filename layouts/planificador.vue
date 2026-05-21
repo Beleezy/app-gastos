@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200" :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'">
     <LayoutOfflineBanner />
-    <LayoutSideNav />
+    <LazyLayoutSideNav />
     <main
       class="flex-1 pb-20 lg:pb-10"
       :class="isModalOpen ? 'overflow-hidden' : 'overflow-y-auto'"
@@ -61,9 +61,9 @@
       </div>
     </main>
     <LayoutBottomNav />
-    <LayoutMobileDrawer />
+    <LazyLayoutMobileDrawer />
     <SharedToastNotification />
-    <OnboardingTourOverlay />
+    <LazyOnboardingTourOverlay />
   </div>
 </template>
 
@@ -102,9 +102,12 @@ watch(isOnline, async (online, prev) => {
 
 onMounted(() => {
   initTheme()
-  setTimeout(() => {
-    if (debeMostrarTour()) iniciarTour()
-  }, 600)
+  const tarea = () => { if (debeMostrarTour()) iniciarTour() }
+  if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+    window.requestIdleCallback(tarea, { timeout: 2500 })
+  } else {
+    setTimeout(tarea, 800)
+  }
 })
 
 const route = useRoute()

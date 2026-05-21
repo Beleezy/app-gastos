@@ -271,6 +271,24 @@
       </NuxtLink>
     </div>
 
+    <!-- Métricas (nuevo módulo) -->
+    <div class="px-5 lg:px-0 mb-2 lg:mb-3">
+      <NuxtLink
+        to="/metricas"
+        class="flex items-center gap-2.5 rounded-2xl p-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
+      >
+        <div class="w-8 h-8 rounded-lg bg-sky-500/15 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v18h18M7 14l4-4 4 4 5-5" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs font-semibold text-theme-text">Métricas</p>
+          <p class="text-[10px] text-theme-text-muted truncate">Histórico mensual de tus finanzas</p>
+        </div>
+      </NuxtLink>
+    </div>
+
     <!-- Información -->
     <div class="px-5 lg:px-0 mb-5">
       <NuxtLink
@@ -357,100 +375,97 @@ const porcentajePlanPagado = computed(() => {
   return (countPagados.value / countTotal.value) * 100
 })
 
-onMounted(() => {
-  // Disparar fetches en paralelo sin esperar: cada card maneja su propio
-  // skeleton/loading. Antes el `await Promise.allSettled` retrasaba el
-  // TTI ~200-300ms en PWA fría hasta que TODAS las requests resolvieran.
-  // Ahora el dashboard se monta inmediato y los datos llenan las cards
-  // a medida que llegan. El menos crítico (ahorros) se difiere para que
-  // no compita con los otros tres por el main thread.
-  cargarResumenGastos().catch(() => {})
-  cargarResumenDeudas().catch(() => {})
-  cargarResumenPlan().catch(() => {})
-  setTimeout(() => cargarResumenAhorros().catch(() => {}), 250)
-  setTimeout(() => cargarResumenIngresos().catch(() => {}), 350)
-})
+// Snapshot SWR del dashboard guardado en sessionStorage por el plugin
+// `prefetch.client.js` y por este mismo handler. Pintar instantáneo en
+// revisitas y revalidar siempre en background.
+const dashboardCache = useState('dashboard-snapshot', () => null)
+const SNAPSHOT_KEY = 'dashboard.snapshot.v1'
+const SNAPSHOT_TTL = 5 * 60 * 1000 // 5 min: tras esto, no usamos para evitar mostrar datos viejos sin avisar
 
-async function cargarResumenGastos() {
+function aplicarSnapshot(d) {
+  if (!d) return
+  if (d.gastos) totalMes.value = Number(d.gastos.totalMes) || 0
+  if (d.deudas) {
+    totalMeDeben.value = Number(d.deudas.totalMeDeben) || 0
+    countMeDeben.value = Number(d.deudas.countMeDeben) || 0
+  }
+  if (d.plan) {
+    presupuesto.value = Number(d.plan.presupuesto) || 0
+    countTotal.value = Number(d.plan.countTotal) || 0
+    countPagados.value = Number(d.plan.countPagados) || 0
+  }
+  if (d.futuros) {
+    futureProjects.value = Number(d.futuros.totalProyectos) || 0
+    futureAverage.value = parseFloat(d.futuros.totalPromedio) || 0
+    futureMin.value = parseFloat(d.futuros.totalMinimo) || 0
+    futureMax.value = parseFloat(d.futuros.totalMaximo) || 0
+    futureHighlights.value = Array.isArray(d.futuros.destacados) ? d.futuros.destacados.slice(0, 2) : []
+  }
+  if (d.ahorros) {
+    ahorrosTotalMes.value = Number(d.ahorros.totalMes) || 0
+    ahorrosTotalGlobal.value = Number(d.ahorros.totalGlobal) || 0
+    ahorrosPorMedio.value = (d.ahorros.porMedio || []).filter(m => m.total > 0)
+  }
+  if (d.ingresos) {
+    totalIngresosMes.value = Number(d.ingresos.totalMes) || 0
+    saldoNetoMes.value = Number(d.ingresos.saldoNeto) || 0
+  }
+}
+
+// Pintado instantáneo si tenemos snapshot fresco (memoria o sessionStorage).
+function pintarDesdeCache() {
+  // 1) prioridad: useState compartido (lo escribe el plugin de prefetch).
+  if (dashboardCache.value) {
+    aplicarSnapshot(dashboardCache.value)
+    loadingGastos.value = false
+    loadingDeudas.value = false
+    loadingPlan.value = false
+    loadingAhorros.value = false
+    return true
+  }
+  // 2) fallback: sessionStorage de la sesión previa.
+  try {
+    const raw = sessionStorage.getItem(SNAPSHOT_KEY)
+    if (!raw) return false
+    const parsed = JSON.parse(raw)
+    if (!parsed?.data || Date.now() - parsed.ts > SNAPSHOT_TTL) return false
+    aplicarSnapshot(parsed.data)
+    loadingGastos.value = false
+    loadingDeudas.value = false
+    loadingPlan.value = false
+    loadingAhorros.value = false
+    return true
+  } catch { return false }
+}
+
+async function cargarDashboard() {
   try {
     errorGastos.value = false
-    const data = await $fetch('/api/gastos/resumen', {
-      query: { mes: mesActualNum, anio: anioActual }
-    })
-    totalMes.value = parseFloat(data.totalMes) || 0
+    errorDeudas.value = false
+    errorPlan.value = false
+    const data = await $fetch('/api/dashboard')
+    aplicarSnapshot(data)
+    dashboardCache.value = data
+    try {
+      sessionStorage.setItem(SNAPSHOT_KEY, JSON.stringify({ ts: Date.now(), data }))
+    } catch {}
   } catch (e) {
     errorGastos.value = true
-    console.warn('[dashboard] cargarResumenGastos falló:', e)
+    errorDeudas.value = true
+    errorPlan.value = true
+    console.warn('[dashboard] /api/dashboard falló:', e)
   } finally {
     loadingGastos.value = false
-  }
-}
-
-async function cargarResumenDeudas() {
-  try {
-    errorDeudas.value = false
-    const data = await $fetch('/api/deudas/resumen')
-    totalMeDeben.value = parseFloat(data.totalMeDeben) || 0
-    countMeDeben.value = data.countMeDeben || 0
-  } catch (e) {
-    errorDeudas.value = true
-    console.warn('[dashboard] cargarResumenDeudas falló:', e)
-  } finally {
     loadingDeudas.value = false
-  }
-}
-
-async function cargarResumenPlan() {
-  try {
-    errorPlan.value = false
-    const data = await $fetch('/api/planificador', {
-      query: { mes: mesActualNum, anio: anioActual }
-    })
-    presupuesto.value = parseFloat(data.plan?.montoPresupuesto) || 0
-    const gastos = data.gastos || []
-    countTotal.value = gastos.length
-    countPagados.value = gastos.filter(g => g.estado === 'pagado').length
-
-    const futuros = data.resumenFuturos || {}
-    futureProjects.value = futuros.totalProyectos || 0
-    futureAverage.value = parseFloat(futuros.totalPromedio) || 0
-    futureMin.value = parseFloat(futuros.totalMinimo) || 0
-    futureMax.value = parseFloat(futuros.totalMaximo) || 0
-    futureHighlights.value = Array.isArray(futuros.destacados) ? futuros.destacados.slice(0, 2) : []
-  } catch (e) {
-    errorPlan.value = true
-    console.warn('[dashboard] cargarResumenPlan falló:', e)
-  } finally {
     loadingPlan.value = false
-  }
-}
-
-async function cargarResumenIngresos() {
-  try {
-    const data = await $fetch('/api/ingresos/resumen', {
-      query: { mes: mesActualNum, anio: anioActual }
-    })
-    totalIngresosMes.value = parseFloat(data.totalIngresos) || 0
-    saldoNetoMes.value = parseFloat(data.saldoNeto) || 0
-  } catch (e) {
-    console.warn('[dashboard] cargarResumenIngresos falló:', e)
-  }
-}
-
-async function cargarResumenAhorros() {
-  try {
-    const data = await $fetch('/api/ahorros', {
-      query: { mes: mesActualNum, anio: anioActual }
-    })
-    ahorrosTotalMes.value = parseFloat(data.totalMes) || 0
-    ahorrosTotalGlobal.value = parseFloat(data.totalGlobal) || 0
-    ahorrosMetaMensual.value = data.metaMensual
-    ahorrosProgresoMensual.value = data.progresoMensual || 0
-    ahorrosPorMedio.value = (data.porMedio || []).filter(m => m.total > 0)
-  } catch (e) {
-    console.warn('[dashboard] cargarResumenAhorros falló:', e)
-  } finally {
     loadingAhorros.value = false
   }
 }
+
+onMounted(() => {
+  // 1) Render inmediato con snapshot cacheado si lo hay.
+  pintarDesdeCache()
+  // 2) Revalidar siempre en background.
+  cargarDashboard()
+})
 </script>
