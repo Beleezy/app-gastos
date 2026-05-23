@@ -11,11 +11,20 @@ export class BasePage {
   /**
    * Espera a que la pagina y la sesion (auth bypass) esten listas.
    * Usa networkidle como heuristica + un selector estable global.
+   *
+   * En mobile (project=mobile) el BottomNav es visible; en desktop
+   * (viewport >= lg) BottomNav lleva `lg:hidden` y el SideNav lo reemplaza
+   * — asi que ningun "nav-tab-X" testid esta visible. Esperamos al `<main
+   * id="contenido-principal">` que esta presente en ambos layouts.
+   *
+   * networkidle adicional para esperar la hidratacion de Vue/Nuxt — sin
+   * eso, el HTML SSR del FAB ya existe pero su @click no esta bindeado
+   * todavia y los tests que hacen click inmediato son no-op.
    */
   async waitForReady() {
     await this.page.waitForLoadState('domcontentloaded')
-    // BottomNav presente = layout cargado y middleware paso
-    await this.page.getByTestId(NAV.TAB_REGISTRO).waitFor({ state: 'visible', timeout: 15_000 })
+    await this.page.locator('#contenido-principal').first().waitFor({ state: 'visible', timeout: 15_000 })
+    await this.page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {})
   }
 
   // ─── BottomNav ──────────────────────────────────────────

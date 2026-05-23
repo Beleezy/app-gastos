@@ -3,16 +3,20 @@
 
 import { test, expect } from '../fixtures/index.js'
 import { RegistroPage } from '../pages/RegistroPage.js'
-import { uniqueSuffix, primeraCategoriaId } from '../helpers/db.js'
+import { uniqueSuffix, primeraCategoriaId, fechaHoyLima } from '../helpers/db.js'
 import { NAV } from '../helpers/selectors.js'
 
 test.describe('Registro — UI', () => {
   test.describe('Smoke', () => {
-    test('la pagina /registro carga con BottomNav y pestañas visibles', async ({ page }) => {
+    test('la pagina /registro carga con BottomNav y pestañas visibles', async ({ page, viewport }) => {
       const registro = new RegistroPage(page)
       await registro.goto()
 
-      await expect(page.getByTestId(NAV.TAB_REGISTRO)).toBeVisible()
+      // El BottomNav (nav-tab-*) tiene `lg:hidden` — en desktop el SideNav
+      // lo reemplaza y los nav-tab-X no se renderizan visibles.
+      if (!viewport || viewport.width < 1024) {
+        await expect(page.getByTestId(NAV.TAB_REGISTRO)).toBeVisible()
+      }
       await expect(registro.btnMicrofono()).toBeVisible()
       await expect(registro.btnCamara()).toBeVisible()
     })
@@ -38,9 +42,11 @@ test.describe('Registro — UI', () => {
       await registro.goto()
 
       const modal = await registro.abrirFormManual()
+      // categoria es obligatoria — sin ella btn-guardar queda disabled.
       await modal.crearGasto({
         concepto,
         monto: 7.5,
+        categoria: 'Alimentacion',
       })
       await modal.esperarCerrado()
 
@@ -53,22 +59,32 @@ test.describe('Registro — UI', () => {
       expect(creado, `debe existir gasto con concepto "${concepto}"`).toBeDefined()
       tracker.gastos.push(creado.id)
 
-      // Y verificamos que aparece en el historial visible (al menos en algun item)
-      await expect(registro.itemPorConcepto(concepto)).toBeVisible({ timeout: 10_000 })
+      // Y verificamos que aparece en el historial visible — el historial
+      // puede tener muchos items de tests previos cuyo cleanup no corrio,
+      // asi que scrolleamos al item antes de verificar.
+      const item = registro.itemPorConcepto(concepto)
+      await item.scrollIntoViewIfNeeded({ timeout: 10_000 })
+      await expect(item).toBeVisible({ timeout: 10_000 })
     })
   })
 
   test.describe('FormGastoManual — validacion', () => {
+    // El form usa validacion preventiva: btn-guardar mantiene el atributo
+    // `disabled` mientras `formularioValido` sea false (concepto >= 2 chars,
+    // monto > 0, categoria seleccionada). Por eso un click sobre el boton
+    // disabled se queda esperando indefinidamente — verificamos el estado
+    // disabled directamente.
+
     test('submit sin concepto no cierra el modal (rechaza)', async ({ page }) => {
       const registro = new RegistroPage(page)
       await registro.goto()
       const modal = await registro.abrirFormManual()
 
       await modal.inputMonto().fill('10')
-      await modal.btnGuardar().click()
 
-      // El modal sigue visible (no se cerro porque hubo validacion)
-      await expect(modal.root).toBeVisible({ timeout: 2000 })
+      // Concepto vacio -> btn-guardar disabled -> modal sigue visible
+      await expect(modal.btnGuardar()).toBeDisabled()
+      await expect(modal.root).toBeVisible()
     })
 
     test('submit con monto cero no crea el gasto', async ({ page }) => {
@@ -78,9 +94,10 @@ test.describe('Registro — UI', () => {
 
       await modal.inputConcepto().fill('Algo')
       await modal.inputMonto().fill('0')
-      await modal.btnGuardar().click()
 
-      await expect(modal.root).toBeVisible({ timeout: 2000 })
+      // Monto cero -> btn-guardar disabled -> el gasto no se crea
+      await expect(modal.btnGuardar()).toBeDisabled()
+      await expect(modal.root).toBeVisible()
     })
   })
 
@@ -96,7 +113,10 @@ test.describe('Registro — UI', () => {
         data: {
           concepto,
           monto: 5,
-          fecha: new Date().toISOString().slice(0, 10),
+          // Lima time porque useGastos.fechaSeleccionada usa fechaHoy() (PE)
+          // y el historial filtra por esa fecha; con UTC el gasto no aparece
+          // cuando UTC ya cruzo medianoche pero PE aun no.
+          fecha: fechaHoyLima(),
           categoriaId,
         },
       })

@@ -12,7 +12,7 @@ test.describe('Categorias — UI', () => {
 
     // Debe haber al menos una categoria visible (las predefinidas)
     // Buscamos por nombres comunes del seed
-    const seedComida = page.getByText(/comida/i).first()
-    await expect(seedComida).toBeVisible({ timeout: 5000 })
+    const seedAlimentacion = page.getByText(/alimentac[ií]on/i).first()
+    await expect(seedAlimentacion).toBeVisible({ timeout: 5000 })
   })
 })

@@ -23,6 +23,32 @@ import { defineConfig, devices } from '@playwright/test'
 const BASE_URL = process.env.BASE_URL || 'http://localhost:3000'
 const useWebServer = process.env.E2E_USE_WEBSERVER === '1'
 
+// El tour de onboarding (components/onboarding/TourOverlay.vue) se monta en
+// los layouts default/planificador y, en primera visita, se autoabre tras
+// requestIdleCallback. Es un overlay z-100 que intercepta clicks en toda la
+// UI, lo que rompe los tests E2E que navegan a /registro, /planificador,
+// /deudas, etc. Pre-cargamos el estado "tour ya visto" via storageState para
+// neutralizarlo en todos los specs. El composable useOnboarding lee
+// localStorage al montar y, con tourCompletado=true, deja `activo: false`.
+const TOUR_DISMISSED_STORAGE_STATE = {
+  cookies: [],
+  origins: [
+    {
+      origin: new URL(BASE_URL).origin,
+      localStorage: [
+        {
+          name: 'onboarding.v1',
+          value: JSON.stringify({
+            tourCompletado: true,
+            tourSaltado: true,
+            hintsVistos: [],
+          }),
+        },
+      ],
+    },
+  ],
+}
+
 export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
@@ -39,6 +65,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    storageState: TOUR_DISMISSED_STORAGE_STATE,
     extraHTTPHeaders:
       process.env.DEV_AUTH_BYPASS === '1' && process.env.DEV_AUTH_TOKEN
         ? {

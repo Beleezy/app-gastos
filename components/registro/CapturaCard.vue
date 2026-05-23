@@ -13,6 +13,7 @@
       <button
         class="mt-3.5 w-[3.25rem] h-[3.25rem] rounded-2xl flex items-center justify-center bg-theme-input border border-theme-border text-amber-400 hover:bg-theme-card-hover active:scale-90 transition-all shadow-sm shadow-black/10 shrink-0"
         aria-label="Escanear voucher"
+        data-testid="btn-camara"
         @click="onPhoto"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -42,6 +43,7 @@
       <button
         class="mt-3.5 w-[3.25rem] h-[3.25rem] rounded-2xl flex items-center justify-center bg-theme-input border border-theme-border text-theme-accent hover:bg-theme-card-hover active:scale-90 transition-all shadow-sm shadow-black/10 shrink-0"
         aria-label="Agregar gasto manual"
+        data-testid="btn-registro-manual"
         @click="onManual"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">

@@ -225,7 +225,10 @@ async function onDeudaEditada() {
 
 async function onDeudaCreated() {
   showFormDeuda.value = false
-  await fetchPersonas()
+  // El composable createDeuda ya hizo fetchPersonas({ noCache: true }).
+  // Repetir aqui sin noCache golpea el HTTP cache (max-age=60) y sobrescribe
+  // personas.value con la lista pre-create — la nueva persona desaparece.
+  // Solo recargamos las deudas de la persona seleccionada si hay una.
   if (personaSeleccionada.value) {
     await fetchDeudasPersona(personaSeleccionada.value.id)
   }

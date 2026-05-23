@@ -57,8 +57,11 @@ test.describe('Deudas — UI', () => {
       expect(creada, `debe existir deuda "${concepto}"`).toBeDefined()
       tracker.deudas.push(creada.id)
 
-      // Verifica en UI
-      await expect(deudas.personaPorNombre(persona)).toBeVisible({ timeout: 10_000 })
+      // Verifica en UI — el seed crea muchas personas con montos > 150, la
+      // nueva persona puede aparecer scrolleada fuera del viewport mobile.
+      const personaItem = deudas.personaPorNombre(persona)
+      await personaItem.scrollIntoViewIfNeeded({ timeout: 10_000 })
+      await expect(personaItem).toBeVisible({ timeout: 10_000 })
     })
   })
 

@@ -41,6 +41,7 @@
           <button
             class="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:bg-emerald-500/35 transition-colors"
             aria-label="Enviar"
+            data-testid="btn-draft-enviar"
             @click="$emit('send')"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

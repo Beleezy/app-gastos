@@ -32,6 +32,11 @@ test.describe('Registro por foto — UI', () => {
       buffer: PNG_1x1,
     })
 
+    // El flujo es upload → preview modal → click Escanear → confirmacion.
+    // BotonCamara hace `showPhotoPreview = true` al capturar; el usuario
+    // confirma con el boton "Escanear" para mandar al LLM.
+    await page.getByTestId('btn-foto-enviar').click({ timeout: 10_000 })
+
     const confirmacion = page.getByTestId(REGISTRO.CONFIRMACION_VOZ)
     await expect(confirmacion).toBeVisible({ timeout: 15_000 })
     await expect(confirmacion).toContainText('Pan integral')
@@ -49,6 +54,10 @@ test.describe('Registro por foto — UI', () => {
       mimeType: 'image/png',
       buffer: PNG_1x1,
     })
+
+    // Necesitamos disparar el send para que el LLM mock responda con [].
+    const sendBtn = page.getByTestId('btn-foto-enviar')
+    await sendBtn.click({ timeout: 10_000 }).catch(() => {})
 
     // Esperamos que NO se abra la confirmacion (o que se cierre rapido si abre y cierra)
     const confirmacion = page.getByTestId(REGISTRO.CONFIRMACION_VOZ)
