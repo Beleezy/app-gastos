@@ -13,9 +13,19 @@ export function useGastos() {
   const isLoadingMensual = ref(false)
   const error = ref(null)
 
-  const mesSeleccionado = useState('registro-mes', () => new Date().getMonth() + 1)
-  const anioSeleccionado = useState('registro-anio', () => new Date().getFullYear())
-  const fechaSeleccionada = useState('registro-fecha', () => new Date().toISOString().split('T')[0])
+  // Usar Lima/Peru para que coincida con form.fecha (FormGastoManual hace
+  // fechaHoy() de useFechaPeru). Si dejamos `toISOString` el server UTC
+  // puede estar en el dia siguiente y la fecha seleccionada no coincide
+  // con la del gasto recien creado — el optimistic add lo filtra y el
+  // historial se ve vacio aunque la API lo persistio.
+  const { fechaHoy } = useFechaPeru()
+  const partesHoyPe = () => {
+    const [a, m, d] = fechaHoy().split('-').map(Number)
+    return { mes: m, anio: a }
+  }
+  const mesSeleccionado = useState('registro-mes', () => partesHoyPe().mes)
+  const anioSeleccionado = useState('registro-anio', () => partesHoyPe().anio)
+  const fechaSeleccionada = useState('registro-fecha', () => fechaHoy())
 
   const fechaFormateada = computed(() => {
     const [anio, mes, dia] = fechaSeleccionada.value.split('-').map(Number)
@@ -33,7 +43,7 @@ export function useGastos() {
   })
 
   const esHoy = computed(() => {
-    return fechaSeleccionada.value === new Date().toISOString().split('T')[0]
+    return fechaSeleccionada.value === fechaHoy()
   })
 
   const gastosPorHora = computed(() => {

@@ -64,7 +64,8 @@ test.describe('Registro de gastos', () => {
     const r = await page.goto('/registro')
     expect(r.status()).toBeLessThan(500)
     await expect(page.getByText(/Historial/i).first()).toBeVisible({ timeout: 10_000 })
-    // La pestaña "Mapa" del Sprint 15 debería estar visible
-    await expect(page.getByRole('button', { name: /Mapa/i })).toBeVisible()
+    // El SharedTabBar emite <button role="tab">, no role=button — la query
+    // por role debe ser 'tab' o caemos al testid del item del SharedTabBar.
+    await expect(page.getByRole('tab', { name: /Mapa/i })).toBeVisible()
   })
 })

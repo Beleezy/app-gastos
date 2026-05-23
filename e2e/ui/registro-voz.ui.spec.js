@@ -53,6 +53,9 @@ test.describe('Registro por voz — UI', () => {
     await registro.goto()
 
     await registro.dictarTranscripcion('almuerzo 25 soles')
+    // SpeechRecognition.onend deja la transcripcion como draft ("Borrador
+    // guardado"). El draft tiene un boton "Enviar" que dispara el parse al LLM.
+    await page.getByTestId('btn-draft-enviar').click({ timeout: 10_000 })
 
     const confirmacion = page.getByTestId(REGISTRO.CONFIRMACION_VOZ)
     await expect(confirmacion).toBeVisible({ timeout: 10_000 })
@@ -68,6 +71,7 @@ test.describe('Registro por voz — UI', () => {
     const registro = new RegistroPage(page)
     await registro.goto()
     await registro.dictarTranscripcion('algo')
+    await page.getByTestId('btn-draft-enviar').click({ timeout: 10_000 })
 
     const confirmacion = page.getByTestId(REGISTRO.CONFIRMACION_VOZ)
     await expect(confirmacion).toBeVisible({ timeout: 10_000 })

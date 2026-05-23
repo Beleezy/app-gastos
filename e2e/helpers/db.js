@@ -64,3 +64,19 @@ export async function primeraCategoriaId(request) {
   const lista = Array.isArray(data) ? data : data?.categorias || []
   return lista[0]?.id || null
 }
+
+/**
+ * Fecha "hoy" en Lima/PE (UTC-5) en formato YYYY-MM-DD. Equivalente al
+ * `fechaHoy()` que usa el frontend (useFechaPeru) — usar para que los gastos
+ * creados via API en tests coincidan con la fecha que renderea el historial.
+ */
+export function fechaHoyLima() {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Lima',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date())
+  const get = (t) => partes.find((p) => p.type === t)?.value
+  return `${get('year')}-${get('month')}-${get('day')}`
+}

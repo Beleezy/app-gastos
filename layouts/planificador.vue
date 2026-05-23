@@ -1,10 +1,18 @@
 <template>
   <div class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200" :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'">
+    <a
+      href="#contenido-principal"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-theme-accent focus:text-white focus:shadow-lg"
+    >
+      Saltar al contenido principal
+    </a>
     <LayoutOfflineBanner />
     <LazyLayoutSideNav />
     <main
+      id="contenido-principal"
       class="flex-1 pb-20 lg:pb-10"
       :class="isModalOpen ? 'overflow-hidden' : 'overflow-y-auto'"
+      tabindex="-1"
     >
       <div class="w-full mx-auto max-w-full lg:max-w-6xl 2xl:max-w-7xl lg:px-6">
         

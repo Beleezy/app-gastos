@@ -116,6 +116,7 @@
                 <!-- Send -->
                 <button
                   class="flex flex-col items-center justify-center gap-1.5 py-3 rounded-xl bg-emerald-500/15 text-emerald-400 text-xs font-medium hover:bg-emerald-500/25 active:scale-95 transition-all"
+                  data-testid="btn-foto-enviar"
                   @click="$emit('send')"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
