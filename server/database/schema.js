@@ -20,9 +20,14 @@ export const usuarios = pgTable('usuarios', {
   monedaPreferida: varchar('moneda_preferida', { length: 10 }).default('PEN').notNull(),
   rol: rolUsuario('rol').default('usuario').notNull(),
   permitido: boolean('permitido').default(false).notNull(),
+  // Si está seteado, esta fila es un "perfil gestionado" (mini-usuario sin
+  // login) administrado por el usuario real indicado. null = usuario real.
+  gestionadoPorId: uuid('gestionado_por_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+}, (table) => [
+  index('usuarios_gestionado_idx').on(table.gestionadoPorId),
+])
 
 // ── Tabla: intenciones_registro ──
 // Solicitudes de acceso de quienes inician sesión con Google pero aún no están
@@ -107,7 +112,6 @@ export const gastos = pgTable('gastos', {
   hora: time('hora').notNull(),
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
   transcripcionVoz: text('transcripcion_voz'),
-  espacioId: uuid('espacio_id'),
   notas: text('notas'),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -117,7 +121,6 @@ export const gastos = pgTable('gastos', {
   index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
   uniqueIndex('gastos_planificado_unique').on(table.gastoPlanificadoId),
   index('gastos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
-  index('gastos_espacio_fecha_idx').on(table.espacioId, table.fecha),
 ])
 
 // ── Tabla 6: personas_entidades ──
@@ -283,42 +286,6 @@ export const vinculosCheckpoints = pgTable('vinculos_checkpoints', {
   index('vinculos_checkpoints_par_tipo_idx').on(table.personaAId, table.tipo),
 ])
 
-// ── Tabla: espacios_compartidos ── (modo familiar)
-// Un espacio es un "wallet compartido" entre varios usuarios. Cada
-// movimiento (gasto / ingreso) puede pertenecer a un espacio en lugar
-// del usuario personal. Los miembros con rol `editor` pueden registrar;
-// `lector` solo ve. El `dueno_id` puede borrar el espacio.
-//
-// Nota: deliberadamente NO se mezcla con `solicitudes_vinculo` (que es
-// para vincular DEUDAS entre usuarios, 1-a-1). Familia es un contexto
-// de finanzas compartidas N-a-N.
-export const espaciosCompartidos = pgTable('espacios_compartidos', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  duenoId: uuid('dueno_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  nombre: varchar('nombre', { length: 100 }).notNull(),
-  descripcion: text('descripcion'),
-  icono: varchar('icono', { length: 16 }),
-  color: varchar('color', { length: 16 }),
-  archivado: boolean('archivado').default(false).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => [
-  index('espacios_dueno_idx').on(table.duenoId),
-])
-
-export const miembrosEspacio = pgTable('miembros_espacio', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  espacioId: uuid('espacio_id').references(() => espaciosCompartidos.id, { onDelete: 'cascade' }).notNull(),
-  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  rol: varchar('rol', { length: 20 }).default('editor').notNull(), // 'dueno' | 'editor' | 'lector'
-  invitadoPorId: uuid('invitado_por_id').references(() => usuarios.id, { onDelete: 'set null' }),
-  aceptadoEn: timestamp('aceptado_en'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => [
-  uniqueIndex('miembros_espacio_unico').on(table.espacioId, table.usuarioId),
-  index('miembros_espacio_usuario_idx').on(table.usuarioId),
-])
-
 // ── Tabla: ingresos ── (módulo de ingresos, espejo simple de gastos)
 // Justifica saldo neto del mes y proyección de flujo de caja. Las
 // categorías de ingreso se distinguen por `tipo_origen` (no se reusan
@@ -334,7 +301,6 @@ export const ingresos = pgTable('ingresos', {
   esRecurrente: boolean('es_recurrente').default(false).notNull(),
   recurrenteGrupoId: uuid('recurrente_grupo_id'),
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
-  espacioId: uuid('espacio_id'),
   notas: text('notas'),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -343,7 +309,6 @@ export const ingresos = pgTable('ingresos', {
   index('ingresos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
   index('ingresos_usuario_origen_idx').on(table.usuarioId, table.origen),
   index('ingresos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
-  index('ingresos_espacio_fecha_idx').on(table.espacioId, table.fecha),
 ])
 
 // ── Tabla: medios_ahorro ──

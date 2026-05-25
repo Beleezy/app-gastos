@@ -135,19 +135,6 @@
       ></textarea>
     </div>
 
-    <!-- Control total: registrar a nombre de un miembro (solo admin de familia) -->
-    <div v-if="!editando && registrables.length">
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Registrar para</label>
-      <select
-        v-model="registrarPara"
-        data-testid="select-registrar-para"
-        class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent"
-      >
-        <option :value="null">Yo</option>
-        <option v-for="r in registrables" :key="r.usuarioId" :value="r.usuarioId">{{ r.nombre }} ({{ r.email }})</option>
-      </select>
-    </div>
-
     <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
 
     <button
@@ -203,17 +190,6 @@ let debounceTimer = null
 
 const { currencySymbol } = useCurrency()
 const { createGasto, updateGasto } = useGastos()
-const { fetchRegistrables } = useEspacios()
-
-// Control total: si soy admin de una familia, puedo registrar el gasto a
-// nombre de un miembro. `null` = lo registro para mí.
-const registrables = ref([])
-const registrarPara = ref(null)
-
-onMounted(async () => {
-  if (editando.value) return
-  registrables.value = await fetchRegistrables()
-})
 
 const formularioValido = computed(() => {
   const c = String(form.concepto || '').trim()
@@ -334,7 +310,6 @@ async function guardar() {
         hora: form.hora,
         metodoRegistro: 'manual',
         notas: form.notas?.trim() || null,
-        enNombreDeUsuarioId: registrarPara.value || null,
       })
     }
     // Aprender concepto+categoria para predicción offline futura.
