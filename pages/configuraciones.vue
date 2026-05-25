@@ -355,6 +355,7 @@
 
       <ConfiguracionesUsoLlm class="mt-4" />
       <ConfiguracionesFeatureFlagsConfig class="mt-4" />
+      <ConfiguracionesSuperadminPanel />
 
       <!-- App info -->
       <div class="text-center pt-4 pb-8">

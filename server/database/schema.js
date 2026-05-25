@@ -7,6 +7,7 @@ export const tipoPersonaEntidad = pgEnum('tipo_persona_entidad', ['persona', 'or
 export const tipoDeuda = pgEnum('tipo_deuda', ['me_deben', 'yo_debo'])
 export const estadoDeuda = pgEnum('estado_deuda', ['pendiente', 'parcial', 'pagado', 'archivado'])
 export const estadoSolicitudVinculo = pgEnum('estado_solicitud_vinculo', ['pendiente', 'aceptada', 'rechazada', 'expirada'])
+export const rolUsuario = pgEnum('rol_usuario', ['superadmin', 'usuario'])
 
 // ── Tabla 1: usuarios ──
 // NOTA: el id lo provee Supabase Auth (mismo UUID que auth.users)
@@ -16,9 +17,23 @@ export const usuarios = pgTable('usuarios', {
   email: varchar('email', { length: 255 }).unique(),
   passwordHash: varchar('password_hash', { length: 255 }),
   monedaPreferida: varchar('moneda_preferida', { length: 10 }).default('PEN').notNull(),
+  rol: rolUsuario('rol').default('usuario').notNull(),
+  permitido: boolean('permitido').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
+
+// ── Tabla: accesos_permitidos ── (allowlist gestionada por el superadmin)
+// Correos autorizados a usar el sistema. Un usuario nuevo solo queda
+// `permitido` si su email está aquí (o si es el SUPERADMIN_EMAIL).
+export const accesosPermitidos = pgTable('accesos_permitidos', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  email: varchar('email', { length: 255 }).notNull(),
+  agregadoPor: uuid('agregado_por').references(() => usuarios.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('accesos_permitidos_email_uniq').on(table.email),
+])
 
 // ── Tabla 2: categorias ──
 export const categorias = pgTable('categorias', {
