@@ -15,6 +15,7 @@
       :class="isModalOpen ? 'overflow-hidden' : 'overflow-y-auto'"
       tabindex="-1"
     >
+      <LayoutPerfilContextBar />
       <div class="w-full mx-auto max-w-full lg:max-w-6xl 2xl:max-w-7xl lg:px-6">
         <slot />
       </div>

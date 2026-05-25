@@ -1,14 +1,15 @@
-// Estado y acciones del superadministrador del sistema: perfil propio (rol) y
-// gestión de la allowlist de correos + acceso por usuario.
+// Estado y acciones del superadministrador: perfil propio (rol), intenciones de
+// registro pendientes y gestión de acceso por usuario.
 
 export function useSuperadmin() {
   const { apiFetch } = useApiFetch()
   const me = useState('superadmin.me', () => null)
-  const accesos = useState('superadmin.accesos', () => [])
+  const intenciones = useState('superadmin.intenciones', () => [])
   const usuarios = useState('superadmin.usuarios', () => [])
   const cargando = ref(false)
 
   const esSuperadmin = computed(() => me.value?.rol === 'superadmin')
+  const pendientes = computed(() => intenciones.value.filter((i) => i.estado === 'pendiente'))
 
   async function fetchMe() {
     try {
@@ -19,34 +20,34 @@ export function useSuperadmin() {
     return me.value
   }
 
-  async function fetchAccesos() {
+  async function fetchAcceso() {
     cargando.value = true
     try {
-      const data = await apiFetch('/api/superadmin/accesos')
-      accesos.value = data.permitidos || []
+      const data = await apiFetch('/api/superadmin/acceso')
+      intenciones.value = data.intenciones || []
       usuarios.value = data.usuarios || []
     } finally {
       cargando.value = false
     }
   }
 
-  async function agregarAcceso(email) {
-    await apiFetch('/api/superadmin/accesos', { method: 'POST', body: { email } })
-    await fetchAccesos()
+  async function aprobar(intencionId) {
+    await apiFetch(`/api/superadmin/intenciones/${intencionId}/aprobar`, { method: 'POST' })
+    await fetchAcceso()
   }
 
-  async function quitarAcceso(id) {
-    await apiFetch(`/api/superadmin/accesos/${id}`, { method: 'DELETE' })
-    await fetchAccesos()
+  async function rechazar(intencionId) {
+    await apiFetch(`/api/superadmin/intenciones/${intencionId}/rechazar`, { method: 'POST' })
+    await fetchAcceso()
   }
 
   async function setPermitidoUsuario(id, permitido) {
     await apiFetch(`/api/superadmin/usuarios/${id}`, { method: 'PATCH', body: { permitido } })
-    await fetchAccesos()
+    await fetchAcceso()
   }
 
   return {
-    me, esSuperadmin, accesos, usuarios, cargando,
-    fetchMe, fetchAccesos, agregarAcceso, quitarAcceso, setPermitidoUsuario,
+    me, esSuperadmin, intenciones, pendientes, usuarios, cargando,
+    fetchMe, fetchAcceso, aprobar, rechazar, setPermitidoUsuario,
   }
 }

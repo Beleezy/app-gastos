@@ -8,6 +8,7 @@ export const tipoDeuda = pgEnum('tipo_deuda', ['me_deben', 'yo_debo'])
 export const estadoDeuda = pgEnum('estado_deuda', ['pendiente', 'parcial', 'pagado', 'archivado'])
 export const estadoSolicitudVinculo = pgEnum('estado_solicitud_vinculo', ['pendiente', 'aceptada', 'rechazada', 'expirada'])
 export const rolUsuario = pgEnum('rol_usuario', ['superadmin', 'usuario'])
+export const estadoIntencion = pgEnum('estado_intencion', ['pendiente', 'aprobada', 'rechazada'])
 
 // ── Tabla 1: usuarios ──
 // NOTA: el id lo provee Supabase Auth (mismo UUID que auth.users)
@@ -19,20 +20,32 @@ export const usuarios = pgTable('usuarios', {
   monedaPreferida: varchar('moneda_preferida', { length: 10 }).default('PEN').notNull(),
   rol: rolUsuario('rol').default('usuario').notNull(),
   permitido: boolean('permitido').default(false).notNull(),
+  // Si está seteado, esta fila es un "perfil gestionado" (mini-usuario sin
+  // login) administrado por el usuario real indicado. null = usuario real.
+  gestionadoPorId: uuid('gestionado_por_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
-
-// ── Tabla: accesos_permitidos ── (allowlist gestionada por el superadmin)
-// Correos autorizados a usar el sistema. Un usuario nuevo solo queda
-// `permitido` si su email está aquí (o si es el SUPERADMIN_EMAIL).
-export const accesosPermitidos = pgTable('accesos_permitidos', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  email: varchar('email', { length: 255 }).notNull(),
-  agregadoPor: uuid('agregado_por').references(() => usuarios.id, { onDelete: 'set null' }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
-  uniqueIndex('accesos_permitidos_email_uniq').on(table.email),
+  index('usuarios_gestionado_idx').on(table.gestionadoPorId),
+])
+
+// ── Tabla: intenciones_registro ──
+// Solicitudes de acceso de quienes inician sesión con Google pero aún no están
+// aprobados. El superadmin las aprueba (se crea/permite el usuario) o las
+// rechaza. Mientras tanto el solicitante solo ve la pantalla "acceso pendiente".
+export const intencionesRegistro = pgTable('intenciones_registro', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  supabaseUserId: uuid('supabase_user_id').notNull(),
+  email: varchar('email', { length: 255 }).notNull(),
+  nombre: varchar('nombre', { length: 255 }),
+  estado: estadoIntencion('estado').default('pendiente').notNull(),
+  decididoPor: uuid('decidido_por').references(() => usuarios.id, { onDelete: 'set null' }),
+  decididoEn: timestamp('decidido_en'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  uniqueIndex('intenciones_registro_supabase_user_uniq').on(table.supabaseUserId),
+  index('intenciones_registro_estado_idx').on(table.estado),
 ])
 
 // ── Tabla 2: categorias ──
@@ -99,7 +112,6 @@ export const gastos = pgTable('gastos', {
   hora: time('hora').notNull(),
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
   transcripcionVoz: text('transcripcion_voz'),
-  espacioId: uuid('espacio_id'),
   notas: text('notas'),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -109,7 +121,6 @@ export const gastos = pgTable('gastos', {
   index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
   uniqueIndex('gastos_planificado_unique').on(table.gastoPlanificadoId),
   index('gastos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
-  index('gastos_espacio_fecha_idx').on(table.espacioId, table.fecha),
 ])
 
 // ── Tabla 6: personas_entidades ──
@@ -275,42 +286,6 @@ export const vinculosCheckpoints = pgTable('vinculos_checkpoints', {
   index('vinculos_checkpoints_par_tipo_idx').on(table.personaAId, table.tipo),
 ])
 
-// ── Tabla: espacios_compartidos ── (modo familiar)
-// Un espacio es un "wallet compartido" entre varios usuarios. Cada
-// movimiento (gasto / ingreso) puede pertenecer a un espacio en lugar
-// del usuario personal. Los miembros con rol `editor` pueden registrar;
-// `lector` solo ve. El `dueno_id` puede borrar el espacio.
-//
-// Nota: deliberadamente NO se mezcla con `solicitudes_vinculo` (que es
-// para vincular DEUDAS entre usuarios, 1-a-1). Familia es un contexto
-// de finanzas compartidas N-a-N.
-export const espaciosCompartidos = pgTable('espacios_compartidos', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  duenoId: uuid('dueno_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  nombre: varchar('nombre', { length: 100 }).notNull(),
-  descripcion: text('descripcion'),
-  icono: varchar('icono', { length: 16 }),
-  color: varchar('color', { length: 16 }),
-  archivado: boolean('archivado').default(false).notNull(),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => [
-  index('espacios_dueno_idx').on(table.duenoId),
-])
-
-export const miembrosEspacio = pgTable('miembros_espacio', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  espacioId: uuid('espacio_id').references(() => espaciosCompartidos.id, { onDelete: 'cascade' }).notNull(),
-  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  rol: varchar('rol', { length: 20 }).default('editor').notNull(), // 'dueno' | 'editor' | 'lector'
-  invitadoPorId: uuid('invitado_por_id').references(() => usuarios.id, { onDelete: 'set null' }),
-  aceptadoEn: timestamp('aceptado_en'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => [
-  uniqueIndex('miembros_espacio_unico').on(table.espacioId, table.usuarioId),
-  index('miembros_espacio_usuario_idx').on(table.usuarioId),
-])
-
 // ── Tabla: ingresos ── (módulo de ingresos, espejo simple de gastos)
 // Justifica saldo neto del mes y proyección de flujo de caja. Las
 // categorías de ingreso se distinguen por `tipo_origen` (no se reusan
@@ -326,7 +301,6 @@ export const ingresos = pgTable('ingresos', {
   esRecurrente: boolean('es_recurrente').default(false).notNull(),
   recurrenteGrupoId: uuid('recurrente_grupo_id'),
   metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
-  espacioId: uuid('espacio_id'),
   notas: text('notas'),
   deletedAt: timestamp('deleted_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -335,7 +309,6 @@ export const ingresos = pgTable('ingresos', {
   index('ingresos_usuario_fecha_idx').on(table.usuarioId, table.fecha),
   index('ingresos_usuario_origen_idx').on(table.usuarioId, table.origen),
   index('ingresos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
-  index('ingresos_espacio_fecha_idx').on(table.espacioId, table.fecha),
 ])
 
 // ── Tabla: medios_ahorro ──
