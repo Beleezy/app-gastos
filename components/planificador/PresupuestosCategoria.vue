@@ -1,26 +1,7 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <div class="relative px-5 pt-8 pb-4 overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-amber-500/15 rounded-full blur-3xl"></div>
-      <div class="relative flex items-center gap-3">
-        <button
-          class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="toggleDrawer"
-          aria-label="Abrir menú"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-        <div class="flex-1 min-w-0">
-          <h1 class="text-xl font-bold text-gradient-blue">Presupuestos por categoría</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">{{ mesAnioActual }}</p>
-        </div>
-      </div>
-    </div>
-
+  <div class="space-y-4">
     <!-- Resumen -->
-    <div class="px-5 lg:px-0 mb-4 grid grid-cols-2 gap-2.5">
+    <div class="grid grid-cols-2 gap-2.5">
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
         <p class="text-[10px] text-theme-text-muted font-medium">Presupuestado</p>
         <p class="text-lg font-bold text-theme-text mt-1">{{ currencySymbol }} {{ formatMonto(totalPresupuestado) }}</p>
@@ -34,7 +15,7 @@
     </div>
 
     <!-- Tabla de categorías -->
-    <div class="px-5 lg:px-0 mb-4">
+    <div>
       <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Categorías</p>
 
       <div v-if="cargandoCat || cargandoCons" class="space-y-2">
@@ -109,7 +90,7 @@
     </div>
 
     <!-- Alertas activas -->
-    <div v-if="alertas.length" class="px-5 lg:px-0 mb-4">
+    <div v-if="alertas.length">
       <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">⚠️ Alertas</p>
       <ul class="bg-theme-card rounded-2xl border border-amber-500/30 overflow-hidden">
         <li
@@ -127,27 +108,11 @@
         </li>
       </ul>
     </div>
-
-    <!-- Nota integración -->
-    <div class="px-5 lg:px-0 mb-8">
-      <div class="rounded-2xl border border-dashed border-theme-border bg-theme-card/40 p-3 flex items-start gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-amber-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="text-[11px] text-theme-text-muted leading-relaxed">
-          <p><strong class="text-theme-text">Submódulo independiente.</strong> Lee categorías y gastos reales (endpoints existentes); los límites viven en localStorage.</p>
-          <p class="mt-1">Integraciones planificadas: mostrar el semáforo en /registro al añadir un gasto, badge en BottomNav cuando hay alerta crítica, notificación push al cruzar umbral. Ver <code>docs/INTEGRACION-SUBMODULOS.md</code>.</p>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { MESES } from '~/utils/constants'
-
 const { currencySymbol, formatMonto } = useCurrency()
-const { toggle: toggleDrawer } = useMobileDrawer()
 const { categorias, fetchCategorias } = useCategorias()
 const cargandoCat = ref(true)
 const cargandoCons = ref(false)
@@ -164,12 +129,10 @@ const {
 const hoy = new Date()
 const mesActual = hoy.getMonth() + 1
 const anioActual = hoy.getFullYear()
-const mesAnioActual = `${MESES[mesActual - 1]} ${anioActual}`
 
 const inputsLimite = ref({})
 
 const categoriasOrdenadas = computed(() => {
-  // Primero las que tienen presupuesto, luego por nombre
   return [...categorias.value].sort((a, b) => {
     const aHas = presupuestos.value.some(p => p.categoriaId === a.id)
     const bHas = presupuestos.value.some(p => p.categoriaId === b.id)
@@ -238,7 +201,6 @@ onMounted(async () => {
   } finally {
     cargandoCat.value = false
   }
-  // Cargar presupuestos del backend + migrar legacy en paralelo con consumo.
   cargandoCons.value = true
   try {
     await Promise.all([
@@ -251,7 +213,6 @@ onMounted(async () => {
   } finally {
     cargandoCons.value = false
   }
-  // pre-llenar inputs con los presupuestos existentes para edición rápida
   for (const p of presupuestos.value) {
     inputsLimite.value[p.categoriaId] = p.montoMensual
   }

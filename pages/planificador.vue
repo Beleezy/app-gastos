@@ -16,6 +16,7 @@
             :is="PlanificadorResumenMes"
             @exportar="exportarPlanificador"
             @abrir-plantillas="showPlantillas = true"
+            @abrir-presupuestos="showPresupuestos = true"
           />
         </div>
       </div>
@@ -114,6 +115,14 @@
         @aplicada="onPlantillaAplicadaFromSheet"
       />
     </SharedBaseBottomSheet>
+
+    <SharedBaseBottomSheet
+      v-if="showPresupuestos"
+      title="Topes por categoría"
+      @close="showPresupuestos = false"
+    >
+      <LazyPlanificadorPresupuestosCategoria />
+    </SharedBaseBottomSheet>
   </div>
 </template>
 
@@ -153,6 +162,8 @@ const showFormMensual = ref(false)
 const showFormRegistrarPago = ref(false)
 const showPlantillas = ref(false)
 useOverlayBack(showPlantillas, () => { showPlantillas.value = false })
+const showPresupuestos = ref(false)
+useOverlayBack(showPresupuestos, () => { showPresupuestos.value = false })
 
 async function onPlantillaAplicadaFromSheet() {
   showPlantillas.value = false
