@@ -1,11 +1,28 @@
 // Capa de servicios de gastos. Ver §2.1 / §4.7 de planifica.md.
 // Los handlers HTTP delegan aquí toda la lógica de negocio + acceso a DB.
 
-import { eq, and, sql, isNull } from 'drizzle-orm'
+import { eq, and, sql, isNull, inArray } from 'drizzle-orm'
 import { db } from '../utils/db.js'
-import { gastos, categorias } from '../database/schema.js'
+import { gastos, categorias, miembrosEspacio } from '../database/schema.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
 import { assertOwner } from '../utils/assertOwner.js'
+
+// Resuelve el espacio compartido donde `duenoId` es dueño y `miembroId` es
+// miembro. Devuelve el espacioId o null si no existe esa relación.
+async function resolverEspacioEnNombre(duenoId, miembroId) {
+  const propios = await db
+    .select({ espacioId: miembrosEspacio.espacioId })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.usuarioId, duenoId), eq(miembrosEspacio.rol, 'dueno')))
+  const ids = propios.map((p) => p.espacioId)
+  if (!ids.length) return null
+  const [m] = await db
+    .select({ espacioId: miembrosEspacio.espacioId })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.usuarioId, miembroId), inArray(miembrosEspacio.espacioId, ids)))
+    .limit(1)
+  return m?.espacioId || null
+}
 
 /**
  * Crea un gasto y devuelve la versión enriquecida con datos de categoría.
@@ -21,6 +38,21 @@ export async function crearGasto({ usuarioId, body }) {
     throw err
   }
 
+  // Control total: un admin de familia puede registrar en nombre de un
+  // miembro de un espacio que posee. El gasto pertenece al miembro y
+  // registradoPorId guarda quién lo creó.
+  let duenoGasto = usuarioId
+  let espacioId = null
+  if (body.enNombreDeUsuarioId && body.enNombreDeUsuarioId !== usuarioId) {
+    espacioId = await resolverEspacioEnNombre(usuarioId, body.enNombreDeUsuarioId)
+    if (!espacioId) {
+      const err = new Error('No tienes permiso para registrar gastos de ese usuario')
+      err.statusCode = 403
+      throw err
+    }
+    duenoGasto = body.enNombreDeUsuarioId
+  }
+
   const { fecha: fechaLocal, hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const fechaHoy = body.fecha || fechaLocal
   const horaActual = body.hora || horaLocal
@@ -28,7 +60,9 @@ export async function crearGasto({ usuarioId, body }) {
   const [gasto] = await db
     .insert(gastos)
     .values({
-      usuarioId,
+      usuarioId: duenoGasto,
+      registradoPorId: usuarioId,
+      espacioId,
       categoriaId: body.categoriaId,
       concepto: body.concepto.trim(),
       monto: String(body.monto),

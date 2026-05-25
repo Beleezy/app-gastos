@@ -88,6 +88,9 @@ export const gastosPlanificados = pgTable('gastos_planificados', {
 export const gastos = pgTable('gastos', {
   id: uuid('id').defaultRandom().primaryKey(),
   usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  // Quién registró el gasto. Difiere de usuarioId cuando un admin de familia
+  // lo registra en nombre de un miembro (control total).
+  registradoPorId: uuid('registrado_por_id').references(() => usuarios.id, { onDelete: 'set null' }),
   categoriaId: uuid('categoria_id').references(() => categorias.id).notNull(),
   gastoPlanificadoId: uuid('gasto_planificado_id').references(() => gastosPlanificados.id, { onDelete: 'set null' }),
   concepto: varchar('concepto', { length: 255 }).notNull(),
@@ -308,22 +311,6 @@ export const miembrosEspacio = pgTable('miembros_espacio', {
   index('miembros_espacio_usuario_idx').on(table.usuarioId),
 ])
 
-export const invitacionesEspacio = pgTable('invitaciones_espacio', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  espacioId: uuid('espacio_id').references(() => espaciosCompartidos.id, { onDelete: 'cascade' }).notNull(),
-  remitenteId: uuid('remitente_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  destinatarioEmail: varchar('destinatario_email', { length: 255 }).notNull(),
-  destinatarioId: uuid('destinatario_id').references(() => usuarios.id, { onDelete: 'set null' }),
-  rol: varchar('rol', { length: 20 }).default('editor').notNull(),
-  estado: estadoSolicitudVinculo('estado').default('pendiente').notNull(),
-  mensaje: text('mensaje'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => [
-  index('invitaciones_espacio_destinatario_idx').on(table.destinatarioEmail, table.estado),
-  index('invitaciones_espacio_espacio_idx').on(table.espacioId),
-])
-
 // ── Tabla: ingresos ── (módulo de ingresos, espejo simple de gastos)
 // Justifica saldo neto del mes y proyección de flujo de caja. Las
 // categorías de ingreso se distinguen por `tipo_origen` (no se reusan
@@ -331,6 +318,7 @@ export const invitacionesEspacio = pgTable('invitaciones_espacio', {
 export const ingresos = pgTable('ingresos', {
   id: uuid('id').defaultRandom().primaryKey(),
   usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
+  registradoPorId: uuid('registrado_por_id').references(() => usuarios.id, { onDelete: 'set null' }),
   concepto: varchar('concepto', { length: 255 }).notNull(),
   monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
   fecha: date('fecha').notNull(),
