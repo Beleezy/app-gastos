@@ -759,6 +759,21 @@ function aplicarQueryMes() {
   if (anio >= 2000 && anio <= 3000) anioSeleccionado.value = anio
 }
 
+// Share Target API: /share guarda el texto compartido en sessionStorage y
+// redirige aquí. Lo procesamos con el mismo pipeline de voz (parse → confirmar).
+function procesarShareDraft() {
+  try {
+    const raw = sessionStorage.getItem('gastos.shareDraft')
+    if (!raw) return
+    sessionStorage.removeItem('gastos.shareDraft')
+    const draft = JSON.parse(raw)
+    if (draft?.texto && Date.now() - (draft.ts || 0) < 120000) {
+      onUpdateTranscript(draft.texto)
+      onSendDraft()
+    }
+  } catch {}
+}
+
 onMounted(() => {
   aplicarQueryMes()
   cargarFavoritos()
@@ -776,6 +791,7 @@ onMounted(() => {
   ]).catch(() => {})
   attachSwipe(historialSwipeZone.value)
   setupResumenObserver()
+  procesarShareDraft()
 })
 
 onUnmounted(() => {
