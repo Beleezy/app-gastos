@@ -38,7 +38,7 @@
         <!-- Vista lista: resumen general "Me deben / Yo debo" -->
         <component
           v-if="!personaSeleccionada"
-          :is="isPreviewV2 ? DeudasResumenDeudasV2 : DeudasResumenDeudas"
+          :is="DeudasResumenDeudas"
         />
 
         <!-- Vista detalle: card con info de la persona seleccionada (solo desktop; en móvil DetallePersona ya muestra la cabecera) -->
@@ -64,7 +64,7 @@
           <div :key="personaSeleccionada ? 'detalle' : 'lista'">
             <component
               v-if="personaSeleccionada"
-              :is="isPreviewV2 ? DeudasDetallePersonaV2 : DeudasDetallePersona"
+              :is="DeudasDetallePersona"
               @registrar-pago="abrirFormPago"
               @agregar-deuda="showFormDeuda = true"
               @editar-deuda="abrirFormEditar"
@@ -72,7 +72,7 @@
             />
             <component
               v-else
-              :is="isPreviewV2 ? DeudasListaPersonasV2 : DeudasListaPersonas"
+              :is="DeudasListaPersonas"
               @seleccionar="onSeleccionarPersona"
             />
           </div>
@@ -144,13 +144,8 @@
 
 <script setup>
 import DeudasResumenDeudas from '~/components/deudas/ResumenDeudas.vue'
-import DeudasResumenDeudasV2 from '~/components/deudas/ResumenDeudasV2.vue'
 import DeudasListaPersonas from '~/components/deudas/ListaPersonas.vue'
-import DeudasListaPersonasV2 from '~/components/deudas/ListaPersonasV2.vue'
 import DeudasDetallePersona from '~/components/deudas/DetallePersona.vue'
-import DeudasDetallePersonaV2 from '~/components/deudas/DetallePersonaV2.vue'
-
-const { isPreviewV2 } = useUiPreview()
 
 const {
   fetchResumen, fetchPersonas, personas,
