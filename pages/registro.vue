@@ -192,17 +192,6 @@
                   </button>
                 </div>
                 <RegistroFiltrosCategoriaBar v-model="categoriaFiltro" :categorias="categorias" />
-                <!-- Filtro por etiqueta (submódulo etiquetas) -->
-                <div v-if="etiquetasItems.length" class="flex flex-wrap gap-1 mt-2">
-                  <button
-                    v-for="e in etiquetasItems"
-                    :key="e.id"
-                    @click="etiquetaFiltro = etiquetaFiltro === e.id ? null : e.id"
-                    class="px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
-                    :class="etiquetaFiltro === e.id ? 'text-white' : 'text-theme-text-muted bg-theme-input hover:bg-theme-border-md'"
-                    :style="etiquetaFiltro === e.id ? { backgroundColor: e.color } : {}"
-                  >#{{ e.nombre }}</button>
-                </div>
               </div>
             </Transition>
           </div>
@@ -473,13 +462,10 @@ const configVistaSemana = computed(() => config.value?.vistaRegistroSemana === t
 
 // Filtros (composable)
 const {
-  busquedaGasto, categoriaFiltro, etiquetaFiltro, rangoRapido, rangosRapidos,
+  busquedaGasto, categoriaFiltro, rangoRapido, rangosRapidos,
   gastosPorDiaFiltrados, gastosPorSemanaFiltrados,
   tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
 } = useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual })
-
-// Catálogo de etiquetas para el chip-bar (submódulo etiquetas).
-const { items: etiquetasItems } = useEtiquetas()
 
 // Optimistic (composable)
 const { mapGastosConIds, pushOptimisticGastos, rollbackOptimistic } = useOptimisticGastos({

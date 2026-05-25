@@ -124,7 +124,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <div class="text-[11px] text-theme-text-muted leading-relaxed">
-          <p><strong class="text-theme-text">Submódulo independiente.</strong> Combina suscripciones (localStorage), planificador y deudas (endpoints existentes) en una vista unificada.</p>
+          <p><strong class="text-theme-text">Submódulo independiente.</strong> Combina planificador y deudas (endpoints existentes) en una vista unificada.</p>
           <p class="mt-1">Integración futura: reemplazar /planificador/CalendarioMensual con esta vista global. Ver <code>docs/INTEGRACION-SUBMODULOS.md</code>.</p>
         </div>
       </div>
@@ -163,15 +163,12 @@
 
 <script setup>
 import { MESES } from '~/utils/constants'
-import { proximaFechaCobro, PERIODICIDADES } from '~/composables/useSuscripciones'
 
 const { currencySymbol, formatMonto } = useCurrency()
 const { toggle: toggleDrawer } = useMobileDrawer()
-const { items: suscripciones } = useSuscripciones()
 const { apiFetch } = useApiFetch()
 
 const filtros = [
-  { valor: 'suscripcion', etiqueta: 'Suscripciones', icono: '🔁', color: '#3b82f6' },
   { valor: 'planificado', etiqueta: 'Planificados', icono: '📋', color: '#8b5cf6' },
   { valor: 'deuda', etiqueta: 'Deudas', icono: '💳', color: '#f59e0b' },
 ]
@@ -227,39 +224,7 @@ const eventosDelMes = computed(() => {
   const primerDia = new Date(anioVer.value, mesVer.value - 1, 1)
   const ultimoDia = new Date(anioVer.value, mesVer.value, 0)
 
-  // 1) Suscripciones — proyectamos las recurrentes dentro del mes
-  if (filtrosActivos.value.has('suscripcion')) {
-    for (const s of suscripciones.value) {
-      if (s.activa === false) continue
-      // Estrategia: arranca de fechaInicio, salta hasta primer cobro >= primerDia,
-      // luego añade todas las recurrencias hasta ultimoDia.
-      const periodo = PERIODICIDADES.find(p => p.valor === s.periodicidad)
-      if (!periodo) continue
-      let cursor = new Date(s.fechaInicio + 'T00:00:00')
-      // Avanzar hasta el mes visible
-      let i = 0
-      while (cursor < primerDia && i < 2000) {
-        avanzar(cursor, periodo.valor)
-        i++
-      }
-      while (cursor <= ultimoDia && i < 2000) {
-        out.push({
-          tipo: 'suscripcion',
-          id: s.id,
-          fecha: toIso(cursor),
-          titulo: s.nombre,
-          monto: Number(s.monto) || 0,
-          signo: -1,
-          color: s.color || '#3b82f6',
-          icono: s.icono || '🔁',
-        })
-        avanzar(cursor, periodo.valor)
-        i++
-      }
-    }
-  }
-
-  // 2) Gastos planificados del mes
+  // 1) Gastos planificados del mes
   if (filtrosActivos.value.has('planificado')) {
     for (const g of planificados.value) {
       if (!g.fechaProbablePago) continue
@@ -297,16 +262,6 @@ const eventosDelMes = computed(() => {
 
   return out.sort((a, b) => a.fecha.localeCompare(b.fecha))
 })
-
-function avanzar(cursor, periodo) {
-  if (periodo === 'mensual') cursor.setMonth(cursor.getMonth() + 1)
-  else if (periodo === 'bimestral') cursor.setMonth(cursor.getMonth() + 2)
-  else if (periodo === 'trimestral') cursor.setMonth(cursor.getMonth() + 3)
-  else if (periodo === 'semestral') cursor.setMonth(cursor.getMonth() + 6)
-  else if (periodo === 'anual') cursor.setFullYear(cursor.getFullYear() + 1)
-  else if (periodo === 'quincenal') cursor.setDate(cursor.getDate() + 14)
-  else cursor.setDate(cursor.getDate() + 7)
-}
 
 function toIso(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -356,8 +311,6 @@ function fechaCorta(f) {
 function etiquetaTipo(t) {
   return filtros.find(f => f.valor === t)?.etiqueta || t
 }
-
-void proximaFechaCobro
 
 onMounted(cargar)
 </script>
