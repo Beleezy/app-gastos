@@ -403,22 +403,6 @@ export const solicitudesVinculo = pgTable('solicitudes_vinculo', {
   index('solicitudes_vinculo_destinatario_estado_idx').on(table.destinatarioEmail, table.estado),
 ])
 
-// ── Tabla 15: suscripciones_push — Web Push API ──
-// Ver §5.3 de planifica.md.
-export const suscripcionesPush = pgTable('suscripciones_push', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  endpoint: text('endpoint').notNull(),
-  p256dh: text('p256dh').notNull(),
-  auth: text('auth').notNull(),
-  userAgent: varchar('user_agent', { length: 500 }),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => [
-  uniqueIndex('suscripciones_push_endpoint_uniq').on(table.endpoint),
-  index('suscripciones_push_usuario_idx').on(table.usuarioId),
-])
-
 // ── Tabla 14: plantillas_mes — plantillas reutilizables de plan mensual ──
 // Ver §5.A punto 4 de planifica.md.
 export const plantillasMes = pgTable('plantillas_mes', {

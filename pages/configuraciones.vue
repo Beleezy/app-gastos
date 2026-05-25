@@ -353,7 +353,6 @@
         <ConfiguracionesIntegracionGoogleCalendar />
       </template>
 
-      <ConfiguracionesPushNotificationsConfig class="mt-4" />
       <ConfiguracionesUsoLlm class="mt-4" />
       <ConfiguracionesFeatureFlagsConfig class="mt-4" />
 
