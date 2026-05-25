@@ -1,14 +1,15 @@
-// Lista la allowlist de correos y los usuarios del sistema. Solo superadmin.
+// Datos del panel de control de acceso (solo superadmin):
+// intenciones de registro (pendientes + historial) y usuarios del sistema.
 
 import { db } from '../../utils/db.js'
-import { accesosPermitidos, usuarios } from '../../database/schema.js'
+import { intencionesRegistro, usuarios } from '../../database/schema.js'
 import { requireSuperadmin } from '../../utils/getUsuario.js'
 import { desc } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   await requireSuperadmin(event)
-  const [permitidos, listaUsuarios] = await Promise.all([
-    db.select().from(accesosPermitidos).orderBy(desc(accesosPermitidos.createdAt)),
+  const [intenciones, listaUsuarios] = await Promise.all([
+    db.select().from(intencionesRegistro).orderBy(desc(intencionesRegistro.createdAt)),
     db
       .select({
         id: usuarios.id,
@@ -20,5 +21,5 @@ export default defineEventHandler(async (event) => {
       .from(usuarios)
       .orderBy(desc(usuarios.createdAt)),
   ])
-  return { permitidos, usuarios: listaUsuarios }
+  return { intenciones, usuarios: listaUsuarios }
 })

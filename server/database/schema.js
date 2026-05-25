@@ -8,6 +8,7 @@ export const tipoDeuda = pgEnum('tipo_deuda', ['me_deben', 'yo_debo'])
 export const estadoDeuda = pgEnum('estado_deuda', ['pendiente', 'parcial', 'pagado', 'archivado'])
 export const estadoSolicitudVinculo = pgEnum('estado_solicitud_vinculo', ['pendiente', 'aceptada', 'rechazada', 'expirada'])
 export const rolUsuario = pgEnum('rol_usuario', ['superadmin', 'usuario'])
+export const estadoIntencion = pgEnum('estado_intencion', ['pendiente', 'aprobada', 'rechazada'])
 
 // ── Tabla 1: usuarios ──
 // NOTA: el id lo provee Supabase Auth (mismo UUID que auth.users)
@@ -23,16 +24,23 @@ export const usuarios = pgTable('usuarios', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
-// ── Tabla: accesos_permitidos ── (allowlist gestionada por el superadmin)
-// Correos autorizados a usar el sistema. Un usuario nuevo solo queda
-// `permitido` si su email está aquí (o si es el SUPERADMIN_EMAIL).
-export const accesosPermitidos = pgTable('accesos_permitidos', {
+// ── Tabla: intenciones_registro ──
+// Solicitudes de acceso de quienes inician sesión con Google pero aún no están
+// aprobados. El superadmin las aprueba (se crea/permite el usuario) o las
+// rechaza. Mientras tanto el solicitante solo ve la pantalla "acceso pendiente".
+export const intencionesRegistro = pgTable('intenciones_registro', {
   id: uuid('id').defaultRandom().primaryKey(),
+  supabaseUserId: uuid('supabase_user_id').notNull(),
   email: varchar('email', { length: 255 }).notNull(),
-  agregadoPor: uuid('agregado_por').references(() => usuarios.id, { onDelete: 'set null' }),
+  nombre: varchar('nombre', { length: 255 }),
+  estado: estadoIntencion('estado').default('pendiente').notNull(),
+  decididoPor: uuid('decidido_por').references(() => usuarios.id, { onDelete: 'set null' }),
+  decididoEn: timestamp('decidido_en'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
-  uniqueIndex('accesos_permitidos_email_uniq').on(table.email),
+  uniqueIndex('intenciones_registro_supabase_user_uniq').on(table.supabaseUserId),
+  index('intenciones_registro_estado_idx').on(table.estado),
 ])
 
 // ── Tabla 2: categorias ──
