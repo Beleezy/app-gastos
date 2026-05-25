@@ -506,40 +506,6 @@ export const googleCalendarConexiones = pgTable('google_calendar_conexiones', {
 // Submódulos integrados (migración 0026)
 // ──────────────────────────────────────────────────────────────────
 
-export const tipoMeta = pgEnum('tipo_meta', ['ahorro', 'deuda', 'gasto_limite'])
-
-export const metas = pgTable('metas', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  nombre: varchar('nombre', { length: 120 }).notNull(),
-  tipo: tipoMeta('tipo').notNull(),
-  montoObjetivo: decimal('monto_objetivo', { precision: 12, scale: 2 }).notNull(),
-  fechaLimite: date('fecha_limite'),
-  icono: varchar('icono', { length: 16 }).default('🎯'),
-  color: varchar('color', { length: 16 }).default('#10b981'),
-  archivada: boolean('archivada').notNull().default(false),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  deletedAt: timestamp('deleted_at'),
-}, (table) => [
-  index('metas_usuario_idx').on(table.usuarioId, table.archivada),
-])
-
-export const metaMovimientos = pgTable('meta_movimientos', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  metaId: uuid('meta_id').references(() => metas.id, { onDelete: 'cascade' }).notNull(),
-  monto: decimal('monto', { precision: 12, scale: 2 }).notNull(),
-  fecha: date('fecha').notNull(),
-  nota: text('nota'),
-  // Origen opcional: enlaza al recurso real que lo generó.
-  origenTipo: varchar('origen_tipo', { length: 24 }), // 'ahorro' | 'pago_deuda' | 'gasto' | 'manual'
-  origenId: uuid('origen_id'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-}, (table) => [
-  index('meta_movs_meta_idx').on(table.metaId, table.fecha),
-  index('meta_movs_origen_idx').on(table.origenTipo, table.origenId),
-])
-
 export const presupuestosCategoria = pgTable('presupuestos_categoria', {
   id: uuid('id').defaultRandom().primaryKey(),
   usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),

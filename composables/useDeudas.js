@@ -189,22 +189,6 @@ export function useDeudas() {
         await fetchPagosPersona(personaSeleccionada.value.id)
       }
       await refreshAuditoriaIfNeeded()
-      // Auto-tracking de metas tipo 'deuda': si existe una meta de pago
-      // de deuda activa, sumar el pago. Heurística simple: la primera
-      // meta de tipo 'deuda' no archivada. Fail-silent.
-      try {
-        const { items: metasItems, registrarMovimiento } = useMetas()
-        const m = (metasItems.value || []).find(x => x.tipo === 'deuda' && !x.archivada)
-        if (m && result?.pago?.monto) {
-          registrarMovimiento(m.id, {
-            monto: parseFloat(result.pago.monto),
-            fecha: result.pago.fecha || new Date().toISOString().slice(0, 10),
-            nota: `Auto desde pago de deuda`,
-            origenTipo: 'pago_deuda',
-            origenId: result.pago.id,
-          }).catch(() => {})
-        }
-      } catch {}
       return result
     } catch (e) {
       error.value = e.message || 'Error al registrar pago'

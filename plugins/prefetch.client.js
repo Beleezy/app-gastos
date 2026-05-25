@@ -145,10 +145,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       const { cargarConsumo } = usePresupuestosCategoria()
       tareas.push(cargarConsumo(hoy.getMonth() + 1, hoy.getFullYear()).catch(() => {}))
     } catch {}
-    try {
-      const { fetchItems } = useMetas()
-      tareas.push(fetchItems().catch(() => {}))
-    } catch {}
     // Esperar todo en paralelo. Cada uno ya está silenciado.
     await Promise.allSettled(tareas)
   }
