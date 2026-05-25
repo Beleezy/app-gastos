@@ -7,6 +7,7 @@
       Saltar al contenido principal
     </a>
     <LayoutOfflineBanner />
+    <LayoutRecordatoriosBanner />
     <LazyLayoutSideNav />
     <main
       id="contenido-principal"

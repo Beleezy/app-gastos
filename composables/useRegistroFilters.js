@@ -3,14 +3,9 @@ import { useDebouncedRef } from './useDebounce'
 export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual }) {
   const busquedaGasto = ref('')
   const categoriaFiltro = ref(null)
-  const etiquetaFiltro = ref(null) // submódulo etiquetas: id o null
   const rangoRapido = ref('mes') // 'hoy' | '7d' | 'mes'
 
   const busquedaDebounced = useDebouncedRef(busquedaGasto, 150)
-
-  // Composable de etiquetas — solo lo invocamos si hay filtro activo para
-  // evitar overhead de reactividad cuando no se usa.
-  const { etiquetasDe } = useEtiquetas()
 
   const rangosRapidos = computed(() => {
     const base = [{ value: 'mes', label: 'Mes' }]
@@ -47,13 +42,11 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
 
   function filtrarGastos(gastosArr) {
     const q = busquedaDebounced.value.toLowerCase()
-    const etqId = etiquetaFiltro.value
     return gastosArr.filter(g => {
       const matchBusqueda = !q || g.concepto.toLowerCase().includes(q)
       const matchCategoria = !categoriaFiltro.value || g.categoriaId === categoriaFiltro.value
       const matchRango = fechaDentroRango(g.fecha)
-      const matchEtiqueta = !etqId || etiquetasDe('gasto', g.id).some(e => e.id === etqId)
-      return matchBusqueda && matchCategoria && matchRango && matchEtiqueta
+      return matchBusqueda && matchCategoria && matchRango
     })
   }
 
@@ -95,7 +88,6 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
   const tieneFiltrosActivos = computed(() =>
     !!busquedaGasto.value
     || !!categoriaFiltro.value
-    || !!etiquetaFiltro.value
     || rangoRapido.value !== 'mes',
   )
 
@@ -103,7 +95,6 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
     let n = 0
     if (busquedaGasto.value) n++
     if (categoriaFiltro.value) n++
-    if (etiquetaFiltro.value) n++
     if (rangoRapido.value !== 'mes') n++
     return n
   })
@@ -111,12 +102,11 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
   function limpiarFiltros() {
     busquedaGasto.value = ''
     categoriaFiltro.value = null
-    etiquetaFiltro.value = null
     rangoRapido.value = 'mes'
   }
 
   return {
-    busquedaGasto, categoriaFiltro, etiquetaFiltro, rangoRapido, rangosRapidos,
+    busquedaGasto, categoriaFiltro, rangoRapido, rangosRapidos,
     gastosPorDiaFiltrados, gastosPorSemanaFiltrados,
     tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
   }

@@ -141,28 +141,10 @@ export default defineNuxtPlugin((nuxtApp) => {
     // 7) Submódulos integrados — pre-cargar para que los badges y chips
     //    aparezcan inmediato. Todos son endpoints chicos (< 5KB típico).
     try {
-      const { fetchItems } = useEtiquetas()
-      tareas.push(fetchItems().catch(() => {}))
-    } catch {}
-    try {
-      const { fetchItems } = useSuscripciones()
-      tareas.push(fetchItems().catch(() => {}))
-    } catch {}
-    try {
       const hoy = new Date()
       const { cargarConsumo } = usePresupuestosCategoria()
       tareas.push(cargarConsumo(hoy.getMonth() + 1, hoy.getFullYear()).catch(() => {}))
     } catch {}
-    try {
-      const { fetchItems } = useMetas()
-      tareas.push(fetchItems().catch(() => {}))
-    } catch {}
-    // Asignaciones de etiquetas — para chips en GastoItem sin lazy.
-    try {
-      const { fetchAsignaciones } = useEtiquetas()
-      tareas.push(fetchAsignaciones().catch(() => {}))
-    } catch {}
-
     // Esperar todo en paralelo. Cada uno ya está silenciado.
     await Promise.allSettled(tareas)
   }

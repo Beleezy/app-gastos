@@ -41,7 +41,7 @@
         <div class="lg:sticky lg:top-20 lg:self-start lg:space-y-4">
           <div ref="resumenWrapperRef" class="px-4 lg:px-0 mb-5 lg:mb-0">
             <component
-              :is="isPreviewV2 ? RegistroResumenMesRegistroV2 : RegistroResumenMesRegistro"
+              :is="RegistroResumenMesRegistro"
               :total-mes="parseFloat(resumen.totalMes) || 0"
               :total-dia="totalDiaActual"
               :gastos-hoy-count="gastosHoyCount"
@@ -192,17 +192,6 @@
                   </button>
                 </div>
                 <RegistroFiltrosCategoriaBar v-model="categoriaFiltro" :categorias="categorias" />
-                <!-- Filtro por etiqueta (submódulo etiquetas) -->
-                <div v-if="etiquetasItems.length" class="flex flex-wrap gap-1 mt-2">
-                  <button
-                    v-for="e in etiquetasItems"
-                    :key="e.id"
-                    @click="etiquetaFiltro = etiquetaFiltro === e.id ? null : e.id"
-                    class="px-2 py-1 rounded-full text-[10px] font-semibold transition-all"
-                    :class="etiquetaFiltro === e.id ? 'text-white' : 'text-theme-text-muted bg-theme-input hover:bg-theme-border-md'"
-                    :style="etiquetaFiltro === e.id ? { backgroundColor: e.color } : {}"
-                  >#{{ e.nombre }}</button>
-                </div>
               </div>
             </Transition>
           </div>
@@ -337,10 +326,10 @@
       @retry="reintentarParseImage"
     />
 
-    <!-- Manual form modal (lazy, V1 o V2 según toggle) -->
+    <!-- Manual form modal (lazy) -->
     <component
       v-if="showFormManual"
-      :is="isPreviewV2 ? RegistroFormGastoManualV2Async : RegistroFormGastoManualAsync"
+      :is="RegistroFormGastoManualAsync"
       :categorias="categorias"
       :gasto-editar="gastoEditar"
       :gasto-duplicar="gastoDuplicar"
@@ -412,7 +401,6 @@
 
 <script setup>
 import RegistroResumenMesRegistro from '~/components/registro/ResumenMesRegistro.vue'
-import RegistroResumenMesRegistroV2 from '~/components/registro/ResumenMesRegistroV2.vue'
 
 // Lazy-loaded heavy components
 const RegistroStatsComparativasAsync = defineAsyncComponent(() =>
@@ -427,15 +415,9 @@ const RegistroConfirmacionVozAsync = defineAsyncComponent(() =>
 const RegistroFormGastoManualAsync = defineAsyncComponent(() =>
   import('~/components/registro/FormGastoManual.vue')
 )
-const RegistroFormGastoManualV2Async = defineAsyncComponent(() =>
-  import('~/components/registro/FormGastoManualV2.vue')
-)
 const RegistroFormBulkEditAsync = defineAsyncComponent(() =>
   import('~/components/registro/FormBulkEdit.vue')
 )
-
-// UI Preview toggle (V1 vs V2)
-const { isPreviewV2 } = useUiPreview()
 
 const {
   gastosMensuales, categorias, resumen, isLoadingMensual,
@@ -480,13 +462,10 @@ const configVistaSemana = computed(() => config.value?.vistaRegistroSemana === t
 
 // Filtros (composable)
 const {
-  busquedaGasto, categoriaFiltro, etiquetaFiltro, rangoRapido, rangosRapidos,
+  busquedaGasto, categoriaFiltro, rangoRapido, rangosRapidos,
   gastosPorDiaFiltrados, gastosPorSemanaFiltrados,
   tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
 } = useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual })
-
-// Catálogo de etiquetas para el chip-bar (submódulo etiquetas).
-const { items: etiquetasItems } = useEtiquetas()
 
 // Optimistic (composable)
 const { mapGastosConIds, pushOptimisticGastos, rollbackOptimistic } = useOptimisticGastos({
@@ -780,6 +759,21 @@ function aplicarQueryMes() {
   if (anio >= 2000 && anio <= 3000) anioSeleccionado.value = anio
 }
 
+// Share Target API: /share guarda el texto compartido en sessionStorage y
+// redirige aquí. Lo procesamos con el mismo pipeline de voz (parse → confirmar).
+function procesarShareDraft() {
+  try {
+    const raw = sessionStorage.getItem('gastos.shareDraft')
+    if (!raw) return
+    sessionStorage.removeItem('gastos.shareDraft')
+    const draft = JSON.parse(raw)
+    if (draft?.texto && Date.now() - (draft.ts || 0) < 120000) {
+      onUpdateTranscript(draft.texto)
+      onSendDraft()
+    }
+  } catch {}
+}
+
 onMounted(() => {
   aplicarQueryMes()
   cargarFavoritos()
@@ -797,6 +791,7 @@ onMounted(() => {
   ]).catch(() => {})
   attachSwipe(historialSwipeZone.value)
   setupResumenObserver()
+  procesarShareDraft()
 })
 
 onUnmounted(() => {

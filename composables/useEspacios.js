@@ -5,7 +5,6 @@
 export function useEspacios() {
   const { apiFetch } = useApiFetch()
   const espacios = useState('espacios-lista', () => [])
-  const invitacionesPendientes = useState('espacios-invitaciones', () => [])
   const espacioActivoId = useState('espacios-activo-id', () => null)
   const isLoading = useState('espacios-loading', () => false)
 
@@ -26,49 +25,57 @@ export function useEspacios() {
     }
   }
 
-  async function fetchInvitaciones() {
-    try {
-      const data = await apiFetch('/api/familia/invitaciones/pendientes')
-      invitacionesPendientes.value = Array.isArray(data) ? data : []
-    } catch {
-      invitacionesPendientes.value = []
-    }
-  }
-
   async function crearEspacio(payload) {
     const e = await apiFetch('/api/familia', { method: 'POST', body: payload })
     espacios.value = [...espacios.value, { ...e, rolUsuario: 'dueno', totalMiembros: 1 }]
     return e
   }
 
-  async function invitarMiembro(espacioId, { destinatarioEmail, rol = 'editor', mensaje = null }) {
-    return apiFetch(`/api/familia/${espacioId}/invitar`, {
-      method: 'POST',
-      body: { destinatarioEmail, rol, mensaje },
-    })
-  }
-
-  async function aceptarInvitacion(invitacionId) {
-    await apiFetch(`/api/familia/invitaciones/${invitacionId}/aceptar`, { method: 'POST' })
-    invitacionesPendientes.value = invitacionesPendientes.value.filter((i) => i.id !== invitacionId)
-    await fetchEspacios()
-  }
-
   function setEspacioActivo(id) {
     espacioActivoId.value = id
   }
 
+  // ── Gestión directa de miembros (modelo admin) ──
+  async function fetchMiembros(espacioId) {
+    const data = await apiFetch(`/api/familia/${espacioId}/miembros`)
+    return Array.isArray(data) ? data : []
+  }
+
+  async function agregarMiembro(espacioId, { email, rol = 'editor' }) {
+    const m = await apiFetch(`/api/familia/${espacioId}/miembros`, {
+      method: 'POST',
+      body: { email, rol },
+    })
+    await fetchEspacios()
+    return m
+  }
+
+  async function quitarMiembro(espacioId, miembroUsuarioId) {
+    await apiFetch(`/api/familia/${espacioId}/miembros/${miembroUsuarioId}`, { method: 'DELETE' })
+    await fetchEspacios()
+  }
+
+  // Usuarios a nombre de los cuales puedo registrar gastos (control total).
+  async function fetchRegistrables() {
+    try {
+      const data = await apiFetch('/api/familia/registrables')
+      return Array.isArray(data) ? data : []
+    } catch {
+      return []
+    }
+  }
+
   return {
     espacios,
-    invitacionesPendientes,
     espacioActivo,
     espacioActivoId,
     isLoading,
     fetchEspacios,
-    fetchInvitaciones,
     crearEspacio,
-    invitarMiembro,
-    aceptarInvitacion,
     setEspacioActivo,
+    fetchMiembros,
+    agregarMiembro,
+    quitarMiembro,
+    fetchRegistrables,
   }
 }

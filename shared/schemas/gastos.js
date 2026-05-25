@@ -11,6 +11,8 @@ const gastoBaseSchema = z.object({
   metodoRegistro: metodoRegistroSchema.optional().default('manual'),
   gastoPlanificadoId: z.union([z.string(), z.number()]).nullable().optional(),
   transcripcionVoz: z.string().max(2000).optional().nullable(),
+  // Control total: registrar este gasto en nombre de un miembro de la familia.
+  enNombreDeUsuarioId: z.string().uuid().optional().nullable(),
 })
 
 export const gastoCreateSchema = gastoBaseSchema

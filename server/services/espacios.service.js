@@ -7,7 +7,6 @@ import { db } from '../utils/db.js'
 import {
   espaciosCompartidos,
   miembrosEspacio,
-  invitacionesEspacio,
   usuarios,
   gastos,
   ingresos,
@@ -146,121 +145,103 @@ export async function assertRolEspacio({ espacioId, usuarioId, requerido }) {
   return m.rol
 }
 
-export async function invitarMiembro({ espacioId, remitenteId, destinatarioEmail, rol = 'editor', mensaje = null }) {
-  await assertRolEspacio({ espacioId, usuarioId: remitenteId, requerido: 'dueno' })
-
-  // Verificar si el destinatario ya tiene cuenta (resolver email → id).
-  const [destUser] = await db
-    .select({ id: usuarios.id })
-    .from(usuarios)
-    .where(eq(usuarios.email, destinatarioEmail.toLowerCase()))
-    .limit(1)
-
-  // Si ya es miembro activo, no duplicar.
-  if (destUser) {
-    const [yaEs] = await db
-      .select({ id: miembrosEspacio.id })
-      .from(miembrosEspacio)
-      .where(and(
-        eq(miembrosEspacio.espacioId, espacioId),
-        eq(miembrosEspacio.usuarioId, destUser.id),
-      ))
-      .limit(1)
-    if (yaEs) {
-      const err = new Error('El usuario ya es miembro del espacio')
-      err.statusCode = 409
-      throw err
-    }
-  }
-
-  const [inv] = await db
-    .insert(invitacionesEspacio)
-    .values({
-      espacioId,
-      remitenteId,
-      destinatarioEmail: destinatarioEmail.toLowerCase(),
-      destinatarioId: destUser?.id || null,
-      rol,
-      mensaje,
-    })
-    .returning()
-  return inv
-}
-
-export async function aceptarInvitacion({ invitacionId, usuarioId }) {
-  const result = await db.transaction(async (tx) => {
-    const [inv] = await tx
-      .select()
-      .from(invitacionesEspacio)
-      .where(eq(invitacionesEspacio.id, invitacionId))
-      .limit(1)
-
-    if (!inv) {
-      const err = new Error('Invitación no encontrada')
-      err.statusCode = 404
-      throw err
-    }
-    if (inv.estado !== 'pendiente') {
-      const err = new Error(`Invitación ya está ${inv.estado}`)
-      err.statusCode = 409
-      throw err
-    }
-
-    // El receptor debe coincidir con la cuenta actual (por email o id).
-    const [u] = await tx.select({ id: usuarios.id, email: usuarios.email }).from(usuarios).where(eq(usuarios.id, usuarioId)).limit(1)
-    if (!u) {
-      const err = new Error('Usuario no encontrado')
-      err.statusCode = 404
-      throw err
-    }
-    if (inv.destinatarioId && inv.destinatarioId !== usuarioId) {
-      const err = new Error('La invitación no es para esta cuenta')
-      err.statusCode = 403
-      throw err
-    }
-    if (!inv.destinatarioId && u.email?.toLowerCase() !== inv.destinatarioEmail) {
-      const err = new Error('La invitación no es para esta cuenta')
-      err.statusCode = 403
-      throw err
-    }
-
-    await tx
-      .insert(miembrosEspacio)
-      .values({
-        espacioId: inv.espacioId,
-        usuarioId,
-        rol: inv.rol,
-        invitadoPorId: inv.remitenteId,
-        aceptadoEn: new Date(),
-      })
-      .onConflictDoNothing()
-
-    const [updated] = await tx
-      .update(invitacionesEspacio)
-      .set({ estado: 'aceptada', destinatarioId: usuarioId, updatedAt: new Date() })
-      .where(eq(invitacionesEspacio.id, invitacionId))
-      .returning()
-
-    return updated
-  })
-  return result
-}
-
-export async function listarInvitacionesPendientes({ email, usuarioId }) {
+/**
+ * Lista los miembros de un espacio (con nombre/email). Requiere ser miembro.
+ */
+export async function listarMiembros({ espacioId, usuarioId }) {
+  await assertRolEspacio({ espacioId, usuarioId, requerido: 'lector' })
   return db
     .select({
-      id: invitacionesEspacio.id,
-      espacioId: invitacionesEspacio.espacioId,
-      espacioNombre: espaciosCompartidos.nombre,
-      espacioIcono: espaciosCompartidos.icono,
-      rol: invitacionesEspacio.rol,
-      mensaje: invitacionesEspacio.mensaje,
-      createdAt: invitacionesEspacio.createdAt,
+      usuarioId: miembrosEspacio.usuarioId,
+      rol: miembrosEspacio.rol,
+      nombre: usuarios.nombre,
+      email: usuarios.email,
+      aceptadoEn: miembrosEspacio.aceptadoEn,
     })
-    .from(invitacionesEspacio)
-    .innerJoin(espaciosCompartidos, eq(invitacionesEspacio.espacioId, espaciosCompartidos.id))
-    .where(and(
-      eq(invitacionesEspacio.estado, 'pendiente'),
-      sql`(${invitacionesEspacio.destinatarioId} = ${usuarioId} OR LOWER(${invitacionesEspacio.destinatarioEmail}) = LOWER(${email}))`,
-    ))
+    .from(miembrosEspacio)
+    .innerJoin(usuarios, eq(miembrosEspacio.usuarioId, usuarios.id))
+    .where(eq(miembrosEspacio.espacioId, espacioId))
+}
+
+/**
+ * Alta directa de un miembro por el dueño (sin invitación). El correo debe
+ * pertenecer a un usuario ya registrado en el sistema.
+ */
+export async function agregarMiembroDirecto({ espacioId, duenoId, email, rol = 'editor' }) {
+  await assertRolEspacio({ espacioId, usuarioId: duenoId, requerido: 'dueno' })
+  const correo = String(email || '').trim().toLowerCase()
+  if (!correo || !correo.includes('@')) {
+    const err = new Error('Correo inválido'); err.statusCode = 400; throw err
+  }
+  const [u] = await db
+    .select({ id: usuarios.id, nombre: usuarios.nombre, email: usuarios.email })
+    .from(usuarios)
+    .where(eq(usuarios.email, correo))
+    .limit(1)
+  if (!u) {
+    const err = new Error('No hay ningún usuario registrado con ese correo'); err.statusCode = 404; throw err
+  }
+  const [ya] = await db
+    .select({ id: miembrosEspacio.id })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.espacioId, espacioId), eq(miembrosEspacio.usuarioId, u.id)))
+    .limit(1)
+  if (ya) {
+    const err = new Error('El usuario ya es miembro del espacio'); err.statusCode = 409; throw err
+  }
+  await db
+    .insert(miembrosEspacio)
+    .values({
+      espacioId,
+      usuarioId: u.id,
+      rol: rol === 'lector' ? 'lector' : 'editor',
+      invitadoPorId: duenoId,
+      aceptadoEn: new Date(),
+    })
+    .onConflictDoNothing()
+  return { usuarioId: u.id, nombre: u.nombre, email: u.email, rol: rol === 'lector' ? 'lector' : 'editor' }
+}
+
+/**
+ * Quita un miembro del espacio. Solo el dueño; no puede quitar a otro dueño
+ * ni a sí mismo.
+ */
+export async function quitarMiembro({ espacioId, duenoId, miembroUsuarioId }) {
+  await assertRolEspacio({ espacioId, usuarioId: duenoId, requerido: 'dueno' })
+  if (miembroUsuarioId === duenoId) {
+    const err = new Error('El dueño no puede quitarse a sí mismo'); err.statusCode = 400; throw err
+  }
+  const [m] = await db
+    .select({ rol: miembrosEspacio.rol })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.espacioId, espacioId), eq(miembrosEspacio.usuarioId, miembroUsuarioId)))
+    .limit(1)
+  if (m?.rol === 'dueno') {
+    const err = new Error('No puedes quitar a un dueño'); err.statusCode = 400; throw err
+  }
+  await db
+    .delete(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.espacioId, espacioId), eq(miembrosEspacio.usuarioId, miembroUsuarioId)))
+  return { ok: true }
+}
+
+/**
+ * Usuarios a nombre de los cuales el `usuarioId` puede registrar (miembros de
+ * los espacios que él posee, excluyéndose a sí mismo).
+ */
+export async function registrablesParaUsuario({ usuarioId }) {
+  const propios = await db
+    .select({ espacioId: miembrosEspacio.espacioId })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.usuarioId, usuarioId), eq(miembrosEspacio.rol, 'dueno')))
+  const ids = propios.map((p) => p.espacioId)
+  if (!ids.length) return []
+  const rows = await db
+    .select({ usuarioId: miembrosEspacio.usuarioId, nombre: usuarios.nombre, email: usuarios.email })
+    .from(miembrosEspacio)
+    .innerJoin(usuarios, eq(miembrosEspacio.usuarioId, usuarios.id))
+    .where(and(inArray(miembrosEspacio.espacioId, ids), sql`${miembrosEspacio.usuarioId} <> ${usuarioId}`))
+  const seen = new Map()
+  for (const r of rows) if (!seen.has(r.usuarioId)) seen.set(r.usuarioId, r)
+  return Array.from(seen.values())
 }

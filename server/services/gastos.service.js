@@ -1,13 +1,28 @@
 // Capa de servicios de gastos. Ver §2.1 / §4.7 de planifica.md.
 // Los handlers HTTP delegan aquí toda la lógica de negocio + acceso a DB.
 
-import { eq, and, sql, isNull, between } from 'drizzle-orm'
+import { eq, and, sql, isNull, inArray } from 'drizzle-orm'
 import { db } from '../utils/db.js'
-import { gastos, categorias, presupuestosCategoria, suscripcionesPush } from '../database/schema.js'
+import { gastos, categorias, miembrosEspacio } from '../database/schema.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
 import { assertOwner } from '../utils/assertOwner.js'
-import { sendPush } from '../utils/webPushSender.js'
-import { logger } from '../utils/logger.js'
+
+// Resuelve el espacio compartido donde `duenoId` es dueño y `miembroId` es
+// miembro. Devuelve el espacioId o null si no existe esa relación.
+async function resolverEspacioEnNombre(duenoId, miembroId) {
+  const propios = await db
+    .select({ espacioId: miembrosEspacio.espacioId })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.usuarioId, duenoId), eq(miembrosEspacio.rol, 'dueno')))
+  const ids = propios.map((p) => p.espacioId)
+  if (!ids.length) return null
+  const [m] = await db
+    .select({ espacioId: miembrosEspacio.espacioId })
+    .from(miembrosEspacio)
+    .where(and(eq(miembrosEspacio.usuarioId, miembroId), inArray(miembrosEspacio.espacioId, ids)))
+    .limit(1)
+  return m?.espacioId || null
+}
 
 /**
  * Crea un gasto y devuelve la versión enriquecida con datos de categoría.
@@ -23,6 +38,21 @@ export async function crearGasto({ usuarioId, body }) {
     throw err
   }
 
+  // Control total: un admin de familia puede registrar en nombre de un
+  // miembro de un espacio que posee. El gasto pertenece al miembro y
+  // registradoPorId guarda quién lo creó.
+  let duenoGasto = usuarioId
+  let espacioId = null
+  if (body.enNombreDeUsuarioId && body.enNombreDeUsuarioId !== usuarioId) {
+    espacioId = await resolverEspacioEnNombre(usuarioId, body.enNombreDeUsuarioId)
+    if (!espacioId) {
+      const err = new Error('No tienes permiso para registrar gastos de ese usuario')
+      err.statusCode = 403
+      throw err
+    }
+    duenoGasto = body.enNombreDeUsuarioId
+  }
+
   const { fecha: fechaLocal, hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const fechaHoy = body.fecha || fechaLocal
   const horaActual = body.hora || horaLocal
@@ -30,7 +60,9 @@ export async function crearGasto({ usuarioId, body }) {
   const [gasto] = await db
     .insert(gastos)
     .values({
-      usuarioId,
+      usuarioId: duenoGasto,
+      registradoPorId: usuarioId,
+      espacioId,
       categoriaId: body.categoriaId,
       concepto: body.concepto.trim(),
       monto: String(body.monto),
@@ -49,84 +81,12 @@ export async function crearGasto({ usuarioId, body }) {
     .where(eq(categorias.id, gasto.categoriaId))
     .limit(1)
 
-  // Submódulo presupuestos por categoría: revisar si este gasto hizo
-  // cruzar el umbral de alerta. Fire-and-forget — un fallo aquí no debe
-  // romper la creación del gasto.
-  verificarAlertaPresupuesto({ usuarioId, gasto, categoria: cat }).catch((e) => {
-    logger.warn('alerta presupuesto falló', { message: e?.message })
-  })
-
   return {
     ...gasto,
     monto: parseFloat(gasto.monto),
     categoriaNombre: cat?.nombre,
     categoriaIcono: cat?.icono,
     categoriaColor: cat?.color,
-  }
-}
-
-// Helper: chequea si el gasto recién creado cruza el umbral del presupuesto
-// de su categoría. Si pasa el límite por primera vez (pctAntes < umbral &&
-// pctAhora >= umbral), envía push a todas las suscripciones del usuario.
-// Evita spam: solo dispara en el "cruce", no en cada gasto subsiguiente.
-async function verificarAlertaPresupuesto({ usuarioId, gasto, categoria }) {
-  if (!gasto?.categoriaId) return
-  const [pcat] = await db
-    .select()
-    .from(presupuestosCategoria)
-    .where(and(
-      eq(presupuestosCategoria.usuarioId, usuarioId),
-      eq(presupuestosCategoria.categoriaId, gasto.categoriaId),
-    ))
-    .limit(1)
-  if (!pcat) return
-
-  const limite = parseFloat(pcat.montoMensual)
-  if (!(limite > 0)) return
-  const umbralPct = Number(pcat.alertaUmbral) || 80
-
-  const [anio, mes] = String(gasto.fecha).split('-').map(Number)
-  const primerDia = `${anio}-${String(mes).padStart(2, '0')}-01`
-  const ultimoDiaNum = new Date(anio, mes, 0).getDate()
-  const ultimaFecha = `${anio}-${String(mes).padStart(2, '0')}-${String(ultimoDiaNum).padStart(2, '0')}`
-
-  const [agg] = await db
-    .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
-    .from(gastos)
-    .where(and(
-      eq(gastos.usuarioId, usuarioId),
-      eq(gastos.categoriaId, gasto.categoriaId),
-      isNull(gastos.deletedAt),
-      between(gastos.fecha, primerDia, ultimaFecha),
-    ))
-
-  const total = parseFloat(agg.total)
-  const totalAntes = total - parseFloat(gasto.monto)
-  const pctAhora = (total / limite) * 100
-  const pctAntes = (totalAntes / limite) * 100
-
-  let titulo = null
-  let cuerpo = null
-  if (pctAntes < 100 && pctAhora >= 100) {
-    titulo = '⚠️ Presupuesto excedido'
-    cuerpo = `Superaste el presupuesto de ${categoria?.nombre || 'la categoría'} (${pctAhora.toFixed(0)}%).`
-  } else if (pctAntes < umbralPct && pctAhora >= umbralPct) {
-    titulo = '🔔 Alerta de presupuesto'
-    cuerpo = `Llegaste al ${pctAhora.toFixed(0)}% del presupuesto de ${categoria?.nombre || 'la categoría'}.`
-  } else {
-    return
-  }
-
-  const subs = await db
-    .select()
-    .from(suscripcionesPush)
-    .where(eq(suscripcionesPush.usuarioId, usuarioId))
-
-  for (const s of subs) {
-    sendPush({
-      subscription: { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-      payload: { titulo, cuerpo, url: '/presupuestos' },
-    }).catch(() => {})
   }
 }
 
