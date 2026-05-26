@@ -34,22 +34,28 @@ const RUTAS_PERFIL = [
   /^\/api\/ingresos(\/|$|\?)/,
   /^\/api\/deudas(\/|$|\?)/,
   /^\/api\/ahorros(\/|$|\?)/,
+  /^\/api\/futuros(\/|$|\?)/,
   /^\/api\/dashboard/,
   /^\/api\/planificador(\/|$|\?)/,
 ]
 
 function rutaUsaPerfil(path) {
-  if (/^\/api\/planificador\/futuros/.test(path)) return false
   return RUTAS_PERFIL.some((r) => r.test(path))
 }
 
 // Si hay un perfil activo válido (cookie `perfil-activo`, propiedad del usuario
 // real) y la ruta lo admite, devuelve el id del perfil como "dueño efectivo".
 async function resolverPerfilEfectivo(event, realId) {
-  const perfilId = getCookie(event, 'perfil-activo')
-  if (!perfilId) return realId
   const path = getRequestURL(event).pathname || ''
   if (!rutaUsaPerfil(path)) return realId
+
+  // La respuesta de estas rutas depende del perfil activo (cookie). Marcamos
+  // Vary: Cookie para que las cachés (navegador/SW) NO reutilicen datos del
+  // perfil anterior al cambiar — sin importar si el fetch usó apiFetch o no.
+  appendResponseHeader(event, 'Vary', 'Cookie')
+
+  const perfilId = getCookie(event, 'perfil-activo')
+  if (!perfilId) return realId
 
   const [p] = await db
     .select({ id: usuarios.id })
