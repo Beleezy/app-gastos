@@ -58,6 +58,13 @@ export function usePerfiles() {
   // perfil (evita estados cacheados inconsistentes).
   function entrarPerfil(id) {
     setPerfilActivo(id)
+    // Escribir la cookie de forma SÍNCRONA: useCookie difiere el write a un
+    // watcher y la recarga podría dispararse antes de que se persista.
+    if (typeof document !== 'undefined') {
+      document.cookie = id
+        ? `perfil-activo=${encodeURIComponent(id)}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
+        : 'perfil-activo=; path=/; max-age=0; samesite=lax'
+    }
     if (typeof window !== 'undefined') window.location.assign('/')
   }
 

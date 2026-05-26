@@ -47,6 +47,19 @@ export default defineNuxtPlugin(() => {
         }
       }
 
+      // Cache-buster por perfil activo: las respuestas dependen de la cookie
+      // `perfil-activo`, pero las cachés (HTTP y service worker) indexan por
+      // URL. Añadir el perfil al query hace que cada contexto tenga su propia
+      // entrada de caché y la data se refresque al instante al cambiar de
+      // perfil (sin servir datos del perfil anterior).
+      try {
+        const m = typeof document !== 'undefined'
+          ? document.cookie.match(/(?:^|; )perfil-activo=([^;]*)/)
+          : null
+        const perfilId = m ? decodeURIComponent(m[1]) : null
+        if (perfilId) options.query = { ...(options.query || {}), _p: perfilId }
+      } catch {}
+
       options.headers = headers
     },
     onResponseError({ response }) {
