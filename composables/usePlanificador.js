@@ -33,7 +33,7 @@ export function usePlanificador() {
 
   const resumen = computed(() => {
     const presupuesto = plan.value?.montoPresupuesto || 0
-    const totalPlanificado = gastosPlaneados.value.reduce((s, g) => s + g.montoEstimado, 0)
+    const totalPlanificado = gastosPlaneados.value.reduce((s, g) => s + (Number(g.montoEstimado) || 0), 0)
     const pagados = gastosPlaneados.value.filter(g => g.estado === 'pagado')
     const pendientes = gastosPlaneados.value.filter(g => g.estado === 'pendiente')
     const hoy = _hoyISO()
@@ -74,7 +74,7 @@ export function usePlanificador() {
         }
       }
       map[key].gastos.push(g)
-      map[key].total += g.montoEstimado
+      map[key].total += Number(g.montoEstimado) || 0
     }
     return Object.values(map).sort((a, b) => b.total - a.total)
   })
@@ -122,7 +122,7 @@ export function usePlanificador() {
 
   const datosGrafico = computed(() => {
     const total = resumen.value.totalPlanificado
-    if (total === 0) return []
+    if (!(total > 0)) return []
     let acumulado = 0
     return gastosPorCategoria.value.map(cat => {
       const porcentaje = (cat.total / total) * 100

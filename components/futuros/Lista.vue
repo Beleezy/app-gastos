@@ -631,7 +631,7 @@
     <!-- Panel: nueva opción -->
     <div v-if="nuevaOpcionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevaOpcion"></div>
-      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 80dvh; overflow-y: auto;">
+      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 80dvh; overflow-y: auto; overscroll-behavior: contain;">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-theme-text">Nueva opcion</h3>
           <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevaOpcion">
@@ -693,7 +693,7 @@
     <!-- Panel: nuevo detalle -->
     <div v-if="nuevoDetalleCtx" class="fixed inset-0 z-50 flex items-end justify-center">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevoDetalle"></div>
-      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3">
+      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-theme-text">Nuevo detalle</h3>
           <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevoDetalle">
@@ -740,7 +740,7 @@
     <!-- Modal: decidir opción -->
     <div v-if="decisionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarDecision"></div>
-      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3">
+      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;">
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-theme-text">
             {{ decisionCtx.tipo === 'comprar' ? 'Comprar ya' : 'Enviar al planificador' }}
@@ -938,6 +938,14 @@ const nuevaOpcion = ref(opcionVacia())
 const decisionCtx = ref(null) // { proyecto, detalle, opcion, tipo }
 const decisionForm = ref({ monto: '', fecha: '', notas: '' })
 const decidiendo = ref(false)
+
+// Botón atrás (Android) + bloqueo del scroll del body para cada modal/sheet
+useOverlayBack(computed(() => proyectoAEliminar.value !== null), () => { proyectoAEliminar.value = null })
+useOverlayBack(computed(() => detalleAEliminar.value !== null), () => { detalleAEliminar.value = null })
+useOverlayBack(computed(() => opcionAEliminar.value !== null), () => { opcionAEliminar.value = null })
+useOverlayBack(computed(() => nuevoDetalleCtx.value !== null), () => cancelarNuevoDetalle())
+useOverlayBack(computed(() => nuevaOpcionCtx.value !== null), () => cancelarNuevaOpcion())
+useOverlayBack(computed(() => decisionCtx.value !== null), () => cancelarDecision())
 
 watch(gastosFuturos, (items) => {
   if (!items.length) {

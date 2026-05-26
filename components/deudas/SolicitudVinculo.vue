@@ -65,15 +65,17 @@
       </div>
     </div>
 
-    <!-- Botón enviar -->
-    <button
-      class="w-full py-3 rounded-xl font-medium text-sm transition-all mt-2"
-      :class="isValid ? 'bg-theme-accent-dark text-theme-on-accent active:bg-theme-accent-dark' : 'bg-theme-card text-theme-text-muted cursor-not-allowed'"
-      :disabled="!isValid || vinculos.isLoading.value"
-      @click="enviar"
-    >
-      {{ vinculos.isLoading.value ? 'Enviando...' : 'Enviar solicitud' }}
-    </button>
+    <template #footer>
+      <!-- Botón enviar -->
+      <button
+        class="w-full py-3 rounded-xl font-medium text-sm transition-all"
+        :class="isValid ? 'bg-theme-accent-dark text-theme-on-accent active:bg-theme-accent-dark' : 'bg-theme-card text-theme-text-muted cursor-not-allowed'"
+        :disabled="!isValid || vinculos.isLoading.value"
+        @click="enviar"
+      >
+        {{ vinculos.isLoading.value ? 'Enviando...' : 'Enviar solicitud' }}
+      </button>
+    </template>
   </SharedBaseBottomSheet>
 </template>
 

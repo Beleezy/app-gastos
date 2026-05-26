@@ -29,7 +29,7 @@
       </div>
 
       <div class="flex shrink-0 items-center justify-between px-5 md:px-6 pt-1 md:pt-5 pb-4">
-        <h2 :id="titleId" class="text-lg md:text-xl font-semibold text-theme-text">{{ title }}</h2>
+        <h2 :id="titleId" class="min-w-0 flex-1 truncate pr-3 text-lg md:text-xl font-semibold text-theme-text">{{ title }}</h2>
         <button
           class="tap-target flex h-9 w-9 items-center justify-center rounded-full bg-theme-border-md text-theme-text-sec hover:text-theme-text transition-colors"
           aria-label="Cerrar"

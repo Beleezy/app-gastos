@@ -5,12 +5,12 @@
     <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" :height="H" preserveAspectRatio="none">
       <!-- Área bajo la curva -->
       <defs>
-        <linearGradient id="grad-deuda" x1="0" y1="0" x2="0" y2="1">
+        <linearGradient :id="gradId" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" :stop-color="color" stop-opacity="0.25" />
           <stop offset="100%" :stop-color="color" stop-opacity="0.02" />
         </linearGradient>
       </defs>
-      <path :d="areaPath" :fill="`url(#grad-deuda)`" />
+      <path :d="areaPath" :fill="`url(#${gradId})`" />
       <!-- Línea -->
       <polyline
         :points="polylinePoints"
@@ -51,6 +51,8 @@ const props = defineProps({
 const W = 300
 const H = 56
 const PAD = 6
+
+const gradId = `grad-deuda-${Math.random().toString(36).slice(2, 9)}`
 
 const { currencySymbol, formatMonto } = useCurrency()
 

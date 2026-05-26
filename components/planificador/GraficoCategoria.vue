@@ -35,15 +35,15 @@
             />
           </svg>
           <!-- Center text -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-3">
             <template v-if="segmentoActivo !== null">
-              <span class="text-[9px] text-theme-text-sec leading-tight">{{ datosGrafico[segmentoActivo].nombre }}</span>
+              <span class="text-[9px] text-theme-text-sec leading-tight truncate max-w-full">{{ datosGrafico[segmentoActivo].nombre }}</span>
               <span class="text-xs font-bold text-theme-text leading-tight">{{ datosGrafico[segmentoActivo].porcentaje }}%</span>
-              <span class="text-[9px] text-theme-text-muted leading-tight">{{ currencySymbol }} {{ formatMonto(datosGrafico[segmentoActivo].total) }}</span>
+              <span class="text-[9px] text-theme-text-muted leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(datosGrafico[segmentoActivo].total) }}</span>
             </template>
             <template v-else>
-              <span class="text-xs text-theme-text-sec">Total</span>
-              <span class="text-sm font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(resumen.totalPlanificado) }}</span>
+              <span class="text-xs text-theme-text-sec leading-tight">Total</span>
+              <span class="text-sm font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(resumen.totalPlanificado) }}</span>
             </template>
           </div>
         </div>

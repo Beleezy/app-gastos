@@ -665,6 +665,6 @@ function onSwipeTouchEnd(e, gasto) {
 }
 .expand-enter-to, .expand-leave-from {
   opacity: 1;
-  max-height: 200px;
+  max-height: 360px;
 }
 </style>

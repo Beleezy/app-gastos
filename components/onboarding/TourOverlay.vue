@@ -12,7 +12,7 @@
 
       <!-- Tour Card -->
       <div
-        class="relative w-full sm:max-w-sm bg-theme-card border-t sm:border border-theme-border sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-hidden"
+        class="relative w-full sm:max-w-sm bg-theme-card border-t sm:border border-theme-border sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-y-auto overscroll-contain"
         style="max-height: 90vh;"
       >
         <!-- Progreso superior -->
@@ -107,6 +107,15 @@ const {
 } = useOnboarding()
 
 const { vibrate } = useHaptic()
+
+// Bloquea el scroll del body mientras el tour está activo
+const { registerModal, unregisterModal } = useModalLayer()
+let tourLocked = false
+watch(() => state.value.activo, (v) => {
+  if (v && !tourLocked) { tourLocked = true; registerModal() }
+  else if (!v && tourLocked) { tourLocked = false; unregisterModal() }
+}, { immediate: true })
+onUnmounted(() => { if (tourLocked) { tourLocked = false; unregisterModal() } })
 
 const pasos = [
   {

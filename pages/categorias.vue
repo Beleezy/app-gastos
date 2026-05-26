@@ -95,7 +95,7 @@
               </div>
 
               <!-- Contenido scrolleable -->
-              <div class="overflow-y-auto flex-1 p-4">
+              <div class="overflow-y-auto overscroll-contain flex-1 p-4">
                 <!-- Tab preseleccionadas -->
                 <div v-if="tabCategoria === 'preseleccionadas'">
                   <!-- Buscador -->
@@ -234,8 +234,6 @@
 </template>
 
 <script setup>
-import { useModalBack } from '~/composables/useModalBack'
-
 const { apiFetch } = useApiFetch()
 const router = useRouter()
 
@@ -339,14 +337,10 @@ const puedeCrearCategoria = computed(() => {
   return nuevaCategoria.nombre.trim().length > 0 && nuevaCategoria.icono && nuevaCategoria.color
 })
 
-// Hook hardware back button
-watch(mostrarSelectorCategorias, (newVal) => {
-  if (newVal) {
-    document.body.style.overflow = 'hidden'
-  } else {
-    document.body.style.overflow = ''
-  }
-})
+// Botón atrás (Android) + bloqueo del scroll del body mientras hay un modal abierto
+useOverlayBack(mostrarSelectorCategorias, () => cerrarSelectorCategorias())
+const eliminarAbierto = computed(() => categoriaAEliminar.value !== null)
+useOverlayBack(eliminarAbierto, () => { categoriaAEliminar.value = null })
 
 async function fetchCategorias() {
   isLoading.value = true

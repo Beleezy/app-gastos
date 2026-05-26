@@ -248,10 +248,13 @@
         </div>
       </div>
 
-      <p v-if="errorMsg" class="text-xs text-red-400">{{ errorMsg }}</p>
+    </div>
+
+    <template #footer>
+      <p v-if="errorMsg" class="text-xs text-red-400 mb-2">{{ errorMsg }}</p>
 
       <button
-        class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white transition-colors"
+        class="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white transition-colors"
         :class="saving ? 'cursor-not-allowed bg-violet-500/70' : 'bg-violet-500 hover:bg-violet-600 active:bg-violet-700'"
         :disabled="saving"
         @click="guardar"
@@ -262,7 +265,7 @@
         </svg>
         {{ saving ? 'Guardando...' : modoEdicion ? 'Guardar gasto futuro' : 'Crear gasto futuro' }}
       </button>
-    </div>
+    </template>
   </SharedBaseBottomSheet>
 </template>
 

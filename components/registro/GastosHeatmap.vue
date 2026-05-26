@@ -31,7 +31,7 @@
         v-for="(c, idx) in celdas"
         :key="`c-${idx}`"
         type="button"
-        class="aspect-square rounded-md transition-all relative outline-none"
+        class="hm-cell aspect-square rounded-md transition-all relative outline-none"
         :class="[
           c.fecha ? 'cursor-pointer hover:scale-105 active:scale-95' : 'opacity-0 pointer-events-none',
           c.fecha && c.fecha === fechaSeleccionada ? 'ring-2 ring-theme-accent ring-offset-1 ring-offset-theme-card scale-105' : '',
@@ -168,6 +168,12 @@ function colorForIntensity(i) {
 </script>
 
 <style scoped>
+/* Fallback visible si el navegador no soporta color-mix (la declaración inline
+   inválida se ignora y cae a este tinte en vez de quedar transparente/blanco). */
+.hm-cell {
+  background-color: rgba(148, 163, 184, 0.18);
+}
+
 .detail-enter-active, .detail-leave-active {
   transition: all 0.25s ease;
   overflow: hidden;

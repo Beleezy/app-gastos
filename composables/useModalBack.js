@@ -25,7 +25,7 @@ export function markCleanupPopPending() {
   }, CLEANUP_SUPPRESS_MS)
 }
 
-function consumeCleanupPop() {
+export function consumeCleanupPop() {
   if (!cleanupPopDeadline || Date.now() > cleanupPopDeadline) return false
 
   cleanupPopDeadline = 0

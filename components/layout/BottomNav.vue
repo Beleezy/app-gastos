@@ -12,7 +12,7 @@
         :data-testid="`nav-tab-${item.to === '/' ? 'inicio' : item.to.slice(1)}`"
         :aria-label="item.ariaLabel || item.label"
         :aria-current="isActive(item.to) ? 'page' : undefined"
-        class="relative flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 group"
+        class="relative flex flex-col items-center justify-center flex-1 min-w-0 px-0.5 h-full transition-all duration-300 group"
         :class="[
           isActive(item.to)
             ? 'text-theme-accent'
@@ -42,7 +42,7 @@
         </div>
 
         <span
-          class="text-xs font-semibold transition-all duration-300 leading-none"
+          class="max-w-full truncate text-xs font-semibold transition-all duration-300 leading-none"
           :class="isActive(item.to) ? 'text-theme-accent opacity-100' : 'opacity-70'"
         >{{ item.label }}</span>
       </NuxtLink>

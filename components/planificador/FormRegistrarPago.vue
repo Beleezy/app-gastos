@@ -58,21 +58,23 @@
       ></textarea>
     </div>
 
-    <p v-if="errorMsg" class="text-xs text-red-400">{{ errorMsg }}</p>
+    <template #footer>
+      <p v-if="errorMsg" class="text-xs text-red-400 mb-2">{{ errorMsg }}</p>
 
-    <button
-      class="mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-theme-on-accent transition-colors"
-      :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
-      :disabled="saving"
-      data-testid="btn-confirmar-pago"
-      @click="guardar"
-    >
-      <svg v-if="saving" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>
-      {{ saving ? 'Guardando...' : gasto.gastoRegistradoId ? 'Actualizar registro' : 'Registrar en gastos' }}
-    </button>
+      <button
+        class="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-theme-on-accent transition-colors"
+        :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
+        :disabled="saving"
+        data-testid="btn-confirmar-pago"
+        @click="guardar"
+      >
+        <svg v-if="saving" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        {{ saving ? 'Guardando...' : gasto.gastoRegistradoId ? 'Actualizar registro' : 'Registrar en gastos' }}
+      </button>
+    </template>
   </SharedBaseBottomSheet>
 </template>
 
