@@ -46,17 +46,29 @@
       </button>
     </div>
 
+    <!-- Formulario crear/editar -->
     <div v-if="mostrarForm" class="px-5 mb-4">
-      <div class="bg-theme-card border border-theme-border rounded-2xl p-4 flex items-center gap-2">
-        <input
-          v-model="nuevoNombre"
-          placeholder="Nombre (p. ej. Papá)"
-          maxlength="255"
-          class="flex-1 bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm"
-          @keyup.enter="guardarNuevo"
-        />
-        <button class="px-3 py-2.5 rounded-xl bg-theme-input text-theme-text-sec text-sm" @click="mostrarForm = false">Cancelar</button>
-        <button class="px-4 py-2.5 rounded-xl bg-fuchsia-500 text-white text-sm font-semibold disabled:opacity-50" :disabled="!nuevoNombre.trim()" @click="guardarNuevo">Crear</button>
+      <div class="bg-theme-card border border-theme-border rounded-2xl p-4 space-y-3">
+        <p class="text-sm font-semibold text-theme-text">{{ form.id ? 'Editar perfil' : 'Nuevo perfil' }}</p>
+        <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">Nombre</label>
+          <input v-model="form.nombre" placeholder="p. ej. Papá" maxlength="255" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">WhatsApp <span class="text-theme-text-muted">(opcional)</span></label>
+          <input v-model="form.telefono" type="tel" inputmode="tel" placeholder="p. ej. 51987654321" maxlength="30" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+          <p class="text-[10px] text-theme-text-muted mt-1">Con código de país, sin espacios ni símbolos. Se usa para enviarle reportes.</p>
+        </div>
+        <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">Presupuesto mensual <span class="text-theme-text-muted">(opcional)</span></label>
+          <input v-model.number="form.presupuesto" type="number" step="0.01" min="0" placeholder="0.00" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div class="flex gap-2 pt-1">
+          <button class="flex-1 px-4 py-2.5 rounded-xl bg-theme-input text-theme-text-sec text-sm" @click="cerrarForm">Cancelar</button>
+          <button class="flex-1 px-4 py-2.5 rounded-xl bg-fuchsia-500 text-white text-sm font-semibold disabled:opacity-50" :disabled="!form.nombre.trim() || guardando" @click="guardar">
+            {{ form.id ? 'Guardar' : 'Crear' }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -65,7 +77,7 @@
       <div v-if="cargando && !perfiles.length" class="space-y-2">
         <div v-for="i in 2" :key="i" class="h-16 bg-theme-card rounded-xl shimmer"></div>
       </div>
-      <div v-else-if="!perfiles.length" class="text-center py-10">
+      <div v-else-if="!perfiles.length && !mostrarForm" class="text-center py-10">
         <p class="text-sm text-theme-text-sec">Aún no tienes perfiles de familiares</p>
         <p class="text-[11px] text-theme-text-muted mt-1">Crea uno para empezar a administrar sus finanzas</p>
       </div>
@@ -76,24 +88,19 @@
         class="bg-theme-card border border-theme-border rounded-xl p-3"
         :class="perfilActivoId === p.id ? 'ring-1 ring-fuchsia-500/40' : ''"
       >
-        <div v-if="editandoId === p.id" class="flex items-center gap-2">
-          <input
-            v-model="editNombre"
-            maxlength="255"
-            class="flex-1 bg-theme-input border border-theme-border rounded-lg px-3 py-2 text-sm"
-            @keyup.enter="guardarEdicion(p)"
-          />
-          <button class="px-3 py-2 rounded-lg bg-theme-input text-theme-text-sec text-xs" @click="editandoId = null">Cancelar</button>
-          <button class="px-3 py-2 rounded-lg bg-fuchsia-500 text-white text-xs font-semibold" @click="guardarEdicion(p)">Guardar</button>
-        </div>
-        <div v-else class="flex items-center justify-between gap-2">
+        <div class="flex items-center justify-between gap-2">
           <div class="flex items-center gap-2.5 min-w-0">
             <div class="w-9 h-9 rounded-lg bg-fuchsia-500/15 flex items-center justify-center text-sm font-bold text-fuchsia-300 shrink-0">
               {{ inicial(p.nombre) }}
             </div>
             <div class="min-w-0">
               <p class="text-sm text-theme-text font-semibold truncate">{{ p.nombre }}</p>
-              <p v-if="perfilActivoId === p.id" class="text-[10px] text-fuchsia-400">Perfil activo</p>
+              <p class="text-[10px] text-theme-text-muted truncate">
+                <span v-if="p.presupuesto > 0">Presup.: {{ currencySymbol }} {{ formatMonto(p.presupuesto) }}</span>
+                <span v-if="p.presupuesto > 0 && p.telefono"> · </span>
+                <span v-if="p.telefono">📱 {{ p.telefono }}</span>
+                <span v-if="perfilActivoId === p.id" class="text-fuchsia-400"> · Activo</span>
+              </p>
             </div>
           </div>
           <div class="flex items-center gap-1 shrink-0">
@@ -118,12 +125,12 @@ const {
   perfiles, perfilActivoId, cargando,
   fetchPerfiles, crearPerfil, actualizarPerfil, eliminarPerfil, entrarPerfil,
 } = usePerfiles()
+const { currencySymbol, formatMonto } = useCurrency()
 const toast = useToast()
 
 const mostrarForm = ref(false)
-const nuevoNombre = ref('')
-const editandoId = ref(null)
-const editNombre = ref('')
+const guardando = ref(false)
+const form = reactive({ id: null, nombre: '', telefono: '', presupuesto: null })
 
 onMounted(fetchPerfiles)
 
@@ -131,38 +138,53 @@ function inicial(nombre) {
   return (nombre || '?').trim().charAt(0).toUpperCase()
 }
 
-function abrirNuevo() {
-  mostrarForm.value = !mostrarForm.value
-  nuevoNombre.value = ''
+function resetForm() {
+  form.id = null
+  form.nombre = ''
+  form.telefono = ''
+  form.presupuesto = null
 }
 
-async function guardarNuevo() {
-  const n = nuevoNombre.value.trim()
-  if (!n) return
-  try {
-    await crearPerfil(n)
-    toast.success('Perfil creado')
-    nuevoNombre.value = ''
+function abrirNuevo() {
+  if (mostrarForm.value && !form.id) {
     mostrarForm.value = false
-  } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo crear el perfil')
+    return
   }
+  resetForm()
+  mostrarForm.value = true
 }
 
 function abrirEdicion(p) {
-  editandoId.value = p.id
-  editNombre.value = p.nombre
+  form.id = p.id
+  form.nombre = p.nombre
+  form.telefono = p.telefono || ''
+  form.presupuesto = p.presupuesto || null
+  mostrarForm.value = true
 }
 
-async function guardarEdicion(p) {
-  const n = editNombre.value.trim()
-  if (!n) return
+function cerrarForm() {
+  mostrarForm.value = false
+  resetForm()
+}
+
+async function guardar() {
+  const nombre = form.nombre.trim()
+  if (!nombre) return
+  guardando.value = true
+  const datos = { nombre, telefono: form.telefono.trim(), presupuesto: Number(form.presupuesto) || 0 }
   try {
-    await actualizarPerfil(p.id, n)
-    editandoId.value = null
-    toast.success('Perfil actualizado')
+    if (form.id) {
+      await actualizarPerfil(form.id, datos)
+      toast.success('Perfil actualizado')
+    } else {
+      await crearPerfil(datos)
+      toast.success('Perfil creado')
+    }
+    cerrarForm()
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo actualizar')
+    toast.error(e?.data?.message || 'No se pudo guardar el perfil')
+  } finally {
+    guardando.value = false
   }
 }
 

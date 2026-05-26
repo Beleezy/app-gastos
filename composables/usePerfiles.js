@@ -36,14 +36,14 @@ export function usePerfiles() {
     }
   }
 
-  async function crearPerfil(nombre) {
-    const p = await apiFetch('/api/perfiles', { method: 'POST', body: { nombre } })
+  async function crearPerfil(datos) {
+    const p = await apiFetch('/api/perfiles', { method: 'POST', body: datos })
     await fetchPerfiles()
     return p
   }
 
-  async function actualizarPerfil(id, nombre) {
-    await apiFetch(`/api/perfiles/${id}`, { method: 'PATCH', body: { nombre } })
+  async function actualizarPerfil(id, datos) {
+    await apiFetch(`/api/perfiles/${id}`, { method: 'PATCH', body: datos })
     await fetchPerfiles()
   }
 

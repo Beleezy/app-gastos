@@ -6,7 +6,11 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   const body = await readBody(event)
   try {
-    return await actualizarPerfil(propietarioId, id, { nombre: body?.nombre })
+    return await actualizarPerfil(propietarioId, id, {
+      nombre: body?.nombre,
+      telefono: body?.telefono,
+      presupuesto: body?.presupuesto,
+    })
   } catch (e) {
     if (e?.statusCode) throw createError({ statusCode: e.statusCode, message: e.message })
     throw e

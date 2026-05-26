@@ -23,6 +23,8 @@ export const usuarios = pgTable('usuarios', {
   // Si está seteado, esta fila es un "perfil gestionado" (mini-usuario sin
   // login) administrado por el usuario real indicado. null = usuario real.
   gestionadoPorId: uuid('gestionado_por_id'),
+  // Teléfono (WhatsApp) del perfil, para enviarle reportes. Formato libre.
+  telefono: varchar('telefono', { length: 30 }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [

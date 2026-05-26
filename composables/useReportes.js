@@ -17,7 +17,7 @@ const MESES = [
 export function useReportes() {
   const { apiFetch } = useApiFetch()
   const { currencySymbol, formatMonto } = useCurrency()
-  const { nombrePerfilActivo } = usePerfiles()
+  const { nombrePerfilActivo, perfilActivo } = usePerfiles()
 
   const fmt = (n) => `${currencySymbol.value} ${formatMonto(Number(n) || 0)}`
 
@@ -206,7 +206,7 @@ export function useReportes() {
     URL.revokeObjectURL(url)
   }
 
-  async function compartir(blob, nombre, textoWa) {
+  async function compartir(blob, nombre, textoWa, telefono) {
     const file = new File([blob], nombre, { type: blob.type })
     if (typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
@@ -218,7 +218,11 @@ export function useReportes() {
     }
     descargar(blob, nombre)
     if (typeof window !== 'undefined') {
-      window.open(`https://wa.me/?text=${encodeURIComponent(textoWa)}`, '_blank')
+      const tel = String(telefono || '').replace(/\D/g, '')
+      const url = tel
+        ? `https://wa.me/${tel}?text=${encodeURIComponent(textoWa)}`
+        : `https://wa.me/?text=${encodeURIComponent(textoWa)}`
+      window.open(url, '_blank')
     }
   }
 
@@ -235,7 +239,7 @@ export function useReportes() {
     const nombre = `reporte-${modulo}-${slug(nombrePerfilActivo.value)}-${anio}-${String(mes).padStart(2, '0')}.${ext}`
     const blob = formato === 'excel' ? await blobExcel(rep) : await blobPdf(rep)
     const textoWa = `${rep.titulo} · ${rep.subtitulo}\n${rep.totalLabel}: ${rep.total}`
-    if (accion === 'compartir') await compartir(blob, nombre, textoWa)
+    if (accion === 'compartir') await compartir(blob, nombre, textoWa, perfilActivo.value?.telefono)
     else descargar(blob, nombre)
   }
 
