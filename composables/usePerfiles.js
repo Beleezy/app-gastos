@@ -1,16 +1,17 @@
 // Perfiles gestionados (familia): mini-usuarios sin login. El "perfil activo"
-// se persiste en localStorage y se envía como X-Perfil-Id en cada request
-// (ver plugins/fetch.js), de modo que el servidor reencuadra los datos de
-// Registro/Planificador/Ahorro/Deudas al perfil elegido.
-
-const STORAGE_KEY = 'perfil-activo-id'
+// se guarda en una COOKIE (`perfil-activo`), no en localStorage: así es válido
+// tanto en SSR como en cliente (sin desajustes de hidratación) y el servidor
+// la lee directamente para reencuadrar los datos de Registro/Planificador/
+// Ahorro/Deudas al perfil elegido (ver server/utils/getUsuario.js).
 
 export function usePerfiles() {
   const { apiFetch } = useApiFetch()
   const perfiles = useState('perfiles-lista', () => [])
-  // El valor real (desde localStorage) lo sincroniza plugins/perfil-activo.client.js
-  // al iniciar; en SSR no hay localStorage, así que arranca en null.
-  const perfilActivoId = useState('perfil-activo-id-state', () => null)
+  const perfilActivoId = useCookie('perfil-activo', {
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 365,
+  })
   const cargando = useState('perfiles-cargando', () => false)
 
   const perfilActivo = computed(
@@ -24,10 +25,6 @@ export function usePerfiles() {
     try {
       const data = await apiFetch('/api/perfiles')
       perfiles.value = Array.isArray(data) ? data : []
-      // Si el perfil activo ya no existe, volver a "Yo".
-      if (perfilActivoId.value && !perfiles.value.some((p) => p.id === perfilActivoId.value)) {
-        setPerfilActivo(null)
-      }
     } catch {
       perfiles.value = []
     } finally {
@@ -52,13 +49,9 @@ export function usePerfiles() {
     await fetchPerfiles()
   }
 
-  // Cambia el perfil activo SIN recargar. Usa `entrarPerfil` para recargar.
+  // Cambia el perfil activo (cookie). Usa `entrarPerfil` para recargar.
   function setPerfilActivo(id) {
     perfilActivoId.value = id || null
-    try {
-      if (id) localStorage.setItem(STORAGE_KEY, id)
-      else localStorage.removeItem(STORAGE_KEY)
-    } catch {}
   }
 
   // Cambia de contexto y recarga para que todos los módulos tomen el nuevo

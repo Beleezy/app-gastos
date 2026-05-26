@@ -26,9 +26,9 @@ function esSuperadminEmail(email) {
 
 // ── Perfiles gestionados (familia) ──
 // Rutas cuyos datos se reencuadran al "perfil activo" (mini-usuario sin login)
-// cuando el cliente envía la cabecera X-Perfil-Id. El resto (categorías,
-// configuración, superadmin, métricas, futuros, papelera) siempre opera sobre
-// el usuario real → quedan compartidas/globales.
+// indicado por la cookie `perfil-activo`. El resto (categorías, configuración,
+// superadmin, métricas, futuros, papelera) siempre opera sobre el usuario
+// real → quedan compartidas/globales.
 const RUTAS_PERFIL = [
   /^\/api\/gastos(\/|$|\?)/,
   /^\/api\/ingresos(\/|$|\?)/,
@@ -43,10 +43,10 @@ function rutaUsaPerfil(path) {
   return RUTAS_PERFIL.some((r) => r.test(path))
 }
 
-// Si hay un perfil activo válido (propiedad del usuario real) y la ruta lo
-// admite, devuelve el id del perfil como "dueño efectivo" de los datos.
+// Si hay un perfil activo válido (cookie `perfil-activo`, propiedad del usuario
+// real) y la ruta lo admite, devuelve el id del perfil como "dueño efectivo".
 async function resolverPerfilEfectivo(event, realId) {
-  const perfilId = getRequestHeader(event, 'x-perfil-id')
+  const perfilId = getCookie(event, 'perfil-activo')
   if (!perfilId) return realId
   const path = getRequestURL(event).pathname || ''
   if (!rutaUsaPerfil(path)) return realId
@@ -56,9 +56,8 @@ async function resolverPerfilEfectivo(event, realId) {
     .from(usuarios)
     .where(and(eq(usuarios.id, perfilId), eq(usuarios.gestionadoPorId, realId)))
     .limit(1)
-  if (!p) {
-    throw createError({ statusCode: 403, message: 'Perfil no válido' })
-  }
+  // Cookie inválida o ajena: ignorar y usar el usuario real (no romper la app).
+  if (!p) return realId
   event.context.usuarioReal = realId
   return perfilId
 }
