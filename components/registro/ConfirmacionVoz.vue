@@ -4,7 +4,7 @@
     <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('close')"></div>
 
     <!-- Modal Content -->
-    <div class="relative w-full max-w-lg bg-theme-card rounded-t-3xl border-t border-theme-border max-h-[95vh] overflow-y-auto animate-slide-up">
+    <div class="relative w-full max-w-lg bg-theme-card rounded-t-3xl border-t border-theme-border max-h-[95vh] overflow-y-auto overscroll-contain animate-slide-up">
       <!-- Handle -->
       <div class="flex justify-center pt-3 pb-1">
         <div class="w-10 h-1 rounded-full bg-theme-border-md"></div>
@@ -276,7 +276,12 @@ const emit = defineEmits(['close', 'confirm', 'retry'])
 const saveError = ref(null)
 
 import { useModalBack } from '~/composables/useModalBack'
+import { useModalLayer } from '~/composables/useModalLayer'
 useModalBack(() => emit('close'))
+
+const { registerModal, unregisterModal } = useModalLayer()
+onMounted(() => registerModal())
+onUnmounted(() => unregisterModal())
 
 const { currencySymbol, formatMonto } = useCurrency()
 

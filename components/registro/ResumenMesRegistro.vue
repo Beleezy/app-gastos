@@ -337,6 +337,6 @@ const otrosTotal = computed(() => {
 }
 .cat-expand-enter-to, .cat-expand-leave-from {
   opacity: 1;
-  max-height: 600px;
+  max-height: 800px;
 }
 </style>

@@ -19,14 +19,14 @@
       <div class="relative mt-1">
         <p class="text-[10px] text-theme-text-sec uppercase tracking-widest font-semibold mb-1">Presupuesto mensual</p>
         <div class="flex items-end justify-between">
-          <div v-if="editandoPresupuesto" class="flex items-center gap-1">
+          <div v-if="editandoPresupuesto" class="flex flex-1 min-w-0 items-center gap-1">
             <span class="text-2xl font-bold text-theme-text-muted">{{ currencySymbol }}</span>
             <input
               ref="inputPresupuesto"
               v-model="presupuestoTemp"
               type="number"
               step="0.01"
-              class="w-36 bg-theme-input border border-theme-accent rounded-lg px-2 py-1 text-3xl font-extrabold text-theme-text focus:outline-none"
+              class="w-full min-w-0 bg-theme-input border border-theme-accent rounded-lg px-2 py-1 text-3xl font-extrabold text-theme-text focus:outline-none"
               @keyup.enter="guardarPresupuesto"
               @blur="guardarPresupuesto"
             />
@@ -377,7 +377,7 @@ async function guardarPresupuesto() {
 .slide-down-enter-to,
 .slide-down-leave-from {
   opacity: 1;
-  max-height: 300px;
+  max-height: 700px;
   transform: translateY(0);
 }
 </style>

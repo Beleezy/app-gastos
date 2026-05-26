@@ -60,19 +60,21 @@
       </div>
     </Transition>
 
-    <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
+    <template #footer>
+      <p v-if="errorMsg" class="text-red-400 text-xs mb-2">{{ errorMsg }}</p>
 
-    <button
-      class="w-full py-3.5 rounded-xl bg-theme-accent text-theme-on-accent font-semibold text-sm transition-colors hover:bg-theme-accent-dark mt-4 flex items-center justify-center gap-2"
-      :disabled="saving"
-      @click="guardar"
-    >
-      <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>
-      {{ saving ? 'Guardando...' : 'Guardar meta' }}
-    </button>
+      <button
+        class="w-full py-3.5 rounded-xl bg-theme-accent text-theme-on-accent font-semibold text-sm transition-colors hover:bg-theme-accent-dark flex items-center justify-center gap-2"
+        :disabled="saving"
+        @click="guardar"
+      >
+        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        {{ saving ? 'Guardando...' : 'Guardar meta' }}
+      </button>
+    </template>
   </SharedBaseBottomSheet>
 </template>
 

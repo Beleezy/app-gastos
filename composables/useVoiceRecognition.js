@@ -1,14 +1,20 @@
+// El reconocimiento de voz se comparte entre todos los consumidores (registro y
+// deudas). Tanto el estado reactivo (useState) como el objeto SpeechRecognition
+// (a nivel de módulo) son únicos, para que `isListening`/`transcript` sean
+// consistentes aunque el composable se invoque desde varios componentes a la vez
+// (p.ej. el overlay de voz + la confirmación + la página de deudas).
+let recognition = null
+let refCount = 0
+let inactivityTimer = null
+let baseTranscript = ''
+
 export function useVoiceRecognition() {
   const { currencyLocale } = useCurrency()
 
-  const isListening = ref(false)
-  const transcript = ref('')
-  const error = ref(null)
-  const isSupported = ref(false)
-
-  let recognition = null
-  let inactivityTimer = null
-  let baseTranscript = ''
+  const isListening = useState('voice-rec-listening', () => false)
+  const transcript = useState('voice-rec-transcript', () => '')
+  const error = useState('voice-rec-error', () => null)
+  const isSupported = useState('voice-rec-supported', () => false)
 
   function resetInactivityTimer() {
     if (inactivityTimer) clearTimeout(inactivityTimer)
@@ -28,6 +34,7 @@ export function useVoiceRecognition() {
 
   function init() {
     if (typeof window === 'undefined') return
+    if (recognition) return
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     if (!SpeechRecognition) {
@@ -86,7 +93,7 @@ export function useVoiceRecognition() {
       recognition.start()
       isListening.value = true
       resetInactivityTimer()
-    } catch (e) {
+    } catch {
       recognition.stop()
       setTimeout(() => {
         recognition.start()
@@ -102,7 +109,7 @@ export function useVoiceRecognition() {
     baseTranscript = ''
     // En Android, la instancia no se puede reutilizar tras onend — siempre crear una nueva
     if (recognition) {
-      try { recognition.abort() } catch {}
+      try { recognition.abort() } catch { /* noop */ }
       recognition = null
     }
     _beginRecognition()
@@ -133,14 +140,19 @@ export function useVoiceRecognition() {
   }
 
   onMounted(() => {
+    refCount += 1
     init()
   })
 
   onUnmounted(() => {
-    clearInactivityTimer()
-    if (recognition) {
-      recognition.stop()
-      recognition = null
+    refCount = Math.max(0, refCount - 1)
+    if (refCount === 0) {
+      clearInactivityTimer()
+      if (recognition) {
+        try { recognition.abort() } catch { /* noop */ }
+        recognition = null
+      }
+      isListening.value = false
     }
   })
 

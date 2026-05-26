@@ -34,8 +34,8 @@
 
     <!-- Loading -->
     <div v-if="isLoadingMes" class="flex flex-col items-center py-8">
-      <div class="w-44 h-44 rounded-full bg-theme-card animate-pulse mx-auto mb-5"></div>
-      <div v-for="i in 3" :key="i" class="w-full h-12 bg-theme-card rounded-xl animate-pulse mb-2"></div>
+      <div class="w-44 h-44 rounded-full bg-theme-border-md animate-pulse mx-auto mb-5"></div>
+      <div v-for="i in 3" :key="i" class="w-full h-12 bg-theme-border-md rounded-xl animate-pulse mb-2"></div>
     </div>
 
     <div v-else-if="datosEfectivos.length === 0" class="flex flex-col items-center py-8">
@@ -75,16 +75,16 @@
             />
           </svg>
           <!-- Center text -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-5 text-center">
             <template v-if="seleccionada">
-              <p class="text-xs text-theme-text-sec">{{ seleccionada }}</p>
-              <p class="text-lg font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(totalSeleccionada) }}</p>
+              <p class="text-xs text-theme-text-sec truncate max-w-full leading-tight">{{ seleccionada }}</p>
+              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(totalSeleccionada) }}</p>
               <p class="text-[10px] text-theme-text-sec">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
             </template>
             <template v-else>
-              <p class="text-xs text-theme-text-sec">Gastado</p>
-              <p class="text-lg font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(totalGeneral) }}</p>
-              <p v-if="presupuesto > 0" class="text-[10px]" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
+              <p class="text-xs text-theme-text-sec leading-tight">Gastado</p>
+              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(totalGeneral) }}</p>
+              <p v-if="presupuesto > 0" class="text-[10px] leading-tight" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
                 de {{ currencySymbol }} {{ formatMonto(presupuesto) }}
               </p>
             </template>
@@ -231,7 +231,7 @@ async function seleccionarMesGrafico(key) {
   if (!obj) return
   isLoadingMes.value = true
   try {
-    gastosOtroMes.value = await $fetch('/api/gastos', { query: { mes: obj.mes, anio: obj.anio } })
+    gastosOtroMes.value = await $fetch('/api/gastos', { query: { mes: obj.mes, anio: obj.anio }, timeout: 15000 })
   } catch { gastosOtroMes.value = [] }
   finally { isLoadingMes.value = false }
 }

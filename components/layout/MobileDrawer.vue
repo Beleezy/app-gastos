@@ -41,7 +41,7 @@
         </div>
 
         <!-- Nav links -->
-        <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        <nav class="flex-1 overflow-y-auto overscroll-contain py-4 px-3 space-y-1">
           <p class="text-[10px] font-semibold uppercase tracking-wider text-theme-text-muted px-3 mb-2">Principal</p>
           <NuxtLink
             v-for="item in navItems"

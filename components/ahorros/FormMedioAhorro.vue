@@ -58,17 +58,20 @@
           </div>
         </div>
 
-        <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
-
-        <button
-          class="w-full py-3 rounded-xl bg-theme-accent text-theme-on-accent font-semibold text-sm transition-colors hover:bg-theme-accent-dark"
-          :disabled="saving"
-          @click="agregar"
-        >
-          {{ saving ? 'Guardando...' : 'Agregar medio' }}
-        </button>
       </div>
     </div>
+
+    <template #footer>
+      <p v-if="errorMsg" class="text-red-400 text-xs mb-2">{{ errorMsg }}</p>
+
+      <button
+        class="w-full py-3 rounded-xl bg-theme-accent text-theme-on-accent font-semibold text-sm transition-colors hover:bg-theme-accent-dark"
+        :disabled="saving"
+        @click="agregar"
+      >
+        {{ saving ? 'Guardando...' : 'Agregar medio' }}
+      </button>
+    </template>
   </SharedBaseBottomSheet>
 </template>
 

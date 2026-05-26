@@ -110,8 +110,6 @@
       </div>
     </div>
 
-    <p v-if="errorMsg" class="text-red-400 text-xs">{{ errorMsg }}</p>
-
     <!-- Result preview (after success) -->
     <div v-if="resultado" class="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 space-y-2">
       <p class="text-xs font-medium text-emerald-400">Pago distribuido exitosamente</p>
@@ -124,28 +122,32 @@
       </div>
     </div>
 
-    <button
-      v-if="!resultado"
-      class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors mt-2 flex items-center justify-center gap-2"
-      :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
-      :disabled="saving"
-      data-testid="btn-distribuir"
-      @click="guardar"
-    >
-      <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-      </svg>
-      {{ saving ? 'Procesando...' : 'Distribuir pago' }}
-    </button>
+    <template #footer>
+      <p v-if="errorMsg" class="text-red-400 text-xs mb-2">{{ errorMsg }}</p>
 
-    <button
-      v-if="resultado"
-      class="w-full py-3.5 rounded-xl bg-theme-border-md text-theme-text font-semibold text-sm transition-colors hover:bg-primary-600"
-      @click="$emit('close')"
-    >
-      Cerrar
-    </button>
+      <button
+        v-if="!resultado"
+        class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
+        :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
+        :disabled="saving"
+        data-testid="btn-distribuir"
+        @click="guardar"
+      >
+        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        {{ saving ? 'Procesando...' : 'Distribuir pago' }}
+      </button>
+
+      <button
+        v-if="resultado"
+        class="w-full py-3.5 rounded-xl bg-theme-border-md text-theme-text font-semibold text-sm transition-colors hover:bg-primary-600"
+        @click="$emit('close')"
+      >
+        Cerrar
+      </button>
+    </template>
   </SharedBaseBottomSheet>
 </template>
 
