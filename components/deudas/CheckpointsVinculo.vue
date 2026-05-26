@@ -287,6 +287,9 @@ const showConfirmRestaurar = ref(false)
 const descripcionNuevoCheckpoint = ref('')
 const checkpointARestaurar = ref(null)
 
+useOverlayBack(showCrearCheckpoint, () => { showCrearCheckpoint.value = false })
+useOverlayBack(showConfirmRestaurar, () => { showConfirmRestaurar.value = false })
+
 onMounted(() => fetchCheckpoints(props.personaId))
 
 const checkpointsOrdenados = computed(() => {

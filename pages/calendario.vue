@@ -132,7 +132,7 @@
 
     <!-- Modal día -->
     <div v-if="diaSel" class="fixed inset-0 z-50 flex items-end lg:items-center justify-center bg-black/60" @click.self="diaSel = null">
-      <div class="w-full max-w-md bg-theme-card rounded-t-3xl lg:rounded-3xl border border-theme-border max-h-[80vh] overflow-y-auto">
+      <div class="w-full max-w-md bg-theme-card rounded-t-3xl lg:rounded-3xl border border-theme-border max-h-[80vh] overflow-y-auto overscroll-contain">
         <div class="sticky top-0 bg-theme-card border-b border-theme-border px-4 py-3 flex items-center justify-between z-10">
           <p class="text-sm font-bold text-theme-text">{{ fechaCorta(diaSel) }}</p>
           <button class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md" @click="diaSel = null" aria-label="Cerrar">
@@ -295,6 +295,7 @@ const celdas = computed(() => {
 })
 
 const diaSel = ref(null)
+useOverlayBack(computed(() => diaSel.value !== null), () => { diaSel.value = null })
 const eventosDia = computed(() => {
   if (!diaSel.value) return []
   return eventosDelMes.value.filter(e => e.fecha === diaSel.value)
