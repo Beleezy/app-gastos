@@ -8,10 +8,9 @@ const STORAGE_KEY = 'perfil-activo-id'
 export function usePerfiles() {
   const { apiFetch } = useApiFetch()
   const perfiles = useState('perfiles-lista', () => [])
-  const perfilActivoId = useState('perfil-activo-id-state', () => {
-    if (typeof localStorage !== 'undefined') return localStorage.getItem(STORAGE_KEY) || null
-    return null
-  })
+  // El valor real (desde localStorage) lo sincroniza plugins/perfil-activo.client.js
+  // al iniciar; en SSR no hay localStorage, así que arranca en null.
+  const perfilActivoId = useState('perfil-activo-id-state', () => null)
   const cargando = useState('perfiles-cargando', () => false)
 
   const perfilActivo = computed(
