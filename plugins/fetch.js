@@ -47,13 +47,6 @@ export default defineNuxtPlugin(() => {
         }
       }
 
-      // Perfil gestionado activo (familia): el servidor reencuadra los datos
-      // de los módulos correspondientes al perfil seleccionado.
-      try {
-        const perfilId = typeof localStorage !== 'undefined' ? localStorage.getItem('perfil-activo-id') : null
-        if (perfilId) headers['x-perfil-id'] = perfilId
-      } catch {}
-
       options.headers = headers
     },
     onResponseError({ response }) {
