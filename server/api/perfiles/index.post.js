@@ -5,11 +5,7 @@ export default defineEventHandler(async (event) => {
   const propietarioId = await getUsuarioFromEvent(event)
   const body = await readBody(event)
   try {
-    return await crearPerfil(propietarioId, {
-      nombre: body?.nombre,
-      telefono: body?.telefono,
-      presupuesto: body?.presupuesto,
-    })
+    return await crearPerfil(propietarioId, body || {})
   } catch (e) {
     if (e?.statusCode) throw createError({ statusCode: e.statusCode, message: e.message })
     throw e

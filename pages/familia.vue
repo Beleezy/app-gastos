@@ -55,6 +55,10 @@
           <input v-model="form.nombre" placeholder="p. ej. Papá" maxlength="255" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
         </div>
         <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">Relación <span class="text-theme-text-muted">(opcional)</span></label>
+          <input v-model="form.relacion" placeholder="p. ej. Padre, Abuelo, Hijo" maxlength="50" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
           <label class="block text-[11px] text-theme-text-muted mb-1">WhatsApp <span class="text-theme-text-muted">(opcional)</span></label>
           <input v-model="form.telefono" type="tel" inputmode="tel" placeholder="p. ej. 51987654321" maxlength="30" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
           <p class="text-[10px] text-theme-text-muted mt-1">Con código de país, sin espacios ni símbolos. Se usa para enviarle reportes.</p>
@@ -62,6 +66,18 @@
         <div>
           <label class="block text-[11px] text-theme-text-muted mb-1">Presupuesto mensual <span class="text-theme-text-muted">(opcional)</span></label>
           <input v-model.number="form.presupuesto" type="number" step="0.01" min="0" placeholder="0.00" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">Correo de contacto <span class="text-theme-text-muted">(opcional)</span></label>
+          <input v-model="form.correoContacto" type="email" inputmode="email" placeholder="correo@ejemplo.com" maxlength="255" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">Fecha de nacimiento <span class="text-theme-text-muted">(opcional)</span></label>
+          <input v-model="form.fechaNacimiento" type="date" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="block text-[11px] text-theme-text-muted mb-1">Notas <span class="text-theme-text-muted">(opcional)</span></label>
+          <textarea v-model="form.notas" rows="2" maxlength="1000" placeholder="Notas sobre esta persona…" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2 text-sm resize-none"></textarea>
         </div>
         <div class="flex gap-2 pt-1">
           <button class="flex-1 px-4 py-2.5 rounded-xl bg-theme-input text-theme-text-sec text-sm" @click="cerrarForm">Cancelar</button>
@@ -94,7 +110,7 @@
               {{ inicial(p.nombre) }}
             </div>
             <div class="min-w-0">
-              <p class="text-sm text-theme-text font-semibold truncate">{{ p.nombre }}</p>
+              <p class="text-sm text-theme-text font-semibold truncate">{{ p.nombre }}<span v-if="p.relacion" class="text-[11px] font-normal text-theme-text-muted"> · {{ p.relacion }}</span></p>
               <p class="text-[10px] text-theme-text-muted truncate">
                 <span v-if="p.presupuesto > 0">Presup.: {{ currencySymbol }} {{ formatMonto(p.presupuesto) }}</span>
                 <span v-if="p.presupuesto > 0 && p.telefono"> · </span>
@@ -130,7 +146,7 @@ const toast = useToast()
 
 const mostrarForm = ref(false)
 const guardando = ref(false)
-const form = reactive({ id: null, nombre: '', telefono: '', presupuesto: null })
+const form = reactive({ id: null, nombre: '', telefono: '', relacion: '', correoContacto: '', fechaNacimiento: '', notas: '', presupuesto: null })
 
 onMounted(fetchPerfiles)
 
@@ -142,6 +158,10 @@ function resetForm() {
   form.id = null
   form.nombre = ''
   form.telefono = ''
+  form.relacion = ''
+  form.correoContacto = ''
+  form.fechaNacimiento = ''
+  form.notas = ''
   form.presupuesto = null
 }
 
@@ -158,6 +178,10 @@ function abrirEdicion(p) {
   form.id = p.id
   form.nombre = p.nombre
   form.telefono = p.telefono || ''
+  form.relacion = p.relacion || ''
+  form.correoContacto = p.correoContacto || ''
+  form.fechaNacimiento = p.fechaNacimiento || ''
+  form.notas = p.notas || ''
   form.presupuesto = p.presupuesto || null
   mostrarForm.value = true
 }
@@ -171,7 +195,15 @@ async function guardar() {
   const nombre = form.nombre.trim()
   if (!nombre) return
   guardando.value = true
-  const datos = { nombre, telefono: form.telefono.trim(), presupuesto: Number(form.presupuesto) || 0 }
+  const datos = {
+    nombre,
+    telefono: form.telefono.trim(),
+    relacion: form.relacion.trim(),
+    correoContacto: form.correoContacto.trim(),
+    fechaNacimiento: form.fechaNacimiento || '',
+    notas: form.notas.trim(),
+    presupuesto: Number(form.presupuesto) || 0,
+  }
   try {
     if (form.id) {
       await actualizarPerfil(form.id, datos)

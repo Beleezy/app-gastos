@@ -25,6 +25,11 @@ export const usuarios = pgTable('usuarios', {
   gestionadoPorId: uuid('gestionado_por_id'),
   // Teléfono (WhatsApp) del perfil, para enviarle reportes. Formato libre.
   telefono: varchar('telefono', { length: 30 }),
+  // Datos de contacto del perfil gestionado (no aplican al usuario real).
+  relacion: varchar('relacion', { length: 50 }), // parentesco: Papá, Abuelo, etc.
+  correoContacto: varchar('correo_contacto', { length: 255 }), // informativo, NO login
+  fechaNacimiento: date('fecha_nacimiento'),
+  notas: text('notas'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => [
