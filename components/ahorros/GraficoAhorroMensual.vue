@@ -11,7 +11,7 @@
           @click="seleccionar(item)"
         >
           <span class="text-[10px] font-medium transition-colors" :class="esSeleccionado(item) ? 'text-emerald-400' : 'text-theme-text-muted'">
-            {{ currencySymbol }} {{ formatCorto(item.total) }}
+            {{ currencySymbol }}&nbsp;{{ formatCorto(item.total) }}
           </span>
           <div class="w-full flex justify-center">
             <div
@@ -46,7 +46,7 @@
             <p class="text-[10px] text-theme-text-muted mt-0.5">{{ registrosMes.length }} registro{{ registrosMes.length !== 1 ? 's' : '' }}</p>
           </div>
           <div class="text-right">
-            <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }} {{ formatMonto(mesSeleccionado.total) }}</p>
+            <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }}&nbsp;{{ formatMonto(mesSeleccionado.total) }}</p>
             <button class="text-[10px] text-theme-text-muted hover:text-theme-text mt-0.5" @click="cerrar">cerrar</button>
           </div>
         </div>

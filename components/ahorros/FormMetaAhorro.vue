@@ -35,7 +35,7 @@
             />
           </div>
           <div v-if="metaMensual" class="mt-2 text-[10px] text-theme-text-muted">
-            Meta actual: {{ currencySymbol }} {{ formatMonto(metaMensual) }}
+            Meta actual: {{ currencySymbol }}&nbsp;{{ formatMonto(metaMensual) }}
           </div>
         </div>
 
@@ -54,7 +54,7 @@
             />
           </div>
           <div v-if="metaGlobal" class="mt-2 text-[10px] text-theme-text-muted">
-            Meta actual: {{ currencySymbol }} {{ formatMonto(metaGlobal) }}
+            Meta actual: {{ currencySymbol }}&nbsp;{{ formatMonto(metaGlobal) }}
           </div>
         </div>
       </div>

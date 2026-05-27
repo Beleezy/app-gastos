@@ -54,7 +54,7 @@
           <p class="text-[10px] text-theme-text-muted">
             {{ gastosDelDia(diaSel).length }} gasto{{ gastosDelDia(diaSel).length === 1 ? '' : 's' }}
             ·
-            {{ currencySymbol }} {{ formatMonto(totalDia(diaSel)) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(totalDia(diaSel)) }}
           </p>
         </div>
         <button
@@ -89,7 +89,7 @@
                 class="text-[9px] px-1.5 py-0.5 rounded-full"
                 :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"
               >{{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}</span>
-              <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(g.montoEstimado) }}</span>
+              <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(g.montoEstimado) }}</span>
             </div>
           </div>
 

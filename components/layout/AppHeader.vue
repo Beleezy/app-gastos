@@ -18,7 +18,7 @@
       <!-- Title + subtitle -->
       <div class="flex-1 min-w-0">
         <div class="flex items-center gap-2 min-w-0">
-          <h1 class="min-w-0 truncate text-lg lg:text-xl font-semibold text-theme-text leading-tight">
+          <h1 class="min-w-0 truncate text-base lg:text-xl font-semibold text-theme-text leading-tight">
             <slot name="title">Mis Finanzas</slot>
           </h1>
           <!-- Badge (optional) -->

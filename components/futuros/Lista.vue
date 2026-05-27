@@ -8,7 +8,7 @@
         <input
           v-model="busqueda"
           type="text"
-          placeholder="Buscar proyecto, detalle u opcion..."
+          placeholder="Buscar proyecto, detalle u opción..."
           class="w-full rounded-xl border border-theme-border bg-theme-card py-2 pl-9 pr-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
       </div>
@@ -330,13 +330,13 @@
                   <!-- Opción: modo edición -->
                   <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
                     <div class="flex items-center justify-between gap-2">
-                      <p class="text-xs font-medium text-theme-text">Editando opcion</p>
+                      <p class="text-xs font-medium text-theme-text">Editando opción</p>
                       <button class="text-[11px] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionOpcion">Cancelar</button>
                     </div>
                     <input
                       v-model="opcionEditando.nombre"
                       type="text"
-                      placeholder="Nombre de la opcion *"
+                      placeholder="Nombre de la opción *"
                       class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
                     />
                     <input
@@ -530,7 +530,7 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                   </svg>
-                  Agregar opcion
+                  Agregar opción
                 </button>
               </div>
             </div>
@@ -564,7 +564,7 @@
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="proyectoAEliminar = null"></div>
       <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
         <h3 class="text-base font-semibold text-theme-text">Eliminar gasto futuro</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">Se eliminaran el proyecto, sus detalles y todas las opciones guardadas.</p>
+        <p class="mt-2 text-sm text-theme-text-sec">Se eliminarán el proyecto, sus detalles y todas las opciones guardadas.</p>
         <p class="mt-2 text-sm font-medium text-theme-text">{{ proyectoAEliminar.tipoGasto }}</p>
         <div class="mt-5 space-y-2">
           <button
@@ -586,10 +586,10 @@
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="detalleAEliminar = null"></div>
       <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
         <h3 class="text-base font-semibold text-theme-text">Eliminar detalle</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">Se eliminara el detalle y todas sus opciones guardadas.</p>
+        <p class="mt-2 text-sm text-theme-text-sec">Se eliminará el detalle y todas sus opciones guardadas.</p>
         <p class="mt-2 text-sm font-medium text-theme-text">{{ detalleAEliminar.detalle.nombre }}</p>
         <p v-if="detalleAEliminar.detalle.opciones?.length" class="mt-1 text-xs text-theme-text-muted">
-          {{ detalleAEliminar.detalle.opciones.length }} opcion{{ detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : '' }} se perderan
+          {{ detalleAEliminar.detalle.opciones.length }} opcion{{ detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : '' }} se perderán
         </p>
         <div class="mt-5 space-y-2">
           <button
@@ -610,8 +610,8 @@
     <div v-if="opcionAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="opcionAEliminar = null"></div>
       <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
-        <h3 class="text-base font-semibold text-theme-text">Eliminar opcion</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">Se eliminara esta opcion de forma permanente.</p>
+        <h3 class="text-base font-semibold text-theme-text">Eliminar opción</h3>
+        <p class="mt-2 text-sm text-theme-text-sec">Se eliminará esta opción de forma permanente.</p>
         <p class="mt-2 text-sm font-medium text-theme-text">{{ opcionAEliminar.opcion.nombre }}</p>
         <div class="mt-5 space-y-2">
           <button
@@ -619,7 +619,7 @@
             :disabled="guardandoInline"
             @click="confirmarEliminarOpcion"
           >
-            {{ guardandoInline ? 'Eliminando...' : 'Eliminar opcion' }}
+            {{ guardandoInline ? 'Eliminando...' : 'Eliminar opción' }}
           </button>
           <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="opcionAEliminar = null">
             Cancelar
@@ -633,7 +633,7 @@
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevaOpcion"></div>
       <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 80dvh; overflow-y: auto; overscroll-behavior: contain;">
         <div class="flex items-center justify-between">
-          <h3 class="text-base font-semibold text-theme-text">Nueva opcion</h3>
+          <h3 class="text-base font-semibold text-theme-text">Nueva opción</h3>
           <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevaOpcion">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -644,7 +644,7 @@
         <input
           v-model="nuevaOpcion.nombre"
           type="text"
-          placeholder="Nombre de la opcion *"
+          placeholder="Nombre de la opción *"
           class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
         <input
@@ -685,7 +685,7 @@
           :disabled="guardandoInline"
           @click="confirmarNuevaOpcion"
         >
-          {{ guardandoInline ? 'Guardando...' : 'Agregar opcion' }}
+          {{ guardandoInline ? 'Guardando...' : 'Agregar opción' }}
         </button>
       </div>
     </div>
@@ -756,8 +756,8 @@
         </p>
         <p class="text-[11px] text-theme-text-muted">
           {{ decisionCtx.tipo === 'comprar'
-            ? 'Se registrara como gasto real y el detalle quedara marcado como comprado. Las demas opciones se eliminaran.'
-            : 'Se creara un gasto planificado en el mes de la fecha elegida. Las demas opciones se eliminaran.' }}
+            ? 'Se registrará como gasto real y el detalle quedará marcado como comprado. Las demás opciones se eliminarán.'
+            : 'Se creará un gasto planificado en el mes de la fecha elegida. Las demás opciones se eliminarán.' }}
         </p>
         <div>
           <label class="mb-1 block text-[11px] text-theme-text-muted">Monto *</label>

@@ -37,9 +37,9 @@
         </div>
         <div class="flex items-end justify-between mb-2">
           <div v-if="loadingGastos" class="h-7 w-32 rounded-md bg-theme-border-md shimmer"></div>
-          <p v-else class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }} {{ formatMonto(totalMes) }}</p>
+          <p v-else class="text-2xl font-bold text-gradient-blue">{{ currencySymbol }}&nbsp;{{ formatMonto(totalMes) }}</p>
           <p v-if="!loadingGastos && presupuesto > 0" class="text-sm text-theme-text-muted">
-            de {{ currencySymbol }} {{ formatMonto(presupuesto) }}
+            de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
           </p>
         </div>
         <div v-if="presupuesto > 0">
@@ -52,7 +52,7 @@
           </div>
           <div class="flex items-center justify-between">
             <span class="text-[10px]" :class="saldoRestante >= 0 ? 'text-emerald-400' : 'text-red-400'">
-              {{ saldoRestante >= 0 ? 'Disponible' : 'Excedido' }}: {{ currencySymbol }} {{ formatMonto(Math.abs(saldoRestante)) }}
+              {{ saldoRestante >= 0 ? 'Disponible' : 'Excedido' }}: {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(saldoRestante)) }}
             </span>
             <span class="text-[10px] text-theme-text-sec">{{ porcentajeGastado.toFixed(0) }}%</span>
           </div>
@@ -76,8 +76,8 @@
             </span>
           </div>
           <div v-if="loadingDeudas" class="h-5 w-20 rounded-md bg-theme-border-md shimmer"></div>
-          <p v-else class="text-lg font-bold text-amber-400">{{ currencySymbol }} {{ formatMonto(totalMeDeben) }}</p>
-          <p v-if="!loadingDeudas" class="text-[10px] text-theme-text-muted mt-0.5">{{ countMeDeben }} persona{{ countMeDeben !== 1 ? 's' : '' }}</p>
+          <p v-else class="text-lg font-bold text-amber-400">{{ currencySymbol }}&nbsp;{{ formatMonto(totalMeDeben) }}</p>
+          <p v-if="!loadingDeudas" class="text-[10px] text-theme-text-muted mt-0.5">{{ countMeDeben }} deuda{{ countMeDeben !== 1 ? 's' : '' }}</p>
           <div v-else class="h-3 w-12 rounded bg-theme-border-md shimmer mt-1"></div>
         </NuxtLink>
 
@@ -125,15 +125,15 @@
           <div class="grid grid-cols-3 gap-2">
             <div class="rounded-xl bg-theme-input px-3 py-2">
               <p class="text-[10px] text-theme-text-muted">Min</p>
-              <p class="mt-0.5 text-xs font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(futureMin) }}</p>
+              <p class="mt-0.5 text-xs font-semibold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(futureMin) }}</p>
             </div>
             <div class="rounded-xl bg-sky-500/10 px-3 py-2">
               <p class="text-[10px] text-sky-300/70">Promedio</p>
-              <p class="mt-0.5 text-xs font-semibold text-sky-300">{{ currencySymbol }} {{ formatMonto(futureAverage) }}</p>
+              <p class="mt-0.5 text-xs font-semibold text-sky-300">{{ currencySymbol }}&nbsp;{{ formatMonto(futureAverage) }}</p>
             </div>
             <div class="rounded-xl bg-theme-input px-3 py-2">
               <p class="text-[10px] text-theme-text-muted">Max</p>
-              <p class="mt-0.5 text-xs font-semibold text-amber-300">{{ currencySymbol }} {{ formatMonto(futureMax) }}</p>
+              <p class="mt-0.5 text-xs font-semibold text-amber-300">{{ currencySymbol }}&nbsp;{{ formatMonto(futureMax) }}</p>
             </div>
           </div>
           <div v-if="futureHighlights.length" class="mt-2.5 flex flex-wrap gap-1.5">
@@ -172,11 +172,11 @@
           <span class="text-[10px] text-emerald-400">{{ totalIngresosMes > 0 ? 'Ver detalle →' : 'Empezar →' }}</span>
         </div>
         <template v-if="totalIngresosMes > 0">
-          <p class="text-lg font-bold text-emerald-400">{{ currencySymbol }} {{ formatMonto(totalIngresosMes) }}</p>
+          <p class="text-lg font-bold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(totalIngresosMes) }}</p>
           <div class="mt-2 flex items-center justify-between">
             <span class="text-[10px] text-theme-text-muted">Saldo neto</span>
             <span class="text-[11px] font-semibold" :class="saldoNetoMes >= 0 ? 'text-emerald-400' : 'text-red-400'">
-              {{ currencySymbol }} {{ formatMonto(saldoNetoMes) }}
+              {{ currencySymbol }}&nbsp;{{ formatMonto(saldoNetoMes) }}
             </span>
           </div>
         </template>
@@ -210,11 +210,11 @@
           <div class="grid grid-cols-2 gap-2">
             <div class="rounded-xl bg-theme-input px-3 py-2">
               <p class="text-[10px] text-theme-text-muted">Este mes</p>
-              <p class="mt-0.5 text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(ahorrosTotalMes) }}</p>
+              <p class="mt-0.5 text-sm font-semibold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(ahorrosTotalMes) }}</p>
             </div>
             <div class="rounded-xl bg-emerald-500/10 px-3 py-2">
               <p class="text-[10px] text-emerald-300/70">Total acumulado</p>
-              <p class="mt-0.5 text-sm font-semibold text-emerald-300">{{ currencySymbol }} {{ formatMonto(ahorrosTotalGlobal) }}</p>
+              <p class="mt-0.5 text-sm font-semibold text-emerald-300">{{ currencySymbol }}&nbsp;{{ formatMonto(ahorrosTotalGlobal) }}</p>
             </div>
           </div>
           <div v-if="ahorrosMetaMensual && ahorrosTotalMes > 0" class="mt-2.5">
@@ -236,7 +236,7 @@
               class="rounded-full bg-theme-input px-2.5 py-1 text-[10px] text-theme-text-sec flex items-center gap-1"
             >
               <span v-if="medio.medioIcono">{{ medio.medioIcono }}</span>
-              {{ medio.medioNombre }}: {{ currencySymbol }} {{ formatMonto(medio.total) }}
+              {{ medio.medioNombre }}: {{ currencySymbol }}&nbsp;{{ formatMonto(medio.total) }}
             </span>
           </div>
         </template>

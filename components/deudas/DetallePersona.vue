@@ -12,7 +12,7 @@
       <!-- Person card -->
       <div class="bg-theme-card rounded-2xl p-4">
         <!-- Name row -->
-        <div class="flex items-center gap-3 mb-2">
+        <div class="flex items-start gap-3 mb-2">
           <div
             class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-semibold shrink-0"
             :class="tabActual === 'me_deben' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'"
@@ -102,7 +102,7 @@
               class="text-lg font-bold"
               :class="tabActual === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
             >
-              {{ currencySymbol }} {{ formatMonto(totalPendientePersona) }}
+              {{ currencySymbol }}&nbsp;{{ formatMonto(totalPendientePersona) }}
             </span>
           </div>
 
@@ -126,8 +126,8 @@
               ></div>
             </div>
             <div class="flex items-center justify-between mt-1">
-              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }} {{ formatMonto(totalCobradoPersona) }} {{ tabActual === 'me_deben' ? 'cobrado' : 'pagado' }}</span>
-              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }} {{ formatMonto(totalOriginalPersona) }} total</span>
+              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(totalCobradoPersona) }} {{ tabActual === 'me_deben' ? 'cobrado' : 'pagado' }}</span>
+              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(totalOriginalPersona) }} total</span>
             </div>
           </div>
 
@@ -194,9 +194,9 @@
               </div>
             </div>
             <div class="text-right shrink-0 ml-3">
-              <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
+              <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
               <p v-if="deuda.estado === 'parcial'" class="text-[0.625rem] text-orange-400 mt-0.5">
-                Pendiente: {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
+                Pendiente: {{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }}
               </p>
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium mt-1"
@@ -310,12 +310,12 @@
             <div v-if="puntoActual.snapshotResumen" class="grid grid-cols-2 gap-2 mt-2 bg-theme-input rounded-lg p-2">
               <div>
                 <p class="text-[0.6rem] text-theme-text-sec truncate">{{ puntoActual.snapshotResumen.personaANombre }}</p>
-                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(puntoActual.snapshotResumen.totalPendienteA) }}</p>
+                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(puntoActual.snapshotResumen.totalPendienteA) }}</p>
                 <p class="text-[0.6rem] text-theme-text-muted">{{ puntoActual.snapshotResumen.totalDeudasA }} deuda(s)</p>
               </div>
               <div>
                 <p class="text-[0.6rem] text-theme-text-sec truncate">{{ puntoActual.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
-                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(puntoActual.snapshotResumen.totalPendienteB) }}</p>
+                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(puntoActual.snapshotResumen.totalPendienteB) }}</p>
                 <p class="text-[0.6rem] text-theme-text-muted">{{ puntoActual.snapshotResumen.totalDeudasB }} deuda(s)</p>
               </div>
             </div>
@@ -374,7 +374,7 @@
             <p class="text-xs text-theme-text-muted mt-0.5">{{ formatFecha(deuda.fechaCreacion) }}</p>
           </div>
           <div class="text-right shrink-0 ml-3">
-            <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
+            <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
             <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium mt-1 bg-emerald-500/15 text-emerald-400">
               {{ deuda.estado === 'archivado' ? 'Archivada' : 'Pagada' }}
             </span>

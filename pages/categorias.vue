@@ -1,11 +1,11 @@
 <template>
   <div>
     <LayoutAppHeader @back="navigateTo('/configuraciones')">
-      <template #title>Mis Categorias</template>
+      <template #title>Mis Categorías</template>
     </LayoutAppHeader>
 
     <div class="max-w-lg lg:max-w-3xl mx-auto lg:mx-0 px-4 lg:px-0 py-4 lg:py-6 space-y-4">
-      <p class="text-sm text-theme-text-sec mb-4">Personaliza las categorias para clasificar tus gastos. Puedes crear nuevas o elegir de las preseleccionadas.</p>
+      <p class="text-sm text-theme-text-sec mb-4">Personaliza las categorías para clasificar tus gastos. Puedes crear nuevas o elegir de las preseleccionadas.</p>
 
       <!-- Categorías actuales del usuario -->
       <div v-if="misCategorias.length === 0 && !isLoading" class="text-center py-10 opacity-70">

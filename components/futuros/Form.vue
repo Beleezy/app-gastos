@@ -6,15 +6,15 @@
         <div class="mt-2 grid grid-cols-3 gap-2">
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
             <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Min</p>
-            <p class="mt-1 text-xs font-medium text-emerald-400">{{ currencySymbol }} {{ formatMonto(resumenTentativo.totalMinimo) }}</p>
+            <p class="mt-1 text-xs font-medium text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMinimo) }}</p>
           </div>
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
             <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-            <p class="mt-1 text-xs font-medium text-sky-300">{{ currencySymbol }} {{ formatMonto(resumenTentativo.totalPromedio) }}</p>
+            <p class="mt-1 text-xs font-medium text-sky-300">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalPromedio) }}</p>
           </div>
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
             <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
-            <p class="mt-1 text-xs font-medium text-amber-300">{{ currencySymbol }} {{ formatMonto(resumenTentativo.totalMaximo) }}</p>
+            <p class="mt-1 text-xs font-medium text-amber-300">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMaximo) }}</p>
           </div>
         </div>
         <p class="mt-2 text-[11px] text-theme-text-sec">
@@ -37,7 +37,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Categoria</label>
+        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Categoría</label>
         <div class="grid grid-cols-4 gap-2">
           <button
             v-for="cat in categorias"
@@ -71,7 +71,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Descripcion general <span class="text-theme-text-muted">(opcional)</span></label>
+        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Descripción general <span class="text-theme-text-muted">(opcional)</span></label>
         <textarea
           v-model="form.descripcion"
           rows="2"
@@ -157,7 +157,7 @@
                   class="rounded-full bg-theme-input px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-theme-text"
                   @click="agregarOpcion(detalle)"
                 >
-                  + Opcion
+                  + Opción
                 </button>
               </div>
 
@@ -167,7 +167,7 @@
                 class="rounded-xl border border-theme-border bg-theme-input/70 p-3"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <p class="text-xs font-medium text-theme-text">{{ opcion.nombre || `Opcion ${optionIndex + 1}` }}</p>
+                  <p class="text-xs font-medium text-theme-text">{{ opcion.nombre || `Opción ${optionIndex + 1}` }}</p>
                   <button
                     type="button"
                     class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
@@ -238,7 +238,7 @@
                   <textarea
                     v-model="opcion.notas"
                     rows="2"
-                    placeholder="Notas de esta opcion (tienda, color, talla, etc.)"
+                    placeholder="Notas de esta opción (tienda, color, talla, etc.)"
                     class="w-full resize-none rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
                   ></textarea>
                 </div>
@@ -444,7 +444,7 @@ function normalizarDetalles(validar = true) {
       if (!tieneContenido) continue
 
       if (validar && !nombreOpcion) {
-        throw new Error(`La opcion ${optionIndex + 1} del detalle ${detalleIndex + 1} debe tener nombre`)
+        throw new Error(`La opción ${optionIndex + 1} del detalle ${detalleIndex + 1} debe tener nombre`)
       }
 
       if (validar && precioMinimo !== null && precioMaximo !== null && precioMinimo > precioMaximo) {

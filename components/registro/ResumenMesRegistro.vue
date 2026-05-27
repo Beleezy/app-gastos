@@ -161,7 +161,7 @@
               Ritmo de gasto
             </p>
             <p class="text-xs text-theme-text leading-snug">
-              A este ritmo gastarias <span class="font-bold tabular-nums">{{ currencySymbol }} {{ formatMonto(proyeccion) }}</span> este mes.
+              A este ritmo gastarias <span class="font-bold tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(proyeccion) }}</span> este mes.
             </p>
             <p v-if="excedeProyeccion" class="text-xs font-semibold text-red-400 mt-0.5">
               Excederias el presupuesto.
@@ -188,7 +188,7 @@
                 {{ cat.nombre }}
               </span>
               <span class="text-sm font-semibold text-theme-text tabular-nums shrink-0">
-                {{ currencySymbol }} {{ formatMonto(cat.total) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}
               </span>
             </li>
             <li
@@ -200,7 +200,7 @@
                 Otros ({{ categoriasResumen.length - maxCategorias }})
               </span>
               <span class="text-sm font-semibold text-theme-text-sec tabular-nums shrink-0">
-                {{ currencySymbol }} {{ formatMonto(otrosTotal) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(otrosTotal) }}
               </span>
             </li>
           </ul>

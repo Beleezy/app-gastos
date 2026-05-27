@@ -29,11 +29,11 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <p class="text-[10px] text-emerald-300/70 uppercase tracking-wider font-medium">Ingresos</p>
-            <p class="text-xl font-bold text-emerald-400 mt-0.5">{{ currencySymbol }} {{ formatMonto(resumen.totalIngresos) }}</p>
+            <p class="text-xl font-bold text-emerald-400 mt-0.5">{{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalIngresos) }}</p>
           </div>
           <div>
             <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium">Gastos</p>
-            <p class="text-xl font-bold text-theme-text mt-0.5">{{ currencySymbol }} {{ formatMonto(resumen.totalGastos) }}</p>
+            <p class="text-xl font-bold text-theme-text mt-0.5">{{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalGastos) }}</p>
           </div>
         </div>
         <div class="mt-3 pt-3 border-t border-emerald-500/20">
@@ -41,7 +41,7 @@
             <div>
               <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium">Saldo neto</p>
               <p class="text-2xl font-bold mt-0.5" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
-                {{ currencySymbol }} {{ formatMonto(resumen.saldoNeto) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.saldoNeto) }}
               </p>
             </div>
             <p class="text-[11px]" :class="resumen.porcentajeAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">
@@ -93,7 +93,7 @@
           :key="p.origen"
           class="rounded-full bg-emerald-500/10 text-emerald-300 px-2.5 py-1 text-[10px]"
         >
-          {{ labelOrigen(p.origen) }}: {{ currencySymbol }} {{ formatMonto(p.total) }}
+          {{ labelOrigen(p.origen) }}: {{ currencySymbol }}&nbsp;{{ formatMonto(p.total) }}
         </span>
       </div>
     </div>
@@ -126,14 +126,14 @@
             <span class="text-base">{{ iconoOrigen(ing.origen) }}</span>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm text-theme-text font-medium truncate">{{ ing.concepto }}</p>
+            <p class="text-sm text-theme-text font-medium line-clamp-2 break-words">{{ ing.concepto }}</p>
             <div class="flex items-center gap-2 mt-0.5">
               <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(ing.fecha) }}</span>
               <span v-if="ing.origen" class="text-[10px] text-emerald-400">{{ labelOrigen(ing.origen) }}</span>
             </div>
           </div>
           <div class="text-right shrink-0">
-            <p class="text-base font-semibold text-emerald-400">+{{ currencySymbol }} {{ formatMonto(ing.monto) }}</p>
+            <p class="text-base font-semibold text-emerald-400">+{{ currencySymbol }}&nbsp;{{ formatMonto(ing.monto) }}</p>
           </div>
           <div class="flex gap-1 shrink-0">
             <button

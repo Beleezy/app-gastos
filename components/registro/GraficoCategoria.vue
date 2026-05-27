@@ -78,14 +78,14 @@
           <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-5 text-center">
             <template v-if="seleccionada">
               <p class="text-xs text-theme-text-sec truncate max-w-full leading-tight">{{ seleccionada }}</p>
-              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(totalSeleccionada) }}</p>
+              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(totalSeleccionada) }}</p>
               <p class="text-[10px] text-theme-text-sec">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
             </template>
             <template v-else>
               <p class="text-xs text-theme-text-sec leading-tight">Gastado</p>
-              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(totalGeneral) }}</p>
+              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(totalGeneral) }}</p>
               <p v-if="presupuesto > 0" class="text-[10px] leading-tight" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
-                de {{ currencySymbol }} {{ formatMonto(presupuesto) }}
+                de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
               </p>
             </template>
           </div>
@@ -125,7 +125,7 @@
                 <span class="text-xs text-theme-text-muted">{{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
+                <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200"
                   :class="{ 'rotate-180': expandida === cat.nombre }"
@@ -163,7 +163,7 @@
                     >{{ getMetodoRegistroBadgeLabel(gasto) }}</span>
                   </div>
                 </div>
-                <span class="text-sm font-medium text-theme-text shrink-0 ml-3">{{ currencySymbol }} {{ formatMonto(gasto.monto) }}</span>
+                <span class="text-sm font-medium text-theme-text shrink-0 ml-3">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}</span>
               </div>
             </div>
           </Transition>

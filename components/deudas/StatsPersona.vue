@@ -7,7 +7,7 @@
         <div class="flex items-center justify-between mb-1">
           <span class="text-xs text-theme-text-sec flex-1 min-w-0 mr-2">{{ deuda.concepto }}</span>
           <div class="flex items-center gap-2 shrink-0">
-            <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}</span>
+            <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }}</span>
             <span class="text-[10px] font-medium w-8 text-right" :class="porcentajeDeuda(deuda) >= 70 ? 'text-emerald-400' : porcentajeDeuda(deuda) > 0 ? 'text-theme-accent' : 'text-theme-text-muted'">
               {{ porcentajeDeuda(deuda).toFixed(0) }}%
             </span>
