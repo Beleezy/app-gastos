@@ -18,6 +18,9 @@ logs
 .fleet
 .idea
 
+# Local UI-review scaffolding (capture scripts + screenshots)
+.ui-review/
+
 # Local env files
 .env
 .env.*
