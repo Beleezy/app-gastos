@@ -8,7 +8,7 @@
             {{ gasto.categoriaNombre || 'Sin categoria' }} · {{ formatFecha(gasto.fechaProbablePago) }}
           </p>
         </div>
-        <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(gasto.montoEstimado) }}</p>
+        <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.montoEstimado) }}</p>
       </div>
     </div>
 

@@ -34,7 +34,7 @@
     <!-- Etiquetas extremos -->
     <div class="flex items-center justify-between mt-1">
       <span class="text-[9px] text-theme-text-muted">{{ etiquetaInicio }}</span>
-      <span class="text-[9px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(montoActual) }}</span>
+      <span class="text-[9px] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}</span>
       <span class="text-[9px] text-theme-text-muted">{{ etiquetaFin }}</span>
     </div>
   </div>

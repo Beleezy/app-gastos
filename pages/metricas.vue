@@ -40,19 +40,19 @@
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
         <p class="text-[10px] text-theme-text-muted font-medium">Promedio gastos</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
-        <p v-else class="text-lg font-bold text-rose-400 mt-1">{{ currencySymbol }} {{ formatMonto(promedios.gastosMensual) }}</p>
+        <p v-else class="text-lg font-bold text-rose-400 mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(promedios.gastosMensual) }}</p>
         <p class="text-[10px] text-theme-text-muted mt-0.5">por mes</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
         <p class="text-[10px] text-theme-text-muted font-medium">Promedio ingresos</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
-        <p v-else class="text-lg font-bold text-emerald-400 mt-1">{{ currencySymbol }} {{ formatMonto(promedios.ingresosMensual) }}</p>
+        <p v-else class="text-lg font-bold text-emerald-400 mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(promedios.ingresosMensual) }}</p>
         <p class="text-[10px] text-theme-text-muted mt-0.5">por mes</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
         <p class="text-[10px] text-theme-text-muted font-medium">Promedio ahorros</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
-        <p v-else class="text-lg font-bold text-sky-400 mt-1">{{ currencySymbol }} {{ formatMonto(promedios.ahorrosMensual) }}</p>
+        <p v-else class="text-lg font-bold text-sky-400 mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(promedios.ahorrosMensual) }}</p>
         <p class="text-[10px] text-theme-text-muted mt-0.5">por mes</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
@@ -151,11 +151,11 @@
                 class="border-t border-theme-border/40"
               >
                 <td class="px-3 py-2 text-theme-text">{{ etiquetaMes(p.mes) }} {{ p.anio }}</td>
-                <td class="px-3 py-2 text-right text-emerald-400">{{ currencySymbol }} {{ formatMonto(p.ingresos) }}</td>
-                <td class="px-3 py-2 text-right text-rose-400">{{ currencySymbol }} {{ formatMonto(p.gastos) }}</td>
-                <td class="px-3 py-2 text-right text-sky-400">{{ currencySymbol }} {{ formatMonto(p.ahorros) }}</td>
+                <td class="px-3 py-2 text-right text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(p.ingresos) }}</td>
+                <td class="px-3 py-2 text-right text-rose-400">{{ currencySymbol }}&nbsp;{{ formatMonto(p.gastos) }}</td>
+                <td class="px-3 py-2 text-right text-sky-400">{{ currencySymbol }}&nbsp;{{ formatMonto(p.ahorros) }}</td>
                 <td class="px-3 py-2 text-right font-semibold" :class="p.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
-                  {{ p.saldoNeto >= 0 ? '+' : '' }}{{ currencySymbol }} {{ formatMonto(p.saldoNeto) }}
+                  {{ p.saldoNeto >= 0 ? '+' : '' }}{{ currencySymbol }}&nbsp;{{ formatMonto(p.saldoNeto) }}
                 </td>
               </tr>
             </tbody>
@@ -200,7 +200,7 @@
               </p>
             </div>
             <div class="text-right shrink-0">
-              <p class="text-xs font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(r.promedio) }}</p>
+              <p class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(r.promedio) }}</p>
               <div class="mt-0.5 flex items-center justify-end gap-1">
                 <span class="text-[9px] text-theme-text-muted">{{ r.confianza }}%</span>
                 <div class="w-10 h-1 bg-theme-input rounded-full overflow-hidden">

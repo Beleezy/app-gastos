@@ -47,7 +47,7 @@
             class="text-sm font-bold mt-0.5 tabular-nums truncate"
             :class="tabActual === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
           >
-            {{ currencySymbol }} {{ formatMonto(totalPendientePersona) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(totalPendientePersona) }}
           </p>
         </div>
         <div class="rounded-xl bg-theme-input p-2.5 text-center">

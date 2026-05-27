@@ -113,7 +113,7 @@
                 <p v-else class="text-[0.625rem] text-theme-text-muted mt-0.5">Sin método registrado</p>
               </div>
               <div class="flex items-center gap-1.5">
-                <span class="text-sm font-bold text-theme-accent">{{ currencySymbol }} {{ formatMonto(pago.montoTotal) }}</span>
+                <span class="text-sm font-bold text-theme-accent">{{ currencySymbol }}&nbsp;{{ formatMonto(pago.montoTotal) }}</span>
                 <!-- Editar pago -->
                 <button
                   class="w-6 h-6 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
@@ -147,7 +147,7 @@
                     {{ detalle.metodoPago }}
                   </div>
                 </div>
-                <span class="text-[0.6875rem] text-theme-text-sec font-medium shrink-0">{{ currencySymbol }} {{ formatMonto(detalle.montoPagado) }}</span>
+                <span class="text-[0.6875rem] text-theme-text-sec font-medium shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.montoPagado) }}</span>
               </div>
             </div>
 

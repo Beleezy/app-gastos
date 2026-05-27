@@ -6,12 +6,12 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-xs text-theme-text-sec">Original</p>
-          <p class="text-sm font-medium text-theme-text-muted">{{ currencySymbol }} {{ formatMonto(deuda.montoOriginal) }}</p>
+          <p class="text-sm font-medium text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
         </div>
         <div class="text-right">
           <p class="text-xs text-theme-text-sec">Pendiente</p>
           <p class="text-sm font-semibold" :class="deuda.tipoDeuda === 'me_deben' ? 'text-emerald-400' : 'text-red-400'">
-            {{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }}
           </p>
         </div>
       </div>
@@ -37,7 +37,7 @@
           class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
           @click="form.monto = deuda.montoPendiente"
         >
-          Total ({{ currencySymbol }} {{ formatMonto(deuda.montoPendiente) }})
+          Total ({{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }})
         </button>
         <button
           v-if="deuda.montoPendiente > 1"

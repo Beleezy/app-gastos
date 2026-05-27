@@ -26,7 +26,7 @@
         <div class="flex-1 min-w-0">
           <div class="flex items-center justify-between">
             <span class="text-sm font-medium text-theme-text truncate">{{ item.medioNombre || 'Sin medio' }}</span>
-            <span class="text-sm font-bold text-emerald-400 whitespace-nowrap ml-2">+{{ currencySymbol }} {{ formatMonto(item.total) }}</span>
+            <span class="text-sm font-bold text-emerald-400 whitespace-nowrap ml-2">+{{ currencySymbol }}&nbsp;{{ formatMonto(item.total) }}</span>
           </div>
           <div class="mt-1.5 relative w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
             <div

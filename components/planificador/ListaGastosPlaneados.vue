@@ -113,7 +113,7 @@
             <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: cat.color }"></span>
             <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider flex-1">{{ cat.nombre }}</h3>
             <span class="text-xs text-theme-text-sec">{{ cat.gastos.length }} ítem{{ cat.gastos.length !== 1 ? 's' : '' }}</span>
-            <span class="text-xs font-semibold text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(cat.total) }}</span>
+            <span class="text-xs font-semibold text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200 shrink-0"
@@ -134,7 +134,7 @@
                 ></div>
               </div>
               <span class="text-[10px] shrink-0 font-medium" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
-                {{ currencySymbol }} {{ formatMonto(cat.totalReal) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(cat.totalReal) }}
               </span>
             </div>
             <!-- Diferencia numérica -->
@@ -146,7 +146,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
               <span class="text-[10px]" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
-                {{ cat.totalReal > cat.total ? 'Excede' : 'Ahorra' }} {{ currencySymbol }} {{ formatMonto(Math.abs(cat.totalReal - cat.total)) }}
+                {{ cat.totalReal > cat.total ? 'Excede' : 'Ahorra' }} {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(cat.totalReal - cat.total)) }}
               </span>
             </div>
           </div>
@@ -233,7 +233,7 @@
               </div>
             </div>
             <div class="text-right">
-              <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(gasto.montoEstimado) }}</p>
+              <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.montoEstimado) }}</p>
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"
                 :class="gasto.estado === 'pagado'

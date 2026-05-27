@@ -197,20 +197,20 @@
               <div class="flex-1 min-w-0">
                 <p class="text-[11px] font-semibold text-red-400">Proyección excede presupuesto</p>
                 <p class="text-[10px] text-theme-text-muted leading-tight mt-0.5">
-                  Al ritmo actual terminarías en {{ currencySymbol }} {{ formatMonto(analitica.proyeccionFinMes) }}
-                  ({{ currencySymbol }} {{ formatMonto(analitica.excesoProyectado) }} sobre presupuesto)
+                  Al ritmo actual terminarías en {{ currencySymbol }}&nbsp;{{ formatMonto(analitica.proyeccionFinMes) }}
+                  ({{ currencySymbol }}&nbsp;{{ formatMonto(analitica.excesoProyectado) }} sobre presupuesto)
                 </p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div class="bg-theme-input rounded-xl p-3">
                 <p class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium">Ritmo por día</p>
-                <p class="text-base font-bold text-theme-text mt-1">{{ currencySymbol }} {{ formatMonto(analitica.ritmoDiarioRecomendado) }}</p>
+                <p class="text-base font-bold text-theme-text mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(analitica.ritmoDiarioRecomendado) }}</p>
                 <p class="text-[9px] text-theme-text-muted leading-tight mt-0.5">por {{ analitica.diasRestantes }} día{{ analitica.diasRestantes === 1 ? '' : 's' }} rest.</p>
               </div>
               <div class="bg-theme-input rounded-xl p-3">
                 <p class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium">Proyección</p>
-                <p class="text-base font-bold mt-1" :class="analitica.excedeProyeccion ? 'text-red-400' : 'text-theme-text'">{{ currencySymbol }} {{ formatMonto(analitica.proyeccionFinMes) }}</p>
+                <p class="text-base font-bold mt-1" :class="analitica.excedeProyeccion ? 'text-red-400' : 'text-theme-text'">{{ currencySymbol }}&nbsp;{{ formatMonto(analitica.proyeccionFinMes) }}</p>
                 <p class="text-[9px] text-theme-text-muted leading-tight mt-0.5">a fin de mes</p>
               </div>
             </div>

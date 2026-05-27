@@ -39,7 +39,7 @@
               class="text-3xl font-bold leading-none transition-colors duration-300"
               :class="tabActual === 'me_deben' ? 'text-gradient-emerald' : 'text-red-400'"
             >
-              {{ currencySymbol }} {{ formatMonto(montoActual) }}
+              {{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}
             </p>
             <p class="text-[11px] text-theme-text-sec mt-1.5">
               {{ countActual }} deuda{{ countActual !== 1 ? 's' : '' }} pendiente{{ countActual !== 1 ? 's' : '' }}
@@ -57,7 +57,7 @@
               class="text-base font-semibold leading-tight"
               :class="tabActual === 'me_deben' ? 'text-red-400' : 'text-emerald-400'"
             >
-              {{ currencySymbol }} {{ formatMonto(montoOpuesto) }}
+              {{ currencySymbol }}&nbsp;{{ formatMonto(montoOpuesto) }}
             </p>
           </button>
         </div>
@@ -83,7 +83,7 @@
             :class="tendencia > 0 ? 'text-emerald-400' : tendencia < 0 ? 'text-red-400' : 'text-theme-text-sec'"
           >
             <template v-if="tendencia !== 0">
-              {{ tendencia > 0 ? '+' : '-' }}{{ currencySymbol }} {{ formatMonto(Math.abs(tendencia)) }}
+              {{ tendencia > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(tendencia)) }}
             </template>
             <template v-else>Sin cambios</template>
             vs mes pasado
@@ -110,7 +110,7 @@
               class="text-[10px] font-semibold"
               :class="resumen.balanceNeto >= 0 ? 'text-emerald-400' : 'text-red-400'"
             >
-              {{ currencySymbol }} {{ formatMonto(Math.abs(resumen.balanceNeto)) }}
+              {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(resumen.balanceNeto)) }}
               {{ resumen.balanceNeto >= 0 ? 'neto' : 'en contra' }}
             </span>
           </div>
@@ -130,7 +130,7 @@
             <span class="opacity-60">·</span>
             {{ primeraVencida.nombre }}
             <span class="opacity-60">·</span>
-            {{ currencySymbol }} {{ formatMonto(primeraVencida.totalPendiente) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(primeraVencida.totalPendiente) }}
           </span>
           <span class="ml-auto shrink-0 text-[10px] font-semibold text-red-400 bg-red-500/15 px-2 py-0.5 rounded-full">
             {{ filtroEstado === 'vencidas' ? 'Quitar' : 'Ver' }}

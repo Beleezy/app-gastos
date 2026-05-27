@@ -107,26 +107,13 @@
           </div>
           <div class="text-right shrink-0">
             <p class="text-xs font-bold" :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'">
-              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }} {{ formatMonto(Math.abs(ev.monto)) }}
+              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(ev.monto)) }}
             </p>
           </div>
         </li>
       </ul>
       <div v-else class="bg-theme-card rounded-2xl border border-theme-border p-6 text-center text-xs text-theme-text-muted">
         Sin eventos este mes con los filtros actuales.
-      </div>
-    </div>
-
-    <!-- Nota integración -->
-    <div class="px-5 lg:px-0 mb-8">
-      <div class="rounded-2xl border border-dashed border-theme-border bg-theme-card/40 p-3 flex items-start gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-violet-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <div class="text-[11px] text-theme-text-muted leading-relaxed">
-          <p><strong class="text-theme-text">Submódulo independiente.</strong> Combina planificador y deudas (endpoints existentes) en una vista unificada.</p>
-          <p class="mt-1">Integración futura: reemplazar /planificador/CalendarioMensual con esta vista global. Ver <code>docs/INTEGRACION-SUBMODULOS.md</code>.</p>
-        </div>
       </div>
     </div>
 
@@ -151,7 +138,7 @@
               <p class="text-[10px] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }}</p>
             </div>
             <p class="text-xs font-bold" :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'">
-              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }} {{ formatMonto(Math.abs(ev.monto)) }}
+              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(ev.monto)) }}
             </p>
           </li>
         </ul>

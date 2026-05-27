@@ -112,7 +112,7 @@
             <div class="min-w-0">
               <p class="text-sm text-theme-text font-semibold truncate">{{ p.nombre }}<span v-if="p.relacion" class="text-[11px] font-normal text-theme-text-muted"> · {{ p.relacion }}</span></p>
               <p class="text-[10px] text-theme-text-muted truncate">
-                <span v-if="p.presupuesto > 0">Presup.: {{ currencySymbol }} {{ formatMonto(p.presupuesto) }}</span>
+                <span v-if="p.presupuesto > 0">Presup.: {{ currencySymbol }}&nbsp;{{ formatMonto(p.presupuesto) }}</span>
                 <span v-if="p.presupuesto > 0 && p.telefono"> · </span>
                 <span v-if="p.telefono">📱 {{ p.telefono }}</span>
                 <span v-if="perfilActivoId === p.id" class="text-fuchsia-400"> · Activo</span>

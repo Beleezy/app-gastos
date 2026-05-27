@@ -69,7 +69,7 @@
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
           <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Este mes</p>
-          <p class="text-lg font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(totalActual) }}</p>
+          <p class="text-lg font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(totalActual) }}</p>
           <p class="text-[10px] text-theme-text-sec mt-0.5">{{ mesActualLabel }}</p>
         </div>
         <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
@@ -78,7 +78,7 @@
             <span v-if="isLoadingComparar">
               <span class="inline-block w-20 h-5 bg-theme-border-md rounded animate-pulse"></span>
             </span>
-            <span v-else>{{ currencySymbol }} {{ formatMonto(totalComparar) }}</span>
+            <span v-else>{{ currencySymbol }}&nbsp;{{ formatMonto(totalComparar) }}</span>
           </p>
           <p class="text-[10px] text-theme-text-sec mt-0.5">{{ mesCompararLabel }}</p>
         </div>
@@ -101,7 +101,7 @@
             class="text-sm font-semibold"
             :class="diferencia > 0 ? 'text-red-400' : diferencia < 0 ? 'text-emerald-400' : 'text-theme-text-muted'"
           >
-            {{ diferencia > 0 ? '+' : '' }}{{ currencySymbol }} {{ formatMonto(Math.abs(diferencia)) }}
+            {{ diferencia > 0 ? '+' : '' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(diferencia)) }}
             <span class="text-xs font-normal ml-1">({{ porcentajeDiferencia }}%)</span>
           </span>
         </div>
@@ -135,7 +135,7 @@
                 </svg>
                 <span class="w-3 h-3" v-else></span>
                 <span class="text-xs font-semibold" :class="cat.diff > 0 ? 'text-red-400' : cat.diff < 0 ? 'text-emerald-400' : 'text-theme-text-sec'">
-                  {{ currencySymbol }} {{ formatMonto(cat.actual) }}
+                  {{ currencySymbol }}&nbsp;{{ formatMonto(cat.actual) }}
                 </span>
               </div>
             </div>
@@ -152,7 +152,7 @@
                 <div class="flex-1 h-1.5 bg-theme-input rounded-full overflow-hidden">
                   <div class="h-full rounded-full bg-gray-600 transition-all duration-500" :style="{ width: cat.barComparar + '%' }"></div>
                 </div>
-                <span class="text-[9px] text-theme-text-muted shrink-0">{{ currencySymbol }} {{ formatMonto(cat.comparar) }}</span>
+                <span class="text-[9px] text-theme-text-muted shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.comparar) }}</span>
               </div>
             </div>
           </div>
@@ -204,7 +204,7 @@
                 <span v-if="m.variacion !== null" class="text-[10px]" :class="m.variacion > 0 ? 'text-red-400' : m.variacion < 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
                   {{ m.variacion > 0 ? '▲' : m.variacion < 0 ? '▼' : '─' }} {{ Math.abs(m.variacion).toFixed(0) }}%
                 </span>
-                <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(m.total) }}</span>
+                <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(m.total) }}</span>
               </div>
             </div>
             <div class="flex-1 h-2 bg-theme-input rounded-full overflow-hidden">
@@ -222,16 +222,16 @@
           <div class="grid grid-cols-2 gap-2">
             <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
               <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Máximo</p>
-              <p class="text-sm font-bold text-red-400">{{ currencySymbol }} {{ formatMonto(maxTendencia) }}</p>
+              <p class="text-sm font-bold text-red-400">{{ currencySymbol }}&nbsp;{{ formatMonto(maxTendencia) }}</p>
             </div>
             <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
               <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Mínimo</p>
-              <p class="text-sm font-bold text-emerald-400">{{ currencySymbol }} {{ formatMonto(minTendencia) }}</p>
+              <p class="text-sm font-bold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(minTendencia) }}</p>
             </div>
           </div>
           <div class="bg-theme-card rounded-xl p-3 border border-theme-border flex items-center justify-between">
             <p class="text-[10px] text-theme-text-sec uppercase tracking-wider">Promedio</p>
-            <p class="text-base font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(promedioTendencia) }}</p>
+            <p class="text-base font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(promedioTendencia) }}</p>
           </div>
         </div>
       </div>

@@ -27,12 +27,18 @@ export function useAhorros() {
     return mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
   })
 
-  async function fetchAhorros() {
+  async function fetchAhorros(force = false) {
     isLoading.value = true
     error.value = null
     try {
+      // En refetch forzado (tras crear/editar/eliminar/meta) añadimos un
+      // cache-buster: el GET trae Cache-Control max-age=60, así que sin esto
+      // el refetch de fondo serviría la respuesta cacheada y pisaría el
+      // update optimista con datos previos.
       const data = await apiFetch('/api/ahorros', {
-        query: { mes: mesActual.value, anio: anioActual.value }
+        query: force
+          ? { mes: mesActual.value, anio: anioActual.value, _t: Date.now() }
+          : { mes: mesActual.value, anio: anioActual.value }
       })
       ahorrosList.value = data.ahorros
       totalMes.value = data.totalMes
@@ -64,7 +70,7 @@ export function useAhorros() {
         totalMes.value += m
         totalGlobal.value += m
       }
-      fetchAhorros().catch(() => {})
+      fetchAhorros(true).catch(() => {})
     } catch (e) {
       error.value = e.message || 'Error al crear ahorro'
       throw e
@@ -79,7 +85,7 @@ export function useAhorros() {
           a.id === id ? { ...actualizado, monto: parseFloat(actualizado.monto) } : a
         )
       }
-      fetchAhorros().catch(() => {})
+      fetchAhorros(true).catch(() => {})
     } catch (e) {
       error.value = e.message || 'Error al actualizar ahorro'
       throw e
@@ -96,7 +102,7 @@ export function useAhorros() {
         totalMes.value = Math.max(0, totalMes.value - m)
         totalGlobal.value = Math.max(0, totalGlobal.value - m)
       }
-      fetchAhorros().catch(() => {})
+      fetchAhorros(true).catch(() => {})
     } catch (e) {
       error.value = e.message || 'Error al eliminar ahorro'
       throw e
@@ -172,7 +178,7 @@ export function useAhorros() {
   async function setMeta(data) {
     try {
       await apiFetch('/api/ahorros/metas', { method: 'PUT', body: data })
-      await fetchAhorros()
+      await fetchAhorros(true)
     } catch (e) {
       error.value = e.message || 'Error al guardar meta'
       throw e

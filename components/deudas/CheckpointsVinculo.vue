@@ -70,7 +70,7 @@
               {{ cp.snapshotResumen.totalDeudasA }}D / {{ cp.snapshotResumen.totalDeudasB }}D
             </p>
             <p class="text-[0.65rem] text-violet-400">
-              {{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}
+              {{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteA) }}
             </p>
           </div>
 
@@ -94,7 +94,7 @@
             <div class="grid grid-cols-2 gap-2">
               <div>
                 <p class="text-[0.65rem] text-theme-text-sec">{{ cp.snapshotResumen.personaANombre }}</p>
-                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
+                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
                 <p class="text-[0.65rem] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasA }} deuda(s)
                   <span v-if="cp.snapshotResumen.totalPagosA > 0"> y {{ cp.snapshotResumen.totalPagosA }} pago(s)</span>
@@ -102,7 +102,7 @@
               </div>
               <div>
                 <p class="text-[0.65rem] text-theme-text-sec">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
-                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }} {{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
+                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
                 <p class="text-[0.65rem] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasB }} deuda(s)
                   <span v-if="cp.snapshotResumen.totalPagosB > 0"> y {{ cp.snapshotResumen.totalPagosB }} pago(s)</span>

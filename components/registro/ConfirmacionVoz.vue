@@ -112,7 +112,7 @@
                 </p>
               </div>
               <span class="text-sm font-semibold text-theme-text whitespace-nowrap shrink-0">
-                {{ currencySymbol }} {{ formatMonto(gasto.monto) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}
               </span>
             </div>
 
@@ -196,7 +196,7 @@
         <div v-if="editableGastos.length > 0" class="pt-2 space-y-2">
           <div class="flex items-center justify-between px-1">
             <span class="text-sm text-theme-text-muted">Total ({{ editableGastos.length }} gastos)</span>
-            <span class="text-lg font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(totalGastos) }}</span>
+            <span class="text-lg font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(totalGastos) }}</span>
           </div>
 
           <!-- Validación contra total del comprobante -->
@@ -216,11 +216,11 @@
                 </span>
               </div>
               <span class="text-sm font-semibold" :class="totalCoincide ? 'text-emerald-400' : 'text-amber-400'">
-                {{ currencySymbol }} {{ formatMonto(totalComprobante) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(totalComprobante) }}
               </span>
             </div>
             <p v-if="!totalCoincide" class="text-[11px] text-amber-400/80 mt-1.5">
-              Diferencia de {{ currencySymbol }} {{ formatMonto(Math.abs(diferenciaTotal)) }}. Revisa los montos o descuentos.
+              Diferencia de {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(diferenciaTotal)) }}. Revisa los montos o descuentos.
             </p>
           </div>
         </div>

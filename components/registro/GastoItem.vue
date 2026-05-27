@@ -84,7 +84,7 @@
 
         <div class="flex flex-col items-end justify-between py-2.5 pr-2.5 pl-1 shrink-0">
           <p class="text-sm font-bold text-theme-text leading-none whitespace-nowrap" data-testid="gasto-monto">
-            {{ currencySymbol }} {{ formatMonto(gasto.monto) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}
           </p>
           <div v-if="!selectable" class="flex items-center gap-0.5 mt-1.5">
             <button

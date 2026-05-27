@@ -168,7 +168,7 @@
                   class="text-sm font-semibold"
                   :class="tabActual === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
                 >
-                  {{ currencySymbol }} {{ formatMonto(persona.totalPendiente) }}
+                  {{ currencySymbol }}&nbsp;{{ formatMonto(persona.totalPendiente) }}
                 </p>
                 <!-- Status indicator -->
                 <div class="flex items-center justify-end gap-1 mt-1">

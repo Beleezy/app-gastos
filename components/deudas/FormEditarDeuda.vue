@@ -23,7 +23,7 @@
         />
       </div>
       <p v-if="totalPagado > 0" class="text-[10px] text-theme-text-muted mt-1">
-        Ya se han pagado {{ currencySymbol }} {{ formatMonto(totalPagado) }}. El pendiente se recalculara automaticamente.
+        Ya se han pagado {{ currencySymbol }}&nbsp;{{ formatMonto(totalPagado) }}. El pendiente se recalculara automaticamente.
       </p>
     </div>
 

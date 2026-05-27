@@ -33,7 +33,7 @@
         <span class="text-2xl">🗑️</span>
       </div>
       <p class="text-sm text-theme-text-sec">La papelera está vacía</p>
-      <p class="text-[11px] text-theme-text-muted mt-1">Los registros eliminados aparecen aquí 30 días</p>
+      <p class="text-[11px] text-theme-text-muted mt-1">Los registros eliminados aparecen aquí durante 30 días</p>
     </div>
 
     <!-- Gastos eliminados -->
@@ -58,7 +58,7 @@
               <span class="text-[10px] text-amber-400">Eliminado {{ fechaRelativa(g.deletedAt) }}</span>
             </div>
           </div>
-          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }} {{ formatMonto(g.monto) }}</p>
+          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(g.monto) }}</p>
           <button
             class="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold shrink-0"
             @click="restaurar('gasto', g.id, g.concepto)"
@@ -89,7 +89,7 @@
               <span class="text-[10px] text-amber-400">Eliminada {{ fechaRelativa(d.deletedAt) }}</span>
             </div>
           </div>
-          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }} {{ formatMonto(d.montoPendiente) }}</p>
+          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(d.montoPendiente) }}</p>
           <button
             class="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold shrink-0"
             @click="restaurar('deuda', d.id, d.concepto)"

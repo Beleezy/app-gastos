@@ -55,7 +55,7 @@
         </div>
 
         <div class="text-right shrink-0">
-          <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }} {{ formatMonto(ahorro.monto) }}</p>
+          <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }}&nbsp;{{ formatMonto(ahorro.monto) }}</p>
           <div v-if="ahorro.gastoPlanificadoId" class="text-[9px] text-theme-accent mt-0.5">vinculado</div>
         </div>
       </div>

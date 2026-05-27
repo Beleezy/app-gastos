@@ -101,7 +101,7 @@
     </template>
 
     <div v-else class="relative rounded-xl border border-dashed border-theme-border bg-theme-input/70 px-4 py-5 text-center">
-      <p class="text-sm text-theme-text">Aun no tienes proyectos futuros</p>
+      <p class="text-sm text-theme-text">Aún no tienes proyectos futuros</p>
       <p class="mt-1 text-xs text-theme-text-sec">Crea uno para comparar alternativas como una PC nueva, ropa o equipamiento.</p>
     </div>
   </div>

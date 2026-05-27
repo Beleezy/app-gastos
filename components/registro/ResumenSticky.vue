@@ -50,10 +50,10 @@
             class="text-2xl font-bold leading-none tabular-nums"
             :class="excedido ? 'text-red-400' : 'text-gradient-blue'"
           >
-            {{ currencySymbol }} {{ formatMonto(totalMes) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(totalMes) }}
           </p>
           <p v-if="presupuesto > 0" class="text-[0.7rem] text-theme-text-sec leading-tight text-right">
-            de {{ currencySymbol }} {{ formatMonto(presupuesto) }}
+            de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
             <span class="block font-semibold" :class="excedido ? 'text-red-400' : 'text-emerald-400'">
               {{ excedido ? '+' : '' }}{{ formatMonto(Math.abs(saldo)) }} {{ excedido ? 'excedido' : 'restante' }}
             </span>

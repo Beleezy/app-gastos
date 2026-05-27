@@ -22,7 +22,7 @@
             </svg>
             <label class="text-sm font-medium text-theme-text">Nombre</label>
           </div>
-          <p class="text-xs text-theme-text-sec mb-3">Tu nombre aparecera en los reportes PDF generados.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Tu nombre aparecerá en los reportes PDF generados.</p>
           <input
             v-model="form.nombre"
             type="text"
@@ -40,7 +40,7 @@
             </svg>
             <label class="text-sm font-medium text-theme-text">Presupuesto mensual por defecto</label>
           </div>
-          <p class="text-xs text-theme-text-sec mb-3">Este monto se usara como presupuesto base al crear un nuevo mes en el planificador.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Este monto se usará como presupuesto base al crear un nuevo mes en el planificador.</p>
           <div class="flex items-center gap-2">
             <span class="text-sm text-theme-text-muted">{{ currencySymbol }}</span>
             <input
@@ -81,7 +81,7 @@
             </svg>
             <label class="text-sm font-medium text-theme-text">Zona horaria</label>
           </div>
-          <p class="text-xs text-theme-text-sec mb-3">Afecta el calculo de fechas en el registro por voz.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Afecta el cálculo de fechas en el registro por voz.</p>
           <select
             v-model="form.zonaHoraria"
             class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
@@ -104,17 +104,17 @@
             </svg>
             <label class="text-sm font-medium text-theme-text">Formato regional</label>
           </div>
-          <p class="text-xs text-theme-text-sec mb-3">Formato de numeros y reconocimiento de voz.</p>
+          <p class="text-xs text-theme-text-sec mb-3">Formato de números y reconocimiento de voz.</p>
           <select
             v-model="form.locale"
             class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
-            <option value="es-PE">Espanol (Peru)</option>
-            <option value="es-CO">Espanol (Colombia)</option>
-            <option value="es-MX">Espanol (Mexico)</option>
-            <option value="es-AR">Espanol (Argentina)</option>
-            <option value="es-ES">Espanol (Espana)</option>
-            <option value="en-US">Ingles (EE.UU.)</option>
+            <option value="es-PE">Español (Perú)</option>
+            <option value="es-CO">Español (Colombia)</option>
+            <option value="es-MX">Español (México)</option>
+            <option value="es-AR">Español (Argentina)</option>
+            <option value="es-ES">Español (España)</option>
+            <option value="en-US">Inglés (EE.UU.)</option>
           </select>
         </div>
 

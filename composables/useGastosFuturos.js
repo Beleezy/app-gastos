@@ -34,7 +34,11 @@ export function useGastosFuturos() {
     error.value = null
     _inFlight = (async () => {
       try {
-        const data = await apiFetch('/api/futuros')
+        // En refetch forzado (tras crear/editar/eliminar/decidir) añadimos un
+        // cache-buster: el GET trae Cache-Control max-age=60, así que sin esto
+        // el navegador serviría la respuesta anterior y la lista no se
+        // actualizaría hasta expirar el caché o recargar.
+        const data = await apiFetch('/api/futuros', force ? { query: { _t: Date.now() } } : undefined)
         gastosFuturos.value = data.gastosFuturos || []
         resumenFuturos.value = data.resumenFuturos || resumenFuturos.value
         _fetchedAt.value = Date.now()
@@ -99,7 +103,7 @@ export function useGastosFuturos() {
       await fetchGastosFuturos(true)
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al decidir la opcion'
+      error.value = e.data?.message || e.message || 'Error al decidir la opción'
       throw e
     }
   }

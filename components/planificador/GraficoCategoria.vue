@@ -39,11 +39,11 @@
             <template v-if="segmentoActivo !== null">
               <span class="text-[9px] text-theme-text-sec leading-tight truncate max-w-full">{{ datosGrafico[segmentoActivo].nombre }}</span>
               <span class="text-xs font-bold text-theme-text leading-tight">{{ datosGrafico[segmentoActivo].porcentaje }}%</span>
-              <span class="text-[9px] text-theme-text-muted leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(datosGrafico[segmentoActivo].total) }}</span>
+              <span class="text-[9px] text-theme-text-muted leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(datosGrafico[segmentoActivo].total) }}</span>
             </template>
             <template v-else>
               <span class="text-xs text-theme-text-sec leading-tight">Total</span>
-              <span class="text-sm font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }} {{ formatMonto(resumen.totalPlanificado) }}</span>
+              <span class="text-sm font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalPlanificado) }}</span>
             </template>
           </div>
         </div>
@@ -71,7 +71,7 @@
                 <span class="text-xs text-theme-text-muted truncate">{{ seg.nombre }}</span>
               </div>
               <div class="flex items-center gap-2 shrink-0">
-                <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }} {{ formatMonto(seg.total) }}</span>
+                <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(seg.total) }}</span>
                 <span class="text-xs font-semibold w-8 text-right" :style="{ color: seg.color }">{{ seg.porcentaje }}%</span>
               </div>
             </div>
@@ -94,7 +94,7 @@
                 class="text-[9px] font-medium shrink-0 min-w-[50px] text-right"
                 :class="gastosPorCategoria[idx].totalReal > seg.total ? 'text-red-400' : 'text-emerald-400'"
               >
-                {{ currencySymbol }} {{ formatMonto(gastosPorCategoria[idx].totalReal) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(gastosPorCategoria[idx].totalReal) }}
               </span>
             </div>
           </button>
@@ -115,12 +115,12 @@
           <div class="flex items-center gap-4 mt-1">
             <div>
               <p class="text-[10px] text-theme-text-sec">Planificado</p>
-              <p class="text-sm font-bold text-theme-text">{{ currencySymbol }} {{ formatMonto(datosGrafico[segmentoActivo].total) }}</p>
+              <p class="text-sm font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(datosGrafico[segmentoActivo].total) }}</p>
             </div>
             <div v-if="gastosPorCategoria[segmentoActivo]?.totalReal > 0">
               <p class="text-[10px] text-theme-text-sec">Gastado</p>
               <p class="text-sm font-bold" :class="gastosPorCategoria[segmentoActivo].totalReal > datosGrafico[segmentoActivo].total ? 'text-red-400' : 'text-emerald-400'">
-                {{ currencySymbol }} {{ formatMonto(gastosPorCategoria[segmentoActivo].totalReal) }}
+                {{ currencySymbol }}&nbsp;{{ formatMonto(gastosPorCategoria[segmentoActivo].totalReal) }}
               </p>
             </div>
             <div>
@@ -192,7 +192,7 @@
                   </div>
                 </div>
                 <div class="text-right shrink-0">
-                  <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }} {{ formatMonto(g.montoEstimado) }}</p>
+                  <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(g.montoEstimado) }}</p>
                   <span
                     class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"
                     :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"

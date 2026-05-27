@@ -63,7 +63,7 @@
               <p class="text-xs text-theme-text-sec">{{ semana.dias.length }} {{ semana.dias.length === 1 ? 'dia' : 'dias' }} con gastos</p>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }} {{ formatMonto(semana.total) }}</span>
+              <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }}&nbsp;{{ formatMonto(semana.total) }}</span>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
                 :class="{ 'rotate-180': semanaExpandida === semana.key }"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
@@ -93,7 +93,7 @@
                           {{ formatFechaDia(dia.fecha) }}
                           <span class="text-theme-text-muted font-normal">· {{ formatRelativo(dia.fecha) }}</span>
                         </p>
-                        <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                        <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(dia.total) }}</span>
                       </div>
                       <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span class="text-[10px] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
@@ -172,7 +172,7 @@
               <div class="flex-1 min-w-0 text-left">
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-sm font-semibold text-theme-text truncate">{{ formatFechaDia(dia.fecha) }}</p>
-                  <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }} {{ formatMonto(dia.total) }}</span>
+                  <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(dia.total) }}</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1 flex-wrap">
                   <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
@@ -184,7 +184,7 @@
                     {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
                   </span>
                   <span class="text-[10px] text-theme-text-muted leading-none">
-                    Prom. {{ currencySymbol }} {{ formatMonto(getStats(dia).promedio) }}
+                    Prom. {{ currencySymbol }}&nbsp;{{ formatMonto(getStats(dia).promedio) }}
                   </span>
                   <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">
                     · {{ getStats(dia).rangoHoras }}

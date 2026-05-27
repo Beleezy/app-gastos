@@ -10,7 +10,7 @@
         </div>
         <div class="text-right">
           <p class="text-xs text-theme-text-sec">Total pendiente</p>
-          <p class="text-sm font-semibold text-emerald-400">{{ currencySymbol }} {{ formatMonto(totalPendiente) }}</p>
+          <p class="text-sm font-semibold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(totalPendiente) }}</p>
         </div>
       </div>
     </div>
@@ -41,7 +41,7 @@
           class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
           @click="form.monto = totalPendiente"
         >
-          Todo ({{ currencySymbol }} {{ formatMonto(totalPendiente) }})
+          Todo ({{ currencySymbol }}&nbsp;{{ formatMonto(totalPendiente) }})
         </button>
         <button
           v-if="totalPendiente > 1"
@@ -100,13 +100,13 @@
           <span class="text-theme-text-muted truncate">{{ s.concepto }}</span>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <span class="text-theme-text font-medium">{{ currencySymbol }} {{ formatMonto(s.pagado) }}</span>
+          <span class="text-theme-text font-medium">{{ currencySymbol }}&nbsp;{{ formatMonto(s.pagado) }}</span>
           <span v-if="s.saldado" class="text-[9px] text-emerald-400">saldado</span>
-          <span v-else class="text-[9px] text-theme-text-muted">resta {{ currencySymbol }} {{ formatMonto(s.restante) }}</span>
+          <span v-else class="text-[9px] text-theme-text-muted">resta {{ currencySymbol }}&nbsp;{{ formatMonto(s.restante) }}</span>
         </div>
       </div>
       <div v-if="sobrante > 0" class="border-t border-theme-border pt-1.5 mt-1.5">
-        <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }} {{ formatMonto(sobrante) }}</p>
+        <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }}&nbsp;{{ formatMonto(sobrante) }}</p>
       </div>
     </div>
 
@@ -115,10 +115,10 @@
       <p class="text-xs font-medium text-emerald-400">Pago distribuido exitosamente</p>
       <div v-for="pago in resultado.pagos" :key="pago.id" class="flex items-center justify-between text-xs">
         <span class="text-theme-text-muted">{{ pago.concepto }}</span>
-        <span class="text-emerald-400 font-medium">{{ currencySymbol }} {{ formatMonto(pago.montoPagado) }}</span>
+        <span class="text-emerald-400 font-medium">{{ currencySymbol }}&nbsp;{{ formatMonto(pago.montoPagado) }}</span>
       </div>
       <div v-if="resultado.montoSobrante > 0" class="border-t border-emerald-500/20 pt-2">
-        <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }} {{ formatMonto(resultado.montoSobrante) }} (todas las deudas fueron cubiertas)</p>
+        <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }}&nbsp;{{ formatMonto(resultado.montoSobrante) }} (todas las deudas fueron cubiertas)</p>
       </div>
     </div>
 

@@ -4,12 +4,12 @@
     <div class="grid grid-cols-2 gap-2.5">
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
         <p class="text-[10px] text-theme-text-muted font-medium">Presupuestado</p>
-        <p class="text-lg font-bold text-theme-text mt-1">{{ currencySymbol }} {{ formatMonto(totalPresupuestado) }}</p>
+        <p class="text-lg font-bold text-theme-text mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(totalPresupuestado) }}</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
         <p class="text-[10px] text-theme-text-muted font-medium">Consumido</p>
         <p class="text-lg font-bold mt-1" :class="totalConsumido > totalPresupuestado ? 'text-red-400' : 'text-amber-400'">
-          {{ currencySymbol }} {{ formatMonto(totalConsumido) }}
+          {{ currencySymbol }}&nbsp;{{ formatMonto(totalConsumido) }}
         </p>
       </div>
     </div>
@@ -41,7 +41,7 @@
               <p class="text-xs font-semibold text-theme-text truncate">{{ c.nombre }}</p>
               <p class="text-[10px] text-theme-text-muted">
                 <span v-if="!presupuestoDe(c.id)">Sin presupuesto · </span>
-                Consumido: {{ currencySymbol }} {{ formatMonto(consumoDe(c.id)) }}
+                Consumido: {{ currencySymbol }}&nbsp;{{ formatMonto(consumoDe(c.id)) }}
               </p>
             </div>
             <div class="shrink-0 flex items-center gap-1.5">
@@ -81,7 +81,7 @@
                 {{ porcentajeUsado(c.id).toFixed(0) }}% del presupuesto
               </span>
               <span class="text-theme-text-muted">
-                {{ currencySymbol }} {{ formatMonto(presupuestoDe(c.id).montoMensual - consumoDe(c.id)) }} disponible
+                {{ currencySymbol }}&nbsp;{{ formatMonto(presupuestoDe(c.id).montoMensual - consumoDe(c.id)) }} disponible
               </span>
             </div>
           </div>

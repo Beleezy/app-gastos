@@ -21,13 +21,13 @@
         <div class="min-w-0 flex-1">
           <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Este mes</p>
           <p class="text-2xl sm:text-3xl font-bold text-emerald-400 leading-tight whitespace-nowrap truncate">
-            {{ currencySymbol }} {{ formatMonto(totalMes) }}
+            {{ currencySymbol }}&nbsp;{{ formatMonto(totalMes) }}
           </p>
         </div>
         <div class="flex flex-col items-end gap-1.5 shrink-0">
           <div class="text-right">
             <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-0.5">Total acumulado</p>
-            <p class="text-sm font-bold text-teal-400 whitespace-nowrap">{{ currencySymbol }} {{ formatMonto(totalGlobal) }}</p>
+            <p class="text-sm font-bold text-teal-400 whitespace-nowrap">{{ currencySymbol }}&nbsp;{{ formatMonto(totalGlobal) }}</p>
           </div>
           <button
             class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-theme-accent-bg text-theme-accent text-[10px] font-medium hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
