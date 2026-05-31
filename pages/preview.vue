@@ -22,8 +22,15 @@
     <main class="max-w-lg mx-auto">
       <Transition name="fade" mode="out-in">
         <PreviewDashboard v-if="vista === 'inicio'" key="inicio" />
+        <PreviewPlanificador v-else-if="vista === 'planificador'" key="planificador" />
+        <PreviewRegistro v-else-if="vista === 'registro'" key="registro" />
         <PreviewDeudas v-else-if="vista === 'deudas'" key="deudas" />
+        <PreviewIngresos v-else-if="vista === 'ingresos'" key="ingresos" />
+        <PreviewAhorros v-else-if="vista === 'ahorros'" key="ahorros" />
+        <PreviewFuturos v-else-if="vista === 'futuros'" key="futuros" />
+        <PreviewCalendario v-else-if="vista === 'calendario'" key="calendario" />
         <PreviewMetricas v-else-if="vista === 'metricas'" key="metricas" />
+        <PreviewReportes v-else-if="vista === 'reportes'" key="reportes" />
       </Transition>
     </main>
 
@@ -66,7 +73,7 @@
             </button>
           </div>
           <p class="text-[0.66rem] text-theme-text-muted text-center mt-4">
-            Maqueta de navegación. Inicio, Deudas y Métricas están rediseñados; el resto son demostrativos.
+            Todos los módulos están rediseñados. Toca cualquiera para abrir su nueva interfaz.
           </p>
         </div>
       </div>
@@ -90,15 +97,15 @@ const tabs = [
 ]
 
 const modulosMas = [
-  { icon: '📋', label: 'Planificador', vista: null },
-  { icon: '🎤', label: 'Registro', vista: null },
+  { icon: '📋', label: 'Planificador', vista: 'planificador' },
+  { icon: '🎤', label: 'Registro', vista: 'registro' },
   { icon: '💳', label: 'Deudas', vista: 'deudas' },
-  { icon: '💵', label: 'Ingresos', vista: null },
-  { icon: '🐷', label: 'Ahorros', vista: null },
-  { icon: '🛍️', label: 'Futuros', vista: null },
+  { icon: '💵', label: 'Ingresos', vista: 'ingresos' },
+  { icon: '🐷', label: 'Ahorros', vista: 'ahorros' },
+  { icon: '🛍️', label: 'Futuros', vista: 'futuros' },
   { icon: '📊', label: 'Métricas', vista: 'metricas' },
-  { icon: '📅', label: 'Calendario', vista: null },
-  { icon: '📄', label: 'Reportes', vista: null },
+  { icon: '📅', label: 'Calendario', vista: 'calendario' },
+  { icon: '📄', label: 'Reportes', vista: 'reportes' },
 ]
 
 function abrirModulo(m) {

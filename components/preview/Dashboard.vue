@@ -69,7 +69,7 @@
             <span class="text-sm">💳</span>
             <span class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted">Me deben</span>
           </div>
-          <SharedMoney :value="d.deudas.totalMeDeben" compact tone="amber" class="text-xl font-extrabold" />
+          <SharedMoney :value="d.deudas.totalMeDeben" tone="amber" class="text-lg font-extrabold" />
           <p class="text-[0.66rem] text-theme-text-muted mt-1">{{ d.deudas.countMeDeben }} deuda{{ d.deudas.countMeDeben !== 1 ? 's' : '' }}</p>
         </div>
         <div class="rounded-2xl border border-theme-border bg-theme-card p-4">
@@ -108,7 +108,7 @@
             <span class="text-base shrink-0">{{ m.icon }}</span>
             <span class="text-sm text-theme-text truncate">{{ m.label }}</span>
           </span>
-          <SharedMoney v-if="m.value > 0" :value="m.value" compact :tone="m.tone" class="text-sm font-semibold shrink-0" />
+          <SharedMoney v-if="m.value > 0" :value="m.value" :tone="m.tone" class="text-sm font-semibold shrink-0" />
           <span v-else class="text-[0.72rem] font-medium shrink-0" :class="m.ctaColor">{{ m.cta }} →</span>
         </div>
       </div>

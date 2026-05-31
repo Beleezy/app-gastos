@@ -19,11 +19,11 @@
         <div class="grid grid-cols-2 gap-3 mt-3">
           <div class="rounded-xl bg-theme-input p-3">
             <p class="text-[0.58rem] uppercase tracking-wide text-theme-text-muted">Me deben</p>
-            <SharedMoney :value="balance.totalMeDeben" compact tone="green" class="text-lg font-extrabold block mt-0.5" />
+            <SharedMoney :value="balance.totalMeDeben" tone="green" class="text-lg font-extrabold block mt-0.5" />
           </div>
           <div class="rounded-xl bg-theme-input p-3">
             <p class="text-[0.58rem] uppercase tracking-wide text-theme-text-muted">Yo debo</p>
-            <SharedMoney :value="balance.totalYoDebo" compact tone="red" class="text-lg font-extrabold block mt-0.5" />
+            <SharedMoney :value="balance.totalYoDebo" tone="red" class="text-lg font-extrabold block mt-0.5" />
           </div>
         </div>
       </div>
@@ -68,7 +68,7 @@
               </p>
             </div>
             <div class="text-right shrink-0">
-              <SharedMoney :value="p.totalPendiente" compact :tone="tab === 'me_deben' ? 'green' : 'red'" class="text-base font-extrabold" />
+              <SharedMoney :value="p.totalPendiente" :tone="tab === 'me_deben' ? 'green' : 'red'" class="text-base font-extrabold" />
               <p class="text-[0.58rem] text-theme-text-muted mt-0.5">pendiente</p>
             </div>
           </div>
