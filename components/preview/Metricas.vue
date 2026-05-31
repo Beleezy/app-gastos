@@ -1,7 +1,20 @@
 <template>
   <div class="px-4 pt-3 pb-28">
     <h1 class="text-2xl font-extrabold text-gradient-blue leading-tight mb-0.5">Métricas</h1>
-    <p class="text-[0.78rem] text-theme-text-sec mb-4">Tu historia financiera, mes a mes</p>
+    <p class="text-[0.78rem] text-theme-text-sec mb-3">Tu historia financiera, mes a mes</p>
+
+    <!-- Selector de período -->
+    <div class="flex gap-2 mb-4 p-1 rounded-xl bg-theme-input">
+      <button
+        v-for="opt in periodos"
+        :key="opt"
+        class="flex-1 py-2 rounded-lg text-[0.78rem] font-semibold transition-colors"
+        :class="meses === opt ? 'bg-theme-card text-theme-text shadow-sm' : 'text-theme-text-muted'"
+        @click="cambiarPeriodo(opt)"
+      >
+        {{ opt }} meses
+      </button>
+    </div>
 
     <div v-if="loading" class="space-y-3">
       <div class="grid grid-cols-2 gap-2.5">
@@ -49,23 +62,23 @@
             <div class="absolute inset-x-0 top-1/2 border-t border-theme-border/40"></div>
             <div class="absolute inset-x-0 border-t border-theme-border/60" style="bottom: 20px"></div>
             <div class="absolute inset-x-0 top-0 flex items-end justify-around" style="bottom: 20px">
-              <div v-for="(m, i) in serie" :key="i" class="flex flex-col items-center justify-end h-full gap-1">
-                <div class="flex items-end gap-[3px] h-full">
+              <div v-for="(m, i) in serie" :key="i" class="flex flex-col items-center justify-end h-full">
+                <div class="flex items-end h-full" :style="{ gap: barGap }">
                   <div
-                    class="w-2.5 rounded-t bg-gradient-to-b from-emerald-400 to-emerald-500"
-                    :style="{ height: barH(m.ingresos) }"
+                    class="rounded-t bg-gradient-to-b from-emerald-400 to-emerald-500"
+                    :style="{ height: barH(m.ingresos), width: barWidth }"
                     :title="`Ingresos: ${m.ingresos}`"
                   ></div>
                   <div
-                    class="w-2.5 rounded-t bg-gradient-to-b from-red-400 to-rose-500"
-                    :style="{ height: barH(m.gastos) }"
+                    class="rounded-t bg-gradient-to-b from-red-400 to-rose-500"
+                    :style="{ height: barH(m.gastos), width: barWidth }"
                     :title="`Gastos: ${m.gastos}`"
                   ></div>
                 </div>
               </div>
             </div>
             <div class="absolute inset-x-0 bottom-0 flex justify-around">
-              <span v-for="(m, i) in serie" :key="i" class="text-[0.58rem] text-theme-text-muted">{{ mesCorto(m.mes) }}</span>
+              <span v-for="(m, i) in serie" :key="i" class="text-[0.58rem] text-theme-text-muted">{{ mostrarLabel(i) ? mesCorto(m.mes) : '' }}</span>
             </div>
           </div>
         </div>
@@ -105,6 +118,8 @@ const { apiFetch } = useApiFetch()
 const loading = ref(true)
 const serie = ref([])
 const promedios = ref({ gastosMensual: 0, ingresosMensual: 0, ahorrosMensual: 0 })
+const periodos = [6, 12, 24]
+const meses = ref(6)
 
 const MESES_CORTOS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
@@ -133,12 +148,24 @@ function barH(v) {
   return `${Math.max(v > 0 ? 3 : 0, (v / niceMax.value) * 100)}%`
 }
 
+// Ancho de barra adaptativo según cuántos meses se muestran.
+const barWidth = computed(() => (serie.value.length <= 6 ? '10px' : serie.value.length <= 12 ? '6px' : '3px'))
+const barGap = computed(() => (serie.value.length <= 12 ? '3px' : '1px'))
+// Con muchos meses, mostrar 1 de cada N etiquetas para que no se encimen.
+function mostrarLabel(i) {
+  const n = serie.value.length
+  if (n <= 12) return true
+  const paso = Math.ceil(n / 8)
+  return i % paso === 0 || i === n - 1
+}
+
 // Detalle: del más reciente al más antiguo.
 const serieReciente = computed(() => [...serie.value].reverse())
 
-onMounted(async () => {
+async function cargar() {
+  loading.value = true
   try {
-    const r = await apiFetch('/api/metricas/historico', { query: { meses: 6 } })
+    const r = await apiFetch('/api/metricas/historico', { query: { meses: meses.value } })
     serie.value = r.serie || []
     promedios.value = r.promedios || promedios.value
   } catch {
@@ -146,5 +173,13 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+function cambiarPeriodo(m) {
+  if (meses.value === m) return
+  meses.value = m
+  cargar()
+}
+
+onMounted(cargar)
 </script>

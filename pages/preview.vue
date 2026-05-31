@@ -20,8 +20,11 @@
     </header>
 
     <main class="max-w-lg mx-auto">
-      <PreviewDashboard v-if="vista === 'inicio'" />
-      <PreviewMetricas v-else-if="vista === 'metricas'" />
+      <Transition name="fade" mode="out-in">
+        <PreviewDashboard v-if="vista === 'inicio'" key="inicio" />
+        <PreviewDeudas v-else-if="vista === 'deudas'" key="deudas" />
+        <PreviewMetricas v-else-if="vista === 'metricas'" key="metricas" />
+      </Transition>
     </main>
 
     <!-- Nav inferior estilo R5 -->
@@ -31,7 +34,7 @@
           v-for="t in tabs"
           :key="t.id"
           class="flex-1 flex flex-col items-center gap-1 py-1 transition-colors"
-          :class="vista === t.id || (t.id === 'mas' && false) ? 'text-theme-accent' : 'text-theme-text-muted'"
+          :class="vista === t.id ? 'text-theme-accent' : 'text-theme-text-muted'"
           @click="t.id === 'mas' ? (sheetMas = true) : (vista = t.id)"
         >
           <span class="text-lg leading-none">{{ t.icon }}</span>
@@ -63,7 +66,7 @@
             </button>
           </div>
           <p class="text-[0.66rem] text-theme-text-muted text-center mt-4">
-            Maqueta de navegación. Métricas e Inicio funcionan dentro de la vista previa.
+            Maqueta de navegación. Inicio, Deudas y Métricas están rediseñados; el resto son demostrativos.
           </p>
         </div>
       </div>
@@ -81,6 +84,7 @@ const sheetMas = ref(false)
 
 const tabs = [
   { id: 'inicio', label: 'Inicio', icon: '🏠' },
+  { id: 'deudas', label: 'Deudas', icon: '💳' },
   { id: 'metricas', label: 'Métricas', icon: '📊' },
   { id: 'mas', label: 'Más', icon: '⋯' },
 ]
@@ -88,7 +92,7 @@ const tabs = [
 const modulosMas = [
   { icon: '📋', label: 'Planificador', vista: null },
   { icon: '🎤', label: 'Registro', vista: null },
-  { icon: '💳', label: 'Deudas', vista: null },
+  { icon: '💳', label: 'Deudas', vista: 'deudas' },
   { icon: '💵', label: 'Ingresos', vista: null },
   { icon: '🐷', label: 'Ahorros', vista: null },
   { icon: '🛍️', label: 'Futuros', vista: null },
@@ -118,4 +122,9 @@ onMounted(() => {
 .sheet-leave-active { transition: opacity 0.2s ease; }
 .sheet-enter-from,
 .sheet-leave-to { opacity: 0; }
+
+.fade-enter-active,
+.fade-leave-active { transition: opacity 0.18s ease; }
+.fade-enter-from,
+.fade-leave-to { opacity: 0; }
 </style>
