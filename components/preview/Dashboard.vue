@@ -1,122 +1,134 @@
 <template>
-  <div class="px-4 pt-3 pb-28">
-    <!-- Saludo -->
-    <div class="flex items-center gap-3 mb-4">
-      <div class="w-11 h-11 rounded-2xl bg-theme-accent-bg flex items-center justify-center">
-        <span class="text-xl">👋</span>
-      </div>
-      <div class="min-w-0">
-        <h1 class="text-xl font-extrabold text-gradient-blue leading-tight">Hola de nuevo</h1>
-        <p class="text-[11px] text-theme-text-sec">Tu resumen de {{ mesLabel }}</p>
-      </div>
-    </div>
+  <div class="px-4 pt-3 pb-32">
+    <PreviewPageHeader icon="👋" title="Hola de nuevo" :subtitle="`Tu resumen de ${mesLabel}`" />
 
     <div v-if="loading" class="space-y-3">
-      <div class="h-32 rounded-3xl bg-theme-card shimmer"></div>
+      <div class="h-36 rounded-3xl bg-theme-card shimmer"></div>
       <div class="grid grid-cols-2 gap-2.5">
-        <div class="h-24 rounded-2xl bg-theme-card shimmer"></div>
-        <div class="h-24 rounded-2xl bg-theme-card shimmer"></div>
+        <div class="h-28 rounded-2xl bg-theme-card shimmer"></div>
+        <div class="h-28 rounded-2xl bg-theme-card shimmer"></div>
       </div>
+      <div class="h-44 rounded-2xl bg-theme-card shimmer"></div>
     </div>
 
     <template v-else>
-      <!-- HERO: gasto del mes (R3 fluido) -->
-      <div class="relative overflow-hidden rounded-3xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/60 p-5 mb-3">
+      <!-- HERO: gasto del mes -->
+      <button
+        class="relative w-full text-left overflow-hidden rounded-3xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/60 p-5 mb-3 active:scale-[0.99] transition-transform"
+        @click="$emit('ir', 'registro')"
+      >
         <div
           class="absolute -top-10 -right-10 w-36 h-36 rounded-full blur-3xl pointer-events-none"
           :class="excedido ? 'bg-red-500/10' : porcentaje > 70 ? 'bg-amber-500/10' : 'bg-theme-accent-bg'"
         ></div>
         <div class="relative">
-          <div class="flex items-center justify-between mb-1.5">
-            <span class="text-[0.62rem] uppercase tracking-wider font-bold text-theme-text-muted">Gasto del mes</span>
-            <span class="text-[10px] text-theme-accent font-medium">Ver detalle →</span>
+          <div class="flex items-center justify-between mb-1.5 gap-2">
+            <span class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted">Gasto del mes</span>
+            <span class="text-[0.7rem] text-theme-accent font-semibold shrink-0">Ver registro →</span>
           </div>
-          <div class="flex items-end justify-between gap-3">
-            <SharedMoney
-              :value="d.gastos.totalMes"
-              class="font-extrabold leading-none text-gradient-blue"
-              :style="heroFontStyle"
-            />
-            <span v-if="presupuesto > 0" class="text-xs text-theme-text-muted shrink-0 pb-1">
-              de <SharedMoney :value="presupuesto" />
-            </span>
-          </div>
+          <PreviewMoney
+            :value="d.gastos.totalMes"
+            class="font-extrabold leading-none text-gradient-blue"
+            :style="heroFontStyle"
+          />
+          <p v-if="presupuesto > 0" class="text-[0.74rem] text-theme-text-muted mt-1">
+            de <PreviewMoney :value="presupuesto" entero /> presupuestados
+          </p>
 
           <div v-if="presupuesto > 0" class="mt-3">
-            <div class="h-1.5 w-full rounded-full bg-theme-input overflow-hidden">
+            <div class="h-2 w-full rounded-full bg-theme-input overflow-hidden">
               <div
                 class="h-full rounded-full transition-all duration-700"
                 :class="excedido ? 'bg-gradient-to-r from-red-500 to-rose-400' : porcentaje > 70 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-emerald-500 to-emerald-400'"
                 :style="{ width: Math.min(porcentaje, 100) + '%' }"
               ></div>
             </div>
-            <div class="flex items-center justify-between mt-1.5">
-              <span class="text-[0.68rem] font-semibold" :class="excedido ? 'text-red-400' : 'text-emerald-400'">
+            <div class="flex items-center justify-between mt-1.5 gap-2">
+              <span class="text-[0.72rem] font-semibold min-w-0" :class="excedido ? 'text-red-400' : 'text-emerald-400'">
                 {{ excedido ? 'Excedido' : 'Disponible' }}:
-                <SharedMoney :value="Math.abs(saldo)" :tone="excedido ? 'red' : 'green'" />
+                <PreviewMoney :value="Math.abs(saldo)" :tone="excedido ? 'red' : 'green'" />
               </span>
-              <span class="text-[0.68rem] text-theme-text-sec font-medium tabular-nums">{{ porcentaje.toFixed(0) }}%</span>
+              <span class="text-[0.72rem] text-theme-text-sec font-medium tabular-nums shrink-0">{{ porcentaje.toFixed(0) }}%</span>
             </div>
           </div>
-          <p v-else class="mt-2 text-[0.68rem] text-theme-text-muted">Sin presupuesto configurado este mes</p>
+          <p v-else class="mt-2 text-[0.72rem] text-theme-text-muted">Sin presupuesto configurado este mes</p>
         </div>
-      </div>
+      </button>
 
       <!-- 2 col: Me deben / Plan -->
       <div class="grid grid-cols-2 gap-2.5 mb-3">
-        <div class="rounded-2xl border border-theme-border bg-theme-card p-4">
+        <button
+          class="rounded-2xl border border-theme-border bg-theme-card p-4 text-left active:scale-[0.98] transition-transform"
+          @click="$emit('ir', 'deudas')"
+        >
           <div class="flex items-center gap-1.5 mb-2">
             <span class="text-sm">💳</span>
-            <span class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted">Me deben</span>
+            <span class="text-[0.62rem] uppercase tracking-wider font-bold text-theme-text-muted">Me deben</span>
           </div>
-          <SharedMoney :value="d.deudas.totalMeDeben" tone="amber" class="text-lg font-extrabold" />
-          <p class="text-[0.66rem] text-theme-text-muted mt-1">{{ d.deudas.countMeDeben }} deuda{{ d.deudas.countMeDeben !== 1 ? 's' : '' }}</p>
-        </div>
-        <div class="rounded-2xl border border-theme-border bg-theme-card p-4">
+          <PreviewMoney :value="d.deudas.totalMeDeben" compact entero tone="amber" class="text-lg font-extrabold" />
+          <p class="text-[0.68rem] text-theme-text-muted mt-1">{{ d.deudas.countMeDeben }} deuda{{ d.deudas.countMeDeben !== 1 ? 's' : '' }} →</p>
+        </button>
+        <button
+          class="rounded-2xl border border-theme-border bg-theme-card p-4 text-left active:scale-[0.98] transition-transform"
+          @click="$emit('ir', 'planificador')"
+        >
           <div class="flex items-center gap-1.5 mb-2">
             <span class="text-sm">📋</span>
-            <span class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted">Plan mensual</span>
+            <span class="text-[0.62rem] uppercase tracking-wider font-bold text-theme-text-muted">Plan mensual</span>
           </div>
-          <p class="text-xl font-extrabold tabular-nums" :class="d.plan.porcentajePagado > 70 ? 'text-emerald-400' : 'text-theme-accent'">
+          <p class="text-lg font-extrabold tabular-nums" :class="d.plan.porcentajePagado > 70 ? 'text-emerald-400' : 'text-theme-accent'">
             {{ d.plan.porcentajePagado.toFixed(0) }}%
           </p>
-          <p class="text-[0.66rem] text-theme-text-muted mt-1">{{ d.plan.countPagados }}/{{ d.plan.countTotal }} pagados</p>
-        </div>
+          <p class="text-[0.68rem] text-theme-text-muted mt-1">{{ d.plan.countPagados }}/{{ d.plan.countTotal }} pagados →</p>
+        </button>
       </div>
 
-      <!-- Saldo neto del mes (ingresos - gastos) -->
-      <div class="rounded-2xl border border-theme-border bg-theme-card p-4 mb-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <span class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted">Saldo neto del mes</span>
+      <!-- Saldo neto del mes -->
+      <button
+        class="w-full rounded-2xl border border-theme-border bg-theme-card p-4 mb-4 text-left active:scale-[0.99] transition-transform"
+        @click="$emit('ir', 'ingresos')"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <span class="text-[0.62rem] uppercase tracking-wider font-bold text-theme-text-muted">Saldo neto del mes</span>
             <div class="mt-1">
-              <SharedMoney :value="d.ingresos.saldoNeto" signo tone="auto" class="text-lg font-extrabold" />
+              <PreviewMoney :value="d.ingresos.saldoNeto" signo tone="auto" class="text-lg font-extrabold" />
             </div>
           </div>
-          <div class="text-right">
-            <p class="text-[0.6rem] text-theme-text-muted">Ingresos</p>
-            <SharedMoney :value="d.ingresos.totalMes" class="text-sm font-semibold text-emerald-400" />
+          <div class="text-right shrink-0">
+            <p class="text-[0.62rem] text-theme-text-muted">Ingresos</p>
+            <PreviewMoney :value="d.ingresos.totalMes" class="text-sm font-semibold text-emerald-400" />
           </div>
         </div>
-      </div>
+      </button>
 
-      <!-- Módulos: con datos → cifra; sin datos → CTA compacto (R4) -->
-      <p class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Tus módulos</p>
-      <div class="rounded-2xl border border-theme-border bg-theme-card divide-y divide-theme-border/60">
-        <div v-for="m in modulos" :key="m.label" class="flex items-center justify-between px-4 py-3">
+      <!-- Módulos: todos navegan a su vista V3 -->
+      <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Tus módulos</p>
+      <div class="rounded-2xl border border-theme-border bg-theme-card divide-y divide-theme-border/60 overflow-hidden">
+        <button
+          v-for="m in modulos"
+          :key="m.vista"
+          class="w-full flex items-center justify-between gap-3 px-4 py-3.5 min-h-[52px] text-left active:bg-theme-input/60 transition-colors"
+          @click="$emit('ir', m.vista)"
+        >
           <span class="flex items-center gap-2.5 min-w-0">
             <span class="text-base shrink-0">{{ m.icon }}</span>
             <span class="text-sm text-theme-text truncate">{{ m.label }}</span>
           </span>
-          <SharedMoney v-if="m.value > 0" :value="m.value" :tone="m.tone" class="text-sm font-semibold shrink-0" />
-          <span v-else class="text-[0.72rem] font-medium shrink-0" :class="m.ctaColor">{{ m.cta }} →</span>
-        </div>
+          <span class="flex items-center gap-1.5 shrink-0">
+            <PreviewMoney v-if="m.value > 0" :value="m.value" entero :tone="m.tone" class="text-sm font-semibold" />
+            <span v-else class="text-[0.72rem] font-medium" :class="m.ctaColor">{{ m.cta }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
+          </span>
+        </button>
       </div>
     </template>
   </div>
 </template>
 
 <script setup>
+defineEmits(['ir'])
+
 const { apiFetch } = useApiFetch()
 
 const loading = ref(true)
@@ -131,24 +143,28 @@ const d = ref({
 })
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-const mesLabel = computed(() => (d.value.mes ? MESES[d.value.mes - 1] : ''))
+const mesLabel = computed(() => (d.value.mes ? MESES[d.value.mes - 1] : '...'))
 const presupuesto = computed(() => Number(d.value.plan?.presupuesto) || 0)
 const porcentaje = computed(() => (presupuesto.value > 0 ? (Number(d.value.gastos.totalMes) / presupuesto.value) * 100 : 0))
 const saldo = computed(() => presupuesto.value - Number(d.value.gastos.totalMes))
 const excedido = computed(() => saldo.value < 0)
 
-// R3: el tamaño del titular baja según la cantidad de dígitos para que
-// nunca desborde a 380px con texto grande.
+// El titular baja de tamaño según la cantidad de dígitos: nunca desborda
+// a 380px con texto grande.
 const heroFontStyle = computed(() => {
   const len = String(Math.round(Number(d.value.gastos.totalMes) || 0)).length
-  const max = len >= 7 ? 1.7 : len >= 6 ? 2.0 : 2.35
+  const max = len >= 7 ? 1.7 : len >= 6 ? 2.0 : 2.3
   return { fontSize: `clamp(1.5rem, ${max - 0.2 + 5}vw, ${max}rem)` }
 })
 
 const modulos = computed(() => [
-  { icon: '🛍️', label: 'Gastos futuros', value: Number(d.value.futuros?.totalPromedio) || 0, tone: 'sky', cta: 'Comenzar', ctaColor: 'text-violet-400' },
-  { icon: '🐷', label: 'Ahorros del mes', value: Number(d.value.ahorros?.totalMes) || 0, tone: 'sky', cta: 'Crear meta', ctaColor: 'text-sky-400' },
-  { icon: '💵', label: 'Ingresos del mes', value: Number(d.value.ingresos?.totalMes) || 0, tone: 'green', cta: 'Registrar', ctaColor: 'text-emerald-400' },
+  { icon: '🛍️', label: 'Gastos futuros', vista: 'futuros', value: Number(d.value.futuros?.totalPromedio) || 0, tone: 'violet', cta: 'Comenzar', ctaColor: 'text-violet-400' },
+  { icon: '🐷', label: 'Ahorros del mes', vista: 'ahorros', value: Number(d.value.ahorros?.totalMes) || 0, tone: 'sky', cta: 'Crear meta', ctaColor: 'text-sky-400' },
+  { icon: '💵', label: 'Ingresos del mes', vista: 'ingresos', value: Number(d.value.ingresos?.totalMes) || 0, tone: 'green', cta: 'Registrar', ctaColor: 'text-emerald-400' },
+  { icon: '📅', label: 'Calendario', vista: 'calendario', value: 0, cta: 'Abrir', ctaColor: 'text-theme-accent' },
+  { icon: '📊', label: 'Métricas', vista: 'metricas', value: 0, cta: 'Abrir', ctaColor: 'text-theme-accent' },
+  { icon: '📄', label: 'Reportes', vista: 'reportes', value: 0, cta: 'Abrir', ctaColor: 'text-theme-accent' },
+  { icon: '👨‍👩‍👧', label: 'Familia', vista: 'familia', value: 0, cta: 'Abrir', ctaColor: 'text-theme-accent' },
 ])
 
 onMounted(async () => {

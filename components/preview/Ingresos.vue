@@ -1,48 +1,51 @@
 <template>
-  <div class="px-4 pt-3 pb-28">
-    <h1 class="text-2xl font-extrabold text-gradient-blue leading-tight mb-0.5">Ingresos</h1>
-    <p class="text-[0.78rem] text-theme-text-sec mb-4">Tu flujo neto del mes</p>
+  <div class="px-4 pt-3 pb-32">
+    <PreviewPageHeader icon="💵" title="Ingresos" subtitle="Tu flujo neto del mes" accent="green" />
 
     <PreviewMonthNav :label="mesLabel" @prev="cambiar(-1)" @next="cambiar(1)" />
 
     <div v-if="loading" class="space-y-3">
-      <div class="h-32 rounded-2xl bg-theme-card shimmer"></div>
-      <div class="h-20 rounded-2xl bg-theme-card shimmer"></div>
+      <div class="h-36 rounded-2xl bg-theme-card shimmer"></div>
+      <div class="h-24 rounded-2xl bg-theme-card shimmer"></div>
     </div>
 
     <template v-else>
       <!-- Saldo neto -->
-      <div class="rounded-2xl border border-theme-border bg-gradient-to-br from-emerald-500/5 to-theme-card p-4 mb-3">
-        <p class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted">Saldo neto</p>
-        <SharedMoney :value="resumen.saldoNeto" signo tone="auto" class="text-2xl font-extrabold block mt-1" />
-        <p class="text-[0.66rem] mt-0.5" :class="resumen.porcentajeAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">
+      <div class="rounded-3xl border border-theme-border bg-gradient-to-br from-emerald-500/5 to-theme-card p-4 mb-3">
+        <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted">Saldo neto</p>
+        <PreviewMoney :value="resumen.saldoNeto" signo tone="auto" class="text-[1.7rem] font-extrabold block mt-1" />
+        <p class="text-[0.7rem] mt-0.5" :class="resumen.porcentajeAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">
           {{ resumen.porcentajeAhorro }}% de ahorro sobre ingresos
         </p>
-        <div class="grid grid-cols-2 gap-3 mt-3">
-          <div class="rounded-xl bg-theme-input p-3">
-            <p class="text-[0.58rem] uppercase tracking-wide text-theme-text-muted">Ingresos</p>
-            <SharedMoney :value="resumen.totalIngresos" tone="green" class="text-base font-bold block mt-0.5" />
+        <div class="grid grid-cols-2 gap-2.5 mt-3">
+          <div class="rounded-xl bg-theme-input p-3 min-w-0">
+            <p class="text-[0.62rem] uppercase tracking-wide text-theme-text-muted">Ingresos</p>
+            <PreviewMoney :value="resumen.totalIngresos" entero tone="green" class="text-base font-bold block mt-0.5" />
           </div>
-          <div class="rounded-xl bg-theme-input p-3">
-            <p class="text-[0.58rem] uppercase tracking-wide text-theme-text-muted">Gastos</p>
-            <SharedMoney :value="resumen.totalGastos" tone="red" class="text-base font-bold block mt-0.5" />
+          <div class="rounded-xl bg-theme-input p-3 min-w-0">
+            <p class="text-[0.62rem] uppercase tracking-wide text-theme-text-muted">Gastos</p>
+            <PreviewMoney :value="resumen.totalGastos" entero tone="red" class="text-base font-bold block mt-0.5" />
           </div>
         </div>
       </div>
 
-      <!-- Lista de ingresos -->
+      <!-- Lista de ingresos: fila apilada (concepto a todo lo ancho) -->
       <div v-if="ingresos.length === 0" class="rounded-2xl border border-dashed border-theme-border bg-theme-card p-8 text-center">
         <p class="text-sm text-theme-text-sec">Sin ingresos este mes</p>
       </div>
       <div v-else class="space-y-2">
-        <div v-for="ing in ingresos" :key="ing.id" class="rounded-2xl border border-theme-border bg-theme-card p-3.5 flex items-center gap-3">
-          <span class="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0 text-base">{{ iconoOrigen(ing.origen) }}</span>
-          <div class="min-w-0 flex-1">
-            <p class="text-sm text-theme-text font-medium line-clamp-2 break-words leading-snug">{{ ing.concepto }}</p>
-            <p class="text-[0.62rem] text-theme-text-muted mt-0.5">{{ fechaCorta(ing.fecha) }}<span v-if="ing.origen"> · {{ labelOrigen(ing.origen) }}</span></p>
+        <article v-for="ing in ingresos" :key="ing.id" class="rounded-2xl border border-theme-border bg-theme-card p-4">
+          <div class="flex items-start gap-3">
+            <span class="w-10 h-10 rounded-2xl bg-emerald-500/15 flex items-center justify-center shrink-0 text-base">{{ iconoOrigen(ing.origen) }}</span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm text-theme-text font-medium leading-snug line-clamp-2 break-words">{{ ing.concepto }}</p>
+              <div class="flex items-center justify-between gap-2 mt-1">
+                <p class="text-[0.66rem] text-theme-text-muted truncate">{{ fechaCorta(ing.fecha) }}<span v-if="ing.origen"> · {{ ing.origen }}</span></p>
+                <PreviewMoney :value="ing.monto" signo tone="green" class="text-base font-bold shrink-0" />
+              </div>
+            </div>
           </div>
-          <SharedMoney :value="ing.monto" signo tone="green" class="text-base font-bold shrink-0" />
-        </div>
+        </article>
       </div>
     </template>
   </div>
@@ -61,9 +64,9 @@ const resumen = ref({ totalIngresos: 0, totalGastos: 0, saldoNeto: 0, porcentaje
 
 const mesLabel = computed(() => `${MESES[mes.value - 1]} ${anio.value}`)
 
-const ORIGENES = { salario: ['💼', 'Salario'], freelance: ['💻', 'Freelance'], inversion: ['📈', 'Inversión'], otro: ['💰', 'Otro'] }
-const iconoOrigen = (o) => (ORIGENES[o]?.[0]) || '💰'
-const labelOrigen = (o) => (ORIGENES[o]?.[1]) || 'Otro'
+const ICONOS_ORIGEN = { trabajo: '💼', salario: '💼', freelance: '💻', inversion: '📈', 'préstamos': '🤝', prestamos: '🤝' }
+const iconoOrigen = (o) => ICONOS_ORIGEN[(o || '').toLowerCase()] || '💰'
+
 function fechaCorta(f) {
   if (!f) return ''
   const [, m, d] = f.split('-').map(Number)

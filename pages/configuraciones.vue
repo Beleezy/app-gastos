@@ -312,13 +312,13 @@
           </svg>
         </button>
 
-        <!-- Vista previa (Beta) — interfaces rediseñadas, momentáneo -->
+        <!-- Vista previa (V3) — interfaces rediseñadas, momentáneo -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border lg:col-span-2">
           <label class="flex items-center justify-between cursor-pointer">
             <div class="flex items-center gap-2.5">
               <span class="text-xl">🧪</span>
               <div>
-                <span class="text-sm text-theme-text font-medium">Vista previa de la nueva interfaz</span>
+                <span class="text-sm text-theme-text font-medium">Vista previa de la nueva interfaz (Versión 3)</span>
                 <p class="text-[11px] text-theme-text-sec leading-tight">Explora los rediseños propuestos sin afectar tus datos ni la app actual.</p>
               </div>
             </div>
@@ -339,7 +339,7 @@
             class="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 transition-colors flex items-center justify-center gap-2"
             @click="navigateTo('/preview')"
           >
-            Abrir vista previa
+            Abrir vista previa V3
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
             </svg>

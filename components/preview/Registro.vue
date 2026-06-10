@@ -1,29 +1,31 @@
 <template>
-  <div class="px-4 pt-3 pb-28">
-    <h1 class="text-2xl font-extrabold text-gradient-blue leading-tight mb-0.5">Registro</h1>
-    <p class="text-[0.78rem] text-theme-text-sec mb-4">Tus gastos del día a día</p>
+  <div class="px-4 pt-3 pb-32">
+    <PreviewPageHeader icon="🎙️" title="Registro" subtitle="Tus gastos del día a día" />
 
     <PreviewMonthNav :label="mesLabel" @prev="cambiar(-1)" @next="cambiar(1)" />
 
     <div v-if="loading" class="space-y-3">
-      <div class="h-24 rounded-2xl bg-theme-card shimmer"></div>
-      <div class="h-32 rounded-2xl bg-theme-card shimmer"></div>
+      <div class="h-28 rounded-2xl bg-theme-card shimmer"></div>
+      <div class="h-36 rounded-2xl bg-theme-card shimmer"></div>
     </div>
 
     <template v-else>
       <!-- Resumen mes -->
-      <div class="rounded-2xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/60 p-4 mb-3">
-        <p class="text-[0.6rem] uppercase tracking-wider font-bold text-theme-text-muted">Gastado este mes</p>
-        <SharedMoney :value="totalMes" :tone="excedido ? 'red' : 'none'" class="text-2xl font-extrabold block mt-1" :class="!excedido ? 'text-gradient-blue' : ''" />
+      <div class="rounded-3xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/60 p-4 mb-3">
+        <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted">Gastado este mes</p>
+        <PreviewMoney :value="totalMes" :tone="excedido ? 'red' : 'none'" class="text-[1.7rem] font-extrabold block mt-1" :class="!excedido ? 'text-gradient-blue' : ''" />
         <div v-if="presupuesto > 0">
-          <div class="h-1.5 w-full rounded-full bg-theme-input overflow-hidden mt-3">
+          <div class="h-2 w-full rounded-full bg-theme-input overflow-hidden mt-3">
             <div class="h-full rounded-full" :class="excedido ? 'bg-red-500' : 'bg-emerald-500'" :style="{ width: Math.min(pct, 100) + '%' }"></div>
           </div>
-          <p class="text-[0.68rem] mt-1.5" :class="excedido ? 'text-red-400' : 'text-theme-text-muted'">
-            {{ pct.toFixed(0) }}% de <SharedMoney :value="presupuesto" /> · {{ gastos.length }} gastos
-          </p>
+          <div class="flex items-center justify-between gap-2 mt-1.5">
+            <p class="text-[0.72rem] min-w-0" :class="excedido ? 'text-red-400' : 'text-theme-text-muted'">
+              {{ pct.toFixed(0) }}% de <PreviewMoney :value="presupuesto" entero />
+            </p>
+            <p class="text-[0.72rem] text-theme-text-sec shrink-0">{{ gastos.length }} gastos</p>
+          </div>
         </div>
-        <p v-else class="text-[0.68rem] text-theme-text-muted mt-2">{{ gastos.length }} gastos registrados</p>
+        <p v-else class="text-[0.72rem] text-theme-text-muted mt-2">{{ gastos.length }} gastos registrados</p>
       </div>
 
       <!-- Historial por día -->
@@ -31,30 +33,33 @@
         <p class="text-sm text-theme-text-sec">Sin gastos este mes</p>
       </div>
       <div v-else class="space-y-3">
-        <div v-for="d in dias" :key="d.fecha" class="rounded-2xl border border-theme-border bg-theme-card overflow-hidden">
-          <div class="flex items-center justify-between px-4 py-2.5 bg-theme-input/40">
-            <span class="flex items-center gap-2.5">
-              <span class="flex flex-col items-center justify-center w-9 h-9 rounded-lg bg-theme-card">
-                <span class="text-[0.5rem] uppercase font-bold text-theme-text-muted leading-none">{{ d.diaSemana }}</span>
+        <section v-for="d in dias" :key="d.fecha" class="rounded-2xl border border-theme-border bg-theme-card overflow-hidden">
+          <div class="flex items-center justify-between gap-2 px-4 py-2.5 bg-theme-input/40">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <span class="flex flex-col items-center justify-center w-10 h-10 rounded-xl bg-theme-card shrink-0">
+                <span class="text-[0.56rem] uppercase font-bold text-theme-text-muted leading-none">{{ d.diaSemana }}</span>
                 <span class="text-sm font-bold text-theme-text leading-tight">{{ d.diaNum }}</span>
               </span>
-              <span class="text-[0.7rem] text-theme-text-muted">{{ d.items.length }} gasto{{ d.items.length !== 1 ? 's' : '' }}</span>
+              <span class="text-[0.72rem] text-theme-text-muted truncate">{{ d.items.length }} gasto{{ d.items.length !== 1 ? 's' : '' }}</span>
             </span>
-            <SharedMoney :value="d.total" class="text-sm font-bold text-theme-text" />
+            <PreviewMoney :value="d.total" class="text-sm font-bold text-theme-text shrink-0" />
           </div>
           <div class="divide-y divide-theme-border/50">
-            <div v-for="g in d.items" :key="g.id" class="flex items-center gap-3 px-4 py-2.5">
-              <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" :style="{ backgroundColor: (g.categoriaColor || '#6b7280') + '22' }">
+            <!-- Fila apilada: concepto a todo lo ancho, monto en la fila de meta. -->
+            <div v-for="g in d.items" :key="g.id" class="flex items-start gap-3 px-4 py-3">
+              <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5" :style="{ backgroundColor: (g.categoriaColor || '#6b7280') + '22' }">
                 <span class="text-sm">{{ g.categoriaIcono || '💸' }}</span>
               </span>
               <div class="min-w-0 flex-1">
-                <p class="text-sm text-theme-text truncate">{{ g.concepto }}</p>
-                <p class="text-[0.62rem] text-theme-text-muted truncate">{{ g.categoriaNombre }} · {{ (g.hora || '').slice(0,5) }}</p>
+                <p class="text-sm text-theme-text leading-snug line-clamp-2 break-words">{{ g.concepto }}</p>
+                <div class="flex items-center justify-between gap-2 mt-1">
+                  <p class="text-[0.66rem] text-theme-text-muted truncate">{{ g.categoriaNombre }} · {{ (g.hora || '').slice(0, 5) }}</p>
+                  <PreviewMoney :value="g.monto" class="text-sm font-semibold text-theme-text shrink-0" />
+                </div>
               </div>
-              <SharedMoney :value="g.monto" class="text-sm font-semibold text-theme-text shrink-0" />
             </div>
           </div>
-        </div>
+        </section>
       </div>
     </template>
   </div>
