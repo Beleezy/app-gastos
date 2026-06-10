@@ -73,10 +73,22 @@ horizontales** en todas las vistas.
 
 ---
 
-## Siguientes pasos sugeridos (cuando el usuario apruebe la V3)
+## V4 — Pulido aplicado directamente a producción (visual-only)
 
-1. Portar el patrón de fila apilada a producción módulo por módulo (Ingresos primero — defecto crítico).
-2. Reemplazar la tabla de Métricas de producción por las tarjetas mensuales.
-3. Aplicar `entero`/regla de 5 cifras a las tripletas de Futuros en producción.
-4. Acortar la etiqueta del BottomNav ("Plan") o reducir tipografía solo en modo grande.
-5. Decidir qué componentes de cada página se conservan (el usuario indicará por módulo).
+A diferencia de la V3 (rediseño completo en `/preview`), la V4 son mejoras quirúrgicas
+sobre las vistas actuales — solo template y clases, sin tocar lógica, props, eventos ni
+endpoints — para que todo encaje a 380px con texto "Grande". Verificadas en vivo con
+cero desbordes horizontales.
+
+| Módulo | Fix aplicado |
+|---|---|
+| **Ingresos** | Fila apilada: concepto a todo el ancho (clamp-2) + fila meta con fecha·origen, monto (`SharedMoney signo compact`) y acciones de 44px. Corrige el colapso a 1–2 caracteres. El form da más ancho a Fecha (`grid-cols-[1fr,1.35fr]`). |
+| **Métricas** | La tabla de 5 columnas (~494px) se reemplazó por tarjetas mensuales: cabecera Mes+Saldo y tripleta Ingresos/Gastos/Ahorros con `SharedMoney compact entero`. |
+| **Futuros** | MÍN/PROM/MÁX y precios de opciones con `SharedMoney compact entero`: 4 cifras completas ("S/ 4,349"), "k" solo desde 10,000. |
+| **Deudas** | Nombres con `line-clamp-2` (lista y sección saldadas); tarjeta de deuda del detalle apilada (concepto arriba, montos/chip en fila meta); carrusel de filtros con `pr-4`. |
+| **Registro** | Tabs Historial/Categorías/Mapa/Comparar en grilla 2×2 bajo 480px (todos visibles, sin cortes); día abreviado "Mié 10" en cabeceras (antes "Miérc..."); chips de Comparar con scroll + `pr-4`; categorías del form manual a 2 líneas. |
+| **Planificador** | Grilla de categorías de 4→3 columnas con etiquetas a 2 líneas (también medios en Registrar pago); tarjeta resumen de Registrar pago apilada; ítems de la lista con `min-w-0`/`shrink-0` y concepto sin aplastarse. |
+| **Ahorros** | Medios del form a 3 columnas con nombre a 2 líneas; "Por medio" y movimientos con clamp-2. |
+| **BottomNav** | Etiquetas a `text-[0.68rem]` (siguen escalando con rem): "Planificador" completo con texto grande. |
+| **Compartidos** | `SharedMoney` ganó el prop `entero` (sin ".00" en celdas estrechas; 4 cifras siempre completas). `SharedTabBar` centra etiquetas y agrega `pr-4` al modo scrollable. |
+

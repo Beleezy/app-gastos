@@ -133,33 +133,33 @@
           <div class="h-6 w-full rounded bg-theme-border-md shimmer"></div>
           <div class="h-6 w-full rounded bg-theme-border-md shimmer"></div>
         </div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full text-xs">
-            <thead class="text-[10px] uppercase text-theme-text-muted bg-theme-input/50">
-              <tr>
-                <th class="text-left px-3 py-2 font-medium">Mes</th>
-                <th class="text-right px-3 py-2 font-medium">Ingresos</th>
-                <th class="text-right px-3 py-2 font-medium">Gastos</th>
-                <th class="text-right px-3 py-2 font-medium">Ahorros</th>
-                <th class="text-right px-3 py-2 font-medium">Saldo</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="p in serieInvertida"
-                :key="`r-${p.anio}-${p.mes}`"
-                class="border-t border-theme-border/40"
-              >
-                <td class="px-3 py-2 text-theme-text">{{ etiquetaMes(p.mes) }} {{ p.anio }}</td>
-                <td class="px-3 py-2 text-right text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(p.ingresos) }}</td>
-                <td class="px-3 py-2 text-right text-rose-400">{{ currencySymbol }}&nbsp;{{ formatMonto(p.gastos) }}</td>
-                <td class="px-3 py-2 text-right text-sky-400">{{ currencySymbol }}&nbsp;{{ formatMonto(p.ahorros) }}</td>
-                <td class="px-3 py-2 text-right font-semibold" :class="p.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
-                  {{ p.saldoNeto >= 0 ? '+' : '' }}{{ currencySymbol }}&nbsp;{{ formatMonto(p.saldoNeto) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Tarjetas por mes en lugar de tabla: a 380px con texto grande la
+             tabla de 5 columnas medía ~494px y ocultaba la columna Saldo. -->
+        <div v-else class="divide-y divide-theme-border/40">
+          <div
+            v-for="p in serieInvertida"
+            :key="`r-${p.anio}-${p.mes}`"
+            class="px-3 py-2.5"
+          >
+            <div class="flex items-center justify-between gap-2 mb-1.5">
+              <span class="text-xs font-semibold text-theme-text capitalize min-w-0 truncate">{{ etiquetaMes(p.mes) }} {{ p.anio }}</span>
+              <SharedMoney :value="p.saldoNeto" signo tone="auto" class="text-xs font-semibold shrink-0" />
+            </div>
+            <div class="grid grid-cols-3 gap-1.5">
+              <div class="min-w-0">
+                <p class="text-[9px] uppercase tracking-wide text-theme-text-muted">Ingresos</p>
+                <SharedMoney :value="p.ingresos" compact entero tone="green" class="text-xs font-medium block mt-0.5" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-[9px] uppercase tracking-wide text-theme-text-muted">Gastos</p>
+                <SharedMoney :value="p.gastos" compact entero tone="red" class="text-xs font-medium block mt-0.5" />
+              </div>
+              <div class="min-w-0">
+                <p class="text-[9px] uppercase tracking-wide text-theme-text-muted">Ahorros</p>
+                <SharedMoney :value="p.ahorros" compact entero tone="sky" class="text-xs font-medium block mt-0.5" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

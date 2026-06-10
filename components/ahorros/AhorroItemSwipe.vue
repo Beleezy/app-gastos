@@ -46,7 +46,7 @@
         </div>
 
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-theme-text truncate">
+          <p class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug">
             {{ ahorro.concepto || ahorro.medioNombre || 'Ahorro' }}
           </p>
           <p class="text-[11px] text-theme-text-sec">

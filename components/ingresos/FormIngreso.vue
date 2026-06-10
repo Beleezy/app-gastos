@@ -12,8 +12,10 @@
       />
     </div>
 
-    <div class="grid grid-cols-2 gap-3">
-      <div>
+    <!-- Fecha con más ancho que Monto: el input date nativo ("06/10/2026" +
+         ícono de calendario) no cabe en mitad exacta con texto grande a 380px. -->
+    <div class="grid grid-cols-[1fr,1.35fr] gap-3">
+      <div class="min-w-0">
         <label class="block text-xs text-theme-text-muted font-medium mb-1.5">Monto</label>
         <input
           v-model.number="form.monto"
@@ -25,7 +27,7 @@
           class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text outline-none focus:border-theme-accent transition-colors"
         />
       </div>
-      <div>
+      <div class="min-w-0">
         <label class="block text-xs text-theme-text-muted font-medium mb-1.5">Fecha</label>
         <input
           v-model="form.fecha"

@@ -9,16 +9,19 @@
 //   - Formato/locale centralizados en useCurrency (una sola fuente de verdad).
 //   - `compact`: colapsa montos de 5+ cifras ("S/ 27.1k"); los de <=4 cifras
 //     se muestran completos. Util en tarjetas estrechas.
+//   - `entero`: oculta los decimales (".00") — para celdas estrechas donde el
+//     texto grande no deja sitio; los montos de 4 cifras siguen completos.
 //   - `signo`: antepone "+" a positivos (para flujos/saldos).
 //   - `tone`: color semantico opcional.
 const props = defineProps({
   value: { type: [Number, String], default: 0 },
   compact: { type: Boolean, default: false },
+  entero: { type: Boolean, default: false },
   signo: { type: Boolean, default: false },
   tone: { type: String, default: 'none' }, // none | auto | red | green | sky | amber | accent | muted
 })
 
-const { currencySymbol, formatMonto } = useCurrency()
+const { currencySymbol, currencyLocale, formatMonto } = useCurrency()
 
 const NBSP = ' '
 
@@ -34,14 +37,19 @@ function formatCompacto(abs) {
   if (abs >= 10_000) {
     return (abs / 1000).toFixed(abs >= 100_000 ? 0 : 1).replace(/\.0$/, '') + 'k'
   }
-  // <= 4 cifras -> completo con decimales (no se colapsa).
+  // <= 4 cifras -> completo (no se colapsa).
+  return cuerpoBase(abs)
+}
+
+function cuerpoBase(abs) {
+  if (props.entero) return Math.round(abs).toLocaleString(currencyLocale.value)
   return formatMonto(abs)
 }
 
 const display = computed(() => {
   const n = num.value
   const abs = Math.abs(n)
-  const cuerpo = props.compact ? formatCompacto(abs) : formatMonto(abs)
+  const cuerpo = props.compact ? formatCompacto(abs) : cuerpoBase(abs)
   let prefijo = ''
   if (n < 0) prefijo = '−' // signo menos tipografico
   else if (props.signo && n > 0) prefijo = '+'

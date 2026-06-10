@@ -173,14 +173,16 @@
         </div>
 
         <div v-for="deuda in deudasActivasPersona" :key="deuda.id" class="bg-theme-card rounded-xl p-3.5 mb-2 border border-theme-border" data-testid="deuda-item">
-          <div class="flex items-start justify-between">
+          <!-- Concepto a todo el ancho: con texto grande, partir la tarjeta en
+               dos columnas dejaba el concepto apretado y la derecha vacía -->
+          <p class="text-sm font-medium text-theme-text leading-snug break-words">{{ deuda.concepto }}</p>
+          <div class="flex items-start justify-between gap-3 mt-1">
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-theme-text">{{ deuda.concepto }}</p>
-              <p class="text-xs text-theme-text-sec mt-0.5">
+              <p class="text-xs text-theme-text-sec">
                 {{ formatFecha(deuda.fechaCreacion) }}
                 <span class="text-theme-text-muted">· {{ formatRelativo(deuda.fechaCreacion) }}</span>
               </p>
-              <div v-if="deuda.fechaPago" class="flex items-center gap-1.5 mt-1">
+              <div v-if="deuda.fechaPago" class="flex items-center gap-1.5 mt-1 flex-wrap">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -193,7 +195,7 @@
                 <p class="text-[0.625rem] text-theme-text-muted italic">{{ deuda.notas }}</p>
               </div>
             </div>
-            <div class="text-right shrink-0 ml-3">
+            <div class="text-right shrink-0">
               <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
               <p v-if="deuda.estado === 'parcial'" class="text-[0.625rem] text-orange-400 mt-0.5">
                 Pendiente: {{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }}

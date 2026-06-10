@@ -2,7 +2,7 @@
   <div
     role="tablist"
     :aria-label="ariaLabel"
-    :class="[containerClass, scrollable ? 'overflow-x-auto pb-1 scrollbar-hide' : '']"
+    :class="[containerClass, scrollable ? 'overflow-x-auto pb-1 pr-4 scrollbar-hide' : '']"
   >
     <button
       v-for="tab in tabs"
@@ -12,7 +12,7 @@
       :aria-selected="modelValue === tab.value"
       :aria-controls="tab.controls"
       :data-testid="tab.testid || `tab-${tab.value}`"
-      class="shrink-0 transition-colors flex items-center gap-1.5 font-medium"
+      class="shrink-0 transition-colors flex items-center justify-center gap-1.5 font-medium"
       :class="[
         sizeClass,
         modelValue === tab.value ? activeClass(tab) : inactiveClass(tab),

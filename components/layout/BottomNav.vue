@@ -41,8 +41,9 @@
           >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span>
         </div>
 
+        <!-- 0.68rem: con texto grande (root 18px) "Planificador" se cortaba a text-xs -->
         <span
-          class="max-w-full truncate text-xs font-semibold transition-all duration-300 leading-none"
+          class="max-w-full truncate text-[0.68rem] font-semibold transition-all duration-300 leading-none"
           :class="isActive(item.to) ? 'text-theme-accent opacity-100' : 'opacity-70'"
         >{{ item.label }}</span>
       </NuxtLink>

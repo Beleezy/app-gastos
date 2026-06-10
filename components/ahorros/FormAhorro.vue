@@ -37,7 +37,8 @@
           Gestionar medios
         </button>
       </div>
-      <div class="grid grid-cols-4 gap-2">
+      <!-- 3 columnas: con texto grande a 380px, 4 columnas truncaban los nombres -->
+      <div class="grid grid-cols-3 gap-2">
         <button
           v-for="medio in medios"
           :key="medio.id"
@@ -53,7 +54,7 @@
           >
             <span class="text-sm">{{ medio.icono || '💰' }}</span>
           </div>
-          <span class="text-[10px] text-theme-text-muted text-center leading-tight truncate w-full">{{ medio.nombre }}</span>
+          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words w-full">{{ medio.nombre }}</span>
         </button>
       </div>
     </div>

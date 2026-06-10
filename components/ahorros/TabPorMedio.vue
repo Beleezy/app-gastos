@@ -24,9 +24,9 @@
           <span class="text-sm">{{ item.medioIcono || '💰' }}</span>
         </div>
         <div class="flex-1 min-w-0">
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium text-theme-text truncate">{{ item.medioNombre || 'Sin medio' }}</span>
-            <span class="text-sm font-bold text-emerald-400 whitespace-nowrap ml-2">+{{ currencySymbol }}&nbsp;{{ formatMonto(item.total) }}</span>
+          <div class="flex items-start justify-between gap-2">
+            <span class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug min-w-0">{{ item.medioNombre || 'Sin medio' }}</span>
+            <span class="text-sm font-bold text-emerald-400 whitespace-nowrap shrink-0">+{{ currencySymbol }}&nbsp;{{ formatMonto(item.total) }}</span>
           </div>
           <div class="mt-1.5 relative w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
             <div

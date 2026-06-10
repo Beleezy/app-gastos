@@ -25,7 +25,9 @@
     <!-- Categoría -->
     <div>
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Categoría</label>
-      <div class="grid grid-cols-4 gap-2">
+      <!-- 3 columnas + 2 líneas: con texto grande a 380px, 4 columnas truncaban
+           los nombres ("Alimenta...", "Entreteni...") -->
+      <div class="grid grid-cols-3 gap-2">
         <button
           v-for="cat in categorias"
           :key="cat.id"
@@ -41,7 +43,7 @@
           >
             <span class="text-sm">{{ getEmoji(cat.nombre) }}</span>
           </div>
-          <span class="text-[10px] text-theme-text-muted text-center leading-tight truncate w-full">{{ cat.nombre }}</span>
+          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words w-full">{{ cat.nombre }}</span>
         </button>
       </div>
     </div>
