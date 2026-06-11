@@ -5,7 +5,7 @@
       <div class="flex items-center justify-between px-4 py-2.5 max-w-lg mx-auto">
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 text-violet-300 text-[0.66rem] font-bold uppercase tracking-wider">
           <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse"></span>
-          Vista previa · V3
+          Vista previa · V5
         </span>
         <button
           class="flex items-center gap-1.5 min-h-[44px] px-2 text-[0.78rem] font-medium text-theme-text-sec hover:text-theme-text transition-colors"
@@ -37,10 +37,12 @@
       </Transition>
     </main>
 
-    <!-- Hoja "Más": todos los módulos. Queda DEBAJO del nav (z-50 < z-60):
-         las pestañas inferiores siguen visibles y tocables con la hoja abierta. -->
+    <!-- Hoja "Más": todos los módulos. Queda DEBAJO del nav (z-30 < z-40),
+         y AMBOS debajo de los bottom-sheets reales de producción (z-50):
+         las pestañas siguen tocables con la hoja abierta y los formularios
+         reales nunca quedan tapados por el nav. -->
     <Transition name="sheet">
-      <div v-if="sheetMas" class="fixed inset-0 z-50 flex items-end justify-center">
+      <div v-if="sheetMas" class="fixed inset-0 z-30 flex items-end justify-center">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="sheetMas = false"></div>
         <div
           class="relative w-full max-w-lg bg-theme-card rounded-t-3xl border-t border-theme-border p-5 max-h-[78vh] overflow-y-auto"
@@ -69,14 +71,17 @@
             </button>
           </div>
           <p class="text-[0.66rem] text-theme-text-muted text-center mt-4">
-            Interfaces rediseñadas (V3) con tus datos reales, en modo lectura.
+            Interfaces rediseñadas (V5) y funcionales: registra, edita y paga con tus datos reales.
           </p>
         </div>
       </div>
     </Transition>
 
-    <!-- Nav inferior V3: siempre por encima de la hoja "Más" -->
-    <nav class="fixed bottom-0 inset-x-0 z-[60] bg-theme-card/95 backdrop-blur border-t border-theme-border">
+    <!-- Toasts de los formularios reales (en producción viven en el layout) -->
+    <SharedToastNotification />
+
+    <!-- Nav inferior V5: por encima de la hoja "Más", debajo de los modales reales -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-theme-card/95 backdrop-blur border-t border-theme-border">
       <div class="max-w-lg mx-auto flex items-stretch px-1 py-1.5" style="padding-bottom: max(0.4rem, env(safe-area-inset-bottom))">
         <button
           v-for="t in tabs"

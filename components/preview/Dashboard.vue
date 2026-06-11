@@ -102,7 +102,33 @@
         </div>
       </button>
 
-      <!-- Módulos: todos navegan a su vista V3 -->
+      <!-- Acciones rápidas: formularios REALES de producción -->
+      <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Acciones rápidas</p>
+      <div class="grid grid-cols-3 gap-2 mb-4">
+        <button
+          class="rounded-2xl border border-theme-border bg-theme-card p-3 min-h-[76px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform"
+          @click="accion = 'gasto'"
+        >
+          <span class="text-xl">💸</span>
+          <span class="text-[0.66rem] font-semibold text-theme-text leading-tight text-center">Nuevo gasto</span>
+        </button>
+        <button
+          class="rounded-2xl border border-theme-border bg-theme-card p-3 min-h-[76px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform"
+          @click="accion = 'deuda'"
+        >
+          <span class="text-xl">💳</span>
+          <span class="text-[0.66rem] font-semibold text-theme-text leading-tight text-center">Nueva deuda</span>
+        </button>
+        <button
+          class="rounded-2xl border border-theme-border bg-theme-card p-3 min-h-[76px] flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform"
+          @click="accion = 'ahorro'"
+        >
+          <span class="text-xl">🐷</span>
+          <span class="text-[0.66rem] font-semibold text-theme-text leading-tight text-center">Ahorro</span>
+        </button>
+      </div>
+
+      <!-- Módulos: todos navegan a su vista V5 -->
       <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Tus módulos</p>
       <div class="rounded-2xl border border-theme-border bg-theme-card divide-y divide-theme-border/60 overflow-hidden">
         <button
@@ -123,6 +149,29 @@
         </button>
       </div>
     </template>
+
+    <!-- Formularios reales de las acciones rápidas -->
+    <RegistroFormGastoManual
+      v-if="accion === 'gasto'"
+      :categorias="categorias"
+      @close="accion = null"
+      @saved="onAccionGuardada"
+    />
+    <DeudasFormDeuda
+      v-if="accion === 'deuda'"
+      @close="accion = null"
+      @saved="onAccionGuardada"
+    />
+    <AhorrosFormAhorro
+      v-if="accion === 'ahorro'"
+      @close="accion = null"
+      @saved="onAccionGuardada"
+      @gestionar-medios="accion = 'medios'"
+    />
+    <AhorrosFormMedioAhorro
+      v-if="accion === 'medios'"
+      @close="accion = 'ahorro'"
+    />
   </div>
 </template>
 
@@ -130,6 +179,14 @@
 defineEmits(['ir'])
 
 const { apiFetch } = useApiFetch()
+const { categorias, fetchCategorias } = useCategorias()
+
+const accion = ref(null)
+
+function onAccionGuardada() {
+  accion.value = null
+  cargarDashboard()
+}
 
 const loading = ref(true)
 const d = ref({
@@ -167,7 +224,7 @@ const modulos = computed(() => [
   { icon: '👨‍👩‍👧', label: 'Familia', vista: 'familia', value: 0, cta: 'Abrir', ctaColor: 'text-theme-accent' },
 ])
 
-onMounted(async () => {
+async function cargarDashboard() {
   try {
     const r = await apiFetch('/api/dashboard')
     d.value = { ...d.value, ...r }
@@ -176,5 +233,11 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  cargarDashboard()
+  // Las categorías las necesita el formulario real de gasto manual.
+  fetchCategorias().catch(() => {})
 })
 </script>

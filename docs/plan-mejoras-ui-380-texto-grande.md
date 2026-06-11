@@ -103,3 +103,33 @@ cero desbordes horizontales.
 | **Calendario** | Títulos de eventos a 2 líneas (`line-clamp-2`) en vez de truncar. |
 | **Verificados sin cambios** | Confirmación de gastos por foto/voz (clamp + "Ver más" + montos completos ya correctos, probado con LLM simulado y montos de 4 cifras), FormPago, FormPagoGlobal, FormDeuda, Metas de ahorro, Papelera, Reportes. |
 
+---
+
+## V5 — Vista previa rediseñada Y funcional (el balance)
+
+La V5 convierte la vista previa en algo **usable de verdad**: conserva el rediseño V3
+(deep links, nav que no se bloquea, fila apilada, reglas de moneda) pero cada módulo
+monta los **formularios reales de producción** — mismas validaciones, mismos toasts,
+mismos datos. Nada de lógica duplicada: los componentes `Form*` existentes se reutilizan
+tal cual (`@saved` → recarga del módulo). Flag `ui-preview-v5` (hereda v3/v2).
+
+| Módulo | Funcionalidad real en V5 |
+|---|---|
+| **Inicio** | Acciones rápidas (Nuevo gasto · Nueva deuda · Ahorro) con los formularios reales; todos los KPIs/módulos navegan. |
+| **Registro** | FAB crear + editar + eliminar (papelera) con `FormGastoManual` y `ConfirmDialog` reales. |
+| **Planificador** | FAB crear/editar (`FormGastoPlaneado`) y "✓ Registrar pago" (`FormRegistrarPago`); el mes del preview se sincroniza con el estado real para que el day-picker cree en el mes visible. |
+| **Deudas** | FAB nueva deuda (`FormDeuda`, con persona predefinida desde el detalle), pago por concepto (`FormPago`) y **pago global** (`FormPagoGlobal`). |
+| **Ingresos** | Form real inline (crear/editar) + eliminar a papelera. |
+| **Ahorros** | FAB con `FormAhorro` + gestión de medios (`FormMedioAhorro`). |
+| **Futuros** | FAB con el form real de proyecto/detalles/opciones. |
+| **Reportes** | Genera de verdad (PDF/Excel, descargar o WhatsApp) con `useReportes` de producción. |
+| **Configuración / Familia** | Tamaño de letra funcional + puentes a las páginas reales. |
+
+Detalle de capas: hoja "Más" (z-30) < nav del preview (z-40) < bottom-sheets reales (z-50),
+y `SharedToastNotification` montado en el shell — los formularios nunca quedan tapados
+y sus toasts se ven (en producción viven en el layout).
+
+**Verificado en vivo a 380px + texto grande**: gasto creado y visible en la lista,
+planificado marcado como pagado (badge + contador actualizados), pago de deuda aplicado
+(pendiente bajó S/ 100 al instante), ingreso creado, y reporte PDF realmente descargado.
+

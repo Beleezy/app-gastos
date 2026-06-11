@@ -14,7 +14,10 @@
     </div>
 
     <template v-else>
-      <button class="w-full rounded-2xl border-2 border-dashed border-violet-400/40 text-violet-300 min-h-[56px] flex items-center justify-center gap-2 text-sm font-semibold mb-4 active:scale-[0.99] transition-transform">
+      <button
+        class="w-full rounded-2xl border-2 border-dashed border-violet-400/40 text-violet-300 min-h-[56px] flex items-center justify-center gap-2 text-sm font-semibold mb-4 active:scale-[0.99] transition-transform"
+        @click="navigateTo('/familia')"
+      >
         <span class="text-lg leading-none">+</span> Nuevo perfil de familiar
       </button>
 
@@ -37,9 +40,12 @@
         </article>
       </div>
 
-      <p class="text-[0.66rem] text-theme-text-muted text-center mt-4">
-        En la vista previa los perfiles son de solo lectura; adminístralos desde la app actual.
-      </p>
+      <button
+        class="mt-4 w-full min-h-[48px] rounded-2xl border border-theme-border bg-theme-card text-sm font-semibold text-theme-text active:scale-[0.99] transition-transform"
+        @click="navigateTo('/familia')"
+      >
+        Administrar perfiles en Familia →
+      </button>
     </template>
   </div>
 </template>

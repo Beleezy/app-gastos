@@ -24,7 +24,7 @@
       <div class="rounded-3xl border border-theme-border bg-gradient-to-br from-theme-card to-theme-card/60 p-4 mb-3">
         <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted">Total pendiente</p>
         <PreviewMoney
-          :value="personaSel.totalPendiente"
+          :value="totalPendienteDetalle"
           :tone="tab === 'me_deben' ? 'green' : 'red'"
           class="text-[1.7rem] font-extrabold block mt-1"
         />
@@ -37,6 +37,16 @@
             <span class="shrink-0 tabular-nums">{{ progresoCobro }}%</span>
           </div>
         </template>
+        <div class="grid grid-cols-2 gap-2 mt-3">
+          <button
+            class="min-h-[44px] rounded-xl bg-theme-accent text-theme-on-accent text-[0.78rem] font-semibold active:scale-[0.98] transition-transform"
+            @click="pagoGlobalAbierto = true"
+          >Pago global</button>
+          <button
+            class="min-h-[44px] rounded-xl bg-theme-input text-theme-text text-[0.78rem] font-semibold active:scale-[0.98] transition-transform"
+            @click="abrirNuevaDeuda"
+          >+ Nueva deuda</button>
+        </div>
       </div>
 
       <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">
@@ -66,6 +76,12 @@
           </div>
           <div v-if="pctPagado(de) > 0" class="h-1.5 w-full rounded-full bg-theme-input overflow-hidden mt-2.5">
             <div class="h-full rounded-full bg-sky-400" :style="{ width: pctPagado(de) + '%' }"></div>
+          </div>
+          <div v-if="Number(de.montoPendiente) > 0" class="flex items-center justify-end mt-2">
+            <button
+              class="min-h-[40px] px-3 rounded-lg bg-emerald-500/15 text-emerald-400 text-[0.74rem] font-semibold active:scale-[0.97] transition-transform"
+              @click="deudaPagar = de"
+            >✓ Registrar pago</button>
           </div>
         </article>
       </div>
@@ -113,9 +129,12 @@
           </button>
         </div>
 
-        <!-- Lista de personas: tarjeta apilada, todo clicable -->
+        <!-- Lista de personas -->
         <div v-if="personasTab.length === 0" class="rounded-2xl border border-dashed border-theme-border bg-theme-card p-8 text-center">
-          <p class="text-sm text-theme-text-sec">Sin deudas en esta sección</p>
+          <p class="text-sm text-theme-text">Sin deudas en esta sección</p>
+          <button class="mt-3 min-h-[44px] px-4 rounded-xl bg-theme-accent text-theme-on-accent text-sm font-semibold active:scale-[0.98] transition-transform" @click="abrirNuevaDeuda">
+            + Registrar una deuda
+          </button>
         </div>
         <div v-else class="space-y-2">
           <button
@@ -139,7 +158,6 @@
               </div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>
             </div>
-            <!-- El monto en su propia fila: el nombre largo nunca lo aplasta. -->
             <div class="flex items-center justify-between gap-2 mt-2.5 pt-2.5 border-t border-theme-border/50">
               <span class="text-[0.66rem] uppercase tracking-wide text-theme-text-muted">Pendiente</span>
               <PreviewMoney :value="p.totalPendiente" :tone="tab === 'me_deben' ? 'green' : 'red'" class="text-base font-extrabold shrink-0" />
@@ -148,6 +166,36 @@
         </div>
       </template>
     </template>
+
+    <!-- FAB: nueva deuda con el formulario REAL -->
+    <button
+      class="fixed bottom-24 right-4 z-20 w-14 h-14 rounded-full bg-theme-accent text-theme-on-accent shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+      aria-label="Agregar nueva deuda"
+      @click="abrirNuevaDeuda"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    </button>
+
+    <DeudasFormDeuda
+      v-if="formDeudaAbierto"
+      :persona-predefinida="personaSel"
+      @close="cerrarForms"
+      @saved="onGuardado"
+    />
+    <DeudasFormPago
+      v-if="deudaPagar"
+      :deuda="deudaPagar"
+      @close="cerrarForms"
+      @saved="onGuardado"
+    />
+    <DeudasFormPagoGlobal
+      v-if="pagoGlobalAbierto && personaSel"
+      :persona="personaSel"
+      :total-pendiente="totalPendienteDetalle"
+      :deudas-activas="deudasActivasDetalle"
+      @close="cerrarForms"
+      @saved="onGuardado"
+    />
   </div>
 </template>
 
@@ -162,6 +210,10 @@ const tab = ref('me_deben')
 const personaSel = ref(null)
 const deudasPersona = ref([])
 const cargandoDetalle = ref(false)
+
+const formDeudaAbierto = ref(false)
+const deudaPagar = ref(null)
+const pagoGlobalAbierto = ref(false)
 
 const tabs = [
   { id: 'me_deben', label: 'Me deben' },
@@ -201,18 +253,37 @@ function pctPagado(de) {
 }
 
 const totalOriginal = computed(() => deudasPersona.value.reduce((s, d) => s + (Number(d.montoOriginal) || 0), 0))
-const totalCobrado = computed(() => totalOriginal.value - deudasPersona.value.reduce((s, d) => s + (Number(d.montoPendiente) || 0), 0))
+const totalPendienteDetalle = computed(() => deudasPersona.value.reduce((s, d) => s + (Number(d.montoPendiente) || 0), 0))
+const totalCobrado = computed(() => totalOriginal.value - totalPendienteDetalle.value)
+const deudasActivasDetalle = computed(() => deudasPersona.value.filter(d => Number(d.montoPendiente) > 0).length)
 const progresoCobro = computed(() => {
   if (cargandoDetalle.value || totalOriginal.value <= 0) return null
   return Math.round((totalCobrado.value / totalOriginal.value) * 100)
 })
 
+function abrirNuevaDeuda() {
+  formDeudaAbierto.value = true
+}
+function cerrarForms() {
+  formDeudaAbierto.value = false
+  deudaPagar.value = null
+  pagoGlobalAbierto.value = false
+}
+async function onGuardado() {
+  cerrarForms()
+  await cargar()
+  if (personaSel.value) await cargarDetalle(personaSel.value.id)
+}
+
 async function abrirPersona(p) {
   personaSel.value = p
+  await cargarDetalle(p.id)
+}
+
+async function cargarDetalle(personaId) {
   cargandoDetalle.value = true
-  deudasPersona.value = []
   try {
-    const r = await apiFetch('/api/deudas', { query: { personaId: p.id } })
+    const r = await apiFetch('/api/deudas', { query: { personaId } })
     deudasPersona.value = Array.isArray(r) ? r : []
   } catch {
     deudasPersona.value = []
@@ -221,7 +292,7 @@ async function abrirPersona(p) {
   }
 }
 
-onMounted(async () => {
+async function cargar() {
   try {
     const [bal, md, yd] = await Promise.all([
       apiFetch('/api/deudas/balance'),
@@ -238,5 +309,7 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
-})
+}
+
+onMounted(cargar)
 </script>

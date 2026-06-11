@@ -11,6 +11,9 @@
       <div v-if="proyectos.length === 0" class="rounded-2xl border border-dashed border-theme-border bg-theme-card p-8 text-center">
         <p class="text-sm text-theme-text">Aún no tienes proyectos futuros</p>
         <p class="text-[0.72rem] text-theme-text-sec mt-1">Crea uno para comparar opciones antes de decidir.</p>
+        <button class="mt-3 min-h-[44px] px-4 rounded-xl bg-violet-500 text-white text-sm font-semibold active:scale-[0.98] transition-transform" @click="formAbierto = true">
+          + Crear gasto futuro
+        </button>
       </div>
 
       <template v-else>
@@ -106,15 +109,38 @@
         </div>
       </template>
     </template>
+
+    <!-- FAB: nuevo gasto futuro con el formulario REAL -->
+    <button
+      class="fixed bottom-24 right-4 z-20 w-14 h-14 rounded-full bg-violet-500 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+      aria-label="Agregar gasto futuro"
+      @click="formAbierto = true"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    </button>
+
+    <FuturosForm
+      v-if="formAbierto"
+      @close="formAbierto = false"
+      @saved="onGuardado"
+    />
   </div>
 </template>
 
 <script setup>
 const { apiFetch } = useApiFetch()
+// Las categorías las necesita el formulario real.
+const { fetchCategorias } = useCategorias()
 
 const loading = ref(true)
 const proyectos = ref([])
 const abierto = ref(null)
+const formAbierto = ref(false)
+
+function onGuardado() {
+  formAbierto.value = false
+  cargar()
+}
 
 function toggle(id) {
   abierto.value = abierto.value === id ? null : id
@@ -137,7 +163,7 @@ const totalMinimo = computed(() => proyectos.value.reduce((s, p) => s + (Number(
 const totalMaximo = computed(() => proyectos.value.reduce((s, p) => s + (Number(p.resumen?.totalMaximo) || 0), 0))
 const totalPromedio = computed(() => proyectos.value.reduce((s, p) => s + (Number(p.resumen?.totalPromedio) || 0), 0))
 
-onMounted(async () => {
+async function cargar() {
   try {
     const r = await apiFetch('/api/futuros')
     proyectos.value = Array.isArray(r?.gastosFuturos) ? r.gastosFuturos : []
@@ -146,5 +172,10 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+}
+
+onMounted(() => {
+  cargar()
+  fetchCategorias().catch(() => {})
 })
 </script>

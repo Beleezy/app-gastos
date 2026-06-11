@@ -61,9 +61,12 @@
           >{{ pref.on ? 'Activado' : 'Desactivado' }}</span>
         </div>
       </div>
-      <p class="text-[0.66rem] text-theme-text-muted text-center mt-4">
-        Los cambios de preferencias se hacen en la app actual; aquí solo se muestran.
-      </p>
+      <button
+        class="mt-4 w-full min-h-[48px] rounded-2xl border border-theme-border bg-theme-card text-sm font-semibold text-theme-text active:scale-[0.99] transition-transform"
+        @click="navigateTo('/configuraciones')"
+      >
+        Abrir Configuraciones completas →
+      </button>
     </template>
   </div>
 </template>

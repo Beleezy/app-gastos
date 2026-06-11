@@ -29,7 +29,18 @@
         </div>
       </div>
 
-      <!-- Lista de ingresos: fila apilada (concepto a todo lo ancho) -->
+      <!-- Registrar / editar con el formulario REAL -->
+      <button
+        class="w-full min-h-[52px] rounded-2xl border-2 border-dashed border-emerald-500/40 text-emerald-400 text-sm font-semibold flex items-center justify-center gap-2 mb-3 active:scale-[0.99] transition-transform"
+        @click="toggleForm"
+      >
+        {{ mostrarForm ? '− Cancelar' : (editando ? 'Editar ingreso' : '+ Registrar ingreso') }}
+      </button>
+      <div v-if="mostrarForm" class="rounded-2xl border border-theme-border bg-theme-card p-4 mb-3">
+        <IngresosFormIngreso :editing="editando" @saved="onGuardado" @cancel="cerrarForm" />
+      </div>
+
+      <!-- Lista de ingresos -->
       <div v-if="ingresos.length === 0" class="rounded-2xl border border-dashed border-theme-border bg-theme-card p-8 text-center">
         <p class="text-sm text-theme-text-sec">Sin ingresos este mes</p>
       </div>
@@ -41,18 +52,38 @@
               <p class="text-sm text-theme-text font-medium leading-snug line-clamp-2 break-words">{{ ing.concepto }}</p>
               <div class="flex items-center justify-between gap-2 mt-1">
                 <p class="text-[0.66rem] text-theme-text-muted truncate">{{ fechaCorta(ing.fecha) }}<span v-if="ing.origen"> · {{ ing.origen }}</span></p>
-                <PreviewMoney :value="ing.monto" signo tone="green" class="text-base font-bold shrink-0" />
+                <span class="flex items-center gap-0.5 shrink-0">
+                  <PreviewMoney :value="ing.monto" signo tone="green" class="text-base font-bold mr-1" />
+                  <button class="w-9 h-9 -my-1.5 rounded-lg flex items-center justify-center text-theme-text-muted active:text-theme-accent active:bg-theme-accent-bg transition-colors" aria-label="Editar ingreso" @click="abrirEdicion(ing)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                  </button>
+                  <button class="w-9 h-9 -my-1.5 -mr-1.5 rounded-lg flex items-center justify-center text-theme-text-muted active:text-red-400 active:bg-red-500/10 transition-colors" aria-label="Eliminar ingreso" @click="pedirEliminar(ing)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+                </span>
               </div>
             </div>
           </div>
         </article>
       </div>
     </template>
+
+    <SharedConfirmDialog
+      v-model="confirmandoEliminar"
+      title="Eliminar ingreso"
+      :message="ingresoEliminar ? `¿Eliminar '${ingresoEliminar.concepto}'? Irá a la papelera (30 días).` : ''"
+      confirm-label="Eliminar"
+      :loading="eliminando"
+      @confirm="confirmarEliminar"
+    />
   </div>
 </template>
 
 <script setup>
 const { apiFetch } = useApiFetch()
+const { eliminarIngreso } = useIngresos()
+const toast = useToast()
+
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 
 const hoy = new Date()
@@ -61,6 +92,12 @@ const anio = ref(hoy.getUTCFullYear())
 const loading = ref(true)
 const ingresos = ref([])
 const resumen = ref({ totalIngresos: 0, totalGastos: 0, saldoNeto: 0, porcentajeAhorro: 0 })
+
+const mostrarForm = ref(false)
+const editando = ref(null)
+const confirmandoEliminar = ref(false)
+const ingresoEliminar = ref(null)
+const eliminando = ref(false)
 
 const mesLabel = computed(() => `${MESES[mes.value - 1]} ${anio.value}`)
 
@@ -71,6 +108,44 @@ function fechaCorta(f) {
   if (!f) return ''
   const [, m, d] = f.split('-').map(Number)
   return `${d}/${String(m).padStart(2, '0')}`
+}
+
+function toggleForm() {
+  if (mostrarForm.value) return cerrarForm()
+  editando.value = null
+  mostrarForm.value = true
+}
+function abrirEdicion(ing) {
+  editando.value = ing
+  mostrarForm.value = true
+}
+function cerrarForm() {
+  mostrarForm.value = false
+  editando.value = null
+}
+function onGuardado() {
+  cerrarForm()
+  cargar()
+}
+
+function pedirEliminar(ing) {
+  ingresoEliminar.value = ing
+  confirmandoEliminar.value = true
+}
+async function confirmarEliminar() {
+  if (!ingresoEliminar.value) return
+  eliminando.value = true
+  try {
+    await eliminarIngreso(ingresoEliminar.value.id)
+    toast.success('Ingreso enviado a la papelera')
+    await cargar()
+  } catch {
+    toast.error('No se pudo eliminar el ingreso')
+  } finally {
+    eliminando.value = false
+    confirmandoEliminar.value = false
+    ingresoEliminar.value = null
+  }
 }
 
 function cambiar(delta) {

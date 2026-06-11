@@ -42,7 +42,10 @@
 
       <!-- Gastos planificados agrupados por categoría -->
       <div v-if="grupos.length === 0" class="rounded-2xl border border-dashed border-theme-border bg-theme-card p-8 text-center">
-        <p class="text-sm text-theme-text-sec">Sin gastos planificados este mes</p>
+        <p class="text-sm text-theme-text">Sin gastos planificados este mes</p>
+        <button class="mt-3 min-h-[44px] px-4 rounded-xl bg-theme-accent text-theme-on-accent text-sm font-semibold active:scale-[0.98] transition-transform" @click="abrirNuevo">
+          + Planificar un gasto
+        </button>
       </div>
       <div v-else class="space-y-3">
         <section v-for="g in grupos" :key="g.nombre" class="rounded-2xl border border-theme-border bg-theme-card overflow-hidden">
@@ -54,8 +57,7 @@
             <PreviewMoney :value="g.total" entero class="text-sm font-bold text-theme-text shrink-0" />
           </div>
           <div class="divide-y divide-theme-border/50">
-            <!-- Fila apilada: el concepto usa TODO el ancho (2 líneas máx.)
-                 y el monto va en su propia fila → nada se aplasta con texto grande. -->
+            <!-- Fila apilada con acciones reales: pagar (pendientes) y editar -->
             <div v-for="item in g.items" :key="item.id" class="px-4 py-3">
               <p class="text-sm text-theme-text leading-snug line-clamp-2 break-words">{{ item.concepto }}</p>
               <div class="flex items-center justify-between gap-2 mt-1.5">
@@ -68,27 +70,66 @@
                 </span>
                 <PreviewMoney :value="item.montoEstimado" class="text-sm font-semibold text-theme-text shrink-0" />
               </div>
+              <div class="flex items-center justify-end gap-2 mt-2">
+                <button
+                  v-if="item.estado !== 'pagado'"
+                  class="min-h-[40px] px-3 rounded-lg bg-emerald-500/15 text-emerald-400 text-[0.74rem] font-semibold active:scale-[0.97] transition-transform"
+                  @click="abrirPago(item)"
+                >✓ Registrar pago</button>
+                <button
+                  class="min-h-[40px] px-3 rounded-lg bg-theme-input text-theme-text-sec text-[0.74rem] font-medium active:scale-[0.97] transition-transform"
+                  @click="abrirEdicion(item)"
+                >Editar</button>
+              </div>
             </div>
           </div>
         </section>
       </div>
     </template>
+
+    <!-- FAB: nuevo gasto planificado con el formulario REAL -->
+    <button
+      class="fixed bottom-24 right-4 z-20 w-14 h-14 rounded-full bg-theme-accent text-theme-on-accent shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+      aria-label="Agregar gasto planificado"
+      @click="abrirNuevo"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    </button>
+
+    <PlanificadorFormGastoPlaneado
+      v-if="formAbierto"
+      :gasto-editar="gastoEditar"
+      @close="cerrarForms"
+      @saved="onGuardado"
+    />
+    <PlanificadorFormRegistrarPago
+      v-if="gastoPagar"
+      :gasto="gastoPagar"
+      @close="cerrarForms"
+      @saved="onGuardado"
+    />
   </div>
 </template>
 
 <script setup>
 const { apiFetch } = useApiFetch()
+// El mes/año del preview vive en el estado compartido del planificador:
+// así el formulario real (day-picker) crea los gastos en el mes que se
+// está viendo, igual que en producción.
+const { mesActual, anioActual, fetchCategorias } = usePlanificador()
+
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
 const MES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
-const hoy = new Date()
-const mes = ref(hoy.getUTCMonth() + 1)
-const anio = ref(hoy.getUTCFullYear())
 const loading = ref(true)
 const plan = ref(null)
 const gastos = ref([])
 
-const mesLabel = computed(() => `${MESES[mes.value - 1]} ${anio.value}`)
+const formAbierto = ref(false)
+const gastoEditar = ref(null)
+const gastoPagar = ref(null)
+
+const mesLabel = computed(() => `${MESES[mesActual.value - 1]} ${anioActual.value}`)
 const presupuesto = computed(() => Number(plan.value?.montoPresupuesto) || 0)
 const totalAsignado = computed(() => gastos.value.reduce((s, g) => s + (Number(g.montoEstimado) || 0), 0))
 const saldo = computed(() => presupuesto.value - totalAsignado.value)
@@ -114,19 +155,40 @@ const grupos = computed(() => {
   return [...map.values()].sort((a, b) => b.total - a.total)
 })
 
+function abrirNuevo() {
+  gastoEditar.value = null
+  formAbierto.value = true
+}
+function abrirEdicion(item) {
+  gastoEditar.value = item
+  formAbierto.value = true
+}
+function abrirPago(item) {
+  gastoPagar.value = item
+}
+function cerrarForms() {
+  formAbierto.value = false
+  gastoEditar.value = null
+  gastoPagar.value = null
+}
+function onGuardado() {
+  cerrarForms()
+  cargar()
+}
+
 function cambiar(delta) {
-  let m = mes.value + delta
-  let a = anio.value
+  let m = mesActual.value + delta
+  let a = anioActual.value
   if (m < 1) { m = 12; a-- }
   if (m > 12) { m = 1; a++ }
-  mes.value = m; anio.value = a
+  mesActual.value = m; anioActual.value = a
   cargar()
 }
 
 async function cargar() {
   loading.value = true
   try {
-    const r = await apiFetch('/api/planificador', { query: { mes: mes.value, anio: anio.value } })
+    const r = await apiFetch('/api/planificador', { query: { mes: mesActual.value, anio: anioActual.value } })
     plan.value = r.plan || null
     gastos.value = Array.isArray(r.gastos) ? r.gastos : []
   } catch {
@@ -136,5 +198,9 @@ async function cargar() {
   }
 }
 
-onMounted(cargar)
+onMounted(() => {
+  cargar()
+  // Las categorías las necesita el formulario real.
+  fetchCategorias?.().catch?.(() => {})
+})
 </script>

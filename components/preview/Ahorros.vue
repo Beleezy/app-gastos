@@ -66,6 +66,26 @@
         </article>
       </div>
     </template>
+
+    <!-- FAB: nuevo ahorro con el formulario REAL -->
+    <button
+      class="fixed bottom-24 right-4 z-20 w-14 h-14 rounded-full bg-sky-500 text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+      aria-label="Registrar ahorro"
+      @click="formAbierto = true"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+    </button>
+
+    <AhorrosFormAhorro
+      v-if="formAbierto"
+      @close="formAbierto = false"
+      @saved="onGuardado"
+      @gestionar-medios="mediosAbierto = true"
+    />
+    <AhorrosFormMedioAhorro
+      v-if="mediosAbierto"
+      @close="onMediosCerrado"
+    />
   </div>
 </template>
 
@@ -83,6 +103,18 @@ const totalGlobal = ref(0)
 const porMedio = ref([])
 const metaMensual = ref(0)
 const progresoMensual = ref(0)
+
+const formAbierto = ref(false)
+const mediosAbierto = ref(false)
+
+function onGuardado() {
+  formAbierto.value = false
+  cargar()
+}
+function onMediosCerrado() {
+  mediosAbierto.value = false
+  cargar()
+}
 
 const mesLabel = computed(() => `${MESES[mes.value - 1]} ${anio.value}`)
 function fechaCorta(f) {

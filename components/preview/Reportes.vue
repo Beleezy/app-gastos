@@ -2,10 +2,6 @@
   <div class="px-4 pt-3 pb-32">
     <PreviewPageHeader icon="📄" title="Reportes" subtitle="Resumen mensual en PDF o Excel" />
 
-    <div class="rounded-2xl border border-theme-border bg-theme-card p-3.5 mb-4 text-[0.74rem] text-theme-text-sec leading-snug">
-      Generando para: <span class="text-theme-text font-semibold">Yo</span>. Cambia el perfil en la barra superior si quieres el reporte de otro familiar.
-    </div>
-
     <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Módulo</p>
     <div class="grid grid-cols-2 gap-2.5 mb-4">
       <button
@@ -23,11 +19,15 @@
     <div class="grid grid-cols-2 gap-2.5 mb-4">
       <div class="min-w-0">
         <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Mes</p>
-        <div class="rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text truncate">{{ MESES[mes - 1] }}</div>
+        <select v-model.number="mes" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-3 text-sm text-theme-text outline-none">
+          <option v-for="(m, i) in MESES" :key="m" :value="i + 1">{{ m }}</option>
+        </select>
       </div>
       <div class="min-w-0">
         <p class="text-[0.66rem] uppercase tracking-wider font-bold text-theme-text-muted mb-2 px-1">Año</p>
-        <div class="rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text">{{ anio }}</div>
+        <select v-model.number="anio" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-3 text-sm text-theme-text outline-none">
+          <option v-for="a in anios" :key="a" :value="a">{{ a }}</option>
+        </select>
       </div>
     </div>
 
@@ -42,26 +42,38 @@
       >{{ f }}</button>
     </div>
 
-    <button class="w-full rounded-2xl min-h-[52px] text-sm font-bold text-white bg-emerald-500 flex items-center justify-center gap-2 mb-2.5 active:scale-[0.99] transition-transform">
+    <button
+      class="w-full rounded-2xl min-h-[52px] text-sm font-bold text-white bg-emerald-500 flex items-center justify-center gap-2 mb-2.5 active:scale-[0.99] transition-transform disabled:opacity-60"
+      :disabled="generando"
+      @click="ejecutar('compartir')"
+    >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 00-8.5 15.3L2 22l4.8-1.5A10 10 0 1012 2z"/></svg>
-      Compartir por WhatsApp
+      {{ generando === 'compartir' ? 'Generando…' : 'Compartir por WhatsApp' }}
     </button>
-    <button class="w-full rounded-2xl min-h-[52px] text-sm font-semibold text-theme-text bg-theme-card border border-theme-border active:scale-[0.99] transition-transform">
-      Descargar
+    <button
+      class="w-full rounded-2xl min-h-[52px] text-sm font-semibold text-theme-text bg-theme-card border border-theme-border active:scale-[0.99] transition-transform disabled:opacity-60"
+      :disabled="generando"
+      @click="ejecutar('descargar')"
+    >
+      {{ generando === 'descargar' ? 'Generando…' : 'Descargar' }}
     </button>
-    <p class="text-[0.66rem] text-theme-text-muted text-center mt-3">
-      En la vista previa los botones son demostrativos; genera el reporte real desde la app actual.
-    </p>
   </div>
 </template>
 
 <script setup>
+// Reportes V5: genera de verdad con el mismo composable de producción.
+const { generar } = useReportes()
+const toast = useToast()
+
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 const hoy = new Date()
 const mes = ref(hoy.getUTCMonth() + 1)
 const anio = ref(hoy.getUTCFullYear())
+const anios = Array.from({ length: 4 }, (_, i) => hoy.getUTCFullYear() - i)
 const modulo = ref('registro')
 const formato = ref('PDF')
+const generando = ref(null)
+
 const modulos = [
   { id: 'registro', label: 'Registro', icon: '🎙️' },
   { id: 'planificador', label: 'Planificador', icon: '📋' },
@@ -69,4 +81,22 @@ const modulos = [
   { id: 'deudas', label: 'Deudas', icon: '💳' },
 ]
 const formatos = ['PDF', 'Excel']
+
+async function ejecutar(accion) {
+  if (generando.value) return
+  generando.value = accion
+  try {
+    await generar({
+      modulo: modulo.value,
+      mes: mes.value,
+      anio: anio.value,
+      formato: formato.value.toLowerCase() === 'excel' ? 'excel' : 'pdf',
+      accion,
+    })
+  } catch (e) {
+    toast.error(e?.message || 'No se pudo generar el reporte')
+  } finally {
+    generando.value = null
+  }
+}
 </script>
