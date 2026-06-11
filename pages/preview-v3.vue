@@ -5,14 +5,14 @@
       <div class="flex items-center justify-between px-4 py-2.5 max-w-lg mx-auto">
         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-violet-500/15 text-violet-300 text-[0.66rem] font-bold uppercase tracking-wider min-w-0">
           <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse shrink-0"></span>
-          V5 · funcional
+          V3 · solo lectura
         </span>
         <div class="flex items-center gap-1 shrink-0">
           <button
-            class="min-h-[44px] px-2.5 rounded-lg text-[0.72rem] font-bold text-violet-300 bg-violet-500/10 active:scale-95 transition-transform"
-            title="Cambiar a la versión 3 (solo lectura)"
-            @click="navigateTo('/preview-v3')"
-          >Ir a V3</button>
+            class="min-h-[44px] px-2.5 rounded-lg text-[0.72rem] font-bold text-emerald-400 bg-emerald-500/10 active:scale-95 transition-transform"
+            title="Cambiar a la versión 5 (funcional)"
+            @click="navigateTo('/preview')"
+          >Ir a V5</button>
           <button
             class="flex items-center gap-1.5 min-h-[44px] px-2 text-[0.78rem] font-medium text-theme-text-sec hover:text-theme-text transition-colors"
             @click="salir"
@@ -28,28 +28,26 @@
 
     <main class="max-w-lg mx-auto">
       <Transition name="fade" mode="out-in">
-        <PreviewDashboard v-if="vista === 'inicio'" key="inicio" @ir="ir" />
-        <PreviewPlanificador v-else-if="vista === 'planificador'" key="planificador" />
-        <PreviewRegistro v-else-if="vista === 'registro'" key="registro" />
-        <PreviewDeudas v-else-if="vista === 'deudas'" key="deudas" />
-        <PreviewIngresos v-else-if="vista === 'ingresos'" key="ingresos" />
-        <PreviewAhorros v-else-if="vista === 'ahorros'" key="ahorros" />
-        <PreviewFuturos v-else-if="vista === 'futuros'" key="futuros" />
-        <PreviewCalendario v-else-if="vista === 'calendario'" key="calendario" />
-        <PreviewMetricas v-else-if="vista === 'metricas'" key="metricas" />
-        <PreviewReportes v-else-if="vista === 'reportes'" key="reportes" />
-        <PreviewFamilia v-else-if="vista === 'familia'" key="familia" />
-        <PreviewConfiguracion v-else-if="vista === 'configuracion'" key="configuracion" />
-        <PreviewDashboard v-else key="fallback" @ir="ir" />
+        <Preview3Dashboard v-if="vista === 'inicio'" key="inicio" @ir="ir" />
+        <Preview3Planificador v-else-if="vista === 'planificador'" key="planificador" />
+        <Preview3Registro v-else-if="vista === 'registro'" key="registro" />
+        <Preview3Deudas v-else-if="vista === 'deudas'" key="deudas" />
+        <Preview3Ingresos v-else-if="vista === 'ingresos'" key="ingresos" />
+        <Preview3Ahorros v-else-if="vista === 'ahorros'" key="ahorros" />
+        <Preview3Futuros v-else-if="vista === 'futuros'" key="futuros" />
+        <Preview3Calendario v-else-if="vista === 'calendario'" key="calendario" />
+        <Preview3Metricas v-else-if="vista === 'metricas'" key="metricas" />
+        <Preview3Reportes v-else-if="vista === 'reportes'" key="reportes" />
+        <Preview3Familia v-else-if="vista === 'familia'" key="familia" />
+        <Preview3Configuracion v-else-if="vista === 'configuracion'" key="configuracion" />
+        <Preview3Dashboard v-else key="fallback" @ir="ir" />
       </Transition>
     </main>
 
-    <!-- Hoja "Más": todos los módulos. Queda DEBAJO del nav (z-30 < z-40),
-         y AMBOS debajo de los bottom-sheets reales de producción (z-50):
-         las pestañas siguen tocables con la hoja abierta y los formularios
-         reales nunca quedan tapados por el nav. -->
+    <!-- Hoja "Más": todos los módulos. Queda DEBAJO del nav (z-50 < z-60):
+         las pestañas inferiores siguen visibles y tocables con la hoja abierta. -->
     <Transition name="sheet">
-      <div v-if="sheetMas" class="fixed inset-0 z-30 flex items-end justify-center">
+      <div v-if="sheetMas" class="fixed inset-0 z-50 flex items-end justify-center">
         <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="sheetMas = false"></div>
         <div
           class="relative w-full max-w-lg bg-theme-card rounded-t-3xl border-t border-theme-border p-5 max-h-[78vh] overflow-y-auto"
@@ -78,17 +76,14 @@
             </button>
           </div>
           <p class="text-[0.66rem] text-theme-text-muted text-center mt-4">
-            Interfaces rediseñadas (V5) y funcionales: registra, edita y paga con tus datos reales.
+            Interfaces rediseñadas (V3) con tus datos reales, en modo lectura.
           </p>
         </div>
       </div>
     </Transition>
 
-    <!-- Toasts de los formularios reales (en producción viven en el layout) -->
-    <SharedToastNotification />
-
-    <!-- Nav inferior V5: por encima de la hoja "Más", debajo de los modales reales -->
-    <nav class="fixed bottom-0 inset-x-0 z-40 bg-theme-card/95 backdrop-blur border-t border-theme-border">
+    <!-- Nav inferior V3: siempre por encima de la hoja "Más" -->
+    <nav class="fixed bottom-0 inset-x-0 z-[60] bg-theme-card/95 backdrop-blur border-t border-theme-border">
       <div class="max-w-lg mx-auto flex items-stretch px-1 py-1.5" style="padding-bottom: max(0.4rem, env(safe-area-inset-bottom))">
         <button
           v-for="t in tabs"
