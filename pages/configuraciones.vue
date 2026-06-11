@@ -334,16 +334,31 @@
               />
             </button>
           </label>
-          <button
-            v-if="uiPreviewEnabled"
-            class="mt-4 w-full py-2.5 rounded-xl text-sm font-semibold bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 transition-colors flex items-center justify-center gap-2"
-            @click="navigateTo('/preview')"
-          >
-            Abrir vista previa V5
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </button>
+          <!-- Las tres versiones, siempre visibles cuando el flag está activo -->
+          <div v-if="uiPreviewEnabled" class="mt-4 space-y-2">
+            <button
+              class="w-full py-2.5 rounded-xl text-sm font-semibold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors flex items-center justify-center gap-2"
+              @click="navigateTo('/preview')"
+            >
+              Abrir V5 — rediseño funcional
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+            <button
+              class="w-full py-2.5 rounded-xl text-sm font-semibold bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 transition-colors flex items-center justify-center gap-2"
+              @click="navigateTo('/preview-v3')"
+            >
+              Abrir V3 — rediseño solo lectura
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </button>
+            <p class="text-[11px] text-theme-text-sec leading-snug text-center">
+              La <span class="text-theme-text font-semibold">V4</span> ya está aplicada a la app actual:
+              es el pulido visual que ves en todas las pantallas normales (Registro, Ingresos, Métricas, Deudas…).
+            </p>
+          </div>
         </div>
 
         <!-- Save button -->
