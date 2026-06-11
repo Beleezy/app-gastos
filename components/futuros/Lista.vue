@@ -24,8 +24,8 @@
       </button>
     </div>
 
-    <!-- Filtros por prioridad y estado -->
-    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+    <!-- Filtros por prioridad y estado (pr-4: el último chip no se corta al borde) -->
+    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-4 scrollbar-hide">
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"

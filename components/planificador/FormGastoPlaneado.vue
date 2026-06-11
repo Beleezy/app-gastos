@@ -43,7 +43,7 @@
           >
             <span class="text-sm">{{ getEmoji(cat.nombre) }}</span>
           </div>
-          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words w-full">{{ cat.nombre }}</span>
+          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-auto w-full">{{ cat.nombre }}</span>
         </button>
       </div>
     </div>

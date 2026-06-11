@@ -92,3 +92,14 @@ cero desbordes horizontales.
 | **BottomNav** | Etiquetas a `text-[0.68rem]` (siguen escalando con rem): "Planificador" completo con texto grande. |
 | **Compartidos** | `SharedMoney` ganó el prop `entero` (sin ".00" en celdas estrechas; 4 cifras siempre completas). `SharedTabBar` centra etiquetas y agrega `pr-4` al modo scrollable. |
 
+### Ronda 2 (superficies restantes)
+
+| Superficie | Fix |
+|---|---|
+| **GastoItem (Registro)** | Monto movido a la fila de meta (`ml-auto`) y acciones en columna angosta: el concepto pasa de ~55% a ~85% del ancho (de 7 líneas a 4 con conceptos largos). |
+| **Modal "Agregar categoría"** | Etiquetas a 2 líneas en vez de truncar ("Aliment..." → nombre completo). |
+| **Idioma + guiones** | `htmlAttrs.lang = 'es'` (accesibilidad) + `hyphens-auto` en todas las grillas de categorías/medios: en dispositivos reales las palabras largas se parten con guion ("Alimenta-ción") en vez de cortarse a secas. |
+| **Futuros** | Carrusel de filtros con `pr-4` (el último chip no queda cortado al borde). |
+| **Calendario** | Títulos de eventos a 2 líneas (`line-clamp-2`) en vez de truncar. |
+| **Verificados sin cambios** | Confirmación de gastos por foto/voz (clamp + "Ver más" + montos completos ya correctos, probado con LLM simulado y montos de 4 cifras), FormPago, FormPagoGlobal, FormDeuda, Metas de ahorro, Papelera, Reportes. |
+

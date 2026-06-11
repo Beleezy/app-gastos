@@ -60,11 +60,13 @@
           </div>
         </div>
 
-        <div class="flex-1 min-w-0 py-2.5 pr-2">
+        <div class="flex-1 min-w-0 py-2.5 pr-1.5">
           <p class="text-sm font-medium text-theme-text break-words leading-tight" data-testid="gasto-concepto">{{ gasto.concepto }}</p>
           <p v-if="gasto.notas" class="mt-1 text-[11px] text-theme-text-muted break-words leading-snug">
             {{ gasto.notas }}
           </p>
+          <!-- Monto en la fila meta (ml-auto): el concepto usa casi todo el
+               ancho en vez de quedar apretado contra una columna derecha -->
           <div class="flex items-center gap-1.5 mt-1 flex-wrap">
             <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none"
               :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '18', color: gasto.categoriaColor || '#6b7280' }"
@@ -79,14 +81,13 @@
               {{ formatHora(gasto.hora) }}
             </span>
             <span v-if="badgeLabel" class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">{{ badgeLabel }}</span>
+            <p class="ml-auto text-sm font-bold text-theme-text leading-none whitespace-nowrap" data-testid="gasto-monto">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}
+            </p>
           </div>
         </div>
 
-        <div class="flex flex-col items-end justify-between py-2.5 pr-2.5 pl-1 shrink-0">
-          <p class="text-sm font-bold text-theme-text leading-none whitespace-nowrap" data-testid="gasto-monto">
-            {{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}
-          </p>
-          <div v-if="!selectable" class="flex items-center gap-0.5 mt-1.5">
+        <div v-if="!selectable" class="flex flex-col items-center justify-center gap-1 py-2.5 pr-2.5 shrink-0">
             <button
               class="w-6 h-6 flex items-center justify-center rounded-md text-theme-text-muted hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 transition-all"
               aria-label="Duplicar"
@@ -116,7 +117,6 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
             </button>
-          </div>
         </div>
       </div>
     </div>

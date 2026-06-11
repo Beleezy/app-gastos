@@ -91,7 +91,7 @@
           <span class="text-base">{{ cat.icono || '📦' }}</span>
           <!-- 2 líneas: "Alimentación"/"Entretenimiento" se truncaban con texto grande -->
           <span
-            class="line-clamp-2 break-words leading-tight w-full text-center"
+            class="line-clamp-2 break-words hyphens-auto leading-tight w-full text-center"
             :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
           >{{ cat.nombre }}</span>
         </button>

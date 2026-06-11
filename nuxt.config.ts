@@ -93,6 +93,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      // lang habilita la división silábica con guiones (hyphens-auto) en
+      // etiquetas estrechas, además de la mejora de accesibilidad.
+      htmlAttrs: { lang: 'es' },
       title: APP_NAME,
       meta: [
         { charset: 'utf-8' },
