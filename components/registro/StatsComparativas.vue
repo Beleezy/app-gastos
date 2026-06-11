@@ -36,11 +36,12 @@
       <!-- Selector de mes a comparar -->
       <div class="mb-4">
         <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-2">Comparar con:</p>
-        <div class="flex items-center gap-1.5">
+        <!-- Carrusel con pr-4: a 380px con texto grande los chips se cortaban al borde -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pr-4 scrollbar-hide">
           <button
             v-for="m in mesesRecientes"
             :key="m.key"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+            class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
             :class="m.key === mesComparar ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40' : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'"
             @click="seleccionarMes(m)"
           >

@@ -102,7 +102,8 @@
             :style="{ backgroundColor: ev.color + '20' }"
           >{{ ev.icono }}</div>
           <div class="flex-1 min-w-0">
-            <p class="text-xs font-semibold text-theme-text truncate">{{ ev.titulo }}</p>
+            <!-- 2 líneas: conceptos largos planificados se truncaban con texto grande -->
+            <p class="text-xs font-semibold text-theme-text line-clamp-2 break-words leading-snug">{{ ev.titulo }}</p>
             <p class="text-[10px] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }} · {{ fechaCorta(ev.fecha) }}</p>
           </div>
           <div class="text-right shrink-0">

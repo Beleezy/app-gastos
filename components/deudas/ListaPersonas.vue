@@ -30,8 +30,8 @@
       </button>
     </div>
 
-    <!-- Filtros de estado -->
-    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+    <!-- Filtros de estado (pr-4: el último chip no queda cortado al borde) -->
+    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 pr-4 scrollbar-hide">
       <button
         v-for="f in filtrosEstado"
         :key="f.value"
@@ -120,7 +120,9 @@
           @touchend.passive="onTouchEnd($event, persona.id)"
         >
           <div class="p-4">
-            <div class="flex items-center gap-3">
+            <!-- items-start: con texto grande el nombre puede ocupar 2 líneas
+                 (line-clamp-2) sin truncarse a ~10 caracteres -->
+            <div class="flex items-start gap-3">
               <!-- Avatar -->
               <div
                 class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold"
@@ -131,8 +133,8 @@
 
               <!-- Info -->
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <p class="text-sm font-medium text-theme-text leading-snug truncate min-w-0" :title="persona.nombre">{{ persona.nombre }}</p>
+                <div class="flex items-start gap-1.5 min-w-0">
+                  <p class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0" :title="persona.nombre">{{ persona.nombre }}</p>
                   <span v-if="persona.tieneVencidas" class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-semibold bg-red-500/20 text-red-400">
                     <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
                     VENCIDA
@@ -252,15 +254,15 @@
             @touchend.passive="onTouchEnd($event, persona.id)"
           >
             <div class="p-4">
-              <div class="flex items-center gap-3">
+              <div class="flex items-start gap-3">
                 <!-- Avatar -->
                 <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold bg-theme-card-hover0/15 text-theme-text-muted">
                   {{ getInitials(persona.nombre) }}
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <p class="text-sm font-medium text-theme-text truncate">{{ persona.nombre }}</p>
+                  <div class="flex items-start gap-2">
+                    <p class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0">{{ persona.nombre }}</p>
                     <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
                   </div>
                   <p class="text-xs text-theme-text-sec mt-0.5">Sin deudas activas</p>

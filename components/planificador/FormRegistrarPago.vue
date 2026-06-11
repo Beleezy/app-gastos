@@ -1,14 +1,14 @@
 <template>
   <SharedBaseBottomSheet :title="gasto.gastoRegistradoId ? 'Editar registro de gasto' : 'Registrar pago'" @close="$emit('close')">
+    <!-- Concepto a todo el ancho: en dos columnas el texto largo se apretaba
+         a la izquierda dejando la derecha vacía con texto grande -->
     <div class="rounded-2xl border border-theme-border bg-theme-input p-4">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <p class="text-sm font-semibold text-theme-text">{{ gasto.concepto }}</p>
-          <p class="mt-1 text-xs text-theme-text-sec">
-            {{ gasto.categoriaNombre || 'Sin categoria' }} · {{ formatFecha(gasto.fechaProbablePago) }}
-          </p>
-        </div>
-        <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.montoEstimado) }}</p>
+      <p class="text-sm font-semibold text-theme-text leading-snug break-words">{{ gasto.concepto }}</p>
+      <div class="mt-1.5 flex items-center justify-between gap-3">
+        <p class="min-w-0 truncate text-xs text-theme-text-sec">
+          {{ gasto.categoriaNombre || 'Sin categoria' }} · {{ formatFecha(gasto.fechaProbablePago) }}
+        </p>
+        <p class="shrink-0 text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.montoEstimado) }}</p>
       </div>
     </div>
 
@@ -26,7 +26,7 @@
     <div v-if="esCategoriaAhorro">
       <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Medio de ahorro</label>
       <div v-if="mediosLoading" class="text-xs text-theme-text-sec">Cargando medios...</div>
-      <div v-else class="grid grid-cols-4 gap-2">
+      <div v-else class="grid grid-cols-3 gap-2">
         <button
           v-for="medio in medios"
           :key="medio.id"
@@ -42,7 +42,7 @@
           >
             <span class="text-sm">{{ medio.icono || '💰' }}</span>
           </div>
-          <span class="text-[10px] text-theme-text-muted text-center leading-tight truncate w-full">{{ medio.nombre }}</span>
+          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-auto w-full">{{ medio.nombre }}</span>
         </button>
       </div>
     </div>

@@ -1,7 +1,7 @@
 <template>
   <div class="flex items-center justify-between mb-3">
     <button
-      class="w-9 h-9 rounded-xl bg-theme-card border border-theme-border flex items-center justify-center text-theme-text-muted active:scale-95 transition-transform"
+      class="w-11 h-11 rounded-2xl bg-theme-card border border-theme-border flex items-center justify-center text-theme-text-muted active:scale-95 transition-transform"
       aria-label="Mes anterior"
       @click="$emit('prev')"
     >
@@ -9,7 +9,7 @@
     </button>
     <p class="text-base font-bold text-theme-text capitalize">{{ label }}</p>
     <button
-      class="w-9 h-9 rounded-xl bg-theme-card border border-theme-border flex items-center justify-center text-theme-text-muted active:scale-95 transition-transform"
+      class="w-11 h-11 rounded-2xl bg-theme-card border border-theme-border flex items-center justify-center text-theme-text-muted active:scale-95 transition-transform"
       aria-label="Mes siguiente"
       @click="$emit('next')"
     >

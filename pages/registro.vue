@@ -208,7 +208,7 @@
                 variant="card"
                 size="md"
                 aria-label="Vista del registro"
-                container-class="grid grid-cols-4 gap-2 lg:flex lg:items-center"
+                container-class="grid grid-cols-2 min-[480px]:grid-cols-4 gap-2 lg:flex lg:items-center"
                 @change="onCambiarVista"
               />
             </div>

@@ -89,8 +89,10 @@
                     </div>
                     <div class="flex-1 min-w-0 text-left">
                       <div class="flex items-center justify-between gap-2">
+                        <!-- Día abreviado (Mié 10): el nombre completo se truncaba
+                             ("Miérc...") a 380px con texto grande -->
                         <p class="text-xs font-medium text-theme-text-sec truncate">
-                          {{ formatFechaDia(dia.fecha) }}
+                          {{ nombreDiaSemana(dia.fecha) }} {{ extraerDia(dia.fecha) }}
                           <span class="text-theme-text-muted font-normal">· {{ formatRelativo(dia.fecha) }}</span>
                         </p>
                         <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(dia.total) }}</span>
@@ -171,7 +173,8 @@
               </div>
               <div class="flex-1 min-w-0 text-left">
                 <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-semibold text-theme-text truncate">{{ formatFechaDia(dia.fecha) }}</p>
+                  <!-- Día abreviado: "Miércoles 10" se truncaba a 380px con texto grande -->
+                  <p class="text-sm font-semibold text-theme-text truncate">{{ nombreDiaSemana(dia.fecha) }} {{ extraerDia(dia.fecha) }}</p>
                   <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(dia.total) }}</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1 flex-wrap">

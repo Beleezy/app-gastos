@@ -115,7 +115,8 @@
                       @click="agregarPreseleccionada(cat)"
                     >
                       <span class="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" :style="{ backgroundColor: cat.color + '26' }">{{ cat.icono }}</span>
-                      <span class="text-xs text-theme-text truncate">{{ cat.nombre }}</span>
+                      <!-- 2 líneas: "Alimentación"/"Entretenimiento" se truncaban con texto grande -->
+                      <span class="text-xs text-theme-text line-clamp-2 break-words hyphens-auto leading-tight min-w-0 flex-1">{{ cat.nombre }}</span>
                       <svg v-if="categoriasExistentes.has(cat.nombre)" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>

@@ -198,16 +198,16 @@
             @touchmove.passive="onSwipeTouchMove($event, gasto.id)"
             @touchend="onSwipeTouchEnd($event, gasto)"
           >
-          <div class="flex items-start justify-between">
-            <div class="flex items-start gap-3">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-start gap-3 flex-1 min-w-0">
               <div
                 class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
                 :style="{ backgroundColor: (gasto._catColor || cat.color) + '26' }"
               >
                 <span class="text-base">{{ getEmoji(gasto._catNombre || cat.nombre) }}</span>
               </div>
-              <div>
-                <p class="text-sm font-medium text-theme-text">{{ gasto.concepto }}</p>
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-theme-text leading-snug break-words">{{ gasto.concepto }}</p>
                 <p class="text-xs mt-0.5 flex items-center gap-1.5 flex-wrap">
                   <span v-if="gasto._catNombre" class="inline-flex items-center gap-1 text-theme-text-sec">
                     <span class="w-1.5 h-1.5 rounded-full inline-block" :style="{ backgroundColor: gasto._catColor }"></span>
@@ -232,7 +232,7 @@
                 </div>
               </div>
             </div>
-            <div class="text-right">
+            <div class="text-right shrink-0">
               <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.montoEstimado) }}</p>
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"

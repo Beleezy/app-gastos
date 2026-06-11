@@ -24,8 +24,8 @@
       </button>
     </div>
 
-    <!-- Filtros por prioridad y estado -->
-    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+    <!-- Filtros por prioridad y estado (pr-4: el último chip no se corta al borde) -->
+    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-4 scrollbar-hide">
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"
@@ -112,21 +112,23 @@
             </div>
           </div>
 
-          <!-- Min/Prom/Max densos en una fila -->
+          <!-- Min/Prom/Max densos en una fila. Enteros via SharedMoney: con texto
+               grande a 380px los montos de 4 cifras con decimales se truncaban
+               ("S/ 4,34..."); "k" solo aplica desde 5 cifras. -->
           <div class="mt-3 flex items-stretch rounded-xl bg-theme-input">
-            <div class="min-w-0 flex-1 px-3 py-2">
+            <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
               <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Mín</p>
-              <p class="mt-0.5 truncate text-xs font-semibold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMinimo) }}</p>
+              <SharedMoney :value="proyecto.resumen.totalMinimo" compact entero class="mt-0.5 block text-xs font-semibold text-emerald-400" />
             </div>
             <div class="w-px bg-theme-border/60"></div>
-            <div class="min-w-0 flex-1 px-3 py-2">
+            <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
               <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-              <p class="mt-0.5 truncate text-xs font-semibold text-sky-300">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalPromedio) }}</p>
+              <SharedMoney :value="proyecto.resumen.totalPromedio" compact entero class="mt-0.5 block text-xs font-semibold text-sky-300" />
             </div>
             <div class="w-px bg-theme-border/60"></div>
-            <div class="min-w-0 flex-1 px-3 py-2">
+            <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
               <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Máx</p>
-              <p class="mt-0.5 truncate text-xs font-semibold text-amber-300">{{ currencySymbol }}&nbsp;{{ formatMonto(proyecto.resumen.totalMaximo) }}</p>
+              <SharedMoney :value="proyecto.resumen.totalMaximo" compact entero class="mt-0.5 block text-xs font-semibold text-amber-300" />
             </div>
           </div>
 
@@ -266,7 +268,7 @@
                         {{ decisionBadge(detalle).label }}
                       </span>
                     </div>
-                    <p class="shrink-0 text-sm font-semibold text-sky-300 whitespace-nowrap leading-tight">{{ currencySymbol }}&nbsp;{{ formatMonto(detalle.resumen.promedioReferencia || 0) }}</p>
+                    <SharedMoney :value="detalle.resumen.promedioReferencia || 0" compact entero class="shrink-0 text-sm font-semibold text-sky-300 leading-tight" />
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center">
@@ -408,14 +410,12 @@
                       <!-- Bloque texto principal -->
                       <div class="min-w-0 flex-1">
                         <div class="flex items-baseline justify-between gap-3">
-                          <p class="text-sm font-medium text-theme-text break-words">{{ opcion.nombre }}</p>
-                          <p class="shrink-0 text-sm font-semibold text-sky-300 whitespace-nowrap">
-                            {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioPromedio || 0) }}
-                          </p>
+                          <p class="min-w-0 text-sm font-medium text-theme-text break-words">{{ opcion.nombre }}</p>
+                          <SharedMoney :value="opcion.precioPromedio || 0" compact entero class="shrink-0 text-sm font-semibold text-sky-300" />
                         </div>
                         <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
                           <span class="text-theme-text-sec whitespace-nowrap">
-                            {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMinimo || 0) }} — {{ currencySymbol }}&nbsp;{{ formatMonto(opcion.precioMaximo || 0) }}
+                            <SharedMoney :value="opcion.precioMinimo || 0" compact entero /> — <SharedMoney :value="opcion.precioMaximo || 0" compact entero />
                           </span>
                           <span
                             v-if="esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1"
@@ -803,7 +803,6 @@
 const emit = defineEmits(['editar'])
 
 const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = useGastosFuturos()
-const { currencySymbol, formatMonto } = useCurrency()
 const { success, error: toastError } = useToast()
 
 const busqueda = ref('')
