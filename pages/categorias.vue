@@ -236,6 +236,7 @@
 
 <script setup>
 const { apiFetch } = useApiFetch()
+const { invalidateCategorias } = useCategorias()
 const router = useRouter()
 
 const CATEGORIAS_PRESELECCIONADAS = [
@@ -347,8 +348,13 @@ async function fetchCategorias() {
   isLoading.value = true
   try {
     await apiFetch('/api/categorias/provision', { method: 'POST' })
-    const data = await apiFetch('/api/categorias')
+    // cache: 'no-cache' — el endpoint responde con max-age=300 y, tras editar,
+    // el caché HTTP devolvía la lista vieja (icono/color sin actualizar).
+    const data = await apiFetch('/api/categorias', { cache: 'no-cache' })
     misCategorias.value = data
+    // El resto de la app (grillas de categorías en los formularios) usa el
+    // caché compartido de useCategorias: invalidarlo para que vea los cambios.
+    invalidateCategorias()
   } catch (e) {
     console.error('Error cargando categorías:', e)
   } finally {

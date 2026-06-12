@@ -9,10 +9,14 @@
     <LayoutOfflineBanner />
     <LayoutRecordatoriosBanner />
     <LazyLayoutSideNav />
+    <!-- Sin overflow-y-auto en estado normal: el scroll real es del documento
+         y un overflow en <main> rompe el position:sticky del AppHeader (el
+         mini-resumen del Registro nunca aparecía). El overflow-hidden con
+         modal abierto se conserva para bloquear el fondo. -->
     <main
       id="contenido-principal"
       class="flex-1 pb-20 lg:pb-10"
-      :class="isModalOpen ? 'overflow-hidden' : 'overflow-y-auto'"
+      :class="isModalOpen ? 'overflow-hidden' : ''"
       tabindex="-1"
     >
       <LayoutPerfilContextBar />

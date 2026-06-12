@@ -215,7 +215,7 @@
           </div>
 
           <!-- Views -->
-          <div ref="historialSwipeZone">
+          <div>
             <Transition name="page" mode="out-in">
               <div :key="vistaRegistro">
                 <RegistroHistorialDiario
@@ -722,8 +722,9 @@ const { isRefreshing } = usePullToRefresh(async () => {
   await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto()])
 })
 
-const historialSwipeZone = ref(null)
-const { attach: attachSwipe, detach: detachSwipe } = useSwipeMonth(mesAnterior, mesSiguiente)
+// El swipe horizontal para cambiar de mes se retiró: con deslizamientos
+// suaves al scrollear cambiaba el mes por accidente. El mes se cambia con
+// las flechas del selector (y el mini-resumen sticky).
 
 // ─── Sticky mini-resumen (solo mobile) ──────────────────
 const resumenWrapperRef = ref(null)
@@ -789,13 +790,11 @@ onMounted(() => {
     fetchPresupuesto(),
     fetchConfig(),
   ]).catch(() => {})
-  attachSwipe(historialSwipeZone.value)
   setupResumenObserver()
   procesarShareDraft()
 })
 
 onUnmounted(() => {
-  detachSwipe(historialSwipeZone.value)
   teardownResumenObserver()
 })
 </script>

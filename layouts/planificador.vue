@@ -9,10 +9,12 @@
     <LayoutOfflineBanner />
     <LayoutRecordatoriosBanner />
     <LazyLayoutSideNav />
+    <!-- Sin overflow-y-auto en estado normal: rompía el sticky del AppHeader
+         (ver layouts/default.vue). -->
     <main
       id="contenido-principal"
       class="flex-1 pb-20 lg:pb-10"
-      :class="isModalOpen ? 'overflow-hidden' : 'overflow-y-auto'"
+      :class="isModalOpen ? 'overflow-hidden' : ''"
       tabindex="-1"
     >
       <LayoutPerfilContextBar />

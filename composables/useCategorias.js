@@ -4,9 +4,13 @@ export function useCategorias() {
   // Cache con SWR de 5 min: las categorías cambian rara vez. Se evita
   // re-fetchear en cada navegación a /registro o /planificador.
   // Compartido con useGastos/usePlanificador vía la key 'registro-categorias'.
+  // cache: 'no-cache' — el endpoint responde con max-age=300; sin esto, el
+  // refresh tras editar una categoría se servía del caché HTTP del navegador
+  // y la UI mostraba el icono/color viejos. El TTL en memoria de este
+  // composable ya cubre el caso de navegaciones repetidas.
   const cache = useResourceCache(
     'registro-categorias',
-    () => apiFetch('/api/categorias'),
+    () => apiFetch('/api/categorias', { cache: 'no-cache' }),
     { ttl: 5 * 60 * 1000, initial: [] },
   )
 

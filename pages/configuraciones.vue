@@ -404,7 +404,11 @@
 
       <ConfiguracionesPerfilModoConfig class="mt-4" />
       <ConfiguracionesUsoLlm class="mt-4" />
-      <ConfiguracionesFeatureFlagsConfig class="mt-4" />
+      <!-- El panel "Funciones experimentales" se retiró: todas sus funciones
+           (predictor de categoría, cola offline, mapa de calor, balance
+           global, plantillas) ya son parte del producto por defecto, y el
+           streaming LLM nunca llegó a cablearse a la UI. Los gates con
+           useFeatureFlag siguen respondiendo a sus defaults. -->
       <ConfiguracionesSuperadminPanel />
 
       <!-- App info -->

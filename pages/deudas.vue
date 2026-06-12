@@ -2,13 +2,6 @@
   <div>
     <LayoutAppHeader>
       <template #title>Deudas y Pagos</template>
-      <template #actions>
-        <SharedExportButton
-          :formats="['excel', 'csv']"
-          label="Exportar"
-          @select="exportarDeudas"
-        />
-      </template>
     </LayoutAppHeader>
 
     <!-- Pull-to-refresh indicator -->
@@ -70,11 +63,20 @@
               @editar-deuda="abrirFormEditar"
               @pago-global="showFormPagoGlobal = true"
             />
-            <component
-              v-else
-              :is="DeudasListaPersonas"
-              @seleccionar="onSeleccionarPersona"
-            />
+            <div v-else>
+              <component
+                :is="DeudasListaPersonas"
+                @seleccionar="onSeleccionarPersona"
+              />
+              <!-- Exportación al final de la lista (antes vivía en el header) -->
+              <div class="px-4 lg:px-0 mt-4 mb-2 flex justify-center">
+                <SharedExportButton
+                  :formats="['excel', 'csv']"
+                  label="Exportar deudas"
+                  @select="exportarDeudas"
+                />
+              </div>
+            </div>
           </div>
         </Transition>
       </div>

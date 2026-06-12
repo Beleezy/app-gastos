@@ -1,165 +1,189 @@
 <template>
-  <div class="min-h-screen pb-32">
-    <!-- Header -->
-    <div class="px-5 pt-8 pb-3 relative overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-emerald-500/10 rounded-full blur-3xl"></div>
-      <div class="relative flex items-center gap-3 mb-1">
-        <button
-          class="w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="$router.back()"
-          aria-label="Volver"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
-        </button>
-        <div class="w-11 h-11 rounded-2xl flex items-center justify-center bg-emerald-500/15">
-          <span class="text-xl">💰</span>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h1 class="text-xl font-bold text-theme-text">Ingresos</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">{{ mesLabel }}</p>
-        </div>
-      </div>
-    </div>
+  <div>
+    <LayoutAppHeader>
+      <template #title>Ingresos</template>
+      <template #subtitle>{{ mesLabel }}</template>
+    </LayoutAppHeader>
 
-    <!-- Resumen flujo neto -->
-    <div class="px-5 mb-4">
-      <div class="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-2xl p-4 border border-emerald-500/20">
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <p class="text-[10px] text-emerald-300/70 uppercase tracking-wider font-medium">Ingresos</p>
-            <p class="text-xl font-bold text-emerald-400 mt-0.5">{{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalIngresos) }}</p>
-          </div>
-          <div>
-            <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium">Gastos</p>
-            <p class="text-xl font-bold text-theme-text mt-0.5">{{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalGastos) }}</p>
-          </div>
-        </div>
-        <div class="mt-3 pt-3 border-t border-emerald-500/20">
-          <div class="flex items-end justify-between">
-            <div>
-              <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium">Saldo neto</p>
-              <p class="text-2xl font-bold mt-0.5" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
-                {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.saldoNeto) }}
-              </p>
-            </div>
-            <p class="text-[11px]" :class="resumen.porcentajeAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">
-              {{ resumen.porcentajeAhorro >= 0 ? '+' : '' }}{{ resumen.porcentajeAhorro.toFixed(1) }}% ahorro
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Selector de mes -->
-    <div class="px-5 mb-4">
+    <div class="max-w-lg mx-auto lg:max-w-2xl pb-32">
       <SharedMonthSelector
         :label="mesLabel"
         :es-actual="esMesActual"
         :disable-next="esMesActual"
+        container-class="px-4 py-3 lg:px-0 lg:pt-6"
         @prev="mesAnterior"
         @next="mesSiguiente"
         @go-to-current="irAMesActual"
       />
-    </div>
 
-    <!-- Toggle form -->
-    <div class="px-5 mb-4">
-      <button
-        class="w-full px-4 py-3 rounded-xl border-2 border-dashed border-emerald-500/30 text-emerald-400 text-sm font-medium flex items-center justify-center gap-2 hover:bg-emerald-500/5 transition-colors"
-        @click="mostrarForm = !mostrarForm"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path v-if="!mostrarForm" stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          <path v-else stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
-        </svg>
-        {{ mostrarForm ? 'Cancelar' : (editando ? 'Editar ingreso' : 'Registrar ingreso') }}
-      </button>
-    </div>
+      <!-- Resumen del mes: ingresos como "presupuesto" del flujo y los gastos
+           consumiéndolo (mismo lenguaje visual que Registro/Planificador) -->
+      <div class="px-4 lg:px-0 mb-4">
+        <div class="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-theme-card p-4">
+          <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none"></div>
+          <div class="relative">
+            <p class="text-[10px] uppercase tracking-wider font-semibold text-emerald-300/80">Ingresos del mes</p>
+            <p class="text-3xl font-bold text-emerald-400 mt-0.5 tabular-nums">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalIngresos) }}
+            </p>
 
-    <div v-if="mostrarForm" class="px-5 mb-6">
-      <div class="bg-theme-card border border-theme-border rounded-2xl p-4">
-        <IngresosFormIngreso :editing="editando" @saved="onSaved" @cancel="cancelarEdicion" />
-      </div>
-    </div>
+            <template v-if="resumen.totalIngresos > 0">
+              <div class="h-2 w-full rounded-full bg-theme-input overflow-hidden mt-3">
+                <div
+                  class="h-full rounded-full transition-all duration-700"
+                  :class="resumen.saldoNeto < 0 ? 'bg-gradient-to-r from-red-500 to-rose-400' : 'bg-gradient-to-r from-amber-500 to-amber-400'"
+                  :style="{ width: pctGastado + '%' }"
+                ></div>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-1.5">
+                <p class="text-[11px] text-theme-text-sec min-w-0">
+                  Gastado: {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalGastos) }}
+                </p>
+                <p class="text-[11px] tabular-nums shrink-0" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  {{ pctGastado.toFixed(0) }}%
+                </p>
+              </div>
+            </template>
+            <p v-else class="text-[11px] text-theme-text-muted mt-2">
+              Gastos del mes: {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalGastos) }}
+            </p>
 
-    <!-- Por origen -->
-    <div v-if="porOrigen.length > 0" class="px-5 mb-4">
-      <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">Por origen</p>
-      <div class="flex flex-wrap gap-1.5">
-        <span
-          v-for="p in porOrigen"
-          :key="p.origen"
-          class="rounded-full bg-emerald-500/10 text-emerald-300 px-2.5 py-1 text-[10px]"
-        >
-          {{ labelOrigen(p.origen) }}: {{ currencySymbol }}&nbsp;{{ formatMonto(p.total) }}
-        </span>
-      </div>
-    </div>
-
-    <!-- Lista -->
-    <div class="px-5">
-      <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
-        {{ ingresos.length }} ingreso{{ ingresos.length !== 1 ? 's' : '' }} este mes
-      </p>
-
-      <div v-if="isLoading && ingresos.length === 0" class="space-y-2">
-        <div v-for="i in 3" :key="i" class="h-16 bg-theme-card rounded-xl shimmer"></div>
-      </div>
-
-      <div v-else-if="ingresos.length === 0" class="text-center py-12">
-        <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
-          <span class="text-2xl">💰</span>
-        </div>
-        <p class="text-sm text-theme-text-sec">Aún no hay ingresos este mes</p>
-        <p class="text-[11px] text-theme-text-muted mt-1">Registra tu primer ingreso para ver el flujo neto</p>
-      </div>
-
-      <div v-else class="space-y-2">
-        <div
-          v-for="ing in ingresos"
-          :key="ing.id"
-          class="bg-theme-card border border-theme-border rounded-xl p-3"
-        >
-          <!-- Fila 1: icono + concepto a todo el ancho -->
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-500/15 flex items-center justify-center shrink-0">
-              <span class="text-base">{{ iconoOrigen(ing.origen) }}</span>
-            </div>
-            <p class="flex-1 min-w-0 text-sm text-theme-text font-medium line-clamp-2 break-words leading-snug">{{ ing.concepto }}</p>
-          </div>
-          <!-- Fila meta: fecha · origen | monto + acciones -->
-          <div class="flex items-center justify-between gap-2 mt-1.5">
-            <div class="flex items-center gap-2 min-w-0">
-              <span class="text-[10px] text-theme-text-muted shrink-0">{{ formatFechaCorta(ing.fecha) }}</span>
-              <span v-if="ing.origen" class="text-[10px] text-emerald-400 truncate">{{ labelOrigen(ing.origen) }}</span>
-            </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <SharedMoney :value="ing.monto" signo compact tone="green" class="text-sm font-semibold" />
-              <button
-                class="w-11 h-11 -my-2 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
-                @click="iniciarEdicion(ing)"
-                aria-label="Editar"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" />
-                </svg>
-              </button>
-              <button
-                class="w-11 h-11 -my-2 -mr-1.5 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-500/10"
-                @click="confirmEliminar(ing)"
-                aria-label="Eliminar"
-              >
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
-              </button>
+            <div class="grid grid-cols-2 gap-2.5 mt-3 pt-3 border-t border-emerald-500/20">
+              <div class="min-w-0">
+                <p class="text-[10px] uppercase tracking-wide text-theme-text-muted">Saldo neto</p>
+                <p class="text-lg font-bold mt-0.5 tabular-nums" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.saldoNeto) }}
+                </p>
+              </div>
+              <div class="min-w-0 text-right">
+                <p class="text-[10px] uppercase tracking-wide text-theme-text-muted">Ahorro</p>
+                <p class="text-lg font-bold mt-0.5 tabular-nums" :class="resumen.porcentajeAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                  {{ resumen.porcentajeAhorro >= 0 ? '+' : '' }}{{ resumen.porcentajeAhorro.toFixed(1) }}%
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      <!-- Por origen -->
+      <div v-if="porOrigen.length > 0" class="px-4 lg:px-0 mb-4">
+        <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">Por origen</p>
+        <div class="flex flex-wrap gap-1.5">
+          <span
+            v-for="p in porOrigen"
+            :key="p.origen"
+            class="rounded-full bg-emerald-500/10 text-emerald-300 px-2.5 py-1 text-[10px]"
+          >
+            {{ iconoOrigen(p.origen) }} {{ labelOrigen(p.origen) }}: {{ currencySymbol }}&nbsp;{{ formatMonto(p.total) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Lista -->
+      <div class="px-4 lg:px-0">
+        <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
+          {{ ingresos.length }} ingreso{{ ingresos.length !== 1 ? 's' : '' }} este mes
+        </p>
+
+        <div v-if="isLoading && ingresos.length === 0" class="space-y-2">
+          <div v-for="i in 3" :key="i" class="h-16 bg-theme-card rounded-xl shimmer"></div>
+        </div>
+
+        <div v-else-if="ingresos.length === 0" class="text-center py-12 rounded-2xl border border-dashed border-theme-border bg-theme-card">
+          <div class="w-14 h-14 mx-auto rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
+            <span class="text-2xl">💰</span>
+          </div>
+          <p class="text-sm text-theme-text-sec">Aún no hay ingresos este mes</p>
+          <button
+            class="mt-3 min-h-[44px] px-4 rounded-xl bg-emerald-500 text-white text-sm font-semibold active:scale-[0.98] transition-transform"
+            @click="abrirNuevo"
+          >
+            + Registrar mi primer ingreso
+          </button>
+        </div>
+
+        <div v-else class="space-y-2">
+          <div
+            v-for="ing in ingresos"
+            :key="ing.id"
+            class="bg-theme-card border border-theme-border hover:border-emerald-500/30 transition-colors rounded-xl p-3"
+          >
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                <span class="text-base">{{ iconoOrigen(ing.origen) }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <!-- Concepto + monto arriba a la derecha (patrón de GastoItem) -->
+                <div class="flex items-start justify-between gap-2">
+                  <p class="min-w-0 flex-1 text-sm font-medium text-theme-text break-words leading-tight">{{ ing.concepto }}</p>
+                  <p class="shrink-0 text-sm font-bold text-emerald-400 leading-tight whitespace-nowrap">
+                    +{{ currencySymbol }}&nbsp;{{ formatMonto(ing.monto) }}
+                  </p>
+                </div>
+                <!-- Meta a la izquierda, acciones a la derecha -->
+                <div class="flex items-center gap-1.5 mt-1">
+                  <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
+                    <span v-if="ing.origen" class="text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none bg-emerald-500/10 text-emerald-400">
+                      {{ labelOrigen(ing.origen) }}
+                    </span>
+                    <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(ing.fecha) }}</span>
+                    <span v-if="ing.esRecurrente" class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">Recurrente</span>
+                  </div>
+                  <div class="flex items-center gap-0.5 shrink-0">
+                    <button
+                      class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                      aria-label="Editar"
+                      @click="iniciarEdicion(ing)"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                    </button>
+                    <button
+                      class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all"
+                      aria-label="Eliminar"
+                      @click="pedirEliminar(ing)"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- FAB: registrar ingreso (mismo patrón que Registro/Planificador) -->
+    <SharedFloatingActionStack>
+      <SharedFloatingActionButton
+        tone="emerald"
+        aria-label="Registrar ingreso"
+        @click="abrirNuevo"
+      />
+    </SharedFloatingActionStack>
+
+    <!-- Form en bottom-sheet, como los demás módulos -->
+    <SharedBaseBottomSheet
+      v-if="mostrarForm"
+      :title="editando ? 'Editar ingreso' : 'Nuevo ingreso'"
+      @close="cancelarEdicion"
+    >
+      <IngresosFormIngreso :editing="editando" @saved="onSaved" @cancel="cancelarEdicion" />
+    </SharedBaseBottomSheet>
+
+    <SharedConfirmDialog
+      v-model="confirmandoEliminar"
+      title="Eliminar ingreso"
+      :message="ingresoEliminar ? `¿Eliminar '${ingresoEliminar.concepto}'? Podrás recuperarlo de la papelera (30 días).` : ''"
+      confirm-label="Eliminar"
+      :loading="eliminando"
+      @confirm="confirmarEliminar"
+    />
   </div>
 </template>
 
@@ -176,6 +200,7 @@ const ORIGENES_MAP = {
 }
 
 const { currencySymbol, formatMonto } = useCurrency()
+const toast = useToast()
 const {
   ingresos, resumen, isLoading,
   mesLabel, esMesActual,
@@ -187,11 +212,29 @@ const {
 
 const mostrarForm = ref(false)
 const editando = ref(null)
+const confirmandoEliminar = ref(false)
+const ingresoEliminar = ref(null)
+const eliminando = ref(false)
+
+// Qué proporción de los ingresos ya se gastó (tope visual 100%).
+const pctGastado = computed(() => {
+  const ing = Number(resumen.value.totalIngresos) || 0
+  if (ing <= 0) return 0
+  return Math.min((Number(resumen.value.totalGastos) / ing) * 100, 100)
+})
+
+// Botón atrás (Android) cierra el sheet en vez de salir de la página
+useOverlayBack(mostrarForm, () => cancelarEdicion())
 
 onMounted(() => {
   fetchIngresos()
   fetchResumen()
 })
+
+function abrirNuevo() {
+  editando.value = null
+  mostrarForm.value = true
+}
 
 function iniciarEdicion(ing) {
   editando.value = ing
@@ -208,12 +251,23 @@ function onSaved() {
   mostrarForm.value = false
 }
 
-async function confirmEliminar(ing) {
-  if (!confirm(`¿Eliminar "${ing.concepto}"? Podrás recuperarlo de la papelera.`)) return
+function pedirEliminar(ing) {
+  ingresoEliminar.value = ing
+  confirmandoEliminar.value = true
+}
+
+async function confirmarEliminar() {
+  if (!ingresoEliminar.value) return
+  eliminando.value = true
   try {
-    await eliminarIngreso(ing.id)
-  } catch (e) {
-    console.error(e)
+    await eliminarIngreso(ingresoEliminar.value.id)
+    toast.success('Ingreso enviado a la papelera')
+  } catch {
+    toast.error('No se pudo eliminar el ingreso')
+  } finally {
+    eliminando.value = false
+    confirmandoEliminar.value = false
+    ingresoEliminar.value = null
   }
 }
 
