@@ -83,7 +83,29 @@
                   @contextmenu.prevent="activarSeleccionDia(dia)"
                 >
                   <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-lg flex flex-col items-center justify-center bg-theme-card border border-theme-border shrink-0">
+                    <!-- En modo selección, el bloque del día también funciona
+                         como checkbox del día completo (vista por semana). -->
+                    <span
+                      v-if="seleccionActiva"
+                      class="relative w-9 h-9 rounded-lg flex flex-col items-center justify-center shrink-0 border-2 transition-colors"
+                      :class="estadoSeleccionDia(dia) === 'all'
+                        ? 'bg-theme-accent border-theme-accent text-theme-on-accent'
+                        : estadoSeleccionDia(dia) === 'some'
+                          ? 'bg-theme-accent-bg border-theme-accent text-theme-accent'
+                          : 'bg-theme-card border-theme-border-md text-theme-text-muted'"
+                      role="checkbox"
+                      :aria-checked="estadoSeleccionDia(dia) === 'all' ? 'true' : estadoSeleccionDia(dia) === 'some' ? 'mixed' : 'false'"
+                      aria-label="Seleccionar todos los gastos del día"
+                      @click.stop="toggleSelectDia(dia)"
+                    >
+                      <span class="text-[8px] uppercase leading-none font-semibold">{{ nombreDiaSemana(dia.fecha) }}</span>
+                      <span class="text-xs font-bold leading-tight">{{ extraerDia(dia.fecha) }}</span>
+                      <span
+                        v-if="estadoSeleccionDia(dia) !== 'none'"
+                        class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center text-[9px] font-bold leading-none shadow"
+                      >{{ estadoSeleccionDia(dia) === 'all' ? '✓' : '−' }}</span>
+                    </span>
+                    <div v-else class="w-9 h-9 rounded-lg flex flex-col items-center justify-center bg-theme-card border border-theme-border shrink-0">
                       <span class="text-[8px] uppercase leading-none font-semibold text-theme-text-muted">{{ nombreDiaSemana(dia.fecha) }}</span>
                       <span class="text-xs font-bold text-theme-text leading-tight">{{ extraerDia(dia.fecha) }}</span>
                     </div>
@@ -165,7 +187,31 @@
             @contextmenu.prevent="activarSeleccionDia(dia)"
           >
             <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
+              <!-- En modo selección, el bloque del día (MIE 20) actúa como
+                   checkbox del día completo: marca/desmarca todos sus gastos. -->
+              <span
+                v-if="seleccionActiva"
+                class="relative w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 border-2 transition-colors"
+                :class="estadoSeleccionDia(dia) === 'all'
+                  ? 'bg-theme-accent border-theme-accent text-theme-on-accent'
+                  : estadoSeleccionDia(dia) === 'some'
+                    ? 'bg-theme-accent-bg border-theme-accent text-theme-accent'
+                    : 'bg-theme-card border-theme-border-md text-theme-text-muted'"
+                role="checkbox"
+                :aria-checked="estadoSeleccionDia(dia) === 'all' ? 'true' : estadoSeleccionDia(dia) === 'some' ? 'mixed' : 'false'"
+                aria-label="Seleccionar todos los gastos del día"
+                @click.stop="toggleSelectDia(dia)"
+              >
+                <span class="text-[9px] uppercase leading-none font-semibold">{{ nombreDiaSemana(dia.fecha) }}</span>
+                <span class="text-base font-bold leading-tight">{{ extraerDia(dia.fecha) }}</span>
+                <span
+                  v-if="estadoSeleccionDia(dia) !== 'none'"
+                  class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center text-[9px] font-bold leading-none shadow"
+                >{{ estadoSeleccionDia(dia) === 'all' ? '✓' : '−' }}</span>
+              </span>
+              <div
+                v-else
+                class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
                 :class="diasExpandidos.has(dia.fecha) ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
               >
                 <span class="text-[9px] uppercase leading-none font-semibold" :class="diasExpandidos.has(dia.fecha) ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
@@ -380,6 +426,30 @@ function toggleSelect(gasto) {
   const nueva = new Set(selectedIds.value)
   if (nueva.has(gasto.id)) nueva.delete(gasto.id)
   else nueva.add(gasto.id)
+  selectedIds.value = nueva
+  if (nueva.size === 0) cancelarSeleccion()
+}
+
+// ─── Checkbox por día (bloque MIE 20) ───────────────────
+// 'all' | 'some' | 'none' según cuántos gastos del día están marcados.
+function estadoSeleccionDia(dia) {
+  const gastos = dia.gastos || []
+  if (!gastos.length) return 'none'
+  const marcados = gastos.filter(g => selectedIds.value.has(g.id)).length
+  return marcados === 0 ? 'none' : marcados === gastos.length ? 'all' : 'some'
+}
+
+// Tocar el bloque del día marca/desmarca todos sus gastos de una vez.
+function toggleSelectDia(dia) {
+  vibrate(10)
+  const gastos = dia.gastos || []
+  if (!gastos.length) return
+  const nueva = new Set(selectedIds.value)
+  if (estadoSeleccionDia(dia) === 'all') {
+    for (const g of gastos) nueva.delete(g.id)
+  } else {
+    for (const g of gastos) nueva.add(g.id)
+  }
   selectedIds.value = nueva
   if (nueva.size === 0) cancelarSeleccion()
 }
