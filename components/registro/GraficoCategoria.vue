@@ -2,7 +2,7 @@
   <div class="px-4">
     <!-- Filtro de mes -->
     <div class="mb-4">
-      <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-2">Mes:</p>
+      <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider mb-2">Mes:</p>
       <div class="flex items-center gap-1.5">
         <button
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
@@ -79,12 +79,12 @@
             <template v-if="seleccionada">
               <p class="text-xs text-theme-text-sec truncate max-w-full leading-tight">{{ seleccionada }}</p>
               <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(totalSeleccionada) }}</p>
-              <p class="text-[10px] text-theme-text-sec">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
+              <p class="text-[0.6875rem] text-theme-text-sec">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
             </template>
             <template v-else>
               <p class="text-xs text-theme-text-sec leading-tight">Gastado</p>
               <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(totalGeneral) }}</p>
-              <p v-if="presupuesto > 0" class="text-[10px] leading-tight" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
+              <p v-if="presupuesto > 0" class="text-[0.6875rem] leading-tight" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
                 de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
               </p>
             </template>
@@ -93,7 +93,7 @@
       </div>
 
       <!-- Hint -->
-      <p v-if="seleccionada" class="text-center text-[10px] text-theme-text-muted -mt-3 mb-4">
+      <p v-if="seleccionada" class="text-center text-[0.6875rem] text-theme-text-muted -mt-3 mb-4">
         Toca de nuevo para quitar el filtro
       </p>
 
@@ -142,7 +142,7 @@
                 :style="{ width: cat.porcentaje + '%', backgroundColor: cat.color }"
               ></div>
             </div>
-            <p class="text-[10px] text-theme-text-muted mt-1 text-right">{{ cat.porcentaje.toFixed(1) }}%</p>
+            <p class="text-[0.6875rem] text-theme-text-muted mt-1 text-right">{{ cat.porcentaje.toFixed(1) }}%</p>
           </button>
 
           <!-- Expanded: expense detail list -->
@@ -156,10 +156,10 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-sm text-theme-text-sec truncate">{{ gasto.concepto }}</p>
                   <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(gasto.fecha) }}</span>
-                    <span v-if="gasto.hora" class="text-[10px] text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
+                    <span class="text-[0.6875rem] text-theme-text-muted">{{ formatFechaCorta(gasto.fecha) }}</span>
+                    <span v-if="gasto.hora" class="text-[0.6875rem] text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
                     <span v-if="getMetodoRegistroBadgeLabel(gasto)"
-                      class="text-[8px] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
+                      class="text-[0.625rem] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
                     >{{ getMetodoRegistroBadgeLabel(gasto) }}</span>
                   </div>
                 </div>

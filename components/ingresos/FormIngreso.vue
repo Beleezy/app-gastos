@@ -58,7 +58,7 @@
 
     <div>
       <label class="flex items-center gap-2 text-xs text-theme-text-muted">
-        <input v-model="form.esRecurrente" type="checkbox" class="h-4 w-4 rounded" />
+        <input v-model="form.esRecurrente" type="checkbox" class="h-5 w-5 rounded" />
         <span>Es recurrente (informativo, sin replicar todavía)</span>
       </label>
     </div>
@@ -153,7 +153,7 @@ async function submit() {
     }
     emit('saved')
   } catch (e) {
-    toast.error(e?.data?.message || e?.message || 'No se pudo guardar')
+    toast.error(handleApiError(e))
   } finally {
     enviando.value = false
   }

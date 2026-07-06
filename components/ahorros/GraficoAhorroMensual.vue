@@ -10,7 +10,7 @@
           class="flex-1 flex flex-col items-center gap-1 group"
           @click="seleccionar(item)"
         >
-          <span class="text-[10px] font-medium transition-colors" :class="esSeleccionado(item) ? 'text-emerald-400' : 'text-theme-text-muted'">
+          <span class="text-[0.6875rem] font-medium transition-colors" :class="esSeleccionado(item) ? 'text-emerald-400' : 'text-theme-text-muted'">
             {{ currencySymbol }}&nbsp;{{ formatCorto(item.total) }}
           </span>
           <div class="w-full flex justify-center">
@@ -27,7 +27,7 @@
             ></div>
           </div>
           <span
-            class="text-[9px] transition-colors"
+            class="text-[0.6875rem] transition-colors"
             :class="esSeleccionado(item) ? 'text-emerald-400 font-semibold' : 'text-theme-text-sec'"
           >{{ MESES_CORTO[item.mes - 1] }}</span>
         </button>
@@ -43,11 +43,11 @@
         <div class="flex items-center justify-between px-4 py-3 border-b border-theme-border">
           <div>
             <span class="text-xs font-semibold text-theme-text">{{ MESES_LARGO[mesSeleccionado.mes - 1] }} {{ mesSeleccionado.anio }}</span>
-            <p class="text-[10px] text-theme-text-muted mt-0.5">{{ registrosMes.length }} registro{{ registrosMes.length !== 1 ? 's' : '' }}</p>
+            <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">{{ registrosMes.length }} registro{{ registrosMes.length !== 1 ? 's' : '' }}</p>
           </div>
           <div class="text-right">
             <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }}&nbsp;{{ formatMonto(mesSeleccionado.total) }}</p>
-            <button class="text-[10px] text-theme-text-muted hover:text-theme-text mt-0.5" @click="cerrar">cerrar</button>
+            <button class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text mt-0.5" @click="cerrar">cerrar</button>
           </div>
         </div>
 

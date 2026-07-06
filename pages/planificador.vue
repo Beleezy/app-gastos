@@ -33,7 +33,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
               Lista
-              <span v-if="vistaActual === 'lista'" class="text-[10px] font-bold bg-theme-accent/20 px-1.5 rounded-full">{{ gastosPlaneados.length }}</span>
+              <span v-if="vistaActual === 'lista'" class="text-[0.6875rem] font-bold bg-theme-accent/20 px-1.5 rounded-full">{{ gastosPlaneados.length }}</span>
             </button>
             <button
               class="flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-medium transition-colors"

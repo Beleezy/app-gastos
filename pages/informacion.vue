@@ -15,7 +15,7 @@
         </NuxtLink>
         <div>
           <h1 class="text-xl font-bold text-gradient-blue">Información</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">Cómo funciona cada módulo</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">Cómo funciona cada módulo</p>
         </div>
       </div>
     </div>

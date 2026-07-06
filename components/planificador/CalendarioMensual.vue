@@ -2,7 +2,7 @@
   <div class="px-4 py-2">
     <!-- Cabecera días de la semana -->
     <div class="grid grid-cols-7 mb-1">
-      <div v-for="d in DIAS" :key="d" class="text-center text-[10px] font-semibold text-theme-text-sec py-1">
+      <div v-for="d in DIAS" :key="d" class="text-center text-[0.6875rem] font-semibold text-theme-text-sec py-1">
         {{ d }}
       </div>
     </div>
@@ -23,12 +23,12 @@
       >
         <div class="flex items-center justify-between">
           <span
-            class="text-[10px] font-semibold leading-none"
+            class="text-[0.6875rem] font-semibold leading-none"
             :class="claseNumero(dia)"
           >{{ dia }}</span>
           <span
             v-if="gastosDelDia(dia).length > 0 && !esDiaSeleccionado(dia)"
-            class="text-[8px] font-semibold leading-none"
+            class="text-[0.625rem] font-semibold leading-none"
             :class="esVencidoDia(dia) ? 'text-red-400' : 'text-theme-text-muted'"
           >{{ formatCompact(totalDia(dia)) }}</span>
         </div>
@@ -41,7 +41,7 @@
             class="w-1.5 h-1.5 rounded-full"
             :style="{ backgroundColor: g.categoriaColor || '#6b7280' }"
           ></span>
-          <span v-if="gastosDelDia(dia).length > 6" class="text-[8px] text-theme-text-muted leading-none">+{{ gastosDelDia(dia).length - 6 }}</span>
+          <span v-if="gastosDelDia(dia).length > 6" class="text-[0.625rem] text-theme-text-muted leading-none">+{{ gastosDelDia(dia).length - 6 }}</span>
         </div>
       </button>
     </div>
@@ -51,7 +51,7 @@
       <div class="flex items-center justify-between px-3 py-2.5 border-b border-theme-border">
         <div>
           <p class="text-xs font-semibold text-theme-text">{{ tituloDiaSel }}</p>
-          <p class="text-[10px] text-theme-text-muted">
+          <p class="text-[0.6875rem] text-theme-text-muted">
             {{ gastosDelDia(diaSel).length }} gasto{{ gastosDelDia(diaSel).length === 1 ? '' : 's' }}
             ·
             {{ currencySymbol }}&nbsp;{{ formatMonto(totalDia(diaSel)) }}
@@ -81,12 +81,12 @@
               <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: g.categoriaColor || '#6b7280' }"></span>
               <div class="min-w-0">
                 <p class="text-xs text-theme-text truncate">{{ g.concepto }}</p>
-                <p class="text-[10px] text-theme-text-muted truncate">{{ g.categoriaNombre || 'Sin categoría' }}</p>
+                <p class="text-[0.6875rem] text-theme-text-muted truncate">{{ g.categoriaNombre || 'Sin categoría' }}</p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <span
-                class="text-[9px] px-1.5 py-0.5 rounded-full"
+                class="text-[0.6875rem] px-1.5 py-0.5 rounded-full"
                 :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"
               >{{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}</span>
               <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(g.montoEstimado) }}</span>
@@ -97,7 +97,7 @@
           <div class="flex justify-end gap-x-3 mt-1.5 pt-1.5 border-t border-theme-border">
             <button
               v-if="g.estado === 'pendiente' && !esCategoriaAhorro(g)"
-              class="text-[11px] text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
+              class="text-[0.6875rem] text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium"
               title="Marcar como pagado"
               @click="marcarPagadoRapido(g)"
             >
@@ -107,7 +107,7 @@
               Pagar
             </button>
             <button
-              class="text-[11px] transition-colors flex items-center gap-1"
+              class="text-[0.6875rem] transition-colors flex items-center gap-1"
               :class="g.gastoRegistradoFecha ? 'text-emerald-400 hover:text-emerald-300' : 'text-orange-400 hover:text-orange-300'"
               @click="emit('registrar', g)"
             >
@@ -117,7 +117,7 @@
               {{ g.gastoRegistradoFecha ? 'Editar registro' : 'Registrar' }}
             </button>
             <button
-              class="text-[11px] text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1"
+              class="text-[0.6875rem] text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1"
               @click="emit('editar', g)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -126,7 +126,7 @@
               Editar
             </button>
             <button
-              class="text-[11px] text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1"
+              class="text-[0.6875rem] text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1"
               @click="pedirConfirmarEliminar(g)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -150,7 +150,7 @@
     >
       <template #message>
         <p>¿Eliminar "{{ gastoParaEliminar?.concepto }}"? Tendrás 5 segundos para deshacer.</p>
-        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
           ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
         </p>
       </template>
@@ -163,7 +163,7 @@
         <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
         <div class="text-sm text-theme-text-muted mb-5">
           Este gasto se repite en meses futuros. ¿Qué deseas hacer?
-          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
             ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
           </p>
         </div>

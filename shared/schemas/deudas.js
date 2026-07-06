@@ -2,11 +2,15 @@ import { z } from 'zod'
 import { fechaIso, monto, conceptoSchema, notasSchema } from './common.js'
 
 export const tipoDeudaSchema = z.enum(['me_deben', 'yo_debo'])
-// NOTA: este schema histórico no coincide 1:1 con el enum real de DB
-// (`persona | organizacion`). Se mantiene para no romper callers que
-// envían 'entidad'/'banco'/'otro'. Para validar el campo en el handler
-// PUT de personas usamos `tipoPersonaEntidadDbSchema` (coincide con DB).
-export const tipoPersonaSchema = z.enum(['persona', 'entidad', 'banco', 'otro'])
+// El enum real de DB es `persona | organizacion`. El front envía esos dos
+// valores; los históricos 'entidad'/'banco'/'otro' se siguen aceptando pero
+// se normalizan al enum de DB (antes 'organizacion' se rechazaba con 400 y
+// 'entidad'/'banco'/'otro' pasaban la validación para luego reventar en el
+// INSERT contra el pgEnum). Para el PUT de personas se usa
+// `tipoPersonaEntidadDbSchema` (sin valores legacy).
+export const tipoPersonaSchema = z
+  .enum(['persona', 'organizacion', 'entidad', 'banco', 'otro'])
+  .transform((v) => (v === 'persona' || v === 'otro' ? 'persona' : 'organizacion'))
 export const tipoPersonaEntidadDbSchema = z.enum(['persona', 'organizacion'])
 
 // estado_deuda enum real en DB (server/database/schema.js:8).

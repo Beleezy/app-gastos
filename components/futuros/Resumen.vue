@@ -6,18 +6,18 @@
     <template v-if="resumenFuturos.totalProyectos > 0">
       <!-- Inversión estimada (centrado) -->
       <div class="relative text-center">
-        <p class="text-[10px] uppercase tracking-[0.22em] text-theme-text-muted">Inversión estimada</p>
+        <p class="text-[0.6875rem] uppercase tracking-[0.22em] text-theme-text-muted">Inversión estimada</p>
         <p class="text-3xl font-bold text-sky-300 truncate leading-tight">
           {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalPromedio) }}
         </p>
-        <p class="mt-0.5 text-[11px] text-theme-text-sec">
+        <p class="mt-0.5 text-[0.6875rem] text-theme-text-sec">
           promedio de {{ resumenFuturos.totalProyectos }} proyecto{{ resumenFuturos.totalProyectos > 1 ? 's' : '' }}
         </p>
       </div>
 
       <!-- Rango min — máx con marcador -->
       <div class="relative">
-        <div class="flex items-center justify-between text-[10px] mb-1.5">
+        <div class="flex items-center justify-between text-[0.6875rem] mb-1.5">
           <span class="font-medium text-emerald-400">min {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMinimo) }}</span>
           <span class="font-medium text-amber-300">máx {{ currencySymbol }}&nbsp;{{ formatMonto(resumenFuturos.totalMaximo) }}</span>
         </div>
@@ -32,15 +32,15 @@
       <!-- Stats: detalles · opciones · decididos -->
       <div class="grid grid-cols-3 gap-2">
         <div class="rounded-xl border border-theme-border bg-theme-input p-2 text-center min-w-0">
-          <p class="text-[9px] uppercase tracking-[0.18em] text-theme-text-muted">Detalles</p>
+          <p class="text-[0.6875rem] uppercase tracking-[0.18em] text-theme-text-muted">Detalles</p>
           <p class="mt-0.5 text-lg font-bold text-theme-text">{{ resumenFuturos.totalDetalles }}</p>
         </div>
         <div class="rounded-xl border border-theme-border bg-theme-input p-2 text-center min-w-0">
-          <p class="text-[9px] uppercase tracking-[0.18em] text-theme-text-muted">Opciones</p>
+          <p class="text-[0.6875rem] uppercase tracking-[0.18em] text-theme-text-muted">Opciones</p>
           <p class="mt-0.5 text-lg font-bold text-theme-text">{{ resumenFuturos.totalOpciones }}</p>
         </div>
         <div class="rounded-xl border border-theme-border bg-theme-input p-2 text-center min-w-0">
-          <p class="text-[9px] uppercase tracking-[0.18em] text-theme-text-muted">Decididos</p>
+          <p class="text-[0.6875rem] uppercase tracking-[0.18em] text-theme-text-muted">Decididos</p>
           <p class="mt-0.5 text-lg font-bold text-theme-text">
             {{ resumenFuturos.progresoDecision?.decididos || 0 }}<span class="text-theme-text-muted font-semibold">/{{ resumenFuturos.progresoDecision?.total || 0 }}</span>
           </p>
@@ -63,7 +63,7 @@
 
       <!-- Pie: leyenda de decisiones + pills de prioridad -->
       <div class="flex items-center justify-between gap-2 flex-wrap">
-        <div class="flex items-center gap-3 text-[11px]">
+        <div class="flex items-center gap-3 text-[0.6875rem]">
           <div class="flex items-center gap-1.5">
             <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
             <span :class="desglose.compradas > 0 ? 'text-emerald-400' : 'text-theme-text-muted'">{{ desglose.compradas }} compr.</span>
@@ -80,19 +80,19 @@
         <div v-if="resumenFuturos.porPrioridad" class="flex items-center gap-1.5">
           <span
             v-if="resumenFuturos.porPrioridad.alta"
-            class="rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold text-red-400"
+            class="rounded-full bg-red-500/15 px-2 py-0.5 text-[0.6875rem] font-semibold text-red-400"
           >
             {{ resumenFuturos.porPrioridad.alta }} alta
           </span>
           <span
             v-if="resumenFuturos.porPrioridad.media"
-            class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-300"
+            class="rounded-full bg-amber-500/15 px-2 py-0.5 text-[0.6875rem] font-semibold text-amber-300"
           >
             {{ resumenFuturos.porPrioridad.media }} med
           </span>
           <span
             v-if="resumenFuturos.porPrioridad.baja"
-            class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400"
+            class="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[0.6875rem] font-semibold text-emerald-400"
           >
             {{ resumenFuturos.porPrioridad.baja }} baja
           </span>

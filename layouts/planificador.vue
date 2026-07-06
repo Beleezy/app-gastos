@@ -13,7 +13,7 @@
          (ver layouts/default.vue). -->
     <main
       id="contenido-principal"
-      class="flex-1 pb-20 lg:pb-10"
+      class="flex-1 pb-44 lg:pb-10"
       :class="isModalOpen ? 'overflow-hidden' : ''"
       tabindex="-1"
     >
@@ -25,7 +25,7 @@
           <template #subtitle>
             <p
               v-if="tabSubtitulo"
-              class="text-[11px] text-theme-text-muted leading-snug"
+              class="text-[0.6875rem] text-theme-text-muted leading-snug"
             >
               {{ tabSubtitulo }}
             </p>

@@ -31,7 +31,7 @@
           <span class="text-xs text-theme-text-sec">{{ s.count }}x</span>
         </button>
       </div>
-      <p v-if="errores.concepto" class="mt-1 text-[11px] text-red-400 flex items-center gap-1">
+      <p v-if="errores.concepto" class="mt-1 text-[0.6875rem] text-red-400 flex items-center gap-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
         {{ errores.concepto }}
       </p>
@@ -57,7 +57,7 @@
           @input="errores.monto && validarMonto()"
         />
       </div>
-      <p v-if="errores.monto" class="mt-1 text-[11px] text-red-400 flex items-center gap-1">
+      <p v-if="errores.monto" class="mt-1 text-[0.6875rem] text-red-400 flex items-center gap-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
         {{ errores.monto }}
       </p>
@@ -69,7 +69,7 @@
         <label class="block text-sm font-medium text-theme-text-muted">Categoría</label>
         <span
           v-if="categoriaFueSugerida && form.categoriaId"
-          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-theme-accent-bg text-theme-accent text-[10px] font-semibold"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-semibold"
           title="Sugerida automáticamente según tus gastos anteriores"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5L18.2 22 12 17.3 5.8 22l2.4-8.1L2 9.4h7.6z"/></svg>
@@ -89,14 +89,14 @@
           @click="elegirCategoria(cat.id)"
         >
           <span class="text-base">{{ cat.icono || '📦' }}</span>
-          <!-- 2 líneas: "Alimentación"/"Entretenimiento" se truncaban con texto grande -->
+          <!-- 2 líneas sin guiones: "Entreteni-miento" se leía mal con texto grande -->
           <span
-            class="line-clamp-2 break-words hyphens-auto leading-tight w-full text-center"
+            class="line-clamp-2 break-words hyphens-none leading-tight w-full text-center"
             :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
           >{{ cat.nombre }}</span>
         </button>
       </div>
-      <p v-if="errores.categoria" class="mt-1 text-[11px] text-red-400 flex items-center gap-1">
+      <p v-if="errores.categoria" class="mt-1 text-[0.6875rem] text-red-400 flex items-center gap-1">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
         {{ errores.categoria }}
       </p>

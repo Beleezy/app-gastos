@@ -11,8 +11,10 @@
  *   ranked[0] // mejor opcion
  */
 
+// El API expone precioMinimo/precioMaximo; se aceptan también los alias
+// cortos precioMin/precioMax por compatibilidad con callers antiguos.
 function precioBase(o) {
-  const candidatos = [o.precioPromedio, o.precioMin, o.precioMax]
+  const candidatos = [o.precioPromedio, o.precioMin ?? o.precioMinimo, o.precioMax ?? o.precioMaximo]
     .map((x) => parseFloat(x))
     .filter((x) => Number.isFinite(x) && x > 0)
   if (candidatos.length === 0) return null
@@ -20,8 +22,8 @@ function precioBase(o) {
 }
 
 function rangoRelativo(o) {
-  const min = parseFloat(o.precioMin)
-  const max = parseFloat(o.precioMax)
+  const min = parseFloat(o.precioMin ?? o.precioMinimo)
+  const max = parseFloat(o.precioMax ?? o.precioMaximo)
   if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0) return null
   if (max < min) return null
   return (max - min) / min

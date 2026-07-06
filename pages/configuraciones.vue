@@ -14,6 +14,20 @@
       </div>
 
       <template v-else>
+        <!-- Secciones colapsables: la página medía ~4,100px de alto en móvil;
+             con acordeones el usuario llega a cada ajuste sin 6 pantallas de
+             scroll. Perfil abre por defecto por ser lo más usado. -->
+        <details class="lg:col-span-2 group" open>
+          <summary class="cfg-summary flex items-center justify-between gap-3 cursor-pointer select-none bg-theme-card border border-theme-border rounded-2xl px-4 py-3 min-h-[3rem]">
+            <span class="text-sm font-semibold text-theme-text flex-1">
+              <span class="mr-1.5">👤</span>Perfil y región
+              <span class="block text-[0.6875rem] font-normal text-theme-text-sec mt-0.5">Nombre, presupuesto, moneda, zona horaria</span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cfg-chev w-4 h-4 text-theme-text-muted transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-3 space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
         <!-- Nombre de usuario -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
@@ -156,6 +170,20 @@
           />
         </div>
 
+          </div>
+        </details>
+
+        <details class="lg:col-span-2 group" >
+          <summary class="cfg-summary flex items-center justify-between gap-3 cursor-pointer select-none bg-theme-card border border-theme-border rounded-2xl px-4 py-3 min-h-[3rem]">
+            <span class="text-sm font-semibold text-theme-text flex-1">
+              <span class="mr-1.5">🎨</span>Apariencia
+              <span class="block text-[0.6875rem] font-normal text-theme-text-sec mt-0.5">Tema, tamaño de letra, accesibilidad</span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cfg-chev w-4 h-4 text-theme-text-muted transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-3 space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
         <!-- Color de acento -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
@@ -183,7 +211,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </span>
-              <span class="text-[10px] text-theme-text-sec">{{ c.label }}</span>
+              <span class="text-[0.6875rem] text-theme-text-sec">{{ c.label }}</span>
             </button>
           </div>
         </div>
@@ -208,7 +236,7 @@
             >
               <span
                 class="font-semibold text-theme-text"
-                :class="size.id === 'normal' ? 'text-sm' : 'text-[17px]'"
+                :class="size.id === 'normal' ? 'text-sm' : 'text-[1.0625rem]'"
               >Aa</span>
               <span class="text-xs text-theme-text-sec">{{ size.label }}</span>
             </button>
@@ -225,12 +253,12 @@
               </svg>
               <div>
                 <span class="text-sm text-theme-text font-medium">Modo daltonico</span>
-                <p class="text-[11px] text-theme-text-sec leading-tight">Reduce la variedad de colores y mejora el contraste</p>
+                <p class="text-[0.6875rem] text-theme-text-sec leading-tight">Reduce la variedad de colores y mejora el contraste</p>
               </div>
             </div>
             <button
               type="button"
-              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0 ml-3"
+              class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors duration-200 focus:outline-none shrink-0 ml-3"
               :class="form.modoDaltonico ? 'bg-blue-500' : 'bg-theme-border-md'"
               @click="toggleModoDaltonico"
             >
@@ -242,6 +270,20 @@
           </label>
         </div>
 
+          </div>
+        </details>
+
+        <details class="lg:col-span-2 group" >
+          <summary class="cfg-summary flex items-center justify-between gap-3 cursor-pointer select-none bg-theme-card border border-theme-border rounded-2xl px-4 py-3 min-h-[3rem]">
+            <span class="text-sm font-semibold text-theme-text flex-1">
+              <span class="mr-1.5">🧾</span>Registro y categorías
+              <span class="block text-[0.6875rem] font-normal text-theme-text-sec mt-0.5">Vistas del historial y tus categorías</span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cfg-chev w-4 h-4 text-theme-text-muted transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-3 space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
         <!-- Vista del registro de gastos -->
         <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
           <div class="flex items-center gap-2 mb-1">
@@ -257,12 +299,12 @@
                 <span class="text-base">📅</span>
                 <div>
                   <span class="text-sm text-theme-text font-medium">Por dia</span>
-                  <p class="text-[11px] text-theme-text-sec leading-tight">Gastos agrupados por dia individual</p>
+                  <p class="text-[0.6875rem] text-theme-text-sec leading-tight">Gastos agrupados por dia individual</p>
                 </div>
               </div>
               <button
                 type="button"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0"
+                class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors duration-200 focus:outline-none shrink-0"
                 :class="form.vistaRegistroDia ? 'bg-blue-500' : 'bg-theme-border-md'"
                 @click="toggleVistaDia"
               >
@@ -277,12 +319,12 @@
                 <span class="text-base">🗓️</span>
                 <div>
                   <span class="text-sm text-theme-text font-medium">Por semana</span>
-                  <p class="text-[11px] text-theme-text-sec leading-tight">Gastos agrupados por semana</p>
+                  <p class="text-[0.6875rem] text-theme-text-sec leading-tight">Gastos agrupados por semana</p>
                 </div>
               </div>
               <button
                 type="button"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0"
+                class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors duration-200 focus:outline-none shrink-0"
                 :class="form.vistaRegistroSemana ? 'bg-blue-500' : 'bg-theme-border-md'"
                 @click="toggleVistaSemana"
               >
@@ -319,12 +361,12 @@
               <span class="text-xl">🧪</span>
               <div>
                 <span class="text-sm text-theme-text font-medium">Vista previa de la nueva interfaz (Versión 5)</span>
-                <p class="text-[11px] text-theme-text-sec leading-tight">Interfaces rediseñadas y funcionales: registra y edita con tus datos reales.</p>
+                <p class="text-[0.6875rem] text-theme-text-sec leading-tight">Interfaces rediseñadas y funcionales: registra y edita con tus datos reales.</p>
               </div>
             </div>
             <button
               type="button"
-              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none shrink-0 ml-3"
+              class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors duration-200 focus:outline-none shrink-0 ml-3"
               :class="uiPreviewEnabled ? 'bg-violet-500' : 'bg-theme-border-md'"
               @click="toggleUiPreview"
             >
@@ -354,12 +396,15 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
               </svg>
             </button>
-            <p class="text-[11px] text-theme-text-sec leading-snug text-center">
+            <p class="text-[0.6875rem] text-theme-text-sec leading-snug text-center">
               La <span class="text-theme-text font-semibold">V4</span> ya está aplicada a la app actual:
               es el pulido visual que ves en todas las pantallas normales (Registro, Ingresos, Métricas, Deudas…).
             </p>
           </div>
         </div>
+
+          </div>
+        </details>
 
         <!-- Save button -->
         <button
@@ -394,16 +439,38 @@
         </button>
 
         <!-- Integraciones -->
-        <div class="lg:col-span-2">
-          <h2 class="text-sm font-semibold text-theme-text-sec uppercase tracking-wider mb-2 px-1 mt-4">
-            Integraciones
-          </h2>
-        </div>
+        <details class="lg:col-span-2 group" >
+          <summary class="cfg-summary flex items-center justify-between gap-3 cursor-pointer select-none bg-theme-card border border-theme-border rounded-2xl px-4 py-3 min-h-[3rem]">
+            <span class="text-sm font-semibold text-theme-text flex-1">
+              <span class="mr-1.5">🔗</span>Integraciones
+              <span class="block text-[0.6875rem] font-normal text-theme-text-sec mt-0.5">Google Calendar</span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cfg-chev w-4 h-4 text-theme-text-muted transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-3 space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
         <ConfiguracionesIntegracionGoogleCalendar />
+          </div>
+        </details>
       </template>
 
-      <ConfiguracionesPerfilModoConfig class="mt-4" />
-      <ConfiguracionesUsoLlm class="mt-4" />
+        <details class="lg:col-span-2 group" >
+          <summary class="cfg-summary flex items-center justify-between gap-3 cursor-pointer select-none bg-theme-card border border-theme-border rounded-2xl px-4 py-3 min-h-[3rem]">
+            <span class="text-sm font-semibold text-theme-text flex-1">
+              <span class="mr-1.5">⚙️</span>Avanzado
+              <span class="block text-[0.6875rem] font-normal text-theme-text-sec mt-0.5">Modo familiar y uso de IA</span>
+            </span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="cfg-chev w-4 h-4 text-theme-text-muted transition-transform shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="mt-3 space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+        <ConfiguracionesPerfilModoConfig />
+        <ConfiguracionesUsoLlm class="mt-4 lg:mt-0" />
+          </div>
+        </details>
+
       <!-- El panel "Funciones experimentales" se retiró: todas sus funciones
            (predictor de categoría, cola offline, mapa de calor, balance
            global, plantillas) ya son parte del producto por defecto, y el
@@ -541,6 +608,12 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Acordeones de secciones */
+.cfg-summary::-webkit-details-marker { display: none; }
+.cfg-summary { list-style: none; }
+details[open] > .cfg-summary .cfg-chev { transform: rotate(180deg); }
+details[open] > .cfg-summary { border-color: var(--color-accent, currentColor); }
+
 .toast-enter-active { transition: all 0.3s ease-out; }
 .toast-leave-active { transition: all 0.2s ease-in; }
 .toast-enter-from { opacity: 0; transform: translate(-50%, 20px); }

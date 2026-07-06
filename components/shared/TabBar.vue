@@ -23,7 +23,7 @@
       <span>{{ tab.label }}</span>
       <span
         v-if="tab.badge != null && tab.badge !== 0"
-        class="px-1.5 py-0 rounded-full text-[10px] font-bold"
+        class="px-1.5 py-0 rounded-full text-[0.6875rem] font-bold"
         :class="modelValue === tab.value ? 'bg-theme-on-accent/20' : 'bg-theme-border-md text-theme-text-muted'"
       >{{ tab.badge }}</span>
       <slot name="append" :tab="tab" :active="modelValue === tab.value" />
@@ -66,7 +66,7 @@ function select(tab) {
 }
 
 const sizeClass = computed(() => ({
-  xs: 'px-2.5 py-1 text-[11px] rounded-full',
+  xs: 'px-2.5 py-1 text-[0.6875rem] rounded-full',
   sm: 'px-3 py-1.5 text-xs rounded-full',
   md: 'px-4 py-2 text-sm rounded-xl',
 }[props.size]))

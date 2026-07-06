@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen pb-32">
+  <div class="min-h-screen pb-4">
     <!-- Header -->
     <div class="px-5 pt-8 pb-3 relative overflow-hidden">
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-amber-500/10 rounded-full blur-3xl"></div>
@@ -18,7 +18,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl font-bold text-theme-text">Papelera</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">Recupera lo eliminado (30 días)</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">Recupera lo eliminado (30 días)</p>
         </div>
       </div>
     </div>
@@ -33,12 +33,12 @@
         <span class="text-2xl">🗑️</span>
       </div>
       <p class="text-sm text-theme-text-sec">La papelera está vacía</p>
-      <p class="text-[11px] text-theme-text-muted mt-1">Los registros eliminados aparecen aquí durante 30 días</p>
+      <p class="text-[0.6875rem] text-theme-text-muted mt-1">Los registros eliminados aparecen aquí durante 30 días</p>
     </div>
 
     <!-- Gastos eliminados -->
     <div v-if="data.gastos?.length" class="px-5 mb-5">
-      <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
+      <p class="text-[0.6875rem] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
         Gastos ({{ data.gastos.length }})
       </p>
       <div class="space-y-2">
@@ -53,9 +53,9 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm text-theme-text font-medium truncate">{{ g.concepto }}</p>
             <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(g.fecha) }}</span>
-              <span v-if="g.categoriaNombre" class="text-[10px] text-theme-text-muted">· {{ g.categoriaNombre }}</span>
-              <span class="text-[10px] text-amber-400">Eliminado {{ fechaRelativa(g.deletedAt) }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{ formatFechaCorta(g.fecha) }}</span>
+              <span v-if="g.categoriaNombre" class="text-[0.6875rem] text-theme-text-muted">· {{ g.categoriaNombre }}</span>
+              <span class="text-[0.6875rem] text-amber-400">Eliminado {{ fechaRelativa(g.deletedAt) }}</span>
             </div>
           </div>
           <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(g.monto) }}</p>
@@ -70,7 +70,7 @@
 
     <!-- Deudas eliminadas -->
     <div v-if="data.deudas?.length" class="px-5 mb-5">
-      <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
+      <p class="text-[0.6875rem] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
         Deudas ({{ data.deudas.length }})
       </p>
       <div class="space-y-2">
@@ -85,8 +85,8 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm text-theme-text font-medium truncate">{{ d.concepto }}</p>
             <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[10px] text-theme-text-muted">{{ d.tipoDeuda === 'me_deben' ? 'Me deben' : 'Yo debo' }}</span>
-              <span class="text-[10px] text-amber-400">Eliminada {{ fechaRelativa(d.deletedAt) }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{ d.tipoDeuda === 'me_deben' ? 'Me deben' : 'Yo debo' }}</span>
+              <span class="text-[0.6875rem] text-amber-400">Eliminada {{ fechaRelativa(d.deletedAt) }}</span>
             </div>
           </div>
           <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(d.montoPendiente) }}</p>
@@ -101,7 +101,7 @@
 
     <!-- Info -->
     <div v-if="totalItems > 0" class="px-5 mt-4">
-      <p class="text-[10px] text-theme-text-muted text-center">
+      <p class="text-[0.6875rem] text-theme-text-muted text-center">
         Los registros se eliminan permanentemente a los 30 días.
       </p>
     </div>

@@ -1,18 +1,21 @@
 <template>
   <Transition name="banner">
+    <!-- En flujo (no fixed): empuja el contenido hacia abajo en vez de tapar
+         los headers sticky de las páginas. Al hacer scroll se va con el
+         documento; el usuario siempre puede descartarlo. -->
     <div
       v-if="visible"
-      class="fixed top-0 left-0 right-0 z-[390] flex items-center gap-2 bg-amber-500/95 text-white text-xs font-medium py-2 px-4 backdrop-blur-sm shadow-md"
+      class="relative z-30 flex items-center gap-2 bg-amber-500/95 text-white text-xs font-medium py-1 pl-4 pr-1.5 shadow-md"
     >
       <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
       </svg>
-      <button type="button" class="flex-1 text-left truncate" @click="irA">
+      <button type="button" class="flex-1 min-h-[2.5rem] text-left truncate" @click="irA">
         {{ mensaje }}
       </button>
       <button
         type="button"
-        class="shrink-0 w-6 h-6 rounded-md hover:bg-white/20 flex items-center justify-center"
+        class="shrink-0 w-10 h-10 rounded-md hover:bg-white/20 flex items-center justify-center"
         aria-label="Descartar recordatorios"
         @click="cerrar"
       >
@@ -70,7 +73,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.banner-enter-active { transition: transform 0.3s ease-out; }
-.banner-leave-active { transition: transform 0.25s ease-in; }
-.banner-enter-from, .banner-leave-to { transform: translateY(-100%); }
+.banner-enter-active { transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+.banner-leave-active { transition: opacity 0.2s ease-in; }
+.banner-enter-from { opacity: 0; transform: translateY(-8px); }
+.banner-leave-to { opacity: 0; }
 </style>

@@ -23,7 +23,7 @@
           <p v-if="s.mensaje" class="text-xs text-theme-text-sec mt-1 italic">
             "{{ s.mensaje }}"
           </p>
-          <p class="text-[10px] text-theme-text-muted mt-1">
+          <p class="text-[0.6875rem] text-theme-text-muted mt-1">
             {{ formatFecha(s.createdAt) }}
           </p>
 

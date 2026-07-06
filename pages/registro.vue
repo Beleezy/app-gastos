@@ -111,7 +111,7 @@
         </div>
 
         <!-- Área principal derecha -->
-        <div class="pb-20 lg:pb-0">
+        <div class="pb-2 lg:pb-0">
           <!-- Barra unificada de filtros (colapsable) -->
           <div class="px-4 lg:px-0 mb-3">
             <div class="flex items-center gap-2">
@@ -128,7 +128,7 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
                 Filtros
-                <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[9px] flex items-center justify-center font-bold leading-none">
+                <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none">
                   {{ conteoFiltrosActivos }}
                 </span>
               </button>
@@ -167,7 +167,7 @@
                 <div class="flex items-center gap-1.5">
                   <span
                     v-if="rangosRapidos.length === 1"
-                    class="text-[10px] uppercase tracking-wider text-theme-text-muted font-semibold shrink-0"
+                    class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted font-semibold shrink-0"
                   >
                     Rango:
                   </span>
@@ -283,18 +283,8 @@
       </div>
     </div>
 
-    <!-- FAB mobile: solo agregar manual (acceso rapido) -->
-    <button
-      v-if="!seleccionMultipleActiva"
-      class="fixed right-4 bottom-24 z-40 w-14 h-14 rounded-full bg-theme-accent shadow-xl shadow-theme-accent/40 flex items-center justify-center text-theme-on-accent active:scale-90 transition-all duration-300 lg:hidden"
-      aria-label="Agregar gasto manual"
-      data-testid="btn-registro-manual"
-      @click="onManualFab"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-      </svg>
-    </button>
+    <!-- Sin FAB flotante: la card de captura (foto/voz/manual) siempre está
+         visible y el FAB duplicaba la entrada manual tapando contenido. -->
 
     <!-- Voice confirmation modal (lazy) -->
     <RegistroConfirmacionVozAsync
@@ -519,11 +509,6 @@ const diasDelMes = computed(() =>
 // ─── Triggers ──────────────────────────────────────────
 function abrirCamara() {
   botonCamaraRef.value?.openCamera()
-}
-
-function onManualFab() {
-  vibrate(20)
-  showFormManual.value = true
 }
 
 const tabsVista = [

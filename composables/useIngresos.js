@@ -52,10 +52,16 @@ export function useIngresos() {
     }
   }
 
-  async function fetchResumen() {
+  async function fetchResumen({ noCache = false } = {}) {
+    // El endpoint tiene Cache-Control max-age=30 + SWR: tras crear/editar un
+    // ingreso hay que saltarse el caché HTTP o el header del mes queda stale
+    // (y saldo neto / % ahorro derivan de ese total).
     try {
       resumen.value = await apiFetch('/api/ingresos/resumen', {
-        query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value },
+        query: noCache
+          ? { mes: mesSeleccionado.value, anio: anioSeleccionado.value, _t: Date.now() }
+          : { mes: mesSeleccionado.value, anio: anioSeleccionado.value },
+        headers: noCache ? { 'Cache-Control': 'no-cache' } : undefined,
       })
     } catch {}
   }
@@ -63,7 +69,7 @@ export function useIngresos() {
   async function crearIngreso(payload) {
     const nuevo = await apiFetch('/api/ingresos', { method: 'POST', body: payload })
     ingresos.value = [nuevo, ...ingresos.value]
-    fetchResumen()
+    fetchResumen({ noCache: true })
     return nuevo
   }
 
@@ -71,14 +77,14 @@ export function useIngresos() {
     const actualizado = await apiFetch(`/api/ingresos/${id}`, { method: 'PUT', body: payload })
     const idx = ingresos.value.findIndex((i) => i.id === id)
     if (idx >= 0) ingresos.value[idx] = actualizado
-    fetchResumen()
+    fetchResumen({ noCache: true })
     return actualizado
   }
 
   async function eliminarIngreso(id) {
     await apiFetch(`/api/ingresos/${id}`, { method: 'DELETE' })
     ingresos.value = ingresos.value.filter((i) => i.id !== id)
-    fetchResumen()
+    fetchResumen({ noCache: true })
   }
 
   function cambiarMes(mes, anio) {

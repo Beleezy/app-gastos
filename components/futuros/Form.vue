@@ -5,25 +5,25 @@
         <p class="text-xs uppercase tracking-[0.18em] text-sky-300/80">Resumen tentativo</p>
         <div class="mt-2 grid grid-cols-3 gap-2">
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
-            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Min</p>
+            <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Min</p>
             <p class="mt-1 text-xs font-medium text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMinimo) }}</p>
           </div>
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
-            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
+            <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
             <p class="mt-1 text-xs font-medium text-sky-300">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalPromedio) }}</p>
           </div>
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
-            <p class="text-[10px] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
+            <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
             <p class="mt-1 text-xs font-medium text-amber-300">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMaximo) }}</p>
           </div>
         </div>
-        <p class="mt-2 text-[11px] text-theme-text-sec">
+        <p class="mt-2 text-[0.6875rem] text-theme-text-sec">
           {{ resumenTentativo.totalDetalles }} detalles · {{ resumenTentativo.totalOpciones }} opciones tentativas
         </p>
       </div>
 
       <div v-if="modoEdicion" class="rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3">
-        <p class="text-[11px] text-sky-300/80">Edita los datos generales del proyecto. Los detalles y opciones se gestionan desde la vista principal.</p>
+        <p class="text-[0.6875rem] text-sky-300/80">Edita los datos generales del proyecto. Los detalles y opciones se gestionan desde la vista principal.</p>
       </div>
 
       <div>
@@ -49,7 +49,7 @@
             <div class="flex h-8 w-8 items-center justify-center rounded-lg" :style="{ backgroundColor: (cat.color || '#6b7280') + '26' }">
               <span class="text-sm">{{ cat.icono || getEmoji(cat.nombre) }}</span>
             </div>
-            <span class="w-full truncate text-center text-[10px] leading-tight text-theme-text-muted">{{ cat.nombre }}</span>
+            <span class="w-full truncate text-center text-[0.6875rem] leading-tight text-theme-text-muted">{{ cat.nombre }}</span>
           </button>
         </div>
       </div>
@@ -109,7 +109,7 @@
               <p class="truncate text-sm font-medium text-theme-text">
                 {{ detalle.nombre || `Detalle ${detalleIndex + 1}` }}
               </p>
-              <p class="mt-0.5 text-[11px] text-theme-text-muted">
+              <p class="mt-0.5 text-[0.6875rem] text-theme-text-muted">
                 {{ detalle.opciones.length }} opcion{{ detalle.opciones.length !== 1 ? 'es' : '' }}
               </p>
             </div>
@@ -117,7 +117,7 @@
               <button
                 v-if="form.detalles.length > 1"
                 type="button"
-                class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                class="text-[0.6875rem] text-theme-text-sec transition-colors hover:text-red-400"
                 @click.stop="eliminarDetalle(detalleIndex)"
               >
                 Quitar
@@ -154,7 +154,7 @@
                 <p class="text-xs font-medium uppercase tracking-[0.18em] text-theme-text-muted">Opciones tentativas</p>
                 <button
                   type="button"
-                  class="rounded-full bg-theme-input px-3 py-1.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:text-theme-text"
+                  class="rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] font-medium text-theme-text-sec transition-colors hover:text-theme-text"
                   @click="agregarOpcion(detalle)"
                 >
                   + Opción
@@ -170,7 +170,7 @@
                   <p class="text-xs font-medium text-theme-text">{{ opcion.nombre || `Opción ${optionIndex + 1}` }}</p>
                   <button
                     type="button"
-                    class="text-[11px] text-theme-text-sec transition-colors hover:text-red-400"
+                    class="text-[0.6875rem] text-theme-text-sec transition-colors hover:text-red-400"
                     @click="eliminarOpcion(detalle, optionIndex)"
                   >
                     Quitar
@@ -201,7 +201,7 @@
 
                   <div class="grid grid-cols-3 gap-2">
                     <div>
-                      <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
+                      <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
                       <input
                         v-model="opcion.precioMinimo"
                         type="number"
@@ -212,7 +212,7 @@
                       />
                     </div>
                     <div>
-                      <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
+                      <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Prom</label>
                       <input
                         v-model="opcion.precioPromedio"
                         type="number"
@@ -223,7 +223,7 @@
                       />
                     </div>
                     <div>
-                      <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
+                      <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
                       <input
                         v-model="opcion.precioMaximo"
                         type="number"

@@ -24,7 +24,7 @@
           <!-- Badge (optional) -->
           <slot name="badge" />
         </div>
-        <p v-if="$slots.subtitle" class="text-[11px] text-theme-text-muted leading-none mt-0.5 truncate">
+        <p v-if="$slots.subtitle" class="text-[0.6875rem] text-theme-text-muted leading-none mt-0.5 truncate">
           <slot name="subtitle" />
         </p>
       </div>

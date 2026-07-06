@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen pb-32">
+  <div class="min-h-screen pb-4">
     <!-- Header -->
     <div class="px-5 pt-8 pb-3 relative overflow-hidden">
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-theme-accent/10 rounded-full blur-3xl"></div>
@@ -15,7 +15,7 @@
         </button>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl font-bold text-theme-text">Control de acceso</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">Aprueba quién puede usar el sistema</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">Aprueba quién puede usar el sistema</p>
         </div>
       </div>
     </div>
@@ -27,7 +27,7 @@
     <template v-else>
       <!-- Pendientes de aprobación -->
       <div class="px-5 mb-5">
-        <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">
+        <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">
           Correos pendientes de aprobación
         </p>
         <div v-if="cargando && !pendientes.length" class="space-y-2">
@@ -46,7 +46,7 @@
               <div class="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center text-base shrink-0">⏳</div>
               <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold text-theme-text truncate">{{ i.nombre || i.email }}</p>
-                <p class="text-[10px] text-theme-text-muted truncate">{{ i.email }}</p>
+                <p class="text-[0.6875rem] text-theme-text-muted truncate">{{ i.email }}</p>
               </div>
             </div>
             <div class="flex gap-2 mt-2.5">
@@ -67,7 +67,7 @@
 
       <!-- Usuarios del sistema -->
       <div class="px-5">
-        <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Usuarios con acceso</p>
+        <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Usuarios con acceso</p>
         <ul class="space-y-1.5">
           <li
             v-for="u in usuarios"
@@ -76,13 +76,13 @@
           >
             <div class="min-w-0">
               <p class="text-xs font-medium text-theme-text truncate">{{ u.nombre }}</p>
-              <p class="text-[10px] text-theme-text-muted truncate">
+              <p class="text-[0.6875rem] text-theme-text-muted truncate">
                 {{ u.email }}<span v-if="u.rol === 'superadmin'"> · superadmin</span>
               </p>
             </div>
             <button
               type="button"
-              class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors shrink-0 disabled:opacity-40"
+              class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors shrink-0 disabled:opacity-40"
               :class="u.permitido ? 'bg-emerald-500' : 'bg-theme-border-md'"
               :disabled="u.rol === 'superadmin' || ocupado === u.id"
               :aria-pressed="u.permitido"

@@ -1,6 +1,6 @@
 <template>
   <div v-if="puntos.length >= 2" class="bg-theme-card rounded-xl p-3 border border-theme-border mb-4">
-    <p class="text-[10px] text-theme-text-sec uppercase tracking-wider font-semibold mb-2">Evolución del saldo</p>
+    <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-2">Evolución del saldo</p>
 
     <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" :height="H" preserveAspectRatio="none">
       <!-- Área bajo la curva -->
@@ -33,9 +33,9 @@
 
     <!-- Etiquetas extremos -->
     <div class="flex items-center justify-between mt-1">
-      <span class="text-[9px] text-theme-text-muted">{{ etiquetaInicio }}</span>
-      <span class="text-[9px] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}</span>
-      <span class="text-[9px] text-theme-text-muted">{{ etiquetaFin }}</span>
+      <span class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaInicio }}</span>
+      <span class="text-[0.6875rem] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}</span>
+      <span class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaFin }}</span>
     </div>
   </div>
 </template>

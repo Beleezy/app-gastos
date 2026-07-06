@@ -92,7 +92,7 @@
 
     <!-- Simulación en tiempo real -->
     <div v-if="simulacion.length > 0 && !resultado" class="bg-theme-input rounded-xl p-3 border border-theme-border space-y-1.5">
-      <p class="text-[10px] font-medium text-theme-text-sec uppercase tracking-wider mb-1">Vista previa de distribución</p>
+      <p class="text-[0.6875rem] font-medium text-theme-text-sec uppercase tracking-wider mb-1">Vista previa de distribución</p>
       <div v-for="s in simulacion" :key="s.concepto" class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-1.5 h-1.5 rounded-full shrink-0"
@@ -101,8 +101,8 @@
         </div>
         <div class="flex items-center gap-2 shrink-0">
           <span class="text-theme-text font-medium">{{ currencySymbol }}&nbsp;{{ formatMonto(s.pagado) }}</span>
-          <span v-if="s.saldado" class="text-[9px] text-emerald-400">saldado</span>
-          <span v-else class="text-[9px] text-theme-text-muted">resta {{ currencySymbol }}&nbsp;{{ formatMonto(s.restante) }}</span>
+          <span v-if="s.saldado" class="text-[0.6875rem] text-emerald-400">saldado</span>
+          <span v-else class="text-[0.6875rem] text-theme-text-muted">resta {{ currencySymbol }}&nbsp;{{ formatMonto(s.restante) }}</span>
         </div>
       </div>
       <div v-if="sobrante > 0" class="border-t border-theme-border pt-1.5 mt-1.5">

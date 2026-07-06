@@ -42,6 +42,8 @@ export class DeudasPage extends BasePage {
 
   // ─── Crear deuda ────────────────────────────────────────
   async abrirNuevaDeuda() {
+    // El FAB es un speed-dial: primero se abre, luego se toca la opción manual.
+    await this.page.getByTestId('fab-deudas').first().click()
     await this.page.getByTestId(DEUDAS.BTN_NUEVA_DEUDA).first().click()
     const modal = new FormDeudaModal(this.page)
     await modal.esperar()

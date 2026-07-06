@@ -7,7 +7,7 @@
       :class="['absolute z-30 pointer-events-auto', positionClass]"
     >
       <div
-        class="relative bg-theme-accent text-theme-on-accent text-[11px] font-medium rounded-xl px-3 py-2 shadow-lg max-w-[220px] leading-snug"
+        class="relative bg-theme-accent text-theme-on-accent text-[0.6875rem] font-medium rounded-xl px-3 py-2 shadow-lg max-w-[220px] leading-snug"
       >
         <!-- Flecha -->
         <div

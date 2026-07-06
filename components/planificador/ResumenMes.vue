@@ -17,7 +17,7 @@
 
       <!-- PRESUPUESTO MENSUAL label + big amount + Editar -->
       <div class="relative mt-1">
-        <p class="text-[10px] text-theme-text-sec uppercase tracking-widest font-semibold mb-1">Presupuesto mensual</p>
+        <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-widest font-semibold mb-1">Presupuesto mensual</p>
         <div class="flex items-end justify-between">
           <div v-if="editandoPresupuesto" class="flex flex-1 min-w-0 items-center gap-1">
             <span class="text-2xl font-bold text-theme-text-muted">{{ currencySymbol }}</span>
@@ -46,7 +46,9 @@
           <div class="flex items-center gap-2 mb-1 shrink-0">
             <button
               v-if="editandoPresupuesto"
-              class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+              type="button"
+              aria-label="Guardar presupuesto"
+              class="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors"
               @click="guardarPresupuesto"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -55,7 +57,10 @@
             </button>
             <button
               v-if="editandoPresupuesto"
-              class="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+              type="button"
+              aria-label="Cancelar edición"
+              class="flex items-center justify-center w-10 h-10 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors"
+              @mousedown.prevent
               @click="cancelarEdicion"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -64,7 +69,8 @@
             </button>
             <button
               v-else
-              class="text-xs font-semibold text-theme-accent hover:text-theme-accent-light transition-colors"
+              type="button"
+              class="text-xs font-semibold text-theme-accent hover:text-theme-accent-light transition-colors min-h-[2.75rem] px-2 -mx-2"
               @click="iniciarEdicion"
             >
               Editar
@@ -78,20 +84,20 @@
         <div class="bg-theme-input rounded-xl px-2.5 py-1.5 border min-w-0 flex flex-col justify-between" :class="resumen.excedeGastoReal ? 'border-red-500/10' : 'border-emerald-500/10'">
           <div class="flex items-center gap-1.5 mb-1.5">
             <span class="w-2 h-2 rounded-full" :class="resumen.excedeGastoReal ? 'bg-red-400' : 'bg-emerald-400'"></span>
-            <span class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium leading-none">Gastado</span>
+            <span class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-medium leading-none">Gastado</span>
           </div>
-          <p class="text-[15px] font-bold truncate leading-tight" :class="resumen.excedeGastoReal ? 'text-red-400' : 'text-emerald-400'">
-            <span class="text-[11px] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
+          <p class="text-[0.9375rem] font-bold truncate leading-tight" :class="resumen.excedeGastoReal ? 'text-red-400' : 'text-emerald-400'">
+            <span class="text-[0.6875rem] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
             {{ formatMonto(totalGastoReal) }}
           </p>
         </div>
         <div class="bg-theme-input rounded-xl px-2.5 py-1.5 border min-w-0 flex flex-col justify-between" :class="resumen.saldoReal >= 0 ? 'border-emerald-500/10' : 'border-red-500/10'">
           <div class="flex items-center gap-1.5 mb-1.5">
             <span class="w-2 h-2 rounded-full" :class="resumen.saldoReal >= 0 ? 'bg-blue-400' : 'bg-red-400'"></span>
-            <span class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium leading-none">Disponible</span>
+            <span class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-medium leading-none">Disponible</span>
           </div>
-          <p class="text-[15px] font-bold truncate leading-tight" :class="resumen.saldoReal >= 0 ? 'text-white' : 'text-red-400'" data-testid="monto-saldo">
-            <span class="text-[11px] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
+          <p class="text-[0.9375rem] font-bold truncate leading-tight" :class="resumen.saldoReal >= 0 ? 'text-white' : 'text-red-400'" data-testid="monto-saldo">
+            <span class="text-[0.6875rem] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
             {{ formatMonto(resumen.saldoReal) }}
           </p>
         </div>
@@ -101,10 +107,10 @@
       <div class="flex items-center justify-between bg-theme-input rounded-xl px-3 py-1.5 mt-2 border border-orange-500/10">
         <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-orange-400"></span>
-          <span class="text-[10px] text-theme-text-sec uppercase tracking-wider font-medium">Planificado</span>
+          <span class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-medium">Planificado</span>
         </div>
-        <p class="text-[13px] font-bold text-orange-400" data-testid="monto-asignado">
-          <span class="text-[10px] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
+        <p class="text-[0.8125rem] font-bold text-orange-400" data-testid="monto-asignado">
+          <span class="text-[0.6875rem] font-medium mr-0.5 opacity-75">{{ currencySymbol }}</span>
           {{ formatMonto(resumen.totalPlanificado) }}
         </p>
       </div>
@@ -114,17 +120,18 @@
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5 bg-emerald-500/8 px-2.5 py-1.5 rounded-lg">
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            <span class="text-[11px] text-theme-text-muted">Pagados</span>
-            <span class="text-[11px] text-emerald-400 font-bold ml-0.5">{{ resumen.countPagados }}</span>
+            <span class="text-[0.6875rem] text-theme-text-muted">Pagados</span>
+            <span class="text-[0.6875rem] text-emerald-400 font-bold ml-0.5">{{ resumen.countPagados }}</span>
           </div>
           <div class="flex items-center gap-1.5 bg-orange-500/8 px-2.5 py-1.5 rounded-lg">
             <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
-            <span class="text-[11px] text-theme-text-muted">Pendientes</span>
-            <span class="text-[11px] text-orange-400 font-bold ml-0.5">{{ resumen.countPendientes }}</span>
+            <span class="text-[0.6875rem] text-theme-text-muted">Pendientes</span>
+            <span class="text-[0.6875rem] text-orange-400 font-bold ml-0.5">{{ resumen.countPendientes }}</span>
           </div>
         </div>
         <button
-          class="text-xs font-semibold text-theme-accent hover:text-theme-accent-light transition-colors flex items-center gap-0.5"
+          type="button"
+          class="text-xs font-semibold text-theme-accent hover:text-theme-accent-light transition-colors flex items-center gap-0.5 min-h-[2.75rem] px-2 -mx-2 -my-2"
           @click="showVerMas = !showVerMas"
         >
           {{ showVerMas ? 'Ver menos' : 'Ver más' }}
@@ -140,7 +147,7 @@
           <!-- Multi-segment progress bar -->
           <div class="space-y-2">
             <div>
-              <div class="flex items-center justify-between text-[10px] font-medium mb-1">
+              <div class="flex items-center justify-between text-[0.6875rem] font-medium mb-1">
                 <span class="text-theme-text-sec uppercase tracking-wider">Planificado / Presupuesto</span>
                 <span :class="resumen.porcentajeAsignado > 90 ? 'text-orange-400' : 'text-theme-text-muted'">
                   {{ resumen.porcentajeAsignado.toFixed(0) }}%
@@ -155,7 +162,7 @@
               </div>
             </div>
             <div>
-              <div class="flex items-center justify-between text-[10px] font-medium mb-1">
+              <div class="flex items-center justify-between text-[0.6875rem] font-medium mb-1">
                 <span class="text-theme-text-sec uppercase tracking-wider">Gastado real / Presupuesto</span>
                 <span :class="resumen.excedeGastoReal ? 'text-red-400' : 'text-emerald-400'">
                   {{ resumen.porcentajeGastadoReal.toFixed(0) }}%
@@ -195,8 +202,8 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M4.93 19h14.14a2 2 0 001.74-3L13.74 4a2 2 0 00-3.48 0L3.19 16a2 2 0 001.74 3z" />
               </svg>
               <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold text-red-400">Proyección excede presupuesto</p>
-                <p class="text-[10px] text-theme-text-muted leading-tight mt-0.5">
+                <p class="text-[0.6875rem] font-semibold text-red-400">Proyección excede presupuesto</p>
+                <p class="text-[0.6875rem] text-theme-text-muted leading-tight mt-0.5">
                   Al ritmo actual terminarías en {{ currencySymbol }}&nbsp;{{ formatMonto(analitica.proyeccionFinMes) }}
                   ({{ currencySymbol }}&nbsp;{{ formatMonto(analitica.excesoProyectado) }} sobre presupuesto)
                 </p>
@@ -204,14 +211,14 @@
             </div>
             <div class="grid grid-cols-2 gap-2">
               <div class="bg-theme-input rounded-xl p-3">
-                <p class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium">Ritmo por día</p>
+                <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-medium">Ritmo por día</p>
                 <p class="text-base font-bold text-theme-text mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(analitica.ritmoDiarioRecomendado) }}</p>
-                <p class="text-[9px] text-theme-text-muted leading-tight mt-0.5">por {{ analitica.diasRestantes }} día{{ analitica.diasRestantes === 1 ? '' : 's' }} rest.</p>
+                <p class="text-[0.6875rem] text-theme-text-muted leading-tight mt-0.5">por {{ analitica.diasRestantes }} día{{ analitica.diasRestantes === 1 ? '' : 's' }} rest.</p>
               </div>
               <div class="bg-theme-input rounded-xl p-3">
-                <p class="text-[9px] text-theme-text-sec uppercase tracking-wider font-medium">Proyección</p>
+                <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-medium">Proyección</p>
                 <p class="text-base font-bold mt-1" :class="analitica.excedeProyeccion ? 'text-red-400' : 'text-theme-text'">{{ currencySymbol }}&nbsp;{{ formatMonto(analitica.proyeccionFinMes) }}</p>
-                <p class="text-[9px] text-theme-text-muted leading-tight mt-0.5">a fin de mes</p>
+                <p class="text-[0.6875rem] text-theme-text-muted leading-tight mt-0.5">a fin de mes</p>
               </div>
             </div>
           </div>

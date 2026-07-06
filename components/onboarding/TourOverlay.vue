@@ -56,7 +56,7 @@
                 :key="i"
                 class="flex items-start gap-2.5 px-1"
               >
-                <span class="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-theme-accent-bg text-theme-accent flex items-center justify-center text-[10px] font-bold">
+                <span class="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-theme-accent-bg text-theme-accent flex items-center justify-center text-[0.6875rem] font-bold">
                   {{ i + 1 }}
                 </span>
                 <p class="text-xs text-theme-text-sec leading-snug">{{ f }}</p>

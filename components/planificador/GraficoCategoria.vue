@@ -37,9 +37,9 @@
           <!-- Center text -->
           <div class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-3">
             <template v-if="segmentoActivo !== null">
-              <span class="text-[9px] text-theme-text-sec leading-tight truncate max-w-full">{{ datosGrafico[segmentoActivo].nombre }}</span>
+              <span class="text-[0.6875rem] text-theme-text-sec leading-tight truncate max-w-full">{{ datosGrafico[segmentoActivo].nombre }}</span>
               <span class="text-xs font-bold text-theme-text leading-tight">{{ datosGrafico[segmentoActivo].porcentaje }}%</span>
-              <span class="text-[9px] text-theme-text-muted leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(datosGrafico[segmentoActivo].total) }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(datosGrafico[segmentoActivo].total) }}</span>
             </template>
             <template v-else>
               <span class="text-xs text-theme-text-sec leading-tight">Total</span>
@@ -49,7 +49,7 @@
         </div>
 
         <!-- Hint cuando hay filtro activo -->
-        <p v-if="segmentoActivo !== null" class="text-center text-[10px] text-theme-text-muted -mt-2">
+        <p v-if="segmentoActivo !== null" class="text-center text-[0.6875rem] text-theme-text-muted -mt-2">
           Toca de nuevo para quitar el filtro
         </p>
 
@@ -71,7 +71,7 @@
                 <span class="text-xs text-theme-text-muted truncate">{{ seg.nombre }}</span>
               </div>
               <div class="flex items-center gap-2 shrink-0">
-                <span class="text-[10px] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(seg.total) }}</span>
+                <span class="text-[0.6875rem] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(seg.total) }}</span>
                 <span class="text-xs font-semibold w-8 text-right" :style="{ color: seg.color }">{{ seg.porcentaje }}%</span>
               </div>
             </div>
@@ -91,7 +91,7 @@
                 ></div>
               </div>
               <span
-                class="text-[9px] font-medium shrink-0 min-w-[50px] text-right"
+                class="text-[0.6875rem] font-medium shrink-0 min-w-[50px] text-right"
                 :class="gastosPorCategoria[idx].totalReal > seg.total ? 'text-red-400' : 'text-emerald-400'"
               >
                 {{ currencySymbol }}&nbsp;{{ formatMonto(gastosPorCategoria[idx].totalReal) }}
@@ -114,17 +114,17 @@
           </div>
           <div class="flex items-center gap-4 mt-1">
             <div>
-              <p class="text-[10px] text-theme-text-sec">Planificado</p>
+              <p class="text-[0.6875rem] text-theme-text-sec">Planificado</p>
               <p class="text-sm font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(datosGrafico[segmentoActivo].total) }}</p>
             </div>
             <div v-if="gastosPorCategoria[segmentoActivo]?.totalReal > 0">
-              <p class="text-[10px] text-theme-text-sec">Gastado</p>
+              <p class="text-[0.6875rem] text-theme-text-sec">Gastado</p>
               <p class="text-sm font-bold" :class="gastosPorCategoria[segmentoActivo].totalReal > datosGrafico[segmentoActivo].total ? 'text-red-400' : 'text-emerald-400'">
                 {{ currencySymbol }}&nbsp;{{ formatMonto(gastosPorCategoria[segmentoActivo].totalReal) }}
               </p>
             </div>
             <div>
-              <p class="text-[10px] text-theme-text-sec">Del total</p>
+              <p class="text-[0.6875rem] text-theme-text-sec">Del total</p>
               <p class="text-sm font-bold" :style="{ color: datosGrafico[segmentoActivo].color }">{{ datosGrafico[segmentoActivo].porcentaje }}%</p>
             </div>
           </div>
@@ -140,7 +140,7 @@
       >
         <div class="px-1 mb-2 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full shrink-0" :style="{ backgroundColor: datosGrafico[segmentoActivo].color }"></span>
-          <p class="text-[10px] font-semibold text-theme-text-sec uppercase tracking-wider">
+          <p class="text-[0.6875rem] font-semibold text-theme-text-sec uppercase tracking-wider">
             Gastos de {{ datosGrafico[segmentoActivo].nombre }} ({{ gastosDelSegmento.length }})
           </p>
         </div>
@@ -182,24 +182,24 @@
                         {{ fechaRelativa(g.fechaProbablePago) }}
                       </span>
                     </p>
-                    <div v-if="g.notas" class="text-[11px] text-theme-text-muted mt-1 line-clamp-2">{{ g.notas }}</div>
+                    <div v-if="g.notas" class="text-[0.6875rem] text-theme-text-muted mt-1 line-clamp-2">{{ g.notas }}</div>
                     <div v-if="g.esRecurrente" class="flex items-center gap-1 mt-1">
                       <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      <span class="text-[10px] text-theme-accent">Recurrente</span>
+                      <span class="text-[0.6875rem] text-theme-accent">Recurrente</span>
                     </div>
                   </div>
                 </div>
                 <div class="text-right shrink-0">
                   <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(g.montoEstimado) }}</p>
                   <span
-                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-medium mt-1 transition-colors"
                     :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"
                   >
                     {{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}
                   </span>
-                  <p v-if="g.gastoRegistradoFecha" class="mt-1 text-[10px] text-theme-text-sec">
+                  <p v-if="g.gastoRegistradoFecha" class="mt-1 text-[0.6875rem] text-theme-text-sec">
                     Registrado: {{ formatFecha(g.gastoRegistradoFecha) }}
                   </p>
                 </div>
@@ -262,7 +262,7 @@
     >
       <template #message>
         <p>¿Eliminar "{{ gastoParaEliminar?.concepto }}"? Tendrás 5 segundos para deshacer.</p>
-        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
           ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
         </p>
       </template>
@@ -275,7 +275,7 @@
         <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
         <div class="text-sm text-theme-text-muted mb-5">
           Este gasto se repite en meses futuros. ¿Qué deseas hacer?
-          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
             ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
           </p>
         </div>

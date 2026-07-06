@@ -51,7 +51,7 @@
             Aplicar a todos
           </button>
         </div>
-        <p v-if="fechaGlobalDiferente" class="text-[11px] text-theme-text-muted mt-1.5">
+        <p v-if="fechaGlobalDiferente" class="text-[0.6875rem] text-theme-text-muted mt-1.5">
           Al aplicar, todos los ítems usarán esta fecha.
         </p>
       </div>
@@ -100,7 +100,7 @@
                   >
                     {{ gasto.concepto }}
                   </p>
-                  <span class="text-[10px] text-theme-accent font-medium mt-0.5 inline-block">
+                  <span class="text-[0.6875rem] text-theme-accent font-medium mt-0.5 inline-block">
                     {{ conceptosExpandidos[idx] ? 'Ver menos' : 'Ver más' }}
                   </span>
                 </button>
@@ -120,12 +120,12 @@
             <div class="mt-2 flex items-center justify-between gap-2 flex-wrap pl-12">
               <div class="flex items-center gap-1.5 flex-wrap min-w-0">
                 <span
-                  class="text-[10px] font-medium px-2 py-0.5 rounded-full leading-tight"
+                  class="text-[0.6875rem] font-medium px-2 py-0.5 rounded-full leading-tight"
                   :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '18', color: getCategoriaColor(gasto.categoria) }"
                 >
                   {{ gasto.categoria }}
                 </span>
-                <span class="text-[10px] text-theme-text-sec">· {{ formatFecha(gasto.fecha) }}</span>
+                <span class="text-[0.6875rem] text-theme-text-sec">· {{ formatFecha(gasto.fecha) }}</span>
               </div>
               <div class="flex items-center gap-2 shrink-0 ml-auto">
                 <button class="w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
@@ -219,7 +219,7 @@
                 {{ currencySymbol }}&nbsp;{{ formatMonto(totalComprobante) }}
               </span>
             </div>
-            <p v-if="!totalCoincide" class="text-[11px] text-amber-400/80 mt-1.5">
+            <p v-if="!totalCoincide" class="text-[0.6875rem] text-amber-400/80 mt-1.5">
               Diferencia de {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(diferenciaTotal)) }}. Revisa los montos o descuentos.
             </p>
           </div>

@@ -22,7 +22,7 @@
           class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
         />
       </div>
-      <p v-if="totalPagado > 0" class="text-[10px] text-theme-text-muted mt-1">
+      <p v-if="totalPagado > 0" class="text-[0.6875rem] text-theme-text-muted mt-1">
         Ya se han pagado {{ currencySymbol }}&nbsp;{{ formatMonto(totalPagado) }}. El pendiente se recalculara automaticamente.
       </p>
     </div>

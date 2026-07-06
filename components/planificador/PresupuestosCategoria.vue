@@ -3,11 +3,11 @@
     <!-- Resumen -->
     <div class="grid grid-cols-2 gap-2.5">
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
-        <p class="text-[10px] text-theme-text-muted font-medium">Presupuestado</p>
+        <p class="text-[0.6875rem] text-theme-text-muted font-medium">Presupuestado</p>
         <p class="text-lg font-bold text-theme-text mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(totalPresupuestado) }}</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
-        <p class="text-[10px] text-theme-text-muted font-medium">Consumido</p>
+        <p class="text-[0.6875rem] text-theme-text-muted font-medium">Consumido</p>
         <p class="text-lg font-bold mt-1" :class="totalConsumido > totalPresupuestado ? 'text-red-400' : 'text-amber-400'">
           {{ currencySymbol }}&nbsp;{{ formatMonto(totalConsumido) }}
         </p>
@@ -16,7 +16,7 @@
 
     <!-- Tabla de categorías -->
     <div>
-      <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Categorías</p>
+      <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Categorías</p>
 
       <div v-if="cargandoCat || cargandoCons" class="space-y-2">
         <div v-for="i in 4" :key="i" class="h-20 w-full rounded-2xl bg-theme-border-md shimmer"></div>
@@ -39,7 +39,7 @@
             >{{ c.icono || '📦' }}</div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-theme-text truncate">{{ c.nombre }}</p>
-              <p class="text-[10px] text-theme-text-muted">
+              <p class="text-[0.6875rem] text-theme-text-muted">
                 <span v-if="!presupuestoDe(c.id)">Sin presupuesto · </span>
                 Consumido: {{ currencySymbol }}&nbsp;{{ formatMonto(consumoDe(c.id)) }}
               </p>
@@ -76,7 +76,7 @@
                 :style="{ width: Math.min(porcentajeUsado(c.id), 100) + '%' }"
               ></div>
             </div>
-            <div class="flex items-center justify-between mt-1.5 text-[10px]">
+            <div class="flex items-center justify-between mt-1.5 text-[0.6875rem]">
               <span :class="textoSemaforo(c.id)">
                 {{ porcentajeUsado(c.id).toFixed(0) }}% del presupuesto
               </span>
@@ -91,7 +91,7 @@
 
     <!-- Alertas activas -->
     <div v-if="alertas.length">
-      <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">⚠️ Alertas</p>
+      <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">⚠️ Alertas</p>
       <ul class="bg-theme-card rounded-2xl border border-amber-500/30 overflow-hidden">
         <li
           v-for="a in alertas"
@@ -101,7 +101,7 @@
           <div class="text-lg">{{ a.icono }}</div>
           <div class="flex-1 min-w-0">
             <p class="text-xs font-semibold text-theme-text">{{ a.nombre }}</p>
-            <p class="text-[10px]" :class="a.estado === 'critico' ? 'text-red-400' : 'text-amber-400'">
+            <p class="text-[0.6875rem]" :class="a.estado === 'critico' ? 'text-red-400' : 'text-amber-400'">
               {{ a.estado === 'critico' ? `Superaste el presupuesto en ${currencySymbol} ${formatMonto(a.exceso)}` : `Llegaste al ${a.porcentaje.toFixed(0)}% del límite` }}
             </p>
           </div>

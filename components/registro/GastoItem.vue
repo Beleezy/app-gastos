@@ -71,25 +71,25 @@
               {{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}
             </p>
           </div>
-          <p v-if="gasto.notas" class="mt-1 text-[11px] text-theme-text-muted break-words leading-snug">
+          <p v-if="gasto.notas" class="mt-1 text-[0.6875rem] text-theme-text-muted break-words leading-snug">
             {{ gasto.notas }}
           </p>
           <!-- Fila 2: meta a la izquierda, acciones a la derecha -->
           <div class="flex items-center gap-1.5 mt-1">
             <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
-              <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none"
+              <span class="text-[0.6875rem] font-medium px-1.5 py-0.5 rounded-md leading-none"
                 :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '18', color: gasto.categoriaColor || '#6b7280' }"
                 data-testid="gasto-categoria"
               >
                 {{ gasto.categoriaNombre || 'Otros' }}
               </span>
-              <span class="text-[10px] text-theme-text-muted flex items-center gap-0.5">
+              <span class="text-[0.6875rem] text-theme-text-muted flex items-center gap-0.5">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 {{ formatHora(gasto.hora) }}
               </span>
-              <span v-if="badgeLabel" class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">{{ badgeLabel }}</span>
+              <span v-if="badgeLabel" class="text-[0.6875rem] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">{{ badgeLabel }}</span>
             </div>
             <div v-if="!selectable" class="flex items-center gap-0.5 shrink-0">
               <button

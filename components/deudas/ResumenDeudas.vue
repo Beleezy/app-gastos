@@ -41,7 +41,7 @@
             >
               {{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}
             </p>
-            <p class="text-[11px] text-theme-text-sec mt-1.5">
+            <p class="text-[0.6875rem] text-theme-text-sec mt-1.5">
               {{ countActual }} deuda{{ countActual !== 1 ? 's' : '' }} pendiente{{ countActual !== 1 ? 's' : '' }}
             </p>
           </div>
@@ -50,7 +50,7 @@
             @click="toggleTab"
             :title="`Cambiar a ${tabActual === 'me_deben' ? 'Yo debo' : 'Me deben'}`"
           >
-            <p class="text-[10px] text-theme-text-sec leading-tight group-hover:text-theme-text-muted transition-colors">
+            <p class="text-[0.6875rem] text-theme-text-sec leading-tight group-hover:text-theme-text-muted transition-colors">
               {{ tabActual === 'me_deben' ? 'Yo debo' : 'Me deben' }}
             </p>
             <p
@@ -79,7 +79,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
           </svg>
           <span
-            class="text-[10px]"
+            class="text-[0.6875rem]"
             :class="tendencia > 0 ? 'text-emerald-400' : tendencia < 0 ? 'text-red-400' : 'text-theme-text-sec'"
           >
             <template v-if="tendencia !== 0">
@@ -103,11 +103,11 @@
             ></div>
           </div>
           <div class="flex items-center justify-between mt-1.5 gap-2">
-            <span class="text-[10px] text-emerald-400/80 font-medium">
+            <span class="text-[0.6875rem] text-emerald-400/80 font-medium">
               {{ porcentajeMeDeben.toFixed(0) }}% a favor
             </span>
             <span
-              class="text-[10px] font-semibold"
+              class="text-[0.6875rem] font-semibold"
               :class="resumen.balanceNeto >= 0 ? 'text-emerald-400' : 'text-red-400'"
             >
               {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(resumen.balanceNeto)) }}
@@ -123,16 +123,16 @@
           @click="toggleFiltroVencidas"
         >
           <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse shrink-0"></span>
-          <span class="text-[11px] font-semibold text-red-400 shrink-0">
+          <span class="text-[0.6875rem] font-semibold text-red-400 shrink-0">
             {{ countVencidas }} deuda{{ countVencidas !== 1 ? 's' : '' }} vencida{{ countVencidas !== 1 ? 's' : '' }}
           </span>
-          <span v-if="primeraVencida" class="text-[11px] text-red-400/80 truncate flex-1 min-w-0">
+          <span v-if="primeraVencida" class="text-[0.6875rem] text-red-400/80 truncate flex-1 min-w-0">
             <span class="opacity-60">·</span>
             {{ primeraVencida.nombre }}
             <span class="opacity-60">·</span>
             {{ currencySymbol }}&nbsp;{{ formatMonto(primeraVencida.totalPendiente) }}
           </span>
-          <span class="ml-auto shrink-0 text-[10px] font-semibold text-red-400 bg-red-500/15 px-2 py-0.5 rounded-full">
+          <span class="ml-auto shrink-0 text-[0.6875rem] font-semibold text-red-400 bg-red-500/15 px-2 py-0.5 rounded-full">
             {{ filtroEstado === 'vencidas' ? 'Quitar' : 'Ver' }}
           </span>
         </button>

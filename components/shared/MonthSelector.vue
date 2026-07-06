@@ -19,8 +19,8 @@
       >
         {{ label }}
       </button>
-      <p v-if="esActual && showCurrentLabel" class="text-[10px] text-theme-accent/70 font-medium mt-0.5">Mes actual</p>
-      <p v-else-if="!esActual && showCurrentLabel" class="text-[10px] text-theme-accent/60 font-medium mt-0.5">Toca para ir al mes actual</p>
+      <p v-if="esActual && showCurrentLabel" class="text-[0.6875rem] text-theme-accent/70 font-medium mt-0.5">Mes actual</p>
+      <p v-else-if="!esActual && showCurrentLabel" class="text-[0.6875rem] text-theme-accent/60 font-medium mt-0.5">Toca para ir al mes actual</p>
     </div>
 
     <button

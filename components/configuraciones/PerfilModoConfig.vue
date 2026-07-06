@@ -12,7 +12,7 @@
         <input type="radio" class="mt-0.5" :checked="modo === 'selector'" @change="setModo('selector')" />
         <div>
           <p class="text-sm font-medium text-theme-text">Selector siempre visible</p>
-          <p class="text-[11px] text-theme-text-muted">Una barra arriba para cambiar de perfil en cualquier momento.</p>
+          <p class="text-[0.6875rem] text-theme-text-muted">Una barra arriba para cambiar de perfil en cualquier momento.</p>
         </div>
       </label>
       <label
@@ -22,7 +22,7 @@
         <input type="radio" class="mt-0.5" :checked="modo === 'familia'" @change="setModo('familia')" />
         <div>
           <p class="text-sm font-medium text-theme-text">Solo desde Familia</p>
-          <p class="text-[11px] text-theme-text-muted">Cambias de perfil entrando desde la página Familia. Menos riesgo de equivocarte de perfil.</p>
+          <p class="text-[0.6875rem] text-theme-text-muted">Cambias de perfil entrando desde la página Familia. Menos riesgo de equivocarte de perfil.</p>
         </div>
       </label>
     </div>

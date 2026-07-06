@@ -118,14 +118,16 @@
           </div>
           <div class="flex items-center gap-1.5 shrink-0">
             <button
-              class="px-2.5 py-1 rounded-lg text-[0.65rem] font-semibold uppercase tracking-wider text-theme-accent bg-theme-accent-bg border border-theme-accent/40 hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
+              type="button"
+              class="px-2.5 min-h-[2.5rem] rounded-lg text-[0.65rem] font-semibold uppercase tracking-wider text-theme-accent bg-theme-accent-bg border border-theme-accent/40 hover:bg-theme-accent-bg-hover active:scale-95 transition-all"
               @click.stop="iniciarEdicion"
             >
               Editar
             </button>
             <button
               v-if="presupuestoDefault > 0 && presupuesto !== presupuestoDefault"
-              class="px-2 py-1 rounded-lg text-theme-text-sec hover:text-theme-accent hover:bg-theme-input transition-colors"
+              type="button"
+              class="px-2 min-h-[2.5rem] rounded-lg text-theme-text-sec hover:text-theme-accent hover:bg-theme-input transition-colors"
               aria-label="Sincronizar con presupuesto por defecto"
               @click.stop="onSincronizar"
             >

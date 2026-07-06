@@ -82,24 +82,65 @@
       </div>
     </div>
 
-    <!-- FABs: Voz + Manual (hidden when voice overlay is active) -->
-    <SharedFloatingActionStack :visible="!showVozOverlay">
-      <SharedFloatingActionButton
-        tone="purple"
-        :pulse="false"
-        aria-label="Registrar deuda por voz"
-        @click="abrirVozOverlay"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-        </svg>
-      </SharedFloatingActionButton>
+    <!-- Backdrop del speed-dial: cierra al tocar fuera -->
+    <div
+      v-if="fabAbierto"
+      class="fixed inset-0 z-30 bg-black/20"
+      aria-hidden="true"
+      @click="fabAbierto = false"
+    />
+
+    <!-- FAB único con speed-dial (Voz / Manual). Oculto en el detalle de
+         persona: ahí las acciones contextuales ya viven en la página y los
+         FABs tapaban montos y botones. -->
+    <SharedFloatingActionStack :visible="!showVozOverlay && !personaSeleccionada" :auto-hide="!fabAbierto">
+      <Transition name="fab-dial">
+        <div v-if="fabAbierto" class="flex flex-col items-end gap-3 self-end">
+          <button
+            type="button"
+            class="flex items-center gap-2 min-h-[2.75rem] pl-3 pr-1 py-1 rounded-full bg-theme-card border border-theme-border shadow-lg text-sm font-medium text-theme-text active:scale-95 transition-transform"
+            @click="onFabVoz"
+          >
+            Por voz
+            <span class="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+              </svg>
+            </span>
+          </button>
+          <button
+            type="button"
+            class="flex items-center gap-2 min-h-[2.75rem] pl-3 pr-1 py-1 rounded-full bg-theme-card border border-theme-border shadow-lg text-sm font-medium text-theme-text active:scale-95 transition-transform"
+            data-testid="btn-nueva-deuda"
+            @click="onFabManual"
+          >
+            Nueva deuda
+            <span class="w-10 h-10 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      </Transition>
       <SharedFloatingActionButton
         tone="accent"
-        aria-label="Agregar nueva deuda"
-        data-testid="btn-nueva-deuda"
-        @click="showFormDeuda = true"
-      />
+        size="lg"
+        :pulse="!fabAbierto"
+        :aria-label="fabAbierto ? 'Cerrar acciones' : 'Agregar deuda'"
+        data-testid="fab-deudas"
+        class="self-end"
+        @click="fabAbierto = !fabAbierto"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-6 h-6 drop-shadow-sm transition-transform duration-200"
+          :class="fabAbierto ? 'rotate-45' : ''"
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </SharedFloatingActionButton>
     </SharedFloatingActionStack>
 
     <!-- Voice overlay -->
@@ -184,6 +225,22 @@ function exportarDeudas(formato) {
 }
 
 const showFormDeuda = ref(false)
+const fabAbierto = ref(false)
+
+function onFabVoz() {
+  fabAbierto.value = false
+  abrirVozOverlay()
+}
+
+function onFabManual() {
+  fabAbierto.value = false
+  showFormDeuda.value = true
+}
+
+// Al entrar/salir del detalle de persona el FAB desaparece; que no quede
+// el speed-dial abierto para la próxima vez.
+watch(personaSeleccionada, () => { fabAbierto.value = false })
+
 const showFormPago = ref(false)
 const showFormEditar = ref(false)
 const showFormPagoGlobal = ref(false)
@@ -243,3 +300,9 @@ onMounted(async () => {
   await Promise.all([fetchResumen(), fetchPersonas(), fetchVinculosPendientes()])
 })
 </script>
+
+<style scoped>
+.fab-dial-enter-active { transition: opacity 0.2s ease-out, transform 0.2s ease-out; }
+.fab-dial-leave-active { transition: opacity 0.15s ease-in, transform 0.15s ease-in; }
+.fab-dial-enter-from, .fab-dial-leave-to { opacity: 0; transform: translateY(8px) scale(0.95); }
+</style>

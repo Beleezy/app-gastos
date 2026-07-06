@@ -34,7 +34,7 @@
               :style="{ width: porcentaje(item.total) + '%', backgroundColor: item.medioColor || '#6b7280' }"
             ></div>
           </div>
-          <p class="text-[10px] text-theme-text-muted mt-1">
+          <p class="text-[0.6875rem] text-theme-text-muted mt-1">
             {{ item.registros.length }} registro{{ item.registros.length !== 1 ? 's' : '' }} · {{ porcentaje(item.total).toFixed(0) }}%
           </p>
         </div>

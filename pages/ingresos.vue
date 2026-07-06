@@ -5,7 +5,7 @@
       <template #subtitle>{{ mesLabel }}</template>
     </LayoutAppHeader>
 
-    <div class="max-w-lg mx-auto lg:max-w-2xl pb-32">
+    <div class="max-w-lg mx-auto lg:max-w-2xl pb-4">
       <SharedMonthSelector
         :label="mesLabel"
         :es-actual="esMesActual"
@@ -22,7 +22,7 @@
         <div class="relative overflow-hidden rounded-2xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-theme-card p-4">
           <div class="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none"></div>
           <div class="relative">
-            <p class="text-[10px] uppercase tracking-wider font-semibold text-emerald-300/80">Ingresos del mes</p>
+            <p class="text-[0.6875rem] uppercase tracking-wider font-semibold text-emerald-300/80">Ingresos del mes</p>
             <p class="text-3xl font-bold text-emerald-400 mt-0.5 tabular-nums">
               {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalIngresos) }}
             </p>
@@ -36,27 +36,27 @@
                 ></div>
               </div>
               <div class="flex items-center justify-between gap-2 mt-1.5">
-                <p class="text-[11px] text-theme-text-sec min-w-0">
+                <p class="text-[0.6875rem] text-theme-text-sec min-w-0">
                   Gastado: {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalGastos) }}
                 </p>
-                <p class="text-[11px] tabular-nums shrink-0" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
+                <p class="text-[0.6875rem] tabular-nums shrink-0" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
                   {{ pctGastado.toFixed(0) }}%
                 </p>
               </div>
             </template>
-            <p v-else class="text-[11px] text-theme-text-muted mt-2">
+            <p v-else class="text-[0.6875rem] text-theme-text-muted mt-2">
               Gastos del mes: {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.totalGastos) }}
             </p>
 
             <div class="grid grid-cols-2 gap-2.5 mt-3 pt-3 border-t border-emerald-500/20">
               <div class="min-w-0">
-                <p class="text-[10px] uppercase tracking-wide text-theme-text-muted">Saldo neto</p>
+                <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-muted">Saldo neto</p>
                 <p class="text-lg font-bold mt-0.5 tabular-nums" :class="resumen.saldoNeto >= 0 ? 'text-emerald-400' : 'text-red-400'">
                   {{ currencySymbol }}&nbsp;{{ formatMonto(resumen.saldoNeto) }}
                 </p>
               </div>
               <div class="min-w-0 text-right">
-                <p class="text-[10px] uppercase tracking-wide text-theme-text-muted">Ahorro</p>
+                <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-muted">Ahorro</p>
                 <p class="text-lg font-bold mt-0.5 tabular-nums" :class="resumen.porcentajeAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">
                   {{ resumen.porcentajeAhorro >= 0 ? '+' : '' }}{{ resumen.porcentajeAhorro.toFixed(1) }}%
                 </p>
@@ -68,12 +68,12 @@
 
       <!-- Por origen -->
       <div v-if="porOrigen.length > 0" class="px-4 lg:px-0 mb-4">
-        <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">Por origen</p>
+        <p class="text-[0.6875rem] text-theme-text-muted uppercase tracking-wider font-medium mb-2">Por origen</p>
         <div class="flex flex-wrap gap-1.5">
           <span
             v-for="p in porOrigen"
             :key="p.origen"
-            class="rounded-full bg-emerald-500/10 text-emerald-300 px-2.5 py-1 text-[10px]"
+            class="rounded-full bg-emerald-500/10 text-emerald-300 px-2.5 py-1 text-[0.6875rem]"
           >
             {{ iconoOrigen(p.origen) }} {{ labelOrigen(p.origen) }}: {{ currencySymbol }}&nbsp;{{ formatMonto(p.total) }}
           </span>
@@ -82,7 +82,7 @@
 
       <!-- Lista -->
       <div class="px-4 lg:px-0">
-        <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
+        <p class="text-[0.6875rem] text-theme-text-muted uppercase tracking-wider font-medium mb-2">
           {{ ingresos.length }} ingreso{{ ingresos.length !== 1 ? 's' : '' }} este mes
         </p>
 
@@ -124,15 +124,15 @@
                 <!-- Meta a la izquierda, acciones a la derecha -->
                 <div class="flex items-center gap-1.5 mt-1">
                   <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
-                    <span v-if="ing.origen" class="text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none bg-emerald-500/10 text-emerald-400">
+                    <span v-if="ing.origen" class="text-[0.6875rem] font-medium px-1.5 py-0.5 rounded-md leading-none bg-emerald-500/10 text-emerald-400">
                       {{ labelOrigen(ing.origen) }}
                     </span>
-                    <span class="text-[10px] text-theme-text-muted">{{ formatFechaCorta(ing.fecha) }}</span>
-                    <span v-if="ing.esRecurrente" class="text-[9px] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">Recurrente</span>
+                    <span class="text-[0.6875rem] text-theme-text-muted">{{ formatFechaCorta(ing.fecha) }}</span>
+                    <span v-if="ing.esRecurrente" class="text-[0.6875rem] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none">Recurrente</span>
                   </div>
                   <div class="flex items-center gap-0.5 shrink-0">
                     <button
-                      class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                      class="w-10 h-10 -my-1.5 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
                       aria-label="Editar"
                       @click="iniciarEdicion(ing)"
                     >
@@ -141,7 +141,7 @@
                       </svg>
                     </button>
                     <button
-                      class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all"
+                      class="w-10 h-10 -my-1.5 flex items-center justify-center rounded-md text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all"
                       aria-label="Eliminar"
                       @click="pedirEliminar(ing)"
                     >
@@ -158,8 +158,9 @@
       </div>
     </div>
 
-    <!-- FAB: registrar ingreso (mismo patrón que Registro/Planificador) -->
-    <SharedFloatingActionStack>
+    <!-- FAB: registrar ingreso. Oculto con la lista vacía: el empty state ya
+         muestra su propio CTA verde y ambos botones se fundían visualmente. -->
+    <SharedFloatingActionStack :visible="ingresos.length > 0">
       <SharedFloatingActionButton
         tone="emerald"
         aria-label="Registrar ingreso"

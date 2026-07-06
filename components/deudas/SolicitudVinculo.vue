@@ -41,7 +41,7 @@
       >
         <div class="flex-1 min-w-0">
           <p class="text-sm text-theme-text-sec truncate">{{ s.destinatarioEmail }}</p>
-          <p class="text-[10px] text-theme-text-sec">
+          <p class="text-[0.6875rem] text-theme-text-sec">
             {{ s.estado === 'pendiente' ? 'Esperando respuesta' : s.estado }}
           </p>
         </div>
@@ -54,7 +54,7 @@
         </button>
         <span
           v-else
-          class="text-[10px] px-2 py-0.5 rounded-full"
+          class="text-[0.6875rem] px-2 py-0.5 rounded-full"
           :class="{
             'bg-emerald-500/20 text-emerald-400': s.estado === 'aceptada',
             'bg-red-500/20 text-red-400': s.estado === 'rechazada',

@@ -9,7 +9,7 @@
       </div>
       <button
         type="button"
-        class="text-xs text-theme-text-sec underline hover:text-theme-text transition-colors shrink-0"
+        class="text-xs text-theme-text-sec underline hover:text-theme-text transition-colors shrink-0 min-h-[2.75rem] px-2 -mx-2"
         :disabled="loading"
         @click="cargar"
       >

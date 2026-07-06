@@ -13,7 +13,7 @@
         />
       </div>
       <button
-        class="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-theme-border bg-theme-card px-3 py-2 text-[11px] text-theme-text-sec hover:text-theme-text transition-colors"
+        class="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-theme-border bg-theme-card px-3 py-2 text-[0.6875rem] text-theme-text-sec hover:text-theme-text transition-colors"
         :title="`Ordenar por ${ordenLabel}`"
         @click="ciclarOrden"
       >
@@ -25,7 +25,7 @@
     </div>
 
     <!-- Filtros por prioridad y estado (pr-4: el último chip no se corta al borde) -->
-    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-4 scrollbar-hide">
+    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r">
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"
@@ -38,7 +38,7 @@
       >
         {{ f.label }}
         <span
-          class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
+          class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[0.6875rem] font-bold"
           :class="filtroActual === f.value ? 'bg-black/15 text-inherit' : 'bg-theme-border-md text-theme-text'"
         >
           {{ f.count }}
@@ -85,26 +85,26 @@
                 <h3 class="text-sm font-semibold text-theme-text break-words">{{ proyecto.tipoGasto }}</h3>
                 <span
                   v-if="prioridadBadge(proyecto.prioridad)"
-                  class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                  class="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium"
                   :class="prioridadBadge(proyecto.prioridad).clases"
                 >
                   {{ prioridadBadge(proyecto.prioridad).label }}
                 </span>
-                <span class="truncate text-[11px] text-theme-text-sec">
+                <span class="truncate text-[0.6875rem] text-theme-text-sec">
                   {{ proyecto.categoriaNombre || 'Sin categoria' }}
                 </span>
               </div>
-              <p v-if="proyecto.descripcion" class="mt-0.5 truncate text-[11px] text-theme-text-muted">{{ proyecto.descripcion }}</p>
+              <p v-if="proyecto.descripcion" class="mt-0.5 truncate text-[0.6875rem] text-theme-text-muted">{{ proyecto.descripcion }}</p>
             </div>
             <!-- Decidido X/N en esquina superior derecha -->
             <div v-if="progresoProyecto(proyecto).total > 0" class="shrink-0 text-right">
-              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Decidido</p>
+              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Decidido</p>
               <p class="text-xs font-semibold whitespace-nowrap" :class="progresoProyecto(proyecto).porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
                 {{ progresoProyecto(proyecto).decididos }}/{{ progresoProyecto(proyecto).total }} · {{ progresoProyecto(proyecto).porcentaje }}%
               </p>
               <span
                 v-if="progresoProyecto(proyecto).decididos === 0 && !estaExpandido(proyecto.id)"
-                class="mt-0.5 inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[9px] font-medium text-violet-300"
+                class="mt-0.5 inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-violet-300"
               >
                 <span class="h-1 w-1 rounded-full bg-violet-400 animate-pulse"></span>
                 Por decidir
@@ -117,17 +117,17 @@
                ("S/ 4,34..."); "k" solo aplica desde 5 cifras. -->
           <div class="mt-3 flex items-stretch rounded-xl bg-theme-input">
             <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
-              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Mín</p>
+              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Mín</p>
               <SharedMoney :value="proyecto.resumen.totalMinimo" compact entero class="mt-0.5 block text-xs font-semibold text-emerald-400" />
             </div>
             <div class="w-px bg-theme-border/60"></div>
             <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
-              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
+              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
               <SharedMoney :value="proyecto.resumen.totalPromedio" compact entero class="mt-0.5 block text-xs font-semibold text-sky-300" />
             </div>
             <div class="w-px bg-theme-border/60"></div>
             <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
-              <p class="text-[9px] uppercase tracking-[0.16em] text-theme-text-muted">Máx</p>
+              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Máx</p>
               <SharedMoney :value="proyecto.resumen.totalMaximo" compact entero class="mt-0.5 block text-xs font-semibold text-amber-300" />
             </div>
           </div>
@@ -144,7 +144,7 @@
           <!-- Footer: Ver detalles + kebab -->
           <div class="mt-3 flex items-center gap-2">
             <button
-              class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[11px] text-theme-text-sec transition-colors hover:text-theme-text"
+              class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] text-theme-text-sec transition-colors hover:text-theme-text"
               @click="toggleExpandido(proyecto.id)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform" :class="estaExpandido(proyecto.id) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -169,14 +169,14 @@
                 class="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
               >
                 <button
-                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
                   @click="emit('editar', proyecto); cerrarMenuProyecto()"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
                   Editar
                 </button>
                 <button
-                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-red-400 transition-colors hover:bg-red-500/10"
+                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
                   @click="proyectoAEliminar = proyecto; cerrarMenuProyecto()"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
@@ -199,7 +199,7 @@
               <div v-if="detalleEditando?.detalleId === detalle.id" class="rounded-xl bg-theme-input p-3 space-y-2">
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-xs font-medium text-theme-text">Editando detalle</p>
-                  <button class="text-[11px] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionDetalle">Cancelar</button>
+                  <button class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionDetalle">Cancelar</button>
                 </div>
                 <input
                   v-model="detalleEditando.nombre"
@@ -212,7 +212,7 @@
                     v-for="opt in prioridadOpcionesDetalle"
                     :key="opt.value"
                     type="button"
-                    class="flex-1 rounded-lg border px-2 py-1.5 text-[11px] font-medium transition-all"
+                    class="flex-1 rounded-lg border px-2 py-1.5 text-[0.6875rem] font-medium transition-all"
                     :class="detalleEditando.prioridad === opt.value ? opt.activo : 'border-theme-border bg-theme-input text-theme-text-muted'"
                     @click="detalleEditando.prioridad = opt.value"
                   >
@@ -246,23 +246,23 @@
                     <h4 class="min-w-0 flex-1 text-base font-semibold text-theme-text leading-tight break-words">{{ detalle.nombre }}</h4>
                   </div>
                   <!-- Descripción (notas): subtítulo full-width que envuelve líneas -->
-                  <p v-if="detalle.notas" class="mt-1 pl-4 text-[11px] text-theme-text-sec break-words leading-snug">{{ detalle.notas }}</p>
+                  <p v-if="detalle.notas" class="mt-1 pl-4 text-[0.6875rem] text-theme-text-sec break-words leading-snug">{{ detalle.notas }}</p>
                   <!-- Metadata + precio en fila inferior -->
                   <div class="mt-1 flex items-center justify-between gap-3 pl-4">
                     <div class="min-w-0 flex-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <span class="text-[11px] text-theme-text-muted">
+                      <span class="text-[0.6875rem] text-theme-text-muted">
                         {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
                       </span>
                       <span
                         v-if="prioridadBadge(detalle.prioridad)"
-                        class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        class="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium"
                         :class="prioridadBadge(detalle.prioridad).clases"
                       >
                         {{ prioridadBadge(detalle.prioridad).label }}
                       </span>
                       <span
                         v-if="decisionBadge(detalle)"
-                        class="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                        class="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium"
                         :class="decisionBadge(detalle).clases"
                       >
                         {{ decisionBadge(detalle).label }}
@@ -289,14 +289,14 @@
                       class="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
                     >
                       <button
-                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
                         @click="iniciarEdicionDetalle(detalle); cerrarMenuDetalle()"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
                         Editar
                       </button>
                       <button
-                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-red-400 transition-colors hover:bg-red-500/10"
+                        class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
                         @click="eliminarDetalleInline(proyecto, detalle); cerrarMenuDetalle()"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
@@ -310,7 +310,7 @@
               <!-- Hint educativo cuando hay opciones por decidir -->
               <p
                 v-if="!detalle.estadoDecision && detalle.opciones.length > 1 && !haySeleccionEnDetalle(detalle.id)"
-                class="pl-4 text-[10px] text-theme-text-muted italic"
+                class="pl-4 text-[0.6875rem] text-theme-text-muted italic"
               >
                 💡 Toca una opción para comparar y decidir
               </p>
@@ -333,7 +333,7 @@
                   <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
                     <div class="flex items-center justify-between gap-2">
                       <p class="text-xs font-medium text-theme-text">Editando opción</p>
-                      <button class="text-[11px] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionOpcion">Cancelar</button>
+                      <button class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionOpcion">Cancelar</button>
                     </div>
                     <input
                       v-model="opcionEditando.nombre"
@@ -355,15 +355,15 @@
                     />
                     <div class="grid grid-cols-3 gap-2">
                       <div>
-                        <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
+                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
                         <input v-model="opcionEditando.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
                       </div>
                       <div>
-                        <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
+                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Prom</label>
                         <input v-model="opcionEditando.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
                       </div>
                       <div>
-                        <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
+                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
                         <input v-model="opcionEditando.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
                       </div>
                     </div>
@@ -395,7 +395,7 @@
                     >
                       <!-- Número índice -->
                       <div
-                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[11px] font-semibold"
+                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[0.6875rem] font-semibold"
                         :class="estaSeleccionada(detalle.id, opcion.id)
                           ? (esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
                               ? 'bg-emerald-500/30 text-emerald-200'
@@ -411,15 +411,16 @@
                       <div class="min-w-0 flex-1">
                         <div class="flex items-baseline justify-between gap-3">
                           <p class="min-w-0 text-sm font-medium text-theme-text break-words">{{ opcion.nombre }}</p>
-                          <SharedMoney :value="opcion.precioPromedio || 0" compact entero class="shrink-0 text-sm font-semibold text-sky-300" />
+                          <SharedMoney v-if="Number(opcion.precioPromedio) > 0" :value="opcion.precioPromedio" compact entero class="shrink-0 text-sm font-semibold text-sky-300" />
                         </div>
-                        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
-                          <span class="text-theme-text-sec whitespace-nowrap">
-                            <SharedMoney :value="opcion.precioMinimo || 0" compact entero /> — <SharedMoney :value="opcion.precioMaximo || 0" compact entero />
+                        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem]">
+                          <!-- Con un solo precio se muestra solo ese (antes "S/ 480 — S/ 0") -->
+                          <span v-if="rangoPrecios(opcion)" class="text-theme-text-sec whitespace-nowrap">
+                            <SharedMoney :value="rangoPrecios(opcion).min" compact entero /><template v-if="rangoPrecios(opcion).max !== null"> — <SharedMoney :value="rangoPrecios(opcion).max" compact entero /></template>
                           </span>
                           <span
                             v-if="esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1"
-                            class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300"
+                            class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-emerald-300"
                           >
                             Mejor precio
                           </span>
@@ -437,7 +438,7 @@
                             </svg>
                           </a>
                         </div>
-                        <p v-if="opcion.notas" class="mt-1 text-[11px] text-theme-text-muted">{{ opcion.notas }}</p>
+                        <p v-if="opcion.notas" class="mt-1 text-[0.6875rem] text-theme-text-muted">{{ opcion.notas }}</p>
                       </div>
 
                       <!-- Imagen miniatura -->
@@ -458,13 +459,13 @@
                       @click.stop
                     >
                       <button
-                        class="flex-1 rounded-lg bg-sky-500/15 px-3 py-1.5 text-[11px] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
+                        class="flex-1 rounded-lg bg-sky-500/15 px-3 py-1.5 text-[0.6875rem] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
                         @click="abrirDecision(proyecto, detalle, opcion, 'planificar')"
                       >
                         Planificar
                       </button>
                       <button
-                        class="flex-1 rounded-lg bg-emerald-500/15 px-3 py-1.5 text-[11px] font-medium text-emerald-400 transition-colors hover:bg-emerald-500/25"
+                        class="flex-1 rounded-lg bg-emerald-500/15 px-3 py-1.5 text-[0.6875rem] font-medium text-emerald-400 transition-colors hover:bg-emerald-500/25"
                         @click="abrirDecision(proyecto, detalle, opcion, 'comprar')"
                       >
                         Comprar ya
@@ -487,7 +488,7 @@
                         >
                           <button
                             v-if="detalle.opciones.length > 1 && idx > 0"
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
                             @click="moverOpcion(proyecto, detalle, opcion, -1); cerrarMenuOpcion()"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
@@ -495,21 +496,21 @@
                           </button>
                           <button
                             v-if="detalle.opciones.length > 1 && idx < detalle.opciones.length - 1"
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
                             @click="moverOpcion(proyecto, detalle, opcion, 1); cerrarMenuOpcion()"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                             Bajar
                           </button>
                           <button
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-theme-text transition-colors hover:bg-theme-input"
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
                             @click="iniciarEdicionOpcion(opcion); cerrarMenuOpcion()"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
                             Editar
                           </button>
                           <button
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-[12px] text-red-400 transition-colors hover:bg-red-500/10"
+                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
                             @click="eliminarOpcionInline(proyecto, detalle, opcion); cerrarMenuOpcion()"
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
@@ -524,7 +525,7 @@
                 <!-- Botón agregar opción -->
                 <button
                   v-if="!detalle.estadoDecision"
-                  class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-theme-border bg-theme-input/50 py-2.5 text-[11px] font-medium text-theme-text-sec transition-colors hover:border-violet-500 hover:text-violet-400"
+                  class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-theme-border bg-theme-input/50 py-2.5 text-[0.6875rem] font-medium text-theme-text-sec transition-colors hover:border-violet-500 hover:text-violet-400"
                   @click="abrirNuevaOpcion(proyecto, detalle)"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
@@ -661,15 +662,15 @@
         />
         <div class="grid grid-cols-3 gap-2">
           <div>
-            <label class="mb-1 block text-[11px] text-theme-text-muted">Min</label>
+            <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
             <input v-model="nuevaOpcion.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
           </div>
           <div>
-            <label class="mb-1 block text-[11px] text-theme-text-muted">Prom</label>
+            <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Prom</label>
             <input v-model="nuevaOpcion.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
           </div>
           <div>
-            <label class="mb-1 block text-[11px] text-theme-text-muted">Max</label>
+            <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
             <input v-model="nuevaOpcion.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
           </div>
         </div>
@@ -714,7 +715,7 @@
             v-for="opt in prioridadOpcionesDetalle"
             :key="opt.value"
             type="button"
-            class="flex-1 rounded-lg border px-2 py-2 text-[11px] font-medium transition-all"
+            class="flex-1 rounded-lg border px-2 py-2 text-[0.6875rem] font-medium transition-all"
             :class="nuevoDetalle.prioridad === opt.value ? opt.activo : 'border-theme-border bg-theme-input text-theme-text-muted'"
             @click="nuevoDetalle.prioridad = opt.value"
           >
@@ -754,13 +755,13 @@
         <p class="text-xs text-theme-text-sec">
           {{ decisionCtx.proyecto.tipoGasto }} › {{ decisionCtx.detalle.nombre }} › <span class="text-theme-text">{{ decisionCtx.opcion.nombre }}</span>
         </p>
-        <p class="text-[11px] text-theme-text-muted">
+        <p class="text-[0.6875rem] text-theme-text-muted">
           {{ decisionCtx.tipo === 'comprar'
             ? 'Se registrará como gasto real y el detalle quedará marcado como comprado. Las demás opciones se eliminarán.'
             : 'Se creará un gasto planificado en el mes de la fecha elegida. Las demás opciones se eliminarán.' }}
         </p>
         <div>
-          <label class="mb-1 block text-[11px] text-theme-text-muted">Monto *</label>
+          <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Monto *</label>
           <input
             v-model="decisionForm.monto"
             type="number"
@@ -770,7 +771,7 @@
           />
         </div>
         <div>
-          <label class="mb-1 block text-[11px] text-theme-text-muted">
+          <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">
             {{ decisionCtx.tipo === 'comprar' ? 'Fecha de compra *' : 'Fecha probable de pago *' }}
           </label>
           <input
@@ -1032,6 +1033,16 @@ function prioridadBadge(valor) {
 
 function hostDeUrl(url) {
   try { return new URL(url).hostname.replace(/^www\./, '') } catch { return 'Abrir enlace' }
+}
+
+// Rango de precios legible: ambos → "min — max"; uno solo → ese precio;
+// 0/vacío se ignora (null = no mostrar nada).
+function rangoPrecios(opcion) {
+  const min = Number(opcion?.precioMinimo) > 0 ? Number(opcion.precioMinimo) : null
+  const max = Number(opcion?.precioMaximo) > 0 ? Number(opcion.precioMaximo) : null
+  if (min !== null && max !== null && max !== min) return { min, max }
+  const unico = min ?? max
+  return unico !== null ? { min: unico, max: null } : null
 }
 
 function opcionVacia() {

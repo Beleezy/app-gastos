@@ -49,21 +49,21 @@
           <p class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug">
             {{ ahorro.concepto || ahorro.medioNombre || 'Ahorro' }}
           </p>
-          <p class="text-[11px] text-theme-text-sec">
+          <p class="text-[0.6875rem] text-theme-text-sec">
             {{ ahorro.medioNombre || 'Sin medio' }} · {{ formatFecha(ahorro.fecha) }}
           </p>
         </div>
 
         <div class="text-right shrink-0">
           <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }}&nbsp;{{ formatMonto(ahorro.monto) }}</p>
-          <div v-if="ahorro.gastoPlanificadoId" class="text-[9px] text-theme-accent mt-0.5">vinculado</div>
+          <div v-if="ahorro.gastoPlanificadoId" class="text-[0.6875rem] text-theme-accent mt-0.5">vinculado</div>
         </div>
       </div>
 
       <!-- Botones inline para desktop hover / accesibilidad -->
       <div class="flex justify-end gap-2 mt-2 pt-2 border-t border-theme-border/50 opacity-0 group-hover:opacity-100 transition-opacity max-sm:hidden">
         <button
-          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-theme-input text-theme-text-sec hover:text-theme-accent text-[11px] transition-colors"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-theme-input text-theme-text-sec hover:text-theme-accent text-[0.6875rem] transition-colors"
           @click.stop="onEdit"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -72,7 +72,7 @@
           Editar
         </button>
         <button
-          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-theme-input text-theme-text-sec hover:text-red-400 text-[11px] transition-colors"
+          class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-theme-input text-theme-text-sec hover:text-red-400 text-[0.6875rem] transition-colors"
           @click.stop="onDelete"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

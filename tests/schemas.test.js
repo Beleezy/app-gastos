@@ -91,6 +91,38 @@ describe('deudaCreateSchema', () => {
       }).success,
     ).toBe(false)
   })
+
+  it('acepta personaTipo organizacion (valor que envía el front)', () => {
+    const r = deudaCreateSchema.safeParse({
+      personaNombre: 'Banco BCP',
+      personaTipo: 'organizacion',
+      tipoDeuda: 'yo_debo',
+      concepto: 'Tarjeta',
+      monto: 100,
+    })
+    expect(r.success).toBe(true)
+    expect(r.data.personaTipo).toBe('organizacion')
+  })
+
+  it('normaliza personaTipo legacy al enum real de DB', () => {
+    const base = { personaNombre: 'X', tipoDeuda: 'me_deben', concepto: 'C', monto: 1 }
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'banco' }).data.personaTipo).toBe('organizacion')
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'entidad' }).data.personaTipo).toBe('organizacion')
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'otro' }).data.personaTipo).toBe('persona')
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'persona' }).data.personaTipo).toBe('persona')
+  })
+
+  it('rechaza personaTipo desconocido', () => {
+    expect(
+      deudaCreateSchema.safeParse({
+        personaNombre: 'X',
+        personaTipo: 'empresa',
+        tipoDeuda: 'me_deben',
+        concepto: 'C',
+        monto: 1,
+      }).success,
+    ).toBe(false)
+  })
 })
 
 describe('pagoCreateSchema', () => {

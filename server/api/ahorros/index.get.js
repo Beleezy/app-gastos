@@ -9,8 +9,12 @@ export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const [anioLocal, mesLocal] = fechaLocal.split('-').map(Number)
-  const mes = parseInt(query.mes) || mesLocal
-  const anio = parseInt(query.anio) || anioLocal
+  // Clamp a rangos válidos: un mes fuera de 1-12 (p. ej. "2026-07" parseado
+  // como 2026) generaba una serie6Meses con meses 2021..2026.
+  const mesQ = parseInt(query.mes)
+  const anioQ = parseInt(query.anio)
+  const mes = mesQ >= 1 && mesQ <= 12 ? mesQ : mesLocal
+  const anio = anioQ >= 2000 && anioQ <= 2100 ? anioQ : anioLocal
 
   // SWR: ahorros cambian con cada depósito; 60s permite cache cross-tab
   // y PWA SW. Las mutaciones invalidan vía el composable.

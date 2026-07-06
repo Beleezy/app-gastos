@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-x-auto scrollbar-hide" data-testid="filtros-categoria">
+  <div class="overflow-x-auto scrollbar-hide scroll-fade-r pr-8" data-testid="filtros-categoria">
     <div class="flex items-center gap-1.5 min-w-max">
       <button
         class="px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap"

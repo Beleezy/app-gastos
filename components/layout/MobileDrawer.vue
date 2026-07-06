@@ -28,7 +28,7 @@
           </div>
           <div class="flex-1 min-w-0">
             <p class="text-sm font-semibold text-theme-text leading-tight truncate">Mis Finanzas</p>
-            <p class="text-[11px] text-theme-text-muted leading-tight truncate">Control personal</p>
+            <p class="text-[0.6875rem] text-theme-text-muted leading-tight truncate">Control personal</p>
           </div>
           <button
             @click="close"
@@ -42,7 +42,7 @@
 
         <!-- Nav links -->
         <nav class="flex-1 overflow-y-auto overscroll-contain py-4 px-3 space-y-1">
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-theme-text-muted px-3 mb-2">Principal</p>
+          <p class="text-[0.6875rem] font-semibold uppercase tracking-wider text-theme-text-muted px-3 mb-2">Principal</p>
           <NuxtLink
             v-for="item in navItems"
             :key="item.to"
@@ -61,13 +61,13 @@
               <component :is="item.icon" class="w-5 h-5" />
               <span
                 v-if="getBadge(item.to) > 0"
-                class="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center leading-none"
+                class="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-red-500 text-white text-[0.6875rem] font-bold flex items-center justify-center leading-none"
               >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span>
             </div>
             <span class="text-sm flex-1 truncate">{{ item.label }}</span>
           </NuxtLink>
 
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-theme-text-muted px-3 mt-6 mb-2">Ajustes</p>
+          <p class="text-[0.6875rem] font-semibold uppercase tracking-wider text-theme-text-muted px-3 mt-6 mb-2">Ajustes</p>
           <NuxtLink
             v-for="item in secondaryItems"
             :key="item.to"
@@ -87,10 +87,10 @@
         <div class="shrink-0 border-t border-theme-border p-3">
           <div class="rounded-xl bg-theme-border-md/40 p-3 space-y-2">
             <div>
-              <p class="text-[10px] uppercase tracking-wider text-theme-text-muted">Saldo del mes</p>
+              <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted">Saldo del mes</p>
               <p class="text-base font-bold text-theme-text tabular-nums truncate">{{ saldoFmt }}</p>
             </div>
-            <div v-if="deudasVencidas > 0" class="flex items-center gap-2 text-[11px] text-red-500">
+            <div v-if="deudasVencidas > 0" class="flex items-center gap-2 text-[0.6875rem] text-red-500">
               <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
               {{ deudasVencidas }} deuda{{ deudasVencidas === 1 ? '' : 's' }} vencida{{ deudasVencidas === 1 ? '' : 's' }}
             </div>

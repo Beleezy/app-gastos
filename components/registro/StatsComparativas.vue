@@ -1,13 +1,13 @@
 <template>
   <div class="px-4 py-2">
-    <!-- Sub-tabs: Comparar / Tendencia -->
+    <!-- Sub-tabs: Resumen / Tendencia -->
     <div class="flex gap-2 mb-4">
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
         :class="vista === 'comparar' ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
         @click="vista = 'comparar'"
       >
-        Comparar
+        Resumen
       </button>
       <button
         class="flex-1 py-2 rounded-xl text-sm font-medium transition-colors"
@@ -35,9 +35,9 @@
 
       <!-- Selector de mes a comparar -->
       <div class="mb-4">
-        <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-2">Comparar con:</p>
+        <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider mb-2">Comparar con:</p>
         <!-- Carrusel con pr-4: a 380px con texto grande los chips se cortaban al borde -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pr-4 scrollbar-hide">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r">
           <button
             v-for="m in mesesRecientes"
             :key="m.key"
@@ -69,19 +69,19 @@
       <!-- Totales -->
       <div class="grid grid-cols-2 gap-3 mb-4">
         <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
-          <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Este mes</p>
+          <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider mb-1">Este mes</p>
           <p class="text-lg font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(totalActual) }}</p>
-          <p class="text-[10px] text-theme-text-sec mt-0.5">{{ mesActualLabel }}</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">{{ mesActualLabel }}</p>
         </div>
         <div class="bg-theme-card rounded-xl p-3 border border-theme-border">
-          <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Mes comparado</p>
+          <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider mb-1">Mes comparado</p>
           <p class="text-lg font-bold text-theme-text-muted">
             <span v-if="isLoadingComparar">
               <span class="inline-block w-20 h-5 bg-theme-border-md rounded animate-pulse"></span>
             </span>
             <span v-else>{{ currencySymbol }}&nbsp;{{ formatMonto(totalComparar) }}</span>
           </p>
-          <p class="text-[10px] text-theme-text-sec mt-0.5">{{ mesCompararLabel }}</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">{{ mesCompararLabel }}</p>
         </div>
       </div>
 
@@ -115,7 +115,7 @@
 
       <!-- Comparativa por categoría -->
       <div v-else>
-        <p class="text-[10px] text-theme-text-muted uppercase tracking-wider font-semibold mb-2">Por categoría</p>
+        <p class="text-[0.6875rem] text-theme-text-muted uppercase tracking-wider font-semibold mb-2">Por categoría</p>
         <div class="space-y-2">
           <div
             v-for="cat in categoriasComparadas"
@@ -143,17 +143,17 @@
             <!-- Barras comparativas -->
             <div class="space-y-1">
               <div class="flex items-center gap-2">
-                <span class="text-[9px] text-theme-text-muted w-14 shrink-0 truncate">{{ mesActualLabel.split(' ')[0] }}</span>
+                <span class="text-[0.6875rem] text-theme-text-muted w-14 shrink-0 truncate">{{ mesActualLabel.split(' ')[0] }}</span>
                 <div class="flex-1 h-1.5 bg-theme-input rounded-full overflow-hidden">
                   <div class="h-full rounded-full transition-all duration-500" :style="{ width: cat.barActual + '%', backgroundColor: cat.color }"></div>
                 </div>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-[9px] text-theme-text-muted w-14 shrink-0 truncate">{{ mesCompararLabel.split(' ')[0] }}</span>
+                <span class="text-[0.6875rem] text-theme-text-muted w-14 shrink-0 truncate">{{ mesCompararLabel.split(' ')[0] }}</span>
                 <div class="flex-1 h-1.5 bg-theme-input rounded-full overflow-hidden">
                   <div class="h-full rounded-full bg-gray-600 transition-all duration-500" :style="{ width: cat.barComparar + '%' }"></div>
                 </div>
-                <span class="text-[9px] text-theme-text-muted shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.comparar) }}</span>
+                <span class="text-[0.6875rem] text-theme-text-muted shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.comparar) }}</span>
               </div>
             </div>
           </div>
@@ -165,7 +165,7 @@
     <div v-if="vista === 'tendencia'">
       <!-- Selector cantidad de meses -->
       <div class="flex items-center justify-between mb-4">
-        <p class="text-[10px] text-theme-text-sec uppercase tracking-wider">Últimos meses</p>
+        <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider">Últimos meses</p>
         <div class="flex gap-1">
           <button
             v-for="n in [3, 6, 12]"
@@ -198,11 +198,11 @@
                 <span class="text-xs font-medium" :class="m.esActual ? 'text-theme-accent' : 'text-theme-text-muted'">
                   {{ m.label }}
                 </span>
-                <span v-if="m.esActual" class="text-[9px] bg-theme-accent-bg text-theme-accent border border-theme-accent px-1.5 py-0.5 rounded-full">actual</span>
+                <span v-if="m.esActual" class="text-[0.6875rem] bg-theme-accent-bg text-theme-accent border border-theme-accent px-1.5 py-0.5 rounded-full">actual</span>
               </div>
               <div class="flex items-center gap-2">
                 <!-- Variación vs mes anterior -->
-                <span v-if="m.variacion !== null" class="text-[10px]" :class="m.variacion > 0 ? 'text-red-400' : m.variacion < 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
+                <span v-if="m.variacion !== null" class="text-[0.6875rem]" :class="m.variacion > 0 ? 'text-red-400' : m.variacion < 0 ? 'text-emerald-400' : 'text-theme-text-muted'">
                   {{ m.variacion > 0 ? '▲' : m.variacion < 0 ? '▼' : '─' }} {{ Math.abs(m.variacion).toFixed(0) }}%
                 </span>
                 <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(m.total) }}</span>
@@ -222,16 +222,16 @@
         <div class="space-y-2">
           <div class="grid grid-cols-2 gap-2">
             <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
-              <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Máximo</p>
+              <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider mb-1">Máximo</p>
               <p class="text-sm font-bold text-red-400">{{ currencySymbol }}&nbsp;{{ formatMonto(maxTendencia) }}</p>
             </div>
             <div class="bg-theme-card rounded-xl p-3 border border-theme-border text-center">
-              <p class="text-[10px] text-theme-text-sec uppercase tracking-wider mb-1">Mínimo</p>
+              <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider mb-1">Mínimo</p>
               <p class="text-sm font-bold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(minTendencia) }}</p>
             </div>
           </div>
           <div class="bg-theme-card rounded-xl p-3 border border-theme-border flex items-center justify-between">
-            <p class="text-[10px] text-theme-text-sec uppercase tracking-wider">Promedio</p>
+            <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider">Promedio</p>
             <p class="text-base font-bold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(promedioTendencia) }}</p>
           </div>
         </div>

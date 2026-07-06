@@ -31,7 +31,7 @@
     </div>
 
     <!-- Filtros de estado (pr-4: el último chip no queda cortado al borde) -->
-    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 pr-4 scrollbar-hide">
+    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r">
       <button
         v-for="f in filtrosEstado"
         :key="f.value"
@@ -194,7 +194,7 @@
             <div v-if="persona.contacto && isPhone(persona.contacto)" class="flex items-center gap-1.5 mt-2 pt-2 border-t border-theme-border/50 pl-[3.75rem]" @click.stop>
               <a
                 :href="`tel:${persona.contacto}`"
-                class="flex items-center gap-1 px-2 py-1 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.65rem] font-medium hover:bg-theme-accent-bg transition-colors"
+                class="flex items-center gap-1.5 px-3 min-h-[2.5rem] rounded-lg bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-medium hover:bg-theme-accent-bg transition-colors"
                 title="Llamar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -206,7 +206,7 @@
                 :href="whatsappUrl(persona)"
                 target="_blank"
                 rel="noopener"
-                class="flex items-center gap-1 px-2 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-[0.65rem] font-medium hover:bg-emerald-500/20 transition-colors"
+                class="flex items-center gap-1.5 px-3 min-h-[2.5rem] rounded-lg bg-emerald-500/10 text-emerald-400 text-[0.6875rem] font-medium hover:bg-emerald-500/20 transition-colors"
                 :title="tabActual === 'me_deben' && persona.totalPendiente > 0 ? 'WhatsApp — recordatorio' : 'WhatsApp'"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">

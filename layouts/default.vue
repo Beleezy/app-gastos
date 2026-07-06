@@ -15,7 +15,7 @@
          modal abierto se conserva para bloquear el fondo. -->
     <main
       id="contenido-principal"
-      class="flex-1 pb-20 lg:pb-10"
+      class="flex-1 pb-44 lg:pb-10"
       :class="isModalOpen ? 'overflow-hidden' : ''"
       tabindex="-1"
     >

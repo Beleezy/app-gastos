@@ -30,7 +30,9 @@
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <button
-              class="p-1.5 rounded-lg text-theme-text-sec hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
+              type="button"
+              aria-label="Editar categoría"
+              class="w-10 h-10 flex items-center justify-center rounded-lg text-theme-text-sec hover:text-blue-400 hover:bg-blue-500/10 transition-colors"
               @click="editarCategoria(cat)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -38,7 +40,9 @@
               </svg>
             </button>
             <button
-              class="p-1.5 rounded-lg text-theme-text-sec hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              type="button"
+              aria-label="Eliminar categoría"
+              class="w-10 h-10 flex items-center justify-center rounded-lg text-theme-text-sec hover:text-red-400 hover:bg-red-500/10 transition-colors"
               @click="eliminarCategoria(cat)"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -116,7 +120,7 @@
                     >
                       <span class="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" :style="{ backgroundColor: cat.color + '26' }">{{ cat.icono }}</span>
                       <!-- 2 líneas: "Alimentación"/"Entretenimiento" se truncaban con texto grande -->
-                      <span class="text-xs text-theme-text line-clamp-2 break-words hyphens-auto leading-tight min-w-0 flex-1">{{ cat.nombre }}</span>
+                      <span class="text-xs text-theme-text line-clamp-2 break-words hyphens-none leading-tight min-w-0 flex-1">{{ cat.nombre }}</span>
                       <svg v-if="categoriasExistentes.has(cat.nombre)" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-emerald-400 shrink-0 ml-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                       </svg>

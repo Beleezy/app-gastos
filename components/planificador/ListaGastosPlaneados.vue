@@ -13,7 +13,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
           </svg>
           Filtros
-          <span v-if="filtroActual !== 'todos'" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[9px] flex items-center justify-center font-bold leading-none">1</span>
+          <span v-if="filtroActual !== 'todos'" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none">1</span>
         </button>
 
         <!-- Búsqueda -->
@@ -64,7 +64,7 @@
             >
               {{ f.label }}
               <span
-                class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold"
+                class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[0.6875rem] font-bold"
                 :class="filtroActual === f.value ? 'bg-black/15 text-inherit' : 'bg-theme-border-md text-theme-text'"
               >
                 {{ f.count }}
@@ -133,7 +133,7 @@
                   :style="{ width: Math.min((cat.totalReal / cat.total) * 100, 100) + '%' }"
                 ></div>
               </div>
-              <span class="text-[10px] shrink-0 font-medium" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
+              <span class="text-[0.6875rem] shrink-0 font-medium" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
                 {{ currencySymbol }}&nbsp;{{ formatMonto(cat.totalReal) }}
               </span>
             </div>
@@ -145,7 +145,7 @@
               <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
               </svg>
-              <span class="text-[10px]" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
+              <span class="text-[0.6875rem]" :class="cat.totalReal > cat.total ? 'text-red-400' : 'text-emerald-400'">
                 {{ cat.totalReal > cat.total ? 'Excede' : 'Ahorra' }} {{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(cat.totalReal - cat.total)) }}
               </span>
             </div>
@@ -228,21 +228,21 @@
                   <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-theme-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  <span class="text-[10px] text-theme-accent">Recurrente</span>
+                  <span class="text-[0.6875rem] text-theme-accent">Recurrente</span>
                 </div>
               </div>
             </div>
             <div class="text-right shrink-0">
               <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.montoEstimado) }}</p>
               <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 transition-colors"
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-medium mt-1 transition-colors"
                 :class="gasto.estado === 'pagado'
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-orange-500/15 text-orange-400'"
               >
                 {{ gasto.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}
               </span>
-              <p v-if="gasto.gastoRegistradoFecha" class="mt-1 text-[10px] text-theme-text-sec">
+              <p v-if="gasto.gastoRegistradoFecha" class="mt-1 text-[0.6875rem] text-theme-text-sec">
                 Registrado: {{ formatFecha(gasto.gastoRegistradoFecha) }}
               </p>
             </div>
@@ -305,7 +305,7 @@
     >
       <template #message>
         <p>¿Eliminar "{{ gastoParaEliminar?.concepto }}"? Tendrás 5 segundos para deshacer.</p>
-        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
           ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
         </p>
       </template>
@@ -318,7 +318,7 @@
         <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
         <div class="text-sm text-theme-text-muted mb-5">
           Este gasto se repite en meses futuros. ¿Qué deseas hacer?
-          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[15px] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
             ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
           </p>
         </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen pb-32">
+  <div class="min-h-screen pb-4">
     <!-- Header -->
     <div class="px-5 pt-8 pb-3 relative overflow-hidden">
       <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-sky-500/10 rounded-full blur-3xl"></div>
@@ -15,7 +15,7 @@
         </button>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl font-bold text-theme-text">Reportes</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">Resumen mensual en PDF o Excel</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">Resumen mensual en PDF o Excel</p>
         </div>
       </div>
     </div>
@@ -24,12 +24,14 @@
       <!-- Contexto del perfil -->
       <div class="rounded-2xl border border-theme-border bg-theme-card p-3 text-xs text-theme-text-sec">
         Generando para: <strong class="text-theme-text">{{ nombrePerfilActivo }}</strong>.
-        Cambia el perfil en la barra superior si quieres el reporte de otro familiar.
+        <template v-if="perfiles.length > 0">
+          Cambia el perfil en la barra "Viendo:" al inicio de la página si quieres el reporte de otro familiar.
+        </template>
       </div>
 
       <!-- Módulo -->
       <div>
-        <label class="block text-[10px] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Módulo</label>
+        <label class="block text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Módulo</label>
         <div class="grid grid-cols-2 gap-2">
           <button
             v-for="m in MODULOS_REPORTE"
@@ -44,26 +46,26 @@
       <!-- Mes / Año -->
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="block text-[10px] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Mes</label>
+          <label class="block text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Mes</label>
           <select v-model.number="mes" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text">
             <option v-for="(n, i) in MESES" :key="i" :value="i + 1">{{ n }}</option>
           </select>
         </div>
         <div>
-          <label class="block text-[10px] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Año</label>
+          <label class="block text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Año</label>
           <select v-model.number="anio" class="w-full bg-theme-input border border-theme-border rounded-xl px-3 py-2.5 text-sm text-theme-text">
             <option v-for="a in anios" :key="a" :value="a">{{ a }}</option>
           </select>
         </div>
       </div>
 
-      <p v-if="modulo === 'deudas'" class="text-[11px] text-theme-text-muted px-1">
+      <p v-if="modulo === 'deudas'" class="text-[0.6875rem] text-theme-text-muted px-1">
         El reporte de deudas muestra el estado actual de las deudas pendientes (no depende del mes).
       </p>
 
       <!-- Formato -->
       <div>
-        <label class="block text-[10px] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Formato</label>
+        <label class="block text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-1.5 px-1">Formato</label>
         <div class="grid grid-cols-2 gap-2">
           <button
             class="py-2.5 rounded-xl border text-sm font-medium transition-colors"

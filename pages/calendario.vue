@@ -14,7 +14,7 @@
         </button>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl font-bold text-gradient-blue">Calendario financiero</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">Cobros, pagos y vencimientos</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">Cobros, pagos y vencimientos</p>
         </div>
       </div>
     </div>
@@ -26,7 +26,7 @@
           v-for="f in filtros"
           :key="f.valor"
           @click="toggleFiltro(f.valor)"
-          class="px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all"
+          class="px-3 min-h-[2.5rem] rounded-full text-[0.6875rem] font-semibold border transition-all"
           :class="filtrosActivos.has(f.valor) ? `border-transparent text-white` : 'border-theme-border text-theme-text-muted'"
           :style="filtrosActivos.has(f.valor) ? { backgroundColor: f.color } : {}"
         >
@@ -38,7 +38,7 @@
     <!-- Navegador de mes -->
     <div class="px-5 lg:px-0 mb-3 flex items-center justify-between">
       <button
-        class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
+        class="w-10 h-10 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
         @click="cambiarMes(-1)"
         aria-label="Mes anterior"
       >
@@ -46,7 +46,7 @@
       </button>
       <p class="text-sm font-bold text-theme-text">{{ etiquetaMes }}</p>
       <button
-        class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
+        class="w-10 h-10 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
         @click="cambiarMes(1)"
         aria-label="Mes siguiente"
       >
@@ -57,7 +57,7 @@
     <!-- Grilla calendario -->
     <div class="px-3 lg:px-0 mb-4">
       <div class="grid grid-cols-7 gap-1 mb-1 px-1">
-        <div v-for="d in ['L','M','X','J','V','S','D']" :key="d" class="text-center text-[10px] font-semibold text-theme-text-muted">{{ d }}</div>
+        <div v-for="d in ['L','M','X','J','V','S','D']" :key="d" class="text-center text-[0.6875rem] font-semibold text-theme-text-muted">{{ d }}</div>
       </div>
       <div class="grid grid-cols-7 gap-1">
         <button
@@ -65,7 +65,7 @@
           :key="i"
           @click="cell.dia ? abrirDia(cell.fecha) : null"
           :disabled="!cell.dia"
-          class="aspect-square rounded-lg flex flex-col items-center justify-center text-[10px] relative transition-colors"
+          class="aspect-square rounded-lg flex flex-col items-center justify-center text-[0.6875rem] relative transition-colors"
           :class="[
             cell.dia ? 'bg-theme-card border border-theme-border active:bg-theme-border-md' : '',
             cell.esHoy ? 'ring-2 ring-violet-400' : '',
@@ -79,7 +79,7 @@
               class="w-1.5 h-1.5 rounded-full"
               :style="{ backgroundColor: ev.color }"
             ></span>
-            <span v-if="cell.eventos.length > 3" class="text-[8px] text-theme-text-muted ml-0.5">+{{ cell.eventos.length - 3 }}</span>
+            <span v-if="cell.eventos.length > 3" class="text-[0.625rem] text-theme-text-muted ml-0.5">+{{ cell.eventos.length - 3 }}</span>
           </div>
         </button>
       </div>
@@ -87,7 +87,7 @@
 
     <!-- Lista del mes -->
     <div class="px-5 lg:px-0 mb-4">
-      <p class="text-[10px] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Eventos del mes ({{ eventosDelMes.length }})</p>
+      <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Eventos del mes ({{ eventosDelMes.length }})</p>
       <div v-if="cargando" class="space-y-2">
         <div v-for="i in 3" :key="i" class="h-14 w-full rounded-xl bg-theme-border-md shimmer"></div>
       </div>
@@ -104,7 +104,7 @@
           <div class="flex-1 min-w-0">
             <!-- 2 líneas: conceptos largos planificados se truncaban con texto grande -->
             <p class="text-xs font-semibold text-theme-text line-clamp-2 break-words leading-snug">{{ ev.titulo }}</p>
-            <p class="text-[10px] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }} · {{ fechaCorta(ev.fecha) }}</p>
+            <p class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }} · {{ fechaCorta(ev.fecha) }}</p>
           </div>
           <div class="text-right shrink-0">
             <p class="text-xs font-bold" :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'">
@@ -136,7 +136,7 @@
             <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0" :style="{ backgroundColor: ev.color + '20' }">{{ ev.icono }}</div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-theme-text truncate">{{ ev.titulo }}</p>
-              <p class="text-[10px] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }}</p>
+              <p class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }}</p>
             </div>
             <p class="text-xs font-bold" :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'">
               {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(ev.monto)) }}

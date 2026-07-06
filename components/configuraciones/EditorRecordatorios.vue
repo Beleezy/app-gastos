@@ -32,7 +32,7 @@
       </span>
 
       <button
-        class="text-theme-text-muted hover:text-red-400 transition-colors p-1"
+        class="text-theme-text-muted hover:text-red-400 transition-colors w-10 h-10 -my-1 flex items-center justify-center shrink-0"
         :aria-label="`Eliminar recordatorio ${i + 1}`"
         @click="eliminar(i)"
       >
@@ -52,14 +52,14 @@
 
     <div class="flex justify-end gap-2 pt-2">
       <button
-        class="text-xs text-theme-text-sec hover:text-theme-text px-3 py-1.5 disabled:opacity-40"
+        class="text-xs text-theme-text-sec hover:text-theme-text px-3 min-h-[2.5rem] disabled:opacity-40"
         :disabled="!cambios || guardando"
         @click="cancelar"
       >
         Cancelar
       </button>
       <button
-        class="bg-theme-accent text-theme-on-accent rounded-lg px-3 py-1.5 text-xs font-semibold disabled:opacity-40 transition-colors"
+        class="bg-theme-accent text-theme-on-accent rounded-lg px-4 min-h-[2.5rem] text-xs font-semibold disabled:opacity-40 transition-colors"
         :disabled="!cambios || guardando"
         @click="onGuardar"
       >

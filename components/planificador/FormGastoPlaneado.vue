@@ -5,7 +5,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
       </svg>
-      <div class="text-[11px] text-theme-accent leading-tight">
+      <div class="text-[0.6875rem] text-theme-accent leading-tight">
         Gasto recurrente. Al guardar elegirás si los cambios se aplican solo a este mes o también a los meses futuros.
       </div>
     </div>
@@ -43,7 +43,7 @@
           >
             <span class="text-sm">{{ getEmoji(cat.nombre) }}</span>
           </div>
-          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-auto w-full">{{ cat.nombre }}</span>
+          <span class="text-[0.6875rem] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-none w-full">{{ cat.nombre }}</span>
         </button>
       </div>
     </div>
@@ -54,10 +54,10 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
       </svg>
       <div class="flex-1 min-w-0">
-        <p class="text-[11px] text-emerald-400 leading-tight">
+        <p class="text-[0.6875rem] text-emerald-400 leading-tight">
           Al marcar este gasto como pagado se registrará como ahorro automáticamente.
         </p>
-        <NuxtLink to="/ahorros" class="text-[10px] text-emerald-400 font-medium underline mt-1 inline-block">
+        <NuxtLink to="/ahorros" class="text-[0.6875rem] text-emerald-400 font-medium underline mt-1 inline-block">
           Ver mis ahorros
         </NuxtLink>
       </div>
@@ -86,7 +86,7 @@
       </label>
       <div class="bg-theme-input rounded-xl p-3 border border-theme-border">
         <div class="grid grid-cols-7 gap-1.5">
-          <span v-for="d in ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']" :key="d" class="text-center text-[10px] text-theme-text-muted font-medium pb-1">
+          <span v-for="d in ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']" :key="d" class="text-center text-[0.6875rem] text-theme-text-muted font-medium pb-1">
             {{ d }}
           </span>
           <span v-for="i in primerDiaOffset" :key="'empty-' + i"></span>
@@ -168,7 +168,7 @@
             @click="confirmarGuardar('solo')"
           >
             Solo este mes
-            <span class="block text-[10px] text-theme-text-muted mt-0.5">Este registro se desvincula y no afecta los futuros</span>
+            <span class="block text-[0.6875rem] text-theme-text-muted mt-0.5">Este registro se desvincula y no afecta los futuros</span>
           </button>
           <button
             class="w-full rounded-xl bg-theme-accent px-3 py-2.5 text-sm font-medium text-theme-on-accent transition-colors hover:bg-theme-accent-dark"
@@ -176,7 +176,7 @@
             @click="confirmarGuardar('futuros')"
           >
             Este y los meses futuros
-            <span class="block text-[10px] text-theme-on-accent opacity-70 mt-0.5">Propaga los cambios a todas las instancias del grupo</span>
+            <span class="block text-[0.6875rem] text-theme-on-accent opacity-70 mt-0.5">Propaga los cambios a todas las instancias del grupo</span>
           </button>
           <button
             class="w-full rounded-xl py-2 text-sm text-theme-text-sec transition-colors hover:text-theme-text"

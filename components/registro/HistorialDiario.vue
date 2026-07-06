@@ -98,15 +98,15 @@
                       aria-label="Seleccionar todos los gastos del día"
                       @click.stop="toggleSelectDia(dia)"
                     >
-                      <span class="text-[8px] uppercase leading-none font-semibold">{{ nombreDiaSemana(dia.fecha) }}</span>
+                      <span class="text-[0.625rem] uppercase leading-none font-semibold">{{ nombreDiaSemana(dia.fecha) }}</span>
                       <span class="text-xs font-bold leading-tight">{{ extraerDia(dia.fecha) }}</span>
                       <span
                         v-if="estadoSeleccionDia(dia) !== 'none'"
-                        class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center text-[9px] font-bold leading-none shadow"
+                        class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center text-[0.6875rem] font-bold leading-none shadow"
                       >{{ estadoSeleccionDia(dia) === 'all' ? '✓' : '−' }}</span>
                     </span>
                     <div v-else class="w-9 h-9 rounded-lg flex flex-col items-center justify-center bg-theme-card border border-theme-border shrink-0">
-                      <span class="text-[8px] uppercase leading-none font-semibold text-theme-text-muted">{{ nombreDiaSemana(dia.fecha) }}</span>
+                      <span class="text-[0.625rem] uppercase leading-none font-semibold text-theme-text-muted">{{ nombreDiaSemana(dia.fecha) }}</span>
                       <span class="text-xs font-bold text-theme-text leading-tight">{{ extraerDia(dia.fecha) }}</span>
                     </div>
                     <div class="flex-1 min-w-0 text-left">
@@ -120,13 +120,13 @@
                         <span class="text-sm font-semibold text-theme-text shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(dia.total) }}</span>
                       </div>
                       <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
-                        <span class="text-[10px] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
-                        <span v-if="getStats(dia).topCat" class="text-[10px] px-1 py-0.5 rounded leading-none font-medium"
+                        <span class="text-[0.6875rem] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
+                        <span v-if="getStats(dia).topCat" class="text-[0.6875rem] px-1 py-0.5 rounded leading-none font-medium"
                           :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
                         >
                           {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
                         </span>
-                        <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">· {{ getStats(dia).rangoHoras }}</span>
+                        <span v-if="getStats(dia).rangoHoras" class="text-[0.6875rem] text-theme-text-muted leading-none">· {{ getStats(dia).rangoHoras }}</span>
                       </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
@@ -202,11 +202,11 @@
                 aria-label="Seleccionar todos los gastos del día"
                 @click.stop="toggleSelectDia(dia)"
               >
-                <span class="text-[9px] uppercase leading-none font-semibold">{{ nombreDiaSemana(dia.fecha) }}</span>
+                <span class="text-[0.6875rem] uppercase leading-none font-semibold">{{ nombreDiaSemana(dia.fecha) }}</span>
                 <span class="text-base font-bold leading-tight">{{ extraerDia(dia.fecha) }}</span>
                 <span
                   v-if="estadoSeleccionDia(dia) !== 'none'"
-                  class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center text-[9px] font-bold leading-none shadow"
+                  class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent flex items-center justify-center text-[0.6875rem] font-bold leading-none shadow"
                 >{{ estadoSeleccionDia(dia) === 'all' ? '✓' : '−' }}</span>
               </span>
               <div
@@ -214,7 +214,7 @@
                 class="w-11 h-11 rounded-xl flex flex-col items-center justify-center transition-colors shrink-0"
                 :class="diasExpandidos.has(dia.fecha) ? 'bg-theme-accent-bg border border-theme-accent/30' : 'bg-theme-border-md'"
               >
-                <span class="text-[9px] uppercase leading-none font-semibold" :class="diasExpandidos.has(dia.fecha) ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
+                <span class="text-[0.6875rem] uppercase leading-none font-semibold" :class="diasExpandidos.has(dia.fecha) ? 'text-theme-accent' : 'text-theme-text-muted'">{{ nombreDiaSemana(dia.fecha) }}</span>
                 <span class="text-base font-bold leading-tight" :class="diasExpandidos.has(dia.fecha) ? 'text-theme-accent' : 'text-theme-text'">{{ extraerDia(dia.fecha) }}</span>
               </div>
               <div class="flex-1 min-w-0 text-left">
@@ -224,18 +224,18 @@
                   <span class="text-sm font-bold text-theme-text shrink-0">{{ currencySymbol }}&nbsp;{{ formatMonto(dia.total) }}</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
+                  <span class="text-[0.6875rem] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
                     {{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}
                   </span>
-                  <span v-if="getStats(dia).topCat" class="text-[10px] px-1.5 py-0.5 rounded-md leading-none font-medium"
+                  <span v-if="getStats(dia).topCat" class="text-[0.6875rem] px-1.5 py-0.5 rounded-md leading-none font-medium"
                     :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
                   >
                     {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
                   </span>
-                  <span class="text-[10px] text-theme-text-muted leading-none">
+                  <span class="text-[0.6875rem] text-theme-text-muted leading-none">
                     Prom. {{ currencySymbol }}&nbsp;{{ formatMonto(getStats(dia).promedio) }}
                   </span>
-                  <span v-if="getStats(dia).rangoHoras" class="text-[10px] text-theme-text-muted leading-none">
+                  <span v-if="getStats(dia).rangoHoras" class="text-[0.6875rem] text-theme-text-muted leading-none">
                     · {{ getStats(dia).rangoHoras }}
                   </span>
                 </div>
@@ -298,11 +298,11 @@
           </svg>
         </button>
         <div class="flex flex-col min-w-0 shrink">
-          <span class="text-[10px] text-theme-text-sec leading-none">Seleccionados</span>
+          <span class="text-[0.6875rem] text-theme-text-sec leading-none">Seleccionados</span>
           <span class="text-xs font-bold text-theme-text leading-tight">{{ selectedIds.size }} gasto{{ selectedIds.size === 1 ? '' : 's' }}</span>
         </div>
         <button
-          class="px-2.5 py-1.5 rounded-lg bg-theme-border-md text-theme-text-sec text-[11px] font-medium hover:text-theme-text transition-colors whitespace-nowrap shrink-0"
+          class="px-2.5 py-1.5 rounded-lg bg-theme-border-md text-theme-text-sec text-[0.6875rem] font-medium hover:text-theme-text transition-colors whitespace-nowrap shrink-0"
           @click="toggleSelectAllDia"
         >
           {{ todosSeleccionadosEnDia ? 'Cancelar' : 'Todo dia' }}
@@ -318,7 +318,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
-          <span class="hidden lg:inline text-[11px]">Editar</span>
+          <span class="hidden lg:inline text-[0.6875rem]">Editar</span>
         </button>
         <!-- Eliminar: solo ícono en móvil, texto en desktop -->
         <button
@@ -331,7 +331,7 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          <span class="hidden lg:inline text-[11px]">Eliminar</span>
+          <span class="hidden lg:inline text-[0.6875rem]">Eliminar</span>
         </button>
       </div>
     </Transition>

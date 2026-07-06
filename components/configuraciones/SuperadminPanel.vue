@@ -12,15 +12,15 @@
           </svg>
         </div>
         <div class="min-w-0">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-theme-text">Control de acceso</h3>
-            <span class="px-2 py-0.5 rounded-full bg-theme-accent text-theme-on-accent text-[10px] font-bold uppercase tracking-wider">Superadmin</span>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h3 class="font-semibold text-theme-text whitespace-nowrap">Control de acceso</h3>
+            <span class="px-2 py-0.5 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] font-bold uppercase tracking-wider shrink-0">Superadmin</span>
           </div>
           <p class="text-sm text-theme-text-sec leading-relaxed">Aprueba o limita quién puede usar el sistema.</p>
         </div>
       </div>
       <div class="flex items-center gap-2 shrink-0">
-        <span v-if="pendientes.length" class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[11px] font-semibold">
+        <span v-if="pendientes.length" class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[0.6875rem] font-semibold">
           {{ pendientes.length }} pend.
         </span>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-theme-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

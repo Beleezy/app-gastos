@@ -14,7 +14,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
         </svg>
         Filtros
-        <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[9px] flex items-center justify-center font-bold leading-none">
+        <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none">
           {{ conteoFiltrosActivos }}
         </span>
       </button>
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Filtro por medio -->
-        <div v-if="medios.length > 0" class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+        <div v-if="medios.length > 0" class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 pl-1 pr-8 scrollbar-hide scroll-fade-r">
           <button
             class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
             :class="!medioActivo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
@@ -99,7 +99,7 @@
         </div>
 
         <!-- Ordenar por -->
-        <div class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1">
+        <div class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 pl-1 pr-8 scrollbar-hide scroll-fade-r">
           <span class="shrink-0 flex items-center text-xs text-theme-text-sec pr-1">Ordenar:</span>
           <button
             v-for="o in opcionesOrden"

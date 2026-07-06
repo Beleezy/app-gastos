@@ -1,7 +1,7 @@
 <!--
   Componente <Chip /> unificado para badges, estados y filtros.
   Usado por el rediseño UI V2. Reemplaza los múltiples patrones de
-  "px-2 py-0.5 rounded-full text-[10px]" duplicados.
+  "px-2 py-0.5 rounded-full text-[0.6875rem]" duplicados.
 
   Variantes: success | warning | danger | accent | neutral
   Tamaños:   sm (badge ~22px) | md (filtro/chip ~44px tap target)
@@ -50,7 +50,7 @@ const sizeClasses = computed(() => {
   if (props.size === 'md') {
     return 'px-3.5 py-2 rounded-full text-sm tap-44'
   }
-  return 'px-2 py-0.5 rounded-full text-[11px]'
+  return 'px-2 py-0.5 rounded-full text-[0.6875rem]'
 })
 
 const variantClasses = computed(() => {

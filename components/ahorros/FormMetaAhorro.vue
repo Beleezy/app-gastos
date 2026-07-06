@@ -34,7 +34,7 @@
               class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
             />
           </div>
-          <div v-if="metaMensual" class="mt-2 text-[10px] text-theme-text-muted">
+          <div v-if="metaMensual" class="mt-2 text-[0.6875rem] text-theme-text-muted">
             Meta actual: {{ currencySymbol }}&nbsp;{{ formatMonto(metaMensual) }}
           </div>
         </div>
@@ -53,7 +53,7 @@
               class="w-full pl-9 pr-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
             />
           </div>
-          <div v-if="metaGlobal" class="mt-2 text-[10px] text-theme-text-muted">
+          <div v-if="metaGlobal" class="mt-2 text-[0.6875rem] text-theme-text-muted">
             Meta actual: {{ currencySymbol }}&nbsp;{{ formatMonto(metaGlobal) }}
           </div>
         </div>

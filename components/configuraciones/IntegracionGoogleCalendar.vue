@@ -8,13 +8,13 @@
       <label class="text-sm font-medium text-theme-text flex-1">Google Calendar</label>
       <span
         v-if="estado.conectado && !estado.ultimoError"
-        class="flex items-center gap-1 text-[10px] text-emerald-400"
+        class="flex items-center gap-1 text-[0.6875rem] text-emerald-400"
       >
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Conectado
       </span>
       <span
         v-else-if="estado.conectado && estado.ultimoError"
-        class="flex items-center gap-1 text-[10px] text-red-400"
+        class="flex items-center gap-1 text-[0.6875rem] text-red-400"
         :title="estado.ultimoError"
       >
         <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> Error

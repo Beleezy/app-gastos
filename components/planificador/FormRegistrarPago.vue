@@ -42,7 +42,7 @@
           >
             <span class="text-sm">{{ medio.icono || '💰' }}</span>
           </div>
-          <span class="text-[10px] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-auto w-full">{{ medio.nombre }}</span>
+          <span class="text-[0.6875rem] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-none w-full">{{ medio.nombre }}</span>
         </button>
       </div>
     </div>

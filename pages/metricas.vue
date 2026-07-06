@@ -15,7 +15,7 @@
         </button>
         <div class="flex-1 min-w-0">
           <h1 class="text-xl font-bold text-gradient-blue">Métricas</h1>
-          <p class="text-[11px] text-theme-text-sec mt-0.5">Tu historia financiera, mes a mes</p>
+          <p class="text-[0.6875rem] text-theme-text-sec mt-0.5">Tu historia financiera, mes a mes</p>
         </div>
       </div>
     </div>
@@ -38,28 +38,28 @@
     <!-- KPIs -->
     <div class="px-5 lg:px-0 mb-4 grid grid-cols-2 lg:grid-cols-4 gap-2.5">
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
-        <p class="text-[10px] text-theme-text-muted font-medium">Promedio gastos</p>
+        <p class="text-[0.6875rem] text-theme-text-muted font-medium">Promedio gastos</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
         <p v-else class="text-lg font-bold text-rose-400 mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(promedios.gastosMensual) }}</p>
-        <p class="text-[10px] text-theme-text-muted mt-0.5">por mes</p>
+        <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">por mes</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
-        <p class="text-[10px] text-theme-text-muted font-medium">Promedio ingresos</p>
+        <p class="text-[0.6875rem] text-theme-text-muted font-medium">Promedio ingresos</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
         <p v-else class="text-lg font-bold text-emerald-400 mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(promedios.ingresosMensual) }}</p>
-        <p class="text-[10px] text-theme-text-muted mt-0.5">por mes</p>
+        <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">por mes</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
-        <p class="text-[10px] text-theme-text-muted font-medium">Promedio ahorros</p>
+        <p class="text-[0.6875rem] text-theme-text-muted font-medium">Promedio ahorros</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
         <p v-else class="text-lg font-bold text-sky-400 mt-1">{{ currencySymbol }}&nbsp;{{ formatMonto(promedios.ahorrosMensual) }}</p>
-        <p class="text-[10px] text-theme-text-muted mt-0.5">por mes</p>
+        <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">por mes</p>
       </div>
       <div class="bg-theme-card rounded-2xl p-3.5 border border-theme-border">
-        <p class="text-[10px] text-theme-text-muted font-medium">Tasa de ahorro</p>
+        <p class="text-[0.6875rem] text-theme-text-muted font-medium">Tasa de ahorro</p>
         <div v-if="cargando" class="h-5 w-20 rounded-md bg-theme-border-md shimmer mt-1.5"></div>
         <p v-else class="text-lg font-bold mt-1" :class="tasaAhorro >= 0 ? 'text-emerald-400' : 'text-red-400'">{{ tasaAhorro.toFixed(1) }}%</p>
-        <p class="text-[10px] text-theme-text-muted mt-0.5">ingresos guardados</p>
+        <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">ingresos guardados</p>
       </div>
     </div>
 
@@ -68,7 +68,7 @@
       <div class="bg-theme-card rounded-2xl p-4 border border-theme-border">
         <div class="flex items-center justify-between mb-3">
           <p class="text-xs font-semibold text-theme-text">Flujo mensual</p>
-          <div class="flex items-center gap-3 text-[10px] text-theme-text-muted">
+          <div class="flex items-center gap-3 text-[0.6875rem] text-theme-text-muted">
             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-emerald-400"></span>Ingresos</span>
             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-sm bg-rose-400"></span>Gastos</span>
           </div>
@@ -106,7 +106,7 @@
             <div
               v-for="p in serie"
               :key="`l-${p.anio}-${p.mes}`"
-              class="text-[9px] text-theme-text-muted text-center truncate"
+              class="text-[0.6875rem] text-theme-text-muted text-center truncate"
             >
               {{ etiquetaMes(p.mes) }}
             </div>
@@ -123,7 +123,7 @@
           <button
             v-if="!cargando"
             @click="exportarCsv"
-            class="text-[10px] text-theme-accent hover:text-theme-accent-light transition-colors"
+            class="text-[0.6875rem] text-theme-accent hover:text-theme-accent-light transition-colors min-h-[2.75rem] px-3 -my-2"
           >
             Exportar CSV
           </button>
@@ -147,15 +147,15 @@
             </div>
             <div class="grid grid-cols-3 gap-1.5">
               <div class="min-w-0">
-                <p class="text-[9px] uppercase tracking-wide text-theme-text-muted">Ingresos</p>
+                <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-muted">Ingresos</p>
                 <SharedMoney :value="p.ingresos" compact entero tone="green" class="text-xs font-medium block mt-0.5" />
               </div>
               <div class="min-w-0">
-                <p class="text-[9px] uppercase tracking-wide text-theme-text-muted">Gastos</p>
+                <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-muted">Gastos</p>
                 <SharedMoney :value="p.gastos" compact entero tone="red" class="text-xs font-medium block mt-0.5" />
               </div>
               <div class="min-w-0">
-                <p class="text-[9px] uppercase tracking-wide text-theme-text-muted">Ahorros</p>
+                <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-muted">Ahorros</p>
                 <SharedMoney :value="p.ahorros" compact entero tone="sky" class="text-xs font-medium block mt-0.5" />
               </div>
             </div>
@@ -170,9 +170,9 @@
         <div class="p-3 border-b border-theme-border flex items-center justify-between">
           <div>
             <p class="text-xs font-semibold text-theme-text">Gastos recurrentes detectados</p>
-            <p class="text-[10px] text-theme-text-muted mt-0.5">Patrones que se repiten en tus últimos 6 meses</p>
+            <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">Patrones que se repiten en tus últimos 6 meses</p>
           </div>
-          <span v-if="!cargandoRecurrentes" class="text-[10px] text-theme-text-muted">{{ recurrentes.length }} encontrados</span>
+          <span v-if="!cargandoRecurrentes" class="text-[0.6875rem] text-theme-text-muted">{{ recurrentes.length }} encontrados</span>
         </div>
         <div v-if="cargandoRecurrentes" class="p-4 space-y-2">
           <div class="h-10 w-full rounded-xl bg-theme-border-md shimmer"></div>
@@ -195,14 +195,14 @@
             </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-theme-text truncate">{{ r.concepto }}</p>
-              <p class="text-[10px] text-theme-text-muted truncate">
+              <p class="text-[0.6875rem] text-theme-text-muted truncate">
                 {{ r.categoria.nombre || 'Sin categoría' }} · {{ r.mesesDistintos }} meses · último {{ r.ultimaFecha }}
               </p>
             </div>
             <div class="text-right shrink-0">
               <p class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(r.promedio) }}</p>
               <div class="mt-0.5 flex items-center justify-end gap-1">
-                <span class="text-[9px] text-theme-text-muted">{{ r.confianza }}%</span>
+                <span class="text-[0.6875rem] text-theme-text-muted">{{ r.confianza }}%</span>
                 <div class="w-10 h-1 bg-theme-input rounded-full overflow-hidden">
                   <div
                     class="h-full rounded-full"
@@ -223,7 +223,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-accent mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <div class="text-[11px] text-theme-text-muted leading-relaxed space-y-1">
+        <div class="text-[0.6875rem] text-theme-text-muted leading-relaxed space-y-1">
           <p><strong class="text-theme-text">Módulo independiente.</strong> No modifica /registro, /planificador ni /deudas.</p>
           <p>Próximas integraciones naturales:</p>
           <ul class="list-disc list-inside space-y-0.5">

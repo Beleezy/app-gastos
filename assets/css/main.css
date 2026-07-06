@@ -414,6 +414,14 @@ html.light {
     scrollbar-width: none;
   }
 
+  /* Affordance de scroll horizontal: desvanece el borde derecho para indicar
+     que hay más contenido. Combinar con padding-right >= 2rem en el contenedor
+     para que el último elemento no quede bajo el fade al llegar al final. */
+  .scroll-fade-r {
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 1.75rem), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 1.75rem), transparent);
+  }
+
   /* Prevent iOS Safari auto-zoom on input focus (requires font-size >= 16px) */
   input, textarea, select {
     font-size: max(16px, 1em);

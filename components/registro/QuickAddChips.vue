@@ -1,7 +1,7 @@
 <template>
-  <div v-if="chips.length > 0" class="overflow-x-auto scrollbar-hide">
+  <div v-if="chips.length > 0" class="overflow-x-auto scrollbar-hide scroll-fade-r pr-8">
     <div class="flex items-center gap-1.5 min-w-max">
-      <span class="text-[10px] uppercase tracking-wider text-theme-text-muted font-semibold pr-1">Rápido</span>
+      <span class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted font-semibold pr-1">Rápido</span>
       <div
         v-for="chip in chips"
         :key="chip.key"
@@ -17,13 +17,13 @@
         <span class="text-sm leading-none">{{ chip.icono || '⚡' }}</span>
         <span class="truncate max-w-[110px]">{{ chip.concepto }}</span>
         <span v-if="!editMode" class="text-theme-accent font-semibold">{{ currencySymbol }}{{ formatMonto(chip.monto) }}</span>
-        <span v-else class="w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center text-[9px] leading-none ml-0.5">✕</span>
+        <span v-else class="w-4 h-4 rounded-full bg-red-500 text-white flex items-center justify-center text-[0.6875rem] leading-none ml-0.5">✕</span>
       </div>
 
       <!-- Botón para salir del modo edición -->
       <button
         v-if="editMode"
-        class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full text-[10px] font-semibold whitespace-nowrap bg-theme-accent/10 text-theme-accent border border-theme-accent/30"
+        class="flex items-center gap-1 pl-2 pr-2.5 py-1.5 rounded-full text-[0.6875rem] font-semibold whitespace-nowrap bg-theme-accent/10 text-theme-accent border border-theme-accent/30"
         @click="editMode = false"
       >
         Listo

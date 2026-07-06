@@ -48,7 +48,7 @@
               {{ s.nombre.charAt(0).toUpperCase() }}
             </div>
             <span>{{ s.nombre }}</span>
-            <span v-if="s.tipo === 'organizacion'" class="text-[9px] bg-primary-600 px-1 py-0.5 rounded text-theme-text-muted">ORG</span>
+            <span v-if="s.tipo === 'organizacion'" class="text-[0.6875rem] bg-primary-600 px-1 py-0.5 rounded text-theme-text-muted">ORG</span>
           </button>
         </div>
       </div>
@@ -118,7 +118,7 @@
         type="date"
         class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
       />
-      <p class="text-[10px] text-theme-text-muted mt-1">Fecha acordada para el pago (si la hay)</p>
+      <p class="text-[0.6875rem] text-theme-text-muted mt-1">Fecha acordada para el pago (si la hay)</p>
     </div>
 
     <!-- Notas -->
@@ -237,7 +237,10 @@ async function guardar() {
     emit('saved')
     emit('close')
   } catch (e) {
-    useToast().error(handleApiError(e))
+    // Mensaje inline en el modal además del toast: el toast puede quedar
+    // tapado por el bottom-sheet y el guardado fallido parecía silencioso.
+    errorMsg.value = handleApiError(e)
+    useToast().error(errorMsg.value)
   } finally {
     saving.value = false
   }

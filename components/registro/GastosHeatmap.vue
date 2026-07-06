@@ -1,6 +1,6 @@
 <template>
   <section class="bg-theme-card rounded-2xl border border-theme-border p-4 md:p-5">
-    <header class="flex items-center justify-between mb-3">
+    <header class="flex items-center justify-between mb-3 flex-wrap gap-x-3 gap-y-1.5">
       <div>
         <h3 class="text-sm md:text-base font-semibold text-theme-text">Mapa de calor del mes</h3>
         <p class="text-xs text-theme-text-sec">
@@ -42,7 +42,12 @@
         :disabled="!c.fecha"
         @click="seleccionarDia(c)"
       >
-        <span v-if="c.fecha" class="block text-[0.55rem] text-theme-text-muted text-right pr-1 pt-0.5">
+        <!-- Texto blanco sobre celdas intensas: el gris muted perdía contraste -->
+        <span
+          v-if="c.fecha"
+          class="block text-[0.6875rem] font-medium text-right pr-1 pt-0.5 leading-none"
+          :class="c.intensidad > 0.55 ? 'text-white' : 'text-theme-text-muted'"
+        >
           {{ Number(c.fecha.slice(8, 10)) }}
         </span>
       </button>
@@ -53,7 +58,7 @@
       <div v-if="fechaSeleccionada" class="mt-4 pt-4 border-t border-theme-border">
         <div class="flex items-center justify-between mb-3">
           <div class="min-w-0">
-            <p class="text-[10px] uppercase tracking-wider text-theme-text-muted font-semibold">Detalle del día</p>
+            <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted font-semibold">Detalle del día</p>
             <h4 class="text-sm font-semibold text-theme-text truncate">{{ fechaFormateada }}</h4>
           </div>
           <div class="flex items-center gap-2 shrink-0">
@@ -88,7 +93,7 @@
             <div class="flex-1 min-w-0">
               <p class="text-sm text-theme-text font-medium break-words leading-tight">{{ g.concepto }}</p>
               <span
-                class="inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-md leading-none mt-1"
+                class="inline-block text-[0.6875rem] font-medium px-1.5 py-0.5 rounded-md leading-none mt-1"
                 :style="{ backgroundColor: (g.categoriaColor || '#6b7280') + '18', color: g.categoriaColor || '#6b7280' }"
               >
                 {{ g.categoriaNombre || 'Otros' }}

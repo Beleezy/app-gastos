@@ -43,10 +43,20 @@ function decimalOptional(value, label) {
   return round2(number)
 }
 
+// Un precio 0 (o vacío) no es un precio de referencia: no debe entrar al
+// min-max ni al promedio (antes "S/ 0" arrastraba los totales del proyecto
+// y el chip "Mejor precio" premiaba opciones con 0).
+function precioValido(value) {
+  return value !== null && value !== undefined && value > 0 ? value : null
+}
+
 function fallbackAverage({ precioMinimo, precioMaximo, precioPromedio }) {
-  if (precioPromedio !== null && precioPromedio !== undefined) return precioPromedio
-  if (precioMinimo !== null && precioMaximo !== null) return round2((precioMinimo + precioMaximo) / 2)
-  return precioMinimo ?? precioMaximo ?? null
+  const promedio = precioValido(precioPromedio)
+  if (promedio !== null) return promedio
+  const minimo = precioValido(precioMinimo)
+  const maximo = precioValido(precioMaximo)
+  if (minimo !== null && maximo !== null) return round2((minimo + maximo) / 2)
+  return minimo ?? maximo ?? null
 }
 
 function hasOptionContent(option) {
@@ -229,8 +239,8 @@ function summarizeDetail(opciones) {
   const avgCandidates = []
 
   for (const opcion of opciones) {
-    const minimo = opcion.precioMinimo ?? opcion.precioPromedio ?? opcion.precioMaximo
-    const maximo = opcion.precioMaximo ?? opcion.precioPromedio ?? opcion.precioMinimo
+    const minimo = precioValido(opcion.precioMinimo) ?? precioValido(opcion.precioPromedio) ?? precioValido(opcion.precioMaximo)
+    const maximo = precioValido(opcion.precioMaximo) ?? precioValido(opcion.precioPromedio) ?? precioValido(opcion.precioMinimo)
     const promedio = fallbackAverage(opcion)
 
     if (minimo !== null) minCandidates.push(minimo)

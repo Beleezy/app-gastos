@@ -15,7 +15,7 @@
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-theme-text truncate">{{ medio.nombre }}</p>
-          <p class="text-[10px] text-theme-text-sec">{{ medio.tipo || 'otro' }}</p>
+          <p class="text-[0.6875rem] text-theme-text-sec">{{ medio.tipo || 'otro' }}</p>
         </div>
         <button
           class="w-7 h-7 flex items-center justify-center rounded-lg text-theme-text-sec hover:text-red-400 transition-colors"

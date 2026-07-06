@@ -23,22 +23,22 @@
         <div v-for="(d, i) in deudasParseadas" :key="'d-'+i"
           class="bg-theme-input rounded-xl p-3 border border-theme-border">
           <div class="flex items-center gap-2 mb-2">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium"
+            <span class="px-2 py-0.5 rounded-full text-[0.6875rem] font-medium"
               :class="d.tipo === 'me_deben' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'">
               {{ d.tipo === 'me_deben' ? 'Me debe' : 'Yo debo' }}
             </span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-sm">
             <div>
-              <label class="text-[10px] text-theme-text-sec">Persona</label>
+              <label class="text-[0.6875rem] text-theme-text-sec">Persona</label>
               <input v-model="d.persona" class="w-full px-2 py-1.5 rounded-lg bg-theme-card border border-theme-border text-theme-text text-xs" />
             </div>
             <div>
-              <label class="text-[10px] text-theme-text-sec">Monto</label>
+              <label class="text-[0.6875rem] text-theme-text-sec">Monto</label>
               <input v-model.number="d.monto" type="number" step="0.01" class="w-full px-2 py-1.5 rounded-lg bg-theme-card border border-theme-border text-theme-text text-xs" />
             </div>
             <div class="col-span-2">
-              <label class="text-[10px] text-theme-text-sec">Concepto</label>
+              <label class="text-[0.6875rem] text-theme-text-sec">Concepto</label>
               <input v-model="d.concepto" class="w-full px-2 py-1.5 rounded-lg bg-theme-card border border-theme-border text-theme-text text-xs" />
             </div>
           </div>
@@ -51,19 +51,19 @@
         <div v-for="(p, i) in pagosParseados" :key="'p-'+i"
           class="bg-theme-input rounded-xl p-3 border border-theme-accent">
           <div class="flex items-center gap-2 mb-2">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-theme-accent-bg text-theme-accent">Pago</span>
+            <span class="px-2 py-0.5 rounded-full text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent">Pago</span>
           </div>
           <div class="grid grid-cols-2 gap-2 text-sm">
             <div>
-              <label class="text-[10px] text-theme-text-sec">Persona</label>
+              <label class="text-[0.6875rem] text-theme-text-sec">Persona</label>
               <input v-model="p.persona" class="w-full px-2 py-1.5 rounded-lg bg-theme-card border border-theme-border text-theme-text text-xs" />
             </div>
             <div>
-              <label class="text-[10px] text-theme-text-sec">Monto</label>
+              <label class="text-[0.6875rem] text-theme-text-sec">Monto</label>
               <input v-model.number="p.monto" type="number" step="0.01" class="w-full px-2 py-1.5 rounded-lg bg-theme-card border border-theme-border text-theme-text text-xs" />
             </div>
             <div class="col-span-2">
-              <label class="text-[10px] text-theme-text-sec">Notas</label>
+              <label class="text-[0.6875rem] text-theme-text-sec">Notas</label>
               <input v-model="p.notas" placeholder="Opcional..." class="w-full px-2 py-1.5 rounded-lg bg-theme-card border border-theme-border text-theme-text text-xs placeholder-gray-600" />
             </div>
           </div>
