@@ -34,10 +34,11 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Nombre</label>
+            <label for="cfg-nombre" class="text-sm font-medium text-theme-text">Nombre</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Tu nombre aparecerá en los reportes PDF generados.</p>
           <input
+            id="cfg-nombre"
             v-model="form.nombre"
             type="text"
             maxlength="100"
@@ -52,13 +53,14 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Presupuesto mensual por defecto</label>
+            <label for="cfg-presupuesto" class="text-sm font-medium text-theme-text">Presupuesto mensual por defecto</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Este monto se usará como presupuesto base al crear un nuevo mes en el planificador.</p>
           <div class="flex items-center gap-2">
             <span class="text-sm text-theme-text-muted">{{ currencySymbol }}</span>
             <input
-              v-model="form.presupuestoMensualDefault"
+              id="cfg-presupuesto"
+            v-model="form.presupuestoMensualDefault"
               type="number"
               step="0.01"
               min="0"
@@ -74,10 +76,11 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Moneda</label>
+            <label for="cfg-moneda" class="text-sm font-medium text-theme-text">Moneda</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Moneda principal para mostrar tus montos.</p>
           <select
+            id="cfg-moneda"
             v-model="form.monedaPreferida"
             class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
@@ -93,10 +96,11 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Zona horaria</label>
+            <label for="cfg-zona" class="text-sm font-medium text-theme-text">Zona horaria</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Afecta el cálculo de fechas en el registro por voz.</p>
           <select
+            id="cfg-zona"
             v-model="form.zonaHoraria"
             class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
@@ -116,10 +120,11 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Formato regional</label>
+            <label for="cfg-locale" class="text-sm font-medium text-theme-text">Formato regional</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Formato de números y reconocimiento de voz.</p>
           <select
+            id="cfg-locale"
             v-model="form.locale"
             class="w-full bg-theme-input border border-theme-border rounded-xl px-4 py-2.5 text-theme-text text-sm focus:outline-none focus:border-blue-500/50 transition-colors appearance-none"
           >
@@ -138,10 +143,11 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Dia de inicio del ciclo</label>
+            <label for="cfg-dia-ciclo" class="text-sm font-medium text-theme-text">Dia de inicio del ciclo</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">El dia del mes en que comienza tu ciclo financiero.</p>
           <input
+            id="cfg-dia-ciclo"
             v-model.number="form.diaInicioCiclo"
             type="number"
             min="1"
@@ -157,10 +163,11 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <label class="text-sm font-medium text-theme-text">Dias de saldadas en PDF</label>
+            <label for="cfg-dias-pdf" class="text-sm font-medium text-theme-text">Dias de saldadas en PDF</label>
           </div>
           <p class="text-xs text-theme-text-sec mb-3">Cantidad de dias hacia atras para incluir deudas saldadas al exportar PDF.</p>
           <input
+            id="cfg-dias-pdf"
             v-model.number="form.diasPdfSaldadas"
             type="number"
             min="1"

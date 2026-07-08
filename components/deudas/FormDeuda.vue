@@ -23,9 +23,10 @@
 
     <!-- Persona (autocomplete or new) -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Persona / Entidad</label>
+      <label for="fd-2" class="block text-sm font-medium text-theme-text-muted mb-1.5">Persona / Entidad</label>
       <div class="relative">
         <input
+          id="fd-2"
           v-model="form.personaNombre"
           type="text"
           placeholder="Nombre de la persona u organizacion..."
@@ -72,8 +73,9 @@
 
     <!-- Concepto -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
+      <label for="fd-3" class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
       <input
+        id="fd-3"
         v-model="form.concepto"
         type="text"
         placeholder="Ej: Almuerzo del martes, Prestamo..."
@@ -84,10 +86,11 @@
 
     <!-- Monto -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto</label>
+      <label for="fd-4" class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto</label>
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
+          id="fd-4"
           v-model="form.monto"
           type="number"
           step="0.01"
@@ -101,8 +104,9 @@
 
     <!-- Fecha -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha</label>
+      <label for="fd-5" class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha</label>
       <input
+        id="fd-5"
         v-model="form.fecha"
         type="date"
         class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
@@ -112,8 +116,9 @@
 
     <!-- Fecha de pago -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha de pago <span class="text-theme-text-muted">(opcional)</span></label>
+      <label for="fd-6" class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha de pago <span class="text-theme-text-muted">(opcional)</span></label>
       <input
+        id="fd-6"
         v-model="form.fechaPago"
         type="date"
         class="w-full px-4 py-3 rounded-xl bg-theme-input border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent focus:ring-1 focus:ring-theme-accent transition-colors"
@@ -123,8 +128,9 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
+      <label for="fd-7" class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
+        id="fd-7"
         v-model="form.notas"
         rows="2"
         placeholder="Agregar notas o detalles..."

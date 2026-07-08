@@ -57,6 +57,12 @@ export function useGastos() {
   let fetchGastosController = null
   let fetchMensualController = null
 
+  // /api/gastos responde con SWR de 30 s. Las mutaciones incrementan esta
+  // época (entra en la query string) para que el siguiente fetch no pueda
+  // servirse de la respuesta cacheada pre-mutación.
+  const cacheEpoch = useState('gastos-cache-epoch', () => 0)
+  const bustCache = () => { cacheEpoch.value++ }
+
   async function fetchGastos() {
     if (fetchGastosController) fetchGastosController.abort()
     fetchGastosController = new AbortController()
@@ -64,7 +70,7 @@ export function useGastos() {
     error.value = null
     try {
       const data = await apiFetch('/api/gastos', {
-        query: { fecha: fechaSeleccionada.value },
+        query: { fecha: fechaSeleccionada.value, ...(cacheEpoch.value ? { _v: cacheEpoch.value } : {}) },
         signal: fetchGastosController.signal,
       })
       gastos.value = data
@@ -104,6 +110,7 @@ export function useGastos() {
         method: 'POST',
         body: data
       })
+      bustCache()
       // Add optimistically if same date
       if (nuevo.fecha === fechaSeleccionada.value) {
         gastos.value = [nuevo, ...gastos.value]
@@ -122,6 +129,7 @@ export function useGastos() {
         method: 'POST',
         body: { gastos: gastosData, transcripcionVoz, metodoRegistro }
       })
+      bustCache()
       // Add those matching current date
       const mismaFecha = nuevos.filter(g => g.fecha === fechaSeleccionada.value)
       if (mismaFecha.length > 0) {
@@ -141,6 +149,7 @@ export function useGastos() {
         method: 'PUT',
         body: data
       })
+      bustCache()
       const idx = gastos.value.findIndex(g => g.id === id)
       if (idx !== -1) {
         gastos.value[idx] = updated
@@ -156,6 +165,7 @@ export function useGastos() {
   async function deleteGasto(id) {
     try {
       await apiFetch(`/api/gastos/${id}`, { method: 'DELETE' })
+      bustCache()
       gastos.value = gastos.value.filter(g => g.id !== id)
       await fetchResumen()
     } catch (e) {
@@ -171,6 +181,7 @@ export function useGastos() {
         method: 'PUT',
         body: { ids, campos },
       })
+      bustCache()
       // Actualizar estado local
       const gastosMap = Object.fromEntries((res.gastos || []).map(g => [g.id, g]))
       gastos.value = gastos.value.map(g => gastosMap[g.id] || g)
@@ -190,6 +201,7 @@ export function useGastos() {
         method: 'DELETE',
         body: { ids },
       })
+      bustCache()
       const idsSet = new Set(res.ids || ids)
       gastos.value = gastos.value.filter(g => !idsSet.has(g.id))
       gastosMensuales.value = gastosMensuales.value.filter(g => !idsSet.has(g.id))
@@ -207,7 +219,7 @@ export function useGastos() {
     isLoadingMensual.value = true
     try {
       const data = await apiFetch('/api/gastos', {
-        query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value },
+        query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value, ...(cacheEpoch.value ? { _v: cacheEpoch.value } : {}) },
         signal: fetchMensualController.signal,
       })
       gastosMensuales.value = data

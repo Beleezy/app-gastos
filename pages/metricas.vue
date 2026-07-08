@@ -136,8 +136,18 @@
         <!-- Tarjetas por mes en lugar de tabla: a 380px con texto grande la
              tabla de 5 columnas medía ~494px y ocultaba la columna Saldo. -->
         <div v-else class="divide-y divide-theme-border/40">
+          <!-- Meses sin actividad colapsados (UX-7): listarlos solo mete ruido
+               y el promedio ya se calcula sobre meses activos. -->
+          <button
+            v-if="mesesVacios.length && !mostrarVacios"
+            type="button"
+            class="w-full px-3 py-2.5 text-left text-[0.6875rem] text-theme-text-muted hover:text-theme-text-sec transition-colors"
+            @click="mostrarVacios = true"
+          >
+            {{ mesesVacios.length }} mes{{ mesesVacios.length === 1 ? '' : 'es' }} sin actividad — tocar para mostrar
+          </button>
           <div
-            v-for="p in serieInvertida"
+            v-for="p in serieVisible"
             :key="`r-${p.anio}-${p.mes}`"
             class="px-3 py-2.5"
           >
@@ -179,7 +189,7 @@
           <div class="h-10 w-full rounded-xl bg-theme-border-md shimmer"></div>
         </div>
         <div v-else-if="!recurrentes.length" class="p-6 text-center text-xs text-theme-text-muted">
-          Sin patrones claros aún. Registra más gastos para ver detecciones.
+          Sin patrones claros aún. Detecta gastos (no ingresos) que se repiten con el mismo concepto en 3+ meses de los últimos 6.
         </div>
         <ul v-else class="divide-y divide-theme-border/40">
           <li
@@ -261,6 +271,12 @@ const recurrentes = ref([])
 const cargandoRecurrentes = ref(true)
 
 const serieInvertida = computed(() => [...serie.value].reverse())
+const mostrarVacios = ref(false)
+const esMesActivo = (p) => p.gastos > 0 || p.ingresos > 0 || p.ahorros > 0
+const mesesVacios = computed(() => serieInvertida.value.filter(p => !esMesActivo(p)))
+const serieVisible = computed(() =>
+  mostrarVacios.value ? serieInvertida.value : serieInvertida.value.filter(esMesActivo)
+)
 
 const tasaAhorro = computed(() => {
   if (!totales.value.ingresos) return 0

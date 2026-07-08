@@ -89,7 +89,9 @@ const { fechaHoy } = useFechaPeru()
 const hoy = fechaHoy()
 
 const form = reactive({
-  fechaPago: props.gasto.gastoRegistradoFecha || props.gasto.fechaProbablePago || hoy,
+  // Por defecto HOY (como el pago de deudas), no la fecha planificada (UX-3);
+  // al editar un registro existente se conserva su fecha.
+  fechaPago: props.gasto.gastoRegistradoFecha || hoy,
   notas: props.gasto.gastoRegistradoNotas || '',
   medioAhorroId: null,
 })

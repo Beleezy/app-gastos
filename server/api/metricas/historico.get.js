@@ -132,10 +132,14 @@ export default defineEventHandler(async (event) => {
     return acc
   }, { gastos: 0, ingresos: 0, ahorros: 0 })
 
+  // Promediar sobre meses CON actividad: con 8 meses en cero el promedio se
+  // diluía (595/mes cuando los meses activos promediaban ~1,787) (UX-7).
+  const mesesActivos = serie.filter(m => m.gastos > 0 || m.ingresos > 0 || m.ahorros > 0).length || 1
   const promedios = {
-    gastosMensual: Math.round((totales.gastos / meses) * 100) / 100,
-    ingresosMensual: Math.round((totales.ingresos / meses) * 100) / 100,
-    ahorrosMensual: Math.round((totales.ahorros / meses) * 100) / 100,
+    gastosMensual: Math.round((totales.gastos / mesesActivos) * 100) / 100,
+    ingresosMensual: Math.round((totales.ingresos / mesesActivos) * 100) / 100,
+    ahorrosMensual: Math.round((totales.ahorros / mesesActivos) * 100) / 100,
+    mesesActivos,
   }
 
   return { meses, serie, totales, promedios }

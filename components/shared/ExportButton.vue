@@ -1,8 +1,9 @@
 <template>
   <div class="relative inline-block">
     <button
+      ref="btnRef"
       type="button"
-      class="min-h-[40px] h-10 px-3 rounded-lg flex items-center gap-1.5 text-xs font-medium transition-colors"
+      class="min-h-[44px] px-4 rounded-lg flex items-center gap-1.5 text-xs font-medium transition-colors"
       :class="loading
         ? 'bg-theme-border-md text-theme-text-muted cursor-wait'
         : 'bg-theme-border-md text-theme-text-sec hover:text-emerald-400'"
@@ -46,8 +47,8 @@
         v-if="abierto"
         ref="menuRef"
         role="menu"
-        class="absolute top-11 z-30 min-w-[10rem] rounded-xl border border-theme-border bg-theme-card shadow-xl overflow-hidden"
-        :class="align === 'left' ? 'left-0' : 'right-0'"
+        class="absolute z-50 min-w-[10rem] rounded-xl border border-theme-border bg-theme-card shadow-xl overflow-hidden"
+        :class="[align === 'left' ? 'left-0' : 'right-0', dropUp ? 'bottom-12' : 'top-12']"
       >
         <button
           v-for="f in formats"
@@ -84,6 +85,11 @@ const emit = defineEmits(['select'])
 
 const abierto = ref(false)
 const menuRef = ref(null)
+const btnRef = ref(null)
+// El botón suele vivir al final de listas largas (p. ej. /deudas): si no hay
+// espacio debajo, el menú se abre hacia arriba para que nunca quede fuera
+// del viewport ni tapado por el bottom nav.
+const dropUp = ref(false)
 
 function formatLabel(f) {
   return {
@@ -100,6 +106,11 @@ function onClick() {
   if (props.formats.length === 1) {
     emit('select', props.formats[0])
     return
+  }
+  if (!abierto.value && btnRef.value && typeof window !== 'undefined') {
+    const rect = btnRef.value.getBoundingClientRect()
+    const altoMenuEstimado = props.formats.length * 48 + 16
+    dropUp.value = window.innerHeight - rect.bottom < altoMenuEstimado + 80
   }
   abierto.value = !abierto.value
 }

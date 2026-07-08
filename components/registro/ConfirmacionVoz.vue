@@ -13,7 +13,7 @@
       <!-- Header -->
       <div class="flex items-center justify-between px-5 pb-3">
         <h2 class="text-lg font-semibold text-theme-text">Confirmar gastos</h2>
-        <button class="w-8 h-8 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted" @click="$emit('close')">
+        <button class="w-11 h-11 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted" @click="$emit('close')">
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -128,7 +128,7 @@
                 <span class="text-[0.6875rem] text-theme-text-sec">· {{ formatFecha(gasto.fecha) }}</span>
               </div>
               <div class="flex items-center gap-2 shrink-0 ml-auto">
-                <button class="w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
+                <button class="w-10 h-10 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
                   aria-label="Editar"
                   @click="toggleEdit(idx)"
                 >
@@ -136,7 +136,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
-                <button class="w-7 h-7 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
+                <button class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
                   aria-label="Eliminar"
                   @click="removeGasto(idx)"
                 >

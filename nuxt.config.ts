@@ -144,7 +144,11 @@ export default defineNuxtConfig({
         },
       ],
     },
-    pageTransition: { name: 'page', mode: 'out-in' },
+    // Sin pageTransition: con `out-in`, una página cuyo setup/chunk quede
+    // pendiente (visto en prod: N3 ronda 2) bloquea el <Transition> y mata
+    // TODA la navegación SPA posterior hasta recargar. La transición visual
+    // no justifica ese modo de fallo; plugins/nav-watchdog.client.js cubre
+    // además la recuperación si una vista no llega a montar.
   },
 
   css: ['~/assets/css/main.css'],

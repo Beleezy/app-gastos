@@ -2,7 +2,7 @@
 // Body: { entidad: 'gasto' | 'deuda', id: uuid }
 
 import { db } from '../../utils/db.js'
-import { gastos, deudas } from '../../database/schema.js'
+import { gastos, deudas, pagosDeuda, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
@@ -20,7 +20,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const { entidad, id } = body.data
-  const tabla = entidad === 'gasto' ? gastos : deudas
 
   // Si es un gasto con gastoPlanificadoId, verificar que no haya otro
   // gasto activo vinculado al mismo planificado (el unique parcial sí lo
@@ -49,15 +48,59 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const [restaurado] = await db
-    .update(tabla)
-    .set({ deletedAt: null })
-    .where(and(
-      eq(tabla.id, id),
-      eq(tabla.usuarioId, usuarioId),
-      sql`${tabla.deletedAt} IS NOT NULL`,
-    ))
-    .returning({ id: tabla.id })
+  const restaurado = await db.transaction(async (tx) => {
+    if (entidad === 'gasto') {
+      const [row] = await tx
+        .update(gastos)
+        .set({ deletedAt: null })
+        .where(and(
+          eq(gastos.id, id),
+          eq(gastos.usuarioId, usuarioId),
+          sql`${gastos.deletedAt} IS NOT NULL`,
+        ))
+        .returning({ id: gastos.id })
+      return row || null
+    }
+
+    const [antes] = await tx
+      .select({ deletedAt: deudas.deletedAt, personaEntidadId: deudas.personaEntidadId })
+      .from(deudas)
+      .where(and(
+        eq(deudas.id, id),
+        eq(deudas.usuarioId, usuarioId),
+        sql`${deudas.deletedAt} IS NOT NULL`,
+      ))
+      .limit(1)
+    if (!antes) return null
+
+    await tx.update(deudas).set({ deletedAt: null }).where(eq(deudas.id, id))
+
+    // Revivir SOLO lo que cayó en la misma cascada de borrado (mismo
+    // timestamp): sus pagos — un pago revertido individualmente ya ajustó
+    // monto_pendiente y no debe resucitar — y, si "Eliminar persona y sus
+    // deudas" se llevó también a la persona, la persona (sin esto la deuda
+    // restaurada quedaría huérfana e invisible en la lista).
+    await tx
+      .update(pagosDeuda)
+      .set({ deletedAt: null })
+      .where(and(
+        eq(pagosDeuda.deudaId, id),
+        eq(pagosDeuda.deletedAt, antes.deletedAt),
+      ))
+
+    if (antes.personaEntidadId) {
+      await tx
+        .update(personasEntidades)
+        .set({ deletedAt: null, updatedAt: new Date() })
+        .where(and(
+          eq(personasEntidades.id, antes.personaEntidadId),
+          eq(personasEntidades.usuarioId, usuarioId),
+          sql`${personasEntidades.deletedAt} IS NOT NULL`,
+        ))
+    }
+
+    return { id }
+  })
 
   if (!restaurado) {
     throw createError({ statusCode: 404, message: 'No encontrado en papelera' })

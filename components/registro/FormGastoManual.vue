@@ -2,8 +2,9 @@
   <SharedBaseBottomSheet :title="editando ? 'Editar gasto' : (duplicando ? 'Copiar gasto' : 'Nuevo gasto')" @close="$emit('close')">
     <!-- Concepto con autocompletado -->
     <div class="relative">
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
+      <label for="fgm-1" class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto</label>
       <input
+        id="fgm-1"
         v-model="form.concepto"
         type="text"
         data-testid="input-concepto"
@@ -39,10 +40,11 @@
 
     <!-- Monto -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto</label>
+      <label for="fgm-2" class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto</label>
       <div class="relative">
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
         <input
+          id="fgm-2"
           v-model="form.monto"
           type="number"
           data-testid="input-monto"
@@ -105,8 +107,9 @@
     <!-- Fecha y Hora -->
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha</label>
+        <label for="fgm-3" class="block text-sm font-medium text-theme-text-muted mb-1.5">Fecha</label>
         <input
+          id="fgm-3"
           v-model="form.fecha"
           type="date"
           data-testid="input-fecha"
@@ -114,8 +117,9 @@
         />
       </div>
       <div>
-        <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Hora</label>
+        <label for="fgm-4" class="block text-sm font-medium text-theme-text-muted mb-1.5">Hora</label>
         <input
+          id="fgm-4"
           v-model="form.hora"
           type="time"
           data-testid="input-hora"
@@ -126,8 +130,9 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
+      <label for="fgm-5" class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
       <textarea
+        id="fgm-5"
         v-model="form.notas"
         data-testid="input-notas"
         rows="2"

@@ -68,13 +68,21 @@ export default defineEventHandler(async (event) => {
     .where(and(...whereConditions))
     .orderBy(...orderBy)
 
-  // Paginación
-  if (limit) {
-    queryBuilder = queryBuilder.limit(Number(limit))
+  // Paginación. Sin filtro de fecha NI limit explícito se aplica un tope:
+  // el histórico completo crece sin cota (45 KB+ y subiendo cada mes — P1)
+  // y ningún consumidor legítimo lo necesita entero.
+  const hayFiltroFecha = Boolean(fecha || (fechaDesde && fechaHasta) || (mes && anio))
+  const limitEfectivo = limit ? Number(limit) : (hayFiltroFecha ? null : 500)
+  if (limitEfectivo) {
+    queryBuilder = queryBuilder.limit(limitEfectivo)
   }
   if (offset) {
     queryBuilder = queryBuilder.offset(Number(offset))
   }
+
+  // SWR corto: el listado del mes se re-pide en cada navegación al registro;
+  // las mutaciones del cliente ya refetchean con cache-bust (P2).
+  setHeader(event, 'Cache-Control', 'private, max-age=30, stale-while-revalidate=120')
 
   const result = await queryBuilder
 

@@ -1,7 +1,6 @@
 import { db } from '../../utils/db.js'
 import { planesMensuales, gastosPlanificados, categorias, configuraciones, gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { fetchFuturePortfolio } from '../../utils/gastosFuturos.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
 
@@ -58,7 +57,7 @@ export default defineEventHandler(async (event) => {
   const primerDia = `${anio}-${String(mes).padStart(2, '0')}-01`
   const ultimoDia = `${anio}-${String(mes).padStart(2, '0')}-${new Date(anio, mes, 0).getDate()}`
 
-  const [gastosRaw, gastosRealesRaw, portfolio] = await Promise.all([
+  const [gastosRaw, gastosRealesRaw] = await Promise.all([
     db
       .select({
         id: gastosPlanificados.id,
@@ -102,8 +101,6 @@ export default defineEventHandler(async (event) => {
         isNull(gastos.deletedAt),
       ))
       .groupBy(gastos.categoriaId),
-
-    fetchFuturePortfolio(db, usuarioId),
   ])
 
   const gastosRealesPorCategoria = {}
@@ -111,8 +108,10 @@ export default defineEventHandler(async (event) => {
     gastosRealesPorCategoria[g.categoriaId] = parseFloat(g.totalReal)
   }
 
-  const { gastosFuturos, resumenFuturos } = portfolio
-
+  // NOTA: antes esta respuesta embebía el portfolio completo de gastos
+  // futuros (fetchFuturePortfolio), con imágenes base64 de las opciones
+  // incluidas (~10+ KB extra por carga). Ningún consumidor lo leía de aquí:
+  // useGastosFuturos pide /api/futuros por su cuenta (P2 ronda 2).
   return {
     plan: {
       ...plan,
@@ -124,7 +123,5 @@ export default defineEventHandler(async (event) => {
       montoEstimado: parseFloat(g.montoEstimado),
     })),
     gastosRealesPorCategoria,
-    gastosFuturos,
-    resumenFuturos,
   }
 })

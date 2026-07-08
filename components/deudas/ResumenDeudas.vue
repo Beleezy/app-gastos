@@ -123,8 +123,10 @@
           @click="toggleFiltroVencidas"
         >
           <span class="w-2 h-2 rounded-full bg-red-400 animate-pulse shrink-0"></span>
+          <!-- Con el scope del tab explícito: el banner global suma me_deben +
+               yo_debo y aquí solo se cuenta el tab activo (UX-5) -->
           <span class="text-[0.6875rem] font-semibold text-red-400 shrink-0">
-            {{ countVencidas }} deuda{{ countVencidas !== 1 ? 's' : '' }} vencida{{ countVencidas !== 1 ? 's' : '' }}
+            {{ countVencidas }} vencida{{ countVencidas !== 1 ? 's' : '' }} {{ tabActual === 'me_deben' ? 'por cobrar' : 'por pagar' }}
           </span>
           <span v-if="primeraVencida" class="text-[0.6875rem] text-red-400/80 truncate flex-1 min-w-0">
             <span class="opacity-60">·</span>
