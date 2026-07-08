@@ -54,7 +54,7 @@
 <script setup>
 const route = useRoute()
 
-const { personas } = useDeudas()
+const { resumen: resumenDeudas } = useDeudas()
 const { resumen: resumenPlan } = usePlanificador()
 const { countPendientes: vinculosPendientes } = useVinculos()
 // Presupuestos: badge en /registro cuando alguna categoría está en estado
@@ -62,8 +62,12 @@ const { countPendientes: vinculosPendientes } = useVinculos()
 // prefetch.client.js puede pre-cargarlo en idle.
 const { countCriticas: presupuestosCriticos } = usePresupuestosCategoria()
 
+// Misma fuente que el drawer y el banner de recordatorios:
+// /api/deudas/resumen cuenta DEUDAS vencidas (me deben + yo debo),
+// no personas con vencidas.
 const deudasVencidas = computed(() =>
-  personas.value.filter(p => p.tieneVencidas).length
+  (Number(resumenDeudas.value?.countVencidasMeDeben) || 0) +
+  (Number(resumenDeudas.value?.countVencidasYoDebo) || 0)
 )
 
 function getBadge(path) {

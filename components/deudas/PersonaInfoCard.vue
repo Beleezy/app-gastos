@@ -27,7 +27,7 @@
           </p>
           <span
             v-if="personaSeleccionada.vinculadoUsuarioId"
-            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.625rem] font-medium mt-1"
+            class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-medium mt-1"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -40,7 +40,7 @@
       <!-- Métricas: total pendiente + # deudas activas + último movimiento -->
       <div class="grid grid-cols-3 gap-2">
         <div class="rounded-xl bg-theme-input p-2.5 text-center">
-          <p class="text-[0.625rem] uppercase tracking-wide text-theme-text-sec">
+          <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-sec">
             {{ tabActual === 'me_deben' ? 'Por cobrar' : 'Por pagar' }}
           </p>
           <p
@@ -51,13 +51,13 @@
           </p>
         </div>
         <div class="rounded-xl bg-theme-input p-2.5 text-center">
-          <p class="text-[0.625rem] uppercase tracking-wide text-theme-text-sec">Activas</p>
+          <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-sec">Activas</p>
           <p class="text-sm font-bold mt-0.5 text-theme-text">
             {{ deudasActivasPersona.length }}
           </p>
         </div>
         <div class="rounded-xl bg-theme-input p-2.5 text-center">
-          <p class="text-[0.625rem] uppercase tracking-wide text-theme-text-sec">Último mov.</p>
+          <p class="text-[0.6875rem] uppercase tracking-wide text-theme-text-sec">Último mov.</p>
           <p class="text-[0.7rem] font-medium mt-0.5 text-theme-text truncate">
             {{ ultimoMovimientoLabel }}
           </p>

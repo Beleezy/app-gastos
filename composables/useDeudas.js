@@ -19,6 +19,9 @@ export function useDeudas() {
     montoVencidoYoDebo: 0,
     countVencidasYoDebo: 0,
   }))
+  const balance = useState('deudas-balance', () => ({ totalMeDeben: 0, totalYoDebo: 0, balanceNeto: 0, personas: [] }))
+  const balanceCargando = useState('deudas-balance-cargando', () => false)
+  const balanceError = useState('deudas-balance-error', () => null)
 
   const isLoading = ref(false)
   const error = ref(null)
@@ -66,6 +69,24 @@ export function useDeudas() {
     }
   }
 
+  async function fetchBalance({ noCache = false } = {}) {
+    // Estado compartido con BalanceGlobal.vue: las mutaciones (crear deuda,
+    // pagar, saldar) lo invalidan aquí mismo — antes el componente hacía su
+    // propio fetch y "Balance global" quedaba stale hasta recargar (F4).
+    balanceCargando.value = true
+    balanceError.value = null
+    try {
+      balance.value = await apiFetch('/api/deudas/balance', {
+        query: noCache ? { _t: Date.now() } : undefined,
+        headers: noCache ? { 'Cache-Control': 'no-cache' } : undefined,
+      })
+    } catch (e) {
+      balanceError.value = e?.data?.message || e?.message || 'Error desconocido'
+    } finally {
+      balanceCargando.value = false
+    }
+  }
+
   async function fetchPersonas({ noCache = false } = {}) {
     if (!pollingActivo.value) {
       isLoading.value = true
@@ -83,14 +104,17 @@ export function useDeudas() {
     }
   }
 
-  async function fetchDeudasPersona(personaId) {
+  async function fetchDeudasPersona(personaId, { noCache = false } = {}) {
     if (!pollingActivo.value) {
       isLoading.value = true
       error.value = null
     }
     try {
       deudasList.value = await apiFetch('/api/deudas', {
-        query: { personaId, tipo: tabActual.value }
+        query: noCache
+          ? { personaId, tipo: tabActual.value, _t: Date.now() }
+          : { personaId, tipo: tabActual.value },
+        headers: noCache ? { 'Cache-Control': 'no-cache' } : undefined,
       })
     } catch (e) {
       error.value = e.message || 'Error al cargar deudas'
@@ -107,9 +131,14 @@ export function useDeudas() {
     }
   }
 
-  async function fetchPagosPersona(personaId) {
+  async function fetchPagosPersona(personaId, { noCache = false } = {}) {
+    // El endpoint tiene max-age=60: tras registrar/saldar un pago hay que
+    // saltar el caché HTTP o el historial muestra un pago menos (N7).
     try {
-      pagosPersona.value = await apiFetch(`/api/deudas/personas/${personaId}/pagos-historial`)
+      pagosPersona.value = await apiFetch(`/api/deudas/personas/${personaId}/pagos-historial`, {
+        query: noCache ? { _t: Date.now() } : undefined,
+        headers: noCache ? { 'Cache-Control': 'no-cache' } : undefined,
+      })
     } catch (e) {
       error.value = e.message || 'Error al cargar historial de pagos'
     }
@@ -129,6 +158,16 @@ export function useDeudas() {
     }
   }
 
+  // Invalidación única post-escritura (F4/N7): todo lo que muestra saldos
+  // agregados se refresca junto, saltándose el caché HTTP.
+  async function invalidarResumenes() {
+    await Promise.all([
+      fetchResumen({ noCache: true }),
+      fetchPersonas({ noCache: true }),
+      fetchBalance({ noCache: true }),
+    ])
+  }
+
   async function createDeuda(data) {
     try {
       await apiFetch('/api/deudas', {
@@ -138,9 +177,9 @@ export function useDeudas() {
       // El endpoint personas tiene Cache-Control max-age=60. Sin noCache aqui
       // la re-fetch post-create devuelve la lista pre-create del cache HTTP
       // y la nueva persona no aparece hasta que pasa el TTL.
-      await Promise.all([fetchResumen({ noCache: true }), fetchPersonas({ noCache: true })])
+      await invalidarResumenes()
       if (personaSeleccionada.value) {
-        await fetchDeudasPersona(personaSeleccionada.value.id)
+        await fetchDeudasPersona(personaSeleccionada.value.id, { noCache: true })
       }
       await refreshAuditoriaIfNeeded()
     } catch (e) {
@@ -155,9 +194,9 @@ export function useDeudas() {
         method: 'PUT',
         body: data,
       })
-      await Promise.all([fetchResumen({ noCache: true }), fetchPersonas({ noCache: true })])
+      await invalidarResumenes()
       if (personaSeleccionada.value) {
-        await fetchDeudasPersona(personaSeleccionada.value.id)
+        await fetchDeudasPersona(personaSeleccionada.value.id, { noCache: true })
       }
       await refreshAuditoriaIfNeeded()
     } catch (e) {
@@ -169,7 +208,7 @@ export function useDeudas() {
     try {
       await apiFetch(`/api/deudas/${id}`, { method: 'DELETE' })
       deudasList.value = deudasList.value.filter(d => d.id !== id)
-      await Promise.all([fetchResumen({ noCache: true }), fetchPersonas({ noCache: true })])
+      await invalidarResumenes()
       await refreshAuditoriaIfNeeded()
     } catch (e) {
       error.value = e.message || 'Error al eliminar deuda'
@@ -189,9 +228,9 @@ export function useDeudas() {
           ...result.deuda,
         }
       }
-      await Promise.all([fetchResumen({ noCache: true }), fetchPersonas({ noCache: true })])
+      await invalidarResumenes()
       if (personaSeleccionada.value) {
-        await fetchPagosPersona(personaSeleccionada.value.id)
+        await fetchPagosPersona(personaSeleccionada.value.id, { noCache: true })
       }
       await refreshAuditoriaIfNeeded()
       return result
@@ -209,8 +248,8 @@ export function useDeudas() {
       })
       if (personaSeleccionada.value) {
         await Promise.all([
-          fetchPagosPersona(personaSeleccionada.value.id),
-          fetchDeudasPersona(personaSeleccionada.value.id),
+          fetchPagosPersona(personaSeleccionada.value.id, { noCache: true }),
+          fetchDeudasPersona(personaSeleccionada.value.id, { noCache: true }),
         ])
       }
       await refreshAuditoriaIfNeeded()
@@ -237,9 +276,9 @@ export function useDeudas() {
         })
         .filter(g => g.detalles.length > 0)
       if (personaSeleccionada.value) {
-        await fetchDeudasPersona(personaSeleccionada.value.id)
+        await fetchDeudasPersona(personaSeleccionada.value.id, { noCache: true })
       }
-      await fetchResumen({ noCache: true })
+      await Promise.all([fetchResumen({ noCache: true }), fetchBalance({ noCache: true })])
       await refreshAuditoriaIfNeeded()
       return result
     } catch (e) {
@@ -269,7 +308,7 @@ export function useDeudas() {
       if (personaSeleccionada.value?.id === id) {
         personaSeleccionada.value = null
       }
-      await fetchResumen({ noCache: true })
+      await Promise.all([fetchResumen({ noCache: true }), fetchBalance({ noCache: true })])
     } catch (e) {
       error.value = e.message || 'Error al eliminar persona'
     }
@@ -440,6 +479,7 @@ export function useDeudas() {
 
   return {
     personas, deudasList, pagos, pagosPersona, auditoriaPersona, resumen,
+    balance, balanceCargando, balanceError,
     checkpoints, guardando, restaurando, cargando: cargandoCheckpoints,
     isLoading, error,
     tabActual, personaSeleccionada, filtroEstado,
@@ -447,6 +487,7 @@ export function useDeudas() {
     deudasActivasPersona, deudasSaldadasPersona,
     totalPendientePersona,
     fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona, fetchAuditoriaPersona,
+    fetchBalance, invalidarResumenes,
     fetchCheckpoints, crearCheckpoint, restaurarCheckpoint,
     createDeuda, updateDeuda, deleteDeuda,
     registrarPago, actualizarPago, archivarDeuda, revertirPago,

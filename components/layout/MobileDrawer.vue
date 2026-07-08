@@ -118,7 +118,8 @@ const router = useRouter()
 
 const { isOpen, close } = useMobileDrawer()
 useOverlayBack(isOpen, close)
-const { personas } = useDeudas()
+const { resumen: resumenDeudas, fetchResumen: fetchResumenDeudas } = useDeudas()
+const { resumen: resumenIngresos, fetchResumen: fetchResumenIngresos } = useIngresos()
 const { resumen: resumenPlan } = usePlanificador()
 const { countPendientes: vinculosPendientes } = useVinculos()
 const { formatMontoConSimbolo } = useCurrency()
@@ -126,14 +127,27 @@ const { vibrate } = useHaptic()
 
 const drawerRef = ref(null)
 
+// Una sola fuente para "vencidas" en drawer, badge del nav y banner:
+// /api/deudas/resumen cuenta DEUDAS vencidas (me deben + yo debo), no
+// personas — antes el footer decía "4" (personas) y el banner "7" (deudas).
 const deudasVencidas = computed(() =>
-  personas.value.filter(p => p.tieneVencidas).length
+  (Number(resumenDeudas.value?.countVencidasMeDeben) || 0) +
+  (Number(resumenDeudas.value?.countVencidasYoDebo) || 0)
 )
 
+// Saldo real del mes (ingresos - gastos), no el saldo proyectado del
+// planificador que mostraba S/ 0.00 sin plan configurado.
 const saldoFmt = computed(() => {
-  const r = resumenPlan.value || {}
-  const saldo = r.saldoProyectado ?? r.saldo ?? r.montoPresupuesto ?? 0
-  try { return formatMontoConSimbolo(saldo) } catch { return `S/ ${Number(saldo).toFixed(2)}` }
+  const saldo = Number(resumenIngresos.value?.saldoNeto) || 0
+  try { return formatMontoConSimbolo(saldo) } catch { return `S/ ${saldo.toFixed(2)}` }
+})
+
+// Refrescar las fuentes del footer al abrir el drawer (ambos endpoints son
+// livianos y con SWR corto).
+watch(isOpen, (abierto) => {
+  if (!abierto) return
+  fetchResumenDeudas().catch(() => {})
+  fetchResumenIngresos().catch(() => {})
 })
 
 function getBadge(path) {

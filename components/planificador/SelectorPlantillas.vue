@@ -72,6 +72,13 @@
         </button>
       </li>
     </ul>
+    <SharedConfirmDialog
+    v-model="showConfirmPlantilla"
+    title="Eliminar plantilla"
+    :message="plantillaAEliminar ? `¿Eliminar la plantilla &quot;${plantillaAEliminar.nombre}&quot;?` : ''"
+    confirm-label="Eliminar"
+    @confirm="ejecutarEliminarPlantilla"
+  />
   </section>
 </template>
 
@@ -129,13 +136,25 @@ async function aplicarPlantilla(p) {
   }
 }
 
-async function eliminarPlantilla(p) {
-  if (!window.confirm(`¿Eliminar la plantilla "${p.nombre}"?`)) return
+const showConfirmPlantilla = ref(false)
+const plantillaAEliminar = ref(null)
+
+function eliminarPlantilla(p) {
+  plantillaAEliminar.value = p
+  showConfirmPlantilla.value = true
+}
+
+async function ejecutarEliminarPlantilla() {
+  const p = plantillaAEliminar.value
+  showConfirmPlantilla.value = false
+  if (!p) return
   try {
     await eliminar(p.id)
     toast.success('Plantilla eliminada')
   } catch (e) {
     toast.error(e?.data?.message || 'No se pudo eliminar')
+  } finally {
+    plantillaAEliminar.value = null
   }
 }
 

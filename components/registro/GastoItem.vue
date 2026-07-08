@@ -93,7 +93,7 @@
             </div>
             <div v-if="!selectable" class="flex items-center gap-0.5 shrink-0">
               <button
-                class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 transition-all"
+                class="w-11 h-11 -my-2 flex items-center justify-center rounded-md text-theme-text-muted hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 transition-all"
                 aria-label="Duplicar"
                 @click.stop="onDuplicate"
               >
@@ -102,7 +102,7 @@
                 </svg>
               </button>
               <button
-                class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                class="w-11 h-11 -my-2 flex items-center justify-center rounded-md text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
                 aria-label="Editar"
                 data-testid="btn-editar-gasto"
                 @click.stop="onEdit"
@@ -112,7 +112,7 @@
                 </svg>
               </button>
               <button
-                class="w-7 h-7 flex items-center justify-center rounded-md text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all"
+                class="w-11 h-11 -my-2 flex items-center justify-center rounded-md text-theme-text-muted hover:text-red-400 hover:bg-red-500/10 active:scale-90 transition-all"
                 aria-label="Eliminar"
                 data-testid="btn-eliminar-gasto"
                 @click.stop="onDelete"

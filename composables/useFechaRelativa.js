@@ -22,13 +22,21 @@ function startOfDay(d) {
 export function formatRelativo(fecha, opts = {}) {
   if (fecha == null) return ''
   const { ahora = new Date() } = opts
+  const esDateOnly = typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha)
   const target = fecha instanceof Date
     ? fecha
-    : typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha)
+    : esDateOnly
       ? parseIsoDate(fecha)
       : new Date(fecha)
 
   if (!target || Number.isNaN(target.getTime())) return ''
+
+  // Fechas sin hora (YYYY-MM-DD): no inventar "hace 15 h" midiendo desde la
+  // medianoche — el mismo día es simplemente "hoy" (UX-2).
+  if (esDateOnly) {
+    const diasDO = Math.round((startOfDay(target).getTime() - startOfDay(ahora).getTime()) / MS_DIA)
+    if (diasDO === 0) return 'hoy'
+  }
 
   const diffMs = target.getTime() - ahora.getTime()
   const futuro = diffMs > 0

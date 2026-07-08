@@ -243,7 +243,7 @@
               <div class="flex items-center gap-1 shrink-0">
                 <span
                   v-if="!seleccionActiva"
-                  class="w-7 h-7 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
+                  class="w-11 h-11 -my-2 flex items-center justify-center rounded-lg text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg active:scale-90 transition-all"
                   role="button"
                   aria-label="Seleccionar gastos"
                   @click.stop="activarSeleccionDia(dia)"
@@ -289,7 +289,7 @@
         class="fixed left-1/2 -translate-x-1/2 bottom-24 z-40 flex items-center gap-2 bg-theme-card border border-theme-border shadow-xl shadow-black/40 backdrop-blur-sm rounded-2xl px-3 py-2.5 max-w-[calc(100%-1.5rem)]"
       >
         <button
-          class="w-8 h-8 rounded-lg bg-theme-border-md text-theme-text-muted hover:text-theme-text flex items-center justify-center active:scale-90 transition-all shrink-0"
+          class="w-11 h-11 rounded-lg bg-theme-border-md text-theme-text-muted hover:text-theme-text flex items-center justify-center active:scale-90 transition-all shrink-0"
           aria-label="Cancelar seleccion"
           @click="cancelarSeleccion"
         >

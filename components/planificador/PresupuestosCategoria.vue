@@ -57,7 +57,7 @@
               />
               <button
                 v-if="presupuestoDe(c.id)"
-                class="w-7 h-7 rounded-lg text-theme-text-muted hover:text-red-400 hover:bg-red-500/10"
+                class="w-11 h-11 -my-2 rounded-lg text-theme-text-muted hover:text-red-400 hover:bg-red-500/10"
                 @click="quitar(c.id)"
                 aria-label="Eliminar presupuesto"
                 title="Quitar presupuesto"
@@ -109,6 +109,15 @@
       </ul>
     </div>
   </div>
+  <SharedConfirmDialog
+    v-model="showConfirmQuitar"
+    title="Quitar presupuesto"
+    message="¿Quitar el presupuesto de esta categoría? Podrás definirlo de nuevo cuando quieras."
+    confirm-label="Quitar"
+    variant="warning"
+    @confirm="ejecutarQuitar"
+  />
+
 </template>
 
 <script setup>
@@ -189,10 +198,21 @@ async function guardar(catId) {
   await cargarConsumo(mesActual, anioActual)
 }
 
-async function quitar(catId) {
-  if (!confirm('¿Quitar el presupuesto de esta categoría?')) return
+const showConfirmQuitar = ref(false)
+const catAQuitar = ref(null)
+
+function quitar(catId) {
+  catAQuitar.value = catId
+  showConfirmQuitar.value = true
+}
+
+async function ejecutarQuitar() {
+  const catId = catAQuitar.value
+  showConfirmQuitar.value = false
+  if (catId == null) return
   await eliminarPresupuesto(catId)
   inputsLimite.value[catId] = ''
+  catAQuitar.value = null
 }
 
 onMounted(async () => {

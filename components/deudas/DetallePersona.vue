@@ -23,7 +23,7 @@
             <h2 class="text-lg font-semibold text-theme-text break-words">{{ personaSeleccionada.nombre }}</h2>
             <p v-if="personaSeleccionada.contacto" class="text-xs text-theme-text-sec truncate">{{ personaSeleccionada.contacto }}</p>
             <!-- Badge vinculado inline -->
-            <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.625rem] font-medium mt-1">
+            <span v-if="personaSeleccionada.vinculadoUsuarioId" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-medium mt-1">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
@@ -126,8 +126,8 @@
               ></div>
             </div>
             <div class="flex items-center justify-between mt-1">
-              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(totalCobradoPersona) }} {{ tabActual === 'me_deben' ? 'cobrado' : 'pagado' }}</span>
-              <span class="text-[0.625rem] text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(totalOriginalPersona) }} total</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(totalCobradoPersona) }} {{ tabActual === 'me_deben' ? 'cobrado' : 'pagado' }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(totalOriginalPersona) }} total</span>
             </div>
           </div>
 
@@ -180,28 +180,28 @@
             <div class="flex-1 min-w-0">
               <p class="text-xs text-theme-text-sec">
                 {{ formatFecha(deuda.fechaCreacion) }}
-                <span class="text-theme-text-muted">· {{ formatRelativo(deuda.fechaCreacion) }}</span>
+                <span class="text-theme-text-muted">· {{ formatRelativo(deuda.createdAt || deuda.fechaCreacion) }}</span>
               </p>
               <div v-if="deuda.fechaPago" class="flex items-center gap-1.5 mt-1 flex-wrap">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p class="text-[0.625rem] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'">
+                <p class="text-[0.6875rem] font-medium" :class="esVencida(deuda) ? 'text-red-400' : 'text-theme-accent'">
                   {{ esVencida(deuda) ? 'Vencida:' : 'Pago:' }} {{ formatFecha(deuda.fechaPago) }}
                 </p>
-                <span v-if="esVencida(deuda)" class="text-[0.5625rem] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
+                <span v-if="esVencida(deuda)" class="text-[0.6875rem] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full font-semibold">VENCIDA</span>
               </div>
               <div v-if="deuda.notas" class="mt-1">
-                <p class="text-[0.625rem] text-theme-text-muted italic">{{ deuda.notas }}</p>
+                <p class="text-[0.6875rem] text-theme-text-muted italic">{{ deuda.notas }}</p>
               </div>
             </div>
             <div class="text-right shrink-0">
               <p class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
-              <p v-if="deuda.estado === 'parcial'" class="text-[0.625rem] text-orange-400 mt-0.5">
+              <p v-if="deuda.estado === 'parcial'" class="text-[0.6875rem] text-orange-400 mt-0.5">
                 Pendiente: {{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }}
               </p>
               <span
-                class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium mt-1"
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-medium mt-1"
                 :class="deuda.estado === 'parcial' ? 'bg-orange-500/15 text-orange-400' : 'bg-yellow-500/15 text-yellow-400'"
               >
                 {{ deuda.estado === 'parcial' ? 'Parcial' : 'Pendiente' }}
@@ -217,7 +217,7 @@
                 :style="{ width: ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100) + '%' }"
               ></div>
             </div>
-            <p class="text-[0.625rem] text-theme-text-muted mt-0.5">
+            <p class="text-[0.6875rem] text-theme-text-muted mt-0.5">
               {{ ((1 - deuda.montoPendiente / deuda.montoOriginal) * 100).toFixed(0) }}% pagado
             </p>
           </div>
@@ -311,14 +311,14 @@
             </p>
             <div v-if="puntoActual.snapshotResumen" class="grid grid-cols-2 gap-2 mt-2 bg-theme-input rounded-lg p-2">
               <div>
-                <p class="text-[0.6rem] text-theme-text-sec truncate">{{ puntoActual.snapshotResumen.personaANombre }}</p>
+                <p class="text-[0.6875rem] text-theme-text-sec truncate">{{ puntoActual.snapshotResumen.personaANombre }}</p>
                 <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(puntoActual.snapshotResumen.totalPendienteA) }}</p>
-                <p class="text-[0.6rem] text-theme-text-muted">{{ puntoActual.snapshotResumen.totalDeudasA }} deuda(s)</p>
+                <p class="text-[0.6875rem] text-theme-text-muted">{{ puntoActual.snapshotResumen.totalDeudasA }} deuda(s)</p>
               </div>
               <div>
-                <p class="text-[0.6rem] text-theme-text-sec truncate">{{ puntoActual.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
+                <p class="text-[0.6875rem] text-theme-text-sec truncate">{{ puntoActual.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
                 <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(puntoActual.snapshotResumen.totalPendienteB) }}</p>
-                <p class="text-[0.6rem] text-theme-text-muted">{{ puntoActual.snapshotResumen.totalDeudasB }} deuda(s)</p>
+                <p class="text-[0.6875rem] text-theme-text-muted">{{ puntoActual.snapshotResumen.totalDeudasB }} deuda(s)</p>
               </div>
             </div>
           </div>
@@ -336,7 +336,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
               Puntos
-              <span class="text-[0.6rem] text-theme-text-muted">{{ checkpoints.length }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{ checkpoints.length }}</span>
             </button>
             <button
               class="flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-purple-400 hover:bg-purple-500/10 active:bg-purple-500/20 transition-colors"
@@ -346,7 +346,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
               Auditoría
-              <span class="text-[0.6rem] text-theme-text-muted">{{ auditoriaPersona.length }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{ auditoriaPersona.length }}</span>
             </button>
           </div>
         </div>
@@ -377,7 +377,7 @@
           </div>
           <div class="text-right shrink-0 ml-3">
             <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
-            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium mt-1 bg-emerald-500/15 text-emerald-400">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-medium mt-1 bg-emerald-500/15 text-emerald-400">
               {{ deuda.estado === 'archivado' ? 'Archivada' : 'Pagada' }}
             </span>
           </div>
@@ -444,7 +444,7 @@
     <SharedConfirmDialog
       v-model="showEliminarDeudaConfirm"
       title="Eliminar deuda"
-      :message="`¿Eliminar '${deudaParaAccion?.concepto}'? Esta acción no se puede deshacer.`"
+      :message="`¿Eliminar '${deudaParaAccion?.concepto}'? Irá a la papelera y podrás restaurarla durante 30 días.`"
       confirm-label="Eliminar"
       variant="danger"
       :loading="procesandoAccion"

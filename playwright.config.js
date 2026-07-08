@@ -62,6 +62,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   use: {
     baseURL: BASE_URL,
+    // Entornos con Chromium preinstalado (p. ej. sandboxes remotos donde no
+    // se puede correr `playwright install`): apuntar al binario del sistema.
+    ...(process.env.PW_EXECUTABLE_PATH
+      ? { launchOptions: { executablePath: process.env.PW_EXECUTABLE_PATH } }
+      : {}),
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

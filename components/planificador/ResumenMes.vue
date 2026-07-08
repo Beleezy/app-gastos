@@ -26,8 +26,10 @@
               v-model="presupuestoTemp"
               type="number"
               step="0.01"
+              aria-label="Presupuesto mensual"
               class="w-full min-w-0 bg-theme-input border border-theme-accent rounded-lg px-2 py-1 text-3xl font-extrabold text-theme-text focus:outline-none"
-              @keyup.enter="guardarPresupuesto"
+              @keydown.enter.prevent="guardarPresupuesto"
+              @keydown.esc.prevent="cancelarEdicion"
               @blur="guardarPresupuesto"
             />
           </div>
@@ -360,12 +362,21 @@ function iniciarEdicion() {
 }
 
 async function guardarPresupuesto() {
+  if (!editandoPresupuesto.value) return
+  editandoPresupuesto.value = false
   const monto = parseFloat(presupuestoTemp.value)
-  if (!isNaN(monto) && monto >= 0) {
+  if (!isNaN(monto) && monto >= 0 && monto !== resumen.value.presupuesto) {
     await updatePresupuesto(monto)
     success('Presupuesto actualizado')
   }
+}
+
+// N1: el botón existía pero la función no — el click lanzaba un error y el
+// display quedaba vacío ("S/") hasta recargar. Cancelar descarta el valor
+// temporal y vuelve a mostrar el presupuesto vigente.
+function cancelarEdicion() {
   editandoPresupuesto.value = false
+  presupuestoTemp.value = resumen.value.presupuesto
 }
 </script>
 

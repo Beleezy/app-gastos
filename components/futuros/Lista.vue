@@ -429,10 +429,10 @@
                             :href="opcion.referenciaUrl"
                             target="_blank"
                             rel="noopener noreferrer"
-                            class="inline-flex items-center gap-0.5 text-violet-400 hover:text-violet-300"
+                            class="inline-flex items-center gap-0.5 text-violet-400 hover:text-violet-300 max-w-[9rem]"
                             @click.stop
                           >
-                            {{ hostDeUrl(opcion.referenciaUrl) }}
+                            <span class="truncate">{{ hostDeUrl(opcion.referenciaUrl) }}</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                               <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5" />
                             </svg>

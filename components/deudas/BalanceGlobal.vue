@@ -137,12 +137,13 @@
 </template>
 
 <script setup>
-const { apiFetch } = useApiFetch()
 const { formatCurrency } = useFormatters()
 
-const balance = ref({ totalMeDeben: 0, totalYoDebo: 0, balanceNeto: 0, personas: [] })
-const cargando = ref(false)
-const error = ref(null)
+// Estado compartido en useDeudas: las mutaciones (crear deuda, pagar,
+// saldar, eliminar) lo invalidan vía invalidarResumenes(), así el balance
+// nunca queda stale tras escribir (F4).
+const { balance, balanceCargando: cargando, balanceError: error, fetchBalance } = useDeudas()
+
 const expanded = ref(false)
 
 const topPersonas = computed(() => (balance.value.personas || []).slice(0, 5))
@@ -151,17 +152,9 @@ function toggleExpand() {
   expanded.value = !expanded.value
 }
 
-async function recargar() {
-  cargando.value = true
-  error.value = null
-  try {
-    balance.value = await apiFetch('/api/deudas/balance')
-  } catch (e) {
-    error.value = e?.data?.message || e?.message || 'Error desconocido'
-  } finally {
-    cargando.value = false
-  }
+function recargar() {
+  return fetchBalance({ noCache: true })
 }
 
-onMounted(recargar)
+onMounted(() => fetchBalance())
 </script>

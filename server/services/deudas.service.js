@@ -24,7 +24,11 @@ async function resolverPersonaId({ usuarioId, body, tx = db }) {
   const [existing] = await tx
     .select({ id: personasEntidades.id })
     .from(personasEntidades)
-    .where(and(eq(personasEntidades.usuarioId, usuarioId), eq(personasEntidades.nombre, nombre)))
+    .where(and(
+      eq(personasEntidades.usuarioId, usuarioId),
+      eq(personasEntidades.nombre, nombre),
+      isNull(personasEntidades.deletedAt),
+    ))
     .limit(1)
 
   if (existing) return existing.id

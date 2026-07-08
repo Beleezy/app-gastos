@@ -1,8 +1,9 @@
 <template>
   <form @submit.prevent="submit" class="space-y-4">
     <div>
-      <label class="block text-xs text-theme-text-muted font-medium mb-1.5">Concepto</label>
+      <label for="fi-1" class="block text-xs text-theme-text-muted font-medium mb-1.5">Concepto</label>
       <input
+        id="fi-1"
         v-model="form.concepto"
         type="text"
         required
@@ -16,8 +17,9 @@
          ícono de calendario) no cabe en mitad exacta con texto grande a 380px. -->
     <div class="grid grid-cols-[1fr,1.35fr] gap-3">
       <div class="min-w-0">
-        <label class="block text-xs text-theme-text-muted font-medium mb-1.5">Monto</label>
+        <label for="fi-2" class="block text-xs text-theme-text-muted font-medium mb-1.5">Monto</label>
         <input
+          id="fi-2"
           v-model.number="form.monto"
           type="number"
           step="0.01"
@@ -28,8 +30,9 @@
         />
       </div>
       <div class="min-w-0">
-        <label class="block text-xs text-theme-text-muted font-medium mb-1.5">Fecha</label>
+        <label for="fi-3" class="block text-xs text-theme-text-muted font-medium mb-1.5">Fecha</label>
         <input
+          id="fi-3"
           v-model="form.fecha"
           type="date"
           required
@@ -58,14 +61,16 @@
 
     <div>
       <label class="flex items-center gap-2 text-xs text-theme-text-muted">
-        <input v-model="form.esRecurrente" type="checkbox" class="h-5 w-5 rounded" />
+        <input
+          v-model="form.esRecurrente" type="checkbox" class="h-5 w-5 rounded" />
         <span>Es recurrente (informativo, sin replicar todavía)</span>
       </label>
     </div>
 
     <div>
-      <label class="block text-xs text-theme-text-muted font-medium mb-1.5">Notas (opcional)</label>
+      <label for="fi-5" class="block text-xs text-theme-text-muted font-medium mb-1.5">Notas (opcional)</label>
       <textarea
+        id="fi-5"
         v-model="form.notas"
         rows="2"
         maxlength="500"

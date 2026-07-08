@@ -22,6 +22,7 @@
       <button
         class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-theme-card border border-theme-border text-theme-text-muted hover:bg-theme-border-md hover:text-theme-text transition-colors"
         :title="`Orden: ${ordenLabels[ordenActual]}`"
+          :aria-label="`Orden: ${ordenLabels[ordenActual]}`"
         @click="ciclarOrden"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -49,7 +50,7 @@
         {{ f.label }}
         <span
           v-if="f.value === 'vencidas' && countVencidas > 0"
-          class="px-1.5 py-0 rounded-full bg-red-500/30 text-red-300 text-[0.5625rem] font-bold"
+          class="px-1.5 py-0 rounded-full bg-red-500/30 text-red-300 text-[0.6875rem] font-bold"
         >{{ countVencidas }}</span>
       </button>
     </div>
@@ -95,7 +96,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            <span class="text-[0.5625rem] font-medium">Ver</span>
+            <span class="text-[0.6875rem] font-medium">Ver</span>
           </button>
           <button
             v-if="tabActual === 'me_deben' && persona.totalPendiente > 0"
@@ -105,7 +106,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <span class="text-[0.5625rem] font-medium">PDF</span>
+            <span class="text-[0.6875rem] font-medium">PDF</span>
           </button>
         </div>
 
@@ -135,16 +136,16 @@
               <div class="flex-1 min-w-0">
                 <div class="flex items-start gap-1.5 min-w-0">
                   <p class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0" :title="persona.nombre">{{ persona.nombre }}</p>
-                  <span v-if="persona.tieneVencidas" class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-semibold bg-red-500/20 text-red-400">
+                  <span v-if="persona.tieneVencidas" class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-semibold bg-red-500/20 text-red-400">
                     <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
                     VENCIDA
                   </span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-border-md text-theme-text-muted">
+                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted">
                     ORG
                   </span>
-                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
+                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                     </svg>
@@ -155,7 +156,7 @@
                 </div>
                 <!-- Próxima a vencer (solo si NO está vencida) -->
                 <div v-if="!persona.tieneVencidas && persona.fechaProximaVencer" class="flex items-center gap-1 mt-1">
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.5625rem] font-medium bg-amber-500/15 text-amber-400">
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-medium bg-amber-500/15 text-amber-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -178,7 +179,7 @@
                     class="w-1.5 h-1.5 rounded-full"
                     :class="persona.totalPendiente > 0 ? (tabActual === 'me_deben' ? 'bg-emerald-400' : 'bg-red-400') : 'bg-gray-600'"
                   ></span>
-                  <span class="text-[0.625rem] text-theme-text-sec">
+                  <span class="text-[0.6875rem] text-theme-text-sec">
                     {{ persona.totalPendiente > 0 ? 'Pendiente' : 'Saldado' }}
                   </span>
                 </div>
@@ -240,7 +241,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              <span class="text-[0.5625rem] font-medium">Ver</span>
+              <span class="text-[0.6875rem] font-medium">Ver</span>
             </button>
           </div>
 
@@ -263,7 +264,7 @@
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start gap-2">
                     <p class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0">{{ persona.nombre }}</p>
-                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.5625rem] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
+                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
                   </div>
                   <p class="text-xs text-theme-text-sec mt-0.5">Sin deudas activas</p>
                 </div>
@@ -272,7 +273,7 @@
                   <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} 0.00</p>
                   <div class="flex items-center justify-end gap-1 mt-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                    <span class="text-[0.625rem] text-theme-text-sec">Saldado</span>
+                    <span class="text-[0.6875rem] text-theme-text-sec">Saldado</span>
                   </div>
                 </div>
                 <!-- Chevron -->

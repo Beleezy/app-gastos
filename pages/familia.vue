@@ -121,16 +121,28 @@
           </div>
           <div class="flex items-center gap-1 shrink-0">
             <button class="px-2.5 py-1.5 rounded-lg bg-fuchsia-500/15 text-fuchsia-400 text-[0.6875rem] font-semibold" @click="entrarPerfil(p.id)">Entrar</button>
-            <button class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md" aria-label="Editar" @click="abrirEdicion(p)">
+            <button class="w-11 h-11 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md" aria-label="Editar" @click="abrirEdicion(p)">
               <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
             </button>
-            <button class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-red-400 hover:bg-red-500/10" aria-label="Eliminar" @click="confirmarEliminar(p)">
+            <button class="w-11 h-11 rounded-lg text-theme-text-muted hover:text-red-400 hover:bg-red-500/10" aria-label="Eliminar" @click="pedirEliminar(p)">
               <svg class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9M4 7h16"/></svg>
             </button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Confirmación custom (N10): window.confirm congelaba el hilo JS y
+         rompía la consistencia visual con el resto de la app -->
+    <SharedConfirmDialog
+      v-model="showConfirmEliminar"
+      title="Eliminar perfil"
+      :message="perfilAEliminar ? `¿Eliminar el perfil &quot;${perfilAEliminar.nombre}&quot;? Se borrarán también sus gastos, ingresos, planificador, ahorros y deudas.` : ''"
+      confirm-label="Eliminar perfil"
+      :loading="eliminandoPerfil"
+      require-checkbox
+      @confirm="ejecutarEliminar"
+    />
   </div>
 </template>
 
@@ -220,13 +232,28 @@ async function guardar() {
   }
 }
 
-async function confirmarEliminar(p) {
-  if (!confirm(`¿Eliminar el perfil "${p.nombre}"? Se borrarán también sus gastos, ingresos, planificador, ahorros y deudas. Esta acción no se puede deshacer.`)) return
+const showConfirmEliminar = ref(false)
+const perfilAEliminar = ref(null)
+const eliminandoPerfil = ref(false)
+
+function pedirEliminar(p) {
+  perfilAEliminar.value = p
+  showConfirmEliminar.value = true
+}
+
+async function ejecutarEliminar() {
+  const p = perfilAEliminar.value
+  if (!p) return
+  eliminandoPerfil.value = true
   try {
     await eliminarPerfil(p.id)
     toast.success('Perfil eliminado')
+    showConfirmEliminar.value = false
+    perfilAEliminar.value = null
   } catch (e) {
     toast.error(e?.data?.message || 'No se pudo eliminar')
+  } finally {
+    eliminandoPerfil.value = false
   }
 }
 </script>
