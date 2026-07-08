@@ -2,7 +2,7 @@
 // Body: { entidad: 'gasto' | 'deuda', id: uuid }
 
 import { db } from '../../utils/db.js'
-import { gastos, deudas, pagosDeuda, personasEntidades } from '../../database/schema.js'
+import { gastos, deudas, pagosDeuda } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, sql } from 'drizzle-orm'
 import { z } from 'zod'
@@ -75,11 +75,9 @@ export default defineEventHandler(async (event) => {
 
     await tx.update(deudas).set({ deletedAt: null }).where(eq(deudas.id, id))
 
-    // Revivir SOLO lo que cayó en la misma cascada de borrado (mismo
-    // timestamp): sus pagos — un pago revertido individualmente ya ajustó
-    // monto_pendiente y no debe resucitar — y, si "Eliminar persona y sus
-    // deudas" se llevó también a la persona, la persona (sin esto la deuda
-    // restaurada quedaría huérfana e invisible en la lista).
+    // Revivir SOLO los pagos que cayeron en la misma cascada de borrado (mismo
+    // timestamp): un pago revertido individualmente ya ajustó monto_pendiente
+    // y no debe resucitar. (deudas/pagos.deleted_at son del schema original.)
     await tx
       .update(pagosDeuda)
       .set({ deletedAt: null })
@@ -87,17 +85,6 @@ export default defineEventHandler(async (event) => {
         eq(pagosDeuda.deudaId, id),
         eq(pagosDeuda.deletedAt, antes.deletedAt),
       ))
-
-    if (antes.personaEntidadId) {
-      await tx
-        .update(personasEntidades)
-        .set({ deletedAt: null, updatedAt: new Date() })
-        .where(and(
-          eq(personasEntidades.id, antes.personaEntidadId),
-          eq(personasEntidades.usuarioId, usuarioId),
-          sql`${personasEntidades.deletedAt} IS NOT NULL`,
-        ))
-    }
 
     return { id }
   })

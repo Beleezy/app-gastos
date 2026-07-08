@@ -192,15 +192,10 @@ export const personasEntidades = pgTable('personas_entidades', {
   vinculoParId: uuid('vinculo_par_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
-  // Soft delete: "Eliminar persona y sus deudas" antes hacía DELETE físico y
-  // el cascade se llevaba también las deudas que YA estaban en la papelera
-  // (bug N12 ronda 2). Ahora persona + deudas + pagos van juntas a papelera.
-  deletedAt: timestamp('deleted_at'),
 }, (table) => [
   index('personas_entidades_usuario_idx').on(table.usuarioId),
   index('personas_entidades_usuario_updated_idx').on(table.usuarioId, table.updatedAt),
   index('personas_entidades_vinculado_idx').on(table.vinculadoUsuarioId),
-  index('personas_entidades_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
 ])
 
 // ── Tabla 7: deudas ──
