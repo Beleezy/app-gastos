@@ -13,11 +13,9 @@
     <p v-if="label" class="text-hero-label">{{ label }}</p>
     <div class="flex items-baseline gap-1">
       <span v-if="currency" class="text-xl font-medium text-theme-text-muted">{{ currency }}</span>
-      <span
-        class="text-hero"
-        :class="amountToneClass"
-        data-testid="hero-amount"
-      >{{ formattedAmount }}</span>
+      <span class="text-hero" :class="amountToneClass" data-testid="hero-amount">{{
+        formattedAmount
+      }}</span>
     </div>
     <p v-if="sublabel" class="text-sm text-theme-text-sec">
       <slot name="sublabel">{{ sublabel }}</slot>
@@ -27,10 +25,26 @@
         class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
         :class="deltaToneClass"
       >
-        <svg v-if="delta > 0" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+        <svg
+          v-if="delta > 0"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-3 h-3"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="3"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" d="M7 17l9.2-9.2M17 17V8H8" />
         </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-3 h-3"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="3"
+        >
           <path stroke-linecap="round" stroke-linejoin="round" d="M17 7L7.8 16.2M7 7v9h9" />
         </svg>
         {{ delta > 0 ? '+' : '' }}{{ delta.toFixed(0) }}% {{ deltaLabel }}
@@ -62,9 +76,12 @@ const formattedAmount = computed(() => {
 
 const amountToneClass = computed(() => {
   switch (props.tone) {
-    case 'success': return 'text-emerald-400'
-    case 'danger': return 'text-red-400'
-    case 'accent': return 'text-theme-accent'
+    case 'success':
+      return 'text-emerald-400'
+    case 'danger':
+      return 'text-red-400'
+    case 'accent':
+      return 'text-theme-accent'
     case 'neutral':
     default:
       return 'text-theme-text'
@@ -74,8 +91,6 @@ const amountToneClass = computed(() => {
 const deltaToneClass = computed(() => {
   // Convención: delta positivo es "gastaste más" → rojo. Negativo → verde.
   // Si se quiere invertir (ej: ingresos), pasa delta negado.
-  return props.delta > 0
-    ? 'bg-red-500/15 text-red-400'
-    : 'bg-emerald-500/15 text-emerald-400'
+  return props.delta > 0 ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400'
 })
 </script>

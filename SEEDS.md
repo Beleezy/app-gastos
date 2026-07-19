@@ -7,6 +7,7 @@ Este documento explica cómo ejecutar los scripts de seed para inicializar la ba
 ### 1. `db:seed` — Seed básico (sin datos de prueba)
 
 Limpia la base de datos completamente y crea:
+
 - Categorías predefinidas
 - Un usuario por defecto vacío
 
@@ -21,6 +22,7 @@ npm run db:seed
 ### 2. `db:seed:test` — Seed con datos de prueba completos (usuario nuevo)
 
 Limpia la base de datos y genera un conjunto completo de datos de prueba:
+
 - **Usuario nuevo** — `Usuario Prueba`
 - **20 gastos planificados** — Para 3 meses (febrero, marzo, abril 2026)
   - Algunos recurrentes (alquiler, servicios, suscripciones)
@@ -58,11 +60,13 @@ npm run db:seed:test:user <USER_ID>
 ```
 
 **Ejemplo:**
+
 ```bash
 npm run db:seed:test:user c0e1d8e5-1234-5678-90ab-cdef12345678
 ```
 
 **Uso:**
+
 1. Después de crear un usuario en la aplicación vía login/signup
 2. Copiar su ID de usuario
 3. Ejecutar este comando para agregar datos de prueba a su cuenta
@@ -74,6 +78,7 @@ npm run db:seed:test:user c0e1d8e5-1234-5678-90ab-cdef12345678
 ### Gastos Planificados (20 conceptos × 3 meses = 60 registros)
 
 #### Recurrentes (7 conceptos):
+
 - Alquiler del mes — S/ 1,500.00 (día 1)
 - Recibo de luz — S/ 180.50 (día 5)
 - Internet y teléfono — S/ 120.00 (día 10)
@@ -83,6 +88,7 @@ npm run db:seed:test:user c0e1d8e5-1234-5678-90ab-cdef12345678
 - Spotify — S/ 10.99 (día 13)
 
 #### Únicos por mes (6 conceptos):
+
 - Compra en supermercado
 - Mantenimiento del auto
 - Compra de vitaminas
@@ -97,12 +103,14 @@ npm run db:seed:test:user c0e1d8e5-1234-5678-90ab-cdef12345678
 ### Gastos Registrados (150 gastos)
 
 Distribuidos aleatoriamente en los últimos 90 días con:
+
 - Múltiples conceptos por categoría
 - Montos variados por tipo de gasto
 - Método: 60% manual, 40% voz
 - Hora aleatoria durante el día
 
 **Categorías incluidas:**
+
 - Alimentación (8 variaciones: café, almuerzo, snacks, etc.)
 - Transporte (pasajes, uber, estacionamiento)
 - Servicios (luz, internet, agua, gas)
@@ -118,6 +126,7 @@ Distribuidos aleatoriamente en los últimos 90 días con:
 ### Deudas — "Me Deben" (5 personas × 10-15 detalles = 50-75 detalles)
 
 **Personas:**
+
 1. **Diego Martinez** — Persona (contacto: +51 999 123456)
 2. **María García** — Persona (contacto: maria@email.com)
 3. **Carlos López** — Persona (contacto: +51 995 654321)
@@ -125,6 +134,7 @@ Distribuidos aleatoriamente en los últimos 90 días con:
 5. **Tienda El Ahorro** — Organización (contacto: info@ahorro.pe)
 
 **Conceptos de deuda:**
+
 - Almuerzo compartido (S/ 20–300)
 - Pasaje pagado
 - Dinero para compras
@@ -145,12 +155,14 @@ Distribuidos aleatoriamente en los últimos 90 días con:
 ### Deudas — "Yo Debo" (4 personas × 10-15 detalles = 40-60 detalles)
 
 **Personas:**
+
 1. **Banco de Crédito** — Organización (contacto: credito@banco.pe)
 2. **Proveedor Importaciones XYZ** — Organización (contacto: ventas@xyz.com)
 3. **Juan Rodríguez** — Persona (contacto: +51 912 345678)
 4. **Sofía Ruiz** — Persona (contacto: sofia@email.com)
 
 **Conceptos de deuda:**
+
 - Préstamo personal (S/ 50–500)
 - Cuota de crédito
 - Compra a plazos
@@ -174,20 +186,24 @@ Distribuidos aleatoriamente en los últimos 90 días con:
 Se generan automáticamente pagos para ~15 deudas aleatorias con estos patrones:
 
 **Patrón 1 — Pago Total (33%):**
+
 - Registra un único pago que cubre el 100% de la deuda
 - Estado actualizado a `pagado`
 
 **Patrón 2 — Pago Parcial (33%):**
+
 - 2–3 cuotas con montos variados
 - Último pago es el residuo para completar
 - Estado actualizado a `parcial`
 
 **Patrón 3 — Abonos Pequeños (33%):**
+
 - 3–5 abonos pequeños distribuidos
 - Último abono completa la deuda
 - Estado actualizado según saldo pendiente
 
 **Métodos de pago (aleatorio):**
+
 - Efectivo
 - Transferencia
 - Tarjeta

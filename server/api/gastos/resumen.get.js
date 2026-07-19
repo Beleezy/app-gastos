@@ -31,11 +31,13 @@ export default defineEventHandler(async (event) => {
         totalMes: sql`COALESCE(SUM(${gastos.monto}), 0)`,
       })
       .from(gastos)
-      .where(and(
-        eq(gastos.usuarioId, usuarioId),
-        isNull(gastos.deletedAt),
-        between(gastos.fecha, primerDia, ultimaFecha),
-      ))
+      .where(
+        and(
+          eq(gastos.usuarioId, usuarioId),
+          isNull(gastos.deletedAt),
+          between(gastos.fecha, primerDia, ultimaFecha),
+        ),
+      )
 
     return {
       totalDia: parseFloat(row.totalDia),
@@ -48,7 +50,9 @@ export default defineEventHandler(async (event) => {
     const [row] = await db
       .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
       .from(gastos)
-      .where(and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), eq(gastos.fecha, fecha)))
+      .where(
+        and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), eq(gastos.fecha, fecha)),
+      )
     return { totalDia: parseFloat(row.total), totalMes: 0 }
   }
 

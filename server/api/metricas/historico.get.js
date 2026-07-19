@@ -35,7 +35,8 @@ export default defineEventHandler(async (event) => {
   const inicio = new Date(anio, mes - 1 - (meses - 1), 1)
   const fin = new Date(anio, mes, 0) // último día del mes actual
 
-  const fmt = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const fmt = (d) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   const desde = fmt(inicio)
   const hasta = fmt(fin)
 
@@ -49,12 +50,14 @@ export default defineEventHandler(async (event) => {
         cantidad: sql`COUNT(*)`.as('cantidad'),
       })
       .from(gastos)
-      .where(and(
-        eq(gastos.usuarioId, usuarioId),
-        isNull(gastos.deletedAt),
-        gte(gastos.fecha, desde),
-        lte(gastos.fecha, hasta),
-      ))
+      .where(
+        and(
+          eq(gastos.usuarioId, usuarioId),
+          isNull(gastos.deletedAt),
+          gte(gastos.fecha, desde),
+          lte(gastos.fecha, hasta),
+        ),
+      )
       .groupBy(sql`EXTRACT(YEAR FROM ${gastos.fecha}), EXTRACT(MONTH FROM ${gastos.fecha})`),
 
     // Ingresos: misma idea.
@@ -65,12 +68,14 @@ export default defineEventHandler(async (event) => {
         total: sql`COALESCE(SUM(${ingresos.monto}), 0)`.as('total'),
       })
       .from(ingresos)
-      .where(and(
-        eq(ingresos.usuarioId, usuarioId),
-        isNull(ingresos.deletedAt),
-        gte(ingresos.fecha, desde),
-        lte(ingresos.fecha, hasta),
-      ))
+      .where(
+        and(
+          eq(ingresos.usuarioId, usuarioId),
+          isNull(ingresos.deletedAt),
+          gte(ingresos.fecha, desde),
+          lte(ingresos.fecha, hasta),
+        ),
+      )
       .groupBy(sql`EXTRACT(YEAR FROM ${ingresos.fecha}), EXTRACT(MONTH FROM ${ingresos.fecha})`),
 
     // Ahorros: la tabla guarda (mes, anio) explícitos.
@@ -91,11 +96,17 @@ export default defineEventHandler(async (event) => {
   {
     let m = mes - (meses - 1)
     let a = anio
-    while (m <= 0) { m += 12; a -= 1 }
+    while (m <= 0) {
+      m += 12
+      a -= 1
+    }
     for (let i = 0; i < meses; i++) {
       periodos.push({ anio: a, mes: m })
       m += 1
-      if (m === 13) { m = 1; a += 1 }
+      if (m === 13) {
+        m = 1
+        a += 1
+      }
     }
   }
 
@@ -108,7 +119,7 @@ export default defineEventHandler(async (event) => {
   const iIdx = indexar(ingresosSerie)
   const aIdx = indexar(ahorrosSerie)
 
-  const serie = periodos.map(p => {
+  const serie = periodos.map((p) => {
     const k = `${p.anio}-${p.mes}`
     const g = parseFloat(gIdx.get(k)?.total || 0)
     const ing = parseFloat(iIdx.get(k)?.total || 0)
@@ -125,16 +136,20 @@ export default defineEventHandler(async (event) => {
   })
 
   // Totales rápidos para no recalcular en el cliente.
-  const totales = serie.reduce((acc, m) => {
-    acc.gastos += m.gastos
-    acc.ingresos += m.ingresos
-    acc.ahorros += m.ahorros
-    return acc
-  }, { gastos: 0, ingresos: 0, ahorros: 0 })
+  const totales = serie.reduce(
+    (acc, m) => {
+      acc.gastos += m.gastos
+      acc.ingresos += m.ingresos
+      acc.ahorros += m.ahorros
+      return acc
+    },
+    { gastos: 0, ingresos: 0, ahorros: 0 },
+  )
 
   // Promediar sobre meses CON actividad: con 8 meses en cero el promedio se
   // diluía (595/mes cuando los meses activos promediaban ~1,787) (UX-7).
-  const mesesActivos = serie.filter(m => m.gastos > 0 || m.ingresos > 0 || m.ahorros > 0).length || 1
+  const mesesActivos =
+    serie.filter((m) => m.gastos > 0 || m.ingresos > 0 || m.ahorros > 0).length || 1
   const promedios = {
     gastosMensual: Math.round((totales.gastos / mesesActivos) * 100) / 100,
     ingresosMensual: Math.round((totales.ingresos / mesesActivos) * 100) / 100,

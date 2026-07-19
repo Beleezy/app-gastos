@@ -65,7 +65,6 @@ export function useFormatters() {
     return `${MESES[mes - 1]} ${anio}`
   }
 
-
   /**
    * Formatea monto monetario con símbolo local (PEN por defecto).
    * @param {number|string} monto
@@ -82,5 +81,12 @@ export function useFormatters() {
     }).format(Number.isFinite(n) ? n : 0)
   }
 
-  return { formatFecha, formatFechaCorta, formatFechaDia, formatHora, formatMesAnio, formatCurrency }
+  return {
+    formatFecha,
+    formatFechaCorta,
+    formatFechaDia,
+    formatHora,
+    formatMesAnio,
+    formatCurrency,
+  }
 }

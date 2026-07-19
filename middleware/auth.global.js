@@ -25,12 +25,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // `plugins/fetch.js` ya lo maneja; la siguiente navegación no tendrá
   // ni user ni cookie y caerá al `navigateTo('/login')` de abajo.
   if (import.meta.client) {
-    const hasSessionCookie = document.cookie
-      .split(';')
-      .some(c => {
-        const name = c.trim().split('=')[0]
-        return name.startsWith('sb-') && name.includes('auth-token')
-      })
+    const hasSessionCookie = document.cookie.split(';').some((c) => {
+      const name = c.trim().split('=')[0]
+      return name.startsWith('sb-') && name.includes('auth-token')
+    })
     if (hasSessionCookie) return
   }
 

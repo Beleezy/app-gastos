@@ -13,10 +13,7 @@ export default defineEventHandler(async (event) => {
       montoPresupuesto: String(body.montoPresupuesto),
       updatedAt: new Date(),
     })
-    .where(and(
-      eq(planesMensuales.id, body.id),
-      eq(planesMensuales.usuarioId, usuarioId)
-    ))
+    .where(and(eq(planesMensuales.id, body.id), eq(planesMensuales.usuarioId, usuarioId)))
     .returning()
 
   return { ...updated, montoPresupuesto: parseFloat(updated.montoPresupuesto) }

@@ -23,11 +23,13 @@ export default defineEventHandler(async (event) => {
   const [planOrigen] = await db
     .select()
     .from(planesMensuales)
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      eq(planesMensuales.mes, mesO),
-      eq(planesMensuales.anio, anioO),
-    ))
+    .where(
+      and(
+        eq(planesMensuales.usuarioId, usuarioId),
+        eq(planesMensuales.mes, mesO),
+        eq(planesMensuales.anio, anioO),
+      ),
+    )
     .limit(1)
 
   if (!planOrigen) {

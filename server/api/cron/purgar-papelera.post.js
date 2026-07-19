@@ -18,10 +18,24 @@ export default defineEventHandler(async (event) => {
   const limite = sql`NOW() - INTERVAL '${sql.raw(String(RETENCION_DIAS))} days'`
 
   const [gastosPurg, deudasPurg, pagosPurg, personasPurg] = await Promise.all([
-    db.delete(gastos).where(sql`${gastos.deletedAt} IS NOT NULL AND ${gastos.deletedAt} < ${limite}`).returning({ id: gastos.id }),
-    db.delete(deudas).where(sql`${deudas.deletedAt} IS NOT NULL AND ${deudas.deletedAt} < ${limite}`).returning({ id: deudas.id }),
-    db.delete(pagosDeuda).where(sql`${pagosDeuda.deletedAt} IS NOT NULL AND ${pagosDeuda.deletedAt} < ${limite}`).returning({ id: pagosDeuda.id }),
-    db.delete(personasEntidades).where(sql`${personasEntidades.deletedAt} IS NOT NULL AND ${personasEntidades.deletedAt} < ${limite}`).returning({ id: personasEntidades.id }),
+    db
+      .delete(gastos)
+      .where(sql`${gastos.deletedAt} IS NOT NULL AND ${gastos.deletedAt} < ${limite}`)
+      .returning({ id: gastos.id }),
+    db
+      .delete(deudas)
+      .where(sql`${deudas.deletedAt} IS NOT NULL AND ${deudas.deletedAt} < ${limite}`)
+      .returning({ id: deudas.id }),
+    db
+      .delete(pagosDeuda)
+      .where(sql`${pagosDeuda.deletedAt} IS NOT NULL AND ${pagosDeuda.deletedAt} < ${limite}`)
+      .returning({ id: pagosDeuda.id }),
+    db
+      .delete(personasEntidades)
+      .where(
+        sql`${personasEntidades.deletedAt} IS NOT NULL AND ${personasEntidades.deletedAt} < ${limite}`,
+      )
+      .returning({ id: personasEntidades.id }),
   ])
 
   const result = {

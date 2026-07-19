@@ -1,7 +1,11 @@
 import { db } from '../../../utils/db.js'
 import {
-  googleCalendarConexiones, gastosPlanificados, planesMensuales,
-  categorias, gastos, configuraciones,
+  googleCalendarConexiones,
+  gastosPlanificados,
+  planesMensuales,
+  categorias,
+  gastos,
+  configuraciones,
 } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { decrypt } from '../../../utils/crypto.js'
@@ -39,7 +43,8 @@ export default defineEventHandler(async (event) => {
     cal = await client.getCalendar(calendarId)
   } catch (e) {
     if (e instanceof TokenExpiradoError) {
-      await db.update(googleCalendarConexiones)
+      await db
+        .update(googleCalendarConexiones)
         .set({ ultimoError: 'Token expirado, reconecta tu Google Calendar', updatedAt: new Date() })
         .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
       throw createError({ statusCode: 401, message: 'Token expirado, reconecta' })
@@ -49,24 +54,39 @@ export default defineEventHandler(async (event) => {
 
   if (!cal) {
     // Calendario borrado en Google → recrear y limpiar event IDs locales
-    const nuevo = await client.createCalendar({ summary: CALENDAR_NOMBRE, timeZone: 'America/Lima' })
+    const nuevo = await client.createCalendar({
+      summary: CALENDAR_NOMBRE,
+      timeZone: 'America/Lima',
+    })
     calendarId = nuevo.id
-    await db.update(googleCalendarConexiones)
+    await db
+      .update(googleCalendarConexiones)
       .set({ calendarId, updatedAt: new Date() })
       .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
 
-    const planes = await db.select({ id: planesMensuales.id }).from(planesMensuales)
+    const planes = await db
+      .select({ id: planesMensuales.id })
+      .from(planesMensuales)
       .where(eq(planesMensuales.usuarioId, usuarioId))
     if (planes.length) {
-      await db.update(gastosPlanificados)
+      await db
+        .update(gastosPlanificados)
         .set({ googleEventId: null })
-        .where(inArray(gastosPlanificados.planMensualId, planes.map(p => p.id)))
+        .where(
+          inArray(
+            gastosPlanificados.planMensualId,
+            planes.map((p) => p.id),
+          ),
+        )
     }
   }
 
   // Moneda preferida
-  const [cfg] = await db.select({ moneda: configuraciones.monedaPreferida })
-    .from(configuraciones).where(eq(configuraciones.usuarioId, usuarioId)).limit(1)
+  const [cfg] = await db
+    .select({ moneda: configuraciones.monedaPreferida })
+    .from(configuraciones)
+    .where(eq(configuraciones.usuarioId, usuarioId))
+    .limit(1)
   const moneda = cfg?.moneda === 'USD' ? 'US$' : cfg?.moneda === 'EUR' ? 'EUR' : 'S/'
 
   // Cargar planificados desde el primer dia del mes actual
@@ -90,18 +110,20 @@ export default defineEventHandler(async (event) => {
     .from(gastosPlanificados)
     .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
     .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
-    .leftJoin(gastos, and(
-      eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
-      eq(gastos.usuarioId, usuarioId),
-    ))
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      gte(gastosPlanificados.fechaProbablePago, primerDiaMes),
-    ))
+    .leftJoin(
+      gastos,
+      and(eq(gastos.gastoPlanificadoId, gastosPlanificados.id), eq(gastos.usuarioId, usuarioId)),
+    )
+    .where(
+      and(
+        eq(planesMensuales.usuarioId, usuarioId),
+        gte(gastosPlanificados.fechaProbablePago, primerDiaMes),
+      ),
+    )
 
   // Listar eventos actuales de Google (en el rango)
   const eventos = await client.listEvents(calendarId, { timeMin: `${primerDiaMes}T00:00:00Z` })
-  const eventosPorId = new Map(eventos.map(e => [e.id, e]))
+  const eventosPorId = new Map(eventos.map((e) => [e.id, e]))
 
   // Procesamos en lotes paralelos: Google Calendar API soporta concurrencia
   // razonable y la red al backend de Google es el cuello de botella. Antes
@@ -109,7 +131,9 @@ export default defineEventHandler(async (event) => {
   // + 30 UPDATEs de BD). Con batches de 5 en paralelo, la sincronización
   // baja de ~15s a ~3s con 30 elementos.
   const BATCH = 5
-  let creados = 0, actualizados = 0, eliminados = 0
+  let creados = 0,
+    actualizados = 0,
+    eliminados = 0
   const idsUpdates = [] // { id, googleEventId } para hacer UPDATE batch al final
 
   async function procesarPlanificado(p) {
@@ -137,7 +161,7 @@ export default defineEventHandler(async (event) => {
 
   for (let i = 0; i < planificados.length; i += BATCH) {
     const batch = planificados.slice(i, i + BATCH)
-    const resultados = await Promise.all(batch.map(p => procesarPlanificado(p).catch(() => null)))
+    const resultados = await Promise.all(batch.map((p) => procesarPlanificado(p).catch(() => null)))
     for (const r of resultados) {
       if (r === 'created') creados++
       else if (r === 'updated') actualizados++
@@ -148,22 +172,33 @@ export default defineEventHandler(async (event) => {
   // `UPDATE ... FROM (VALUES ...)` portable sin SQL crudo, así que
   // hacemos N updates pero al menos en paralelo.
   if (idsUpdates.length) {
-    await Promise.all(idsUpdates.map(u =>
-      db.update(gastosPlanificados).set({ googleEventId: u.googleEventId }).where(eq(gastosPlanificados.id, u.id))
-    ))
+    await Promise.all(
+      idsUpdates.map((u) =>
+        db
+          .update(gastosPlanificados)
+          .set({ googleEventId: u.googleEventId })
+          .where(eq(gastosPlanificados.id, u.id)),
+      ),
+    )
   }
 
   // Eventos huerfanos en Google: borrar en paralelo en lotes.
   const huerfanos = [...eventosPorId.keys()]
   for (let i = 0; i < huerfanos.length; i += BATCH) {
     const batch = huerfanos.slice(i, i + BATCH)
-    const resultados = await Promise.all(batch.map(id =>
-      client.deleteEvent(calendarId, id).then(() => true).catch(() => false)
-    ))
+    const resultados = await Promise.all(
+      batch.map((id) =>
+        client
+          .deleteEvent(calendarId, id)
+          .then(() => true)
+          .catch(() => false),
+      ),
+    )
     eliminados += resultados.filter(Boolean).length
   }
 
-  await db.update(googleCalendarConexiones)
+  await db
+    .update(googleCalendarConexiones)
     .set({ ultimaSync: new Date(), ultimoError: null, updatedAt: new Date() })
     .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
 

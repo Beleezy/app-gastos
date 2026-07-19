@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Sanitizar: solo strings/números
-  const ids = body.ids.filter(id => typeof id === 'string' || typeof id === 'number').map(String)
+  const ids = body.ids.filter((id) => typeof id === 'string' || typeof id === 'number').map(String)
   if (ids.length === 0) {
     throw createError({ statusCode: 400, message: 'Ids inválidos' })
   }
@@ -26,15 +26,15 @@ export default defineEventHandler(async (event) => {
     const borrados = await tx
       .update(gastos)
       .set({ deletedAt: new Date() })
-      .where(and(inArray(gastos.id, ids), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
+      .where(
+        and(inArray(gastos.id, ids), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)),
+      )
       .returning({
         id: gastos.id,
         gastoPlanificadoId: gastos.gastoPlanificadoId,
       })
 
-    const planificadosIds = borrados
-      .map(g => g.gastoPlanificadoId)
-      .filter(Boolean)
+    const planificadosIds = borrados.map((g) => g.gastoPlanificadoId).filter(Boolean)
 
     if (planificadosIds.length > 0) {
       await tx
@@ -46,5 +46,5 @@ export default defineEventHandler(async (event) => {
     return borrados
   })
 
-  return { success: true, eliminados: eliminados.length, ids: eliminados.map(g => g.id) }
+  return { success: true, eliminados: eliminados.length, ids: eliminados.map((g) => g.id) }
 })

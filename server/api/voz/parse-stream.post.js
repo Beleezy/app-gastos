@@ -30,7 +30,11 @@ import {
 } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
-import { sanitizeLlmInput, sanitizeForSystemPrompt, validateGastosLlm } from '../../utils/llmSafety.js'
+import {
+  sanitizeLlmInput,
+  sanitizeForSystemPrompt,
+  validateGastosLlm,
+} from '../../utils/llmSafety.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
 
@@ -63,7 +67,9 @@ export default defineEventHandler(async (event) => {
 
   const res = event.node.res
   const send = (eventName, data) => {
-    try { res.write(sseFrame(eventName, data)) } catch {}
+    try {
+      res.write(sseFrame(eventName, data))
+    } catch {}
   }
 
   send('started', { ts: Date.now() })
@@ -83,7 +89,13 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select({ nombre: categorias.nombre })
     .from(categorias)
-    .where(or(eq(categorias.esPredefinida, true), eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)))
+    .where(
+      or(
+        eq(categorias.esPredefinida, true),
+        eq(categorias.usuarioId, usuarioId),
+        isNull(categorias.usuarioId),
+      ),
+    )
     .orderBy(categorias.nombre)
   // Saneamos nombres custom (texto libre del usuario) antes de inyectarlos
   // al system prompt — evita stored prompt injection.
@@ -110,7 +122,9 @@ Reglas:
 - Para "ayer", "el martes", "hace dos días", usa estas referencias exactas: ${referenciaDias}.
 - Concepto máx 50 caracteres. Monto decimal positivo.`
 
-  const configuredModels = parseModelList(runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview')
+  const configuredModels = parseModelList(
+    runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview',
+  )
   const validModels = await getValidModels(configuredModels, apiKey)
   const primaryModel = selectBestModel(validModels, runtimeConfig)
 
@@ -139,8 +153,17 @@ Reglas:
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               system_instruction: { parts: [{ text: systemPrompt }] },
-              contents: [{ role: 'user', parts: [{ text: `<USER_INPUT>\n${promptUsuario}\n</USER_INPUT>` }] }],
-              generationConfig: { temperature: 0.2, maxOutputTokens: 1024, responseMimeType: 'application/json' },
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: `<USER_INPUT>\n${promptUsuario}\n</USER_INPUT>` }],
+                },
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 1024,
+                responseMimeType: 'application/json',
+              },
             }),
           },
         )
@@ -155,13 +178,24 @@ Reglas:
 
         const data = await response.json()
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()
-        if (!text) { lastError = 'Respuesta vacía'; continue }
+        if (!text) {
+          lastError = 'Respuesta vacía'
+          continue
+        }
 
         let parsed
-        try { parsed = JSON.parse(text) } catch { lastError = 'JSON inválido'; continue }
+        try {
+          parsed = JSON.parse(text)
+        } catch {
+          lastError = 'JSON inválido'
+          continue
+        }
 
         const validados = validateGastosLlm(parsed, { fechaDefault: hoy, categoriasValidas })
-        if (validados.gastos.length === 0) { lastError = 'Sin gastos'; continue }
+        if (validados.gastos.length === 0) {
+          lastError = 'Sin gastos'
+          continue
+        }
 
         // Emitir un evento por cada gasto detectado para feedback progresivo
         for (const g of validados.gastos) {

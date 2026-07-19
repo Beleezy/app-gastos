@@ -9,7 +9,9 @@ export function useCurrency() {
 
   const currencyCode = computed(() => config.value?.monedaPreferida || 'PEN')
   const currencySymbol = computed(() => CURRENCY_MAP[currencyCode.value]?.symbol || 'S/')
-  const currencyLocale = computed(() => config.value?.locale || CURRENCY_MAP[currencyCode.value]?.locale || 'es-PE')
+  const currencyLocale = computed(
+    () => config.value?.locale || CURRENCY_MAP[currencyCode.value]?.locale || 'es-PE',
+  )
 
   function formatMonto(valor) {
     return Number(valor).toLocaleString(currencyLocale.value, {

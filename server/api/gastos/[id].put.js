@@ -31,7 +31,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Gasto no encontrado' })
   }
 
-  const [cat] = await db.select().from(categorias).where(eq(categorias.id, updated.categoriaId)).limit(1)
+  const [cat] = await db
+    .select()
+    .from(categorias)
+    .where(eq(categorias.id, updated.categoriaId))
+    .limit(1)
 
   return {
     ...updated,

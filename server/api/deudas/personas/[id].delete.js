@@ -1,7 +1,16 @@
 import { db } from '../../../utils/db.js'
-import { personasEntidades, solicitudesVinculo, deudas, pagosDeuda } from '../../../database/schema.js'
+import {
+  personasEntidades,
+  solicitudesVinculo,
+  deudas,
+  pagosDeuda,
+} from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
-import { desvincularPersonas, registrarAuditoria, getNombreDisplay } from '../../../utils/vinculos.js'
+import {
+  desvincularPersonas,
+  registrarAuditoria,
+  getNombreDisplay,
+} from '../../../utils/vinculos.js'
 import { eq, and, or, isNull, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -11,11 +20,13 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select()
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, id),
-      eq(personasEntidades.usuarioId, usuarioId),
-      isNull(personasEntidades.deletedAt)
-    ))
+    .where(
+      and(
+        eq(personasEntidades.id, id),
+        eq(personasEntidades.usuarioId, usuarioId),
+        isNull(personasEntidades.deletedAt),
+      ),
+    )
     .limit(1)
 
   if (!persona) {
@@ -28,7 +39,11 @@ export default defineEventHandler(async (event) => {
 
     // Obtener persona par para auditoría
     const [personaPar] = await db
-      .select({ id: personasEntidades.id, nombre: personasEntidades.nombre, usuarioId: personasEntidades.usuarioId })
+      .select({
+        id: personasEntidades.id,
+        nombre: personasEntidades.nombre,
+        usuarioId: personasEntidades.usuarioId,
+      })
       .from(personasEntidades)
       .where(eq(personasEntidades.id, personaParId))
       .limit(1)
@@ -54,19 +69,21 @@ export default defineEventHandler(async (event) => {
         await tx
           .update(solicitudesVinculo)
           .set({ estado: 'expirada', updatedAt: new Date() })
-          .where(and(
-            eq(solicitudesVinculo.estado, 'aceptada'),
-            or(
-              and(
-                eq(solicitudesVinculo.remitenteId, usuarioId),
-                eq(solicitudesVinculo.destinatarioId, personaPar.usuarioId)
+          .where(
+            and(
+              eq(solicitudesVinculo.estado, 'aceptada'),
+              or(
+                and(
+                  eq(solicitudesVinculo.remitenteId, usuarioId),
+                  eq(solicitudesVinculo.destinatarioId, personaPar.usuarioId),
+                ),
+                and(
+                  eq(solicitudesVinculo.remitenteId, personaPar.usuarioId),
+                  eq(solicitudesVinculo.destinatarioId, usuarioId),
+                ),
               ),
-              and(
-                eq(solicitudesVinculo.remitenteId, personaPar.usuarioId),
-                eq(solicitudesVinculo.destinatarioId, usuarioId)
-              )
-            )
-          ))
+            ),
+          )
       }
     })
   }
@@ -80,11 +97,13 @@ export default defineEventHandler(async (event) => {
     const [row] = await tx
       .update(personasEntidades)
       .set({ deletedAt: ahora, updatedAt: ahora })
-      .where(and(
-        eq(personasEntidades.id, id),
-        eq(personasEntidades.usuarioId, usuarioId),
-        isNull(personasEntidades.deletedAt)
-      ))
+      .where(
+        and(
+          eq(personasEntidades.id, id),
+          eq(personasEntidades.usuarioId, usuarioId),
+          isNull(personasEntidades.deletedAt),
+        ),
+      )
       .returning({ id: personasEntidades.id })
 
     if (!row) return null
@@ -99,10 +118,15 @@ export default defineEventHandler(async (event) => {
       await tx
         .update(pagosDeuda)
         .set({ deletedAt: ahora })
-        .where(and(
-          inArray(pagosDeuda.deudaId, deudasActivas.map(d => d.id)),
-          isNull(pagosDeuda.deletedAt)
-        ))
+        .where(
+          and(
+            inArray(
+              pagosDeuda.deudaId,
+              deudasActivas.map((d) => d.id),
+            ),
+            isNull(pagosDeuda.deletedAt),
+          ),
+        )
     }
     return row
   })

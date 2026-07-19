@@ -13,11 +13,7 @@ export default defineEventHandler(async (event) => {
     const [gastoEliminado] = await tx
       .update(gastos)
       .set({ deletedAt: new Date() })
-      .where(and(
-        eq(gastos.id, id),
-        eq(gastos.usuarioId, usuarioId),
-        isNull(gastos.deletedAt),
-      ))
+      .where(and(eq(gastos.id, id), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
       .returning({
         id: gastos.id,
         gastoPlanificadoId: gastos.gastoPlanificadoId,

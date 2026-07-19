@@ -34,5 +34,5 @@ export default defineEventHandler(async (event) => {
     medios = await db.insert(mediosAhorro).values(values).returning()
   }
 
-  return medios.filter(m => m.activo)
+  return medios.filter((m) => m.activo)
 })

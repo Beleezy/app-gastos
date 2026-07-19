@@ -38,7 +38,10 @@ export function useGastosFuturos() {
         // cache-buster: el GET trae Cache-Control max-age=60, así que sin esto
         // el navegador serviría la respuesta anterior y la lista no se
         // actualizaría hasta expirar el caché o recargar.
-        const data = await apiFetch('/api/futuros', force ? { query: { _t: Date.now() } } : undefined)
+        const data = await apiFetch(
+          '/api/futuros',
+          force ? { query: { _t: Date.now() } } : undefined,
+        )
         gastosFuturos.value = data.gastosFuturos || []
         resumenFuturos.value = data.resumenFuturos || resumenFuturos.value
         _fetchedAt.value = Date.now()
@@ -96,10 +99,13 @@ export function useGastosFuturos() {
 
   async function decidirOpcionFutura(proyectoId, detalleId, data) {
     try {
-      const result = await apiFetch(`/api/planificador/futuros/${proyectoId}/detalles/${detalleId}/decidir`, {
-        method: 'POST',
-        body: data,
-      })
+      const result = await apiFetch(
+        `/api/planificador/futuros/${proyectoId}/detalles/${detalleId}/decidir`,
+        {
+          method: 'POST',
+          body: data,
+        },
+      )
       await fetchGastosFuturos(true)
       return result
     } catch (e) {
@@ -109,8 +115,15 @@ export function useGastosFuturos() {
   }
 
   return {
-    gastosFuturos, resumenFuturos, isLoading, error,
-    fetchGastosFuturos, invalidateGastosFuturos,
-    createGastoFuturo, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura,
+    gastosFuturos,
+    resumenFuturos,
+    isLoading,
+    error,
+    fetchGastosFuturos,
+    invalidateGastosFuturos,
+    createGastoFuturo,
+    updateGastoFuturo,
+    deleteGastoFuturo,
+    decidirOpcionFutura,
   }
 }

@@ -7,7 +7,9 @@
     >
       <div class="flex items-start gap-3">
         <!-- Avatar -->
-        <div class="w-10 h-10 rounded-full bg-theme-accent-bg flex items-center justify-center flex-shrink-0">
+        <div
+          class="w-10 h-10 rounded-full bg-theme-accent-bg flex items-center justify-center flex-shrink-0"
+        >
           <span class="text-theme-accent text-sm font-bold">
             {{ (s.remitenteNombre || '?').charAt(0).toUpperCase() }}
           </span>
@@ -18,11 +20,10 @@
             {{ s.remitenteNombre }}
           </p>
           <p class="text-xs text-theme-text-muted mt-0.5">
-            Quiere vincular la persona <strong class="text-theme-accent">"{{ s.personaNombre }}"</strong> contigo
+            Quiere vincular la persona
+            <strong class="text-theme-accent">"{{ s.personaNombre }}"</strong> contigo
           </p>
-          <p v-if="s.mensaje" class="text-xs text-theme-text-sec mt-1 italic">
-            "{{ s.mensaje }}"
-          </p>
+          <p v-if="s.mensaje" class="text-xs text-theme-text-sec mt-1 italic">"{{ s.mensaje }}"</p>
           <p class="text-[0.6875rem] text-theme-text-muted mt-1">
             {{ formatFecha(s.createdAt) }}
           </p>

@@ -10,16 +10,16 @@ Permitir al usuario sincronizar sus `gastos_planificados` con un calendario dedi
 
 ## 2. Decisiones de diseño (resumen)
 
-| Tema | Decisión |
-|---|---|
-| Nivel de integración | Google Calendar API directa con OAuth propio (no Supabase OAuth) |
-| Modo de sync | Híbrido: automático en cada cambio + botón "Resincronizar ahora" |
-| Estado pagado | Evento conservado, color verde, prefijo `✅ PAGADO`, recordatorios eliminados, descripción enriquecida |
-| Calendario destino | Calendario dedicado creado por la app: "Mis Finanzas — Gastos planificados" |
-| Formato del evento | Todo el día, recordatorios configurables (default: día anterior 18:00 + mismo día 09:00) |
-| Rango de meses | Mes actual + todos los meses futuros que ya tengan planificados (no backfill de pasado) |
-| Persistencia OAuth | Refresh token cifrado (AES-256-GCM) en tabla nueva `google_calendar_conexiones` |
-| Vínculo evento↔planificado | Columna nueva `google_event_id` en `gastos_planificados` |
+| Tema                       | Decisión                                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Nivel de integración       | Google Calendar API directa con OAuth propio (no Supabase OAuth)                                       |
+| Modo de sync               | Híbrido: automático en cada cambio + botón "Resincronizar ahora"                                       |
+| Estado pagado              | Evento conservado, color verde, prefijo `✅ PAGADO`, recordatorios eliminados, descripción enriquecida |
+| Calendario destino         | Calendario dedicado creado por la app: "Mis Finanzas — Gastos planificados"                            |
+| Formato del evento         | Todo el día, recordatorios configurables (default: día anterior 18:00 + mismo día 09:00)               |
+| Rango de meses             | Mes actual + todos los meses futuros que ya tengan planificados (no backfill de pasado)                |
+| Persistencia OAuth         | Refresh token cifrado (AES-256-GCM) en tabla nueva `google_calendar_conexiones`                        |
+| Vínculo evento↔planificado | Columna nueva `google_event_id` en `gastos_planificados`                                               |
 
 ## 3. Arquitectura
 
@@ -39,16 +39,19 @@ Justificación: Supabase no persiste el `provider_refresh_token` de Google de fo
 ### 3.2 Componentes nuevos
 
 **Cliente (composables y componentes):**
+
 - [composables/useGoogleCalendar.js](composables/useGoogleCalendar.js) — wraps llamadas a `/api/integraciones/google/*`, expone `estado`, `conectar()`, `desconectar()`, `resincronizar()`, `actualizarRecordatorios()`.
 - [components/configuraciones/IntegracionGoogleCalendar.vue](components/configuraciones/IntegracionGoogleCalendar.vue) — card en pages/configuraciones con los dos estados (desconectado / conectado).
 - [components/configuraciones/EditorRecordatorios.vue](components/configuraciones/EditorRecordatorios.vue) — lista editable de recordatorios (hasta 5), cada uno con tipo y hora.
 
 **Servidor:**
+
 - [server/utils/googleCalendar.js](server/utils/googleCalendar.js) — wrapper de Google Calendar API: refresh de access_token, retry con backoff, batch requests, manejo de errores específicos (404, 401/invalid_grant, 429).
 - [server/utils/crypto.js](server/utils/crypto.js) — `encrypt(plaintext)` / `decrypt(ciphertext)` con AES-256-GCM. Lee `ENCRYPTION_KEY` de `runtimeConfig`. Falla al arrancar si no está definida.
 - [server/utils/planificadorToGcalEvent.js](server/utils/planificadorToGcalEvent.js) — convierte una fila de `gastos_planificados` (+ gasto real si está pagado) al payload de evento de Google Calendar (título, descripción, fecha, color, recordatorios).
 
 **Endpoints API:**
+
 - `POST /api/integraciones/google/oauth-start` → devuelve la URL de autorización de Google con `state` aleatorio firmado.
 - `GET  /api/integraciones/google/oauth-callback` → valida `state`, intercambia `code`, cifra refresh_token, crea el calendario dedicado, hace primer push de eventos, redirige a `/configuraciones?gcal=conectado`.
 - `GET  /api/integraciones/google` → devuelve estado actual (conectado/desconectado, ultimaSync, ultimoError, recordatoriosConfig, calendarNombre).
@@ -57,6 +60,7 @@ Justificación: Supabase no persiste el `provider_refresh_token` de Google de fo
 - `DELETE /api/integraciones/google?borrarCalendario=true|false` → desconecta y opcionalmente borra el calendario en Google.
 
 **Hooks de auto-sync** en endpoints existentes del planificador:
+
 - `POST /api/planificador/gastos` → crea evento (fire-and-forget).
 - `PATCH /api/planificador/gastos/:id` → patchea evento.
 - `DELETE /api/planificador/gastos/:id` → borra evento.
@@ -68,46 +72,50 @@ Todos estos hooks van **después** del `setResponseStatus` / response, usando `e
 
 **Tabla nueva** `google_calendar_conexiones`:
 
-| Columna | Tipo | Nullable | Nota |
-|---|---|---|---|
-| `id` | uuid PK | no | |
-| `usuario_id` | uuid FK → usuarios.id (cascade) | no | UNIQUE — un usuario, una conexión |
-| `refresh_token_cifrado` | text | no | AES-256-GCM, formato `iv:tag:ciphertext` (base64) |
-| `calendar_id` | varchar(255) | no | ID que devuelve Google al crear el calendario |
-| `calendar_nombre` | varchar(255) | no | "Mis Finanzas — Gastos planificados" |
-| `recordatorios_config` | jsonb | no | `[{tipo, hora}]` — ver formato abajo |
-| `ultima_sync` | timestamp | sí | |
-| `ultimo_error` | text | sí | mensaje legible o null |
-| `fecha_conexion` | timestamp | no | default now() |
-| `updated_at` | timestamp | no | default now() |
+| Columna                 | Tipo                            | Nullable | Nota                                              |
+| ----------------------- | ------------------------------- | -------- | ------------------------------------------------- |
+| `id`                    | uuid PK                         | no       |                                                   |
+| `usuario_id`            | uuid FK → usuarios.id (cascade) | no       | UNIQUE — un usuario, una conexión                 |
+| `refresh_token_cifrado` | text                            | no       | AES-256-GCM, formato `iv:tag:ciphertext` (base64) |
+| `calendar_id`           | varchar(255)                    | no       | ID que devuelve Google al crear el calendario     |
+| `calendar_nombre`       | varchar(255)                    | no       | "Mis Finanzas — Gastos planificados"              |
+| `recordatorios_config`  | jsonb                           | no       | `[{tipo, hora}]` — ver formato abajo              |
+| `ultima_sync`           | timestamp                       | sí       |                                                   |
+| `ultimo_error`          | text                            | sí       | mensaje legible o null                            |
+| `fecha_conexion`        | timestamp                       | no       | default now()                                     |
+| `updated_at`            | timestamp                       | no       | default now()                                     |
 
 `recordatorios_config` formato:
+
 ```json
 [
   { "tipo": "dia_anterior", "hora": "18:00" },
-  { "tipo": "mismo_dia",    "hora": "09:00" }
+  { "tipo": "mismo_dia", "hora": "09:00" }
 ]
 ```
+
 - `tipo` ∈ `mismo_dia | dia_anterior | dos_dias_antes | una_semana_antes`
 - `hora` en formato `HH:MM` (24h, zona horaria del usuario `America/Lima`)
 - Máximo 5 recordatorios.
 
 **Modificación a `gastos_planificados`:**
 
-| Columna | Tipo | Nullable | Nota |
-|---|---|---|---|
-| `google_event_id` | varchar(255) | sí | ID del evento en Google; null si no se sincronizó aún o si la conexión está rota |
+| Columna           | Tipo         | Nullable | Nota                                                                             |
+| ----------------- | ------------ | -------- | -------------------------------------------------------------------------------- |
+| `google_event_id` | varchar(255) | sí       | ID del evento en Google; null si no se sincronizó aún o si la conexión está rota |
 
 **Migración:** generada con `npm run db:generate`, aplicada con `npm run db:push`.
 
 ### 3.4 Formato del evento en Google Calendar
 
 **Estado pendiente:**
+
 - **Título:** `S/ 150.00 · Internet` (formato: `{moneda}{monto formateado} · {concepto}`)
 - **Tipo:** todo el día (`start.date` / `end.date`, no `dateTime`)
 - **Fecha:** `gastosPlanificados.fechaProbablePago`
 - **Color:** default del calendario (azul/9)
 - **Descripción:**
+
   ```
   Pendiente · S/ 150.00
   Categoría: {categoría nombre}
@@ -116,17 +124,20 @@ Todos estos hooks van **después** del `setResponseStatus` / response, usando `e
 
   Abrir en Mis Finanzas: {APP_URL}/planificador?gasto={id}
   ```
+
 - **Recordatorios:** `useDefault: false`, lista construida desde `recordatoriosConfig`. Cada entrada `{tipo, hora}` se traduce a `{ method: 'popup', minutes: N }` donde N son los minutos antes del **inicio del evento**. Como los eventos son `all-day`, Google considera el inicio a las **00:00 del día del evento** en la zona horaria del calendario (`America/Lima`):
   - `dia_anterior` con hora `HH:MM` → `minutes = (24 - H) * 60 - M`. Ej: día anterior 18:00 → `(24-18)*60 = 360` min antes.
   - `dos_dias_antes` con hora `HH:MM` → `minutes = (48 - H) * 60 - M`.
   - `una_semana_antes` con hora `HH:MM` → `minutes = (168 - H) * 60 - M`.
-  - `mismo_dia`: la API de Google **no admite offsets negativos** sobre all-day events, así que el campo `hora` se ignora para este tipo y se envía `minutes: 0`. El aviso llegará según la configuración global del usuario en Google Calendar (Settings → Event settings → Default notification → All-day events; por defecto suele ser 9 AM). La UI muestra un tooltip aclarando esto: *"El recordatorio del mismo día llega según la hora global de tu Google Calendar. Para una hora exacta, usa un recordatorio del día anterior."*
+  - `mismo_dia`: la API de Google **no admite offsets negativos** sobre all-day events, así que el campo `hora` se ignora para este tipo y se envía `minutes: 0`. El aviso llegará según la configuración global del usuario en Google Calendar (Settings → Event settings → Default notification → All-day events; por defecto suele ser 9 AM). La UI muestra un tooltip aclarando esto: _"El recordatorio del mismo día llega según la hora global de tu Google Calendar. Para una hora exacta, usa un recordatorio del día anterior."_
 
 **Estado pagado** (al marcar como pagado, patchea el mismo evento):
+
 - **Título:** `✅ PAGADO · S/ 150.00 · Internet`
 - **Color:** `colorId: '2'` (Sage/verde en la paleta de Google)
 - **Recordatorios:** `useDefault: false, overrides: []` (sin recordatorios)
 - **Descripción:**
+
   ```
   ✅ Pagado el 22/05/2026 · Monto real: S/ 148.50
   Categoría: {categoría nombre}
@@ -139,6 +150,7 @@ Todos estos hooks van **después** del `setResponseStatus` / response, usando `e
 ## 4. Flujos de usuario
 
 ### 4.1 Conectar
+
 1. `Configuraciones → Integraciones → Google Calendar`: tap en "Conectar Google Calendar".
 2. `useGoogleCalendar.conectar()` llama a `POST /api/integraciones/google/oauth-start` y abre la URL devuelta en una nueva pestaña (no popup — en mobile/PWA los popups son inconsistentes).
 3. Usuario acepta el consent en Google → Google redirige a `/api/integraciones/google/oauth-callback?code=...&state=...`.
@@ -153,7 +165,9 @@ Todos estos hooks van **después** del `setResponseStatus` / response, usando `e
 5. Frontend detecta el query param, muestra toast "Google Calendar conectado · 23 gastos sincronizados".
 
 ### 4.2 Sync automático
+
 Cada operación CRUD sobre `gastos_planificados` dispara fire-and-forget:
+
 - **Crear:** llamar `events.insert`, guardar `google_event_id`.
 - **Editar:** llamar `events.patch` con los campos cambiados; recalcular título/descripción siempre.
 - **Borrar:** llamar `events.delete`. Si el planificado tenía `google_event_id = null`, skip.
@@ -162,6 +176,7 @@ Cada operación CRUD sobre `gastos_planificados` dispara fire-and-forget:
 Si la conexión no existe (`google_calendar_conexiones` vacía para ese usuario), el hook hace skip silencioso.
 
 ### 4.3 Resync manual
+
 1. Botón en Configuraciones (`Sincronizar ahora`) o en el menú "..." del ResumenMes del Planificador.
 2. `POST /api/integraciones/google/resync`:
    - Lee todos los `gastos_planificados` del usuario con `fecha_probable_pago >= primer día del mes actual`.
@@ -177,6 +192,7 @@ Si la conexión no existe (`google_calendar_conexiones` vacía para ese usuario)
 3. Devuelve `{ creados, actualizados, eliminados }`. Frontend muestra toast.
 
 ### 4.4 Cambiar configuración de recordatorios
+
 1. En Configuraciones, editar los recordatorios (toggle / agregar / quitar / cambiar hora).
 2. Tap en "Guardar" (o auto-guardado con debounce 1s).
 3. `PATCH /api/integraciones/google/config` con el nuevo array.
@@ -184,6 +200,7 @@ Si la conexión no existe (`google_calendar_conexiones` vacía para ese usuario)
 5. Toast: "Recordatorios actualizados · aplicados a 18 eventos pendientes".
 
 ### 4.5 Desconectar
+
 1. Botón "Desconectar" → `ConfirmDialog` con dos opciones (no es booleano sí/no, son dos rutas):
    - **"Sí, borrar el calendario en Google también"** → `DELETE /api/integraciones/google?borrarCalendario=true`.
    - **"Solo desconectar (mantener calendario)"** → `DELETE /api/integraciones/google?borrarCalendario=false`.
@@ -201,6 +218,7 @@ Si la conexión no existe (`google_calendar_conexiones` vacía para ese usuario)
 Nueva sección **"Integraciones"** en [pages/configuraciones.vue](pages/configuraciones.vue), debajo de las secciones existentes. Card único por ahora: Google Calendar.
 
 **Estado: desconectado**
+
 ```
 ┌──────────────────────────────────────────┐
 │ 📅 Google Calendar                       │
@@ -213,6 +231,7 @@ Nueva sección **"Integraciones"** en [pages/configuraciones.vue](pages/configur
 ```
 
 **Estado: conectado**
+
 ```
 ┌──────────────────────────────────────────┐
 │ 📅 Google Calendar      ● Conectado      │
@@ -231,26 +250,31 @@ Nueva sección **"Integraciones"** en [pages/configuraciones.vue](pages/configur
 Para los recordatorios de tipo `mismo_dia`, el selector de hora se deshabilita y se muestra "hora global" con un ícono ⓘ que abre el tooltip explicativo (ver sección 3.4). Los demás tipos (`dia_anterior`, `dos_dias_antes`, `una_semana_antes`) sí permiten hora personalizada.
 
 **Estado: error**
+
 - Badge `● Error` en rojo, con tooltip mostrando `ultimoError`.
 - Si el error es `invalid_grant` (token expirado), banner adicional: "Tu conexión expiró. [Reconectar]".
 
 ### 5.2 Planificador
 
 En [components/planificador/ResumenMes.vue](components/planificador/ResumenMes.vue), el menú "..." (que ya tiene "Exportar a Excel") agrega:
+
 - **"Sincronizar con Google Calendar"** — visible solo si está conectado. Tap → llama a `resincronizar()` + toast.
 
 ## 6. Manejo de errores y casos borde
 
 ### 6.1 Token expirado / revocado (`invalid_grant`)
+
 - Marcar `ultimoError = 'Token expirado, reconecta'`.
 - Banner en Configuraciones.
 - **No** borrar `google_event_id` locales — al reconectar, se intenta reusar matching por ID.
 
 ### 6.2 Rate limiting (HTTP 429)
+
 - Retry con backoff exponencial: 1s, 2s, 4s, 8s (máx 4 intentos).
 - Batch requests para syncs grandes (>50 eventos).
 
 ### 6.3 Calendario dedicado borrado en Google
+
 - Si `calendars.get(calendarId)` o cualquier operación devuelve `404` sobre el calendar_id:
   - Recrear calendario.
   - `UPDATE gastos_planificados SET google_event_id = NULL WHERE usuario_id = ?`.
@@ -258,21 +282,26 @@ En [components/planificador/ResumenMes.vue](components/planificador/ResumenMes.v
   - Toast: "Tu calendario fue recreado y resincronizado".
 
 ### 6.4 Evento individual borrado en Google
+
 - Si `events.patch(eventId)` o `events.delete(eventId)` devuelve `404`:
   - Tratar como inexistente. Si era un patch, crear evento nuevo y actualizar `google_event_id`. Si era un delete, skip.
 
 ### 6.5 Offline
+
 - Reusar [composables/useOnlineStatus.js](composables/useOnlineStatus.js): si está offline, skip el fire-and-forget en cliente. Servidor: si `fetch` a Google falla con error de red, loguear, set `ultimoError`, no reintentar.
 - **No** implementar cola de operaciones offline. El resync manual cubre este caso.
 
 ### 6.6 Concurrencia
+
 - Sin lockeo. Google maneja IDs. La última escritura gana.
 
 ### 6.7 Cascada de borrado de usuario
+
 - FK con `onDelete: cascade` borra `google_calendar_conexiones`.
 - El calendario en Google queda huérfano (no podemos llamar a API sin el refresh token, que se borró con la fila).
 
 ### 6.8 Falla al cifrar/descifrar (clave inválida)
+
 - Si `decrypt()` falla al leer un refresh token, tratar como conexión rota: `ultimoError = 'Credenciales corruptas, reconecta'` y mostrar reconectar.
 
 ## 7. Seguridad
@@ -286,6 +315,7 @@ En [components/planificador/ResumenMes.vue](components/planificador/ResumenMes.v
 ## 8. Variables de entorno nuevas
 
 En `.env.example`:
+
 ```
 # Cifrado de refresh tokens (32 bytes base64)
 ENCRYPTION_KEY=
@@ -297,6 +327,7 @@ GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3000/api/integraciones/google/oauth-c
 ```
 
 En `nuxt.config.ts` → `runtimeConfig`:
+
 ```js
 encryptionKey: process.env.ENCRYPTION_KEY || '',
 googleOAuthClientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',

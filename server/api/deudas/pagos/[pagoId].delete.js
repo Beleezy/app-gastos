@@ -18,12 +18,14 @@ export default defineEventHandler(async (event) => {
     })
     .from(pagosDeuda)
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
-    .where(and(
-      eq(pagosDeuda.id, pagoId),
-      eq(deudas.usuarioId, usuarioId),
-      isNull(pagosDeuda.deletedAt),
-      isNull(deudas.deletedAt)
-    ))
+    .where(
+      and(
+        eq(pagosDeuda.id, pagoId),
+        eq(deudas.usuarioId, usuarioId),
+        isNull(pagosDeuda.deletedAt),
+        isNull(deudas.deletedAt),
+      ),
+    )
     .limit(1)
 
   if (!pago) {
@@ -45,7 +47,7 @@ export default defineEventHandler(async (event) => {
   const montoPagado = parseFloat(pago.montoPagado)
   const nuevoPendiente = Math.min(
     parseFloat(deuda.montoOriginal),
-    parseFloat(deuda.montoPendiente) + montoPagado
+    parseFloat(deuda.montoPendiente) + montoPagado,
   )
   const nuevoEstado = nuevoPendiente >= parseFloat(deuda.montoOriginal) ? 'pendiente' : 'parcial'
 
@@ -59,10 +61,16 @@ export default defineEventHandler(async (event) => {
   await db.transaction(async (tx) => {
     if (pago.vinculoPagoId && deuda.vinculoDeudaId) {
       // Desvincular ambos pagos primero
-      await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pago.vinculoPagoId))
+      await tx
+        .update(pagosDeuda)
+        .set({ vinculoPagoId: null })
+        .where(eq(pagosDeuda.id, pago.vinculoPagoId))
       await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pagoId))
       // Soft-eliminar pago espejo
-      await tx.update(pagosDeuda).set({ deletedAt: new Date() }).where(and(eq(pagosDeuda.id, pago.vinculoPagoId), isNull(pagosDeuda.deletedAt)))
+      await tx
+        .update(pagosDeuda)
+        .set({ deletedAt: new Date() })
+        .where(and(eq(pagosDeuda.id, pago.vinculoPagoId), isNull(pagosDeuda.deletedAt)))
       // Actualizar deuda espejo
       await tx
         .update(deudas)
@@ -75,7 +83,10 @@ export default defineEventHandler(async (event) => {
     }
 
     // Soft-eliminar pago original y actualizar deuda
-    await tx.update(pagosDeuda).set({ deletedAt: new Date() }).where(and(eq(pagosDeuda.id, pagoId), isNull(pagosDeuda.deletedAt)))
+    await tx
+      .update(pagosDeuda)
+      .set({ deletedAt: new Date() })
+      .where(and(eq(pagosDeuda.id, pagoId), isNull(pagosDeuda.deletedAt)))
     await tx
       .update(deudas)
       .set({

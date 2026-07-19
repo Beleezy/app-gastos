@@ -36,11 +36,13 @@ export default defineEventHandler(async (event) => {
       .from(gastosPlanificados)
       .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
       .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
-      .where(and(
-        eq(planesMensuales.usuarioId, usuarioId),
-        eq(gastosPlanificados.fechaProbablePago, mananaStr),
-        eq(gastosPlanificados.estado, 'pendiente'),
-      )),
+      .where(
+        and(
+          eq(planesMensuales.usuarioId, usuarioId),
+          eq(gastosPlanificados.fechaProbablePago, mananaStr),
+          eq(gastosPlanificados.estado, 'pendiente'),
+        ),
+      ),
     db
       .select({
         id: deudas.id,
@@ -52,12 +54,14 @@ export default defineEventHandler(async (event) => {
       })
       .from(deudas)
       .innerJoin(personasEntidades, eq(deudas.personaEntidadId, personasEntidades.id))
-      .where(and(
-        eq(deudas.usuarioId, usuarioId),
-        isNull(deudas.deletedAt),
-        lt(deudas.fechaPago, hoyStr),
-        sql`${deudas.estado} IN ('pendiente', 'parcial')`,
-      )),
+      .where(
+        and(
+          eq(deudas.usuarioId, usuarioId),
+          isNull(deudas.deletedAt),
+          lt(deudas.fechaPago, hoyStr),
+          sql`${deudas.estado} IN ('pendiente', 'parcial')`,
+        ),
+      ),
   ])
 
   return {

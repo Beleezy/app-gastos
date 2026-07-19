@@ -1,5 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200" :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'">
+  <div
+    class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200"
+    :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'"
+  >
     <a
       href="#contenido-principal"
       class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-theme-accent focus:text-white focus:shadow-lg"
@@ -19,37 +22,58 @@
     >
       <LayoutPerfilContextBar />
       <div class="w-full mx-auto max-w-full lg:max-w-6xl 2xl:max-w-7xl lg:px-6">
-
         <LayoutAppHeader>
           <template #title>{{ pageTitle }}</template>
           <template #subtitle>
-            <p
-              v-if="tabSubtitulo"
-              class="text-[0.6875rem] text-theme-text-muted leading-snug"
-            >
+            <p v-if="tabSubtitulo" class="text-[0.6875rem] text-theme-text-muted leading-snug">
               {{ tabSubtitulo }}
             </p>
           </template>
         </LayoutAppHeader>
 
         <div class="px-4 lg:px-0 pt-2 pb-2 lg:pt-3">
-          <div class="flex items-center gap-1 bg-theme-card/60 rounded-2xl p-1 border border-theme-border/50 overflow-x-auto hide-scrollbar">
+          <div
+            class="flex items-center gap-1 bg-theme-card/60 rounded-2xl p-1 border border-theme-border/50 overflow-x-auto hide-scrollbar"
+          >
             <NuxtLink
               to="/planificador?seccion=mensual"
               class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
-              :class="activeTab === 'mensual' ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20' : 'text-theme-text-muted hover:text-theme-text-sec'"
+              :class="
+                activeTab === 'mensual'
+                  ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
+                  : 'text-theme-text-muted hover:text-theme-text-sec'
+              "
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3.5 h-3.5 shrink-0"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"
+                />
               </svg>
               Mensual
             </NuxtLink>
             <NuxtLink
               to="/futuros"
               class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
-              :class="activeTab === 'futuros' ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20' : 'text-theme-text-muted hover:text-theme-text-sec'"
+              :class="
+                activeTab === 'futuros'
+                  ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
+                  : 'text-theme-text-muted hover:text-theme-text-sec'
+              "
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'futuros' ? '' : 'text-violet-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3.5 h-3.5 shrink-0"
+                :class="activeTab === 'futuros' ? '' : 'text-violet-400'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <circle cx="12" cy="12" r="10" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />
               </svg>
@@ -58,10 +82,26 @@
             <NuxtLink
               to="/ahorros"
               class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
-              :class="activeTab === 'ahorros' ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20' : 'text-theme-text-muted hover:text-theme-text-sec'"
+              :class="
+                activeTab === 'ahorros'
+                  ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
+                  : 'text-theme-text-muted hover:text-theme-text-sec'
+              "
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 shrink-0" :class="activeTab === 'ahorros' ? '' : 'text-emerald-400'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3.5 h-3.5 shrink-0"
+                :class="activeTab === 'ahorros' ? '' : 'text-emerald-400'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5 10l7-7m0 0l7 7m-7-7v18"
+                />
               </svg>
               Ahorros
             </NuxtLink>
@@ -69,7 +109,6 @@
         </div>
 
         <slot />
-
       </div>
     </main>
     <LayoutBottomNav />
@@ -114,7 +153,9 @@ watch(isOnline, async (online, prev) => {
 
 onMounted(() => {
   initTheme()
-  const tarea = () => { if (debeMostrarTour()) iniciarTour() }
+  const tarea = () => {
+    if (debeMostrarTour()) iniciarTour()
+  }
   if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
     window.requestIdleCallback(tarea, { timeout: 2500 })
   } else {

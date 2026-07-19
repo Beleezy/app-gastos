@@ -31,9 +31,7 @@ function escapeCell(val, sep) {
 export function generarCsv({ columnas = [], filas = [], separator = ';', bom = true } = {}) {
   const head = columnas.map((c) => escapeCell(c.label, separator)).join(separator)
   const body = filas
-    .map((fila) =>
-      columnas.map((c) => escapeCell(c.getValue(fila), separator)).join(separator),
-    )
+    .map((fila) => columnas.map((c) => escapeCell(c.getValue(fila), separator)).join(separator))
     .join('\r\n')
   const contenido = body ? `${head}\r\n${body}` : head
   return bom ? `\uFEFF${contenido}` : contenido

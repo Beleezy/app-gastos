@@ -11,10 +11,12 @@ export default defineEventHandler(async (event) => {
 
   const [borrado] = await db
     .delete(presupuestosCategoria)
-    .where(and(
-      eq(presupuestosCategoria.usuarioId, usuarioId),
-      eq(presupuestosCategoria.categoriaId, categoriaId),
-    ))
+    .where(
+      and(
+        eq(presupuestosCategoria.usuarioId, usuarioId),
+        eq(presupuestosCategoria.categoriaId, categoriaId),
+      ),
+    )
     .returning({ id: presupuestosCategoria.id })
 
   if (!borrado) throw createError({ statusCode: 404, message: 'Presupuesto no encontrado' })

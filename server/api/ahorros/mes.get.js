@@ -33,12 +33,8 @@ export default defineEventHandler(async (event) => {
     })
     .from(ahorros)
     .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
-    .where(and(
-      eq(ahorros.usuarioId, usuarioId),
-      eq(ahorros.mes, mes),
-      eq(ahorros.anio, anio),
-    ))
+    .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
     .orderBy(desc(ahorros.fecha))
 
-  return rows.map(a => ({ ...a, monto: parseFloat(a.monto) }))
+  return rows.map((a) => ({ ...a, monto: parseFloat(a.monto) }))
 })

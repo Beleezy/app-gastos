@@ -1,29 +1,42 @@
 <template>
-  <SharedBaseBottomSheet :title="modoEdicion ? 'Editar proyecto' : 'Nuevo gasto futuro'" @close="$emit('close')">
+  <SharedBaseBottomSheet
+    :title="modoEdicion ? 'Editar proyecto' : 'Nuevo gasto futuro'"
+    @close="$emit('close')"
+  >
     <div class="space-y-4">
       <div v-if="!modoEdicion" class="rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3">
         <p class="text-xs uppercase tracking-[0.18em] text-sky-300/80">Resumen tentativo</p>
         <div class="mt-2 grid grid-cols-3 gap-2">
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
             <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Min</p>
-            <p class="mt-1 text-xs font-medium text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMinimo) }}</p>
+            <p class="mt-1 text-xs font-medium text-emerald-400">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMinimo) }}
+            </p>
           </div>
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
             <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-            <p class="mt-1 text-xs font-medium text-sky-300">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalPromedio) }}</p>
+            <p class="mt-1 text-xs font-medium text-sky-300">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalPromedio) }}
+            </p>
           </div>
           <div class="rounded-xl bg-theme-card/80 px-3 py-2">
             <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Max</p>
-            <p class="mt-1 text-xs font-medium text-amber-300">{{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMaximo) }}</p>
+            <p class="mt-1 text-xs font-medium text-amber-300">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(resumenTentativo.totalMaximo) }}
+            </p>
           </div>
         </div>
         <p class="mt-2 text-[0.6875rem] text-theme-text-sec">
-          {{ resumenTentativo.totalDetalles }} detalles · {{ resumenTentativo.totalOpciones }} opciones tentativas
+          {{ resumenTentativo.totalDetalles }} detalles ·
+          {{ resumenTentativo.totalOpciones }} opciones tentativas
         </p>
       </div>
 
       <div v-if="modoEdicion" class="rounded-2xl border border-sky-500/15 bg-sky-500/8 px-4 py-3">
-        <p class="text-[0.6875rem] text-sky-300/80">Edita los datos generales del proyecto. Los detalles y opciones se gestionan desde la vista principal.</p>
+        <p class="text-[0.6875rem] text-sky-300/80">
+          Edita los datos generales del proyecto. Los detalles y opciones se gestionan desde la
+          vista principal.
+        </p>
       </div>
 
       <div>
@@ -43,13 +56,23 @@
             v-for="cat in categorias"
             :key="cat.id"
             class="flex flex-col items-center gap-1 rounded-xl border p-2 transition-all"
-            :class="form.categoriaId === cat.id ? 'border-violet-500 bg-violet-500/10' : 'border-theme-border bg-theme-input'"
+            :class="
+              form.categoriaId === cat.id
+                ? 'border-violet-500 bg-violet-500/10'
+                : 'border-theme-border bg-theme-input'
+            "
             @click="form.categoriaId = cat.id"
           >
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg" :style="{ backgroundColor: (cat.color || '#6b7280') + '26' }">
+            <div
+              class="flex h-8 w-8 items-center justify-center rounded-lg"
+              :style="{ backgroundColor: (cat.color || '#6b7280') + '26' }"
+            >
               <span class="text-sm">{{ cat.icono || getEmoji(cat.nombre) }}</span>
             </div>
-            <span class="w-full truncate text-center text-[0.6875rem] leading-tight text-theme-text-muted">{{ cat.nombre }}</span>
+            <span
+              class="w-full truncate text-center text-[0.6875rem] leading-tight text-theme-text-muted"
+              >{{ cat.nombre }}</span
+            >
           </button>
         </div>
       </div>
@@ -62,7 +85,11 @@
             :key="opt.value"
             type="button"
             class="rounded-xl border px-2 py-2.5 text-xs font-medium transition-all"
-            :class="form.prioridad === opt.value ? opt.bg + ' ' + opt.color : 'border-theme-border bg-theme-input text-theme-text-muted'"
+            :class="
+              form.prioridad === opt.value
+                ? opt.bg + ' ' + opt.color
+                : 'border-theme-border bg-theme-input text-theme-text-muted'
+            "
             @click="form.prioridad = opt.value"
           >
             {{ opt.label }}
@@ -71,7 +98,9 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted">Descripción general <span class="text-theme-text-muted">(opcional)</span></label>
+        <label class="mb-1.5 block text-sm font-medium text-theme-text-muted"
+          >Descripción general <span class="text-theme-text-muted">(opcional)</span></label
+        >
         <textarea
           v-model="form.descripcion"
           rows="2"
@@ -84,7 +113,9 @@
         <div class="flex items-center justify-between">
           <div>
             <p class="text-sm font-medium text-theme-text">Detalles</p>
-            <p class="text-xs text-theme-text-sec">Toca un detalle para expandirlo y editar sus opciones.</p>
+            <p class="text-xs text-theme-text-sec">
+              Toca un detalle para expandirlo y editar sus opciones.
+            </p>
           </div>
           <button
             class="rounded-full bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-400 transition-colors hover:bg-violet-500/20"
@@ -126,15 +157,25 @@
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-4 w-4 shrink-0 text-theme-text-muted transition-transform"
                 :class="detalleExpandido(detalle.key) ? 'rotate-180' : ''"
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
               >
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25L12 15.75 4.5 8.25" />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25L12 15.75 4.5 8.25"
+                />
               </svg>
             </div>
           </button>
 
           <!-- Contenido expandido -->
-          <div v-if="detalleExpandido(detalle.key)" class="border-t border-theme-border px-3 pb-3 pt-3 space-y-3">
+          <div
+            v-if="detalleExpandido(detalle.key)"
+            class="border-t border-theme-border px-3 pb-3 pt-3 space-y-3"
+          >
             <input
               v-model="detalle.nombre"
               type="text"
@@ -151,7 +192,9 @@
 
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <p class="text-xs font-medium uppercase tracking-[0.18em] text-theme-text-muted">Opciones tentativas</p>
+                <p class="text-xs font-medium uppercase tracking-[0.18em] text-theme-text-muted">
+                  Opciones tentativas
+                </p>
                 <button
                   type="button"
                   class="rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] font-medium text-theme-text-sec transition-colors hover:text-theme-text"
@@ -167,7 +210,9 @@
                 class="rounded-xl border border-theme-border bg-theme-input/70 p-3"
               >
                 <div class="flex items-center justify-between gap-3">
-                  <p class="text-xs font-medium text-theme-text">{{ opcion.nombre || `Opción ${optionIndex + 1}` }}</p>
+                  <p class="text-xs font-medium text-theme-text">
+                    {{ opcion.nombre || `Opción ${optionIndex + 1}` }}
+                  </p>
                   <button
                     type="button"
                     class="text-[0.6875rem] text-theme-text-sec transition-colors hover:text-red-400"
@@ -247,7 +292,6 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <template #footer>
@@ -255,13 +299,34 @@
 
       <button
         class="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-semibold text-white transition-colors"
-        :class="saving ? 'cursor-not-allowed bg-violet-500/70' : 'bg-violet-500 hover:bg-violet-600 active:bg-violet-700'"
+        :class="
+          saving
+            ? 'cursor-not-allowed bg-violet-500/70'
+            : 'bg-violet-500 hover:bg-violet-600 active:bg-violet-700'
+        "
         :disabled="saving"
         @click="guardar"
       >
-        <svg v-if="saving" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          v-if="saving"
+          class="h-4 w-4 animate-spin"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
         {{ saving ? 'Guardando...' : modoEdicion ? 'Guardar gasto futuro' : 'Crear gasto futuro' }}
       </button>
@@ -297,9 +362,10 @@ function createDetail(data = {}) {
     key: nextKey(),
     nombre: data.nombre || '',
     notas: data.notas || '',
-    opciones: Array.isArray(data.opciones) && data.opciones.length
-      ? data.opciones.map(opcion => createOption(opcion))
-      : [createOption()],
+    opciones:
+      Array.isArray(data.opciones) && data.opciones.length
+        ? data.opciones.map((opcion) => createOption(opcion))
+        : [createOption()],
   }
 }
 
@@ -315,16 +381,27 @@ const form = reactive({
   tipoGasto: props.gastoEditar?.tipoGasto || '',
   descripcion: props.gastoEditar?.descripcion || '',
   prioridad: props.gastoEditar?.prioridad ?? 0,
-  detalles: Array.isArray(props.gastoEditar?.detalles) && props.gastoEditar.detalles.length
-    ? props.gastoEditar.detalles.map(detalle => createDetail(detalle))
-    : [createDetail()],
+  detalles:
+    Array.isArray(props.gastoEditar?.detalles) && props.gastoEditar.detalles.length
+      ? props.gastoEditar.detalles.map((detalle) => createDetail(detalle))
+      : [createDetail()],
 })
 
 const prioridadOpciones = [
   { value: 3, label: 'Alta', color: 'text-red-400', bg: 'bg-red-500/15 border-red-500/40' },
   { value: 2, label: 'Media', color: 'text-amber-300', bg: 'bg-amber-500/15 border-amber-500/40' },
-  { value: 1, label: 'Baja', color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/40' },
-  { value: 0, label: 'Sin def.', color: 'text-theme-text-sec', bg: 'bg-theme-input border-theme-border' },
+  {
+    value: 1,
+    label: 'Baja',
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/15 border-emerald-500/40',
+  },
+  {
+    value: 0,
+    label: 'Sin def.',
+    color: 'text-theme-text-sec',
+    bg: 'bg-theme-input border-theme-border',
+  },
 ]
 
 const saving = ref(false)
@@ -368,7 +445,8 @@ const resumenTentativo = computed(() => {
 
     if (minimos.length) resumen.totalMinimo += Math.min(...minimos)
     if (maximos.length) resumen.totalMaximo += Math.max(...maximos)
-    if (promedios.length) resumen.totalPromedio += promedios.reduce((sum, value) => sum + value, 0) / promedios.length
+    if (promedios.length)
+      resumen.totalPromedio += promedios.reduce((sum, value) => sum + value, 0) / promedios.length
   }
 
   resumen.totalMinimo = round2(resumen.totalMinimo)
@@ -392,8 +470,10 @@ function parseAmount(value) {
 }
 
 function inferAverage(option) {
-  if (option.precioPromedio !== null && option.precioPromedio !== undefined) return option.precioPromedio
-  if (option.precioMinimo !== null && option.precioMaximo !== null) return round2((option.precioMinimo + option.precioMaximo) / 2)
+  if (option.precioPromedio !== null && option.precioPromedio !== undefined)
+    return option.precioPromedio
+  if (option.precioMinimo !== null && option.precioMaximo !== null)
+    return round2((option.precioMinimo + option.precioMaximo) / 2)
   return option.precioMinimo ?? option.precioMaximo ?? null
 }
 
@@ -434,21 +514,39 @@ function normalizarDetalles(validar = true) {
       const precioMinimo = parseAmount(opcion.precioMinimo)
       const precioPromedioInput = parseAmount(opcion.precioPromedio)
       const precioMaximo = parseAmount(opcion.precioMaximo)
-      const precioPromedio = inferAverage({ precioMinimo, precioPromedio: precioPromedioInput, precioMaximo })
+      const precioPromedio = inferAverage({
+        precioMinimo,
+        precioPromedio: precioPromedioInput,
+        precioMaximo,
+      })
 
       const tieneContenido = Boolean(
-        nombreOpcion || referenciaUrl || imagenUrl || notasOpcion
-        || precioMinimo !== null || precioPromedio !== null || precioMaximo !== null
+        nombreOpcion ||
+        referenciaUrl ||
+        imagenUrl ||
+        notasOpcion ||
+        precioMinimo !== null ||
+        precioPromedio !== null ||
+        precioMaximo !== null,
       )
 
       if (!tieneContenido) continue
 
       if (validar && !nombreOpcion) {
-        throw new Error(`La opción ${optionIndex + 1} del detalle ${detalleIndex + 1} debe tener nombre`)
+        throw new Error(
+          `La opción ${optionIndex + 1} del detalle ${detalleIndex + 1} debe tener nombre`,
+        )
       }
 
-      if (validar && precioMinimo !== null && precioMaximo !== null && precioMinimo > precioMaximo) {
-        throw new Error(`El rango de precios no es valido en ${nombreOpcion || `detalle ${detalleIndex + 1}`}`)
+      if (
+        validar &&
+        precioMinimo !== null &&
+        precioMaximo !== null &&
+        precioMinimo > precioMaximo
+      ) {
+        throw new Error(
+          `El rango de precios no es valido en ${nombreOpcion || `detalle ${detalleIndex + 1}`}`,
+        )
       }
 
       opciones.push({
@@ -510,12 +608,12 @@ async function guardar() {
   try {
     if (modoEdicion.value) {
       // En modo edición solo actualizamos los datos del proyecto, preservando detalles existentes
-      const existingDetalles = (props.gastoEditar.detalles || []).map(d => ({
+      const existingDetalles = (props.gastoEditar.detalles || []).map((d) => ({
         id: d.id,
         nombre: d.nombre,
         notas: d.notas || null,
         prioridad: d.prioridad ?? 0,
-        opciones: (d.opciones || []).map(o => ({
+        opciones: (d.opciones || []).map((o) => ({
           nombre: o.nombre,
           referenciaUrl: o.referenciaUrl || null,
           imagenUrl: o.imagenUrl || null,

@@ -7,22 +7,45 @@
     <div class="space-y-2">
       <label
         class="flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-colors"
-        :class="modo === 'selector' ? 'border-theme-accent bg-theme-accent-bg' : 'border-theme-border bg-theme-input'"
+        :class="
+          modo === 'selector'
+            ? 'border-theme-accent bg-theme-accent-bg'
+            : 'border-theme-border bg-theme-input'
+        "
       >
-        <input type="radio" class="mt-0.5" :checked="modo === 'selector'" @change="setModo('selector')" />
+        <input
+          type="radio"
+          class="mt-0.5"
+          :checked="modo === 'selector'"
+          @change="setModo('selector')"
+        />
         <div>
           <p class="text-sm font-medium text-theme-text">Selector siempre visible</p>
-          <p class="text-[0.6875rem] text-theme-text-muted">Una barra arriba para cambiar de perfil en cualquier momento.</p>
+          <p class="text-[0.6875rem] text-theme-text-muted">
+            Una barra arriba para cambiar de perfil en cualquier momento.
+          </p>
         </div>
       </label>
       <label
         class="flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition-colors"
-        :class="modo === 'familia' ? 'border-theme-accent bg-theme-accent-bg' : 'border-theme-border bg-theme-input'"
+        :class="
+          modo === 'familia'
+            ? 'border-theme-accent bg-theme-accent-bg'
+            : 'border-theme-border bg-theme-input'
+        "
       >
-        <input type="radio" class="mt-0.5" :checked="modo === 'familia'" @change="setModo('familia')" />
+        <input
+          type="radio"
+          class="mt-0.5"
+          :checked="modo === 'familia'"
+          @change="setModo('familia')"
+        />
         <div>
           <p class="text-sm font-medium text-theme-text">Solo desde Familia</p>
-          <p class="text-[0.6875rem] text-theme-text-muted">Cambias de perfil entrando desde la página Familia. Menos riesgo de equivocarte de perfil.</p>
+          <p class="text-[0.6875rem] text-theme-text-muted">
+            Cambias de perfil entrando desde la página Familia. Menos riesgo de equivocarte de
+            perfil.
+          </p>
         </div>
       </label>
     </div>

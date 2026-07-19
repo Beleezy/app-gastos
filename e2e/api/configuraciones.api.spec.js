@@ -24,12 +24,15 @@ test.describe('Configuraciones', () => {
     const firstToggle = featureSection.locator('input[type="checkbox"]').first()
     const before = await firstToggle.isChecked()
 
-    await page.evaluate(({ key, value }) => {
-      const raw = localStorage.getItem('gastos.featureFlags.v1')
-      const parsed = raw ? JSON.parse(raw) : {}
-      parsed[key] = value
-      localStorage.setItem('gastos.featureFlags.v1', JSON.stringify(parsed))
-    }, { key: flagKey, value: !before })
+    await page.evaluate(
+      ({ key, value }) => {
+        const raw = localStorage.getItem('gastos.featureFlags.v1')
+        const parsed = raw ? JSON.parse(raw) : {}
+        parsed[key] = value
+        localStorage.setItem('gastos.featureFlags.v1', JSON.stringify(parsed))
+      },
+      { key: flagKey, value: !before },
+    )
 
     await page.reload()
     await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()

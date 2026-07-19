@@ -8,7 +8,12 @@ const proyectos = [
     tipo: 'tecnología',
     prioridad: 'alta',
     detalles: [
-      { id: 11, concepto: 'MacBook Air', estadoDecision: 'pendiente', opciones: [{ nombre: 'M2', precioMin: 1200 }] },
+      {
+        id: 11,
+        concepto: 'MacBook Air',
+        estadoDecision: 'pendiente',
+        opciones: [{ nombre: 'M2', precioMin: 1200 }],
+      },
     ],
   },
   {
@@ -17,7 +22,12 @@ const proyectos = [
     tipo: 'viajes',
     prioridad: 'media',
     detalles: [
-      { id: 21, concepto: 'Hotel Cuzco', estadoDecision: 'decidido', opciones: [{ nombre: 'Belmond', precioMin: 800 }] },
+      {
+        id: 21,
+        concepto: 'Hotel Cuzco',
+        estadoDecision: 'decidido',
+        opciones: [{ nombre: 'Belmond', precioMin: 800 }],
+      },
     ],
   },
   {

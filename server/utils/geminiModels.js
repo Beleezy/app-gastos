@@ -39,7 +39,7 @@ function parseRateLimitsConfig(configString) {
   const limits = new Map()
   if (!configString) return limits
 
-  configString.split(';').forEach(entry => {
+  configString.split(';').forEach((entry) => {
     const parts = entry.trim().split(':')
     if (parts.length >= 3) {
       const model = parts[0].trim()
@@ -112,8 +112,8 @@ export function parseModelList(modelString) {
   if (!modelString) return []
   return modelString
     .split(';')
-    .map(m => m.trim())
-    .filter(m => m.length > 0)
+    .map((m) => m.trim())
+    .filter((m) => m.length > 0)
 }
 
 /**
@@ -122,14 +122,14 @@ export function parseModelList(modelString) {
 async function fetchAvailableModels(apiKey) {
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
     )
     if (!response.ok) {
       console.error('Error al consultar modelos disponibles:', response.status)
       return null
     }
     const data = await response.json()
-    return (data.models || []).map(m => m.name.replace('models/', ''))
+    return (data.models || []).map((m) => m.name.replace('models/', ''))
   } catch (e) {
     console.error('Error al consultar modelos disponibles:', e.message)
     return null
@@ -143,8 +143,8 @@ async function fetchAvailableModels(apiKey) {
 export async function getValidModels(configuredModels, apiKey) {
   const now = Date.now()
 
-  if (validatedModelsCache && (now - validatedModelsCacheTime) < CACHE_TTL) {
-    const valid = configuredModels.filter(m => validatedModelsCache.includes(m))
+  if (validatedModelsCache && now - validatedModelsCacheTime < CACHE_TTL) {
+    const valid = configuredModels.filter((m) => validatedModelsCache.includes(m))
     if (valid.length > 0) return valid
   }
 
@@ -157,16 +157,16 @@ export async function getValidModels(configuredModels, apiKey) {
   validatedModelsCache = available
   validatedModelsCacheTime = now
 
-  const valid = configuredModels.filter(m => available.includes(m))
+  const valid = configuredModels.filter((m) => available.includes(m))
 
   if (valid.length === 0) {
     console.warn(
-      `Ninguno de los modelos configurados está disponible. Configurados: [${configuredModels.join(', ')}]. Disponibles: [${available.slice(0, 10).join(', ')}...]`
+      `Ninguno de los modelos configurados está disponible. Configurados: [${configuredModels.join(', ')}]. Disponibles: [${available.slice(0, 10).join(', ')}...]`,
     )
     return configuredModels
   }
 
-  const invalid = configuredModels.filter(m => !available.includes(m))
+  const invalid = configuredModels.filter((m) => !available.includes(m))
   if (invalid.length > 0) {
     console.warn(`Modelos no disponibles (ignorados): [${invalid.join(', ')}]`)
   }
@@ -282,7 +282,7 @@ export function selectBestModel(models, runtimeConfig) {
  * respetando el orden original de la variable de entorno.
  */
 export function getFallbackModels(models, selectedModel, runtimeConfig) {
-  return models.filter(m => m !== selectedModel && hasAvailableCapacity(m, runtimeConfig))
+  return models.filter((m) => m !== selectedModel && hasAvailableCapacity(m, runtimeConfig))
 }
 
 /**

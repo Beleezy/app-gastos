@@ -33,11 +33,13 @@ export default defineEventHandler(async (event) => {
       const [otroActivo] = await db
         .select({ id: gastos.id })
         .from(gastos)
-        .where(and(
-          eq(gastos.gastoPlanificadoId, g.planId),
-          sql`${gastos.deletedAt} IS NULL`,
-          sql`${gastos.id} != ${id}`,
-        ))
+        .where(
+          and(
+            eq(gastos.gastoPlanificadoId, g.planId),
+            sql`${gastos.deletedAt} IS NULL`,
+            sql`${gastos.id} != ${id}`,
+          ),
+        )
         .limit(1)
       if (otroActivo) {
         throw createError({
@@ -53,11 +55,13 @@ export default defineEventHandler(async (event) => {
       const [row] = await tx
         .update(gastos)
         .set({ deletedAt: null })
-        .where(and(
-          eq(gastos.id, id),
-          eq(gastos.usuarioId, usuarioId),
-          sql`${gastos.deletedAt} IS NOT NULL`,
-        ))
+        .where(
+          and(
+            eq(gastos.id, id),
+            eq(gastos.usuarioId, usuarioId),
+            sql`${gastos.deletedAt} IS NOT NULL`,
+          ),
+        )
         .returning({ id: gastos.id })
       return row || null
     }
@@ -65,11 +69,13 @@ export default defineEventHandler(async (event) => {
     const [antes] = await tx
       .select({ deletedAt: deudas.deletedAt, personaEntidadId: deudas.personaEntidadId })
       .from(deudas)
-      .where(and(
-        eq(deudas.id, id),
-        eq(deudas.usuarioId, usuarioId),
-        sql`${deudas.deletedAt} IS NOT NULL`,
-      ))
+      .where(
+        and(
+          eq(deudas.id, id),
+          eq(deudas.usuarioId, usuarioId),
+          sql`${deudas.deletedAt} IS NOT NULL`,
+        ),
+      )
       .limit(1)
     if (!antes) return null
 
@@ -83,20 +89,19 @@ export default defineEventHandler(async (event) => {
     await tx
       .update(pagosDeuda)
       .set({ deletedAt: null })
-      .where(and(
-        eq(pagosDeuda.deudaId, id),
-        eq(pagosDeuda.deletedAt, antes.deletedAt),
-      ))
+      .where(and(eq(pagosDeuda.deudaId, id), eq(pagosDeuda.deletedAt, antes.deletedAt)))
 
     if (antes.personaEntidadId) {
       await tx
         .update(personasEntidades)
         .set({ deletedAt: null, updatedAt: new Date() })
-        .where(and(
-          eq(personasEntidades.id, antes.personaEntidadId),
-          eq(personasEntidades.usuarioId, usuarioId),
-          sql`${personasEntidades.deletedAt} IS NOT NULL`,
-        ))
+        .where(
+          and(
+            eq(personasEntidades.id, antes.personaEntidadId),
+            eq(personasEntidades.usuarioId, usuarioId),
+            sql`${personasEntidades.deletedAt} IS NOT NULL`,
+          ),
+        )
     }
 
     return { id }

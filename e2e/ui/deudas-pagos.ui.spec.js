@@ -5,7 +5,11 @@ import { DeudasPage } from '../pages/DeudasPage.js'
 import { uniqueSuffix } from '../helpers/db.js'
 
 test.describe('Deudas — pagos UI', () => {
-  test('pago parcial reduce monto pendiente y deja deuda en estado parcial', async ({ page, request, tracker }) => {
+  test('pago parcial reduce monto pendiente y deja deuda en estado parcial', async ({
+    page,
+    request,
+    tracker,
+  }) => {
     const sufijo = uniqueSuffix()
     const persona = `Deudor ${sufijo}`
     const concepto = `Pago parcial ${sufijo}`

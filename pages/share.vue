@@ -2,9 +2,7 @@
   <div class="min-h-[60vh] flex items-center justify-center px-6 text-center">
     <div class="max-w-sm">
       <p class="text-2xl mb-3" aria-hidden="true">📥</p>
-      <h1 class="text-base font-semibold text-theme-text mb-2">
-        Recibimos tu compartido
-      </h1>
+      <h1 class="text-base font-semibold text-theme-text mb-2">Recibimos tu compartido</h1>
       <p class="text-sm text-theme-text-sec">
         Te llevamos al registro para que confirmes el gasto.
       </p>

@@ -3,8 +3,19 @@
     <!-- Barra de búsqueda y ordenamiento -->
     <div class="flex items-center gap-2 mb-3">
       <div class="relative flex-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
         </svg>
         <input
           v-model="busqueda"
@@ -12,8 +23,19 @@
           placeholder="Buscar persona..."
           class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-theme-input border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent transition-colors"
         />
-        <button v-if="busqueda" class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-sec hover:text-theme-text-sec" @click="busqueda = ''">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <button
+          v-if="busqueda"
+          class="absolute right-3 top-1/2 -translate-y-1/2 text-theme-text-sec hover:text-theme-text-sec"
+          @click="busqueda = ''"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -22,37 +44,56 @@
       <button
         class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-theme-card border border-theme-border text-theme-text-muted hover:bg-theme-border-md hover:text-theme-text transition-colors"
         :title="`Orden: ${ordenLabels[ordenActual]}`"
-          :aria-label="`Orden: ${ordenLabels[ordenActual]}`"
+        :aria-label="`Orden: ${ordenLabels[ordenActual]}`"
         @click="ciclarOrden"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+          />
         </svg>
       </button>
     </div>
 
     <!-- Filtros de estado (pr-4: el último chip no queda cortado al borde) -->
-    <div class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r">
+    <div
+      class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r"
+    >
       <button
         v-for="f in filtrosEstado"
         :key="f.value"
         class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
         :class="[
           filtroEstado === f.value
-            ? (f.value === 'vencidas' ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-theme-accent text-theme-on-accent')
-            : (f.value === 'vencidas' && countVencidas > 0 ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-theme-card text-theme-text-sec border border-theme-border')
+            ? f.value === 'vencidas'
+              ? 'bg-red-500/20 text-red-400 border border-red-500/40'
+              : 'bg-theme-accent text-theme-on-accent'
+            : f.value === 'vencidas' && countVencidas > 0
+              ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+              : 'bg-theme-card text-theme-text-sec border border-theme-border',
         ]"
         @click="filtroEstado = f.value"
       >
         <span
-v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
+          v-if="f.value === 'vencidas'"
+          class="w-1.5 h-1.5 rounded-full bg-red-400"
           :class="{ 'animate-pulse': countVencidas > 0 }"
         ></span>
         {{ f.label }}
         <span
           v-if="f.value === 'vencidas' && countVencidas > 0"
           class="px-1.5 py-0 rounded-full bg-red-500/30 text-red-300 text-[0.6875rem] font-bold"
-        >{{ countVencidas }}</span>
+          >{{ countVencidas }}</span
+        >
       </button>
     </div>
 
@@ -93,9 +134,24 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
             class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-theme-accent bg-theme-accent-bg rounded-lg"
             @click.stop="emit('seleccionar', persona)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
             </svg>
             <span class="text-[0.6875rem] font-medium">Ver</span>
           </button>
@@ -104,8 +160,19 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
             class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-emerald-400 bg-emerald-500/10 rounded-lg"
             @click.stop="exportarPdf(persona)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
             </svg>
             <span class="text-[0.6875rem] font-medium">PDF</span>
           </button>
@@ -114,8 +181,14 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
         <!-- Swipeable card -->
         <div
           class="relative bg-theme-card rounded-xl border transition-transform duration-200 cursor-pointer"
-          :class="persona.tieneVencidas ? 'border-red-500/40 shadow-sm shadow-red-500/5' : 'border-theme-border'"
-          :style="{ transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '' }"
+          :class="
+            persona.tieneVencidas
+              ? 'border-red-500/40 shadow-sm shadow-red-500/5'
+              : 'border-theme-border'
+          "
+          :style="{
+            transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '',
+          }"
           @click="handleCardClick(persona)"
           @touchstart.passive="onTouchStart($event, persona.id)"
           @touchmove.passive="onTouchMove($event, persona.id)"
@@ -128,7 +201,11 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
               <!-- Avatar -->
               <div
                 class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold"
-                :class="tabActual === 'me_deben' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-red-500/15 text-red-400'"
+                :class="
+                  tabActual === 'me_deben'
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-red-500/15 text-red-400'
+                "
               >
                 {{ getInitials(persona.nombre) }}
               </div>
@@ -136,19 +213,45 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
               <!-- Info -->
               <div class="flex-1 min-w-0">
                 <div class="flex items-start gap-1.5 min-w-0">
-                  <p class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0" :title="persona.nombre">{{ persona.nombre }}</p>
-                  <span v-if="persona.tieneVencidas" class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-semibold bg-red-500/20 text-red-400">
+                  <p
+                    class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0"
+                    :title="persona.nombre"
+                  >
+                    {{ persona.nombre }}
+                  </p>
+                  <span
+                    v-if="persona.tieneVencidas"
+                    class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-semibold bg-red-500/20 text-red-400"
+                  >
                     <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
                     VENCIDA
                   </span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
-                  <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted">
+                  <span
+                    v-if="persona.tipo === 'organizacion'"
+                    class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted"
+                  >
                     ORG
                   </span>
-                  <span v-if="persona.vinculadoUsuarioId" class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent" title="Vinculado con usuario">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  <span
+                    v-if="persona.vinculadoUsuarioId"
+                    class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent"
+                    title="Vinculado con usuario"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-3 h-3 inline"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                      />
                     </svg>
                   </span>
                   <span class="text-xs text-theme-text-sec">
@@ -156,10 +259,26 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
                   </span>
                 </div>
                 <!-- Próxima a vencer (solo si NO está vencida) -->
-                <div v-if="!persona.tieneVencidas && persona.fechaProximaVencer" class="flex items-center gap-1 mt-1">
-                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-medium bg-amber-500/15 text-amber-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <div
+                  v-if="!persona.tieneVencidas && persona.fechaProximaVencer"
+                  class="flex items-center gap-1 mt-1"
+                >
+                  <span
+                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-medium bg-amber-500/15 text-amber-400"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      class="w-2.5 h-2.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
                     </svg>
                     {{ formatFechaCorta(persona.fechaProximaVencer) }}
                   </span>
@@ -178,7 +297,13 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
                 <div class="flex items-center justify-end gap-1 mt-1">
                   <span
                     class="w-1.5 h-1.5 rounded-full"
-                    :class="persona.totalPendiente > 0 ? (tabActual === 'me_deben' ? 'bg-emerald-400' : 'bg-red-400') : 'bg-gray-600'"
+                    :class="
+                      persona.totalPendiente > 0
+                        ? tabActual === 'me_deben'
+                          ? 'bg-emerald-400'
+                          : 'bg-red-400'
+                        : 'bg-gray-600'
+                    "
                   ></span>
                   <span class="text-[0.6875rem] text-theme-text-sec">
                     {{ persona.totalPendiente > 0 ? 'Pendiente' : 'Saldado' }}
@@ -187,20 +312,42 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
               </div>
 
               <!-- Chevron -->
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4 text-theme-text-muted shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </div>
 
             <!-- Contact quick actions (phone / WhatsApp) - below name row -->
-            <div v-if="persona.contacto && isPhone(persona.contacto)" class="flex items-center gap-1.5 mt-2 pt-2 border-t border-theme-border/50 pl-[3.75rem]" @click.stop>
+            <div
+              v-if="persona.contacto && isPhone(persona.contacto)"
+              class="flex items-center gap-1.5 mt-2 pt-2 border-t border-theme-border/50 pl-[3.75rem]"
+              @click.stop
+            >
               <a
                 :href="`tel:${persona.contacto}`"
                 class="flex items-center gap-1.5 px-3 min-h-[2.5rem] rounded-lg bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-medium hover:bg-theme-accent-bg transition-colors"
                 title="Llamar"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.338c0 7.734 6.678 14.412 14.412 14.412A2.338 2.338 0 0018.99 18.41l.9-1.798a1.125 1.125 0 00-.26-1.364l-2.248-1.686a1.125 1.125 0 00-1.393.044l-.728.728a.75.75 0 01-.938.077 12.742 12.742 0 01-5.736-5.736.75.75 0 01.077-.938l.728-.728a1.125 1.125 0 00.044-1.393L7.75 3.41a1.125 1.125 0 00-1.364-.26l-1.799.9A2.338 2.338 0 002.25 6.338z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3 h-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.25 6.338c0 7.734 6.678 14.412 14.412 14.412A2.338 2.338 0 0018.99 18.41l.9-1.798a1.125 1.125 0 00-.26-1.364l-2.248-1.686a1.125 1.125 0 00-1.393.044l-.728.728a.75.75 0 01-.938.077 12.742 12.742 0 01-5.736-5.736.75.75 0 01.077-.938l.728-.728a1.125 1.125 0 00.044-1.393L7.75 3.41a1.125 1.125 0 00-1.364-.26l-1.799.9A2.338 2.338 0 002.25 6.338z"
+                  />
                 </svg>
                 Llamar
               </a>
@@ -209,10 +356,21 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
                 target="_blank"
                 rel="noopener"
                 class="flex items-center gap-1.5 px-3 min-h-[2.5rem] rounded-lg bg-emerald-500/10 text-emerald-400 text-[0.6875rem] font-medium hover:bg-emerald-500/20 transition-colors"
-                :title="tabActual === 'me_deben' && persona.totalPendiente > 0 ? 'WhatsApp — recordatorio' : 'WhatsApp'"
+                :title="
+                  tabActual === 'me_deben' && persona.totalPendiente > 0
+                    ? 'WhatsApp — recordatorio'
+                    : 'WhatsApp'
+                "
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3 h-3"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"
+                  />
                 </svg>
                 WhatsApp
               </a>
@@ -224,7 +382,9 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
       <!-- Sección "Otros" para personas sin deudas activas -->
       <template v-if="personasInactivas.length > 0">
         <div class="mt-6 mb-2 xl:col-span-2">
-          <p class="text-xs font-medium text-theme-text-sec uppercase tracking-wider px-1">Sin deudas activas</p>
+          <p class="text-xs font-medium text-theme-text-sec uppercase tracking-wider px-1">
+            Sin deudas activas
+          </p>
         </div>
         <div
           v-for="persona in personasInactivas"
@@ -238,9 +398,24 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
               class="w-12 h-full flex flex-col items-center justify-center gap-0.5 text-theme-accent bg-theme-accent-bg rounded-lg"
               @click.stop="emit('seleccionar', persona)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
               </svg>
               <span class="text-[0.6875rem] font-medium">Ver</span>
             </button>
@@ -249,7 +424,11 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
           <!-- Swipeable card -->
           <div
             class="relative bg-theme-card rounded-xl border border-theme-border transition-transform duration-200 cursor-pointer"
-            :style="{ transform: swipeOffsets[persona.id] ? `translateX(${swipeOffsets[persona.id]}px)` : '' }"
+            :style="{
+              transform: swipeOffsets[persona.id]
+                ? `translateX(${swipeOffsets[persona.id]}px)`
+                : '',
+            }"
             @click="handleCardClick(persona)"
             @touchstart.passive="onTouchStart($event, persona.id)"
             @touchmove.passive="onTouchMove($event, persona.id)"
@@ -258,14 +437,24 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
             <div class="p-4">
               <div class="flex items-start gap-3">
                 <!-- Avatar -->
-                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold bg-theme-card-hover0/15 text-theme-text-muted">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-semibold bg-theme-card-hover0/15 text-theme-text-muted"
+                >
                   {{ getInitials(persona.nombre) }}
                 </div>
                 <!-- Info -->
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start gap-2">
-                    <p class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0">{{ persona.nombre }}</p>
-                    <span v-if="persona.tipo === 'organizacion'" class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted">ORG</span>
+                    <p
+                      class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0"
+                    >
+                      {{ persona.nombre }}
+                    </p>
+                    <span
+                      v-if="persona.tipo === 'organizacion'"
+                      class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted"
+                      >ORG</span
+                    >
                   </div>
                   <p class="text-xs text-theme-text-sec mt-0.5">Sin deudas activas</p>
                 </div>
@@ -278,7 +467,14 @@ v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
                   </div>
                 </div>
                 <!-- Chevron -->
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-muted shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4 text-theme-text-muted shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </div>
@@ -314,7 +510,9 @@ const filtrosEstado = [
 ]
 
 const countVencidas = computed(() =>
-  tabActual.value === 'me_deben' ? resumen.value.countVencidasMeDeben : resumen.value.countVencidasYoDebo
+  tabActual.value === 'me_deben'
+    ? resumen.value.countVencidasMeDeben
+    : resumen.value.countVencidasYoDebo,
 )
 
 const emptyStateMsg = computed(() => {
@@ -334,17 +532,17 @@ function aplicarFiltros(list) {
 
   // Filtrar por estado
   if (filtroEstado.value === 'pendiente') {
-    result = result.filter(p => p.totalPendiente > 0)
+    result = result.filter((p) => p.totalPendiente > 0)
   } else if (filtroEstado.value === 'saldado') {
-    result = result.filter(p => p.totalPendiente === 0)
+    result = result.filter((p) => p.totalPendiente === 0)
   } else if (filtroEstado.value === 'vencidas') {
-    result = result.filter(p => p.tieneVencidas)
+    result = result.filter((p) => p.tieneVencidas)
   }
 
   // Filtrar por búsqueda (debounced para evitar recomputos en cada tecla)
   if (busquedaDebounced.value?.trim()) {
     const q = busquedaDebounced.value.toLowerCase()
-    result = result.filter(p => p.nombre.toLowerCase().includes(q))
+    result = result.filter((p) => p.nombre.toLowerCase().includes(q))
   }
 
   // Ordenar
@@ -360,11 +558,11 @@ function aplicarFiltros(list) {
 }
 
 const personasActivas = computed(() => {
-  return aplicarFiltros(personas.value.filter(p => p.deudasActivas > 0))
+  return aplicarFiltros(personas.value.filter((p) => p.deudasActivas > 0))
 })
 
 const personasInactivas = computed(() => {
-  return aplicarFiltros(personas.value.filter(p => p.deudasActivas === 0))
+  return aplicarFiltros(personas.value.filter((p) => p.deudasActivas === 0))
 })
 
 const personasFiltradas = computed(() => {
@@ -374,10 +572,10 @@ const personasFiltradas = computed(() => {
 async function exportarPdf(persona) {
   try {
     const deudas = await $fetch('/api/deudas', {
-      query: { personaId: persona.id, tipo: 'me_deben' }
+      query: { personaId: persona.id, tipo: 'me_deben' },
     })
-    const activas = deudas.filter(d => d.estado === 'pendiente' || d.estado === 'parcial')
-    const saldadas = deudas.filter(d => d.estado === 'pagado' || d.estado === 'archivado')
+    const activas = deudas.filter((d) => d.estado === 'pendiente' || d.estado === 'parcial')
+    const saldadas = deudas.filter((d) => d.estado === 'pagado' || d.estado === 'archivado')
     await descargarPdf(persona, activas, saldadas)
   } catch (e) {
     console.error('Error al generar PDF:', e)

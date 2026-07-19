@@ -1,5 +1,11 @@
 import { db } from '../../../../utils/db.js'
-import { gastosPlanificados, planesMensuales, gastos, categorias, ahorros } from '../../../../database/schema.js'
+import {
+  gastosPlanificados,
+  planesMensuales,
+  gastos,
+  categorias,
+  ahorros,
+} from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
@@ -23,10 +29,7 @@ export default defineEventHandler(async (event) => {
     })
     .from(gastosPlanificados)
     .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
-    .where(and(
-      eq(gastosPlanificados.id, id),
-      eq(planesMensuales.usuarioId, usuarioId),
-    ))
+    .where(and(eq(gastosPlanificados.id, id), eq(planesMensuales.usuarioId, usuarioId)))
     .limit(1)
 
   if (!gastoPlanificado) {
@@ -39,10 +42,7 @@ export default defineEventHandler(async (event) => {
       hora: gastos.hora,
     })
     .from(gastos)
-    .where(and(
-      eq(gastos.gastoPlanificadoId, id),
-      eq(gastos.usuarioId, usuarioId),
-    ))
+    .where(and(eq(gastos.gastoPlanificadoId, id), eq(gastos.usuarioId, usuarioId)))
     .limit(1)
 
   const { hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
@@ -63,10 +63,7 @@ export default defineEventHandler(async (event) => {
           notas: body.notas?.trim() || null,
           updatedAt: new Date(),
         })
-        .where(and(
-          eq(gastos.id, gastoExistente.id),
-          eq(gastos.usuarioId, usuarioId),
-        ))
+        .where(and(eq(gastos.id, gastoExistente.id), eq(gastos.usuarioId, usuarioId)))
         .returning()
     } else {
       ;[gastoActualizado] = await tx

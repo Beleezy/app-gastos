@@ -33,11 +33,7 @@ describe('useSseStream start con stub fetch', () => {
     let completed = false
 
     const encoder = new TextEncoder()
-    const chunks = [
-      'data: {"i":1}\n\n',
-      'data: {"i":2}\n\n',
-      'data: {"i":3}\n\n',
-    ]
+    const chunks = ['data: {"i":1}\n\n', 'data: {"i":2}\n\n', 'data: {"i":3}\n\n']
 
     const stream = new ReadableStream({
       start(controller) {
@@ -53,7 +49,9 @@ describe('useSseStream start con stub fetch', () => {
 
     const { start } = useSseStream({
       onEvent: (data) => events.push(data),
-      onComplete: () => { completed = true },
+      onComplete: () => {
+        completed = true
+      },
     })
 
     await start('/api/stream', { x: 1 })

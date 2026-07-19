@@ -1,5 +1,9 @@
 import { db } from '../../../utils/db.js'
-import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '../../../database/schema.js'
+import {
+  googleCalendarConexiones,
+  gastosPlanificados,
+  planesMensuales,
+} from '../../../database/schema.js'
 import { verifyState } from '../../../utils/googleOAuthState.js'
 import { encrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
@@ -91,12 +95,20 @@ export default defineEventHandler(async (event) => {
   })
 
   // Limpiar googleEventId obsoletos (en caso de reconexion)
-  const planes = await db.select({ id: planesMensuales.id }).from(planesMensuales)
+  const planes = await db
+    .select({ id: planesMensuales.id })
+    .from(planesMensuales)
     .where(eq(planesMensuales.usuarioId, usuarioId))
   if (planes.length) {
-    await db.update(gastosPlanificados)
+    await db
+      .update(gastosPlanificados)
       .set({ googleEventId: null })
-      .where(inArray(gastosPlanificados.planMensualId, planes.map(p => p.id)))
+      .where(
+        inArray(
+          gastosPlanificados.planMensualId,
+          planes.map((p) => p.id),
+        ),
+      )
   }
 
   return sendRedirect(event, '/configuraciones?gcal=conectado')

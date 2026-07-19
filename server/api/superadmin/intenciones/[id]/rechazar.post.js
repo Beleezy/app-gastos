@@ -22,7 +22,12 @@ export default defineEventHandler(async (event) => {
   await db.update(usuarios).set({ permitido: false }).where(eq(usuarios.id, intent.supabaseUserId))
   await db
     .update(intencionesRegistro)
-    .set({ estado: 'rechazada', decididoPor: adminId, decididoEn: new Date(), updatedAt: new Date() })
+    .set({
+      estado: 'rechazada',
+      decididoPor: adminId,
+      decididoEn: new Date(),
+      updatedAt: new Date(),
+    })
     .where(eq(intencionesRegistro.id, id))
 
   invalidarAccesoCache(intent.supabaseUserId)

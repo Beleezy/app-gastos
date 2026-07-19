@@ -39,8 +39,15 @@ export function useOverlayBack(isVisible, closeFn) {
     // overlay → overlay). En ese caso no cerramos: re-armamos la entrada de history.
     if (consumeCleanupPop()) {
       if (window.history.state?.__overlayId !== historyId.value) {
-        const current = window.history.state && typeof window.history.state === 'object' ? window.history.state : {}
-        window.history.pushState({ ...current, __overlayId: historyId.value }, '', window.location.href)
+        const current =
+          window.history.state && typeof window.history.state === 'object'
+            ? window.history.state
+            : {}
+        window.history.pushState(
+          { ...current, __overlayId: historyId.value },
+          '',
+          window.location.href,
+        )
       }
       return
     }
@@ -65,7 +72,8 @@ export function useOverlayBack(isVisible, closeFn) {
     if (!import.meta.client) return
     if (val && !oldVal) {
       const id = `overlay-${Math.random().toString(36).slice(2, 9)}`
-      const current = window.history.state && typeof window.history.state === 'object' ? window.history.state : {}
+      const current =
+        window.history.state && typeof window.history.state === 'object' ? window.history.state : {}
       window.history.pushState({ ...current, __overlayId: id }, '', window.location.href)
       historyId.value = id
       lockScroll()

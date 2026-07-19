@@ -49,14 +49,16 @@ export default defineEventHandler(async (event) => {
 
   try {
     const pares = SENTINEL_COLUMNS.map(([t, c]) => `('${t}','${c}')`).join(',')
-    const rows = await db.execute(sql.raw(`
+    const rows = await db.execute(
+      sql.raw(`
       SELECT table_name, column_name FROM information_schema.columns
       WHERE (table_name, column_name) IN (${pares})
-    `))
+    `),
+    )
     const presentes = new Set(rows.map((r) => `${r.table_name}.${r.column_name}`))
-    const faltantes = SENTINEL_COLUMNS
-      .map(([t, c]) => `${t}.${c}`)
-      .filter((col) => !presentes.has(col))
+    const faltantes = SENTINEL_COLUMNS.map(([t, c]) => `${t}.${c}`).filter(
+      (col) => !presentes.has(col),
+    )
 
     if (faltantes.length > 0) {
       checks.schema = 'drift'

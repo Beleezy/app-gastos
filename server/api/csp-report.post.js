@@ -29,9 +29,8 @@ export default defineEventHandler(async (event) => {
     body = null
   }
   // Normalizar a array de reports.
-  const reports = (Array.isArray(body)
-    ? body.map((r) => r?.body || r)
-    : [body?.['csp-report'] || body]
+  const reports = (
+    Array.isArray(body) ? body.map((r) => r?.body || r) : [body?.['csp-report'] || body]
   ).slice(0, MAX_REPORTS)
 
   for (const r of reports) {

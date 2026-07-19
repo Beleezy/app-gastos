@@ -6,13 +6,9 @@ import { z } from 'zod'
 const FECHA_ISO = /^\d{4}-\d{2}-\d{2}$/
 const HORA_HHMM = /^([01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/
 
-export const fechaIso = z
-  .string()
-  .regex(FECHA_ISO, 'Fecha inválida (esperado YYYY-MM-DD)')
+export const fechaIso = z.string().regex(FECHA_ISO, 'Fecha inválida (esperado YYYY-MM-DD)')
 
-export const horaHhmm = z
-  .string()
-  .regex(HORA_HHMM, 'Hora inválida (esperado HH:mm)')
+export const horaHhmm = z.string().regex(HORA_HHMM, 'Hora inválida (esperado HH:mm)')
 
 export const monto = z
   .number({ error: 'Monto debe ser numérico' })

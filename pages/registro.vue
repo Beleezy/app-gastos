@@ -19,9 +19,25 @@
     <div class="max-w-lg mx-auto lg:max-w-none lg:mx-0">
       <Transition name="ptr">
         <div v-if="isRefreshing" class="flex justify-center py-2">
-          <svg class="animate-spin w-5 h-5 text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          <svg
+            class="animate-spin w-5 h-5 text-theme-accent"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            ></circle>
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            ></path>
           </svg>
         </div>
       </Transition>
@@ -102,7 +118,14 @@
               class="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-theme-accent text-theme-on-accent font-medium text-sm shadow-sm shadow-theme-accent/20 hover:opacity-90 active:scale-[0.98] transition-all"
               @click="showFormManual = true"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
               </svg>
               Agregar gasto manual
@@ -120,15 +143,29 @@
                 :class="[
                   mostrarFiltros || tieneFiltrosActivos
                     ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
-                    : 'bg-theme-card text-theme-text-sec border-theme-border'
+                    : 'bg-theme-card text-theme-text-sec border-theme-border',
                 ]"
                 @click="toggleFiltros"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                  />
                 </svg>
                 Filtros
-                <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none">
+                <span
+                  v-if="conteoFiltrosActivos > 0"
+                  class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none"
+                >
                   {{ conteoFiltrosActivos }}
                 </span>
               </button>
@@ -141,11 +178,33 @@
                   placeholder="Buscar gasto..."
                   class="w-full pl-9 pr-8 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent transition-all"
                 />
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
                 </svg>
-                <button v-if="busquedaGasto" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-text-sec" @click="busquedaGasto = ''">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <button
+                  v-if="busquedaGasto"
+                  class="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-text-sec"
+                  @click="busquedaGasto = ''"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
@@ -156,8 +215,19 @@
                 aria-label="Exportar a Excel"
                 @click="exportarGastos"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                  />
                 </svg>
               </button>
             </div>
@@ -177,7 +247,9 @@
                     class="py-1.5 rounded-lg text-xs font-medium transition-colors"
                     :class="[
                       rangosRapidos.length > 1 ? 'flex-1 lg:flex-none lg:px-4' : 'px-4',
-                      rangoRapido === r.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'
+                      rangoRapido === r.value
+                        ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+                        : 'bg-theme-card text-theme-text-sec border border-theme-border',
                     ]"
                     @click="onRangoChange(r.value)"
                   >
@@ -245,7 +317,11 @@
                   />
                   <template #fallback>
                     <div class="px-4 space-y-2">
-                      <div v-for="i in 3" :key="i" class="h-16 rounded-xl bg-theme-card shimmer"></div>
+                      <div
+                        v-for="i in 3"
+                        :key="i"
+                        class="h-16 rounded-xl bg-theme-card shimmer"
+                      ></div>
                     </div>
                   </template>
                 </Suspense>
@@ -263,7 +339,11 @@
                   />
                   <template #fallback>
                     <div class="px-4 space-y-2">
-                      <div v-for="i in 3" :key="i" class="h-16 rounded-xl bg-theme-card shimmer"></div>
+                      <div
+                        v-for="i in 3"
+                        :key="i"
+                        class="h-16 rounded-xl bg-theme-card shimmer"
+                      ></div>
                     </div>
                   </template>
                 </Suspense>
@@ -362,7 +442,7 @@
     <!-- Toast success -->
     <Transition name="toast">
       <div
-v-if="toastMsg"
+        v-if="toastMsg"
         class="fixed left-1/2 -translate-x-1/2 z-50 bg-emerald-500/90 text-white text-sm font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-emerald-500/20 backdrop-blur-sm border border-emerald-400/20"
         :class="undoPendiente ? 'bottom-40' : 'bottom-24'"
       >
@@ -373,11 +453,22 @@ v-if="toastMsg"
     <!-- Undo toast -->
     <Transition name="toast">
       <div
-v-if="undoPendiente"
+        v-if="undoPendiente"
         class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-theme-card text-theme-text text-sm px-4 py-3 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-sm border border-theme-border"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4 text-red-400 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
         </svg>
         <span class="text-theme-text-sec">Gasto eliminado</span>
         <button
@@ -395,48 +486,87 @@ v-if="undoPendiente"
 import RegistroResumenMesRegistro from '~/components/registro/ResumenMesRegistro.vue'
 
 // Lazy-loaded heavy components
-const RegistroStatsComparativasAsync = defineAsyncComponent(() =>
-  import('~/components/registro/StatsComparativas.vue')
+const RegistroStatsComparativasAsync = defineAsyncComponent(
+  () => import('~/components/registro/StatsComparativas.vue'),
 )
-const RegistroGraficoCategoriaAsync = defineAsyncComponent(() =>
-  import('~/components/registro/GraficoCategoria.vue')
+const RegistroGraficoCategoriaAsync = defineAsyncComponent(
+  () => import('~/components/registro/GraficoCategoria.vue'),
 )
-const RegistroConfirmacionVozAsync = defineAsyncComponent(() =>
-  import('~/components/registro/ConfirmacionVoz.vue')
+const RegistroConfirmacionVozAsync = defineAsyncComponent(
+  () => import('~/components/registro/ConfirmacionVoz.vue'),
 )
-const RegistroFormGastoManualAsync = defineAsyncComponent(() =>
-  import('~/components/registro/FormGastoManual.vue')
+const RegistroFormGastoManualAsync = defineAsyncComponent(
+  () => import('~/components/registro/FormGastoManual.vue'),
 )
-const RegistroFormBulkEditAsync = defineAsyncComponent(() =>
-  import('~/components/registro/FormBulkEdit.vue')
+const RegistroFormBulkEditAsync = defineAsyncComponent(
+  () => import('~/components/registro/FormBulkEdit.vue'),
 )
 
 const {
-  gastosMensuales, categorias, resumen, isLoadingMensual,
-  mesSeleccionado, anioSeleccionado, mesFormateado, esMesActual,
-  gastosPorDia, gastosPorSemana, gastosPorCategoria,
-  fetchResumen, fetchCategorias, fetchGastosMensuales,
-  createGastosBulk, updateGastosBulk, deleteGasto, deleteGastosBulk,
-  mesAnterior, mesSiguiente, irAMesActual,
+  gastosMensuales,
+  categorias,
+  resumen,
+  isLoadingMensual,
+  mesSeleccionado,
+  anioSeleccionado,
+  mesFormateado,
+  esMesActual,
+  gastosPorDia,
+  gastosPorSemana,
+  gastosPorCategoria,
+  fetchResumen,
+  fetchCategorias,
+  fetchGastosMensuales,
+  createGastosBulk,
+  updateGastosBulk,
+  deleteGasto,
+  deleteGastosBulk,
+  mesAnterior,
+  mesSiguiente,
+  irAMesActual,
   getCategoriaPorNombre,
-  formatFechaDia, formatRangoSemana,
+  formatFechaDia,
+  formatRangoSemana,
 } = useGastos()
 
 const {
-  isListening, transcript, voiceError, isSupported, hasDraft,
-  showConfirmacion, lastTranscript, isParsing, parsedExpenses, parseError, retryStatus,
-  onStartListening, onStopListening, onContinueListening,
-  onSendDraft, onDiscardDraft, onOverwriteDraft, onUpdateTranscript,
-  reintentarParse, cerrarConfirmacion,
+  isListening,
+  transcript,
+  voiceError,
+  isSupported,
+  hasDraft,
+  showConfirmacion,
+  lastTranscript,
+  isParsing,
+  parsedExpenses,
+  parseError,
+  retryStatus,
+  onStartListening,
+  onStopListening,
+  onContinueListening,
+  onSendDraft,
+  onDiscardDraft,
+  onOverwriteDraft,
+  onUpdateTranscript,
+  reintentarParse,
+  cerrarConfirmacion,
 } = useVoiceDraft()
 
 const {
-  photoPreview, showPhotoPreview, showPhotoConfirmacion,
-  isParsing: isParsingPhoto, parsedExpenses: parsedPhotoExpenses,
-  parseError: photoParseError, retryStatus: photoRetryStatus,
+  photoPreview,
+  showPhotoPreview,
+  showPhotoConfirmacion,
+  isParsing: isParsingPhoto,
+  parsedExpenses: parsedPhotoExpenses,
+  parseError: photoParseError,
+  retryStatus: photoRetryStatus,
   totalComprobante: photoTotalComprobante,
-  onPhotoCapture, onSendPhoto, onRetakePhoto, onCancelPhoto,
-  reintentarParseImage, cerrarPhotoConfirmacion,
+  onPhotoCapture,
+  onSendPhoto,
+  onRetakePhoto,
+  onCancelPhoto,
+  reintentarParseImage,
+  cerrarPhotoConfirmacion,
 } = usePhotoDraft()
 
 const route = useRoute()
@@ -446,7 +576,8 @@ const { vibrate } = useHaptic()
 
 // Presupuesto (composable)
 const { presupuesto, fetchPresupuesto, actualizarPresupuesto } = usePresupuestoMes({
-  mesSeleccionado, anioSeleccionado,
+  mesSeleccionado,
+  anioSeleccionado,
 })
 const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
 const configVistaDia = computed(() => config.value?.vistaRegistroDia !== false)
@@ -454,14 +585,22 @@ const configVistaSemana = computed(() => config.value?.vistaRegistroSemana === t
 
 // Filtros (composable)
 const {
-  busquedaGasto, categoriaFiltro, rangoRapido, rangosRapidos,
-  gastosPorDiaFiltrados, gastosPorSemanaFiltrados,
-  tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
+  busquedaGasto,
+  categoriaFiltro,
+  rangoRapido,
+  rangosRapidos,
+  gastosPorDiaFiltrados,
+  gastosPorSemanaFiltrados,
+  tieneFiltrosActivos,
+  conteoFiltrosActivos,
+  limpiarFiltros,
 } = useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual })
 
 // Optimistic (composable)
 const { mapGastosConIds, pushOptimisticGastos, rollbackOptimistic } = useOptimisticGastos({
-  gastosMensuales, categorias, getCategoriaPorNombre,
+  gastosMensuales,
+  categorias,
+  getCategoriaPorNombre,
 })
 
 // Export (composable)
@@ -469,17 +608,27 @@ const { exportarGastos } = useRegistroExport({ mesFormateado, gastosMensuales })
 
 // Delete (composable)
 const {
-  gastoEliminar, undoPendiente, undoCountdown,
-  confirmarEliminar: confirmarEliminarInterno, cancelarConfirmacion,
-  ejecutarEliminar, deshacerEliminar,
+  gastoEliminar,
+  undoPendiente,
+  undoCountdown,
+  confirmarEliminar: confirmarEliminarInterno,
+  cancelarConfirmacion,
+  ejecutarEliminar,
+  deshacerEliminar,
 } = useGastoDelete({
-  gastosMensuales, deleteGasto,
+  gastosMensuales,
+  deleteGasto,
   fetchResumenMensual: () => fetchResumenMensual(),
   toastError,
 })
 
 // Favoritos (E#1)
-const { topFavoritos, cargar: cargarFavoritos, registrarUsoBulk, eliminarFavorito } = useGastoFavoritos()
+const {
+  topFavoritos,
+  cargar: cargarFavoritos,
+  registrarUsoBulk,
+  eliminarFavorito,
+} = useGastoFavoritos()
 
 // Estado de UI
 const vistaRegistro = ref('historial')
@@ -496,7 +645,7 @@ const totalDiaActual = computed(() => parseFloat(resumen.value?.totalDia) || 0)
 
 const gastosHoyCount = computed(() => {
   const hoy = useFechaPeru().fechaHoy()
-  return gastosMensuales.value.filter(g => g.fecha === hoy).length
+  return gastosMensuales.value.filter((g) => g.fecha === hoy).length
 })
 
 const diasTranscurridos = computed(() => {
@@ -505,7 +654,7 @@ const diasTranscurridos = computed(() => {
 })
 
 const diasDelMes = computed(() =>
-  new Date(anioSeleccionado.value, mesSeleccionado.value, 0).getDate()
+  new Date(anioSeleccionado.value, mesSeleccionado.value, 0).getDate(),
 )
 
 // ─── Triggers ──────────────────────────────────────────
@@ -537,7 +686,9 @@ function onCambiarVista(value) {
 
 const showDeleteConfirm = computed({
   get: () => !!gastoEliminar.value,
-  set: (v) => { if (!v) cancelarConfirmacion() },
+  set: (v) => {
+    if (!v) cancelarConfirmacion()
+  },
 })
 const mensajeEliminar = computed(() => {
   if (!gastoEliminar.value) return ''
@@ -641,7 +792,9 @@ function duplicarGasto(gasto) {
 
 function showToast(msg) {
   toastMsg.value = msg
-  setTimeout(() => { toastMsg.value = '' }, 2500)
+  setTimeout(() => {
+    toastMsg.value = ''
+  }, 2500)
 }
 
 async function onConfirmGastos(gastosEditados) {
@@ -649,7 +802,9 @@ async function onConfirmGastos(gastosEditados) {
   const gastosConIds = mapGastosConIds(gastosEditados)
   const tempIds = pushOptimisticGastos(gastosConIds)
   cerrarConfirmacion()
-  showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
+  showToast(
+    `${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`,
+  )
   try {
     await createGastosBulk(gastosConIds, lastTranscript.value, 'voz')
     registrarUsoBulk(gastosConIds)
@@ -665,7 +820,9 @@ async function onConfirmPhotoGastos(gastosEditados) {
   const gastosConIds = mapGastosConIds(gastosEditados)
   const tempIds = pushOptimisticGastos(gastosConIds)
   cerrarPhotoConfirmacion()
-  showToast(`${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`)
+  showToast(
+    `${gastosEditados.length} gasto${gastosEditados.length > 1 ? 's' : ''} registrado${gastosEditados.length > 1 ? 's' : ''}`,
+  )
   try {
     await createGastosBulk(gastosConIds, 'Escaneado desde foto de voucher', 'foto')
     registrarUsoBulk(gastosConIds)
@@ -706,7 +863,12 @@ async function fetchResumenMensual() {
 }
 
 const { isRefreshing } = usePullToRefresh(async () => {
-  await Promise.all([fetchGastosMensuales(), fetchResumenMensual(), fetchCategorias(), fetchPresupuesto()])
+  await Promise.all([
+    fetchGastosMensuales(),
+    fetchResumenMensual(),
+    fetchCategorias(),
+    fetchPresupuesto(),
+  ])
 })
 
 // El swipe horizontal para cambiar de mes se retiró: con deslizamientos
@@ -787,20 +949,33 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.toast-enter-active { transition: all 0.3s ease-out; }
-.toast-leave-active { transition: all 0.2s ease-in; }
-.toast-enter-from { opacity: 0; transform: translate(-50%, 20px); }
-.toast-leave-to { opacity: 0; transform: translate(-50%, -10px); }
+.toast-enter-active {
+  transition: all 0.3s ease-out;
+}
+.toast-leave-active {
+  transition: all 0.2s ease-in;
+}
+.toast-enter-from {
+  opacity: 0;
+  transform: translate(-50%, 20px);
+}
+.toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -10px);
+}
 
-.expand-enter-active, .expand-leave-active {
+.expand-enter-active,
+.expand-leave-active {
   transition: all 0.2s ease;
   overflow: hidden;
 }
-.expand-enter-from, .expand-leave-to {
+.expand-enter-from,
+.expand-leave-to {
   opacity: 0;
   max-height: 0;
 }
-.expand-enter-to, .expand-leave-from {
+.expand-enter-to,
+.expand-leave-from {
   opacity: 1;
   max-height: 500px;
 }

@@ -16,8 +16,14 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
   }
 
   function clearTimers() {
-    if (undoTimer) { clearTimeout(undoTimer); undoTimer = null }
-    if (undoCountdownTimer) { clearInterval(undoCountdownTimer); undoCountdownTimer = null }
+    if (undoTimer) {
+      clearTimeout(undoTimer)
+      undoTimer = null
+    }
+    if (undoCountdownTimer) {
+      clearInterval(undoCountdownTimer)
+      undoCountdownTimer = null
+    }
   }
 
   async function flushPendiente() {
@@ -29,11 +35,10 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
       await deleteGasto(gastoPrev.id)
       await fetchResumenMensual()
     } catch (e) {
-      gastosMensuales.value = [...gastosMensuales.value, gastoPrev]
-        .sort((a, b) => {
-          if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
-          return (b.hora || '').localeCompare(a.hora || '')
-        })
+      gastosMensuales.value = [...gastosMensuales.value, gastoPrev].sort((a, b) => {
+        if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
+        return (b.hora || '').localeCompare(a.hora || '')
+      })
       toastError?.('No se pudo eliminar el gasto')
     }
   }
@@ -49,7 +54,7 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
       await flushPendiente()
     }
 
-    gastosMensuales.value = gastosMensuales.value.filter(g => g.id !== gasto.id)
+    gastosMensuales.value = gastosMensuales.value.filter((g) => g.id !== gasto.id)
 
     undoPendiente.value = gasto
     undoCountdown.value = 5
@@ -64,7 +69,10 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
     }, 1000)
 
     undoTimer = setTimeout(async () => {
-      if (undoCountdownTimer) { clearInterval(undoCountdownTimer); undoCountdownTimer = null }
+      if (undoCountdownTimer) {
+        clearInterval(undoCountdownTimer)
+        undoCountdownTimer = null
+      }
       const gastoActual = undoPendiente.value
       undoPendiente.value = null
       undoTimer = null
@@ -73,11 +81,10 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
         await deleteGasto(gastoActual.id)
         await fetchResumenMensual()
       } catch (e) {
-        gastosMensuales.value = [...gastosMensuales.value, gastoActual]
-          .sort((a, b) => {
-            if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
-            return (b.hora || '').localeCompare(a.hora || '')
-          })
+        gastosMensuales.value = [...gastosMensuales.value, gastoActual].sort((a, b) => {
+          if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
+          return (b.hora || '').localeCompare(a.hora || '')
+        })
         toastError?.('No se pudo eliminar el gasto')
       }
     }, 5000)
@@ -87,11 +94,10 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
     clearTimers()
     if (undoPendiente.value) {
       vibrate(15)
-      gastosMensuales.value = [...gastosMensuales.value, undoPendiente.value]
-        .sort((a, b) => {
-          if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
-          return (b.hora || '').localeCompare(a.hora || '')
-        })
+      gastosMensuales.value = [...gastosMensuales.value, undoPendiente.value].sort((a, b) => {
+        if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
+        return (b.hora || '').localeCompare(a.hora || '')
+      })
     }
     undoPendiente.value = null
   }
@@ -115,8 +121,13 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
   })
 
   return {
-    gastoEliminar, undoPendiente, undoCountdown,
-    confirmarEliminar, cancelarConfirmacion, ejecutarEliminar, deshacerEliminar,
+    gastoEliminar,
+    undoPendiente,
+    undoCountdown,
+    confirmarEliminar,
+    cancelarConfirmacion,
+    ejecutarEliminar,
+    deshacerEliminar,
     flushPendiente,
   }
 }

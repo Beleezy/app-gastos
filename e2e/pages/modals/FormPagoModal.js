@@ -12,10 +12,18 @@ export class FormPagoModal {
     await this.root.waitFor({ state: 'visible', timeout: 5000 })
   }
 
-  inputMonto() { return this.root.getByTestId(DEUDAS.INPUT_MONTO_PAGO) }
-  inputFecha() { return this.root.getByTestId(DEUDAS.INPUT_FECHA_PAGO) }
-  inputNotas() { return this.root.getByTestId(DEUDAS.INPUT_NOTAS_PAGO) }
-  btnConfirmar() { return this.root.getByTestId(DEUDAS.BTN_CONFIRMAR_PAGO) }
+  inputMonto() {
+    return this.root.getByTestId(DEUDAS.INPUT_MONTO_PAGO)
+  }
+  inputFecha() {
+    return this.root.getByTestId(DEUDAS.INPUT_FECHA_PAGO)
+  }
+  inputNotas() {
+    return this.root.getByTestId(DEUDAS.INPUT_NOTAS_PAGO)
+  }
+  btnConfirmar() {
+    return this.root.getByTestId(DEUDAS.BTN_CONFIRMAR_PAGO)
+  }
 
   async registrarPago({ monto, fecha, notas } = {}) {
     if (monto !== undefined) await this.inputMonto().fill(String(monto))

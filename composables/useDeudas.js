@@ -19,7 +19,12 @@ export function useDeudas() {
     montoVencidoYoDebo: 0,
     countVencidasYoDebo: 0,
   }))
-  const balance = useState('deudas-balance', () => ({ totalMeDeben: 0, totalYoDebo: 0, balanceNeto: 0, personas: [] }))
+  const balance = useState('deudas-balance', () => ({
+    totalMeDeben: 0,
+    totalYoDebo: 0,
+    balanceNeto: 0,
+    personas: [],
+  }))
   const balanceCargando = useState('deudas-balance-cargando', () => false)
   const balanceError = useState('deudas-balance-error', () => null)
 
@@ -31,25 +36,24 @@ export function useDeudas() {
   const filtroEstado = useState('deudas-filtro-estado', () => 'todos')
 
   const personasFiltradas = computed(() => {
-    return personas.value.filter(p => {
+    return personas.value.filter((p) => {
       return p.deudasActivas > 0 || p.totalPendiente > 0
     })
   })
 
   const deudasPersona = computed(() => {
     if (!personaSeleccionada.value) return []
-    return deudasList.value.filter(d =>
-      d.personaEntidadId === personaSeleccionada.value.id &&
-      d.tipoDeuda === tabActual.value
+    return deudasList.value.filter(
+      (d) => d.personaEntidadId === personaSeleccionada.value.id && d.tipoDeuda === tabActual.value,
     )
   })
 
   const deudasActivasPersona = computed(() => {
-    return deudasPersona.value.filter(d => d.estado === 'pendiente' || d.estado === 'parcial')
+    return deudasPersona.value.filter((d) => d.estado === 'pendiente' || d.estado === 'parcial')
   })
 
   const deudasSaldadasPersona = computed(() => {
-    return deudasPersona.value.filter(d => d.estado === 'pagado' || d.estado === 'archivado')
+    return deudasPersona.value.filter((d) => d.estado === 'pagado' || d.estado === 'archivado')
   })
 
   const totalPendientePersona = computed(() => {
@@ -207,7 +211,7 @@ export function useDeudas() {
   async function deleteDeuda(id) {
     try {
       await apiFetch(`/api/deudas/${id}`, { method: 'DELETE' })
-      deudasList.value = deudasList.value.filter(d => d.id !== id)
+      deudasList.value = deudasList.value.filter((d) => d.id !== id)
       await invalidarResumenes()
       await refreshAuditoriaIfNeeded()
     } catch (e) {
@@ -221,7 +225,7 @@ export function useDeudas() {
         method: 'POST',
         body: data,
       })
-      const idx = deudasList.value.findIndex(d => d.id === deudaId)
+      const idx = deudasList.value.findIndex((d) => d.id === deudaId)
       if (idx !== -1) {
         deudasList.value[idx] = {
           ...deudasList.value[idx],
@@ -268,13 +272,18 @@ export function useDeudas() {
     try {
       const result = await apiFetch(`/api/deudas/pagos/${pagoId}`, { method: 'DELETE' })
       pagosPersona.value = pagosPersona.value
-        .map(g => {
+        .map((g) => {
           if (!g.pagoIds?.includes(pagoId)) return g
-          const nuevosDetalles = g.detalles.filter(d => d.pagoId !== pagoId)
+          const nuevosDetalles = g.detalles.filter((d) => d.pagoId !== pagoId)
           const nuevoTotal = nuevosDetalles.reduce((s, d) => s + d.montoPagado, 0)
-          return { ...g, detalles: nuevosDetalles, pagoIds: g.pagoIds.filter(id => id !== pagoId), montoTotal: nuevoTotal }
+          return {
+            ...g,
+            detalles: nuevosDetalles,
+            pagoIds: g.pagoIds.filter((id) => id !== pagoId),
+            montoTotal: nuevoTotal,
+          }
         })
-        .filter(g => g.detalles.length > 0)
+        .filter((g) => g.detalles.length > 0)
       if (personaSeleccionada.value) {
         await fetchDeudasPersona(personaSeleccionada.value.id, { noCache: true })
       }
@@ -304,7 +313,7 @@ export function useDeudas() {
   async function deletePersona(id) {
     try {
       await apiFetch(`/api/deudas/personas/${id}`, { method: 'DELETE' })
-      personas.value = personas.value.filter(p => p.id !== id)
+      personas.value = personas.value.filter((p) => p.id !== id)
       if (personaSeleccionada.value?.id === id) {
         personaSeleccionada.value = null
       }
@@ -328,8 +337,8 @@ export function useDeudas() {
           vinculoParId: null,
         }
       }
-      personas.value = personas.value.map(p =>
-        p.id === personaId ? { ...p, vinculadoUsuarioId: null, vinculoParId: null } : p
+      personas.value = personas.value.map((p) =>
+        p.id === personaId ? { ...p, vinculadoUsuarioId: null, vinculoParId: null } : p,
       )
       return result
     } catch (e) {
@@ -380,7 +389,9 @@ export function useDeudas() {
     if (typeof document !== 'undefined') {
       // Disparar un tick inmediato cuando el tab vuelve a ser visible
       // para no esperar hasta 10s tras retomar la PWA.
-      pollingVisibilityListener = () => { if (!document.hidden) tick() }
+      pollingVisibilityListener = () => {
+        if (!document.hidden) tick()
+      }
       document.addEventListener('visibilitychange', pollingVisibilityListener, { passive: true })
     }
   }
@@ -456,9 +467,13 @@ export function useDeudas() {
       await Promise.all([
         fetchResumen({ noCache: true }),
         fetchPersonas({ noCache: true }),
-        personaSeleccionada.value ? fetchDeudasPersona(personaSeleccionada.value.id) : Promise.resolve(),
+        personaSeleccionada.value
+          ? fetchDeudasPersona(personaSeleccionada.value.id)
+          : Promise.resolve(),
         fetchCheckpoints(personaId),
-        personaSeleccionada.value ? fetchPagosPersona(personaSeleccionada.value.id) : Promise.resolve(),
+        personaSeleccionada.value
+          ? fetchPagosPersona(personaSeleccionada.value.id)
+          : Promise.resolve(),
         refreshAuditoriaIfNeeded(),
       ])
     } catch (e) {
@@ -478,20 +493,52 @@ export function useDeudas() {
   }
 
   return {
-    personas, deudasList, pagos, pagosPersona, auditoriaPersona, resumen,
-    balance, balanceCargando, balanceError,
-    checkpoints, guardando, restaurando, cargando: cargandoCheckpoints,
-    isLoading, error,
-    tabActual, personaSeleccionada, filtroEstado,
-    personasFiltradas, deudasPersona,
-    deudasActivasPersona, deudasSaldadasPersona,
+    personas,
+    deudasList,
+    pagos,
+    pagosPersona,
+    auditoriaPersona,
+    resumen,
+    balance,
+    balanceCargando,
+    balanceError,
+    checkpoints,
+    guardando,
+    restaurando,
+    cargando: cargandoCheckpoints,
+    isLoading,
+    error,
+    tabActual,
+    personaSeleccionada,
+    filtroEstado,
+    personasFiltradas,
+    deudasPersona,
+    deudasActivasPersona,
+    deudasSaldadasPersona,
     totalPendientePersona,
-    fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagos, fetchPagosPersona, fetchAuditoriaPersona,
-    fetchBalance, invalidarResumenes,
-    fetchCheckpoints, crearCheckpoint, restaurarCheckpoint,
-    createDeuda, updateDeuda, deleteDeuda,
-    registrarPago, actualizarPago, archivarDeuda, revertirPago,
-    createPersona, deletePersona, desvincularPersona,
-    seleccionarPersona, volverALista, cambiarTab,
+    fetchResumen,
+    fetchPersonas,
+    fetchDeudasPersona,
+    fetchPagos,
+    fetchPagosPersona,
+    fetchAuditoriaPersona,
+    fetchBalance,
+    invalidarResumenes,
+    fetchCheckpoints,
+    crearCheckpoint,
+    restaurarCheckpoint,
+    createDeuda,
+    updateDeuda,
+    deleteDeuda,
+    registrarPago,
+    actualizarPago,
+    archivarDeuda,
+    revertirPago,
+    createPersona,
+    deletePersona,
+    desvincularPersona,
+    seleccionarPersona,
+    volverALista,
+    cambiarTab,
   }
 }

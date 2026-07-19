@@ -1,7 +1,9 @@
 <template>
   <form class="space-y-4" @submit.prevent="submit">
     <div>
-      <label for="fi-1" class="block text-xs text-theme-text-muted font-medium mb-1.5">Concepto</label>
+      <label for="fi-1" class="block text-xs text-theme-text-muted font-medium mb-1.5"
+        >Concepto</label
+      >
       <input
         id="fi-1"
         v-model="form.concepto"
@@ -17,7 +19,9 @@
          ícono de calendario) no cabe en mitad exacta con texto grande a 380px. -->
     <div class="grid grid-cols-[1fr,1.35fr] gap-3">
       <div class="min-w-0">
-        <label for="fi-2" class="block text-xs text-theme-text-muted font-medium mb-1.5">Monto</label>
+        <label for="fi-2" class="block text-xs text-theme-text-muted font-medium mb-1.5"
+          >Monto</label
+        >
         <input
           id="fi-2"
           v-model.number="form.monto"
@@ -30,7 +34,9 @@
         />
       </div>
       <div class="min-w-0">
-        <label for="fi-3" class="block text-xs text-theme-text-muted font-medium mb-1.5">Fecha</label>
+        <label for="fi-3" class="block text-xs text-theme-text-muted font-medium mb-1.5"
+          >Fecha</label
+        >
         <input
           id="fi-3"
           v-model="form.fecha"
@@ -49,9 +55,11 @@
           :key="o.value"
           type="button"
           class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
-          :class="form.origen === o.value
-            ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40'
-            : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text'"
+          :class="
+            form.origen === o.value
+              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40'
+              : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text'
+          "
           @click="form.origen = form.origen === o.value ? null : o.value"
         >
           {{ o.icon }} {{ o.label }}
@@ -61,14 +69,15 @@
 
     <div>
       <label class="flex items-center gap-2 text-xs text-theme-text-muted">
-        <input
-          v-model="form.esRecurrente" type="checkbox" class="h-5 w-5 rounded" />
+        <input v-model="form.esRecurrente" type="checkbox" class="h-5 w-5 rounded" />
         <span>Es recurrente (informativo, sin replicar todavía)</span>
       </label>
     </div>
 
     <div>
-      <label for="fi-5" class="block text-xs text-theme-text-muted font-medium mb-1.5">Notas (opcional)</label>
+      <label for="fi-5" class="block text-xs text-theme-text-muted font-medium mb-1.5"
+        >Notas (opcional)</label
+      >
       <textarea
         id="fi-5"
         v-model="form.notas"
@@ -84,12 +93,16 @@
         type="button"
         class="flex-1 px-4 py-2.5 rounded-xl bg-theme-input text-theme-text-sec text-sm font-medium"
         @click="$emit('cancel')"
-      >Cancelar</button>
+      >
+        Cancelar
+      </button>
       <button
         type="submit"
         :disabled="enviando"
         class="flex-1 px-4 py-2.5 rounded-xl bg-emerald-500 text-white text-sm font-semibold disabled:opacity-50"
-      >{{ enviando ? 'Guardando...' : (props.editing ? 'Guardar cambios' : 'Registrar ingreso') }}</button>
+      >
+        {{ enviando ? 'Guardando...' : props.editing ? 'Guardar cambios' : 'Registrar ingreso' }}
+      </button>
     </div>
   </form>
 </template>
@@ -119,18 +132,22 @@ const form = ref({
   notas: '',
 })
 
-watch(() => props.editing, (ed) => {
-  if (ed) {
-    form.value = {
-      concepto: ed.concepto || '',
-      monto: parseFloat(ed.monto) || null,
-      fecha: ed.fecha || hoy,
-      origen: ed.origen || null,
-      esRecurrente: !!ed.esRecurrente,
-      notas: ed.notas || '',
+watch(
+  () => props.editing,
+  (ed) => {
+    if (ed) {
+      form.value = {
+        concepto: ed.concepto || '',
+        monto: parseFloat(ed.monto) || null,
+        fecha: ed.fecha || hoy,
+        origen: ed.origen || null,
+        esRecurrente: !!ed.esRecurrente,
+        notas: ed.notas || '',
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 const enviando = ref(false)
 const { crearIngreso, actualizarIngreso } = useIngresos()
@@ -154,7 +171,14 @@ async function submit() {
     } else {
       await crearIngreso(payload)
       toast.success('Ingreso registrado')
-      form.value = { concepto: '', monto: null, fecha: hoy, origen: null, esRecurrente: false, notas: '' }
+      form.value = {
+        concepto: '',
+        monto: null,
+        fecha: hoy,
+        origen: null,
+        esRecurrente: false,
+        notas: '',
+      }
     }
     emit('saved')
   } catch (e) {

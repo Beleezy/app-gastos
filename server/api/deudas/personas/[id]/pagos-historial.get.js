@@ -12,10 +12,7 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select({ id: personasEntidades.id })
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, personaId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(and(eq(personasEntidades.id, personaId), eq(personasEntidades.usuarioId, usuarioId)))
     .limit(1)
 
   if (!persona) {
@@ -37,12 +34,14 @@ export default defineEventHandler(async (event) => {
     })
     .from(pagosDeuda)
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
-    .where(and(
-      eq(deudas.personaEntidadId, personaId),
-      eq(deudas.usuarioId, usuarioId),
-      isNull(deudas.deletedAt),
-      isNull(pagosDeuda.deletedAt)
-    ))
+    .where(
+      and(
+        eq(deudas.personaEntidadId, personaId),
+        eq(deudas.usuarioId, usuarioId),
+        isNull(deudas.deletedAt),
+        isNull(pagosDeuda.deletedAt),
+      ),
+    )
     .orderBy(desc(pagosDeuda.createdAt))
 
   // Group payments by fecha + createdAt proximity (same transaction = same global payment)
@@ -53,7 +52,11 @@ export default defineEventHandler(async (event) => {
   for (const pago of pagos) {
     const pagoTime = new Date(pago.createdAt).getTime()
 
-    if (!grupoActual || Math.abs(pagoTime - grupoActual.timestamp) > 2000 || pago.fechaPago !== grupoActual.fechaPago) {
+    if (
+      !grupoActual ||
+      Math.abs(pagoTime - grupoActual.timestamp) > 2000 ||
+      pago.fechaPago !== grupoActual.fechaPago
+    ) {
       grupoActual = {
         fechaPago: pago.fechaPago,
         metodoPago: pago.metodoPago,
@@ -80,7 +83,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Round totals
-  grupos.forEach(g => {
+  grupos.forEach((g) => {
     g.montoTotal = Math.round(g.montoTotal * 100) / 100
   })
 

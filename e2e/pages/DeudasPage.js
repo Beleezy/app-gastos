@@ -13,15 +13,27 @@ export class DeudasPage extends BasePage {
   }
 
   // ─── Tabs me deben / yo debo ────────────────────────────
-  tabMeDeben() { return this.page.getByTestId(DEUDAS.TAB_ME_DEBEN) }
-  tabYoDebo() { return this.page.getByTestId(DEUDAS.TAB_YO_DEBO) }
+  tabMeDeben() {
+    return this.page.getByTestId(DEUDAS.TAB_ME_DEBEN)
+  }
+  tabYoDebo() {
+    return this.page.getByTestId(DEUDAS.TAB_YO_DEBO)
+  }
 
-  async verMeDeben() { await this.tabMeDeben().click() }
-  async verYoDebo() { await this.tabYoDebo().click() }
+  async verMeDeben() {
+    await this.tabMeDeben().click()
+  }
+  async verYoDebo() {
+    await this.tabYoDebo().click()
+  }
 
   // ─── Lista personas ─────────────────────────────────────
-  listaPersonas() { return this.page.getByTestId(DEUDAS.LISTA_PERSONAS) }
-  personaItems() { return this.page.getByTestId(DEUDAS.PERSONA_ITEM) }
+  listaPersonas() {
+    return this.page.getByTestId(DEUDAS.LISTA_PERSONAS)
+  }
+  personaItems() {
+    return this.page.getByTestId(DEUDAS.PERSONA_ITEM)
+  }
 
   personaPorNombre(nombre) {
     return this.personaItems().filter({ hasText: nombre }).first()
@@ -33,8 +45,12 @@ export class DeudasPage extends BasePage {
   }
 
   // ─── Detalle persona ────────────────────────────────────
-  detalle() { return this.page.getByTestId(DEUDAS.DETALLE_PERSONA) }
-  deudaItems() { return this.page.getByTestId(DEUDAS.DEUDA_ITEM) }
+  detalle() {
+    return this.page.getByTestId(DEUDAS.DETALLE_PERSONA)
+  }
+  deudaItems() {
+    return this.page.getByTestId(DEUDAS.DEUDA_ITEM)
+  }
 
   deudaPorConcepto(texto) {
     return this.deudaItems().filter({ hasText: texto }).first()

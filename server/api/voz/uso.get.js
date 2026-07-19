@@ -31,13 +31,7 @@ export default defineEventHandler(async (event) => {
       ultimaPeticion: usoLlm.ultimaPeticion,
     })
     .from(usoLlm)
-    .where(
-      and(
-        eq(usoLlm.usuarioId, usuarioId),
-        eq(usoLlm.anio, anio),
-        eq(usoLlm.mes, mes),
-      ),
-    )
+    .where(and(eq(usoLlm.usuarioId, usuarioId), eq(usoLlm.anio, anio), eq(usoLlm.mes, mes)))
 
   const usadas = await getUsoMensual(usuarioId)
   const limite = quotaMensual()

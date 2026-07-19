@@ -121,8 +121,10 @@ export default defineConfig({
           SUPABASE_URL: process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL || '',
           NUXT_SUPABASE_URL: process.env.NUXT_SUPABASE_URL || process.env.SUPABASE_URL || '',
           NUXT_SUPABASE_KEY: process.env.NUXT_SUPABASE_KEY || process.env.SUPABASE_ANON_KEY || '',
-          NUXT_PUBLIC_SUPABASE_URL: process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '',
-          NUXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '',
+          NUXT_PUBLIC_SUPABASE_URL:
+            process.env.NUXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || '',
+          NUXT_PUBLIC_SUPABASE_ANON_KEY:
+            process.env.NUXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY || '',
           DEV_AUTH_BYPASS: process.env.DEV_AUTH_BYPASS || '1',
           // Mínimo 16 chars — el middleware 04.dev-auth-bypass rechaza
           // tokens más cortos para evitar configs descuidadas.

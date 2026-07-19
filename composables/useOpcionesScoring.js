@@ -14,7 +14,11 @@
 // El API expone precioMinimo/precioMaximo; se aceptan también los alias
 // cortos precioMin/precioMax por compatibilidad con callers antiguos.
 function precioBase(o) {
-  const candidatos = [o.precioPromedio, o.precioMin ?? o.precioMinimo, o.precioMax ?? o.precioMaximo]
+  const candidatos = [
+    o.precioPromedio,
+    o.precioMin ?? o.precioMinimo,
+    o.precioMax ?? o.precioMaximo,
+  ]
     .map((x) => parseFloat(x))
     .filter((x) => Number.isFinite(x) && x > 0)
   if (candidatos.length === 0) return null
@@ -59,10 +63,12 @@ export function rankearOpciones(opciones, opts = {}) {
       // Manual: 0..1 si fue provisto; default 0.5 (neutro)
       const scoreManual = x.manual != null ? Math.max(0, Math.min(1, x.manual)) : 0.5
       const score =
-        scorePrecio * pesoPrecio +
-        scoreConfianza * pesoConfianza +
-        scoreManual * pesoManual
-      return { ...x.raw, _score: Math.round(score * 1000) / 1000, _precioBase: Math.round(x.precio * 100) / 100 }
+        scorePrecio * pesoPrecio + scoreConfianza * pesoConfianza + scoreManual * pesoManual
+      return {
+        ...x.raw,
+        _score: Math.round(score * 1000) / 1000,
+        _precioBase: Math.round(x.precio * 100) / 100,
+      }
     })
     .sort((a, b) => b._score - a._score)
 }

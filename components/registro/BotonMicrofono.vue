@@ -14,12 +14,19 @@
         class="absolute inset-0 flex items-center justify-center transition-opacity duration-500"
         :class="isListening ? 'opacity-100' : 'opacity-0'"
       >
-        <div class="absolute w-28 h-28 rounded-full bg-[var(--color-accent)]/10 animate-ping-slow"></div>
-        <div class="absolute w-36 h-36 rounded-full bg-[var(--color-accent)]/5 animate-ping-slower"></div>
+        <div
+          class="absolute w-28 h-28 rounded-full bg-[var(--color-accent)]/10 animate-ping-slow"
+        ></div>
+        <div
+          class="absolute w-36 h-36 rounded-full bg-[var(--color-accent)]/5 animate-ping-slower"
+        ></div>
       </div>
 
       <!-- Idle ambient glow -->
-      <div v-if="!isListening && !hasDraft" class="absolute inset-0 flex items-center justify-center">
+      <div
+        v-if="!isListening && !hasDraft"
+        class="absolute inset-0 flex items-center justify-center"
+      >
         <div class="w-24 h-24 rounded-full bg-[var(--color-accent)]/8 blur-xl"></div>
       </div>
 
@@ -29,7 +36,7 @@
         :class="[
           isListening
             ? 'bg-gradient-to-br from-red-500 to-rose-600 shadow-xl shadow-red-500/30'
-            : 'bg-gradient-to-br from-[var(--color-accent)] to-indigo-600 shadow-xl shadow-[var(--color-accent)]/30 hover:shadow-[var(--color-accent)]/40'
+            : 'bg-gradient-to-br from-[var(--color-accent)] to-indigo-600 shadow-xl shadow-[var(--color-accent)]/30 hover:shadow-[var(--color-accent)]/40',
         ]"
         :disabled="!isSupported"
         @click="toggleListening"
@@ -38,11 +45,29 @@
         @pointerleave="onPointerUp"
       >
         <!-- Mic icon -->
-        <svg v-if="!isListening" xmlns="http://www.w3.org/2000/svg" class="w-9 h-9 text-theme-on-accent drop-shadow-sm" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+        <svg
+          v-if="!isListening"
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-9 h-9 text-theme-on-accent drop-shadow-sm"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
+          />
         </svg>
         <!-- Stop icon -->
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white drop-shadow-sm" fill="currentColor" viewBox="0 0 24 24">
+        <svg
+          v-else
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-8 h-8 text-white drop-shadow-sm"
+          fill="currentColor"
+          viewBox="0 0 24 24"
+        >
           <rect x="6" y="6" width="12" height="12" rx="2" />
         </svg>
       </button>
@@ -51,13 +76,13 @@
     <!-- Audio wave visualization (real AudioContext data) -->
     <div v-if="isListening" class="flex items-center gap-1.5 h-8">
       <div
-v-for="(level, i) in audioLevels" :key="i"
+        v-for="(level, i) in audioLevels"
+        :key="i"
         class="w-1 rounded-full transition-all duration-75"
         :class="i % 2 === 0 ? 'bg-theme-accent' : 'bg-indigo-400'"
         :style="{ height: `${level}px` }"
       ></div>
     </div>
-
 
     <!-- Live transcript while recording (no draft yet) — se oculta cuando el padre lo controla -->
     <div v-if="!hideTranscript && isListening && transcript" class="w-full max-w-sm">
@@ -112,10 +137,13 @@ function stopWaveAnimation() {
   audioLevels.value = Array(7).fill(8)
 }
 
-watch(() => props.isListening, (val) => {
-  if (val) startWaveAnimation()
-  else stopWaveAnimation()
-})
+watch(
+  () => props.isListening,
+  (val) => {
+    if (val) startWaveAnimation()
+    else stopWaveAnimation()
+  },
+)
 
 onUnmounted(stopWaveAnimation)
 
@@ -154,16 +182,33 @@ function onPointerUp() {
 
 <style scoped>
 @keyframes ping-slow {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.6); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
 }
 @keyframes ping-slower {
-  0% { transform: scale(1); opacity: 0.3; }
-  100% { transform: scale(2); opacity: 0; }
+  0% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 @keyframes wave {
-  0%, 100% { height: 6px; }
-  50% { height: 26px; }
+  0%,
+  100% {
+    height: 6px;
+  }
+  50% {
+    height: 26px;
+  }
 }
 .animate-ping-slow {
   animation: ping-slow 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
@@ -175,6 +220,8 @@ function onPointerUp() {
   animation: wave 0.7s ease-in-out infinite;
 }
 .mic-btn {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease;
 }
 </style>

@@ -21,10 +21,7 @@ export default defineEventHandler(async (event) => {
   const [solicitud] = await db
     .select()
     .from(solicitudesVinculo)
-    .where(and(
-      eq(solicitudesVinculo.id, solicitudId),
-      eq(solicitudesVinculo.estado, 'pendiente')
-    ))
+    .where(and(eq(solicitudesVinculo.id, solicitudId), eq(solicitudesVinculo.estado, 'pendiente')))
     .limit(1)
 
   if (!solicitud) {

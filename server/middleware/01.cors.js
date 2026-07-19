@@ -31,10 +31,7 @@ let cachedAllowlist = null
 function buildAllowlist() {
   if (cachedAllowlist) return cachedAllowlist
   const set = new Set()
-  const candidates = [
-    process.env.APP_PUBLIC_URL,
-    ...(process.env.ALLOWED_ORIGINS || '').split(','),
-  ]
+  const candidates = [process.env.APP_PUBLIC_URL, ...(process.env.ALLOWED_ORIGINS || '').split(',')]
   for (const raw of candidates) {
     if (!raw) continue
     const trimmed = String(raw).trim().replace(/\/$/, '')

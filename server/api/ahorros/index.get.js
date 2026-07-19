@@ -23,15 +23,19 @@ export default defineEventHandler(async (event) => {
   // Construir lista (mes, anio) de los últimos 6 meses para la serie.
   const periodos = []
   {
-    let m = mes, a = anio
+    let m = mes,
+      a = anio
     for (let i = 0; i < 6; i++) {
       periodos.unshift({ mes: m, anio: a })
       m--
-      if (m === 0) { m = 12; a-- }
+      if (m === 0) {
+        m = 12
+        a--
+      }
     }
   }
   const serieCond = or(
-    ...periodos.map(p => and(eq(ahorros.mes, p.mes), eq(ahorros.anio, p.anio)))
+    ...periodos.map((p) => and(eq(ahorros.mes, p.mes), eq(ahorros.anio, p.anio))),
   )
 
   // Disparar todas las queries en paralelo. Antes había 8 round-trips
@@ -65,21 +69,13 @@ export default defineEventHandler(async (event) => {
       })
       .from(ahorros)
       .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
-      .where(and(
-        eq(ahorros.usuarioId, usuarioId),
-        eq(ahorros.mes, mes),
-        eq(ahorros.anio, anio),
-      ))
+      .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .orderBy(desc(ahorros.fecha)),
 
     db
       .select({ total: sql`COALESCE(SUM(${ahorros.monto}), 0)` })
       .from(ahorros)
-      .where(and(
-        eq(ahorros.usuarioId, usuarioId),
-        eq(ahorros.mes, mes),
-        eq(ahorros.anio, anio),
-      )),
+      .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio))),
 
     db
       .select({ total: sql`COALESCE(SUM(${ahorros.monto}), 0)` })
@@ -96,31 +92,26 @@ export default defineEventHandler(async (event) => {
       })
       .from(ahorros)
       .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
-      .where(and(
-        eq(ahorros.usuarioId, usuarioId),
-        eq(ahorros.mes, mes),
-        eq(ahorros.anio, anio),
-      ))
+      .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .groupBy(ahorros.medioAhorroId, mediosAhorro.nombre, mediosAhorro.icono, mediosAhorro.color),
 
     db
       .select()
       .from(metasAhorro)
-      .where(and(
-        eq(metasAhorro.usuarioId, usuarioId),
-        eq(metasAhorro.tipo, 'mensual'),
-        eq(metasAhorro.mes, mes),
-        eq(metasAhorro.anio, anio),
-      ))
+      .where(
+        and(
+          eq(metasAhorro.usuarioId, usuarioId),
+          eq(metasAhorro.tipo, 'mensual'),
+          eq(metasAhorro.mes, mes),
+          eq(metasAhorro.anio, anio),
+        ),
+      )
       .limit(1),
 
     db
       .select()
       .from(metasAhorro)
-      .where(and(
-        eq(metasAhorro.usuarioId, usuarioId),
-        eq(metasAhorro.tipo, 'global'),
-      ))
+      .where(and(eq(metasAhorro.usuarioId, usuarioId), eq(metasAhorro.tipo, 'global')))
       .limit(1),
 
     db
@@ -146,17 +137,17 @@ export default defineEventHandler(async (event) => {
   for (const row of serie6Raw) {
     serieMap.set(`${row.anio}-${row.mes}`, parseFloat(row.total))
   }
-  const serie6Meses = periodos.map(p => ({
+  const serie6Meses = periodos.map((p) => ({
     mes: p.mes,
     anio: p.anio,
     total: serieMap.get(`${p.anio}-${p.mes}`) ?? 0,
   }))
 
   return {
-    ahorros: ahorrosMes.map(a => ({ ...a, monto: parseFloat(a.monto) })),
+    ahorros: ahorrosMes.map((a) => ({ ...a, monto: parseFloat(a.monto) })),
     totalMes,
     totalGlobal,
-    porMedio: porMedioRaw.map(p => ({
+    porMedio: porMedioRaw.map((p) => ({
       ...p,
       total: parseFloat(p.total),
     })),

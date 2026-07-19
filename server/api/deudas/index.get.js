@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     .limit(limit)
     .offset(offset)
 
-  return deudasRaw.map(d => ({
+  return deudasRaw.map((d) => ({
     ...d,
     montoOriginal: parseFloat(d.montoOriginal),
     montoPendiente: parseFloat(d.montoPendiente),

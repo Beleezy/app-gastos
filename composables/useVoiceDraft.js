@@ -3,8 +3,24 @@
  * Extrae la lógica de draft/confirmación de registro.vue.
  */
 export function useVoiceDraft() {
-  const { isListening, transcript, error: voiceError, isSupported, startListening, continueListening, stopListening, resetTranscript } = useVoiceRecognition()
-  const { isParsing, parsedExpenses, error: parseError, retryStatus, parseVoiceText, clearParsed } = useLLMParser()
+  const {
+    isListening,
+    transcript,
+    error: voiceError,
+    isSupported,
+    startListening,
+    continueListening,
+    stopListening,
+    resetTranscript,
+  } = useVoiceRecognition()
+  const {
+    isParsing,
+    parsedExpenses,
+    error: parseError,
+    retryStatus,
+    parseVoiceText,
+    clearParsed,
+  } = useLLMParser()
 
   const showConfirmacion = ref(false)
   const lastTranscript = ref('')
@@ -78,14 +94,28 @@ export function useVoiceDraft() {
 
   return {
     // voice recognition state
-    isListening, transcript, voiceError, isSupported,
+    isListening,
+    transcript,
+    voiceError,
+    isSupported,
     // draft state
-    hasDraft, showConfirmacion, lastTranscript,
+    hasDraft,
+    showConfirmacion,
+    lastTranscript,
     // LLM parser state
-    isParsing, parsedExpenses, parseError, retryStatus,
+    isParsing,
+    parsedExpenses,
+    parseError,
+    retryStatus,
     // handlers
-    onStartListening, onStopListening, onContinueListening,
-    onSendDraft, onDiscardDraft, onOverwriteDraft,
-    onUpdateTranscript, reintentarParse, cerrarConfirmacion,
+    onStartListening,
+    onStopListening,
+    onContinueListening,
+    onSendDraft,
+    onDiscardDraft,
+    onOverwriteDraft,
+    onUpdateTranscript,
+    reintentarParse,
+    cerrarConfirmacion,
   }
 }

@@ -2,8 +2,19 @@
   <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
     <!-- Header -->
     <div class="flex items-center gap-2 mb-1">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-4 h-4 text-blue-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
       </svg>
       <label class="text-sm font-medium text-theme-text flex-1">Google Calendar</label>
       <span
@@ -22,7 +33,8 @@
     </div>
 
     <p v-if="!estado.conectado && !estado.loading" class="text-xs text-theme-text-sec mb-3">
-      Sincroniza tus gastos planificados con tu calendario para recibir recordatorios el dia que toca pagar.
+      Sincroniza tus gastos planificados con tu calendario para recibir recordatorios el dia que
+      toca pagar.
     </p>
 
     <!-- Loading -->
@@ -46,7 +58,9 @@
         class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300"
       >
         <p class="font-semibold mb-1">Conexion expirada</p>
-        <p class="mb-2">Tu acceso a Google Calendar caduco. Reconecta para reanudar la sincronizacion.</p>
+        <p class="mb-2">
+          Tu acceso a Google Calendar caduco. Reconecta para reanudar la sincronizacion.
+        </p>
         <button
           class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-xs font-semibold transition-colors"
           @click="onConectar"
@@ -56,7 +70,9 @@
       </div>
 
       <div class="text-xs text-theme-text-sec">
-        <p>Calendario: <span class="text-theme-text">{{ estado.calendarNombre }}</span></p>
+        <p>
+          Calendario: <span class="text-theme-text">{{ estado.calendarNombre }}</span>
+        </p>
         <p>Ultima sync: {{ ultimaSyncTexto }}</p>
       </div>
 
@@ -106,7 +122,8 @@
 </template>
 
 <script setup>
-const { estado, fetchEstado, conectar, desconectar, resincronizar, actualizarRecordatorios } = useGoogleCalendar()
+const { estado, fetchEstado, conectar, desconectar, resincronizar, actualizarRecordatorios } =
+  useGoogleCalendar()
 const toast = useToast()
 const route = useRoute()
 const router = useRouter()
@@ -141,7 +158,9 @@ async function onResincronizar() {
   sincronizando.value = true
   try {
     const r = await resincronizar()
-    toast.success(`Sincronizado: ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados`)
+    toast.success(
+      `Sincronizado: ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados`,
+    )
   } catch (e) {
     toast.error('Error al sincronizar: ' + (e?.message || e))
   } finally {

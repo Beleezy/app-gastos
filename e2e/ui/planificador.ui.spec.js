@@ -39,5 +39,4 @@ test.describe('Planificador — UI', () => {
       expect(labelNuevo).not.toBe(labelInicial)
     })
   })
-
 })

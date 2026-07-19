@@ -5,7 +5,10 @@ import { mergePersonas } from '../../../services/deudas.service.js'
 
 const bodySchema = z.object({
   destinoId: z.union([z.string(), z.number()]),
-  origenIds: z.array(z.union([z.string(), z.number()])).min(1).max(20),
+  origenIds: z
+    .array(z.union([z.string(), z.number()]))
+    .min(1)
+    .max(20),
 })
 
 export default defineEventHandler(async (event) => {

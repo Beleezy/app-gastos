@@ -32,10 +32,12 @@ export default defineEventHandler(async (event) => {
     .from(solicitudesVinculo)
     .innerJoin(usuarios, eq(usuarios.id, solicitudesVinculo.remitenteId))
     .innerJoin(personasEntidades, eq(personasEntidades.id, solicitudesVinculo.personaEntidadId))
-    .where(and(
-      eq(solicitudesVinculo.destinatarioEmail, usuario.email.toLowerCase()),
-      eq(solicitudesVinculo.estado, 'pendiente')
-    ))
+    .where(
+      and(
+        eq(solicitudesVinculo.destinatarioEmail, usuario.email.toLowerCase()),
+        eq(solicitudesVinculo.estado, 'pendiente'),
+      ),
+    )
     .orderBy(solicitudesVinculo.createdAt)
 
   return solicitudes

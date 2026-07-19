@@ -33,7 +33,11 @@ export default defineEventHandler(async (event) => {
 
   let medio = null
   if (ahorro.medioAhorroId) {
-    ;[medio] = await db.select().from(mediosAhorro).where(eq(mediosAhorro.id, ahorro.medioAhorroId)).limit(1)
+    ;[medio] = await db
+      .select()
+      .from(mediosAhorro)
+      .where(eq(mediosAhorro.id, ahorro.medioAhorroId))
+      .limit(1)
   }
 
   return {

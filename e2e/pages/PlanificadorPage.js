@@ -12,14 +12,26 @@ export class PlanificadorPage extends BasePage {
   }
 
   // ─── Resumen ────────────────────────────────────────────
-  resumen() { return this.page.getByTestId(PLANIFICADOR.RESUMEN) }
-  montoPresupuesto() { return this.page.getByTestId(PLANIFICADOR.MONTO_PRESUPUESTO) }
-  montoAsignado() { return this.page.getByTestId(PLANIFICADOR.MONTO_ASIGNADO) }
-  montoSaldo() { return this.page.getByTestId(PLANIFICADOR.MONTO_SALDO) }
+  resumen() {
+    return this.page.getByTestId(PLANIFICADOR.RESUMEN)
+  }
+  montoPresupuesto() {
+    return this.page.getByTestId(PLANIFICADOR.MONTO_PRESUPUESTO)
+  }
+  montoAsignado() {
+    return this.page.getByTestId(PLANIFICADOR.MONTO_ASIGNADO)
+  }
+  montoSaldo() {
+    return this.page.getByTestId(PLANIFICADOR.MONTO_SALDO)
+  }
 
   // ─── Lista planificados ─────────────────────────────────
-  lista() { return this.page.getByTestId(PLANIFICADOR.LISTA) }
-  items() { return this.page.getByTestId(PLANIFICADOR.ITEM) }
+  lista() {
+    return this.page.getByTestId(PLANIFICADOR.LISTA)
+  }
+  items() {
+    return this.page.getByTestId(PLANIFICADOR.ITEM)
+  }
 
   itemPorConcepto(texto) {
     return this.items().filter({ hasText: texto }).first()

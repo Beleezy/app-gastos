@@ -4,14 +4,14 @@ const FONT_SIZES = [
 ]
 
 const ACCENT_COLORS = [
-  { id: 'negro',   label: 'Negro',   color: '#6b7280', mode: 'dark' },
-  { id: 'azul',    label: 'Azul',    color: '#3b82f6', mode: 'dark' },
+  { id: 'negro', label: 'Negro', color: '#6b7280', mode: 'dark' },
+  { id: 'azul', label: 'Azul', color: '#3b82f6', mode: 'dark' },
   { id: 'celeste', label: 'Celeste', color: '#06b6d4', mode: 'dark' },
-  { id: 'morado',  label: 'Morado',  color: '#8b5cf6', mode: 'dark' },
-  { id: 'rosado',  label: 'Rosado',  color: '#ec4899', mode: 'light' },
-  { id: 'gris',    label: 'Gris',    color: '#78716c', mode: 'dark' },
+  { id: 'morado', label: 'Morado', color: '#8b5cf6', mode: 'dark' },
+  { id: 'rosado', label: 'Rosado', color: '#ec4899', mode: 'light' },
+  { id: 'gris', label: 'Gris', color: '#78716c', mode: 'dark' },
 
-  { id: 'blanco',  label: 'Blanco',  color: '#e2e8f0', mode: 'light' },
+  { id: 'blanco', label: 'Blanco', color: '#e2e8f0', mode: 'light' },
 ]
 
 export function useTheme() {
@@ -34,7 +34,7 @@ export function useTheme() {
 
   function applyAccent(id) {
     if (!import.meta.client) return
-    ACCENT_COLORS.forEach(c => {
+    ACCENT_COLORS.forEach((c) => {
       document.documentElement.classList.remove(`accent-${c.id}`)
     })
     document.documentElement.classList.add(`accent-${id}`)
@@ -42,13 +42,13 @@ export function useTheme() {
   }
 
   function modeFor(id) {
-    const c = ACCENT_COLORS.find(x => x.id === id)
+    const c = ACCENT_COLORS.find((x) => x.id === id)
     return c?.mode === 'light' ? false : true
   }
 
   function applyFontSize(id) {
     if (!import.meta.client) return
-    const size = FONT_SIZES.find(s => s.id === id) || FONT_SIZES[0]
+    const size = FONT_SIZES.find((s) => s.id === id) || FONT_SIZES[0]
     document.documentElement.style.fontSize = `${size.rootPx}px`
     localStorage.setItem('theme-font-size', id)
   }
@@ -122,5 +122,17 @@ export function useTheme() {
     applyColorblind(savedColorblind)
   }
 
-  return { isDark, toggleTheme, initTheme, accentColor, setAccentColor, ACCENT_COLORS, fontSize, setFontSize, FONT_SIZES, isColorblind, setColorblindMode }
+  return {
+    isDark,
+    toggleTheme,
+    initTheme,
+    accentColor,
+    setAccentColor,
+    ACCENT_COLORS,
+    fontSize,
+    setFontSize,
+    FONT_SIZES,
+    isColorblind,
+    setColorblindMode,
+  }
 }

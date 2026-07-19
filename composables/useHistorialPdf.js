@@ -26,20 +26,31 @@ export function useHistorialPdf() {
 
     doc.setFontSize(11)
     doc.setFont('helvetica', 'normal')
-    doc.text(`Persona: ${persona?.nombre || '-'}`, margin, y); y += 5
-    if (persona?.email) { doc.text(`Email: ${persona.email}`, margin, y); y += 5 }
-    if (persona?.telefono) { doc.text(`Teléfono: ${persona.telefono}`, margin, y); y += 5 }
+    doc.text(`Persona: ${persona?.nombre || '-'}`, margin, y)
+    y += 5
+    if (persona?.email) {
+      doc.text(`Email: ${persona.email}`, margin, y)
+      y += 5
+    }
+    if (persona?.telefono) {
+      doc.text(`Teléfono: ${persona.telefono}`, margin, y)
+      y += 5
+    }
 
     const totalPendiente = deudas.reduce((s, d) => s + (parseFloat(d.montoPendiente) || 0), 0)
     const totalPagos = pagos.reduce((s, p) => s + (parseFloat(p.montoPagado) || 0), 0)
 
     y += 3
     doc.setFont('helvetica', 'bold')
-    doc.text('Resumen', margin, y); y += 6
+    doc.text('Resumen', margin, y)
+    y += 6
     doc.setFont('helvetica', 'normal')
-    doc.text(`Total pendiente: ${formatCurrency(totalPendiente)}`, margin, y); y += 5
-    doc.text(`Total pagado: ${formatCurrency(totalPagos)}`, margin, y); y += 5
-    doc.text(`Movimientos: ${deudas.length} deudas · ${pagos.length} pagos`, margin, y); y += 8
+    doc.text(`Total pendiente: ${formatCurrency(totalPendiente)}`, margin, y)
+    y += 5
+    doc.text(`Total pagado: ${formatCurrency(totalPagos)}`, margin, y)
+    y += 5
+    doc.text(`Movimientos: ${deudas.length} deudas · ${pagos.length} pagos`, margin, y)
+    y += 8
 
     function checkPage() {
       if (y > doc.internal.pageSize.getHeight() - margin - 10) {
@@ -50,7 +61,8 @@ export function useHistorialPdf() {
 
     if (deudas.length > 0) {
       doc.setFont('helvetica', 'bold')
-      doc.text('Deudas', margin, y); y += 6
+      doc.text('Deudas', margin, y)
+      y += 6
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
       for (const d of deudas) {
@@ -67,7 +79,8 @@ export function useHistorialPdf() {
       checkPage()
       doc.setFontSize(11)
       doc.setFont('helvetica', 'bold')
-      doc.text('Pagos', margin, y); y += 6
+      doc.text('Pagos', margin, y)
+      y += 6
       doc.setFont('helvetica', 'normal')
       doc.setFontSize(10)
       for (const p of pagos) {

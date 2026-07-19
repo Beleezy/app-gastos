@@ -28,24 +28,24 @@ npm run dev           # http://localhost:3000
 
 Críticas (la app no arranca correctamente sin estas):
 
-| Variable | Descripción |
-|---|---|
-| `DATABASE_URL` | PostgreSQL (Supabase) connection string. |
-| `SUPABASE_URL` | URL del proyecto Supabase. |
-| `SUPABASE_ANON_KEY` | Public anon key (cliente). |
+| Variable            | Descripción                              |
+| ------------------- | ---------------------------------------- |
+| `DATABASE_URL`      | PostgreSQL (Supabase) connection string. |
+| `SUPABASE_URL`      | URL del proyecto Supabase.               |
+| `SUPABASE_ANON_KEY` | Public anon key (cliente).               |
 
 Recomendadas (algunas features quedan deshabilitadas si faltan):
 
-| Variable | Para qué sirve |
-|---|---|
-| `GEMINI_API_KEY` | Endpoints de voz/foto (`/api/voz/parse*`). |
-| `GEMINI_MODEL` | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`. |
-| `GEMINI_MAX_RETRIES` | Reintentos por modelo. Default `3`. |
-| `GEMINI_RATE_LIMITS` | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`. |
-| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza. |
-| `LLM_CACHE_TTL_SECONDS` | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h). |
-| `CRON_SECRET` | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM). |
-| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas. |
+| Variable                    | Para qué sirve                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`            | Endpoints de voz/foto (`/api/voz/parse*`).                                                               |
+| `GEMINI_MODEL`              | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`. |
+| `GEMINI_MAX_RETRIES`        | Reintentos por modelo. Default `3`.                                                                      |
+| `GEMINI_RATE_LIMITS`        | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`.                                                 |
+| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza.                   |
+| `LLM_CACHE_TTL_SECONDS`     | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h).                                 |
+| `CRON_SECRET`               | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM).                 |
+| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas.                                                                   |
 
 El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WARN/ERROR si falta alguna.
 
@@ -53,24 +53,24 @@ El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WA
 
 ## Scripts
 
-| Script | Acción |
-|---|---|
-| `npm run dev` | Servidor de desarrollo. |
-| `npm run build` | Build de producción. |
-| `npm run preview` | Preview local del build. |
-| `npm test` | Suite Vitest (unit). |
-| `npm run test:watch` | Vitest en modo watch. |
-| `npm run test:coverage` | Cobertura con `@vitest/coverage-v8`. |
-| `npm run lint` | ESLint flat config. |
-| `npm run lint:fix` | ESLint con `--fix`. |
-| `npm run format` | Prettier `--write`. |
-| `npm run format:check` | Prettier verificación. |
-| `npm run db:generate` | Generar migración Drizzle. |
-| `npm run db:apply` | Aplicar migraciones SQL pendientes (tabla de control `_migraciones_aplicadas`). |
-| `npm run db:push` | Aplicar schema a la DB (solo dev exploratorio; en flujo normal usar `db:apply`). |
-| `npm run db:studio` | Drizzle Studio (UI). |
-| `npm run db:seed` | Cargar datos iniciales. |
-| `npm run db:seed:test` | Seed datos de prueba. |
+| Script                  | Acción                                                                           |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `npm run dev`           | Servidor de desarrollo.                                                          |
+| `npm run build`         | Build de producción.                                                             |
+| `npm run preview`       | Preview local del build.                                                         |
+| `npm test`              | Suite Vitest (unit).                                                             |
+| `npm run test:watch`    | Vitest en modo watch.                                                            |
+| `npm run test:coverage` | Cobertura con `@vitest/coverage-v8`.                                             |
+| `npm run lint`          | ESLint flat config.                                                              |
+| `npm run lint:fix`      | ESLint con `--fix`.                                                              |
+| `npm run format`        | Prettier `--write`.                                                              |
+| `npm run format:check`  | Prettier verificación.                                                           |
+| `npm run db:generate`   | Generar migración Drizzle.                                                       |
+| `npm run db:apply`      | Aplicar migraciones SQL pendientes (tabla de control `_migraciones_aplicadas`).  |
+| `npm run db:push`       | Aplicar schema a la DB (solo dev exploratorio; en flujo normal usar `db:apply`). |
+| `npm run db:studio`     | Drizzle Studio (UI).                                                             |
+| `npm run db:seed`       | Cargar datos iniciales.                                                          |
+| `npm run db:seed:test`  | Seed datos de prueba.                                                            |
 
 ---
 
@@ -144,9 +144,9 @@ si la BD quedó desfasada — mantener la lista al añadir columnas críticas.
 
 `.github/workflows/db-backup.yml` hace `pg_dump` semanal cifrado (GPG simétrico) y lo sube como
 artifact con 90 días de retención. Requiere secrets `BACKUP_DATABASE_URL` (cadena **directa** o
-session pooler — el pooler de transacción del puerto 6543 no sirve para pg_dump) y
+session pooler — el pooler de transacción del puerto 6543 no sirve para pg*dump) y
 `BACKUP_PASSPHRASE` (guardarla fuera del repo; sin ella el backup es irrecuperable). Se puede
-disparar a mano con *workflow_dispatch* para un backup pre-migración.
+disparar a mano con \_workflow_dispatch* para un backup pre-migración.
 
 ### Uptime y keep-alive
 

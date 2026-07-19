@@ -1,6 +1,11 @@
 <template>
-  <div v-if="puntos.length >= 2" class="bg-theme-card rounded-xl p-3 border border-theme-border mb-4">
-    <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-2">Evolución del saldo</p>
+  <div
+    v-if="puntos.length >= 2"
+    class="bg-theme-card rounded-xl p-3 border border-theme-border mb-4"
+  >
+    <p class="text-[0.6875rem] text-theme-text-sec uppercase tracking-wider font-semibold mb-2">
+      Evolución del saldo
+    </p>
 
     <svg :viewBox="`0 0 ${W} ${H}`" class="w-full" :height="H" preserveAspectRatio="none">
       <!-- Área bajo la curva -->
@@ -21,20 +26,15 @@
         stroke-linejoin="round"
       />
       <!-- Puntos -->
-      <circle
-        v-for="(p, i) in puntos"
-        :key="i"
-        :cx="p.x"
-        :cy="p.y"
-        r="2.5"
-        :fill="color"
-      />
+      <circle v-for="(p, i) in puntos" :key="i" :cx="p.x" :cy="p.y" r="2.5" :fill="color" />
     </svg>
 
     <!-- Etiquetas extremos -->
     <div class="flex items-center justify-between mt-1">
       <span class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaInicio }}</span>
-      <span class="text-[0.6875rem] text-theme-text-sec">{{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}</span>
+      <span class="text-[0.6875rem] text-theme-text-sec"
+        >{{ currencySymbol }}&nbsp;{{ formatMonto(montoActual) }}</span
+      >
       <span class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaFin }}</span>
     </div>
   </div>
@@ -62,8 +62,8 @@ const puntos = computed(() => {
 
   // Aplanar todos los pagos individuales
   const pagosFlat = props.pagos
-    .flatMap(g => g.detalles || [])
-    .filter(d => d.fechaPago)
+    .flatMap((g) => g.detalles || [])
+    .filter((d) => d.fechaPago)
     .sort((a, b) => a.fechaPago.localeCompare(b.fechaPago))
 
   if (pagosFlat.length === 0) return []
@@ -75,7 +75,7 @@ const puntos = computed(() => {
     serie.push({ fecha: p.fechaPago, monto: pendiente })
   }
 
-  const maxM = Math.max(...serie.map(s => s.monto)) || 1
+  const maxM = Math.max(...serie.map((s) => s.monto)) || 1
   const n = serie.length
 
   return serie.map((s, i) => ({
@@ -86,17 +86,17 @@ const puntos = computed(() => {
   }))
 })
 
-const polylinePoints = computed(() =>
-  puntos.value.map(p => `${p.x},${p.y}`).join(' ')
-)
+const polylinePoints = computed(() => puntos.value.map((p) => `${p.x},${p.y}`).join(' '))
 
 const areaPath = computed(() => {
   if (puntos.value.length < 2) return ''
   const pts = puntos.value
   const bottom = H - PAD
-  return `M ${pts[0].x},${bottom} ` +
-    pts.map(p => `L ${p.x},${p.y}`).join(' ') +
+  return (
+    `M ${pts[0].x},${bottom} ` +
+    pts.map((p) => `L ${p.x},${p.y}`).join(' ') +
     ` L ${pts[pts.length - 1].x},${bottom} Z`
+  )
 })
 
 function formatFechaCorta(fecha) {
@@ -106,9 +106,9 @@ function formatFechaCorta(fecha) {
 }
 
 const etiquetaInicio = computed(() =>
-  puntos.value.length > 0 ? formatFechaCorta(puntos.value[0].fecha) : ''
+  puntos.value.length > 0 ? formatFechaCorta(puntos.value[0].fecha) : '',
 )
 const etiquetaFin = computed(() =>
-  puntos.value.length > 0 ? formatFechaCorta(puntos.value[puntos.value.length - 1].fecha) : ''
+  puntos.value.length > 0 ? formatFechaCorta(puntos.value[puntos.value.length - 1].fecha) : '',
 )
 </script>

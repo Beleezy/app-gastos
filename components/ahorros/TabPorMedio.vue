@@ -25,31 +25,46 @@
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-2">
-            <span class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug min-w-0">{{ item.medioNombre || 'Sin medio' }}</span>
-            <span class="text-sm font-bold text-emerald-400 whitespace-nowrap shrink-0">+{{ currencySymbol }}&nbsp;{{ formatMonto(item.total) }}</span>
+            <span
+              class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug min-w-0"
+              >{{ item.medioNombre || 'Sin medio' }}</span
+            >
+            <span class="text-sm font-bold text-emerald-400 whitespace-nowrap shrink-0"
+              >+{{ currencySymbol }}&nbsp;{{ formatMonto(item.total) }}</span
+            >
           </div>
           <div class="mt-1.5 relative w-full h-1.5 bg-theme-input rounded-full overflow-hidden">
             <div
               class="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
-              :style="{ width: porcentaje(item.total) + '%', backgroundColor: item.medioColor || '#6b7280' }"
+              :style="{
+                width: porcentaje(item.total) + '%',
+                backgroundColor: item.medioColor || '#6b7280',
+              }"
             ></div>
           </div>
           <p class="text-[0.6875rem] text-theme-text-muted mt-1">
-            {{ item.registros.length }} registro{{ item.registros.length !== 1 ? 's' : '' }} · {{ porcentaje(item.total).toFixed(0) }}%
+            {{ item.registros.length }} registro{{ item.registros.length !== 1 ? 's' : '' }} ·
+            {{ porcentaje(item.total).toFixed(0) }}%
           </p>
         </div>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="w-4 h-4 text-theme-text-muted transition-transform duration-200 shrink-0"
           :class="expandidos.has(keyOf(item)) ? 'rotate-180' : ''"
-          fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
         >
           <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
       <Transition name="expand">
-        <div v-if="expandidos.has(keyOf(item))" class="border-t border-theme-border px-2 py-2 space-y-1.5">
+        <div
+          v-if="expandidos.has(keyOf(item))"
+          class="border-t border-theme-border px-2 py-2 space-y-1.5"
+        >
           <AhorrosAhorroItemSwipe
             v-for="a in item.registros"
             :key="a.id"
@@ -88,15 +103,18 @@ function toggle(item) {
 </script>
 
 <style scoped>
-.expand-enter-active, .expand-leave-active {
+.expand-enter-active,
+.expand-leave-active {
   transition: all 0.2s ease;
   overflow: hidden;
 }
-.expand-enter-from, .expand-leave-to {
+.expand-enter-from,
+.expand-leave-to {
   max-height: 0;
   opacity: 0;
 }
-.expand-enter-to, .expand-leave-from {
+.expand-enter-to,
+.expand-leave-from {
   max-height: 2000px;
   opacity: 1;
 }

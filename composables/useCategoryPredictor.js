@@ -17,9 +17,28 @@ const STORAGE_KEY = 'gastos.categoryHints.v1'
 const MAX_VARIANTS = 5
 const MAX_KEYS = 500
 const STOPWORDS = new Set([
-  'el', 'la', 'los', 'las', 'un', 'una', 'unos', 'unas',
-  'de', 'del', 'al', 'a', 'en', 'por', 'para', 'con',
-  'y', 'o', 'pero', 'mi', 'tu', 'su',
+  'el',
+  'la',
+  'los',
+  'las',
+  'un',
+  'una',
+  'unos',
+  'unas',
+  'de',
+  'del',
+  'al',
+  'a',
+  'en',
+  'por',
+  'para',
+  'con',
+  'y',
+  'o',
+  'pero',
+  'mi',
+  'tu',
+  'su',
 ])
 
 function normalizar(s) {

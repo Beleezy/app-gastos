@@ -5,8 +5,8 @@
 export function usePhotoDraft() {
   const { apiFetch } = useApiFetch()
 
-  const photoPreview = ref(null)      // data URL for preview
-  const photoBase64 = ref(null)       // base64 data to send to API
+  const photoPreview = ref(null) // data URL for preview
+  const photoBase64 = ref(null) // base64 data to send to API
   const showPhotoPreview = ref(false)
   const showPhotoConfirmacion = ref(false)
 

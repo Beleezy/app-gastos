@@ -47,7 +47,16 @@ export function useSuperadmin() {
   }
 
   return {
-    me, esSuperadmin, intenciones, pendientes, usuarios, cargando,
-    fetchMe, fetchAcceso, aprobar, rechazar, setPermitidoUsuario,
+    me,
+    esSuperadmin,
+    intenciones,
+    pendientes,
+    usuarios,
+    cargando,
+    fetchMe,
+    fetchAcceso,
+    aprobar,
+    rechazar,
+    setPermitidoUsuario,
   }
 }

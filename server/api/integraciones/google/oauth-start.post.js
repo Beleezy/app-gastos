@@ -8,7 +8,10 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
 
   if (!config.googleOAuthClientId || !config.googleOAuthRedirectUri) {
-    throw createError({ statusCode: 500, message: 'Google OAuth no esta configurado en el servidor' })
+    throw createError({
+      statusCode: 500,
+      message: 'Google OAuth no esta configurado en el servidor',
+    })
   }
 
   const state = signState({ usuarioId })

@@ -17,12 +17,14 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select()
     .from(categorias)
-    .where(or(
-      eq(categorias.usuarioId, usuarioId),
-      and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
-    ))
+    .where(
+      or(
+        eq(categorias.usuarioId, usuarioId),
+        and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
+      ),
+    )
     .orderBy(categorias.nombre)
 
-  const propias = cats.filter(c => c.usuarioId === usuarioId)
+  const propias = cats.filter((c) => c.usuarioId === usuarioId)
   return propias.length > 0 ? propias : cats
 })

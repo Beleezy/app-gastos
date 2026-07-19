@@ -36,7 +36,8 @@ export function calcularSaldoTrasPago({ pendienteActual, montoPago } = {}) {
  * @param {'fifo'|'lifo'} [input.estrategia='fifo']
  */
 export function distribuirPagoGlobal({ deudas, monto, estrategia = 'fifo' } = {}) {
-  if (!Array.isArray(deudas) || deudas.length === 0) return { asignaciones: [], sobrante: monto || 0 }
+  if (!Array.isArray(deudas) || deudas.length === 0)
+    return { asignaciones: [], sobrante: monto || 0 }
   const total = parseFloat(monto)
   if (!Number.isFinite(total) || total <= 0) return { asignaciones: [], sobrante: 0 }
 

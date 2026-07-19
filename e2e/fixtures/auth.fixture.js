@@ -5,10 +5,8 @@
 
 import { test as base, expect } from '@playwright/test'
 
-export const E2E_USER_ID =
-  process.env.E2E_USER_ID || '00000000-0000-0000-0000-000000000101'
-export const E2E_USER_EMAIL =
-  process.env.E2E_USER_EMAIL || 'demo1@test.local'
+export const E2E_USER_ID = process.env.E2E_USER_ID || '00000000-0000-0000-0000-000000000101'
+export const E2E_USER_EMAIL = process.env.E2E_USER_EMAIL || 'demo1@test.local'
 
 export const test = base.extend({
   // eslint-disable-next-line no-empty-pattern -- firma de fixture de Playwright
@@ -16,7 +14,7 @@ export const test = base.extend({
     if (process.env.DEV_AUTH_BYPASS !== '1') {
       throw new Error(
         'DEV_AUTH_BYPASS=1 es requerido para tests UI E2E. ' +
-        'Revisa playwright.config.js y la variable de entorno.'
+          'Revisa playwright.config.js y la variable de entorno.',
       )
     }
     await use({

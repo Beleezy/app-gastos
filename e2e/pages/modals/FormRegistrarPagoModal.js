@@ -12,9 +12,15 @@ export class FormRegistrarPagoModal {
     await this.root.waitFor({ state: 'visible', timeout: 5000 })
   }
 
-  inputFechaPago() { return this.root.getByTestId(PLANIFICADOR.INPUT_FECHA_PAGO) }
-  inputNotasPago() { return this.root.getByTestId(PLANIFICADOR.INPUT_NOTAS_PAGO) }
-  btnConfirmar() { return this.root.getByTestId(PLANIFICADOR.BTN_CONFIRMAR_PAGO) }
+  inputFechaPago() {
+    return this.root.getByTestId(PLANIFICADOR.INPUT_FECHA_PAGO)
+  }
+  inputNotasPago() {
+    return this.root.getByTestId(PLANIFICADOR.INPUT_NOTAS_PAGO)
+  }
+  btnConfirmar() {
+    return this.root.getByTestId(PLANIFICADOR.BTN_CONFIRMAR_PAGO)
+  }
 
   async registrar({ fecha, notas } = {}) {
     if (fecha !== undefined) {

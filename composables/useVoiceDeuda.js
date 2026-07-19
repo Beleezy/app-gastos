@@ -1,8 +1,22 @@
 export function useVoiceDeuda() {
-  const { isListening, transcript, startListening, continueListening, stopListening, resetTranscript } = useVoiceRecognition()
+  const {
+    isListening,
+    transcript,
+    startListening,
+    continueListening,
+    stopListening,
+    resetTranscript,
+  } = useVoiceRecognition()
 
   const { apiFetch } = useApiFetch()
-  const { createDeuda, fetchResumen, fetchPersonas, fetchDeudasPersona, fetchPagosPersona, personaSeleccionada } = useDeudas()
+  const {
+    createDeuda,
+    fetchResumen,
+    fetchPersonas,
+    fetchDeudasPersona,
+    fetchPagosPersona,
+    personaSeleccionada,
+  } = useDeudas()
 
   const showVozOverlay = useState('voz-deuda-overlay', () => false)
   const hasDraft = useState('voz-deuda-draft', () => false)
@@ -107,12 +121,14 @@ export function useVoiceDeuda() {
     try {
       const result = await apiFetch('/api/voz/parse', {
         method: 'POST',
-        body: { texto: vozTranscript.value, modo: 'deudas' }
+        body: { texto: vozTranscript.value, modo: 'deudas' },
       })
       deudasParseadas.value = result.deudas || []
       pagosParseados.value = result.pagos || []
     } catch (e) {
-      vozError.value = e.data?.message || 'Error al interpretar el audio. Intenta de nuevo con frases claras como "Juan me debe 20 soles por almuerzo".'
+      vozError.value =
+        e.data?.message ||
+        'Error al interpretar el audio. Intenta de nuevo con frases claras como "Juan me debe 20 soles por almuerzo".'
     } finally {
       vozParsing.value = false
     }
@@ -146,9 +162,7 @@ export function useVoiceDeuda() {
       for (const p of pagosParseados.value) {
         const todasPersonas = await apiFetch('/api/deudas/personas')
         const nombreLower = p.persona.toLowerCase()
-        const personaMatch = todasPersonas.find(pe =>
-          pe.nombre.toLowerCase() === nombreLower
-        )
+        const personaMatch = todasPersonas.find((pe) => pe.nombre.toLowerCase() === nombreLower)
         if (personaMatch && personaMatch.totalPendiente > 0) {
           await apiFetch(`/api/deudas/personas/${personaMatch.id}/pago-global`, {
             method: 'POST',
@@ -156,7 +170,7 @@ export function useVoiceDeuda() {
               monto: p.monto,
               fecha: p.fecha || new Date().toISOString().split('T')[0],
               notas: p.notas || 'Pago registrado por voz',
-            }
+            },
           })
         }
       }

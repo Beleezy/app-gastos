@@ -6,11 +6,16 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-xs text-theme-text-sec">Original</p>
-          <p class="text-sm font-medium text-theme-text-muted">{{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}</p>
+          <p class="text-sm font-medium text-theme-text-muted">
+            {{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoOriginal) }}
+          </p>
         </div>
         <div class="text-right">
           <p class="text-xs text-theme-text-sec">Pendiente</p>
-          <p class="text-sm font-semibold" :class="deuda.tipoDeuda === 'me_deben' ? 'text-emerald-400' : 'text-red-400'">
+          <p
+            class="text-sm font-semibold"
+            :class="deuda.tipoDeuda === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
+          >
             {{ currencySymbol }}&nbsp;{{ formatMonto(deuda.montoPendiente) }}
           </p>
         </div>
@@ -21,7 +26,9 @@
     <div>
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto del pago</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{
+          currencySymbol
+        }}</span>
         <input
           v-model="form.monto"
           type="number"
@@ -42,7 +49,7 @@
         <button
           v-if="deuda.montoPendiente > 1"
           class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
-          @click="form.monto = Math.round(deuda.montoPendiente / 2 * 100) / 100"
+          @click="form.monto = Math.round((deuda.montoPendiente / 2) * 100) / 100"
         >
           Mitad
         </button>
@@ -62,13 +69,19 @@
 
     <!-- Metodo de pago -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Metodo de pago <span class="text-theme-text-muted">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Metodo de pago <span class="text-theme-text-muted">(opcional)</span></label
+      >
       <div class="flex gap-2 flex-wrap">
         <button
           v-for="metodo in metodos"
           :key="metodo"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-input text-theme-text-sec border border-transparent'"
+          :class="
+            form.metodoPago === metodo
+              ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+              : 'bg-theme-input text-theme-text-sec border border-transparent'
+          "
           @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
         >
           {{ metodo }}
@@ -78,7 +91,9 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Notas <span class="text-theme-text-muted">(opcional)</span></label
+      >
       <textarea
         v-model="form.notas"
         rows="2"
@@ -93,14 +108,35 @@
 
       <button
         class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-        :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
+        :class="
+          saving
+            ? 'bg-theme-accent cursor-not-allowed'
+            : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'
+        "
         :disabled="saving"
         data-testid="btn-confirmar-pago"
         @click="guardar"
       >
-        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          v-if="saving"
+          class="animate-spin w-4 h-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
         {{ saving ? 'Registrando...' : 'Registrar pago' }}
       </button>

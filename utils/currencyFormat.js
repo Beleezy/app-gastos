@@ -35,12 +35,7 @@ export function getSymbol(moneda = 'PEN') {
  * @param {string} [opts.separadorDecimales='.']
  */
 export function formatMonto(valor, opts = {}) {
-  const {
-    moneda = 'PEN',
-    signo = false,
-    separadorMiles = ',',
-    separadorDecimales = '.',
-  } = opts
+  const { moneda = 'PEN', signo = false, separadorMiles = ',', separadorDecimales = '.' } = opts
 
   const n = parseFloat(valor)
   if (!Number.isFinite(n)) return `${getSymbol(moneda)} 0${separadorDecimales}00`
@@ -51,7 +46,7 @@ export function formatMonto(valor, opts = {}) {
   const enteroConMiles = entero.replace(/\B(?=(\d{3})+(?!\d))/g, separadorMiles)
 
   const sym = getSymbol(moneda)
-  const prefix = signo ? (n >= 0 ? '+' : '-') : (n < 0 ? '-' : '')
+  const prefix = signo ? (n >= 0 ? '+' : '-') : n < 0 ? '-' : ''
   return `${prefix}${sym} ${enteroConMiles}${separadorDecimales}${dec}`
 }
 

@@ -10,20 +10,40 @@
  */
 
 const PALETA_DEFAULT = [
-  '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#ec4899', '#06b6d4', '#84cc16', '#f97316', '#6366f1',
+  '#3b82f6',
+  '#10b981',
+  '#f59e0b',
+  '#ef4444',
+  '#8b5cf6',
+  '#ec4899',
+  '#06b6d4',
+  '#84cc16',
+  '#f97316',
+  '#6366f1',
 ]
 
 const PALETA_DALTONICO = [
-  '#0072B2', '#009E73', '#F0E442', '#D55E00', '#CC79A7',
-  '#56B4E9', '#E69F00', '#000000', '#999999', '#0072B2',
+  '#0072B2',
+  '#009E73',
+  '#F0E442',
+  '#D55E00',
+  '#CC79A7',
+  '#56B4E9',
+  '#E69F00',
+  '#000000',
+  '#999999',
+  '#0072B2',
 ]
 
 function hexToRgb(hex) {
   const clean = hex.replace('#', '')
-  const expanded = clean.length === 3
-    ? clean.split('').map((c) => c + c).join('')
-    : clean
+  const expanded =
+    clean.length === 3
+      ? clean
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : clean
   const num = parseInt(expanded, 16)
   if (Number.isNaN(num)) return null
   return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 }

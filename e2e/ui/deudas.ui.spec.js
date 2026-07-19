@@ -53,7 +53,7 @@ test.describe('Deudas — UI', () => {
       expect(r.ok()).toBeTruthy()
       const data = await r.json()
       const lista = Array.isArray(data) ? data : data?.deudas || []
-      const creada = lista.find(d => d.concepto === concepto)
+      const creada = lista.find((d) => d.concepto === concepto)
       expect(creada, `debe existir deuda "${concepto}"`).toBeDefined()
       tracker.deudas.push(creada.id)
 

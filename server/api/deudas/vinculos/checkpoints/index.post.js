@@ -1,7 +1,12 @@
 import { db } from '../../../../utils/db.js'
 import { personasEntidades } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
-import { normalizarParPersonas, crearCheckpoint, registrarAuditoria, getNombreDisplay } from '../../../../utils/vinculos.js'
+import {
+  normalizarParPersonas,
+  crearCheckpoint,
+  registrarAuditoria,
+  getNombreDisplay,
+} from '../../../../utils/vinculos.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -17,10 +22,7 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select()
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, personaId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(and(eq(personasEntidades.id, personaId), eq(personasEntidades.usuarioId, usuarioId)))
     .limit(1)
 
   if (!persona) {
@@ -54,7 +56,11 @@ export default defineEventHandler(async (event) => {
       usuarioId,
       accion: 'checkpoint_creado',
       descripcion: descAuditoria,
-      datos: { checkpointId: cp.id, tipo: 'actual', descripcionUsuario: descripcion?.trim() || null },
+      datos: {
+        checkpointId: cp.id,
+        tipo: 'actual',
+        descripcionUsuario: descripcion?.trim() || null,
+      },
     })
 
     return cp

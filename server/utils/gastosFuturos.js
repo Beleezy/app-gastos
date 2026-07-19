@@ -1,6 +1,11 @@
 import { and, asc, desc, eq, inArray } from 'drizzle-orm'
 import { createError } from 'h3'
-import { categorias, gastosFuturos, gastosFuturosDetalles, gastosFuturosOpciones } from '../database/schema.js'
+import {
+  categorias,
+  gastosFuturos,
+  gastosFuturosDetalles,
+  gastosFuturosOpciones,
+} from '../database/schema.js'
 
 function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100
@@ -61,13 +66,13 @@ function fallbackAverage({ precioMinimo, precioMaximo, precioPromedio }) {
 
 function hasOptionContent(option) {
   return Boolean(
-    textOptional(option?.nombre)
-    || textOptional(option?.referenciaUrl)
-    || textOptional(option?.imagenUrl)
-    || textOptional(option?.notas)
-    || option?.precioMinimo !== null && option?.precioMinimo !== undefined
-    || option?.precioMaximo !== null && option?.precioMaximo !== undefined
-    || option?.precioPromedio !== null && option?.precioPromedio !== undefined
+    textOptional(option?.nombre) ||
+    textOptional(option?.referenciaUrl) ||
+    textOptional(option?.imagenUrl) ||
+    textOptional(option?.notas) ||
+    (option?.precioMinimo !== null && option?.precioMinimo !== undefined) ||
+    (option?.precioMaximo !== null && option?.precioMaximo !== undefined) ||
+    (option?.precioPromedio !== null && option?.precioPromedio !== undefined),
   )
 }
 
@@ -95,11 +100,26 @@ export function normalizeGastoFuturoPayload(body) {
       const opciones = opcionesBody
         .map((opcion, optionIndex) => {
           const nombreOpcion = textOptional(opcion?.nombre)
-          const referenciaUrl = urlOptional(opcion?.referenciaUrl, `El link de referencia de la opcion ${optionIndex + 1}`)
-          const imagenUrl = urlOptional(opcion?.imagenUrl, `La imagen de la opcion ${optionIndex + 1}`)
-          const precioMinimo = decimalOptional(opcion?.precioMinimo, `El precio minimo de la opcion ${optionIndex + 1}`)
-          const precioMaximo = decimalOptional(opcion?.precioMaximo, `El precio maximo de la opcion ${optionIndex + 1}`)
-          let precioPromedio = decimalOptional(opcion?.precioPromedio, `El precio promedio de la opcion ${optionIndex + 1}`)
+          const referenciaUrl = urlOptional(
+            opcion?.referenciaUrl,
+            `El link de referencia de la opcion ${optionIndex + 1}`,
+          )
+          const imagenUrl = urlOptional(
+            opcion?.imagenUrl,
+            `La imagen de la opcion ${optionIndex + 1}`,
+          )
+          const precioMinimo = decimalOptional(
+            opcion?.precioMinimo,
+            `El precio minimo de la opcion ${optionIndex + 1}`,
+          )
+          const precioMaximo = decimalOptional(
+            opcion?.precioMaximo,
+            `El precio maximo de la opcion ${optionIndex + 1}`,
+          )
+          let precioPromedio = decimalOptional(
+            opcion?.precioPromedio,
+            `El precio promedio de la opcion ${optionIndex + 1}`,
+          )
           const notasOpcion = textOptional(opcion?.notas)
 
           const normalized = {
@@ -115,11 +135,17 @@ export function normalizeGastoFuturoPayload(body) {
           if (!hasOptionContent(normalized)) return null
 
           if (!nombreOpcion) {
-            throw createError({ statusCode: 400, message: `La opcion ${optionIndex + 1} del detalle ${detalleIndex + 1} debe tener nombre` })
+            throw createError({
+              statusCode: 400,
+              message: `La opcion ${optionIndex + 1} del detalle ${detalleIndex + 1} debe tener nombre`,
+            })
           }
 
           if (precioMinimo !== null && precioMaximo !== null && precioMinimo > precioMaximo) {
-            throw createError({ statusCode: 400, message: `El precio minimo no puede ser mayor que el maximo en ${nombreOpcion}` })
+            throw createError({
+              statusCode: 400,
+              message: `El precio minimo no puede ser mayor que el maximo en ${nombreOpcion}`,
+            })
           }
 
           precioPromedio = fallbackAverage({ precioMinimo, precioMaximo, precioPromedio })
@@ -141,7 +167,10 @@ export function normalizeGastoFuturoPayload(body) {
       }
 
       if (!nombre) {
-        throw createError({ statusCode: 400, message: `El detalle ${detalleIndex + 1} debe tener nombre` })
+        throw createError({
+          statusCode: 400,
+          message: `El detalle ${detalleIndex + 1} debe tener nombre`,
+        })
       }
 
       const prioridadDetalle = detalle?.prioridad
@@ -210,19 +239,17 @@ export async function persistGastoFuturoChildren(tx, gastoFuturoId, detalles) {
       .returning({ id: gastosFuturosDetalles.id })
 
     for (const [optionIndex, opcion] of detalle.opciones.entries()) {
-      await tx
-        .insert(gastosFuturosOpciones)
-        .values({
-          detalleId: insertedDetail.id,
-          nombre: opcion.nombre,
-          referenciaUrl: opcion.referenciaUrl,
-          imagenUrl: opcion.imagenUrl,
-          precioMinimo: opcion.precioMinimo !== null ? String(opcion.precioMinimo) : null,
-          precioMaximo: opcion.precioMaximo !== null ? String(opcion.precioMaximo) : null,
-          precioPromedio: opcion.precioPromedio !== null ? String(opcion.precioPromedio) : null,
-          notas: opcion.notas,
-          orden: optionIndex,
-        })
+      await tx.insert(gastosFuturosOpciones).values({
+        detalleId: insertedDetail.id,
+        nombre: opcion.nombre,
+        referenciaUrl: opcion.referenciaUrl,
+        imagenUrl: opcion.imagenUrl,
+        precioMinimo: opcion.precioMinimo !== null ? String(opcion.precioMinimo) : null,
+        precioMaximo: opcion.precioMaximo !== null ? String(opcion.precioMaximo) : null,
+        precioPromedio: opcion.precioPromedio !== null ? String(opcion.precioPromedio) : null,
+        notas: opcion.notas,
+        orden: optionIndex,
+      })
     }
   }
 }
@@ -239,8 +266,14 @@ function summarizeDetail(opciones) {
   const avgCandidates = []
 
   for (const opcion of opciones) {
-    const minimo = precioValido(opcion.precioMinimo) ?? precioValido(opcion.precioPromedio) ?? precioValido(opcion.precioMaximo)
-    const maximo = precioValido(opcion.precioMaximo) ?? precioValido(opcion.precioPromedio) ?? precioValido(opcion.precioMinimo)
+    const minimo =
+      precioValido(opcion.precioMinimo) ??
+      precioValido(opcion.precioPromedio) ??
+      precioValido(opcion.precioMaximo)
+    const maximo =
+      precioValido(opcion.precioMaximo) ??
+      precioValido(opcion.precioPromedio) ??
+      precioValido(opcion.precioMinimo)
     const promedio = fallbackAverage(opcion)
 
     if (minimo !== null) minCandidates.push(minimo)
@@ -250,10 +283,13 @@ function summarizeDetail(opciones) {
 
   return {
     totalOpciones: opciones.length,
-    tieneReferencias: minCandidates.length > 0 || maxCandidates.length > 0 || avgCandidates.length > 0,
+    tieneReferencias:
+      minCandidates.length > 0 || maxCandidates.length > 0 || avgCandidates.length > 0,
     minimoReferencia: minCandidates.length ? round2(Math.min(...minCandidates)) : null,
     maximoReferencia: maxCandidates.length ? round2(Math.max(...maxCandidates)) : null,
-    promedioReferencia: avgCandidates.length ? round2(avgCandidates.reduce((sum, value) => sum + value, 0) / avgCandidates.length) : null,
+    promedioReferencia: avgCandidates.length
+      ? round2(avgCandidates.reduce((sum, value) => sum + value, 0) / avgCandidates.length)
+      : null,
   }
 }
 
@@ -324,7 +360,13 @@ export function summarizeFuturePortfolio(proyectos) {
     // Por categoría
     const catKey = proyecto.categoriaNombre || 'Sin categoria'
     if (!categoriaMap.has(catKey)) {
-      categoriaMap.set(catKey, { nombre: catKey, icono: proyecto.categoriaIcono, color: proyecto.categoriaColor, cantidad: 0, totalPromedio: 0 })
+      categoriaMap.set(catKey, {
+        nombre: catKey,
+        icono: proyecto.categoriaIcono,
+        color: proyecto.categoriaColor,
+        cantidad: 0,
+        totalPromedio: 0,
+      })
     }
     const cat = categoriaMap.get(catKey)
     cat.cantidad++
@@ -337,7 +379,10 @@ export function summarizeFuturePortfolio(proyectos) {
       summary.totalPromedio += proyecto.resumen.totalPromedio
 
       // Proyecto más caro
-      if (!summary.proyectoMasCaro || proyecto.resumen.totalPromedio > summary.proyectoMasCaro.totalPromedio) {
+      if (
+        !summary.proyectoMasCaro ||
+        proyecto.resumen.totalPromedio > summary.proyectoMasCaro.totalPromedio
+      ) {
         summary.proyectoMasCaro = {
           tipoGasto: proyecto.tipoGasto,
           totalPromedio: proyecto.resumen.totalPromedio,
@@ -351,20 +396,22 @@ export function summarizeFuturePortfolio(proyectos) {
   summary.totalMinimo = round2(summary.totalMinimo)
   summary.totalMaximo = round2(summary.totalMaximo)
   summary.totalPromedio = round2(summary.totalPromedio)
-  summary.promedioPorProyecto = summary.proyectosConReferencia > 0
-    ? round2(summary.totalPromedio / summary.proyectosConReferencia)
-    : 0
-  summary.progresoDecision.porcentaje = summary.progresoDecision.total > 0
-    ? Math.round((summary.progresoDecision.decididos / summary.progresoDecision.total) * 100)
-    : 0
+  summary.promedioPorProyecto =
+    summary.proyectosConReferencia > 0
+      ? round2(summary.totalPromedio / summary.proyectosConReferencia)
+      : 0
+  summary.progresoDecision.porcentaje =
+    summary.progresoDecision.total > 0
+      ? Math.round((summary.progresoDecision.decididos / summary.progresoDecision.total) * 100)
+      : 0
   summary.porCategoria = Array.from(categoriaMap.values())
-    .map(c => ({ ...c, totalPromedio: round2(c.totalPromedio) }))
+    .map((c) => ({ ...c, totalPromedio: round2(c.totalPromedio) }))
     .sort((a, b) => b.totalPromedio - a.totalPromedio)
   summary.destacados = proyectos
     .slice()
     .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
     .slice(0, 3)
-    .map(proyecto => ({
+    .map((proyecto) => ({
       id: proyecto.id,
       tipoGasto: proyecto.tipoGasto,
       categoriaNombre: proyecto.categoriaNombre,
@@ -375,7 +422,7 @@ export function summarizeFuturePortfolio(proyectos) {
       totalDetalles: proyecto.resumen.totalDetalles,
       totalOpciones: proyecto.resumen.totalOpciones,
       tieneReferencias: proyecto.resumen.tieneReferencias,
-      detalles: proyecto.detalles.slice(0, 3).map(detalle => detalle.nombre),
+      detalles: proyecto.detalles.slice(0, 3).map((detalle) => detalle.nombre),
     }))
 
   return summary
@@ -399,7 +446,11 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
     .from(gastosFuturos)
     .leftJoin(categorias, eq(gastosFuturos.categoriaId, categorias.id))
     .where(eq(gastosFuturos.usuarioId, usuarioId))
-    .orderBy(desc(gastosFuturos.prioridad), desc(gastosFuturos.updatedAt), asc(gastosFuturos.tipoGasto))
+    .orderBy(
+      desc(gastosFuturos.prioridad),
+      desc(gastosFuturos.updatedAt),
+      asc(gastosFuturos.tipoGasto),
+    )
 
   if (proyectosRows.length === 0) {
     return {
@@ -408,21 +459,26 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
     }
   }
 
-  const proyectoIds = proyectosRows.map(proyecto => proyecto.id)
+  const proyectoIds = proyectosRows.map((proyecto) => proyecto.id)
   const detallesRows = await executor
     .select()
     .from(gastosFuturosDetalles)
     .where(inArray(gastosFuturosDetalles.gastoFuturoId, proyectoIds))
-    .orderBy(desc(gastosFuturosDetalles.prioridad), asc(gastosFuturosDetalles.orden), asc(gastosFuturosDetalles.createdAt))
+    .orderBy(
+      desc(gastosFuturosDetalles.prioridad),
+      asc(gastosFuturosDetalles.orden),
+      asc(gastosFuturosDetalles.createdAt),
+    )
 
-  const detalleIds = detallesRows.map(detalle => detalle.id)
-  const opcionesRows = detalleIds.length > 0
-    ? await executor
-      .select()
-      .from(gastosFuturosOpciones)
-      .where(inArray(gastosFuturosOpciones.detalleId, detalleIds))
-      .orderBy(asc(gastosFuturosOpciones.orden), asc(gastosFuturosOpciones.createdAt))
-    : []
+  const detalleIds = detallesRows.map((detalle) => detalle.id)
+  const opcionesRows =
+    detalleIds.length > 0
+      ? await executor
+          .select()
+          .from(gastosFuturosOpciones)
+          .where(inArray(gastosFuturosOpciones.detalleId, detalleIds))
+          .orderBy(asc(gastosFuturosOpciones.orden), asc(gastosFuturosOpciones.createdAt))
+      : []
 
   const opcionesByDetalle = new Map()
   for (const option of opcionesRows) {
@@ -458,7 +514,7 @@ export async function fetchFuturePortfolio(executor, usuarioId) {
     detallesByProyecto.get(detalle.gastoFuturoId).push(normalized)
   }
 
-  const portfolio = proyectosRows.map(proyecto => {
+  const portfolio = proyectosRows.map((proyecto) => {
     const detalles = detallesByProyecto.get(proyecto.id) || []
     return {
       ...proyecto,
@@ -483,5 +539,5 @@ export async function fetchFutureExpenseById(executor, usuarioId, id) {
   if (proyecto.length === 0) return null
 
   const portfolio = await fetchFuturePortfolio(executor, usuarioId)
-  return portfolio.gastosFuturos.find(item => item.id === id) || null
+  return portfolio.gastosFuturos.find((item) => item.id === id) || null
 }

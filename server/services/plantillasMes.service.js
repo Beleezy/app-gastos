@@ -147,9 +147,7 @@ export async function aplicarPlantilla({ usuarioId, plantillaId, planMensualId }
     .from(categorias)
   const setValidas = new Set(categoriasValidas.map((c) => String(c.id)))
   const fallbackCategoriaId =
-    categoriasValidas.find((c) => /otros/i.test(c.nombre))?.id ||
-    categoriasValidas[0]?.id ||
-    null
+    categoriasValidas.find((c) => /otros/i.test(c.nombre))?.id || categoriasValidas[0]?.id || null
 
   const ultimoDiaMes = new Date(plan.anio, plan.mes, 0).getDate()
   const valores = []
@@ -179,7 +177,10 @@ export async function aplicarPlantilla({ usuarioId, plantillaId, planMensualId }
   }
 
   if (valores.length === 0) return { creados: 0, categoriasReemplazadas: 0 }
-  const insertados = await db.insert(gastosPlanificados).values(valores).returning({ id: gastosPlanificados.id })
+  const insertados = await db
+    .insert(gastosPlanificados)
+    .values(valores)
+    .returning({ id: gastosPlanificados.id })
   return { creados: insertados.length, categoriasReemplazadas }
 }
 

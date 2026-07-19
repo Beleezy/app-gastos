@@ -78,7 +78,7 @@ Ninguna barra tiene etiqueta. El lector no sabe qué representa cada una.
 ### Cambios
 
 1. Anteponer a cada barra un micro-label (`text-[10px]` o `text-[11px]`, `text-theme-text-sec`) con el nombre y el porcentaje al final, en una fila ligera:
-   - Barra superior: `Planificado` ·······  `{{ porcentajeAsignado.toFixed(0) }}%`
+   - Barra superior: `Planificado` ······· `{{ porcentajeAsignado.toFixed(0) }}%`
    - Barra inferior: `Gastado real` ······· `{{ porcentajeGastadoReal.toFixed(0) }}%`
 2. Mantener los colores actuales (no cambia el diseño visual, solo agrega contexto textual).
 3. Mobile-first: las etiquetas ocupan su propia línea arriba de cada barra — no comprometen el ancho en pantallas chicas.

@@ -24,8 +24,16 @@ definePageMeta({ layout: false })
 
 const config = useRuntimeConfig()
 const usuarios = [
-  { id: '00000000-0000-0000-0000-000000000101', nombre: 'Usuario Demo 1', email: 'demo1@test.local' },
-  { id: '00000000-0000-0000-0000-000000000102', nombre: 'Usuario Demo 2', email: 'demo2@test.local' },
+  {
+    id: '00000000-0000-0000-0000-000000000101',
+    nombre: 'Usuario Demo 1',
+    email: 'demo1@test.local',
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000102',
+    nombre: 'Usuario Demo 2',
+    email: 'demo2@test.local',
+  },
 ]
 
 if (!config.public.devAuthBypass) {

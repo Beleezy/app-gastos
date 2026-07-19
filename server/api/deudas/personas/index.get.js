@@ -23,25 +23,43 @@ export default defineEventHandler(async (event) => {
       vinculadoUsuarioId: personasEntidades.vinculadoUsuarioId,
       vinculoParId: personasEntidades.vinculoParId,
       createdAt: personasEntidades.createdAt,
-      totalPendiente: sql`COALESCE(SUM(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as('total_pendiente'),
+      totalPendiente:
+        sql`COALESCE(SUM(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as(
+          'total_pendiente',
+        ),
       totalDeudas: sql`COUNT(${deudas.id})`.as('total_deudas'),
-      deudasActivas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN 1 END)`.as('deudas_activas'),
+      deudasActivas:
+        sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') THEN 1 END)`.as(
+          'deudas_activas',
+        ),
       ultimoMovimiento: sql`MAX(${deudas.updatedAt})`.as('ultimo_movimiento'),
-      countVencidas: sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN 1 END)`.as('count_vencidas'),
-      montoVencido: sql`COALESCE(SUM(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as('monto_vencido'),
-      fechaProximaVencer: sql`MIN(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} >= ${hoy} THEN ${deudas.fechaPago} END)`.as('fecha_proxima_vencer'),
+      countVencidas:
+        sql`COUNT(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN 1 END)`.as(
+          'count_vencidas',
+        ),
+      montoVencido:
+        sql`COALESCE(SUM(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} < ${hoy} THEN CAST(${deudas.montoPendiente} AS NUMERIC) ELSE 0 END), 0)`.as(
+          'monto_vencido',
+        ),
+      fechaProximaVencer:
+        sql`MIN(CASE WHEN ${deudas.estado} IN ('pendiente', 'parcial') AND ${deudas.fechaPago} IS NOT NULL AND ${deudas.fechaPago} >= ${hoy} THEN ${deudas.fechaPago} END)`.as(
+          'fecha_proxima_vencer',
+        ),
     })
     .from(personasEntidades)
-    .leftJoin(deudas, and(
-      eq(deudas.personaEntidadId, personasEntidades.id),
-      isNull(deudas.deletedAt),
-      tipo ? eq(deudas.tipoDeuda, tipo) : undefined
-    ))
+    .leftJoin(
+      deudas,
+      and(
+        eq(deudas.personaEntidadId, personasEntidades.id),
+        isNull(deudas.deletedAt),
+        tipo ? eq(deudas.tipoDeuda, tipo) : undefined,
+      ),
+    )
     .where(and(eq(personasEntidades.usuarioId, usuarioId), isNull(personasEntidades.deletedAt)))
     .groupBy(personasEntidades.id)
     .orderBy(sql`MAX(${deudas.updatedAt}) DESC NULLS LAST`)
 
-  return personasRaw.map(p => {
+  return personasRaw.map((p) => {
     const countVencidas = Number(p.countVencidas)
     return {
       ...p,

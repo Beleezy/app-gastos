@@ -1,5 +1,11 @@
 import { db } from '../../../../utils/db.js'
-import { vinculosCheckpoints, personasEntidades, auditoriaVinculos, usuarios, configuraciones } from '../../../../database/schema.js'
+import {
+  vinculosCheckpoints,
+  personasEntidades,
+  auditoriaVinculos,
+  usuarios,
+  configuraciones,
+} from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { normalizarParPersonas } from '../../../../utils/vinculos.js'
 import { eq, and, or, gte, lt, asc } from 'drizzle-orm'
@@ -17,10 +23,7 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select()
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, personaId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(and(eq(personasEntidades.id, personaId), eq(personasEntidades.usuarioId, usuarioId)))
     .limit(1)
 
   if (!persona) {
@@ -66,7 +69,7 @@ export default defineEventHandler(async (event) => {
         eq(auditoriaVinculos.personaAId, personaId),
         eq(auditoriaVinculos.personaBId, personaId),
         eq(auditoriaVinculos.personaAId, parPersonaId),
-        eq(auditoriaVinculos.personaBId, parPersonaId)
+        eq(auditoriaVinculos.personaBId, parPersonaId),
       ),
       gte(auditoriaVinculos.createdAt, new Date(cp.createdAt)),
     ]
@@ -112,7 +115,7 @@ export default defineEventHandler(async (event) => {
           nombreActor,
           esTuyo,
         }
-      })
+      }),
     )
 
     checkpointsConAuditoria.push({

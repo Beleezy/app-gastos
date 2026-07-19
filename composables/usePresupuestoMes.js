@@ -29,7 +29,7 @@ export function usePresupuestoMes({ mesSeleccionado, anioSeleccionado }) {
     try {
       await apiFetch('/api/planificador', {
         method: 'PUT',
-        body: { id: planId.value, montoPresupuesto: monto }
+        body: { id: planId.value, montoPresupuesto: monto },
       })
       presupuesto.value = monto
       toastSuccess('Presupuesto actualizado')

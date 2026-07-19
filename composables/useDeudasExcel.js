@@ -10,7 +10,12 @@ import { useFormatters } from './useFormatters'
 export function useDeudasExcel() {
   const { formatCurrency, formatDate } = useFormatters()
 
-  async function exportar({ nombreArchivo = 'deudas', deudas = [], pagos = [], persona = null } = {}) {
+  async function exportar({
+    nombreArchivo = 'deudas',
+    deudas = [],
+    pagos = [],
+    persona = null,
+  } = {}) {
     const ExcelJS = (await import('exceljs')).default || (await import('exceljs'))
 
     const filasDeudas = deudas.map((d) => ({

@@ -1,7 +1,20 @@
 import { db } from '../../../../utils/db.js'
-import { solicitudesVinculo, personasEntidades, deudas, pagosDeuda, usuarios } from '../../../../database/schema.js'
+import {
+  solicitudesVinculo,
+  personasEntidades,
+  deudas,
+  pagosDeuda,
+  usuarios,
+} from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
-import { crearDeudasEspejoBulk, crearPagosEspejoBulk, registrarAuditoria, getNombreDisplay, normalizarParPersonas, crearCheckpoint } from '../../../../utils/vinculos.js'
+import {
+  crearDeudasEspejoBulk,
+  crearPagosEspejoBulk,
+  registrarAuditoria,
+  getNombreDisplay,
+  normalizarParPersonas,
+  crearCheckpoint,
+} from '../../../../utils/vinculos.js'
 import { eq, and, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -23,10 +36,7 @@ export default defineEventHandler(async (event) => {
   const [solicitud] = await db
     .select()
     .from(solicitudesVinculo)
-    .where(and(
-      eq(solicitudesVinculo.id, solicitudId),
-      eq(solicitudesVinculo.estado, 'pendiente')
-    ))
+    .where(and(eq(solicitudesVinculo.id, solicitudId), eq(solicitudesVinculo.estado, 'pendiente')))
     .limit(1)
 
   if (!solicitud) {
@@ -49,21 +59,29 @@ export default defineEventHandler(async (event) => {
   }
 
   if (personaRemitente.vinculadoUsuarioId) {
-    throw createError({ statusCode: 400, message: 'Esta persona ya está vinculada con otro usuario' })
+    throw createError({
+      statusCode: 400,
+      message: 'Esta persona ya está vinculada con otro usuario',
+    })
   }
 
   // Validar: solo una sincronización activa entre estos 2 usuarios
   const [vinculoExistente] = await db
     .select({ id: personasEntidades.id })
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.usuarioId, usuarioId),
-      eq(personasEntidades.vinculadoUsuarioId, solicitud.remitenteId)
-    ))
+    .where(
+      and(
+        eq(personasEntidades.usuarioId, usuarioId),
+        eq(personasEntidades.vinculadoUsuarioId, solicitud.remitenteId),
+      ),
+    )
     .limit(1)
 
   if (vinculoExistente) {
-    throw createError({ statusCode: 400, message: 'Ya existe un vínculo activo entre tú y este usuario' })
+    throw createError({
+      statusCode: 400,
+      message: 'Ya existe un vínculo activo entre tú y este usuario',
+    })
   }
 
   // Obtener nombre del remitente (display name: config primero, luego usuarios)
@@ -107,13 +125,20 @@ export default defineEventHandler(async (event) => {
     const deudasActivas = await tx
       .select()
       .from(deudas)
-      .where(and(
-        eq(deudas.personaEntidadId, personaRemitente.id),
-        inArray(deudas.estado, ['pendiente', 'parcial'])
-      ))
+      .where(
+        and(
+          eq(deudas.personaEntidadId, personaRemitente.id),
+          inArray(deudas.estado, ['pendiente', 'parcial']),
+        ),
+      )
 
     // 4b. Espejar deudas en bulk: 1 INSERT batch (vs N INSERTs anteriores).
-    const deudaEspejoMap = await crearDeudasEspejoBulk(tx, deudasActivas, personaEspejo.id, usuarioId)
+    const deudaEspejoMap = await crearDeudasEspejoBulk(
+      tx,
+      deudasActivas,
+      personaEspejo.id,
+      usuarioId,
+    )
 
     // 5. Espejar pagos en bulk: 1 SELECT (todos los pagos) + 1 INSERT batch.
     let pagosSincronizados = 0
@@ -121,11 +146,16 @@ export default defineEventHandler(async (event) => {
       const pagosTodos = await tx
         .select()
         .from(pagosDeuda)
-        .where(inArray(pagosDeuda.deudaId, deudasActivas.map(d => d.id)))
+        .where(
+          inArray(
+            pagosDeuda.deudaId,
+            deudasActivas.map((d) => d.id),
+          ),
+        )
 
       const pagosConEspejo = pagosTodos
-        .map(p => ({ pago: p, deudaEspejoId: deudaEspejoMap.get(p.deudaId) }))
-        .filter(x => x.deudaEspejoId)
+        .map((p) => ({ pago: p, deudaEspejoId: deudaEspejoMap.get(p.deudaId) }))
+        .filter((x) => x.deudaEspejoId)
 
       pagosSincronizados = await crearPagosEspejoBulk(tx, pagosConEspejo)
     }

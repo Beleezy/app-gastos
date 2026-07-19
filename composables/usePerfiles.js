@@ -69,7 +69,17 @@ export function usePerfiles() {
   }
 
   return {
-    perfiles, perfilActivoId, perfilActivo, nombrePerfilActivo, viendoPerfil, cargando,
-    fetchPerfiles, crearPerfil, actualizarPerfil, eliminarPerfil, setPerfilActivo, entrarPerfil,
+    perfiles,
+    perfilActivoId,
+    perfilActivo,
+    nombrePerfilActivo,
+    viendoPerfil,
+    cargando,
+    fetchPerfiles,
+    crearPerfil,
+    actualizarPerfil,
+    eliminarPerfil,
+    setPerfilActivo,
+    entrarPerfil,
   }
 }

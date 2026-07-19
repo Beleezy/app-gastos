@@ -21,9 +21,7 @@ export function useIngresos() {
 
   const mesLabel = computed(() => `${MESES[mesSeleccionado.value - 1]} ${anioSeleccionado.value}`)
 
-  const totalMes = computed(() =>
-    ingresos.value.reduce((s, i) => s + (Number(i.monto) || 0), 0)
-  )
+  const totalMes = computed(() => ingresos.value.reduce((s, i) => s + (Number(i.monto) || 0), 0))
 
   const porOrigen = computed(() => {
     const map = new Map()
@@ -97,14 +95,20 @@ export function useIngresos() {
   function mesAnterior() {
     let m = mesSeleccionado.value - 1
     let a = anioSeleccionado.value
-    if (m < 1) { m = 12; a-- }
+    if (m < 1) {
+      m = 12
+      a--
+    }
     cambiarMes(m, a)
   }
 
   function mesSiguiente() {
     let m = mesSeleccionado.value + 1
     let a = anioSeleccionado.value
-    if (m > 12) { m = 1; a++ }
+    if (m > 12) {
+      m = 1
+      a++
+    }
     cambiarMes(m, a)
   }
 
@@ -115,8 +119,9 @@ export function useIngresos() {
 
   const esMesActual = computed(() => {
     const hoy = new Date()
-    return mesSeleccionado.value === hoy.getMonth() + 1
-      && anioSeleccionado.value === hoy.getFullYear()
+    return (
+      mesSeleccionado.value === hoy.getMonth() + 1 && anioSeleccionado.value === hoy.getFullYear()
+    )
   })
 
   return {

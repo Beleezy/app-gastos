@@ -11,7 +11,9 @@ export default defineEventHandler(async (event) => {
   }
 
   function capitalizarNombre(nombre) {
-    return nombre.trim().replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    return nombre
+      .trim()
+      .replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
   }
 
   const [persona] = await db

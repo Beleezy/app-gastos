@@ -16,7 +16,10 @@ export default defineNuxtPlugin(() => {
   // que `useSupabaseUser()` quede poblado cuanto antes.
   Promise.resolve().then(async () => {
     try {
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
       if (error) {
         console.warn('[auth-restore] Error al restaurar sesión:', error.message)
         return

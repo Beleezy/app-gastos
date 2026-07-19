@@ -24,11 +24,13 @@ async function resolverPersonaId({ usuarioId, body, tx = db }) {
   const [existing] = await tx
     .select({ id: personasEntidades.id })
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.usuarioId, usuarioId),
-      eq(personasEntidades.nombre, nombre),
-      isNull(personasEntidades.deletedAt),
-    ))
+    .where(
+      and(
+        eq(personasEntidades.usuarioId, usuarioId),
+        eq(personasEntidades.nombre, nombre),
+        isNull(personasEntidades.deletedAt),
+      ),
+    )
     .limit(1)
 
   if (existing) return existing.id
@@ -171,7 +173,13 @@ export async function balanceGlobal(usuarioId) {
     })
     .from(deudas)
     .innerJoin(personasEntidades, eq(deudas.personaEntidadId, personasEntidades.id))
-    .where(and(eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt), sql`${deudas.estado} != 'archivado'`))
+    .where(
+      and(
+        eq(deudas.usuarioId, usuarioId),
+        isNull(deudas.deletedAt),
+        sql`${deudas.estado} != 'archivado'`,
+      ),
+    )
     .groupBy(personasEntidades.id, personasEntidades.nombre, deudas.tipoDeuda)
 
   return agregarBalance(rows)
@@ -234,15 +242,17 @@ export async function mergePersonas({ usuarioId, destinoId, origenIds }) {
       .update(deudas)
       .set({ personaEntidadId: destinoId, updatedAt: new Date() })
       .where(
-        and(eq(deudas.usuarioId, usuarioId), inArray(deudas.personaEntidadId, ids), isNull(deudas.deletedAt)),
+        and(
+          eq(deudas.usuarioId, usuarioId),
+          inArray(deudas.personaEntidadId, ids),
+          isNull(deudas.deletedAt),
+        ),
       )
       .returning({ id: deudas.id })
 
     const del = await tx
       .delete(personasEntidades)
-      .where(
-        and(eq(personasEntidades.usuarioId, usuarioId), inArray(personasEntidades.id, ids)),
-      )
+      .where(and(eq(personasEntidades.usuarioId, usuarioId), inArray(personasEntidades.id, ids)))
       .returning({ id: personasEntidades.id })
 
     return {

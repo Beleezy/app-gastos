@@ -72,13 +72,7 @@ export async function getUsoMensual(usuarioId) {
     const [row] = await db
       .select({ total: sql`COALESCE(SUM(${usoLlm.totalRequests}), 0)`.as('total') })
       .from(usoLlm)
-      .where(
-        and(
-          eq(usoLlm.usuarioId, usuarioId),
-          eq(usoLlm.anio, anio),
-          eq(usoLlm.mes, mes),
-        ),
-      )
+      .where(and(eq(usoLlm.usuarioId, usuarioId), eq(usoLlm.anio, anio), eq(usoLlm.mes, mes)))
     return Number(row?.total || 0)
   } catch (e) {
     logger.warn('No se pudo leer uso mensual de LLM', { error: e })
@@ -99,7 +93,8 @@ export async function assertCuotaMensual(usuarioId) {
     throw createError({
       statusCode: 429,
       statusMessage: 'LLM quota exceeded',
-      message: 'Has superado el cupo mensual de procesamiento por voz/foto. Intenta de nuevo el próximo mes o registra el gasto manualmente.',
+      message:
+        'Has superado el cupo mensual de procesamiento por voz/foto. Intenta de nuevo el próximo mes o registra el gasto manualmente.',
     })
   }
 }

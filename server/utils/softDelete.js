@@ -46,7 +46,9 @@ export async function restoreRow(table, id, usuarioId) {
   const rows = await db
     .update(table)
     .set({ deletedAt: null })
-    .where(and(eq(table.id, id), eq(table.usuarioId, usuarioId), sql`${table.deletedAt} IS NOT NULL`))
+    .where(
+      and(eq(table.id, id), eq(table.usuarioId, usuarioId), sql`${table.deletedAt} IS NOT NULL`),
+    )
     .returning()
   return rows[0]
 }

@@ -12,5 +12,5 @@ export default defineEventHandler(async (event) => {
     .from(presupuestosCategoria)
     .where(eq(presupuestosCategoria.usuarioId, usuarioId))
 
-  return rows.map(p => ({ ...p, montoMensual: parseFloat(p.montoMensual) }))
+  return rows.map((p) => ({ ...p, montoMensual: parseFloat(p.montoMensual) }))
 })

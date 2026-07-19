@@ -25,7 +25,9 @@ describe('formatMonto', () => {
     expect(formatMonto(-50, { signo: true })).toBe('-S/ 50.00')
   })
   it('separadores configurables (es-PE con coma decimal)', () => {
-    expect(formatMonto(1234.5, { separadorMiles: '.', separadorDecimales: ',' })).toBe('S/ 1.234,50')
+    expect(formatMonto(1234.5, { separadorMiles: '.', separadorDecimales: ',' })).toBe(
+      'S/ 1.234,50',
+    )
   })
   it('moneda alternativa', () => {
     expect(formatMonto(99, { moneda: 'USD' })).toBe('$ 99.00')

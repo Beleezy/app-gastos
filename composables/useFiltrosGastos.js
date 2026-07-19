@@ -62,9 +62,10 @@ export function useFiltrosGastos(gastosSource, filtrosSource) {
   })
 
   const totalFiltrado = computed(() => {
-    return Math.round(
-      gastosFiltrados.value.reduce((s, g) => s + (parseFloat(g.monto) || 0), 0) * 100,
-    ) / 100
+    return (
+      Math.round(gastosFiltrados.value.reduce((s, g) => s + (parseFloat(g.monto) || 0), 0) * 100) /
+      100
+    )
   })
 
   function limpiarFiltros() {

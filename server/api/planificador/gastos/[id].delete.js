@@ -19,10 +19,7 @@ export default defineEventHandler(async (event) => {
     .select({ gp: gastosPlanificados })
     .from(gastosPlanificados)
     .innerJoin(planesMensuales, eq(planesMensuales.id, gastosPlanificados.planMensualId))
-    .where(and(
-      eq(gastosPlanificados.id, id),
-      eq(planesMensuales.usuarioId, usuarioId),
-    ))
+    .where(and(eq(gastosPlanificados.id, id), eq(planesMensuales.usuarioId, usuarioId)))
     .limit(1)
   const gasto = row?.gp
 
@@ -40,15 +37,10 @@ export default defineEventHandler(async (event) => {
   // planificado; el gasto real está restringido por usuarioId vía la FK).
   await db
     .delete(gastos)
-    .where(and(
-      eq(gastos.gastoPlanificadoId, id),
-      eq(gastos.usuarioId, usuarioId),
-    ))
+    .where(and(eq(gastos.gastoPlanificadoId, id), eq(gastos.usuarioId, usuarioId)))
 
   // Delete the current one
-  await db
-    .delete(gastosPlanificados)
-    .where(eq(gastosPlanificados.id, id))
+  await db.delete(gastosPlanificados).where(eq(gastosPlanificados.id, id))
 
   syncDeleted(usuarioId, gasto.googleEventId)
   return { success: true }

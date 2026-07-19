@@ -28,11 +28,7 @@ function ttlSeconds() {
  */
 function normalize(input) {
   if (input == null) return ''
-  return String(input)
-    .normalize('NFKC')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim()
+  return String(input).normalize('NFKC').toLowerCase().replace(/\s+/g, ' ').trim()
 }
 
 export function hashInput({ texto = '', extra = '' } = {}) {
@@ -64,8 +60,7 @@ export async function getCached({ usuarioId, endpoint, modelo, inputHash }) {
     if (!row) return null
     if (new Date(row.expiresAt).getTime() < Date.now()) return null
     // Best-effort incremento de hits (no bloquea la lectura)
-    db
-      .update(llmCache)
+    db.update(llmCache)
       .set({ hits: sql`${llmCache.hits} + 1` })
       .where(eq(llmCache.id, row.id))
       .catch(() => {})

@@ -48,7 +48,9 @@
           <p class="text-sm font-medium text-theme-text truncate">{{ p.nombre }}</p>
           <p class="text-[0.7rem] text-theme-text-sec">
             {{ p.gastos?.length || 0 }} gastos
-            <span v-if="p.montoPresupuesto != null">· {{ formatCurrency(p.montoPresupuesto) }}</span>
+            <span v-if="p.montoPresupuesto != null"
+              >· {{ formatCurrency(p.montoPresupuesto) }}</span
+            >
           </p>
         </div>
         <button
@@ -66,19 +68,33 @@
           :aria-label="`Eliminar plantilla ${p.nombre}`"
           @click="eliminarPlantilla(p)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
           </svg>
         </button>
       </li>
     </ul>
     <SharedConfirmDialog
-    v-model="showConfirmPlantilla"
-    title="Eliminar plantilla"
-    :message="plantillaAEliminar ? `¿Eliminar la plantilla &quot;${plantillaAEliminar.nombre}&quot;?` : ''"
-    confirm-label="Eliminar"
-    @confirm="ejecutarEliminarPlantilla"
-  />
+      v-model="showConfirmPlantilla"
+      title="Eliminar plantilla"
+      :message="
+        plantillaAEliminar ? `¿Eliminar la plantilla &quot;${plantillaAEliminar.nombre}&quot;?` : ''
+      "
+      confirm-label="Eliminar"
+      @confirm="ejecutarEliminarPlantilla"
+    />
   </section>
 </template>
 
@@ -91,7 +107,8 @@ const props = defineProps({
 
 const emit = defineEmits(['aplicada'])
 
-const { plantillas, isLoading, error, fetchPlantillas, crearDesdePlan, aplicar, eliminar } = usePlantillasMes()
+const { plantillas, isLoading, error, fetchPlantillas, crearDesdePlan, aplicar, eliminar } =
+  usePlantillasMes()
 const { formatCurrency } = useFormatters()
 const toast = useToast()
 
@@ -124,7 +141,9 @@ async function aplicarPlantilla(p) {
     if (!r.creados || r.creados === 0) {
       toast.warning('La plantilla no creó gastos. Revisa que tenga ítems válidos.')
     } else if (r.categoriasReemplazadas > 0) {
-      toast.success(`Aplicada: ${r.creados} gastos (${r.categoriasReemplazadas} con categoría reemplazada)`)
+      toast.success(
+        `Aplicada: ${r.creados} gastos (${r.categoriasReemplazadas} con categoría reemplazada)`,
+      )
     } else {
       toast.success(`Aplicada: ${r.creados} gastos creados`)
     }

@@ -9,7 +9,8 @@ const INVISIBLE_CHARS = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g
 const PROMPT_BOUNDARY_TAGS =
   /<\/?(system|user|assistant|tool|user_input|instruction|prompt|context|developer)[^>]*>/gi
 // Marcadores tipo ChatML / Llama / Anthropic usados como vector de injection.
-const ROLE_MARKERS = /<\|(?:im_start|im_end|endoftext|start_header_id|end_header_id|eot_id|system|user|assistant)\|>/gi
+const ROLE_MARKERS =
+  /<\|(?:im_start|im_end|endoftext|start_header_id|end_header_id|eot_id|system|user|assistant)\|>/gi
 // Frases que históricamente disparan jailbreaks. Las neutralizamos
 // reemplazándolas por una marca para que el modelo NO las interprete
 // como instrucción autoritativa proveniente del system prompt.
@@ -127,7 +128,10 @@ export function coerceString(value, maxLen = 200) {
  * el resultado normalizado. No lanza: el caller decide qué hacer si
  * `gastos.length === 0`.
  */
-export function validateGastosLlm(parsed, { fechaDefault, categoriasValidas, montoMaximo = 100_000 } = {}) {
+export function validateGastosLlm(
+  parsed,
+  { fechaDefault, categoriasValidas, montoMaximo = 100_000 } = {},
+) {
   if (!parsed || typeof parsed !== 'object') return { gastos: [] }
   const arr = Array.isArray(parsed.gastos) ? parsed.gastos : []
   const gastos = arr

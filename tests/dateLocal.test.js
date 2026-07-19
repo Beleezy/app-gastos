@@ -31,9 +31,9 @@ describe('hoyConReferencias', () => {
   it('devuelve estructura coherente', () => {
     const r = hoyConReferencias('America/Lima')
     expect(r.fecha).toMatch(/^\d{4}-\d{2}-\d{2}$/)
-    expect([
-      'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado',
-    ]).toContain(r.diaSemana)
+    expect(['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado']).toContain(
+      r.diaSemana,
+    )
     // referencias siempre tiene 7 entradas únicas (cada día de la semana)
     const dias = Object.keys(r.referencias)
     expect(dias.length).toBe(7)

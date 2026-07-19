@@ -10,11 +10,7 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
   const rangosRapidos = computed(() => {
     const base = [{ value: 'mes', label: 'Mes' }]
     if (esMesActual.value) {
-      return [
-        { value: 'hoy', label: 'Hoy' },
-        { value: '7d', label: '7 días' },
-        ...base,
-      ]
+      return [{ value: 'hoy', label: 'Hoy' }, { value: '7d', label: '7 días' }, ...base]
     }
     return base
   })
@@ -42,7 +38,7 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
 
   function filtrarGastos(gastosArr) {
     const q = busquedaDebounced.value.toLowerCase()
-    return gastosArr.filter(g => {
+    return gastosArr.filter((g) => {
       const matchBusqueda = !q || g.concepto.toLowerCase().includes(q)
       const matchCategoria = !categoriaFiltro.value || g.categoriaId === categoriaFiltro.value
       const matchRango = fechaDentroRango(g.fecha)
@@ -52,7 +48,7 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
 
   const gastosPorDiaFiltrados = computed(() => {
     return gastosPorDia.value
-      .map(dia => {
+      .map((dia) => {
         const gastosFiltrados = filtrarGastos(dia.gastos)
         return {
           ...dia,
@@ -60,14 +56,14 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
           total: gastosFiltrados.reduce((sum, g) => sum + Number(g.monto || 0), 0),
         }
       })
-      .filter(dia => dia.gastos.length > 0)
+      .filter((dia) => dia.gastos.length > 0)
   })
 
   const gastosPorSemanaFiltrados = computed(() => {
     return gastosPorSemana.value
-      .map(semana => {
+      .map((semana) => {
         const diasFiltrados = semana.dias
-          .map(dia => {
+          .map((dia) => {
             const gastosFiltrados = filtrarGastos(dia.gastos)
             return {
               ...dia,
@@ -75,20 +71,18 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
               total: gastosFiltrados.reduce((sum, g) => sum + Number(g.monto || 0), 0),
             }
           })
-          .filter(dia => dia.gastos.length > 0)
+          .filter((dia) => dia.gastos.length > 0)
         return {
           ...semana,
           dias: diasFiltrados,
           total: diasFiltrados.reduce((sum, d) => sum + d.total, 0),
         }
       })
-      .filter(semana => semana.dias.length > 0)
+      .filter((semana) => semana.dias.length > 0)
   })
 
-  const tieneFiltrosActivos = computed(() =>
-    !!busquedaGasto.value
-    || !!categoriaFiltro.value
-    || rangoRapido.value !== 'mes',
+  const tieneFiltrosActivos = computed(
+    () => !!busquedaGasto.value || !!categoriaFiltro.value || rangoRapido.value !== 'mes',
   )
 
   const conteoFiltrosActivos = computed(() => {
@@ -106,8 +100,14 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
   }
 
   return {
-    busquedaGasto, categoriaFiltro, rangoRapido, rangosRapidos,
-    gastosPorDiaFiltrados, gastosPorSemanaFiltrados,
-    tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
+    busquedaGasto,
+    categoriaFiltro,
+    rangoRapido,
+    rangosRapidos,
+    gastosPorDiaFiltrados,
+    gastosPorSemanaFiltrados,
+    tieneFiltrosActivos,
+    conteoFiltrosActivos,
+    limpiarFiltros,
   }
 }

@@ -19,11 +19,7 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
   const rangosRapidos = computed(() => {
     const base = [{ value: 'mes', label: 'Mes' }]
     if (esMesActual.value) {
-      return [
-        { value: 'hoy', label: 'Hoy' },
-        { value: '7d', label: '7 días' },
-        ...base,
-      ]
+      return [{ value: 'hoy', label: 'Hoy' }, { value: '7d', label: '7 días' }, ...base]
     }
     return base
   })
@@ -50,7 +46,7 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
 
   const ahorrosFiltrados = computed(() => {
     const q = busquedaDebounced.value.toLowerCase()
-    const filtered = ahorrosList.value.filter(a => {
+    const filtered = ahorrosList.value.filter((a) => {
       const concepto = (a.concepto || a.medioNombre || '').toLowerCase()
       const matchBusqueda = !q || concepto.includes(q)
       const matchMedio = !medioFiltro.value || a.medioAhorroId === medioFiltro.value
@@ -59,21 +55,25 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
     })
     return filtered.sort((a, b) => {
       switch (ordenarPor.value) {
-        case 'fecha_asc': return new Date(a.fecha) - new Date(b.fecha)
-        case 'monto_desc': return Number(b.monto) - Number(a.monto)
-        case 'monto_asc': return Number(a.monto) - Number(b.monto)
+        case 'fecha_asc':
+          return new Date(a.fecha) - new Date(b.fecha)
+        case 'monto_desc':
+          return Number(b.monto) - Number(a.monto)
+        case 'monto_asc':
+          return Number(a.monto) - Number(b.monto)
         case 'concepto_asc': {
           const an = (a.concepto || a.medioNombre || '').toLowerCase()
           const bn = (b.concepto || b.medioNombre || '').toLowerCase()
           return an.localeCompare(bn)
         }
-        default: return new Date(b.fecha) - new Date(a.fecha)
+        default:
+          return new Date(b.fecha) - new Date(a.fecha)
       }
     })
   })
 
   const totalFiltrado = computed(() =>
-    ahorrosFiltrados.value.reduce((sum, a) => sum + Number(a.monto || 0), 0)
+    ahorrosFiltrados.value.reduce((sum, a) => sum + Number(a.monto || 0), 0),
   )
 
   const porMedioFiltrado = computed(() => {
@@ -97,8 +97,12 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
     return Array.from(grupos.values()).sort((a, b) => b.total - a.total)
   })
 
-  const tieneFiltrosActivos = computed(() =>
-    !!busquedaAhorro.value || !!medioFiltro.value || rangoRapido.value !== 'mes' || ordenarPor.value !== 'fecha_desc'
+  const tieneFiltrosActivos = computed(
+    () =>
+      !!busquedaAhorro.value ||
+      !!medioFiltro.value ||
+      rangoRapido.value !== 'mes' ||
+      ordenarPor.value !== 'fecha_desc',
   )
 
   const conteoFiltrosActivos = computed(() => {
@@ -118,9 +122,16 @@ export function useAhorrosFilters({ ahorrosList, esMesActual }) {
   }
 
   return {
-    busquedaAhorro, medioFiltro, rangoRapido, rangosRapidos,
+    busquedaAhorro,
+    medioFiltro,
+    rangoRapido,
+    rangosRapidos,
     ordenarPor,
-    ahorrosFiltrados, totalFiltrado, porMedioFiltrado,
-    tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
+    ahorrosFiltrados,
+    totalFiltrado,
+    porMedioFiltrado,
+    tieneFiltrosActivos,
+    conteoFiltrosActivos,
+    limpiarFiltros,
   }
 }

@@ -78,7 +78,10 @@ export function matchDuplicados(candidatos, existentes) {
   if (!Array.isArray(candidatos) || candidatos.length === 0) return []
   const ex = Array.isArray(existentes) ? existentes : []
   const tolerancia = (m) => Math.max(0.05, Math.abs(parseFloat(m)) * 0.005)
-  const norm = (s) => String(s || '').trim().toLowerCase()
+  const norm = (s) =>
+    String(s || '')
+      .trim()
+      .toLowerCase()
 
   return candidatos.map((c) => {
     const cm = parseFloat(c.monto)
@@ -109,7 +112,13 @@ export async function detectarDuplicados({ usuarioId, candidatos }) {
       fecha: gastos.fecha,
     })
     .from(gastos)
-    .where(and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), sql`${gastos.fecha} IN (${sql.join(fechas, sql`, `)})`))
+    .where(
+      and(
+        eq(gastos.usuarioId, usuarioId),
+        isNull(gastos.deletedAt),
+        sql`${gastos.fecha} IN (${sql.join(fechas, sql`, `)})`,
+      ),
+    )
 
   return matchDuplicados(candidatos, existentes)
 }

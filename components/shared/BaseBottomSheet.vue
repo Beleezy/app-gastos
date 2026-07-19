@@ -14,7 +14,7 @@
       data-testid="bottom-sheet"
       :aria-labelledby="titleId"
       class="relative flex w-full max-w-lg md:max-w-2xl lg:max-w-3xl flex-col overflow-hidden rounded-t-3xl md:rounded-3xl border-t md:border border-theme-border bg-theme-card animate-slide-up md:animate-dialog-in md:shadow-2xl md:shadow-black/40"
-      style="max-height: 90dvh;"
+      style="max-height: 90dvh"
       :style="sheetStyle"
       @keydown="onKeydown"
       @touchstart="onSheetTouchStart"
@@ -22,21 +22,32 @@
       @touchend="onSheetTouchEnd"
       @touchcancel="onSheetTouchEnd"
     >
-      <div
-        class="flex justify-center pt-3 pb-1 select-none md:hidden"
-      >
+      <div class="flex justify-center pt-3 pb-1 select-none md:hidden">
         <div class="w-10 h-1 rounded-full bg-theme-border-md" aria-hidden="true"></div>
       </div>
 
       <div class="flex shrink-0 items-center justify-between px-5 md:px-6 pt-1 md:pt-5 pb-4">
-        <h2 :id="titleId" class="min-w-0 flex-1 truncate pr-3 text-lg md:text-xl font-semibold text-theme-text">{{ title }}</h2>
+        <h2
+          :id="titleId"
+          class="min-w-0 flex-1 truncate pr-3 text-lg md:text-xl font-semibold text-theme-text"
+        >
+          {{ title }}
+        </h2>
         <button
           class="tap-target flex h-9 w-9 items-center justify-center rounded-full bg-theme-border-md text-theme-text-sec hover:text-theme-text transition-colors"
           aria-label="Cerrar"
           data-testid="btn-cerrar-bottom-sheet"
           @click="$emit('close')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -50,10 +61,7 @@
         <slot />
       </div>
 
-      <div
-        v-if="$slots.footer"
-        class="shrink-0 sheet-footer-sticky"
-      >
+      <div v-if="$slots.footer" class="shrink-0 sheet-footer-sticky">
         <slot name="footer" />
       </div>
     </div>
@@ -142,7 +150,7 @@ function onSheetTouchMove(event) {
 
   if (decidedAction === 'scroll') {
     // Durante el scroll, si llegamos al tope y seguimos arrastrando abajo, transicionar a drag
-    if (scrollEl && scrollEl.scrollTop <= 0 && (currentY - touchStartY) > 0) {
+    if (scrollEl && scrollEl.scrollTop <= 0 && currentY - touchStartY > 0) {
       decidedAction = 'drag'
       draggingSheet = true
       isDragging.value = true
@@ -203,8 +211,14 @@ onUnmounted(() => {
 <style>
 @media (min-width: 768px) {
   @keyframes dialog-in {
-    from { opacity: 0; transform: translateY(12px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+      opacity: 0;
+      transform: translateY(12px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
   .md\:animate-dialog-in {
     animation: dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1);

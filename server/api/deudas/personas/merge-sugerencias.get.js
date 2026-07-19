@@ -10,7 +10,11 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
 
   const personas = await db
-    .select({ id: personasEntidades.id, nombre: personasEntidades.nombre, tipo: personasEntidades.tipo })
+    .select({
+      id: personasEntidades.id,
+      nombre: personasEntidades.nombre,
+      tipo: personasEntidades.tipo,
+    })
     .from(personasEntidades)
     .where(and(eq(personasEntidades.usuarioId, usuarioId), isNull(personasEntidades.deletedAt)))
 

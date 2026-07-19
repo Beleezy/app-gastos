@@ -12,10 +12,7 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select({ id: personasEntidades.id, vinculoParId: personasEntidades.vinculoParId })
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, personaId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(and(eq(personasEntidades.id, personaId), eq(personasEntidades.usuarioId, usuarioId)))
     .limit(1)
 
   if (!persona) {
@@ -36,15 +33,12 @@ export default defineEventHandler(async (event) => {
     .from(auditoriaVinculos)
     .innerJoin(usuarios, eq(auditoriaVinculos.usuarioId, usuarios.id))
     .where(
-      or(
-        eq(auditoriaVinculos.personaAId, personaId),
-        eq(auditoriaVinculos.personaBId, personaId)
-      )
+      or(eq(auditoriaVinculos.personaAId, personaId), eq(auditoriaVinculos.personaBId, personaId)),
     )
     .orderBy(desc(auditoriaVinculos.createdAt))
     .limit(100)
 
-  return entradas.map(e => ({
+  return entradas.map((e) => ({
     ...e,
     datos: e.datos ? JSON.parse(e.datos) : null,
     esMiAccion: e.usuarioId === usuarioId,

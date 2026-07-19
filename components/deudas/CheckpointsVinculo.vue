@@ -4,7 +4,9 @@
     <div class="flex items-center justify-between mb-3">
       <div v-if="!embedded" class="flex items-center gap-2">
         <span class="w-1.5 h-1.5 rounded-full bg-violet-400"></span>
-        <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Puntos de guardado</h3>
+        <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">
+          Puntos de guardado
+        </h3>
         <span class="text-xs text-theme-text-muted">{{ checkpoints.length }}/5</span>
       </div>
       <span v-else class="text-xs text-theme-text-muted">{{ checkpoints.length }}/5 puntos</span>
@@ -13,8 +15,19 @@
         :disabled="guardando"
         @click="showCrearCheckpoint = true"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-3.5 h-3.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
+          />
         </svg>
         Guardar punto
       </button>
@@ -29,9 +42,14 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="checkpoints.length === 0" class="bg-theme-card rounded-xl p-4 text-center border border-theme-border">
+    <div
+      v-else-if="checkpoints.length === 0"
+      class="bg-theme-card rounded-xl p-4 text-center border border-theme-border"
+    >
       <p class="text-[0.7rem] text-theme-text-sec">No hay puntos de guardado todavía</p>
-      <p class="text-[0.65rem] text-theme-text-muted mt-0.5">Se creará uno automáticamente al vincular</p>
+      <p class="text-[0.65rem] text-theme-text-muted mt-0.5">
+        Se creará uno automáticamente al vincular
+      </p>
     </div>
 
     <!-- Lista de checkpoints (orden: actual → anterior → inicio) -->
@@ -42,10 +60,7 @@
         class="bg-theme-card rounded-xl border border-theme-border overflow-hidden"
       >
         <!-- Header del checkpoint -->
-        <div
-          class="flex items-center gap-2.5 p-3 cursor-pointer"
-          @click="toggleExpand(cp.id)"
-        >
+        <div class="flex items-center gap-2.5 p-3 cursor-pointer" @click="toggleExpand(cp.id)">
           <!-- Badge tipo -->
           <div
             class="flex-shrink-0 px-2 py-0.5 rounded-full text-[0.7rem] font-semibold"
@@ -79,7 +94,10 @@
             xmlns="http://www.w3.org/2000/svg"
             class="w-3.5 h-3.5 text-theme-text-muted transition-transform flex-shrink-0"
             :class="expandido === cp.id ? 'rotate-180' : ''"
-            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
           >
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
           </svg>
@@ -87,25 +105,40 @@
 
         <!-- Detalle expandido -->
         <div v-if="expandido === cp.id" class="border-t border-theme-border p-3 space-y-3">
-
           <!-- Resumen del estado guardado -->
           <div v-if="cp.snapshotResumen" class="bg-theme-input rounded-lg p-2.5">
-            <p class="text-[0.65rem] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">Estado guardado</p>
+            <p
+              class="text-[0.65rem] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5"
+            >
+              Estado guardado
+            </p>
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <p class="text-[0.65rem] text-theme-text-sec">{{ cp.snapshotResumen.personaANombre }}</p>
-                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteA) }}</p>
+                <p class="text-[0.65rem] text-theme-text-sec">
+                  {{ cp.snapshotResumen.personaANombre }}
+                </p>
+                <p class="text-[0.7rem] font-medium text-theme-text">
+                  {{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteA) }}
+                </p>
                 <p class="text-[0.65rem] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasA }} deuda(s)
-                  <span v-if="cp.snapshotResumen.totalPagosA > 0"> y {{ cp.snapshotResumen.totalPagosA }} pago(s)</span>
+                  <span v-if="cp.snapshotResumen.totalPagosA > 0">
+                    y {{ cp.snapshotResumen.totalPagosA }} pago(s)</span
+                  >
                 </p>
               </div>
               <div>
-                <p class="text-[0.65rem] text-theme-text-sec">{{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}</p>
-                <p class="text-[0.7rem] font-medium text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteB) }}</p>
+                <p class="text-[0.65rem] text-theme-text-sec">
+                  {{ cp.snapshotResumen.personaBNombre || 'Otro lado' }}
+                </p>
+                <p class="text-[0.7rem] font-medium text-theme-text">
+                  {{ currencySymbol }}&nbsp;{{ formatMonto(cp.snapshotResumen.totalPendienteB) }}
+                </p>
                 <p class="text-[0.65rem] text-theme-text-muted">
                   {{ cp.snapshotResumen.totalDeudasB }} deuda(s)
-                  <span v-if="cp.snapshotResumen.totalPagosB > 0"> y {{ cp.snapshotResumen.totalPagosB }} pago(s)</span>
+                  <span v-if="cp.snapshotResumen.totalPagosB > 0">
+                    y {{ cp.snapshotResumen.totalPagosB }} pago(s)</span
+                  >
                 </p>
               </div>
             </div>
@@ -113,7 +146,9 @@
 
           <!-- Auditoría de cambios en este período -->
           <div v-if="cp.auditoria && cp.auditoria.length > 0">
-            <p class="text-[0.65rem] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5">
+            <p
+              class="text-[0.65rem] font-semibold text-theme-text-muted uppercase tracking-wider mb-1.5"
+            >
               Cambios en este período ({{ cp.auditoria.length }})
             </p>
             <div class="space-y-1.5 max-h-48 overflow-y-auto">
@@ -127,33 +162,114 @@
                   class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
                   :class="accionIconClass(entrada.accion)"
                 >
-                  <svg v-if="entrada.accion.includes('eliminada') || entrada.accion.includes('eliminado')" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <svg
+                    v-if="
+                      entrada.accion.includes('eliminada') || entrada.accion.includes('eliminado')
+                    "
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
                   </svg>
-                  <svg v-else-if="entrada.accion.includes('creada') || entrada.accion.includes('creado')" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <svg
+                    v-else-if="
+                      entrada.accion.includes('creada') || entrada.accion.includes('creado')
+                    "
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                   </svg>
-                  <svg v-else-if="entrada.accion.includes('editada') || entrada.accion.includes('editado')" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <svg
+                    v-else-if="
+                      entrada.accion.includes('editada') || entrada.accion.includes('editado')
+                    "
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
                   </svg>
-                  <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    v-else
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="w-3 h-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <p v-if="!tieneDetallesColoreados(entrada)" class="text-[0.7rem] text-theme-text-sec leading-relaxed">{{ entrada.descripcion }}</p>
+                  <p
+                    v-if="!tieneDetallesColoreados(entrada)"
+                    class="text-[0.7rem] text-theme-text-sec leading-relaxed"
+                  >
+                    {{ entrada.descripcion }}
+                  </p>
                   <!-- Detailed changes for edits -->
-                  <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-0.5 space-y-0.5">
-                    <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[0.7rem] text-theme-text-sec flex items-center gap-1">
-                      <span class="text-theme-text-muted font-semibold">{{ cambio.label || campo }}:</span>
-                      <span class="text-red-400/70 line-through">{{ cambio.antes || '(vacío)' }}</span>
+                  <div
+                    v-if="
+                      entrada.datos?.cambios &&
+                      typeof entrada.datos.cambios === 'object' &&
+                      !Array.isArray(entrada.datos.cambios)
+                    "
+                    class="mt-0.5 space-y-0.5"
+                  >
+                    <div
+                      v-for="(cambio, campo) in entrada.datos.cambios"
+                      :key="campo"
+                      class="text-[0.7rem] text-theme-text-sec flex items-center gap-1"
+                    >
+                      <span class="text-theme-text-muted font-semibold"
+                        >{{ cambio.label || campo }}:</span
+                      >
+                      <span class="text-red-400/70 line-through">{{
+                        cambio.antes || '(vacío)'
+                      }}</span>
                       <span class="text-theme-text-sec">&rarr;</span>
-                      <span class="text-emerald-400/70 font-medium">{{ cambio.despues || '(vacío)' }}</span>
+                      <span class="text-emerald-400/70 font-medium">{{
+                        cambio.despues || '(vacío)'
+                      }}</span>
                     </div>
                   </div>
                   <!-- Detailed debts for global payments -->
-                  <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1 space-y-0.5">
-                    <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[0.65rem] text-theme-text-sec flex items-center gap-1">
+                  <div
+                    v-if="
+                      entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)
+                    "
+                    class="mt-1 space-y-0.5"
+                  >
+                    <div
+                      v-for="(dp, idx) in entrada.datos.deudasPagadas"
+                      :key="idx"
+                      class="text-[0.65rem] text-theme-text-sec flex items-center gap-1"
+                    >
                       <span class="text-teal-400/60">S/ {{ dp.monto }}</span>
                       <span class="text-theme-text-muted">&rarr;</span>
                       <span class="text-theme-text-muted">{{ dp.concepto }}</span>
@@ -162,11 +278,17 @@
                   <div class="flex items-center gap-1.5 mt-0.5">
                     <span
                       class="text-[0.65rem] font-medium px-1.5 py-0.5 rounded-full"
-                      :class="entrada.esTuyo ? 'bg-theme-accent-bg text-theme-accent' : 'bg-theme-card-hover0/20 text-theme-text-muted'"
+                      :class="
+                        entrada.esTuyo
+                          ? 'bg-theme-accent-bg text-theme-accent'
+                          : 'bg-theme-card-hover0/20 text-theme-text-muted'
+                      "
                     >
                       {{ entrada.nombreActor }}
                     </span>
-                    <span class="text-[0.65rem] text-theme-text-muted">{{ formatHora(entrada.createdAt) }}</span>
+                    <span class="text-[0.65rem] text-theme-text-muted">{{
+                      formatHora(entrada.createdAt)
+                    }}</span>
                   </div>
                 </div>
               </div>
@@ -174,24 +296,57 @@
           </div>
 
           <div v-else class="text-center py-2">
-            <p class="text-[0.65rem] text-theme-text-muted">Sin cambios registrados en este período</p>
+            <p class="text-[0.65rem] text-theme-text-muted">
+              Sin cambios registrados en este período
+            </p>
           </div>
 
           <!-- Botón restaurar -->
           <button
             class="w-full py-2 rounded-lg text-[0.7rem] font-medium transition-colors flex items-center justify-center gap-1.5"
-            :class="restaurando === cp.id
-              ? 'bg-theme-border-md text-theme-text-muted cursor-not-allowed'
-              : 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'"
+            :class="
+              restaurando === cp.id
+                ? 'bg-theme-border-md text-theme-text-muted cursor-not-allowed'
+                : 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'
+            "
             :disabled="restaurando !== null"
             @click="confirmarRestaurar(cp)"
           >
-            <svg v-if="restaurando !== cp.id" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              v-if="restaurando !== cp.id"
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
-            <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-3.5 h-3.5 animate-spin"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
             </svg>
             {{ restaurando === cp.id ? 'Restaurando...' : `Restaurar a este punto` }}
           </button>
@@ -200,13 +355,23 @@
     </div>
 
     <!-- Modal: crear checkpoint -->
-    <div v-if="showCrearCheckpoint" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showCrearCheckpoint = false"></div>
-      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+    <div
+      v-if="showCrearCheckpoint"
+      class="fixed inset-0 z-50 flex items-center justify-center px-6"
+    >
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="showCrearCheckpoint = false"
+      ></div>
+      <div
+        class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border"
+      >
         <h3 class="text-base font-semibold text-theme-text mb-1">Guardar punto de guardado</h3>
         <p class="text-xs text-theme-text-muted mb-4">
           Se guardará el estado actual de todas las deudas con esta persona.
-          <span v-if="checkpoints.length >= 5" class="text-amber-400"> El punto más antiguo será reemplazado.</span>
+          <span v-if="checkpoints.length >= 5" class="text-amber-400">
+            El punto más antiguo será reemplazado.</span
+          >
         </p>
         <div class="mb-4">
           <label class="text-xs text-theme-text-muted block mb-1.5">Descripción (opcional)</label>
@@ -237,18 +402,32 @@
     </div>
 
     <!-- Modal: confirmar restaurar -->
-    <div v-if="showConfirmRestaurar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="showConfirmRestaurar = false"></div>
-      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+    <div
+      v-if="showConfirmRestaurar"
+      class="fixed inset-0 z-50 flex items-center justify-center px-6"
+    >
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="showConfirmRestaurar = false"
+      ></div>
+      <div
+        class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border"
+      >
         <h3 class="text-base font-semibold text-theme-text mb-2">Restaurar punto de guardado</h3>
         <p class="text-sm text-theme-text-muted mb-2">
-          Se restaurarán los datos de <span class="text-theme-text font-medium">ambos usuarios</span> al estado guardado el
-          <span class="text-violet-400">{{ checkpointARestaurar ? formatFechaHora(checkpointARestaurar.createdAt) : '' }}</span>.
+          Se restaurarán los datos de
+          <span class="text-theme-text font-medium">ambos usuarios</span> al estado guardado el
+          <span class="text-violet-400">{{
+            checkpointARestaurar ? formatFechaHora(checkpointARestaurar.createdAt) : ''
+          }}</span
+          >.
         </p>
         <ul class="text-xs text-theme-text-sec space-y-1 mb-4 list-disc pl-4">
           <li>Las deudas y pagos actuales serán reemplazados</li>
           <li>El estado actual se guarda automáticamente antes de restaurar</li>
-          <li>Esta acción aplica para <span class="text-theme-text">ambos lados del vínculo</span></li>
+          <li>
+            Esta acción aplica para <span class="text-theme-text">ambos lados del vínculo</span>
+          </li>
         </ul>
         <div class="space-y-2">
           <button
@@ -278,7 +457,15 @@ const props = defineProps({
 
 const emit = defineEmits(['restaurado', 'creado'])
 
-const { checkpoints, cargando, guardando, restaurando, fetchCheckpoints, crearCheckpoint, restaurarCheckpoint } = useDeudas()
+const {
+  checkpoints,
+  cargando,
+  guardando,
+  restaurando,
+  fetchCheckpoints,
+  crearCheckpoint,
+  restaurarCheckpoint,
+} = useDeudas()
 const { currencySymbol, formatMonto } = useCurrency()
 
 const expandido = ref(null)
@@ -287,8 +474,12 @@ const showConfirmRestaurar = ref(false)
 const descripcionNuevoCheckpoint = ref('')
 const checkpointARestaurar = ref(null)
 
-useOverlayBack(showCrearCheckpoint, () => { showCrearCheckpoint.value = false })
-useOverlayBack(showConfirmRestaurar, () => { showConfirmRestaurar.value = false })
+useOverlayBack(showCrearCheckpoint, () => {
+  showCrearCheckpoint.value = false
+})
+useOverlayBack(showConfirmRestaurar, () => {
+  showConfirmRestaurar.value = false
+})
 
 onMounted(() => fetchCheckpoints(props.personaId))
 
@@ -302,8 +493,14 @@ function toggleExpand(id) {
 }
 
 function tieneDetallesColoreados(entrada) {
-  return (entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios))
-    || (entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas) && entrada.datos.deudasPagadas.length > 0)
+  return (
+    (entrada.datos?.cambios &&
+      typeof entrada.datos.cambios === 'object' &&
+      !Array.isArray(entrada.datos.cambios)) ||
+    (entrada.datos?.deudasPagadas &&
+      Array.isArray(entrada.datos.deudasPagadas) &&
+      entrada.datos.deudasPagadas.length > 0)
+  )
 }
 
 function tipoLabel(tipo) {
@@ -311,17 +508,22 @@ function tipoLabel(tipo) {
 }
 
 function tipoBadgeClass(tipo) {
-  return {
-    actual: 'bg-emerald-500/20 text-emerald-400',
-    anterior: 'bg-theme-accent-bg text-theme-accent',
-    inicio_vinculo: 'bg-violet-500/20 text-violet-400',
-  }[tipo] || 'bg-theme-card-hover0/20 text-theme-text-muted'
+  return (
+    {
+      actual: 'bg-emerald-500/20 text-emerald-400',
+      anterior: 'bg-theme-accent-bg text-theme-accent',
+      inicio_vinculo: 'bg-violet-500/20 text-violet-400',
+    }[tipo] || 'bg-theme-card-hover0/20 text-theme-text-muted'
+  )
 }
 
 function accionIconClass(accion) {
-  if (accion.includes('eliminada') || accion.includes('eliminado')) return 'bg-red-500/20 text-red-400'
-  if (accion.includes('creada') || accion.includes('creado')) return 'bg-emerald-500/20 text-emerald-400'
-  if (accion.includes('editada') || accion.includes('editado')) return 'bg-amber-500/20 text-amber-400'
+  if (accion.includes('eliminada') || accion.includes('eliminado'))
+    return 'bg-red-500/20 text-red-400'
+  if (accion.includes('creada') || accion.includes('creado'))
+    return 'bg-emerald-500/20 text-emerald-400'
+  if (accion.includes('editada') || accion.includes('editado'))
+    return 'bg-amber-500/20 text-amber-400'
   if (accion.includes('restaurado')) return 'bg-violet-500/20 text-violet-400'
   return 'bg-theme-card-hover0/20 text-theme-text-muted'
 }

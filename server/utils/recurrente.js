@@ -12,15 +12,18 @@ const MESES_FUTUROS = 12
  */
 export async function obtenerOCrearPlan(usuarioId, mes, anio, dbClient = db) {
   // Always try to find first
-  const buscar = () => dbClient
-    .select()
-    .from(planesMensuales)
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      eq(planesMensuales.mes, mes),
-      eq(planesMensuales.anio, anio)
-    ))
-    .limit(1)
+  const buscar = () =>
+    dbClient
+      .select()
+      .from(planesMensuales)
+      .where(
+        and(
+          eq(planesMensuales.usuarioId, usuarioId),
+          eq(planesMensuales.mes, mes),
+          eq(planesMensuales.anio, anio),
+        ),
+      )
+      .limit(1)
 
   let [plan] = await buscar()
   if (plan) return plan
@@ -98,18 +101,16 @@ export async function replicarGastoRecurrente(usuarioId, gasto, grupoId) {
     const diaAjustado = ajustarDia(diaOriginal, mes, anio)
     const fecha = `${anio}-${String(mes).padStart(2, '0')}-${String(diaAjustado).padStart(2, '0')}`
 
-    await db
-      .insert(gastosPlanificados)
-      .values({
-        planMensualId: plan.id,
-        categoriaId: gasto.categoriaId,
-        concepto: gasto.concepto,
-        montoEstimado: String(gasto.montoEstimado),
-        fechaProbablePago: fecha,
-        esRecurrente: true,
-        recurrenteGrupoId: grupoId,
-        notas: gasto.notas || null,
-      })
+    await db.insert(gastosPlanificados).values({
+      planMensualId: plan.id,
+      categoriaId: gasto.categoriaId,
+      concepto: gasto.concepto,
+      montoEstimado: String(gasto.montoEstimado),
+      fechaProbablePago: fecha,
+      esRecurrente: true,
+      recurrenteGrupoId: grupoId,
+      notas: gasto.notas || null,
+    })
   }
 }
 
@@ -158,10 +159,7 @@ export async function actualizarRecurrentesFuturos(grupoId, gastoActualId, datos
       updateData.fechaProbablePago = `${anioGp}-${String(mesGp).padStart(2, '0')}-${String(diaAjustado).padStart(2, '0')}`
     }
 
-    await db
-      .update(gastosPlanificados)
-      .set(updateData)
-      .where(eq(gastosPlanificados.id, gp.id))
+    await db.update(gastosPlanificados).set(updateData).where(eq(gastosPlanificados.id, gp.id))
   }
 }
 
@@ -192,13 +190,9 @@ export async function eliminarRecurrentesFuturos(grupoId, gastoActualId) {
     if (anioGp < anioActual || (anioGp === anioActual && mesGp < mesActual)) continue
 
     // Delete associated real expense if exists
-    await db
-      .delete(gastos)
-      .where(eq(gastos.gastoPlanificadoId, gp.id))
+    await db.delete(gastos).where(eq(gastos.gastoPlanificadoId, gp.id))
 
-    await db
-      .delete(gastosPlanificados)
-      .where(eq(gastosPlanificados.id, gp.id))
+    await db.delete(gastosPlanificados).where(eq(gastosPlanificados.id, gp.id))
   }
 }
 

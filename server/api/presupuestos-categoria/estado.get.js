@@ -28,14 +28,20 @@ export default defineEventHandler(async (event) => {
       categoriaColor: categorias.color,
       montoMensual: presupuestosCategoria.montoMensual,
       alertaUmbral: presupuestosCategoria.alertaUmbral,
-      consumido: sql`COALESCE(SUM(CASE WHEN ${gastos.fecha} BETWEEN ${primerDia} AND ${ultimaFecha} AND ${gastos.deletedAt} IS NULL THEN ${gastos.monto} END), 0)`.as('consumido'),
+      consumido:
+        sql`COALESCE(SUM(CASE WHEN ${gastos.fecha} BETWEEN ${primerDia} AND ${ultimaFecha} AND ${gastos.deletedAt} IS NULL THEN ${gastos.monto} END), 0)`.as(
+          'consumido',
+        ),
     })
     .from(presupuestosCategoria)
     .innerJoin(categorias, eq(categorias.id, presupuestosCategoria.categoriaId))
-    .leftJoin(gastos, and(
-      eq(gastos.categoriaId, presupuestosCategoria.categoriaId),
-      eq(gastos.usuarioId, usuarioId),
-    ))
+    .leftJoin(
+      gastos,
+      and(
+        eq(gastos.categoriaId, presupuestosCategoria.categoriaId),
+        eq(gastos.usuarioId, usuarioId),
+      ),
+    )
     .where(eq(presupuestosCategoria.usuarioId, usuarioId))
     .groupBy(
       presupuestosCategoria.categoriaId,
@@ -46,7 +52,7 @@ export default defineEventHandler(async (event) => {
       categorias.color,
     )
 
-  return rows.map(r => {
+  return rows.map((r) => {
     const monto = parseFloat(r.montoMensual)
     const consumido = parseFloat(r.consumido)
     const pct = monto > 0 ? (consumido / monto) * 100 : 0

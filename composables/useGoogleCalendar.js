@@ -18,7 +18,9 @@ export function useGoogleCalendar() {
   }
 
   async function desconectar(borrarCalendario = false) {
-    await apiFetch(`/api/integraciones/google?borrarCalendario=${borrarCalendario}`, { method: 'DELETE' })
+    await apiFetch(`/api/integraciones/google?borrarCalendario=${borrarCalendario}`, {
+      method: 'DELETE',
+    })
     await fetchEstado()
   }
 

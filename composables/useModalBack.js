@@ -7,9 +7,10 @@ let cleanupPopDeadline = 0
 let cleanupTimer = null
 
 function getCleanHistoryState() {
-  const currentState = window.history.state && typeof window.history.state === 'object'
-    ? { ...window.history.state }
-    : {}
+  const currentState =
+    window.history.state && typeof window.history.state === 'object'
+      ? { ...window.history.state }
+      : {}
 
   delete currentState[MODAL_STATE_KEY]
   return currentState
@@ -47,7 +48,11 @@ export function useModalBack(closeCallback) {
       // If a previously closed modal had a pending history.back(), keep this
       // newly opened modal armed instead of closing it with that stale popstate.
       if (window.history.state?.[MODAL_STATE_KEY] !== modalStateId) {
-        window.history.pushState({ ...getCleanHistoryState(), [MODAL_STATE_KEY]: modalStateId }, '', window.location.href)
+        window.history.pushState(
+          { ...getCleanHistoryState(), [MODAL_STATE_KEY]: modalStateId },
+          '',
+          window.location.href,
+        )
       }
       return
     }
@@ -66,7 +71,11 @@ export function useModalBack(closeCallback) {
       window.history.replaceState(currentState, '', window.location.href)
     }
 
-    window.history.pushState({ ...currentState, [MODAL_STATE_KEY]: modalStateId }, '', window.location.href)
+    window.history.pushState(
+      { ...currentState, [MODAL_STATE_KEY]: modalStateId },
+      '',
+      window.location.href,
+    )
     window.addEventListener('popstate', handlePopState)
   })
 

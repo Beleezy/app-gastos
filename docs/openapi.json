@@ -50,11 +50,7 @@
           },
           "metodoRegistro": {
             "type": "string",
-            "enum": [
-              "voz",
-              "foto",
-              "manual"
-            ]
+            "enum": ["voz", "foto", "manual"]
           },
           "gastoPlanificadoId": {
             "oneOf": [
@@ -71,11 +67,7 @@
             "maxLength": 2000
           }
         },
-        "required": [
-          "concepto",
-          "monto",
-          "fecha"
-        ]
+        "required": ["concepto", "monto", "fecha"]
       },
       "GastoUpdate": {
         "type": "object",
@@ -114,11 +106,7 @@
           },
           "metodoRegistro": {
             "type": "string",
-            "enum": [
-              "voz",
-              "foto",
-              "manual"
-            ]
+            "enum": ["voz", "foto", "manual"]
           },
           "gastoPlanificadoId": {
             "oneOf": [
@@ -178,11 +166,7 @@
                 },
                 "metodoRegistro": {
                   "type": "string",
-                  "enum": [
-                    "voz",
-                    "foto",
-                    "manual"
-                  ]
+                  "enum": ["voz", "foto", "manual"]
                 },
                 "gastoPlanificadoId": {
                   "oneOf": [
@@ -199,25 +183,15 @@
                   "maxLength": 2000
                 }
               },
-              "required": [
-                "concepto",
-                "monto",
-                "fecha"
-              ]
+              "required": ["concepto", "monto", "fecha"]
             }
           },
           "metodoRegistro": {
             "type": "string",
-            "enum": [
-              "voz",
-              "foto",
-              "manual"
-            ]
+            "enum": ["voz", "foto", "manual"]
           }
         },
-        "required": [
-          "gastos"
-        ]
+        "required": ["gastos"]
       },
       "GastosBulkIds": {
         "type": "object",
@@ -236,9 +210,7 @@
             }
           }
         },
-        "required": [
-          "ids"
-        ]
+        "required": ["ids"]
       },
       "DeudaCreate": {
         "type": "object",
@@ -259,19 +231,11 @@
           },
           "personaTipo": {
             "type": "string",
-            "enum": [
-              "persona",
-              "entidad",
-              "banco",
-              "otro"
-            ]
+            "enum": ["persona", "entidad", "banco", "otro"]
           },
           "tipoDeuda": {
             "type": "string",
-            "enum": [
-              "me_deben",
-              "yo_debo"
-            ]
+            "enum": ["me_deben", "yo_debo"]
           },
           "concepto": {
             "type": "string",
@@ -300,11 +264,7 @@
             "maxLength": 1000
           }
         },
-        "required": [
-          "tipoDeuda",
-          "concepto",
-          "monto"
-        ]
+        "required": ["tipoDeuda", "concepto", "monto"]
       },
       "DeudaUpdate": {
         "type": "object",
@@ -325,19 +285,11 @@
           },
           "personaTipo": {
             "type": "string",
-            "enum": [
-              "persona",
-              "entidad",
-              "banco",
-              "otro"
-            ]
+            "enum": ["persona", "entidad", "banco", "otro"]
           },
           "tipoDeuda": {
             "type": "string",
-            "enum": [
-              "me_deben",
-              "yo_debo"
-            ]
+            "enum": ["me_deben", "yo_debo"]
           },
           "concepto": {
             "type": "string",
@@ -394,11 +346,7 @@
             "maxLength": 1000
           }
         },
-        "required": [
-          "deudaId",
-          "monto",
-          "fechaPago"
-        ]
+        "required": ["deudaId", "monto", "fechaPago"]
       },
       "PagoGlobal": {
         "type": "object",
@@ -415,10 +363,7 @@
           },
           "tipoDeuda": {
             "type": "string",
-            "enum": [
-              "me_deben",
-              "yo_debo"
-            ]
+            "enum": ["me_deben", "yo_debo"]
           },
           "monto": {
             "type": "number",
@@ -435,11 +380,7 @@
           },
           "estrategia": {
             "type": "string",
-            "enum": [
-              "fifo",
-              "lifo",
-              "manual"
-            ]
+            "enum": ["fifo", "lifo", "manual"]
           },
           "asignaciones": {
             "type": "array",
@@ -462,19 +403,11 @@
                   "maximum": 10000000
                 }
               },
-              "required": [
-                "deudaId",
-                "monto"
-              ]
+              "required": ["deudaId", "monto"]
             }
           }
         },
-        "required": [
-          "personaEntidadId",
-          "tipoDeuda",
-          "monto",
-          "fechaPago"
-        ]
+        "required": ["personaEntidadId", "tipoDeuda", "monto", "fechaPago"]
       },
       "SolicitudVinculo": {
         "type": "object",
@@ -499,10 +432,7 @@
             "maxLength": 500
           }
         },
-        "required": [
-          "email",
-          "personaEntidadId"
-        ]
+        "required": ["email", "personaEntidadId"]
       },
       "PlanMensual": {
         "type": "object",
@@ -523,10 +453,7 @@
             "maximum": 10000000
           }
         },
-        "required": [
-          "mes",
-          "anio"
-        ]
+        "required": ["mes", "anio"]
       },
       "GastoPlanificado": {
         "type": "object",
@@ -567,12 +494,7 @@
           },
           "estado": {
             "type": "string",
-            "enum": [
-              "pendiente",
-              "pagado",
-              "archivado",
-              "cancelado"
-            ]
+            "enum": ["pendiente", "pagado", "archivado", "cancelado"]
           },
           "recurrente": {
             "type": "boolean"
@@ -592,10 +514,7 @@
             "maxLength": 1000
           }
         },
-        "required": [
-          "concepto",
-          "monto"
-        ]
+        "required": ["concepto", "monto"]
       },
       "GastoFuturoCreate": {
         "type": "object",
@@ -607,21 +526,14 @@
           },
           "prioridad": {
             "type": "string",
-            "enum": [
-              "baja",
-              "media",
-              "alta",
-              "critica"
-            ]
+            "enum": ["baja", "media", "alta", "critica"]
           },
           "notas": {
             "type": "string",
             "maxLength": 1000
           }
         },
-        "required": [
-          "tipo"
-        ]
+        "required": ["tipo"]
       }
     }
   },

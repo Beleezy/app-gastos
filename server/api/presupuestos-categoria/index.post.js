@@ -22,10 +22,12 @@ export default defineEventHandler(async (event) => {
   const [cat] = await db
     .select({ id: categorias.id })
     .from(categorias)
-    .where(and(
-      eq(categorias.id, categoriaId),
-      or(eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)),
-    ))
+    .where(
+      and(
+        eq(categorias.id, categoriaId),
+        or(eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)),
+      ),
+    )
     .limit(1)
   if (!cat) throw createError({ statusCode: 404, message: 'Categoría no encontrada' })
 

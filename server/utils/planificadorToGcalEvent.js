@@ -19,7 +19,13 @@ function formatMonto(n) {
   return Number(n).toFixed(2)
 }
 
-export function buildEvent({ gasto, gastoReal = null, moneda = 'S/', recordatorios = [], appUrl = '' }) {
+export function buildEvent({
+  gasto,
+  gastoReal = null,
+  moneda = 'S/',
+  recordatorios = [],
+  appUrl = '',
+}) {
   const monto = formatMonto(gasto.montoEstimado)
   const tituloBase = `${moneda} ${monto} · ${gasto.concepto}`
   const fechaEvento = gasto.fechaProbablePago
@@ -30,7 +36,9 @@ export function buildEvent({ gasto, gastoReal = null, moneda = 'S/', recordatori
 
   const descPartes = []
   if (isPagado) {
-    descPartes.push(`✅ Pagado el ${gastoReal.fecha} · Monto real: ${moneda} ${formatMonto(gastoReal.monto)}`)
+    descPartes.push(
+      `✅ Pagado el ${gastoReal.fecha} · Monto real: ${moneda} ${formatMonto(gastoReal.monto)}`,
+    )
   } else {
     descPartes.push(`Pendiente · ${moneda} ${monto}`)
   }
@@ -54,7 +62,10 @@ export function buildEvent({ gasto, gastoReal = null, moneda = 'S/', recordatori
       ? { useDefault: false, overrides: [] }
       : {
           useDefault: false,
-          overrides: recordatorios.map(r => ({ method: 'popup', minutes: recordatorioToMinutes(r) })),
+          overrides: recordatorios.map((r) => ({
+            method: 'popup',
+            minutes: recordatorioToMinutes(r),
+          })),
         },
   }
 

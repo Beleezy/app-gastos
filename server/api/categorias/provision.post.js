@@ -1,5 +1,11 @@
 import { db } from '../../utils/db.js'
-import { categorias, gastos, gastosPlanificados, planesMensuales, gastosFuturos } from '../../database/schema.js'
+import {
+  categorias,
+  gastos,
+  gastosPlanificados,
+  planesMensuales,
+  gastosFuturos,
+} from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, inArray } from 'drizzle-orm'
 
@@ -24,10 +30,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Obtener categorías predefinidas
-  const predefinidas = await db
-    .select()
-    .from(categorias)
-    .where(eq(categorias.esPredefinida, true))
+  const predefinidas = await db.select().from(categorias).where(eq(categorias.esPredefinida, true))
 
   if (predefinidas.length === 0) {
     return { provisioned: false, categories: [] }
@@ -36,19 +39,21 @@ export default defineEventHandler(async (event) => {
   // Clonar predefinidas como categorías del usuario
   const clonadas = await db
     .insert(categorias)
-    .values(predefinidas.map(c => ({
-      usuarioId,
-      nombre: c.nombre,
-      icono: c.icono,
-      color: c.color,
-      esPredefinida: false,
-    })))
+    .values(
+      predefinidas.map((c) => ({
+        usuarioId,
+        nombre: c.nombre,
+        icono: c.icono,
+        color: c.color,
+        esPredefinida: false,
+      })),
+    )
     .returning()
 
   // Construir mapa de IDs viejas -> nuevas
   const idMap = {}
   for (const vieja of predefinidas) {
-    const nueva = clonadas.find(n => n.nombre === vieja.nombre)
+    const nueva = clonadas.find((n) => n.nombre === vieja.nombre)
     if (nueva) idMap[vieja.id] = nueva.id
   }
 
@@ -69,15 +74,17 @@ export default defineEventHandler(async (event) => {
       .where(eq(planesMensuales.usuarioId, usuarioId))
 
     if (userPlanIds.length > 0) {
-      const planIds = userPlanIds.map(p => p.id)
+      const planIds = userPlanIds.map((p) => p.id)
       for (const [oldId, newId] of Object.entries(idMap)) {
         await db
           .update(gastosPlanificados)
           .set({ categoriaId: newId })
-          .where(and(
-            eq(gastosPlanificados.categoriaId, oldId),
-            inArray(gastosPlanificados.planMensualId, planIds)
-          ))
+          .where(
+            and(
+              eq(gastosPlanificados.categoriaId, oldId),
+              inArray(gastosPlanificados.planMensualId, planIds),
+            ),
+          )
       }
     }
 
@@ -85,10 +92,7 @@ export default defineEventHandler(async (event) => {
       await db
         .update(gastosFuturos)
         .set({ categoriaId: newId, updatedAt: new Date() })
-        .where(and(
-          eq(gastosFuturos.usuarioId, usuarioId),
-          eq(gastosFuturos.categoriaId, oldId)
-        ))
+        .where(and(eq(gastosFuturos.usuarioId, usuarioId), eq(gastosFuturos.categoriaId, oldId)))
     }
   }
 

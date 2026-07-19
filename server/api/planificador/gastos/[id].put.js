@@ -7,7 +7,7 @@ import {
   replicarGastoRecurrente,
   actualizarRecurrentesFuturos,
   eliminarRecurrentesFuturos,
-  generarGrupoId
+  generarGrupoId,
 } from '../../../utils/recurrente.js'
 import { and, eq } from 'drizzle-orm'
 import { syncUpdated } from '../../../utils/gcalAutoSync.js'
@@ -21,10 +21,7 @@ async function cargarGastoPropio(id, usuarioId) {
     .select({ gp: gastosPlanificados })
     .from(gastosPlanificados)
     .innerJoin(planesMensuales, eq(planesMensuales.id, gastosPlanificados.planMensualId))
-    .where(and(
-      eq(gastosPlanificados.id, id),
-      eq(planesMensuales.usuarioId, usuarioId),
-    ))
+    .where(and(eq(gastosPlanificados.id, id), eq(planesMensuales.usuarioId, usuarioId)))
     .limit(1)
   return row?.gp || null
 }
@@ -92,17 +89,20 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
-    await replicarGastoRecurrente(usuarioId, {
-      categoriaId: updated.categoriaId,
-      concepto: updated.concepto,
-      montoEstimado: parseFloat(updated.montoEstimado),
-      fechaProbablePago: updated.fechaProbablePago,
-      notas: updated.notas,
-    }, nuevoGrupoId)
+    await replicarGastoRecurrente(
+      usuarioId,
+      {
+        categoriaId: updated.categoriaId,
+        concepto: updated.concepto,
+        montoEstimado: parseFloat(updated.montoEstimado),
+        fechaProbablePago: updated.fechaProbablePago,
+        notas: updated.notas,
+      },
+      nuevoGrupoId,
+    )
 
     syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
-
   } else if (eraRecurrente && !seraRecurrente) {
     // Turned OFF: remove future copies, clear group
     if (grupoAnterior) {
@@ -118,7 +118,6 @@ export default defineEventHandler(async (event) => {
 
     syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
-
   } else if (eraRecurrente && seraRecurrente && grupoAnterior) {
     // Was and still is recurring: propagate changes to future months
     const [updated] = await db
@@ -132,7 +131,8 @@ export default defineEventHandler(async (event) => {
     if (body.concepto !== undefined) datosParaPropagar.concepto = body.concepto
     if (body.montoEstimado !== undefined) datosParaPropagar.montoEstimado = body.montoEstimado
     if (body.categoriaId !== undefined) datosParaPropagar.categoriaId = body.categoriaId
-    if (body.fechaProbablePago !== undefined) datosParaPropagar.fechaProbablePago = body.fechaProbablePago
+    if (body.fechaProbablePago !== undefined)
+      datosParaPropagar.fechaProbablePago = body.fechaProbablePago
     if (body.notas !== undefined) datosParaPropagar.notas = body.notas
 
     if (Object.keys(datosParaPropagar).length > 0) {
@@ -141,7 +141,6 @@ export default defineEventHandler(async (event) => {
 
     syncUpdated(usuarioId, id)
     return await respuestaConCategoria(updated)
-
   } else {
     // Not recurring, simple update
     const [updated] = await db
@@ -156,7 +155,11 @@ export default defineEventHandler(async (event) => {
 })
 
 async function respuestaConCategoria(gasto) {
-  const [cat] = await db.select().from(categorias).where(eq(categorias.id, gasto.categoriaId)).limit(1)
+  const [cat] = await db
+    .select()
+    .from(categorias)
+    .where(eq(categorias.id, gasto.categoriaId))
+    .limit(1)
   return {
     ...gasto,
     montoEstimado: parseFloat(gasto.montoEstimado),

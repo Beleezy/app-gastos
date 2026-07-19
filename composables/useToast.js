@@ -2,7 +2,7 @@ export function useToast() {
   const toasts = useState('toasts', () => [])
 
   function dismiss(id) {
-    toasts.value = toasts.value.filter(t => t.id !== id)
+    toasts.value = toasts.value.filter((t) => t.id !== id)
   }
 
   function show({ message, type = 'info', duration = 3000, action = null }) {

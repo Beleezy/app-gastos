@@ -15,12 +15,24 @@ export class FormGastoManualModal {
   }
 
   // ─── Inputs ─────────────────────────────────────────────
-  inputConcepto() { return this.root.getByTestId(REGISTRO.INPUT_CONCEPTO) }
-  inputMonto() { return this.root.getByTestId(REGISTRO.INPUT_MONTO) }
-  inputFecha() { return this.root.getByTestId(REGISTRO.INPUT_FECHA) }
-  inputHora() { return this.root.getByTestId(REGISTRO.INPUT_HORA) }
-  inputNotas() { return this.root.getByTestId(REGISTRO.INPUT_NOTAS) }
-  btnGuardar() { return this.root.getByTestId(REGISTRO.BTN_GUARDAR) }
+  inputConcepto() {
+    return this.root.getByTestId(REGISTRO.INPUT_CONCEPTO)
+  }
+  inputMonto() {
+    return this.root.getByTestId(REGISTRO.INPUT_MONTO)
+  }
+  inputFecha() {
+    return this.root.getByTestId(REGISTRO.INPUT_FECHA)
+  }
+  inputHora() {
+    return this.root.getByTestId(REGISTRO.INPUT_HORA)
+  }
+  inputNotas() {
+    return this.root.getByTestId(REGISTRO.INPUT_NOTAS)
+  }
+  btnGuardar() {
+    return this.root.getByTestId(REGISTRO.BTN_GUARDAR)
+  }
 
   /**
    * Selecciona categoria por nombre visible (es un grid de botones, no select).

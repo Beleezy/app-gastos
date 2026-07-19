@@ -24,12 +24,13 @@ export default defineEventHandler(async (event) => {
 
   // Verificar persona y si está vinculada
   const [persona] = await db
-    .select({ id: personasEntidades.id, vinculoParId: personasEntidades.vinculoParId, vinculadoUsuarioId: personasEntidades.vinculadoUsuarioId })
+    .select({
+      id: personasEntidades.id,
+      vinculoParId: personasEntidades.vinculoParId,
+      vinculadoUsuarioId: personasEntidades.vinculadoUsuarioId,
+    })
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, personaId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(and(eq(personasEntidades.id, personaId), eq(personasEntidades.usuarioId, usuarioId)))
     .limit(1)
 
   if (!persona) {
@@ -39,12 +40,14 @@ export default defineEventHandler(async (event) => {
   const deudasActivas = await db
     .select()
     .from(deudas)
-    .where(and(
-      eq(deudas.usuarioId, usuarioId),
-      eq(deudas.personaEntidadId, personaId),
-      isNull(deudas.deletedAt),
-      or(eq(deudas.estado, 'pendiente'), eq(deudas.estado, 'parcial'))
-    ))
+    .where(
+      and(
+        eq(deudas.usuarioId, usuarioId),
+        eq(deudas.personaEntidadId, personaId),
+        isNull(deudas.deletedAt),
+        or(eq(deudas.estado, 'pendiente'), eq(deudas.estado, 'parcial')),
+      ),
+    )
 
   if (deudasActivas.length === 0) {
     throw createError({ statusCode: 400, message: 'No hay deudas pendientes para esta persona' })
@@ -123,7 +126,15 @@ export default defineEventHandler(async (event) => {
         usuarioId,
         accion: 'pago_creado',
         descripcion: `Pago global de S/ ${montoAplicado}${metodoPago ? ` vía ${metodoPago}` : ''} (${pagosRealizados.length} deuda${pagosRealizados.length !== 1 ? 's' : ''})`,
-        datos: { montoAplicado, metodoPago, deudasPagadas: pagosRealizados.map(p => ({ deudaId: p.deudaId, concepto: p.concepto, monto: p.montoPagado })) },
+        datos: {
+          montoAplicado,
+          metodoPago,
+          deudasPagadas: pagosRealizados.map((p) => ({
+            deudaId: p.deudaId,
+            concepto: p.concepto,
+            monto: p.montoPagado,
+          })),
+        },
       })
     }
 

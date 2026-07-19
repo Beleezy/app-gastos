@@ -15,6 +15,7 @@
 ## Mapa de archivos
 
 **Nuevos archivos (servidor):**
+
 - `server/utils/crypto.js` — `encrypt(plaintext)` / `decrypt(ciphertext)` con AES-256-GCM
 - `server/utils/googleOAuthState.js` — firmar/validar el `state` del OAuth callback
 - `server/utils/googleCalendar.js` — wrapper de Google Calendar API (refresh token, retry, self-heal 404)
@@ -28,11 +29,13 @@
 - `server/api/integraciones/google/config.patch.js`
 
 **Nuevos archivos (cliente):**
+
 - `composables/useGoogleCalendar.js`
 - `components/configuraciones/IntegracionGoogleCalendar.vue`
 - `components/configuraciones/EditorRecordatorios.vue`
 
 **Modificaciones:**
+
 - `server/database/schema.js` — agregar tabla `googleCalendarConexiones` + columna `googleEventId` en `gastosPlanificados`
 - `server/database/migrations/0018_google_calendar.sql` — migración SQL
 - `nuxt.config.ts` — runtimeConfig (encryption key + OAuth Google)
@@ -45,6 +48,7 @@
 - `components/planificador/ResumenMes.vue` — entrada "Sincronizar con Google Calendar" en menú "..."
 
 **Nuevos tests:**
+
 - `tests/crypto.test.js`
 - `tests/googleOAuthState.test.js`
 - `tests/planificadorToGcalEvent.test.js`
@@ -55,6 +59,7 @@
 ## Task 1: Utilidad de cifrado AES-256-GCM
 
 **Files:**
+
 - Create: `server/utils/crypto.js`
 - Test: `tests/crypto.test.js`
 
@@ -166,6 +171,7 @@ git commit -m "feat: utilidad de cifrado AES-256-GCM para tokens OAuth"
 ## Task 2: Variables de entorno y runtimeConfig
 
 **Files:**
+
 - Modify: `.env.example`
 - Modify: `nuxt.config.ts`
 
@@ -211,6 +217,7 @@ git commit -m "feat: env vars para integración Google Calendar"
 ## Task 3: Esquema de DB + migración
 
 **Files:**
+
 - Modify: `server/database/schema.js`
 - Create: `server/database/migrations/0018_google_calendar.sql`
 
@@ -219,27 +226,47 @@ git commit -m "feat: env vars para integración Google Calendar"
 En la línea 1, asegurar que `jsonb` está en el import:
 
 ```js
-import { pgTable, uuid, varchar, text, boolean, integer, decimal, date, time, timestamp, pgEnum, unique, index, uniqueIndex, jsonb } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  varchar,
+  text,
+  boolean,
+  integer,
+  decimal,
+  date,
+  time,
+  timestamp,
+  pgEnum,
+  unique,
+  index,
+  uniqueIndex,
+  jsonb,
+} from 'drizzle-orm/pg-core'
 ```
 
 Al final del archivo `server/database/schema.js`, agregar:
 
 ```js
 // ── Integraciones: Google Calendar ──
-export const googleCalendarConexiones = pgTable('google_calendar_conexiones', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  usuarioId: uuid('usuario_id').references(() => usuarios.id, { onDelete: 'cascade' }).notNull(),
-  refreshTokenCifrado: text('refresh_token_cifrado').notNull(),
-  calendarId: varchar('calendar_id', { length: 255 }).notNull(),
-  calendarNombre: varchar('calendar_nombre', { length: 255 }).notNull(),
-  recordatoriosConfig: jsonb('recordatorios_config').notNull(),
-  ultimaSync: timestamp('ultima_sync'),
-  ultimoError: text('ultimo_error'),
-  fechaConexion: timestamp('fecha_conexion').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-}, (table) => [
-  uniqueIndex('google_calendar_conexiones_usuario_unique').on(table.usuarioId),
-])
+export const googleCalendarConexiones = pgTable(
+  'google_calendar_conexiones',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    usuarioId: uuid('usuario_id')
+      .references(() => usuarios.id, { onDelete: 'cascade' })
+      .notNull(),
+    refreshTokenCifrado: text('refresh_token_cifrado').notNull(),
+    calendarId: varchar('calendar_id', { length: 255 }).notNull(),
+    calendarNombre: varchar('calendar_nombre', { length: 255 }).notNull(),
+    recordatoriosConfig: jsonb('recordatorios_config').notNull(),
+    ultimaSync: timestamp('ultima_sync'),
+    ultimoError: text('ultimo_error'),
+    fechaConexion: timestamp('fecha_conexion').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex('google_calendar_conexiones_usuario_unique').on(table.usuarioId)],
+)
 ```
 
 - [ ] **Step 2: Agregar columna `googleEventId` a `gastosPlanificados`**
@@ -297,6 +324,7 @@ git commit -m "feat: esquema para integración Google Calendar"
 ## Task 4: Firma del state OAuth
 
 **Files:**
+
 - Create: `server/utils/googleOAuthState.js`
 - Test: `tests/googleOAuthState.test.js`
 
@@ -399,6 +427,7 @@ git commit -m "feat: firma HMAC para state del OAuth Google Calendar"
 ## Task 5: Builder de payload de evento
 
 **Files:**
+
 - Create: `server/utils/planificadorToGcalEvent.js`
 - Test: `tests/planificadorToGcalEvent.test.js`
 
@@ -561,7 +590,13 @@ function formatMonto(n) {
   return Number(n).toFixed(2)
 }
 
-export function buildEvent({ gasto, gastoReal = null, moneda = 'S/', recordatorios = [], appUrl = '' }) {
+export function buildEvent({
+  gasto,
+  gastoReal = null,
+  moneda = 'S/',
+  recordatorios = [],
+  appUrl = '',
+}) {
   const monto = formatMonto(gasto.montoEstimado)
   const tituloBase = `${moneda} ${monto} · ${gasto.concepto}`
   const fechaEvento = gasto.fechaProbablePago
@@ -572,7 +607,9 @@ export function buildEvent({ gasto, gastoReal = null, moneda = 'S/', recordatori
 
   const descPartes = []
   if (isPagado) {
-    descPartes.push(`✅ Pagado el ${gastoReal.fecha} · Monto real: ${moneda} ${formatMonto(gastoReal.monto)}`)
+    descPartes.push(
+      `✅ Pagado el ${gastoReal.fecha} · Monto real: ${moneda} ${formatMonto(gastoReal.monto)}`,
+    )
   } else {
     descPartes.push(`Pendiente · ${moneda} ${monto}`)
   }
@@ -596,7 +633,10 @@ export function buildEvent({ gasto, gastoReal = null, moneda = 'S/', recordatori
       ? { useDefault: false, overrides: [] }
       : {
           useDefault: false,
-          overrides: recordatorios.map(r => ({ method: 'popup', minutes: recordatorioToMinutes(r) })),
+          overrides: recordatorios.map((r) => ({
+            method: 'popup',
+            minutes: recordatorioToMinutes(r),
+          })),
         },
   }
 
@@ -625,6 +665,7 @@ git commit -m "feat: builder de payload de evento para Google Calendar"
 ## Task 6: Wrapper de Google Calendar API (refresh token + helpers)
 
 **Files:**
+
 - Create: `server/utils/googleCalendar.js`
 - Test: `tests/googleCalendar.test.js`
 
@@ -648,7 +689,12 @@ beforeEach(async () => {
 })
 
 function mockJson(body, status = 200) {
-  return { ok: status < 400, status, json: async () => body, text: async () => JSON.stringify(body) }
+  return {
+    ok: status < 400,
+    status,
+    json: async () => body,
+    text: async () => JSON.stringify(body),
+  }
 }
 
 describe('googleCalendar — refresh token', () => {
@@ -659,7 +705,7 @@ describe('googleCalendar — refresh token', () => {
     expect(token).toBe('tk-abc')
     expect(fetchMock).toHaveBeenCalledWith(
       'https://oauth2.googleapis.com/token',
-      expect.objectContaining({ method: 'POST' })
+      expect.objectContaining({ method: 'POST' }),
     )
   })
 
@@ -673,7 +719,11 @@ describe('googleCalendar — refresh token', () => {
 
   it('invalid_grant lanza error específico', async () => {
     fetchMock.mockResolvedValueOnce(mockJson({ error: 'invalid_grant' }, 400))
-    const client = createGcalClient({ refreshToken: 'rt-bad', clientId: 'cid', clientSecret: 'csec' })
+    const client = createGcalClient({
+      refreshToken: 'rt-bad',
+      clientId: 'cid',
+      clientSecret: 'csec',
+    })
     await expect(client.getAccessToken()).rejects.toThrow(/invalid_grant|token.*expirad/i)
   })
 })
@@ -688,15 +738,15 @@ describe('googleCalendar — events CRUD', () => {
     expect(id).toBe('evt-xyz')
     expect(fetchMock).toHaveBeenLastCalledWith(
       'https://www.googleapis.com/calendar/v3/calendars/cal-1/events',
-      expect.objectContaining({ method: 'POST' })
+      expect.objectContaining({ method: 'POST' }),
     )
   })
 
   it('patchEvent recrea evento si Google devuelve 404', async () => {
     fetchMock
       .mockResolvedValueOnce(mockJson({ access_token: 'tk', expires_in: 3600 }))
-      .mockResolvedValueOnce(mockJson({ error: { code: 404 } }, 404))  // patch falla
-      .mockResolvedValueOnce(mockJson({ id: 'evt-new' }))               // insert exitoso
+      .mockResolvedValueOnce(mockJson({ error: { code: 404 } }, 404)) // patch falla
+      .mockResolvedValueOnce(mockJson({ id: 'evt-new' })) // insert exitoso
     const client = createGcalClient({ refreshToken: 'rt', clientId: 'c', clientSecret: 's' })
     const result = await client.patchEvent('cal-1', 'evt-viejo', { summary: 'x' })
     expect(result.id).toBe('evt-new')
@@ -720,8 +770,10 @@ describe('googleCalendar — retry on 429', () => {
       .mockResolvedValueOnce(mockJson({}, 429))
       .mockResolvedValueOnce(mockJson({ id: 'evt-x' }))
     const client = createGcalClient({
-      refreshToken: 'rt', clientId: 'c', clientSecret: 's',
-      sleep: () => Promise.resolve(),  // no real delay en test
+      refreshToken: 'rt',
+      clientId: 'c',
+      clientSecret: 's',
+      sleep: () => Promise.resolve(), // no real delay en test
     })
     const id = await client.insertEvent('cal-1', { summary: 'x' })
     expect(id).toBe('evt-x')
@@ -754,7 +806,7 @@ describe('googleCalendar — calendars', () => {
     const client = createGcalClient({ refreshToken: 'rt', clientId: 'c', clientSecret: 's' })
     const events = await client.listEvents('cal-1')
     expect(events).toHaveLength(3)
-    expect(events.map(e => e.id)).toEqual(['e1', 'e2', 'e3'])
+    expect(events.map((e) => e.id)).toEqual(['e1', 'e2', 'e3'])
   })
 })
 ```
@@ -773,10 +825,17 @@ const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const API_BASE = 'https://www.googleapis.com/calendar/v3'
 
 class TokenExpiradoError extends Error {
-  constructor() { super('invalid_grant: refresh token expirado o revocado') }
+  constructor() {
+    super('invalid_grant: refresh token expirado o revocado')
+  }
 }
 
-export function createGcalClient({ refreshToken, clientId, clientSecret, sleep = (ms) => new Promise(r => setTimeout(r, ms)) }) {
+export function createGcalClient({
+  refreshToken,
+  clientId,
+  clientSecret,
+  sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
+}) {
   let cachedToken = null
   let cachedExpMs = 0
 
@@ -801,7 +860,7 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
       throw new Error(`Refresh falló: ${JSON.stringify(data)}`)
     }
     cachedToken = data.access_token
-    cachedExpMs = Date.now() + (data.expires_in * 1000)
+    cachedExpMs = Date.now() + data.expires_in * 1000
     return cachedToken
   }
 
@@ -837,7 +896,9 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
   }
 
   async function deleteCalendar(calendarId) {
-    const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}`, { method: 'DELETE' })
+    const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}`, {
+      method: 'DELETE',
+    })
     if (!res.ok && res.status !== 404 && res.status !== 410) {
       throw new Error(`deleteCalendar falló: ${await res.text()}`)
     }
@@ -852,10 +913,13 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
 
   // ── Events ──
   async function insertEvent(calendarId, eventPayload) {
-    const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events`, {
-      method: 'POST',
-      body: JSON.stringify(eventPayload),
-    })
+    const res = await authedFetch(
+      `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events`,
+      {
+        method: 'POST',
+        body: JSON.stringify(eventPayload),
+      },
+    )
     if (!res.ok) throw new Error(`insertEvent falló (${res.status}): ${await res.text()}`)
     const data = await res.json()
     return data.id
@@ -864,7 +928,7 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
   async function patchEvent(calendarId, eventId, eventPayload) {
     const res = await authedFetch(
       `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
-      { method: 'PATCH', body: JSON.stringify(eventPayload) }
+      { method: 'PATCH', body: JSON.stringify(eventPayload) },
     )
     if (res.status === 404) {
       // Self-heal: recrear
@@ -879,7 +943,7 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
   async function deleteEvent(calendarId, eventId) {
     const res = await authedFetch(
       `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
-      { method: 'DELETE' }
+      { method: 'DELETE' },
     )
     if (!res.ok && res.status !== 404 && res.status !== 410) {
       throw new Error(`deleteEvent falló: ${await res.text()}`)
@@ -893,7 +957,9 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
       const params = new URLSearchParams({ maxResults: '250', singleEvents: 'true' })
       if (timeMin) params.set('timeMin', timeMin)
       if (pageToken) params.set('pageToken', pageToken)
-      const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`)
+      const res = await authedFetch(
+        `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`,
+      )
       if (!res.ok) throw new Error(`listEvents falló: ${await res.text()}`)
       const data = await res.json()
       all.push(...(data.items || []))
@@ -904,8 +970,13 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
 
   return {
     getAccessToken,
-    createCalendar, deleteCalendar, getCalendar,
-    insertEvent, patchEvent, deleteEvent, listEvents,
+    createCalendar,
+    deleteCalendar,
+    getCalendar,
+    insertEvent,
+    patchEvent,
+    deleteEvent,
+    listEvents,
   }
 }
 
@@ -929,6 +1000,7 @@ git commit -m "feat: cliente de Google Calendar API con retry y self-heal"
 ## Task 7: Helper de auto-sync fire-and-forget
 
 **Files:**
+
 - Create: `server/utils/gcalAutoSync.js`
 
 Este helper carga la conexión del usuario, construye el evento, llama al método correcto del cliente, y captura cualquier error en `ultimoError` sin propagarlo.
@@ -938,7 +1010,13 @@ Este helper carga la conexión del usuario, construye el evento, llama al métod
 ```js
 // server/utils/gcalAutoSync.js
 import { db } from './db.js'
-import { googleCalendarConexiones, gastosPlanificados, gastos, categorias, configuraciones } from '../database/schema.js'
+import {
+  googleCalendarConexiones,
+  gastosPlanificados,
+  gastos,
+  categorias,
+  configuraciones,
+} from '../database/schema.js'
 import { eq, and } from 'drizzle-orm'
 import { decrypt } from './crypto.js'
 import { createGcalClient, TokenExpiradoError } from './googleCalendar.js'
@@ -960,8 +1038,11 @@ async function loadContext(usuarioId) {
     clientSecret: config.googleOAuthClientSecret,
   })
 
-  const [cfg] = await db.select({ moneda: configuraciones.monedaPreferida })
-    .from(configuraciones).where(eq(configuraciones.usuarioId, usuarioId)).limit(1)
+  const [cfg] = await db
+    .select({ moneda: configuraciones.monedaPreferida })
+    .from(configuraciones)
+    .where(eq(configuraciones.usuarioId, usuarioId))
+    .limit(1)
   const moneda = cfg?.moneda === 'USD' ? 'US$' : cfg?.moneda === 'EUR' ? 'EUR' : 'S/'
 
   return { conexion, client, moneda }
@@ -969,7 +1050,8 @@ async function loadContext(usuarioId) {
 
 async function setUltimoError(usuarioId, msg) {
   try {
-    await db.update(googleCalendarConexiones)
+    await db
+      .update(googleCalendarConexiones)
       .set({ ultimoError: msg, updatedAt: new Date() })
       .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
   } catch (e) {
@@ -978,7 +1060,8 @@ async function setUltimoError(usuarioId, msg) {
 }
 
 async function clearUltimoError(usuarioId) {
-  await db.update(googleCalendarConexiones)
+  await db
+    .update(googleCalendarConexiones)
     .set({ ultimoError: null, ultimaSync: new Date(), updatedAt: new Date() })
     .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
 }
@@ -1001,12 +1084,14 @@ async function loadGastoEnriquecido(planificadoId, usuarioId) {
     .limit(1)
   if (!g) return null
 
-  const [real] = g.estado === 'pagado'
-    ? await db.select({ id: gastos.id, fecha: gastos.fecha, monto: gastos.monto })
-        .from(gastos)
-        .where(and(eq(gastos.gastoPlanificadoId, planificadoId), eq(gastos.usuarioId, usuarioId)))
-        .limit(1)
-    : [null]
+  const [real] =
+    g.estado === 'pagado'
+      ? await db
+          .select({ id: gastos.id, fecha: gastos.fecha, monto: gastos.monto })
+          .from(gastos)
+          .where(and(eq(gastos.gastoPlanificadoId, planificadoId), eq(gastos.usuarioId, usuarioId)))
+          .limit(1)
+      : [null]
 
   return {
     gasto: { ...g, montoEstimado: parseFloat(g.montoEstimado) },
@@ -1025,9 +1110,10 @@ function fireAndForget(usuarioId, label, fn) {
       await fn()
       await clearUltimoError(usuarioId).catch(() => {})
     } catch (err) {
-      const msg = err instanceof TokenExpiradoError
-        ? 'Token expirado, reconecta tu Google Calendar'
-        : `${label}: ${err.message || err}`
+      const msg =
+        err instanceof TokenExpiradoError
+          ? 'Token expirado, reconecta tu Google Calendar'
+          : `${label}: ${err.message || err}`
       console.error(`[gcal] ${label} usuarioId=${usuarioId}`, err)
       await setUltimoError(usuarioId, msg)
     }
@@ -1040,9 +1126,17 @@ export function syncCreated(usuarioId, planificadoId) {
     if (!ctx) return
     const data = await loadGastoEnriquecido(planificadoId, usuarioId)
     if (!data) return
-    const payload = buildEvent({ ...data, moneda: ctx.moneda, recordatorios: ctx.conexion.recordatoriosConfig, appUrl: appUrl() })
+    const payload = buildEvent({
+      ...data,
+      moneda: ctx.moneda,
+      recordatorios: ctx.conexion.recordatoriosConfig,
+      appUrl: appUrl(),
+    })
     const eventId = await ctx.client.insertEvent(ctx.conexion.calendarId, payload)
-    await db.update(gastosPlanificados).set({ googleEventId: eventId }).where(eq(gastosPlanificados.id, planificadoId))
+    await db
+      .update(gastosPlanificados)
+      .set({ googleEventId: eventId })
+      .where(eq(gastosPlanificados.id, planificadoId))
   })
 }
 
@@ -1052,15 +1146,30 @@ export function syncUpdated(usuarioId, planificadoId) {
     if (!ctx) return
     const data = await loadGastoEnriquecido(planificadoId, usuarioId)
     if (!data) return
-    const payload = buildEvent({ ...data, moneda: ctx.moneda, recordatorios: ctx.conexion.recordatoriosConfig, appUrl: appUrl() })
+    const payload = buildEvent({
+      ...data,
+      moneda: ctx.moneda,
+      recordatorios: ctx.conexion.recordatoriosConfig,
+      appUrl: appUrl(),
+    })
     const existingId = data.gasto.googleEventId
     if (!existingId) {
       const eventId = await ctx.client.insertEvent(ctx.conexion.calendarId, payload)
-      await db.update(gastosPlanificados).set({ googleEventId: eventId }).where(eq(gastosPlanificados.id, planificadoId))
+      await db
+        .update(gastosPlanificados)
+        .set({ googleEventId: eventId })
+        .where(eq(gastosPlanificados.id, planificadoId))
     } else {
-      const { id: newId, recreated } = await ctx.client.patchEvent(ctx.conexion.calendarId, existingId, payload)
+      const { id: newId, recreated } = await ctx.client.patchEvent(
+        ctx.conexion.calendarId,
+        existingId,
+        payload,
+      )
       if (recreated) {
-        await db.update(gastosPlanificados).set({ googleEventId: newId }).where(eq(gastosPlanificados.id, planificadoId))
+        await db
+          .update(gastosPlanificados)
+          .set({ googleEventId: newId })
+          .where(eq(gastosPlanificados.id, planificadoId))
       }
     }
   })
@@ -1097,6 +1206,7 @@ git commit -m "feat: helper fire-and-forget para auto-sync con Google Calendar"
 ## Task 8: Endpoint OAuth start
 
 **Files:**
+
 - Create: `server/api/integraciones/google/oauth-start.post.js`
 
 - [ ] **Step 1: Crear el endpoint**
@@ -1134,6 +1244,7 @@ export default defineEventHandler(async (event) => {
 - [ ] **Step 2: Probar manualmente con curl**
 
 Run:
+
 ```bash
 curl -X POST http://localhost:3000/api/integraciones/google/oauth-start \
   -H "Authorization: Bearer <token-supabase>" | jq
@@ -1153,6 +1264,7 @@ git commit -m "feat: endpoint OAuth start para Google Calendar"
 ## Task 9: Endpoint OAuth callback
 
 **Files:**
+
 - Create: `server/api/integraciones/google/oauth-callback.get.js`
 
 Intercambia code por tokens, cifra refresh_token, crea calendario dedicado y guarda la conexión. Después redirige a `/configuraciones?gcal=conectado`.
@@ -1216,7 +1328,10 @@ export default defineEventHandler(async (event) => {
     clientId: config.googleOAuthClientId,
     clientSecret: config.googleOAuthClientSecret,
   })
-  const calendar = await client.createCalendar({ summary: CALENDAR_NOMBRE, timeZone: 'America/Lima' })
+  const calendar = await client.createCalendar({
+    summary: CALENDAR_NOMBRE,
+    timeZone: 'America/Lima',
+  })
 
   // Persistir conexión (upsert)
   const refreshCifrado = encrypt(tokens.refresh_token)
@@ -1231,7 +1346,8 @@ export default defineEventHandler(async (event) => {
   })
 
   // Limpiar google_event_id obsoletos (de conexiones previas) y disparar primer resync
-  await db.update(gastosPlanificados)
+  await db
+    .update(gastosPlanificados)
     .set({ googleEventId: null })
     .where(eq(gastosPlanificados.googleEventId, gastosPlanificados.googleEventId)) // no-op WHERE intencional; el resync lo hará completo
 
@@ -1253,6 +1369,7 @@ git commit -m "feat: endpoint callback OAuth Google Calendar"
 ## Task 10: Endpoint GET estado de la conexión
 
 **Files:**
+
 - Create: `server/api/integraciones/google/index.get.js`
 
 - [ ] **Step 1: Crear endpoint**
@@ -1297,6 +1414,7 @@ git commit -m "feat: endpoint estado de conexión Google Calendar"
 ## Task 11: Endpoint POST resync
 
 **Files:**
+
 - Create: `server/api/integraciones/google/resync.post.js`
 
 Diff entre estado local y Google Calendar. Crea/actualiza/borra. Reconstruye el calendario si fue borrado en Google. Devuelve counts.
@@ -1307,8 +1425,12 @@ Diff entre estado local y Google Calendar. Crea/actualiza/borra. Reconstruye el 
 // server/api/integraciones/google/resync.post.js
 import { db } from '../../../utils/db.js'
 import {
-  googleCalendarConexiones, gastosPlanificados, planesMensuales,
-  categorias, gastos, configuraciones,
+  googleCalendarConexiones,
+  gastosPlanificados,
+  planesMensuales,
+  categorias,
+  gastos,
+  configuraciones,
 } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { decrypt } from '../../../utils/crypto.js'
@@ -1345,7 +1467,8 @@ export default defineEventHandler(async (event) => {
     cal = await client.getCalendar(calendarId)
   } catch (e) {
     if (e instanceof TokenExpiradoError) {
-      await db.update(googleCalendarConexiones)
+      await db
+        .update(googleCalendarConexiones)
         .set({ ultimoError: 'Token expirado, reconecta tu Google Calendar', updatedAt: new Date() })
         .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
       throw createError({ statusCode: 401, message: 'Token expirado, reconecta' })
@@ -1354,19 +1477,27 @@ export default defineEventHandler(async (event) => {
   }
   if (!cal) {
     // Calendario borrado en Google → recrear y limpiar event IDs
-    const nuevo = await client.createCalendar({ summary: CALENDAR_NOMBRE, timeZone: 'America/Lima' })
+    const nuevo = await client.createCalendar({
+      summary: CALENDAR_NOMBRE,
+      timeZone: 'America/Lima',
+    })
     calendarId = nuevo.id
-    await db.update(googleCalendarConexiones)
+    await db
+      .update(googleCalendarConexiones)
       .set({ calendarId, updatedAt: new Date() })
       .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
-    await db.update(gastosPlanificados)
+    await db
+      .update(gastosPlanificados)
       .set({ googleEventId: null })
       .where(eq(gastosPlanificados.googleEventId, gastosPlanificados.googleEventId))
   }
 
   // Cargar moneda
-  const [cfg] = await db.select({ moneda: configuraciones.monedaPreferida })
-    .from(configuraciones).where(eq(configuraciones.usuarioId, usuarioId)).limit(1)
+  const [cfg] = await db
+    .select({ moneda: configuraciones.monedaPreferida })
+    .from(configuraciones)
+    .where(eq(configuraciones.usuarioId, usuarioId))
+    .limit(1)
   const moneda = cfg?.moneda === 'USD' ? 'US$' : cfg?.moneda === 'EUR' ? 'EUR' : 'S/'
 
   // Cargar planificados desde el mes actual en adelante
@@ -1390,20 +1521,24 @@ export default defineEventHandler(async (event) => {
     .from(gastosPlanificados)
     .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
     .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
-    .leftJoin(gastos, and(
-      eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
-      eq(gastos.usuarioId, usuarioId),
-    ))
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      gte(gastosPlanificados.fechaProbablePago, primerDiaMes),
-    ))
+    .leftJoin(
+      gastos,
+      and(eq(gastos.gastoPlanificadoId, gastosPlanificados.id), eq(gastos.usuarioId, usuarioId)),
+    )
+    .where(
+      and(
+        eq(planesMensuales.usuarioId, usuarioId),
+        gte(gastosPlanificados.fechaProbablePago, primerDiaMes),
+      ),
+    )
 
   // Listar eventos actuales del calendario
   const eventos = await client.listEvents(calendarId, { timeMin: `${primerDiaMes}T00:00:00Z` })
-  const eventosPorId = new Map(eventos.map(e => [e.id, e]))
+  const eventosPorId = new Map(eventos.map((e) => [e.id, e]))
 
-  let creados = 0, actualizados = 0, eliminados = 0
+  let creados = 0,
+    actualizados = 0,
+    eliminados = 0
 
   // CREATE/PATCH
   for (const p of planificados) {
@@ -1419,13 +1554,19 @@ export default defineEventHandler(async (event) => {
     if (p.googleEventId && eventosPorId.has(p.googleEventId)) {
       const { recreated, id: newId } = await client.patchEvent(calendarId, p.googleEventId, payload)
       if (recreated) {
-        await db.update(gastosPlanificados).set({ googleEventId: newId }).where(eq(gastosPlanificados.id, p.id))
+        await db
+          .update(gastosPlanificados)
+          .set({ googleEventId: newId })
+          .where(eq(gastosPlanificados.id, p.id))
       }
       eventosPorId.delete(p.googleEventId)
       actualizados++
     } else {
       const newId = await client.insertEvent(calendarId, payload)
-      await db.update(gastosPlanificados).set({ googleEventId: newId }).where(eq(gastosPlanificados.id, p.id))
+      await db
+        .update(gastosPlanificados)
+        .set({ googleEventId: newId })
+        .where(eq(gastosPlanificados.id, p.id))
       creados++
     }
   }
@@ -1436,7 +1577,8 @@ export default defineEventHandler(async (event) => {
     eliminados++
   }
 
-  await db.update(googleCalendarConexiones)
+  await db
+    .update(googleCalendarConexiones)
     .set({ ultimaSync: new Date(), ultimoError: null, updatedAt: new Date() })
     .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
 
@@ -1456,6 +1598,7 @@ git commit -m "feat: endpoint resync para Google Calendar"
 ## Task 12: Endpoint PATCH config (recordatorios)
 
 **Files:**
+
 - Create: `server/api/integraciones/google/config.patch.js`
 
 - [ ] **Step 1: Crear endpoint**
@@ -1473,10 +1616,13 @@ import { eq, and, isNotNull, ne } from 'drizzle-orm'
 const TIPOS = new Set(['mismo_dia', 'dia_anterior', 'dos_dias_antes', 'una_semana_antes'])
 
 function validar(recordatorios) {
-  if (!Array.isArray(recordatorios)) throw createError({ statusCode: 400, message: 'recordatorios debe ser un array' })
-  if (recordatorios.length > 5) throw createError({ statusCode: 400, message: 'Máximo 5 recordatorios' })
+  if (!Array.isArray(recordatorios))
+    throw createError({ statusCode: 400, message: 'recordatorios debe ser un array' })
+  if (recordatorios.length > 5)
+    throw createError({ statusCode: 400, message: 'Máximo 5 recordatorios' })
   for (const r of recordatorios) {
-    if (!TIPOS.has(r.tipo)) throw createError({ statusCode: 400, message: `tipo inválido: ${r.tipo}` })
+    if (!TIPOS.has(r.tipo))
+      throw createError({ statusCode: 400, message: `tipo inválido: ${r.tipo}` })
     if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(r.hora || '')) {
       throw createError({ statusCode: 400, message: `hora inválida: ${r.hora}` })
     }
@@ -1488,19 +1634,24 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   validar(body.recordatorios)
 
-  const [conexion] = await db.select().from(googleCalendarConexiones)
-    .where(eq(googleCalendarConexiones.usuarioId, usuarioId)).limit(1)
+  const [conexion] = await db
+    .select()
+    .from(googleCalendarConexiones)
+    .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
+    .limit(1)
   if (!conexion) throw createError({ statusCode: 400, message: 'No hay conexión' })
 
-  await db.update(googleCalendarConexiones)
+  await db
+    .update(googleCalendarConexiones)
     .set({ recordatoriosConfig: body.recordatorios, updatedAt: new Date() })
     .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
 
   // Re-aplicar recordatorios a eventos NO pagados (estado != 'pagado')
-  const pendientes = await db.select({
-    id: gastosPlanificados.id,
-    googleEventId: gastosPlanificados.googleEventId,
-  })
+  const pendientes = await db
+    .select({
+      id: gastosPlanificados.id,
+      googleEventId: gastosPlanificados.googleEventId,
+    })
     .from(gastosPlanificados)
     .innerJoin(/* planesMensuales para filtrar por usuario, importar arriba */ null, null) // placeholder — ver implementación abajo
 
@@ -1514,7 +1665,10 @@ export default defineEventHandler(async (event) => {
     clientSecret: config.googleOAuthClientSecret,
   })
 
-  const overrides = body.recordatorios.map(r => ({ method: 'popup', minutes: recordatorioToMinutes(r) }))
+  const overrides = body.recordatorios.map((r) => ({
+    method: 'popup',
+    minutes: recordatorioToMinutes(r),
+  }))
   let actualizados = 0
   for (const p of pendientes) {
     if (!p.googleEventId) continue
@@ -1542,11 +1696,13 @@ const pendientes = await db
   })
   .from(gastosPlanificados)
   .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
-  .where(and(
-    eq(planesMensuales.usuarioId, usuarioId),
-    eq(gastosPlanificados.estado, 'pendiente'),
-    isNotNull(gastosPlanificados.googleEventId),
-  ))
+  .where(
+    and(
+      eq(planesMensuales.usuarioId, usuarioId),
+      eq(gastosPlanificados.estado, 'pendiente'),
+      isNotNull(gastosPlanificados.googleEventId),
+    ),
+  )
 ```
 
 Y agregar el import `planesMensuales` en la parte superior.
@@ -1563,6 +1719,7 @@ git commit -m "feat: endpoint PATCH config de recordatorios Google Calendar"
 ## Task 13: Endpoint DELETE desconectar
 
 **Files:**
+
 - Create: `server/api/integraciones/google/index.delete.js`
 
 - [ ] **Step 1: Crear endpoint**
@@ -1570,7 +1727,11 @@ git commit -m "feat: endpoint PATCH config de recordatorios Google Calendar"
 ```js
 // server/api/integraciones/google/index.delete.js
 import { db } from '../../../utils/db.js'
-import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '../../../database/schema.js'
+import {
+  googleCalendarConexiones,
+  gastosPlanificados,
+  planesMensuales,
+} from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { decrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
@@ -1581,8 +1742,11 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const borrarCalendario = query.borrarCalendario === 'true'
 
-  const [conexion] = await db.select().from(googleCalendarConexiones)
-    .where(eq(googleCalendarConexiones.usuarioId, usuarioId)).limit(1)
+  const [conexion] = await db
+    .select()
+    .from(googleCalendarConexiones)
+    .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
+    .limit(1)
   if (!conexion) return { ok: true, sinAccion: true }
 
   if (borrarCalendario) {
@@ -1601,12 +1765,20 @@ export default defineEventHandler(async (event) => {
   }
 
   // Limpiar IDs en planificados del usuario
-  const planes = await db.select({ id: planesMensuales.id }).from(planesMensuales)
+  const planes = await db
+    .select({ id: planesMensuales.id })
+    .from(planesMensuales)
     .where(eq(planesMensuales.usuarioId, usuarioId))
   if (planes.length) {
-    await db.update(gastosPlanificados)
+    await db
+      .update(gastosPlanificados)
       .set({ googleEventId: null })
-      .where(inArray(gastosPlanificados.planMensualId, planes.map(p => p.id)))
+      .where(
+        inArray(
+          gastosPlanificados.planMensualId,
+          planes.map((p) => p.id),
+        ),
+      )
   }
 
   await db.delete(googleCalendarConexiones).where(eq(googleCalendarConexiones.usuarioId, usuarioId))
@@ -1627,6 +1799,7 @@ git commit -m "feat: endpoint DELETE desconectar Google Calendar"
 ## Task 14: Hooks de auto-sync en endpoints del planificador
 
 **Files:**
+
 - Modify: `server/api/planificador/gastos/index.post.js`
 - Modify: `server/api/planificador/gastos/[id].put.js`
 - Modify: `server/api/planificador/gastos/[id].delete.js`
@@ -1692,6 +1865,7 @@ syncUpdated(usuarioId, gastoPlanificado.id)
 - [ ] **Step 5: Smoke test manual**
 
 Levantar dev server: `npm run dev`. Sin conexión a Google Calendar configurada todavía:
+
 1. Crear un gasto planificado desde la UI → debe persistir normalmente; `gcalAutoSync` sale temprano por `loadContext` devolviendo null.
 2. Editar el gasto → mismo comportamiento.
 3. Borrar el gasto → mismo comportamiento.
@@ -1710,6 +1884,7 @@ git commit -m "feat: hooks de auto-sync con Google Calendar en CRUD del planific
 ## Task 15: Composable cliente `useGoogleCalendar.js`
 
 **Files:**
+
 - Create: `composables/useGoogleCalendar.js`
 
 - [ ] **Step 1: Crear el composable**
@@ -1736,7 +1911,9 @@ export function useGoogleCalendar() {
   }
 
   async function desconectar(borrarCalendario = false) {
-    await apiFetch(`/api/integraciones/google?borrarCalendario=${borrarCalendario}`, { method: 'DELETE' })
+    await apiFetch(`/api/integraciones/google?borrarCalendario=${borrarCalendario}`, {
+      method: 'DELETE',
+    })
     await fetchEstado()
   }
 
@@ -1771,6 +1948,7 @@ git commit -m "feat: composable useGoogleCalendar"
 ## Task 16: Componente `EditorRecordatorios.vue`
 
 **Files:**
+
 - Create: `components/configuraciones/EditorRecordatorios.vue`
 
 Lista editable de recordatorios. Sigue los patrones visuales de `pages/configuraciones.vue` (bg-theme-input, bordes, etc.).
@@ -1816,8 +1994,19 @@ Lista editable de recordatorios. Sigue los patrones visuales de `pages/configura
         :aria-label="`Eliminar recordatorio ${i + 1}`"
         @click="eliminar(i)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"
+          />
         </svg>
       </button>
     </div>
@@ -1855,7 +2044,8 @@ const props = defineProps({
 })
 const emit = defineEmits(['guardar'])
 
-const tooltipMismoDia = 'El recordatorio del mismo día llega según la hora global de tu Google Calendar. Para una hora exacta, usa un recordatorio del día anterior.'
+const tooltipMismoDia =
+  'El recordatorio del mismo día llega según la hora global de tu Google Calendar. Para una hora exacta, usa un recordatorio del día anterior.'
 
 const modelo = ref(JSON.parse(JSON.stringify(props.recordatorios)))
 const guardando = ref(false)
@@ -1887,9 +2077,13 @@ async function guardar() {
   }
 }
 
-watch(() => props.recordatorios, (nuevo) => {
-  if (!cambios.value) modelo.value = JSON.parse(JSON.stringify(nuevo))
-}, { deep: true })
+watch(
+  () => props.recordatorios,
+  (nuevo) => {
+    if (!cambios.value) modelo.value = JSON.parse(JSON.stringify(nuevo))
+  },
+  { deep: true },
+)
 </script>
 ```
 
@@ -1905,6 +2099,7 @@ git commit -m "feat: componente EditorRecordatorios"
 ## Task 17: Componente `IntegracionGoogleCalendar.vue`
 
 **Files:**
+
 - Create: `components/configuraciones/IntegracionGoogleCalendar.vue`
 
 Card principal. Muestra los dos estados (desconectado / conectado), banner de error si aplica, botones de acción.
@@ -1916,8 +2111,19 @@ Card principal. Muestra los dos estados (desconectado / conectado), banner de er
   <div class="bg-theme-card rounded-2xl p-5 border border-theme-border">
     <!-- Header -->
     <div class="flex items-center gap-2 mb-1">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-4 h-4 text-blue-400"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
       </svg>
       <label class="text-sm font-medium text-theme-text flex-1">Google Calendar</label>
       <span
@@ -1936,7 +2142,8 @@ Card principal. Muestra los dos estados (desconectado / conectado), banner de er
     </div>
 
     <p v-if="!estado.conectado" class="text-xs text-theme-text-sec mb-3">
-      Sincroniza tus gastos planificados con tu calendario para recibir recordatorios el día que toca pagar.
+      Sincroniza tus gastos planificados con tu calendario para recibir recordatorios el día que
+      toca pagar.
     </p>
 
     <!-- Desconectado -->
@@ -1957,7 +2164,9 @@ Card principal. Muestra los dos estados (desconectado / conectado), banner de er
         class="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-xs text-red-300"
       >
         <p class="font-semibold mb-1">Conexión expirada</p>
-        <p class="mb-2">Tu acceso a Google Calendar caducó. Reconecta para reanudar la sincronización.</p>
+        <p class="mb-2">
+          Tu acceso a Google Calendar caducó. Reconecta para reanudar la sincronización.
+        </p>
         <button
           class="bg-red-500 hover:bg-red-600 text-white rounded-lg px-3 py-1 text-xs font-semibold transition-colors"
           @click="onConectar"
@@ -1967,7 +2176,9 @@ Card principal. Muestra los dos estados (desconectado / conectado), banner de er
       </div>
 
       <div class="text-xs text-theme-text-sec">
-        <p>Calendario: <span class="text-theme-text">{{ estado.calendarNombre }}</span></p>
+        <p>
+          Calendario: <span class="text-theme-text">{{ estado.calendarNombre }}</span>
+        </p>
         <p>Última sync: {{ ultimaSyncTexto }}</p>
       </div>
 
@@ -1999,7 +2210,8 @@ Card principal. Muestra los dos estados (desconectado / conectado), banner de er
 </template>
 
 <script setup>
-const { estado, fetchEstado, conectar, desconectar, resincronizar, actualizarRecordatorios } = useGoogleCalendar()
+const { estado, fetchEstado, conectar, desconectar, resincronizar, actualizarRecordatorios } =
+  useGoogleCalendar()
 const { showToast } = useToast()
 const { confirm } = useConfirmDialog()
 const route = useRoute()
@@ -2033,7 +2245,10 @@ async function onResincronizar() {
   sincronizando.value = true
   try {
     const r = await resincronizar()
-    showToast({ tipo: 'exito', mensaje: `Sincronizado · ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados` })
+    showToast({
+      tipo: 'exito',
+      mensaje: `Sincronizado · ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados`,
+    })
   } catch (e) {
     showToast({ tipo: 'error', mensaje: 'Error al sincronizar: ' + e.message })
   } finally {
@@ -2058,7 +2273,10 @@ async function onDesconectar() {
 async function onGuardarRecordatorios(recordatorios) {
   try {
     const r = await actualizarRecordatorios(recordatorios)
-    showToast({ tipo: 'exito', mensaje: `Recordatorios guardados · aplicados a ${r.actualizados} eventos` })
+    showToast({
+      tipo: 'exito',
+      mensaje: `Recordatorios guardados · aplicados a ${r.actualizados} eventos`,
+    })
   } catch (e) {
     showToast({ tipo: 'error', mensaje: 'Error al guardar: ' + e.message })
   }
@@ -2072,7 +2290,10 @@ onMounted(async () => {
     router.replace({ query: { ...route.query, gcal: undefined } })
     onResincronizar()
   } else if (route.query.gcal === 'error') {
-    showToast({ tipo: 'error', mensaje: `Conexión fallida: ${route.query.motivo || 'desconocido'}` })
+    showToast({
+      tipo: 'error',
+      mensaje: `Conexión fallida: ${route.query.motivo || 'desconocido'}`,
+    })
     router.replace({ query: { ...route.query, gcal: undefined, motivo: undefined } })
   }
 })
@@ -2080,6 +2301,7 @@ onMounted(async () => {
 ```
 
 **Nota sobre dependencias del componente**: usa `useToast` y `useConfirmDialog`. Verificar que ambos existen en el proyecto antes de continuar:
+
 - `composables/useToast.js` o similar (revisar `components/shared/ToastNotification.vue`).
 - `composables/useConfirmDialog.js` o `components/shared/ConfirmDialog.vue`.
 
@@ -2094,7 +2316,8 @@ async function onDesconectar() {
   if (!ok) return
   const borrar = await confirm({
     titulo: '¿Borrar también el calendario en Google?',
-    mensaje: 'Esto elimina "Mis Finanzas — Gastos planificados" y todos sus eventos de tu cuenta de Google. Si dices "No", el calendario queda intacto pero ya no se actualizará desde la app.',
+    mensaje:
+      'Esto elimina "Mis Finanzas — Gastos planificados" y todos sus eventos de tu cuenta de Google. Si dices "No", el calendario queda intacto pero ya no se actualizará desde la app.',
     confirmLabel: 'Sí, borrarlo',
     cancelLabel: 'No, mantenerlo',
   })
@@ -2115,6 +2338,7 @@ git commit -m "feat: componente IntegracionGoogleCalendar"
 ## Task 18: Integrar la sección "Integraciones" en `pages/configuraciones.vue`
 
 **Files:**
+
 - Modify: `pages/configuraciones.vue`
 
 - [ ] **Step 1: Agregar la sección al final del grid de opciones**
@@ -2122,13 +2346,13 @@ git commit -m "feat: componente IntegracionGoogleCalendar"
 Buscar el cierre del `<template v-else>` (donde están todos los cards de configuración). Justo antes de ese `</template>`, agregar:
 
 ```vue
-        <!-- Integraciones -->
-        <div class="lg:col-span-2">
+<!-- Integraciones -->
+<div class="lg:col-span-2">
           <h2 class="text-sm font-semibold text-theme-text-sec uppercase tracking-wider mb-3 px-1">
             Integraciones
           </h2>
         </div>
-        <ConfiguracionesIntegracionGoogleCalendar />
+<ConfiguracionesIntegracionGoogleCalendar />
 ```
 
 (La altura `lg:col-span-2` del título mantiene el subtítulo a ancho completo en desktop. El componente toma 1 columna como el resto de cards.)
@@ -2136,6 +2360,7 @@ Buscar el cierre del `<template v-else>` (donde están todos los cards de config
 - [ ] **Step 2: Smoke test manual**
 
 Run: `npm run dev`. Ir a `/configuraciones`. Verificar:
+
 - Aparece el subtítulo "Integraciones".
 - Aparece el card "Google Calendar" con el botón "Conectar Google Calendar" (estado desconectado).
 - Si haces click sin haber configurado las env vars: aparece un toast de error claro.
@@ -2152,6 +2377,7 @@ git commit -m "feat: sección de Integraciones en Configuraciones"
 ## Task 19: Entrada "Sincronizar con Google Calendar" en menú del Planificador
 
 **Files:**
+
 - Modify: `components/planificador/ResumenMes.vue`
 
 Buscar el menú "..." que ya tiene la opción "Exportar a Excel". Agregar una entrada condicional que aparezca solo si la conexión está activa.
@@ -2161,7 +2387,11 @@ Buscar el menú "..." que ya tiene la opción "Exportar a Excel". Agregar una en
 En el `<script setup>` de `ResumenMes.vue`, agregar (si no está ya):
 
 ```js
-const { estado: gcalEstado, fetchEstado: fetchGcalEstado, resincronizar: gcalResincronizar } = useGoogleCalendar()
+const {
+  estado: gcalEstado,
+  fetchEstado: fetchGcalEstado,
+  resincronizar: gcalResincronizar,
+} = useGoogleCalendar()
 const { showToast } = useToast()
 
 onMounted(() => {
@@ -2171,7 +2401,10 @@ onMounted(() => {
 async function onSincronizarGcal() {
   try {
     const r = await gcalResincronizar()
-    showToast({ tipo: 'exito', mensaje: `Sincronizado · ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados` })
+    showToast({
+      tipo: 'exito',
+      mensaje: `Sincronizado · ${r.creados} creados, ${r.actualizados} actualizados, ${r.eliminados} eliminados`,
+    })
   } catch (e) {
     showToast({ tipo: 'error', mensaje: 'Error al sincronizar: ' + e.message })
   }
@@ -2212,6 +2445,7 @@ git commit -m "feat: opción Sincronizar con Google Calendar en ResumenMes"
 **Files:** ninguna (es checklist de verificación manual).
 
 Antes de empezar:
+
 - Crear un proyecto en https://console.cloud.google.com.
 - Habilitar Google Calendar API.
 - Crear credenciales OAuth tipo "Web application" con redirect URI `http://localhost:3000/api/integraciones/google/oauth-callback`.
@@ -2240,30 +2474,32 @@ Checklist:
 
 ### 1. Cobertura del spec
 
-| Sección spec | Tarea(s) que lo cubre |
-|---|---|
-| §2 decisiones (todas) | distribuidas en T3 (esquema), T5 (formato), T8/9 (OAuth), T11 (resync), T13 (desconectar) |
-| §3.1 OAuth flow | T8 (start) + T9 (callback) |
-| §3.2 endpoints + utils + hooks | T6, T7, T8–13, T14 |
-| §3.3 modelo de datos | T3 |
-| §3.4 formato evento | T5 |
-| §4.1 conectar | T8, T9, T17 (UI), T20 (E2E) |
-| §4.2 sync auto | T7 (helper), T14 (hooks) |
-| §4.3 resync | T11 |
-| §4.4 cambiar recordatorios | T12 + T16 (editor) |
-| §4.5 desconectar | T13 + T17 (UI con ConfirmDialog) |
-| §5 UI configuraciones | T16, T17, T18 |
-| §5.2 menú "..." planificador | T19 |
-| §6 manejo de errores | T6 (retry+404+token), T7 (ultimoError), T11 (calendar 404 self-heal), T17 (banner error) |
-| §7 seguridad | T1 (crypto), T4 (state HMAC), T2 (vars solo en server) |
-| §8 vars de entorno | T2 |
-| §11 plan de rollout | tareas en el mismo orden |
+| Sección spec                   | Tarea(s) que lo cubre                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------------------------- |
+| §2 decisiones (todas)          | distribuidas en T3 (esquema), T5 (formato), T8/9 (OAuth), T11 (resync), T13 (desconectar) |
+| §3.1 OAuth flow                | T8 (start) + T9 (callback)                                                                |
+| §3.2 endpoints + utils + hooks | T6, T7, T8–13, T14                                                                        |
+| §3.3 modelo de datos           | T3                                                                                        |
+| §3.4 formato evento            | T5                                                                                        |
+| §4.1 conectar                  | T8, T9, T17 (UI), T20 (E2E)                                                               |
+| §4.2 sync auto                 | T7 (helper), T14 (hooks)                                                                  |
+| §4.3 resync                    | T11                                                                                       |
+| §4.4 cambiar recordatorios     | T12 + T16 (editor)                                                                        |
+| §4.5 desconectar               | T13 + T17 (UI con ConfirmDialog)                                                          |
+| §5 UI configuraciones          | T16, T17, T18                                                                             |
+| §5.2 menú "..." planificador   | T19                                                                                       |
+| §6 manejo de errores           | T6 (retry+404+token), T7 (ultimoError), T11 (calendar 404 self-heal), T17 (banner error)  |
+| §7 seguridad                   | T1 (crypto), T4 (state HMAC), T2 (vars solo en server)                                    |
+| §8 vars de entorno             | T2                                                                                        |
+| §11 plan de rollout            | tareas en el mismo orden                                                                  |
 
 ### 2. Placeholder scan
+
 - T12 tenía un placeholder en el bloque del query (`/* placeholder */`). Fix incluido en Step 1.1 con el query completo.
 - No quedan TBD/TODO ni "implementar después".
 
 ### 3. Consistencia de tipos
+
 - `googleEventId` (camelCase en JS / `google_event_id` en SQL) usado consistentemente en T3, T6, T7, T9, T11, T13, T14.
 - `recordatoriosConfig` array de `{tipo, hora}` consistente entre T3 (schema), T5 (builder), T9 (default), T12 (validador), T16 (UI).
 - `tipo ∈ {mismo_dia, dia_anterior, dos_dias_antes, una_semana_antes}` consistente entre T5 (test+impl), T12 (validador), T16 (UI dropdown).

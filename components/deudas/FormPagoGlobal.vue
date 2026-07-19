@@ -6,11 +6,15 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-xs text-theme-text-sec">Deudas activas</p>
-          <p class="text-sm font-medium text-theme-text-muted">{{ deudasActivas }} concepto{{ deudasActivas !== 1 ? 's' : '' }}</p>
+          <p class="text-sm font-medium text-theme-text-muted">
+            {{ deudasActivas }} concepto{{ deudasActivas !== 1 ? 's' : '' }}
+          </p>
         </div>
         <div class="text-right">
           <p class="text-xs text-theme-text-sec">Total pendiente</p>
-          <p class="text-sm font-semibold text-emerald-400">{{ currencySymbol }}&nbsp;{{ formatMonto(totalPendiente) }}</p>
+          <p class="text-sm font-semibold text-emerald-400">
+            {{ currencySymbol }}&nbsp;{{ formatMonto(totalPendiente) }}
+          </p>
         </div>
       </div>
     </div>
@@ -18,7 +22,8 @@
     <!-- Info -->
     <div class="bg-theme-accent-bg rounded-xl p-3 border border-theme-accent">
       <p class="text-xs text-theme-accent">
-        El monto se distribuira automaticamente: primero a deudas vencidas, luego a las mas antiguas.
+        El monto se distribuira automaticamente: primero a deudas vencidas, luego a las mas
+        antiguas.
       </p>
     </div>
 
@@ -26,7 +31,9 @@
     <div>
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto recibido</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{
+          currencySymbol
+        }}</span>
         <input
           v-model="form.monto"
           type="number"
@@ -46,7 +53,7 @@
         <button
           v-if="totalPendiente > 1"
           class="px-3 py-1.5 rounded-lg text-xs font-medium bg-theme-input text-theme-text-muted hover:bg-theme-border-md transition-colors"
-          @click="form.monto = Math.round(totalPendiente / 2 * 100) / 100"
+          @click="form.monto = Math.round((totalPendiente / 2) * 100) / 100"
         >
           Mitad
         </button>
@@ -65,13 +72,19 @@
 
     <!-- Metodo de pago -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Metodo de pago <span class="text-theme-text-muted">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Metodo de pago <span class="text-theme-text-muted">(opcional)</span></label
+      >
       <div class="flex gap-2 flex-wrap">
         <button
           v-for="metodo in metodos"
           :key="metodo"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-          :class="form.metodoPago === metodo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-input text-theme-text-sec border border-transparent'"
+          :class="
+            form.metodoPago === metodo
+              ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+              : 'bg-theme-input text-theme-text-sec border border-transparent'
+          "
           @click="form.metodoPago = form.metodoPago === metodo ? null : metodo"
         >
           {{ metodo }}
@@ -81,7 +94,9 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Notas <span class="text-theme-text-muted">(opcional)</span></label
+      >
       <textarea
         v-model="form.notas"
         rows="2"
@@ -91,35 +106,63 @@
     </div>
 
     <!-- Simulación en tiempo real -->
-    <div v-if="simulacion.length > 0 && !resultado" class="bg-theme-input rounded-xl p-3 border border-theme-border space-y-1.5">
-      <p class="text-[0.6875rem] font-medium text-theme-text-sec uppercase tracking-wider mb-1">Vista previa de distribución</p>
-      <div v-for="s in simulacion" :key="s.concepto" class="flex items-center justify-between text-xs">
+    <div
+      v-if="simulacion.length > 0 && !resultado"
+      class="bg-theme-input rounded-xl p-3 border border-theme-border space-y-1.5"
+    >
+      <p class="text-[0.6875rem] font-medium text-theme-text-sec uppercase tracking-wider mb-1">
+        Vista previa de distribución
+      </p>
+      <div
+        v-for="s in simulacion"
+        :key="s.concepto"
+        class="flex items-center justify-between text-xs"
+      >
         <div class="flex items-center gap-2 min-w-0">
           <span
-class="w-1.5 h-1.5 rounded-full shrink-0"
-            :class="s.saldado ? 'bg-emerald-400' : 'bg-amber-400'"></span>
+            class="w-1.5 h-1.5 rounded-full shrink-0"
+            :class="s.saldado ? 'bg-emerald-400' : 'bg-amber-400'"
+          ></span>
           <span class="text-theme-text-muted truncate">{{ s.concepto }}</span>
         </div>
         <div class="flex items-center gap-2 shrink-0">
-          <span class="text-theme-text font-medium">{{ currencySymbol }}&nbsp;{{ formatMonto(s.pagado) }}</span>
+          <span class="text-theme-text font-medium"
+            >{{ currencySymbol }}&nbsp;{{ formatMonto(s.pagado) }}</span
+          >
           <span v-if="s.saldado" class="text-[0.6875rem] text-emerald-400">saldado</span>
-          <span v-else class="text-[0.6875rem] text-theme-text-muted">resta {{ currencySymbol }}&nbsp;{{ formatMonto(s.restante) }}</span>
+          <span v-else class="text-[0.6875rem] text-theme-text-muted"
+            >resta {{ currencySymbol }}&nbsp;{{ formatMonto(s.restante) }}</span
+          >
         </div>
       </div>
       <div v-if="sobrante > 0" class="border-t border-theme-border pt-1.5 mt-1.5">
-        <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }}&nbsp;{{ formatMonto(sobrante) }}</p>
+        <p class="text-xs text-yellow-400">
+          Sobrante: {{ currencySymbol }}&nbsp;{{ formatMonto(sobrante) }}
+        </p>
       </div>
     </div>
 
     <!-- Result preview (after success) -->
-    <div v-if="resultado" class="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 space-y-2">
+    <div
+      v-if="resultado"
+      class="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20 space-y-2"
+    >
       <p class="text-xs font-medium text-emerald-400">Pago distribuido exitosamente</p>
-      <div v-for="pago in resultado.pagos" :key="pago.id" class="flex items-center justify-between text-xs">
+      <div
+        v-for="pago in resultado.pagos"
+        :key="pago.id"
+        class="flex items-center justify-between text-xs"
+      >
         <span class="text-theme-text-muted">{{ pago.concepto }}</span>
-        <span class="text-emerald-400 font-medium">{{ currencySymbol }}&nbsp;{{ formatMonto(pago.montoPagado) }}</span>
+        <span class="text-emerald-400 font-medium"
+          >{{ currencySymbol }}&nbsp;{{ formatMonto(pago.montoPagado) }}</span
+        >
       </div>
       <div v-if="resultado.montoSobrante > 0" class="border-t border-emerald-500/20 pt-2">
-        <p class="text-xs text-yellow-400">Sobrante: {{ currencySymbol }}&nbsp;{{ formatMonto(resultado.montoSobrante) }} (todas las deudas fueron cubiertas)</p>
+        <p class="text-xs text-yellow-400">
+          Sobrante: {{ currencySymbol }}&nbsp;{{ formatMonto(resultado.montoSobrante) }} (todas las
+          deudas fueron cubiertas)
+        </p>
       </div>
     </div>
 
@@ -129,14 +172,35 @@ class="w-1.5 h-1.5 rounded-full shrink-0"
       <button
         v-if="!resultado"
         class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-        :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
+        :class="
+          saving
+            ? 'bg-theme-accent cursor-not-allowed'
+            : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'
+        "
         :disabled="saving"
         data-testid="btn-distribuir"
         @click="guardar"
       >
-        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          v-if="saving"
+          class="animate-spin w-4 h-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
         {{ saving ? 'Procesando...' : 'Distribuir pago' }}
       </button>
@@ -161,7 +225,12 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
-const { fetchResumen, fetchPersonas, fetchDeudasPersona, deudasActivasPersona: deudasActivasList } = useDeudas()
+const {
+  fetchResumen,
+  fetchPersonas,
+  fetchDeudasPersona,
+  deudasActivasPersona: deudasActivasList,
+} = useDeudas()
 
 const metodos = ['Efectivo', 'Yape', 'Plin', 'Transferencia', 'Tarjeta']
 
@@ -196,17 +265,19 @@ const simulacion = computed(() => {
   })
 
   let restante = monto
-  return sorted.map(d => {
-    const pendiente = d.montoPendiente || 0
-    const pagado = Math.min(restante, pendiente)
-    restante -= pagado
-    return {
-      concepto: d.concepto,
-      pagado,
-      restante: pendiente - pagado,
-      saldado: pagado >= pendiente,
-    }
-  }).filter(s => s.pagado > 0)
+  return sorted
+    .map((d) => {
+      const pendiente = d.montoPendiente || 0
+      const pagado = Math.min(restante, pendiente)
+      restante -= pagado
+      return {
+        concepto: d.concepto,
+        pagado,
+        restante: pendiente - pagado,
+        saldado: pagado >= pendiente,
+      }
+    })
+    .filter((s) => s.pagado > 0)
 })
 
 const sobrante = computed(() => {
@@ -234,11 +305,7 @@ async function guardar() {
         notas: form.notas?.trim() || null,
       },
     })
-    await Promise.all([
-      fetchResumen(),
-      fetchPersonas(),
-      fetchDeudasPersona(props.persona.id),
-    ])
+    await Promise.all([fetchResumen(), fetchPersonas(), fetchDeudasPersona(props.persona.id)])
     emit('saved')
   } catch (e) {
     errorMsg.value = handleApiError(e)

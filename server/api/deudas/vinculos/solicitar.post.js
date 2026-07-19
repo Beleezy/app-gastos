@@ -22,10 +22,12 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select()
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, body.personaEntidadId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(
+      and(
+        eq(personasEntidades.id, body.personaEntidadId),
+        eq(personasEntidades.usuarioId, usuarioId),
+      ),
+    )
     .limit(1)
 
   if (!persona) {
@@ -65,14 +67,23 @@ export default defineEventHandler(async (event) => {
   const [vinculoExistente] = await db
     .select({ id: personasEntidades.id })
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.usuarioId, usuarioId),
-      eq(personasEntidades.vinculadoUsuarioId, destinatario?.id || '00000000-0000-0000-0000-000000000000')
-    ))
+    .where(
+      and(
+        eq(personasEntidades.usuarioId, usuarioId),
+        eq(
+          personasEntidades.vinculadoUsuarioId,
+          destinatario?.id || '00000000-0000-0000-0000-000000000000',
+        ),
+      ),
+    )
     .limit(1)
 
   if (vinculoExistente) {
-    throw createError({ statusCode: 400, message: 'Ya tienes un vínculo activo con este usuario. Solo se permite un vínculo por par de usuarios.' })
+    throw createError({
+      statusCode: 400,
+      message:
+        'Ya tienes un vínculo activo con este usuario. Solo se permite un vínculo por par de usuarios.',
+    })
   }
 
   // También verificar si el destinatario ya tiene vínculo activo hacia el remitente
@@ -80,14 +91,19 @@ export default defineEventHandler(async (event) => {
     const [vinculoInverso] = await db
       .select({ id: personasEntidades.id })
       .from(personasEntidades)
-      .where(and(
-        eq(personasEntidades.usuarioId, destinatario.id),
-        eq(personasEntidades.vinculadoUsuarioId, usuarioId)
-      ))
+      .where(
+        and(
+          eq(personasEntidades.usuarioId, destinatario.id),
+          eq(personasEntidades.vinculadoUsuarioId, usuarioId),
+        ),
+      )
       .limit(1)
 
     if (vinculoInverso) {
-      throw createError({ statusCode: 400, message: 'Ya existe un vínculo activo entre tú y este usuario.' })
+      throw createError({
+        statusCode: 400,
+        message: 'Ya existe un vínculo activo entre tú y este usuario.',
+      })
     }
   }
 
@@ -96,23 +112,28 @@ export default defineEventHandler(async (event) => {
     const [solicitudDuplicada] = await db
       .select({ id: solicitudesVinculo.id })
       .from(solicitudesVinculo)
-      .where(and(
-        eq(solicitudesVinculo.estado, 'pendiente'),
-        or(
-          and(
-            eq(solicitudesVinculo.remitenteId, usuarioId),
-            eq(solicitudesVinculo.destinatarioId, destinatario.id)
+      .where(
+        and(
+          eq(solicitudesVinculo.estado, 'pendiente'),
+          or(
+            and(
+              eq(solicitudesVinculo.remitenteId, usuarioId),
+              eq(solicitudesVinculo.destinatarioId, destinatario.id),
+            ),
+            and(
+              eq(solicitudesVinculo.remitenteId, destinatario.id),
+              eq(solicitudesVinculo.destinatarioId, usuarioId),
+            ),
           ),
-          and(
-            eq(solicitudesVinculo.remitenteId, destinatario.id),
-            eq(solicitudesVinculo.destinatarioId, usuarioId)
-          )
-        )
-      ))
+        ),
+      )
       .limit(1)
 
     if (solicitudDuplicada) {
-      throw createError({ statusCode: 400, message: 'Ya existe una solicitud pendiente entre tú y este usuario' })
+      throw createError({
+        statusCode: 400,
+        message: 'Ya existe una solicitud pendiente entre tú y este usuario',
+      })
     }
   }
 
@@ -120,15 +141,20 @@ export default defineEventHandler(async (event) => {
   const [existentePorEmail] = await db
     .select({ id: solicitudesVinculo.id })
     .from(solicitudesVinculo)
-    .where(and(
-      eq(solicitudesVinculo.remitenteId, usuarioId),
-      eq(solicitudesVinculo.destinatarioEmail, email),
-      eq(solicitudesVinculo.estado, 'pendiente')
-    ))
+    .where(
+      and(
+        eq(solicitudesVinculo.remitenteId, usuarioId),
+        eq(solicitudesVinculo.destinatarioEmail, email),
+        eq(solicitudesVinculo.estado, 'pendiente'),
+      ),
+    )
     .limit(1)
 
   if (existentePorEmail) {
-    throw createError({ statusCode: 400, message: 'Ya existe una solicitud pendiente para este email' })
+    throw createError({
+      statusCode: 400,
+      message: 'Ya existe una solicitud pendiente para este email',
+    })
   }
 
   // Obtener nombre display del remitente para incluir en la solicitud

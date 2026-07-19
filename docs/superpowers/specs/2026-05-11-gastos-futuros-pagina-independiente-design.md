@@ -45,13 +45,14 @@ El objetivo es que "Gastos futuros" se sienta como un apartado distinto y como u
 
 Mover de `components/planificador/` a `components/futuros/`, renombrando para auto-import limpio:
 
-| Antes | Después | Auto-import |
-|---|---|---|
-| `planificador/ListaGastosFuturos.vue` | `futuros/Lista.vue` | `<FuturosLista />` |
+| Antes                                   | Después               | Auto-import          |
+| --------------------------------------- | --------------------- | -------------------- |
+| `planificador/ListaGastosFuturos.vue`   | `futuros/Lista.vue`   | `<FuturosLista />`   |
 | `planificador/ResumenGastosFuturos.vue` | `futuros/Resumen.vue` | `<FuturosResumen />` |
-| `planificador/FormGastoFuturo.vue` | `futuros/Form.vue` | `<FuturosForm />` |
+| `planificador/FormGastoFuturo.vue`      | `futuros/Form.vue`    | `<FuturosForm />`    |
 
 Dentro de cada componente movido:
+
 - Reemplazar referencias internas a `usePlanificador()` por `useGastosFuturos()`.
 - Reemplazar accesos a `gastosFuturos`, `resumenFuturos`, `createGastoFuturo`, `updateGastoFuturo`, `deleteGastoFuturo`, `decidirOpcionFutura` por los del nuevo composable.
 - Sustituir clases de color del acento principal (`theme-accent`, `theme-accent-bg`, `theme-on-accent`) por las equivalentes en **violeta** (`violet-500`, `violet-600`, `bg-violet-500/10`, `text-violet-500`, `text-white` para texto sobre violeta, etc.) en los puntos donde el color comunica identidad del módulo (encabezados de tarjetas, botones primarios, badges activos, indicadores de selección).
@@ -62,15 +63,18 @@ Dentro de cada componente movido:
 Crear `composables/useGastosFuturos.js` con:
 
 **Estado** (`useState` para compartirlo entre componentes):
+
 - `gastosFuturos` — array.
 - `resumenFuturos` — objeto con la forma actual (`totalProyectos`, `totalDetalles`, `totalOpciones`, `proyectosConReferencia`, `totalMinimo`, `totalMaximo`, `totalPromedio`, `promedioPorProyecto`, `destacados`).
 - `isLoading`, `error`.
 
 **Funciones:**
+
 - `fetchGastosFuturos()` — llama al nuevo `GET /api/futuros` (ver Sección 4) y rellena `gastosFuturos` + `resumenFuturos`.
 - `createGastoFuturo(data)`, `updateGastoFuturo(id, data)`, `deleteGastoFuturo(id)`, `decidirOpcionFutura(proyectoId, detalleId, payload)` — mismas firmas y endpoints que hoy (`/api/planificador/futuros/*`). Tras cada mutación, refrescan llamando a `fetchGastosFuturos()`.
 
 **Limpieza en `usePlanificador.js`:**
+
 - Eliminar de `usePlanificador.js`:
   - Estado: `gastosFuturos`, `resumenFuturos`.
   - Funciones: `createGastoFuturo`, `updateGastoFuturo`, `deleteGastoFuturo`, `decidirOpcionFutura`.
@@ -81,15 +85,18 @@ Crear `composables/useGastosFuturos.js` con:
 ## 4. Backend (API)
 
 **Cambio mínimo invasivo.** Los endpoints existentes bajo `/api/planificador/futuros/*` se conservan tal cual:
+
 - `POST /api/planificador/futuros` — crear.
 - `PUT /api/planificador/futuros/[id]` — actualizar.
 - `DELETE /api/planificador/futuros/[id]` — eliminar.
 - `POST /api/planificador/futuros/[id]/detalles/[detalleId]/decidir` — decidir opción.
 
 **Nuevo endpoint:**
+
 - `GET /api/futuros` — devuelve `{ gastosFuturos, resumenFuturos }` con la misma forma que hoy retorna `/api/planificador` para esos dos campos. Reusa la misma lógica de consulta y agregación.
 
 **`GET /api/planificador`:**
+
 - Mantener por ahora `gastosFuturos` y `resumenFuturos` en la respuesta (compat de transición). Si después de la migración del frontend nada los consume desde ese endpoint, se eliminan en un commit posterior — fuera de scope de este plan.
 
 ## 5. Identidad visual (violeta)
@@ -132,6 +139,7 @@ Al terminar la implementación, verificar (mobile y desktop):
 ## Archivos afectados (resumen)
 
 **Nuevos:**
+
 - `pages/futuros.vue`
 - `composables/useGastosFuturos.js`
 - `components/futuros/Lista.vue` (movido y renombrado)
@@ -140,6 +148,7 @@ Al terminar la implementación, verificar (mobile y desktop):
 - `server/api/futuros/index.get.js`
 
 **Modificados:**
+
 - `pages/planificador.vue` — remover lógica de futuros + agregar redirect de query vieja.
 - `composables/usePlanificador.js` — remover estado/funciones de futuros.
 - `layouts/planificador.vue` — sub-tab `to` y estilo activo violeta.
@@ -147,6 +156,7 @@ Al terminar la implementación, verificar (mobile y desktop):
 - `components/layout/MobileDrawer.vue` — actualizar `to`.
 
 **Eliminados (movidos a nueva ubicación):**
+
 - `components/planificador/ListaGastosFuturos.vue`
 - `components/planificador/ResumenGastosFuturos.vue`
 - `components/planificador/FormGastoFuturo.vue`

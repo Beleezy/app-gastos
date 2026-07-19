@@ -25,7 +25,14 @@ const medioAhorroBase = z.object({
   // mediosAhorro.tipo es varchar(40); no es enum en DB pero el frontend
   // usa un conjunto fijo. Limitamos longitud y caracteres para impedir
   // payloads exóticos sin atarse al conjunto que evoluciona.
-  tipo: z.string().trim().min(1).max(40).regex(/^[\w\- ]+$/, 'Tipo inválido').optional().nullable(),
+  tipo: z
+    .string()
+    .trim()
+    .min(1)
+    .max(40)
+    .regex(/^[\w\- ]+$/, 'Tipo inválido')
+    .optional()
+    .nullable(),
   icono: z.string().trim().max(16).optional().nullable(),
   color: colorHex.or(z.string().trim().max(16)).optional().nullable(),
   orden: z.number().int().min(0).max(10_000).optional(),

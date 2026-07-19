@@ -26,16 +26,24 @@ describe('clasificarDeuda', () => {
   })
 
   it('urgente si vence hoy o mañana', () => {
-    expect(clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-04-28' }, HOY).urgencia).toBe('urgente')
-    expect(clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-04-29' }, HOY).urgencia).toBe('urgente')
+    expect(
+      clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-04-28' }, HOY).urgencia,
+    ).toBe('urgente')
+    expect(
+      clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-04-29' }, HOY).urgencia,
+    ).toBe('urgente')
   })
 
   it('pronto si vence en menos de 7 dias', () => {
-    expect(clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-05-03' }, HOY).urgencia).toBe('pronto')
+    expect(
+      clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-05-03' }, HOY).urgencia,
+    ).toBe('pronto')
   })
 
   it('normal si > 7 dias', () => {
-    expect(clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-06-01' }, HOY).urgencia).toBe('normal')
+    expect(
+      clasificarDeuda({ montoPendiente: 100, fechaVencimiento: '2026-06-01' }, HOY).urgencia,
+    ).toBe('normal')
   })
 })
 
@@ -46,7 +54,7 @@ describe('deudasParaRecordar', () => {
       { id: 2, montoPendiente: 100, fechaVencimiento: '2026-04-25' }, // vencida (-3)
       { id: 3, montoPendiente: 100, fechaVencimiento: '2026-05-03' }, // pronto (5)
       { id: 4, montoPendiente: 100, fechaVencimiento: '2026-04-28' }, // urgente (0)
-      { id: 5, montoPendiente: 0, fechaVencimiento: '2026-04-20' },   // pagada
+      { id: 5, montoPendiente: 0, fechaVencimiento: '2026-04-20' }, // pagada
     ]
     const r = deudasParaRecordar(lista, HOY)
     expect(r.map((x) => x.id)).toEqual([2, 4, 3])

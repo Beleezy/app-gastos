@@ -27,10 +27,14 @@ export function fechaHoraEnZona(tz) {
   const ahora = new Date()
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: tz,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit', hour12: false,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
   }).formatToParts(ahora)
-  const get = (t) => parts.find(p => p.type === t)?.value
+  const get = (t) => parts.find((p) => p.type === t)?.value
   let hora = get('hour')
   if (hora === '24') hora = '00'
   return {

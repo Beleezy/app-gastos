@@ -23,7 +23,10 @@ export class BasePage {
    */
   async waitForReady() {
     await this.page.waitForLoadState('domcontentloaded')
-    await this.page.locator('#contenido-principal').first().waitFor({ state: 'visible', timeout: 15_000 })
+    await this.page
+      .locator('#contenido-principal')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 })
     await this.page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {})
   }
 
@@ -54,9 +57,14 @@ export class BasePage {
       await btn.click()
     } else {
       // fallback: click overlay
-      await this.page.getByTestId(SHARED.BOTTOM_SHEET_OVERLAY).last().click({ position: { x: 5, y: 5 } })
+      await this.page
+        .getByTestId(SHARED.BOTTOM_SHEET_OVERLAY)
+        .last()
+        .click({ position: { x: 5, y: 5 } })
     }
-    await this.bottomSheet().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+    await this.bottomSheet()
+      .waitFor({ state: 'hidden', timeout: 5000 })
+      .catch(() => {})
   }
 
   // ─── ConfirmDialog ──────────────────────────────────────
@@ -66,7 +74,9 @@ export class BasePage {
 
   async confirmarDialogo() {
     await this.confirmDialog().getByTestId(SHARED.BTN_CONFIRM_YES).click()
-    await this.confirmDialog().waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
+    await this.confirmDialog()
+      .waitFor({ state: 'hidden', timeout: 5000 })
+      .catch(() => {})
   }
 
   async cancelarDialogo() {

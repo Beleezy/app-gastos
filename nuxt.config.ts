@@ -146,7 +146,8 @@ export default defineNuxtConfig({
         {
           tagPosition: 'head',
           tagPriority: 'critical',
-          innerHTML: "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true'){d.classList.add('colorblind');var l=document.createElement('link');l.id='colorblind-css';l.rel='stylesheet';l.href='/colorblind.css';document.head.appendChild(l);}}catch(e){}})();",
+          innerHTML:
+            "(function(){try{var d=document.documentElement;var L={rosado:1,blanco:1};var a=localStorage.getItem('theme-accent')||'azul';d.classList.add(L[a]?'light':'dark');d.classList.add('accent-'+a);d.style.fontSize=localStorage.getItem('theme-font-size')==='grande'?'18px':'16px';if(localStorage.getItem('colorblind-mode')==='true'){d.classList.add('colorblind');var l=document.createElement('link');l.id='colorblind-css';l.rel='stylesheet';l.href='/colorblind.css';document.head.appendChild(l);}}catch(e){}})();",
         },
       ],
     },
@@ -241,10 +242,9 @@ export default defineNuxtConfig({
           // Endpoints "estables" (categorías, configuraciones): SWR para
           // servir cache instantáneo y revalidar en background.
           urlPattern: ({ url, sameOrigin }: { url: URL; sameOrigin: boolean; request: Request }) =>
-            sameOrigin && (
-              url.pathname.startsWith('/api/categorias') ||
-              url.pathname.startsWith('/api/configuraciones')
-            ),
+            sameOrigin &&
+            (url.pathname.startsWith('/api/categorias') ||
+              url.pathname.startsWith('/api/configuraciones')),
           handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'api-stable',
@@ -254,8 +254,15 @@ export default defineNuxtConfig({
         {
           // Resto del API: NetworkFirst con timeout corto. Si la red
           // tarda más de 3s, se sirve la última respuesta cacheada.
-          urlPattern: ({ url, sameOrigin, request }: { url: URL; sameOrigin: boolean; request: Request }) =>
-            sameOrigin && url.pathname.startsWith('/api/') && request.method === 'GET',
+          urlPattern: ({
+            url,
+            sameOrigin,
+            request,
+          }: {
+            url: URL
+            sameOrigin: boolean
+            request: Request
+          }) => sameOrigin && url.pathname.startsWith('/api/') && request.method === 'GET',
           handler: 'NetworkFirst',
           options: {
             cacheName: 'api-dynamic',

@@ -1,15 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { gastoCreateSchema, gastosBulkCreateSchema, gastoUpdateSchema } from '../shared/schemas/gastos.js'
+import {
+  gastoCreateSchema,
+  gastosBulkCreateSchema,
+  gastoUpdateSchema,
+} from '../shared/schemas/gastos.js'
 import {
   deudaCreateSchema,
   deudaUpdateRealSchema,
   pagoCreateSchema,
   personaEntidadUpdateSchema,
 } from '../shared/schemas/deudas.js'
-import {
-  planMensualSchema,
-  gastoPlanificadoUpdateSchema,
-} from '../shared/schemas/planificador.js'
+import { planMensualSchema, gastoPlanificadoUpdateSchema } from '../shared/schemas/planificador.js'
 import {
   categoriaUpdateSchema,
   ahorroUpdateSchema,
@@ -33,16 +34,24 @@ describe('gastoCreateSchema', () => {
   })
 
   it('rechaza monto cero o negativo', () => {
-    expect(gastoCreateSchema.safeParse({ concepto: 'X', monto: 0, fecha: '2026-04-28' }).success).toBe(false)
-    expect(gastoCreateSchema.safeParse({ concepto: 'X', monto: -5, fecha: '2026-04-28' }).success).toBe(false)
+    expect(
+      gastoCreateSchema.safeParse({ concepto: 'X', monto: 0, fecha: '2026-04-28' }).success,
+    ).toBe(false)
+    expect(
+      gastoCreateSchema.safeParse({ concepto: 'X', monto: -5, fecha: '2026-04-28' }).success,
+    ).toBe(false)
   })
 
   it('rechaza fecha mal formateada', () => {
-    expect(gastoCreateSchema.safeParse({ concepto: 'X', monto: 5, fecha: '28/04/2026' }).success).toBe(false)
+    expect(
+      gastoCreateSchema.safeParse({ concepto: 'X', monto: 5, fecha: '28/04/2026' }).success,
+    ).toBe(false)
   })
 
   it('rechaza monto absurdo', () => {
-    expect(gastoCreateSchema.safeParse({ concepto: 'X', monto: 1e10, fecha: '2026-04-28' }).success).toBe(false)
+    expect(
+      gastoCreateSchema.safeParse({ concepto: 'X', monto: 1e10, fecha: '2026-04-28' }).success,
+    ).toBe(false)
   })
 })
 
@@ -106,10 +115,18 @@ describe('deudaCreateSchema', () => {
 
   it('normaliza personaTipo legacy al enum real de DB', () => {
     const base = { personaNombre: 'X', tipoDeuda: 'me_deben', concepto: 'C', monto: 1 }
-    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'banco' }).data.personaTipo).toBe('organizacion')
-    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'entidad' }).data.personaTipo).toBe('organizacion')
-    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'otro' }).data.personaTipo).toBe('persona')
-    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'persona' }).data.personaTipo).toBe('persona')
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'banco' }).data.personaTipo).toBe(
+      'organizacion',
+    )
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'entidad' }).data.personaTipo).toBe(
+      'organizacion',
+    )
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'otro' }).data.personaTipo).toBe(
+      'persona',
+    )
+    expect(deudaCreateSchema.safeParse({ ...base, personaTipo: 'persona' }).data.personaTipo).toBe(
+      'persona',
+    )
   })
 
   it('rechaza personaTipo desconocido', () => {

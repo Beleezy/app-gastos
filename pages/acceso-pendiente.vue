@@ -1,7 +1,9 @@
 <template>
   <div class="min-h-screen flex items-center justify-center px-6 bg-theme-bg">
     <div class="max-w-sm w-full text-center">
-      <div class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/15 flex items-center justify-center mb-4">
+      <div
+        class="w-16 h-16 mx-auto rounded-2xl bg-amber-500/15 flex items-center justify-center mb-4"
+      >
         <span class="text-3xl" aria-hidden="true">{{ rechazado ? '🔒' : '⏳' }}</span>
       </div>
 
@@ -11,14 +13,13 @@
 
       <p class="text-sm text-theme-text-sec leading-relaxed">
         <template v-if="rechazado">
-          Tu solicitud de acceso no fue aprobada. Si crees que es un error,
-          comunícate con el administrador del sistema.
+          Tu solicitud de acceso no fue aprobada. Si crees que es un error, comunícate con el
+          administrador del sistema.
         </template>
         <template v-else>
-          Tu cuenta está pendiente de aprobación. Un administrador debe
-          habilitar tu acceso antes de que puedas usar la aplicación.
-          Te avisaremos en cuanto esté lista; si necesitas agilizarlo,
-          comunícate con el administrador del sistema.
+          Tu cuenta está pendiente de aprobación. Un administrador debe habilitar tu acceso antes de
+          que puedas usar la aplicación. Te avisaremos en cuanto esté lista; si necesitas
+          agilizarlo, comunícate con el administrador del sistema.
         </template>
       </p>
 

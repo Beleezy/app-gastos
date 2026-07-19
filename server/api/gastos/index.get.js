@@ -8,7 +8,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  const { fecha, fechaDesde, fechaHasta, mes, anio, busqueda, categoriaId, limit, offset, orden } = query
+  const { fecha, fechaDesde, fechaHasta, mes, anio, busqueda, categoriaId, limit, offset, orden } =
+    query
 
   let whereConditions = [eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)]
 
@@ -72,7 +73,7 @@ export default defineEventHandler(async (event) => {
   // el histórico completo crece sin cota (45 KB+ y subiendo cada mes — P1)
   // y ningún consumidor legítimo lo necesita entero.
   const hayFiltroFecha = Boolean(fecha || (fechaDesde && fechaHasta) || (mes && anio))
-  const limitEfectivo = limit ? Number(limit) : (hayFiltroFecha ? null : 500)
+  const limitEfectivo = limit ? Number(limit) : hayFiltroFecha ? null : 500
   if (limitEfectivo) {
     queryBuilder = queryBuilder.limit(limitEfectivo)
   }
@@ -86,7 +87,7 @@ export default defineEventHandler(async (event) => {
 
   const result = await queryBuilder
 
-  return result.map(g => ({
+  return result.map((g) => ({
     ...g,
     monto: parseFloat(g.monto),
   }))

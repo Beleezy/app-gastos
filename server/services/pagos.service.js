@@ -44,7 +44,8 @@ export async function registrarPago({ usuarioId, deudaId, body }) {
     .where(eq(personasEntidades.id, deuda.personaEntidadId))
     .limit(1)
 
-  const fechaPago = body.fechaPago || body.fecha || (await getFechaHoraLocalUsuario(usuarioId)).fecha
+  const fechaPago =
+    body.fechaPago || body.fecha || (await getFechaHoraLocalUsuario(usuarioId)).fecha
 
   const resultado = await db.transaction(async (tx) => {
     const [pago] = await tx

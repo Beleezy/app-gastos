@@ -63,7 +63,16 @@ export async function softDeleteIngreso({ id, usuarioId }) {
   return { id: ingreso.id }
 }
 
-export async function listarIngresos({ usuarioId, mes, anio, fechaDesde, fechaHasta, origen, limit, offset }) {
+export async function listarIngresos({
+  usuarioId,
+  mes,
+  anio,
+  fechaDesde,
+  fechaHasta,
+  origen,
+  limit,
+  offset,
+}) {
   const where = [eq(ingresos.usuarioId, usuarioId), isNull(ingresos.deletedAt)]
   if (mes && anio) {
     const primerDia = `${anio}-${String(mes).padStart(2, '0')}-01`
@@ -98,11 +107,13 @@ export async function totalIngresosMes({ usuarioId, mes, anio }) {
   const [row] = await db
     .select({ total: sql`COALESCE(SUM(${ingresos.monto}), 0)` })
     .from(ingresos)
-    .where(and(
-      eq(ingresos.usuarioId, usuarioId),
-      isNull(ingresos.deletedAt),
-      between(ingresos.fecha, primerDia, ultimaFecha),
-    ))
+    .where(
+      and(
+        eq(ingresos.usuarioId, usuarioId),
+        isNull(ingresos.deletedAt),
+        between(ingresos.fecha, primerDia, ultimaFecha),
+      ),
+    )
 
   return parseFloat(row?.total || 0)
 }

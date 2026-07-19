@@ -25,23 +25,23 @@ prioriza eso.
 
 ### Resumen ejecutivo
 
-| # | Mejora | Sev. | Esf. | Veredicto |
-|---|--------|------|------|-----------|
-| 1.1 | Pipeline de migraciones con tabla de control + deploy | 🔴 | M | ✅ |
-| 1.2 | Normalizar numeración de migraciones duplicadas | 🔴 | S | ✅ |
-| 1.3 | Backup automático de la BD (Supabase free no incluye) | 🔴 | S | ✅ |
-| 1.4 | Keep-alive Supabase + uptime monitor externo | 🟠 | S | ✅ |
-| 2.1 | Eliminar código muerto de previews (V1/V3/V5) | 🟠 | S | ✅ |
-| 2.2 | Actualizar CLAUDE.md al estado real | 🟠 | S | ✅ |
-| 2.3 | Restaurar soft-delete de `personas_entidades` (revertido en hotfix) | 🟠 | M | ✅ |
-| 3.1 | Promover lint a check bloqueante | 🟡 | M | ✅ |
-| 3.2 | Job E2E smoke en CI de PRs | 🟡 | S | ✅ |
-| 3.3 | Dependabot/npm audit programado | 🟡 | S | ✅ |
-| 4.1 | Permitir zoom (quitar `user-scalable=no`) | 🟡 | S | ✅ |
-| 4.2 | Self-host de la fuente Inter | 🟡 | S | ✅ |
-| 4.3 | Refactor incremental de componentes >600 líneas | 🟡 | L | 🕐 |
-| 5.1 | CSP estricta con nonce en header activo | 🟡 | L | 🕐 |
-| — | Migración a TypeScript, RLS total, Sentry pago, Redis dedicado, multi-tenant | — | XL | ❌ |
+| #   | Mejora                                                                       | Sev. | Esf. | Veredicto |
+| --- | ---------------------------------------------------------------------------- | ---- | ---- | --------- |
+| 1.1 | Pipeline de migraciones con tabla de control + deploy                        | 🔴   | M    | ✅        |
+| 1.2 | Normalizar numeración de migraciones duplicadas                              | 🔴   | S    | ✅        |
+| 1.3 | Backup automático de la BD (Supabase free no incluye)                        | 🔴   | S    | ✅        |
+| 1.4 | Keep-alive Supabase + uptime monitor externo                                 | 🟠   | S    | ✅        |
+| 2.1 | Eliminar código muerto de previews (V1/V3/V5)                                | 🟠   | S    | ✅        |
+| 2.2 | Actualizar CLAUDE.md al estado real                                          | 🟠   | S    | ✅        |
+| 2.3 | Restaurar soft-delete de `personas_entidades` (revertido en hotfix)          | 🟠   | M    | ✅        |
+| 3.1 | Promover lint a check bloqueante                                             | 🟡   | M    | ✅        |
+| 3.2 | Job E2E smoke en CI de PRs                                                   | 🟡   | S    | ✅        |
+| 3.3 | Dependabot/npm audit programado                                              | 🟡   | S    | ✅        |
+| 4.1 | Permitir zoom (quitar `user-scalable=no`)                                    | 🟡   | S    | ✅        |
+| 4.2 | Self-host de la fuente Inter                                                 | 🟡   | S    | ✅        |
+| 4.3 | Refactor incremental de componentes >600 líneas                              | 🟡   | L    | 🕐        |
+| 5.1 | CSP estricta con nonce en header activo                                      | 🟡   | L    | 🕐        |
+| —   | Migración a TypeScript, RLS total, Sentry pago, Redis dedicado, multi-tenant | —    | XL   | ❌        |
 
 ---
 
@@ -60,15 +60,16 @@ ejecuta `nuxt build` y nunca aplica migraciones**. Hubo que revertir la feature 
   por otra causa, los 2 primeros quedan aplicados y no hay registro de en qué estado quedó.
 
 **Propuesta.**
+
 1. Añadir tabla `_migraciones_aplicadas (archivo text pk, hash text, aplicada_en timestamptz)`.
    `apply-migrations.mjs` pasa a: saltar archivos ya registrados → ejecutar cada archivo nuevo
    dentro de una transacción → registrar al confirmar. Los códigos ignorables se conservan solo
-   como *bootstrap* la primera vez (BD existente sin tabla de control).
+   como _bootstrap_ la primera vez (BD existente sin tabla de control).
 2. Ejecutar migraciones en el deploy: en Vercel, Build Command =
    `npm run db:apply && npm run build` (la build ya tiene `DATABASE_URL`). Con la tabla de
    control, correr esto en cada build es barato y seguro. Alternativa equivalente: job de
    GitHub Actions en push a `main` que corre `db:apply` antes de que Vercel despliegue.
-3. Extender `/api/health` (solo fuera de prod, o bajo `CRON_SECRET`) con un check de *drift*:
+3. Extender `/api/health` (solo fuera de prod, o bajo `CRON_SECRET`) con un check de _drift_:
    comparar `SELECT column_name FROM information_schema.columns` contra 3–4 columnas centinela
    recientes del schema. El smoke E2E post-deploy lo consume.
 
@@ -137,7 +138,7 @@ Para un proyecto que se desarrolla principalmente con agentes de IA, el CLAUDE.m
 documentación operativa: cada sesión que arranca con el mapa desactualizado re-explora el repo
 (lento) o asume estructura que ya no existe (errores). Reescribirlo al estado real y añadir la
 regla de mantenerlo al cierre de cada ronda. Aprovechar para actualizar el "Hot paths" del
-README (tiene una frase inacabada: *"análogo a venir en services/deudas.service.js"*).
+README (tiene una frase inacabada: _"análogo a venir en services/deudas.service.js"_).
 
 ### 2.3 Restaurar soft-delete de personas 🟠 (M) — ✅ HACER (después de 1.1)
 
@@ -237,23 +238,23 @@ serverless). Verificar en el dashboard de Vercel; es un checkbox pendiente, no u
 
 ## 6. Descartadas (y por qué, para no reevaluarlas cada ronda)
 
-| Idea | Por qué se descarta |
-|---|---|
-| **Migrar a TypeScript** | Reescritura XL sobre ~200 archivos JS estables. Zod compartido + tests ya dan el grueso del valor de contratos. Para uso personal, el costo/beneficio es claramente negativo. |
+| Idea                                          | Por qué se descarta                                                                                                                                                                                                        |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Migrar a TypeScript**                       | Reescritura XL sobre ~200 archivos JS estables. Zod compartido + tests ya dan el grueso del valor de contratos. Para uso personal, el costo/beneficio es claramente negativo.                                              |
 | **RLS de Supabase como capa de autorización** | La app accede por Drizzle con conexión directa (rol postgres), no por PostgREST: RLS no aplicaría al tráfico real sin rehacer la capa de datos. `assertOwner` + filtros por `usuario_id` + tests IDOR cumplen esa función. |
-| **Sentry / observabilidad SaaS** | Ya hay `useErrorReporter` + `/api/errors` + logger estructurado. El free tier de Sentry añade otro third-party y cuota que vigilar para un solo usuario. UptimeRobot (1.4) cubre la alerta que de verdad falta. |
-| **Redis/cola dedicada, SSR caching avanzado** | Un usuario. El dashboard consolidado + SWR del SW ya dejaron el TTI donde debe estar. |
-| **Multi-tenancy / monetización / landing** | Fuera del objetivo declarado (uso personal con allowlist). |
-| **Migrar de Web Speech API a STT de pago** | El flujo voz→LLM ya tiene confirmación manual que absorbe errores de transcripción. Gemini free + caché + cuotas mantienen costo cero. |
+| **Sentry / observabilidad SaaS**              | Ya hay `useErrorReporter` + `/api/errors` + logger estructurado. El free tier de Sentry añade otro third-party y cuota que vigilar para un solo usuario. UptimeRobot (1.4) cubre la alerta que de verdad falta.            |
+| **Redis/cola dedicada, SSR caching avanzado** | Un usuario. El dashboard consolidado + SWR del SW ya dejaron el TTI donde debe estar.                                                                                                                                      |
+| **Multi-tenancy / monetización / landing**    | Fuera del objetivo declarado (uso personal con allowlist).                                                                                                                                                                 |
+| **Migrar de Web Speech API a STT de pago**    | El flujo voz→LLM ya tiene confirmación manual que absorbe errores de transcripción. Gemini free + caché + cuotas mantienen costo cero.                                                                                     |
 
 ---
 
 ## 7. Orden de ejecución sugerido
 
 1. **Ronda A — Operaciones (P0):** 1.2 → 1.1 → 1.3 → 1.4 (+ config Upstash de 5.2).
-   *Resultado: la clase de incidente del hotfix queda extinta; hay backups y alertas.*
+   _Resultado: la clase de incidente del hotfix queda extinta; hay backups y alertas._
 2. **Ronda B — Higiene:** 2.1 → 2.2 → 3.3 → 4.1.
-   *Resultado: repo limpio, docs fieles, dependencias vigiladas. Todo S, un día en total.*
+   _Resultado: repo limpio, docs fieles, dependencias vigiladas. Todo S, un día en total._
 3. **Ronda C — Validación del pipeline:** 2.3 (restaurar soft-delete personas) + 3.2 (smoke en CI).
 4. **Ronda D — Calidad:** 3.1 (lint bloqueante) → 4.2 (fuentes).
 5. **Backlog vivo:** 4.3 y 5.1 según se toquen las áreas.

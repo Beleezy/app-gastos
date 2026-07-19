@@ -1,5 +1,9 @@
 import { db } from '../../../utils/db.js'
-import { googleCalendarConexiones, gastosPlanificados, planesMensuales } from '../../../database/schema.js'
+import {
+  googleCalendarConexiones,
+  gastosPlanificados,
+  planesMensuales,
+} from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { decrypt } from '../../../utils/crypto.js'
 import { createGcalClient } from '../../../utils/googleCalendar.js'
@@ -31,13 +35,17 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   validar(body.recordatorios)
 
-  const [conexion] = await db.select().from(googleCalendarConexiones)
-    .where(eq(googleCalendarConexiones.usuarioId, usuarioId)).limit(1)
+  const [conexion] = await db
+    .select()
+    .from(googleCalendarConexiones)
+    .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
+    .limit(1)
   if (!conexion) {
     throw createError({ statusCode: 400, message: 'No hay conexion' })
   }
 
-  await db.update(googleCalendarConexiones)
+  await db
+    .update(googleCalendarConexiones)
     .set({ recordatoriosConfig: body.recordatorios, updatedAt: new Date() })
     .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
 
@@ -49,11 +57,13 @@ export default defineEventHandler(async (event) => {
     })
     .from(gastosPlanificados)
     .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      eq(gastosPlanificados.estado, 'pendiente'),
-      isNotNull(gastosPlanificados.googleEventId),
-    ))
+    .where(
+      and(
+        eq(planesMensuales.usuarioId, usuarioId),
+        eq(gastosPlanificados.estado, 'pendiente'),
+        isNotNull(gastosPlanificados.googleEventId),
+      ),
+    )
 
   const config = useRuntimeConfig()
   const client = createGcalClient({
@@ -62,7 +72,10 @@ export default defineEventHandler(async (event) => {
     clientSecret: config.googleOAuthClientSecret,
   })
 
-  const overrides = body.recordatorios.map(r => ({ method: 'popup', minutes: recordatorioToMinutes(r) }))
+  const overrides = body.recordatorios.map((r) => ({
+    method: 'popup',
+    minutes: recordatorioToMinutes(r),
+  }))
   let actualizados = 0
   for (const p of pendientes) {
     try {
