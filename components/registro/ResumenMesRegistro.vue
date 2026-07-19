@@ -213,6 +213,9 @@
 </template>
 
 <script setup>
+// ─── Calculados ──────────────────────────────────────────
+import { calcularPresupuesto } from '~/composables/usePresupuestoCalc'
+
 const props = defineProps({
   totalMes: { type: Number, default: 0 },
   totalDia: { type: Number, default: 0 },
@@ -264,9 +267,6 @@ function onSincronizar() {
   emit('update:presupuesto', props.presupuestoDefault)
 }
 
-// ─── Calculados ──────────────────────────────────────────
-import { calcularPresupuesto } from '~/composables/usePresupuestoCalc'
-
 const calc = computed(() =>
   calcularPresupuesto({
     presupuesto: props.presupuesto,
@@ -298,7 +298,7 @@ const vaBien = computed(() =>
 const detallesAbierto = ref(false)
 
 onMounted(() => {
-  if (process.client) {
+  if (import.meta.client) {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
       if (saved !== null) detallesAbierto.value = saved === 'true'
@@ -309,7 +309,7 @@ onMounted(() => {
 function toggleDetalles() {
   if (editando.value) return
   detallesAbierto.value = !detallesAbierto.value
-  if (process.client) {
+  if (import.meta.client) {
     try {
       localStorage.setItem(STORAGE_KEY, String(detallesAbierto.value))
     } catch {}

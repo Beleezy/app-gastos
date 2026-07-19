@@ -9,7 +9,8 @@
     @contextmenu.prevent="onLongPress"
   >
     <!-- Acción revelada al swipe-derecha: Editar -->
-    <div class="swipe-action swipe-action-left absolute inset-y-0 left-0 flex items-center pl-4"
+    <div
+class="swipe-action swipe-action-left absolute inset-y-0 left-0 flex items-center pl-4"
       :class="swipeOffset > 20 ? 'opacity-100' : 'opacity-0'"
     >
       <div class="flex items-center gap-2 text-theme-accent">
@@ -21,7 +22,8 @@
     </div>
 
     <!-- Acción revelada al swipe-izquierda: Eliminar -->
-    <div class="swipe-action swipe-action-right absolute inset-y-0 right-0 flex items-center pr-4"
+    <div
+class="swipe-action swipe-action-right absolute inset-y-0 right-0 flex items-center pr-4"
       :class="swipeOffset < -20 ? 'opacity-100' : 'opacity-0'"
     >
       <div class="flex items-center gap-2 text-red-400">
@@ -53,7 +55,8 @@
       </div>
       <div class="flex items-stretch flex-1 min-w-0">
         <div class="flex items-center pl-2.5 pr-2 py-2.5">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 relative"
+          <div
+class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 relative"
             :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '20' }"
           >
             <span class="text-base leading-none">{{ resolveIcono(gasto.categoriaIcono) }}</span>
@@ -77,7 +80,8 @@
           <!-- Fila 2: meta a la izquierda, acciones a la derecha -->
           <div class="flex items-center gap-1.5 mt-1">
             <div class="flex items-center gap-1.5 min-w-0 flex-1 flex-wrap">
-              <span class="text-[0.6875rem] font-medium px-1.5 py-0.5 rounded-md leading-none"
+              <span
+class="text-[0.6875rem] font-medium px-1.5 py-0.5 rounded-md leading-none"
                 :style="{ backgroundColor: (gasto.categoriaColor || '#6b7280') + '18', color: gasto.categoriaColor || '#6b7280' }"
                 data-testid="gasto-categoria"
               >

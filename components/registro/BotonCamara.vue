@@ -163,11 +163,11 @@ function onCameraPopState(event) {
 }
 
 onMounted(() => {
-  if (process.client) window.addEventListener('popstate', onCameraPopState)
+  if (import.meta.client) window.addEventListener('popstate', onCameraPopState)
 })
 
 onUnmounted(() => {
-  if (process.client) window.removeEventListener('popstate', onCameraPopState)
+  if (import.meta.client) window.removeEventListener('popstate', onCameraPopState)
   stopStream()
 })
 

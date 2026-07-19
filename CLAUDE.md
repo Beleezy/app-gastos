@@ -1,132 +1,104 @@
 # Sistema de Finanzas Personales — Guía del Proyecto
 
-PWA mobile-first de finanzas personales en **Nuxt 3 (JS) + Vue 3 Composition API**, con Tailwind, Drizzle ORM sobre **PostgreSQL (Supabase)**, autenticación con Supabase Auth y PWA vía `@vite-pwa/nuxt`. Moneda por defecto: **Soles peruanos (S/)**, locale `es-PE`, zona horaria `America/Lima`.
+PWA mobile-first de finanzas personales en **Nuxt (JS) + Vue 3 Composition API**, con Tailwind 4, Pinia, Drizzle ORM sobre **PostgreSQL (Supabase)**, autenticación Supabase Auth y PWA vía `@vite-pwa/nuxt`. Moneda por defecto: **Soles peruanos (S/)**, locale `es-PE`, zona horaria `America/Lima`.
 
-Navegación inferior ([components/layout/BottomNav.vue](components/layout/BottomNav.vue)) con tabs: **Planificador**, **Registro**, **Deudas**, más acceso a Configuraciones / Categorías / Información.
+> **Regla de mantenimiento:** al cerrar una ronda de trabajo que añada/quite módulos, tablas o convenciones, actualizar este archivo. Es la documentación operativa que usan las sesiones de IA — si miente, cada sesión futura paga el costo.
 
----
-
-## Módulo 1 — Planificador ([pages/planificador.vue](pages/planificador.vue))
-
-Planificación mensual del presupuesto. Incluye dos sub-áreas:
-
-### 1a. Gastos planificados del mes
-- [ResumenMes.vue](components/planificador/ResumenMes.vue): monto presupuestado, total asignado, saldo proyectado, barra de progreso y gráfico por categoría ([GraficoCategoria.vue](components/planificador/GraficoCategoria.vue)).
-- [ListaGastosPlaneados.vue](components/planificador/ListaGastosPlaneados.vue) + [FormGastoPlaneado.vue](components/planificador/FormGastoPlaneado.vue): CRUD con concepto, categoría, monto estimado, fecha probable, recurrencia (columna `recurrente_grupo_id` para replicar en meses futuros), estado `pendiente|pagado`, notas.
-- [CalendarioMensual.vue](components/planificador/CalendarioMensual.vue): vista de calendario con gastos planificados por día.
-- [FormRegistrarPago.vue](components/planificador/FormRegistrarPago.vue): al marcar un planificado como pagado se crea el gasto real vinculado (columna `gasto_planificado_id` en `gastos`, con índice único — un planificado ↔ máximo un gasto real).
-- Duplicación del plan de un mes anterior vía `/api/planificador/duplicar`.
-
-### 1b. Gastos futuros (deseos / decisiones pendientes)
-Sistema independiente para planear compras futuras **aún no decididas**, con jerarquía de 3 niveles:
-- `gastos_futuros` — tipo de gasto + prioridad.
-- `gastos_futuros_detalles` — ítems concretos con `estado_decision` y fecha; al decidirse pueden enlazar a un `gasto_id` o `gasto_planificado_id`.
-- `gastos_futuros_opciones` — alternativas comparables con precio mín/máx/promedio, URL de referencia e imagen.
-
-Componentes: [ListaGastosFuturos.vue](components/planificador/ListaGastosFuturos.vue), [FormGastoFuturo.vue](components/planificador/FormGastoFuturo.vue), [ResumenGastosFuturos.vue](components/planificador/ResumenGastosFuturos.vue). API en `/api/planificador/futuros`. Composable: [usePlanificador.js](composables/usePlanificador.js).
+Navegación: [BottomNav.vue](components/layout/BottomNav.vue) (móvil) + [SideNav.vue](components/layout/SideNav.vue)/[MobileDrawer.vue](components/layout/MobileDrawer.vue) ("Más") dan acceso a los módulos.
 
 ---
 
-## Módulo 2 — Registro de Gastos ([pages/registro.vue](pages/registro.vue))
+## Módulos
 
-Registro real de gastos con **tres métodos** (`metodo_registro` enum: `voz | foto | manual`):
+| Página | Qué hace | Piezas clave |
+|---|---|---|
+| [index.vue](pages/index.vue) | **Dashboard** home: resumen consolidado de gastos, deudas, plan, ahorros, ingresos y futuros en 1 request | `/api/dashboard` (queries paralelas) |
+| [planificador.vue](pages/planificador.vue) | Presupuesto mensual, gastos planeados (CRUD, recurrencia vía `recurrente_grupo_id`, estado pendiente/pagado), duplicar mes, presupuestos por categoría | `components/planificador/`, [usePlanificador.js](composables/usePlanificador.js), `/api/planificador`, [SelectorPlantillas.vue](components/planificador/SelectorPlantillas.vue) |
+| [registro.vue](pages/registro.vue) | Registro real de gastos por **voz / foto / manual** (`metodo_registro`), historial diario/semanal, stats, filtros, quick-add, bulk edit | `components/registro/`, [useGastos.js](composables/useGastos.js), `/api/gastos` (+`bulk`, `conceptos`, `resumen`, `detectar-duplicados`) |
+| [deudas.vue](pages/deudas.vue) | "Me deben / Yo debo" por persona/entidad, pagos parciales y globales, merge de duplicados, PDF/Excel, registro por voz, **vínculos entre cuentas** con espejado | `components/deudas/`, [useDeudas.js](composables/useDeudas.js), [useVinculos.js](composables/useVinculos.js), `/api/deudas/**` |
+| [ahorros.vue](pages/ahorros.vue) | Ahorros por medio (cuenta/banco), metas, gráfico mensual, vista 6 meses | `components/ahorros/`, [useAhorros.js](composables/useAhorros.js), `/api/ahorros/**` |
+| [ingresos.vue](pages/ingresos.vue) | Ingresos del mes; alimenta saldo neto del dashboard | [FormIngreso.vue](components/ingresos/FormIngreso.vue), [useIngresos.js](composables/useIngresos.js), `/api/ingresos` |
+| [futuros.vue](pages/futuros.vue) | Gastos futuros (deseos aún no decididos): jerarquía `gastos_futuros` → `_detalles` (estado_decision) → `_opciones` (alternativas con precios/scoring) | `components/futuros/`, [useGastosFuturos.js](composables/useGastosFuturos.js), [useOpcionesScoring.js](composables/useOpcionesScoring.js), `/api/planificador/futuros` |
+| [calendario.vue](pages/calendario.vue) | Vista calendario de planificados/gastos | [CalendarioMensual.vue](components/planificador/CalendarioMensual.vue) |
+| [metricas.vue](pages/metricas.vue) | Histórico y recurrentes | `/api/metricas/*` |
+| [reportes.vue](pages/reportes.vue) | Reportes/exportaciones | [useReportes.js](composables/useReportes.js) |
+| [papelera.vue](pages/papelera.vue) | Soft-delete: restaurar/purgar gastos, deudas, pagos y personas (`deleted_at`) | `/api/papelera/*`, [softDelete.js](server/utils/softDelete.js), cron `purgar-papelera` |
+| [familia.vue](pages/familia.vue) | **Perfiles gestionados** (familiares sin cuenta propia): crear/editar perfiles, cambiar de perfil activo | [usePerfiles.js](composables/usePerfiles.js), [usePerfilModo.js](composables/usePerfilModo.js), `/api/perfiles`, [PerfilContextBar.vue](components/layout/PerfilContextBar.vue) |
+| [categorias.vue](pages/categorias.vue) | Categorías predefinidas globales (`usuario_id` NULL) + personalizadas | `/api/categorias` |
+| [configuraciones.vue](pages/configuraciones.vue) | Perfil, presupuesto default, moneda, ciclo, tema/acento/daltónico/tamaño letra, recordatorios, Google Calendar, uso LLM, panel superadmin | `components/configuraciones/` |
+| [login.vue](pages/login.vue), `auth/`, [dev-login.vue](pages/dev-login.vue) | Supabase Auth (PKCE); dev-login solo con `DEV_AUTH_BYPASS` fuera de prod | [useAuth.js](composables/useAuth.js), `middleware/auth.global.js` |
+| [control-acceso.vue](pages/control-acceso.vue), [acceso-pendiente.vue](pages/acceso-pendiente.vue) | Allowlist por email controlada por superadmin (`SUPERADMIN_EMAIL`) | `/api/acceso`, `/api/superadmin`, `middleware/acceso.global.js` |
+| [share.vue](pages/share.vue) | Share Target API de la PWA (recibir texto/imagen de otras apps) | manifest en `nuxt.config.ts` |
 
-### Voz ([BotonMicrofono.vue](components/registro/BotonMicrofono.vue))
-- Web Speech API vía [useVoiceRecognition.js](composables/useVoiceRecognition.js).
-- Transcripción → `/api/voz/parse` → LLM parsea a JSON estructurado ([useLLMParser.js](composables/useLLMParser.js)).
-- [ConfirmacionVoz.vue](components/registro/ConfirmacionVoz.vue) muestra los gastos detectados para editar/confirmar/descartar antes de persistir.
-- Draft persistente ([useVoiceDraft.js](composables/useVoiceDraft.js)) para no perder dictados ante recargas.
+### Captura por voz/foto (hot path)
+- Voz: [useVoiceRecognition.js](composables/useVoiceRecognition.js) (Web Speech) → `/api/voz/parse` o `parse-stream` (SSE) → Gemini parsea a JSON estricto → [ConfirmacionVoz.vue](components/registro/ConfirmacionVoz.vue) para editar/confirmar → `/api/gastos/bulk`.
+- Foto: [BotonCamara.vue](components/registro/BotonCamara.vue) → `/api/voz/parse-image` (multimodal, valida magic bytes en [imageMagic.js](server/utils/imageMagic.js)).
+- Drafts persistentes ante recargas: [useDraftManager.js](composables/useDraftManager.js) + [useVoiceDraft.js](composables/useVoiceDraft.js)/[usePhotoDraft.js](composables/usePhotoDraft.js). Deudas por voz: [useVoiceDeuda.js](composables/useVoiceDeuda.js).
+- Servidor: sanitización + delimitadores anti prompt-injection ([llmSafety.js](server/utils/llmSafety.js)), caché por hash ([llmCache.js](server/utils/llmCache.js)), cuota mensual por usuario ([usoLlm.js](server/utils/usoLlm.js)), fallback de modelos ([geminiModels.js](server/utils/geminiModels.js)).
 
-### Foto ([BotonCamara.vue](components/registro/BotonCamara.vue))
-- Subida de imagen (recibo/ticket) → `/api/voz/parse-image` → LLM multimodal extrae ítems.
-- Mismo flujo de confirmación que voz; draft en [usePhotoDraft.js](composables/usePhotoDraft.js).
-
-### Manual
-- [FormGastoManual.vue](components/registro/FormGastoManual.vue) con concepto, monto, categoría, fecha, hora, notas.
-
-### Historial y analítica
-- [HistorialDiario.vue](components/registro/HistorialDiario.vue) con navegación por día (swipe vía [useSwipeMonth.js](composables/useSwipeMonth.js)).
-- [GastoItem.vue](components/registro/GastoItem.vue) con acciones editar/eliminar.
-- [ResumenMesRegistro.vue](components/registro/ResumenMesRegistro.vue), [StatsComparativas.vue](components/registro/StatsComparativas.vue), [GraficoCategoria.vue](components/registro/GraficoCategoria.vue).
-- [FiltrosCategoriaBar.vue](components/registro/FiltrosCategoriaBar.vue) para filtrado rápido.
-- Endpoints: `/api/gastos` (CRUD + `bulk.post.js` para confirmación por voz/foto, `conceptos.get.js` para autocompletado, `resumen.get.js`).
-- Composable: [useGastos.js](composables/useGastos.js).
-
----
-
-## Módulo 3 — Deudas ([pages/deudas.vue](pages/deudas.vue))
-
-Gestión de **"Me deben" / "Yo debo"** agrupadas por persona/entidad. El usuario usa mayoritariamente el lado "Me deben".
-
-### Núcleo
-- [ListaPersonas.vue](components/deudas/ListaPersonas.vue) con tabs por tipo, [ResumenDeudas.vue](components/deudas/ResumenDeudas.vue) (balance neto).
-- [DetallePersona.vue](components/deudas/DetallePersona.vue): lista de conceptos, historial de pagos, stats, gráfico de evolución.
-- CRUD: [FormDeuda.vue](components/deudas/FormDeuda.vue), [FormEditarDeuda.vue](components/deudas/FormEditarDeuda.vue), [FormEditarPersona.vue](components/deudas/FormEditarPersona.vue), [MergePersonas.vue](components/deudas/MergePersonas.vue) (consolidar duplicados).
-- Pagos: [FormPago.vue](components/deudas/FormPago.vue) (por concepto) y [FormPagoGlobal.vue](components/deudas/FormPagoGlobal.vue) (distribuir sobre varias deudas). `monto_pendiente` se actualiza por cada pago; estado transiciona `pendiente → parcial → pagado` / `archivado`.
-- [HistorialPagosPersona.vue](components/deudas/HistorialPagosPersona.vue), [StatsPersona.vue](components/deudas/StatsPersona.vue), [GraficoEvolucionDeuda.vue](components/deudas/GraficoEvolucionDeuda.vue).
-- Registro de deudas por voz: [VozOverlayDeuda.vue](components/deudas/VozOverlayDeuda.vue) + [ConfirmacionVozDeuda.vue](components/deudas/ConfirmacionVozDeuda.vue), composable [useVoiceDeuda.js](composables/useVoiceDeuda.js).
-- Exportación a PDF ([useDeudaPdf.js](composables/useDeudaPdf.js)); días para incluir saldadas configurables vía `configuraciones.dias_pdf_saldadas`.
-
-### Vínculos entre usuarios (feature avanzada)
-Una `persona_entidad` local puede **vincularse al usuario real de otra cuenta** (`vinculado_usuario_id`, `vinculo_par_id`), compartiendo visibilidad de la deuda entre ambas partes:
-- `solicitudes_vinculo` — flujo pendiente/aceptada/rechazada/expirada por email.
-- `vinculos_checkpoints` — snapshots tipados (`inicio_vinculo | anterior | actual`) para comparar el estado en el tiempo.
-- `auditoria_vinculos` — log de acciones sobre el vínculo.
-- Componentes: [SolicitudVinculo.vue](components/deudas/SolicitudVinculo.vue), [NotificacionesVinculo.vue](components/deudas/NotificacionesVinculo.vue), [CheckpointsVinculo.vue](components/deudas/CheckpointsVinculo.vue), [AuditoriaVinculo.vue](components/deudas/AuditoriaVinculo.vue).
-- API en `/api/deudas/vinculos`, `/api/deudas/personas`, `/api/deudas/pagos`. Composable: [useVinculos.js](composables/useVinculos.js).
-- Deudas y pagos espejados llevan `vinculo_deuda_id` / `vinculo_pago_id`.
+### Vínculos entre usuarios (deudas)
+Una `persona_entidad` puede vincularse al usuario real de otra cuenta (`vinculado_usuario_id`, `vinculo_par_id`): solicitudes por email (`solicitudes_vinculo`), espejado de deudas/pagos (`vinculo_deuda_id`/`vinculo_pago_id`), checkpoints comparables (`vinculos_checkpoints`) y auditoría (`auditoria_vinculos`). API en `/api/deudas/vinculos`; helpers en [vinculos.js](server/utils/vinculos.js).
 
 ---
 
-## Esquema de base de datos ([server/database/schema.js](server/database/schema.js))
+## Base de datos ([schema.js](server/database/schema.js))
 
-Drizzle ORM. Tablas principales:
+Tablas: `usuarios` (espejo de auth.users, + perfiles gestionados con contacto), `intenciones_registro`, `categorias`, `planes_mensuales` (UNIQUE usuario+mes+año), `gastos_planificados`, `gastos` (vínculo 1:1 opcional a planificado), `gastos_futuros`/`_detalles`/`_opciones`, `personas_entidades`, `deudas`, `pagos_deuda`, `configuraciones` (1:1 usuario), `auditoria_vinculos`, `vinculos_checkpoints`, `solicitudes_vinculo`, `ingresos`, `medios_ahorro`, `ahorros`, `metas_ahorro`, `plantillas_mes`, `uso_llm`, `llm_cache`, `google_calendar_conexiones`, `presupuestos_categoria`.
 
-| Tabla | Propósito |
-|---|---|
-| `usuarios` | Espejo de `auth.users` de Supabase (mismo UUID). Trigger en [supabase-auth-trigger.sql](server/database/supabase-auth-trigger.sql). |
-| `categorias` | Predefinidas globales (`usuario_id` NULL) + personalizadas por usuario. |
-| `configuraciones` | 1:1 con usuario: nombre, presupuesto default, moneda, día inicio de ciclo, zona horaria, locale, `dias_pdf_saldadas`. |
-| `planes_mensuales` | UNIQUE(usuario, mes, año) con `monto_presupuesto`. |
-| `gastos_planificados` | FK a plan + categoría; `recurrente_grupo_id` agrupa instancias recurrentes. |
-| `gastos` | Registro real; `gasto_planificado_id` UNIQUE vincula 1:1 con planificado; guarda `transcripcion_voz`. |
-| `gastos_futuros` / `_detalles` / `_opciones` | Jerarquía para decisiones de compra pendientes. |
-| `personas_entidades` | Deudores/acreedores; soporta vínculo con usuario real de otra cuenta. |
-| `deudas` | `tipo_deuda` me_deben/yo_debo; `monto_pendiente` mutable; `vinculo_deuda_id` para espejado. |
-| `pagos_deuda` | Historial de pagos; `vinculo_pago_id` para espejado. |
-| `solicitudes_vinculo`, `vinculos_checkpoints`, `auditoria_vinculos` | Soporte al sistema de vínculos. |
+Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — filtrar con `isNull()` en TODA query de lectura.
 
-Enums: `estado_gasto_planificado`, `metodo_registro` (`voz|foto|manual`), `tipo_persona_entidad`, `tipo_deuda`, `estado_deuda`, `estado_solicitud_vinculo`.
-
-Migraciones en [server/database/migrations/](server/database/migrations/). Scripts: `db:generate`, `db:push`, `db:studio`, `db:seed`, `db:seed:test`.
+### Migraciones — REGLAS CRÍTICAS
+- Archivos SQL en [migrations/](server/database/migrations/); se aplican con `npm run db:apply` ([apply-migrations.mjs](scripts/apply-migrations.mjs)), que lleva registro en la tabla `_migraciones_aplicadas` (transaccional para archivos nuevos; los que contienen `CREATE INDEX CONCURRENTLY` van fuera de transacción).
+- **El deploy SÍ aplica migraciones**: `vercel.json` define `buildCommand: npm run db:apply && npm run build`. Nunca mergear código que dependa de una columna sin su migración en el mismo PR (causa del hotfix `2bb83a7`).
+- Un prefijo numérico = una migración; ante conflicto usar sufijo letra (`0005a_...`). No editar migraciones ya aplicadas — crear una nueva.
+- Al añadir una columna crítica, actualizar las columnas centinela de [health.get.js](server/api/health.get.js) (check de drift → 503).
 
 ---
 
-## Convenciones y patrones
+## Capa servidor
 
-- **Stack real:** Nuxt 3 + **JavaScript** (no TS en composables/componentes), Tailwind, Drizzle, Supabase (DB + Auth), `@nuxtjs/supabase`, `@vite-pwa/nuxt`, `jspdf`, `xlsx`.
-- **Auth:** Supabase; middleware en [middleware/](middleware/), composable [useAuth.js](composables/useAuth.js). Login en [pages/login.vue](pages/login.vue) y [pages/auth/](pages/auth/).
-- **Fetch API autenticado:** siempre vía [useApiFetch.js](composables/useApiFetch.js) (inyecta el token de Supabase).
-- **UI compartida:** [components/shared/](components/shared/) — `BaseBottomSheet`, `ConfirmDialog`, `MonthSelector`, `SkeletonLoader`, `ToastNotification`.
-- **Modales como capas:** [useModalLayer.js](composables/useModalLayer.js) + [useModalBack.js](composables/useModalBack.js) para que el botón atrás en móvil cierre el modal en vez de salir de la página.
-- **Offline/online:** [useOnlineStatus.js](composables/useOnlineStatus.js) + [OfflineBanner.vue](components/layout/OfflineBanner.vue).
-- **UX móvil:** haptic feedback ([useHaptic.js](composables/useHaptic.js)), pull-to-refresh ([usePullToRefresh.js](composables/usePullToRefresh.js)), swipe gestures.
-- **Temas claro/oscuro:** [useTheme.js](composables/useTheme.js), configurable en [pages/configuraciones.vue](pages/configuraciones.vue).
-- **Formato moneda/fechas:** [useFormatters.js](composables/useFormatters.js), [useCurrency.js](composables/useCurrency.js) — respetan `locale` y `moneda_preferida` del usuario.
-- **Exportación:** Excel en [useExportExcel.js](composables/useExportExcel.js), PDF de deudas en [useDeudaPdf.js](composables/useDeudaPdf.js).
-- **LLM para voz/imagen:** prompt del sistema exige JSON estricto (sin markdown), categorías restringidas al set predefinido, fechas relativas ("ayer", "el martes") resueltas contra `FECHA_ACTUAL` inyectada.
-- **Mobile-first:** diseñar para 360–412px; toques mínimos 44x44px; tipografía Inter/Poppins.
+- **Handlers delgados** en `server/api/**`: auth (`getUsuarioFromEvent`) + validación + delegar a `server/services/*.service.js` (gastos, deudas, pagos, ingresos, planificador, plantillasMes, perfiles).
+- **Validación:** schemas Zod compartidos en `shared/schemas/*` — se usan en servidor (`validateBody` de [validate.js](server/utils/validate.js)) y en cliente (validación en vivo con `useFormField`).
+- **Middleware** (orden): security-headers (CSP activa + estricta en Report-Only → `/api/csp-report`) · CORS allowlist · request-log · bypass E2E/dev · rate-limit global por IP ([rateLimit.js](server/utils/rateLimit.js), driver memoria o Upstash).
+- **Ownership:** [assertOwner.js](server/utils/assertOwner.js) contra IDOR; suite [seguridad.api.spec.js](e2e/api/seguridad.api.spec.js).
+- **Logger:** [logger.js](server/utils/logger.js) redacta tokens/keys — nunca `console.error` con cuerpos crudos.
+- **Cron** (`/api/cron/*`, header `X-Cron-Secret`): expirar solicitudes, purgar caché LLM, purgar papelera.
+- **Integración Google Calendar:** OAuth propio, refresh tokens cifrados AES ([crypto.js](server/utils/crypto.js)), sync de planificados ([gcalAutoSync.js](server/utils/gcalAutoSync.js)).
 
-## Estructura clave
+## Convenciones cliente
+
+- **Stack:** JavaScript (no TS) en composables/componentes; Pinia en [stores/](stores/) (usuario, plantillas).
+- **Fetch autenticado:** siempre `useApiFetch()` (plugin [fetch.js](plugins/fetch.js) inyecta token Supabase).
+- **UI compartida:** `components/shared/` — `BaseBottomSheet`, `ConfirmDialog`, `MonthSelector`, `SkeletonLoader`, `ToastNotification`, `VirtualList`, `Money`, `EmptyState`, `Chip`, FABs. Modales con focus trap + `aria-modal` integrados; botón atrás cierra modal ([useModalLayer.js](composables/useModalLayer.js) + [useModalBack.js](composables/useModalBack.js)).
+- **Offline/PWA:** cola de sincronización ([useSyncQueue.js](composables/useSyncQueue.js) + [SyncQueueBadge.vue](components/layout/SyncQueueBadge.vue)), banner offline, update prompt opt-in ([usePwaUpdate.js](composables/usePwaUpdate.js)); runtime caching SWR/NetworkFirst en `nuxt.config.ts`.
+- **UX móvil:** 360–412 px, tap targets ≥ 44 px (`.tap-target`), haptics, pull-to-refresh, swipe de mes, long-press, drag & drop. Onboarding: [TourOverlay.vue](components/onboarding/TourOverlay.vue).
+- **Temas:** [useTheme.js](composables/useTheme.js) — dark/light + acentos + daltónico + tamaño letra; script inline en head aplica clases pre-hidratación (no tocar sin entender el flicker que evita).
+- **Formato:** [useFormatters.js](composables/useFormatters.js)/[useCurrency.js](composables/useCurrency.js) respetan locale y `moneda_preferida`. Fechas de negocio en zona del usuario: [useFechaPeru.js](composables/useFechaPeru.js), [dateLocal.js](server/utils/dateLocal.js).
+- **Exportación:** Excel ([useExportExcel.js](composables/useExportExcel.js), exceljs), PDF (jspdf, `useDeudaPdf`/`useHistorialPdf`), CSV. Libs pesadas via `await import()` (chunks separados).
+
+## Testing y CI
+
+- Unit: `npm test` (Vitest, `tests/*.test.js` — lógica pura extraída de composables/utils).
+- E2E: Playwright (`e2e/`) con page objects; proyectos `smoke | api | mobile | desktop | visual`; auth bypass con `DEV_AUTH_BYPASS=1` + token; Postgres efímera en CI.
+- Workflows: `ci.yml` (unit + lint + build), `e2e.yml` (PRs y main), `e2e-visual-baseline.yml`, `db-backup.yml` (dump semanal cifrado).
+
+## Estructura
 
 ```
-pages/          planificador · registro · deudas · configuraciones · categorias · informacion · login · auth/
-components/     layout/ · planificador/ · registro/ · deudas/ · shared/
-composables/    useGastos · usePlanificador · useDeudas · useVinculos · useVoiceRecognition
-                useLLMParser · useVoiceDraft · usePhotoDraft · useVoiceDeuda
-                useAuth · useApiFetch · useTheme · useModalLayer · useModalBack
-                useFormatters · useCurrency · useHaptic · useOnlineStatus · ...
-server/api/     gastos/ · planificador/ (+ futuros/) · deudas/ (+ personas/ pagos/ vinculos/)
-                categorias/ · configuraciones/ · voz/ (parse + parse-image)
-server/database/ schema.js · index.js · migrations/ · seed.js · seed-test-data.js · supabase-auth-trigger.sql
+pages/          index(dashboard) · planificador · registro · deudas · ahorros · ingresos · futuros
+                calendario · metricas · reportes · papelera · familia · categorias · configuraciones
+                informacion · login · auth/ · dev-login · control-acceso · acceso-pendiente · share
+components/     layout/ · shared/ · planificador/ · registro/ · deudas/ · ahorros/ · ingresos/
+                futuros/ · configuraciones/ · onboarding/
+composables/    ~90 archivos — useGastos · useDeudas · usePlanificador · useAhorros · useIngresos
+                useVinculos · usePerfiles · useLLMParser · useDraftManager · useApiFetch · useTheme ...
+stores/         usuario · plantillas (Pinia)
+shared/schemas/ Zod compartido cliente↔servidor
+server/api/     gastos · deudas · planificador · ahorros · ingresos · futuros · categorias
+                configuraciones · perfiles · metricas · papelera · voz · integraciones/google
+                acceso · superadmin · cron · dashboard · health · csp-report · errors
+server/services/  lógica de negocio (7 servicios)
+server/utils/     30 helpers (auth, rate limit, LLM, crypto, fechas, soft delete, ...)
+server/database/  schema.js · migrations/ · seeds
+e2e/ · tests/     Playwright · Vitest
 ```

@@ -67,14 +67,14 @@
               @registrar="abrirRegistroPago"
             />
             <component
-              v-else-if="vistaActual === 'calendario'"
               :is="LazyPlanificadorCalendarioMensual"
+              v-else-if="vistaActual === 'calendario'"
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />
             <component
-              v-else
               :is="PlanificadorListaGastosPlaneados"
+              v-else
               @editar="editarGastoPlaneado"
               @registrar="abrirRegistroPago"
             />

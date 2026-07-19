@@ -35,7 +35,8 @@
 
         <!-- Audio wave -->
         <div v-if="isListening" class="flex items-center gap-1 h-8">
-          <div v-for="i in 5" :key="i"
+          <div
+v-for="i in 5" :key="i"
             class="w-1 bg-purple-400 rounded-full animate-wave"
             :style="{ animationDelay: `${i * 0.1}s`, height: `${12 + Math.random() * 20}px` }"
           ></div>

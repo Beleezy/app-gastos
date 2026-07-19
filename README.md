@@ -66,7 +66,8 @@ El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WA
 | `npm run format` | Prettier `--write`. |
 | `npm run format:check` | Prettier verificación. |
 | `npm run db:generate` | Generar migración Drizzle. |
-| `npm run db:push` | Aplicar schema a la DB. |
+| `npm run db:apply` | Aplicar migraciones SQL pendientes (tabla de control `_migraciones_aplicadas`). |
+| `npm run db:push` | Aplicar schema a la DB (solo dev exploratorio; en flujo normal usar `db:apply`). |
 | `npm run db:studio` | Drizzle Studio (UI). |
 | `npm run db:seed` | Cargar datos iniciales. |
 | `npm run db:seed:test` | Seed datos de prueba. |
@@ -120,8 +121,44 @@ Variables de Supabase se setean a placeholders en CI para no exigir credenciales
 - **Captura por voz**: `composables/useVoiceRecognition.js` → `composables/useLLMParser.js` → `/api/voz/parse` → `ConfirmacionVoz.vue`.
 - **Captura por foto**: `BotonCamara.vue` → `composables/usePhotoDraft.js` → `/api/voz/parse-image`.
 - **Captura manual**: `FormGastoManual.vue` → `composables/useGastos.js` → `/api/gastos`.
-- **Crear deuda**: `FormDeuda.vue` → `useDeudas.js` → `/api/deudas` (servicio `crearGasto` análogo a venir en `services/deudas.service.js`).
+- **Crear deuda**: `FormDeuda.vue` → `useDeudas.js` → `/api/deudas` (lógica en `server/services/deudas.service.js`).
 - **Pagar deuda**: `FormPago.vue` o `FormPagoGlobal.vue` → `/api/deudas/pagos*`.
+
+---
+
+## Operaciones (producción en free tier)
+
+### Deploy y migraciones
+
+`vercel.json` define `buildCommand: npm run db:apply && npm run build` — **cada deploy aplica
+las migraciones pendientes antes de compilar**. El script lleva registro por archivo en la
+tabla `_migraciones_aplicadas` (hash + fecha): los aplicados se saltan, los nuevos van en
+transacción, y si uno falla el build aborta (la BD no queda a medias ni el código nuevo se
+despliega sin su columna). Reglas: no editar migraciones aplicadas; un prefijo numérico por
+migración (ante conflicto, sufijo letra: `0005a_...`).
+
+`/api/health` verifica columnas centinela del schema y responde 503 con `checks.schema='drift'`
+si la BD quedó desfasada — mantener la lista al añadir columnas críticas.
+
+### Backups (Supabase free no incluye)
+
+`.github/workflows/db-backup.yml` hace `pg_dump` semanal cifrado (GPG simétrico) y lo sube como
+artifact con 90 días de retención. Requiere secrets `BACKUP_DATABASE_URL` (cadena **directa** o
+session pooler — el pooler de transacción del puerto 6543 no sirve para pg_dump) y
+`BACKUP_PASSPHRASE` (guardarla fuera del repo; sin ella el backup es irrecuperable). Se puede
+disparar a mano con *workflow_dispatch* para un backup pre-migración.
+
+### Uptime y keep-alive
+
+Supabase free pausa el proyecto tras ~7 días sin actividad. Configurar un monitor gratuito
+(p. ej. UptimeRobot, ping cada 5 min) contra `https://<app>/api/health`: el `SELECT 1` cuenta
+como actividad y el monitor avisa por email si la app o la BD caen (incluido el 503 por drift).
+
+### Rate limit distribuido (opcional pero recomendado en Vercel)
+
+Sin configurar nada, el rate limit usa un Map en memoria **por instancia** serverless. Crear
+una instancia gratuita en [Upstash](https://upstash.com/) y setear `UPSTASH_REDIS_REST_URL` +
+`UPSTASH_REDIS_REST_TOKEN` en Vercel — el código ya trae el driver.
 
 ---
 

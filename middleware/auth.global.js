@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (config.public.devAuthBypass) return
 
   // Si está offline y ya hay sesión en caché de Supabase, dejar pasar
-  if (process.client && !navigator.onLine) return
+  if (import.meta.client && !navigator.onLine) return
 
   const user = useSupabaseUser()
   if (user.value) return
@@ -24,7 +24,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // primer fetch a `/api/*` recibirá 401 y el toast handler en
   // `plugins/fetch.js` ya lo maneja; la siguiente navegación no tendrá
   // ni user ni cookie y caerá al `navigateTo('/login')` de abajo.
-  if (process.client) {
+  if (import.meta.client) {
     const hasSessionCookie = document.cookie
       .split(';')
       .some(c => {

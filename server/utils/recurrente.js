@@ -1,5 +1,5 @@
 import { db } from './db.js'
-import { planesMensuales, gastosPlanificados, configuraciones } from '../database/schema.js'
+import { planesMensuales, gastosPlanificados, configuraciones, gastos } from '../database/schema.js'
 import { eq, and } from 'drizzle-orm'
 import crypto from 'crypto'
 

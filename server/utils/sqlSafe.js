@@ -11,7 +11,7 @@
 // profundidad para no depender exclusivamente del ORM.
 
 const CONTROL = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g // eslint-disable-line no-control-regex
-const INVISIBLE = /[​-‏‪-‮⁠-⁯﻿]/g
+const INVISIBLE = /[\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g
 
 /**
  * Limpia un string genérico antes de mandarlo a DB:

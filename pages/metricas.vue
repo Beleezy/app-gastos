@@ -5,9 +5,9 @@
       <div class="relative flex items-center gap-3">
         <button
           class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="toggleDrawer"
           title="Menú"
           aria-label="Abrir menú"
+          @click="toggleDrawer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -26,9 +26,9 @@
         <button
           v-for="opt in opcionesMeses"
           :key="opt.valor"
-          @click="cambiarMeses(opt.valor)"
           class="flex-1 rounded-xl px-3 py-2 text-xs font-semibold transition-all"
           :class="meses === opt.valor ? 'bg-theme-accent text-theme-on-accent shadow-md' : 'text-theme-text-muted hover:text-theme-text-sec'"
+          @click="cambiarMeses(opt.valor)"
         >
           {{ opt.etiqueta }}
         </button>
@@ -122,8 +122,8 @@
           <p class="text-xs font-semibold text-theme-text">Detalle mensual</p>
           <button
             v-if="!cargando"
-            @click="exportarCsv"
             class="text-[0.6875rem] text-theme-accent hover:text-theme-accent-light transition-colors min-h-[2.75rem] px-3 -my-2"
+            @click="exportarCsv"
           >
             Exportar CSV
           </button>

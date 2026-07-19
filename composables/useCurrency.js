@@ -19,9 +19,9 @@ export function useCurrency() {
   }
 
   function formatMontoConSimbolo(valor) {
-    // Espacio duro ( ): evita que el símbolo y el monto se separen en
+    // Espacio duro (\u00A0): evita que el símbolo y el monto se separen en
     // dos líneas dentro de contenedores estrechos (ej. "S/ \n 1,234.00").
-    return `${currencySymbol.value} ${formatMonto(valor)}`
+    return `${currencySymbol.value}\u00A0${formatMonto(valor)}`
   }
 
   return { currencyCode, currencySymbol, currencyLocale, formatMonto, formatMontoConSimbolo }

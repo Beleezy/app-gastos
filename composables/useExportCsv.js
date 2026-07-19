@@ -36,7 +36,7 @@ export function generarCsv({ columnas = [], filas = [], separator = ';', bom = t
     )
     .join('\r\n')
   const contenido = body ? `${head}\r\n${body}` : head
-  return bom ? `﻿${contenido}` : contenido
+  return bom ? `\uFEFF${contenido}` : contenido
 }
 
 /**

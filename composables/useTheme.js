@@ -21,7 +21,7 @@ export function useTheme() {
   const isColorblind = useState('theme-colorblind', () => false)
 
   function applyTheme(dark) {
-    if (!process.client) return
+    if (!import.meta.client) return
     if (dark) {
       document.documentElement.classList.remove('light')
       document.documentElement.classList.add('dark')
@@ -33,7 +33,7 @@ export function useTheme() {
   }
 
   function applyAccent(id) {
-    if (!process.client) return
+    if (!import.meta.client) return
     ACCENT_COLORS.forEach(c => {
       document.documentElement.classList.remove(`accent-${c.id}`)
     })
@@ -47,7 +47,7 @@ export function useTheme() {
   }
 
   function applyFontSize(id) {
-    if (!process.client) return
+    if (!import.meta.client) return
     const size = FONT_SIZES.find(s => s.id === id) || FONT_SIZES[0]
     document.documentElement.style.fontSize = `${size.rootPx}px`
     localStorage.setItem('theme-font-size', id)
@@ -75,7 +75,7 @@ export function useTheme() {
   }
 
   function applyColorblind(enabled) {
-    if (!process.client) return
+    if (!import.meta.client) return
     if (enabled) {
       ensureColorblindStylesheet()
       document.documentElement.classList.add('colorblind')
@@ -105,7 +105,7 @@ export function useTheme() {
   }
 
   function initTheme() {
-    if (!process.client) return
+    if (!import.meta.client) return
     const savedAccent = localStorage.getItem('theme-accent') || 'azul'
     accentColor.value = savedAccent
     const dark = modeFor(savedAccent)

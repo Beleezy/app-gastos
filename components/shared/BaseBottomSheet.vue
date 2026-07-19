@@ -60,18 +60,6 @@
   </div>
 </template>
 
-<style>
-@media (min-width: 768px) {
-  @keyframes dialog-in {
-    from { opacity: 0; transform: translateY(12px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  .md\:animate-dialog-in {
-    animation: dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-}
-</style>
-
 <script setup>
 import { useModalBack } from '~/composables/useModalBack'
 import { useModalLayer } from '~/composables/useModalLayer'
@@ -211,3 +199,15 @@ onUnmounted(() => {
   focusTrap.deactivate()
 })
 </script>
+
+<style>
+@media (min-width: 768px) {
+  @keyframes dialog-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .md\:animate-dialog-in {
+    animation: dialog-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+</style>

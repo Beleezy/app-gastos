@@ -31,8 +31,8 @@
             <p class="text-[0.6875rem] text-theme-text-muted leading-tight truncate">Control personal</p>
           </div>
           <button
-            @click="close"
             class="w-8 h-8 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors"
+            @click="close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

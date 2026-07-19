@@ -27,6 +27,7 @@ async function resolverPersonaId({ usuarioId, body, tx = db }) {
     .where(and(
       eq(personasEntidades.usuarioId, usuarioId),
       eq(personasEntidades.nombre, nombre),
+      isNull(personasEntidades.deletedAt),
     ))
     .limit(1)
 

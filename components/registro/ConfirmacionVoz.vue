@@ -27,7 +27,8 @@
       </div>
 
       <!-- Fecha global (útil cuando la IA equivocó la fecha del voucher) -->
-      <div v-if="showFechaGlobal && !isParsing && !parseError && editableGastos.length > 0"
+      <div
+v-if="showFechaGlobal && !isParsing && !parseError && editableGastos.length > 0"
         class="mx-5 mb-4 px-3 py-2.5 bg-theme-accent-bg/40 rounded-lg border border-theme-accent/30"
       >
         <label class="flex items-center gap-2 text-xs text-theme-text-sec mb-1.5">
@@ -73,7 +74,8 @@
 
       <!-- Parsed expenses list -->
       <div v-else class="px-5 pb-6 space-y-3">
-        <div v-for="(gasto, idx) in editableGastos" :key="idx"
+        <div
+v-for="(gasto, idx) in editableGastos" :key="idx"
           data-testid="confirmacion-item"
           class="bg-theme-input rounded-xl border border-theme-border overflow-hidden"
         >
@@ -81,7 +83,8 @@
           <div class="px-4 py-3">
             <!-- Fila superior: ícono + concepto (full width, puede hacer wrap) + monto -->
             <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0"
+              <div
+class="w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0"
                 :style="{ backgroundColor: getCategoriaColor(gasto.categoria) + '20', color: getCategoriaColor(gasto.categoria) }"
               >
                 {{ getCategoriaIcono(gasto.categoria) }}
@@ -128,7 +131,8 @@
                 <span class="text-[0.6875rem] text-theme-text-sec">· {{ formatFecha(gasto.fecha) }}</span>
               </div>
               <div class="flex items-center gap-2 shrink-0 ml-auto">
-                <button class="w-10 h-10 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
+                <button
+class="w-10 h-10 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
                   aria-label="Editar"
                   @click="toggleEdit(idx)"
                 >
@@ -136,7 +140,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                   </svg>
                 </button>
-                <button class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
+                <button
+class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-400 hover:bg-red-500/20 transition-colors"
                   aria-label="Eliminar"
                   @click="removeGasto(idx)"
                 >
@@ -152,7 +157,8 @@
           <div v-if="editingIdx === idx" class="px-4 pb-4 space-y-3 border-t border-theme-border pt-3">
             <div>
               <label class="block text-xs text-theme-text-sec mb-1">Concepto</label>
-              <input v-model="gasto.concepto" type="text"
+              <input
+v-model="gasto.concepto" type="text"
                 class="w-full px-3 py-2 rounded-lg bg-theme-card border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent transition-colors"
               />
             </div>
@@ -161,21 +167,24 @@
                 <label class="block text-xs text-theme-text-sec mb-1">Monto</label>
                 <div class="relative">
                   <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-theme-text-sec">{{ currencySymbol }}</span>
-                  <input v-model.number="gasto.monto" type="number" step="0.01"
+                  <input
+v-model.number="gasto.monto" type="number" step="0.01"
                     class="w-full pl-8 pr-3 py-2 rounded-lg bg-theme-card border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent transition-colors"
                   />
                 </div>
               </div>
               <div>
                 <label class="block text-xs text-theme-text-sec mb-1">Fecha</label>
-                <input v-model="gasto.fecha" type="date"
+                <input
+v-model="gasto.fecha" type="date"
                   class="w-full px-3 py-2 rounded-lg bg-theme-card border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent transition-colors"
                 />
               </div>
             </div>
             <div>
               <label class="block text-xs text-theme-text-sec mb-1">Categoría</label>
-              <select v-model="gasto.categoria"
+              <select
+v-model="gasto.categoria"
                 class="w-full px-3 py-2 rounded-lg bg-theme-card border border-theme-border text-theme-text text-sm focus:outline-none focus:border-theme-accent transition-colors"
               >
                 <option v-for="cat in categoriasDisponibles" :key="cat" :value="cat">{{ cat }}</option>
@@ -200,7 +209,8 @@
           </div>
 
           <!-- Validación contra total del comprobante -->
-          <div v-if="totalComprobante != null" class="px-3 py-2.5 rounded-xl border"
+          <div
+v-if="totalComprobante != null" class="px-3 py-2.5 rounded-xl border"
             :class="totalCoincide ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'"
           >
             <div class="flex items-center justify-between">
@@ -259,6 +269,9 @@
 </template>
 
 <script setup>
+import { useModalBack } from '~/composables/useModalBack'
+import { useModalLayer } from '~/composables/useModalLayer'
+
 const props = defineProps({
   gastos: { type: Array, required: true },
   transcripcion: { type: String, default: '' },
@@ -274,9 +287,6 @@ const props = defineProps({
 const emit = defineEmits(['close', 'confirm', 'retry'])
 
 const saveError = ref(null)
-
-import { useModalBack } from '~/composables/useModalBack'
-import { useModalLayer } from '~/composables/useModalLayer'
 useModalBack(() => emit('close'))
 
 const { registerModal, unregisterModal } = useModalLayer()

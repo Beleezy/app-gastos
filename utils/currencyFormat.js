@@ -62,7 +62,7 @@ export function formatMonto(valor, opts = {}) {
 export function parseMonto(str) {
   if (typeof str !== 'string') return parseFloat(str)
   // quitar símbolos no numéricos excepto coma, punto y signo
-  let limpio = str.replace(/[^0-9,.\-]/g, '').trim()
+  let limpio = str.replace(/[^0-9,.-]/g, '').trim()
   if (!limpio) return NaN
   // Si tiene coma Y punto: el último separador es el decimal
   const lastComma = limpio.lastIndexOf(',')

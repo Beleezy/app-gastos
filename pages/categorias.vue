@@ -228,7 +228,8 @@
 
       <!-- Toast -->
       <Transition name="toast">
-        <div v-if="toastMsg"
+        <div
+v-if="toastMsg"
           class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/90 text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
         >
           {{ toastMsg }}

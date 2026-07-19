@@ -6,8 +6,8 @@
       <div class="relative flex items-center gap-3 mb-1">
         <button
           class="w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="$router.back()"
           aria-label="Volver"
+          @click="$router.back()"
         >
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -61,8 +61,8 @@
           <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(g.monto) }}</p>
           <button
             class="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold shrink-0"
-            @click="restaurar('gasto', g.id, g.concepto)"
             :disabled="restaurando === g.id"
+            @click="restaurar('gasto', g.id, g.concepto)"
           >{{ restaurando === g.id ? '...' : 'Restaurar' }}</button>
         </div>
       </div>
@@ -92,8 +92,8 @@
           <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(d.montoPendiente) }}</p>
           <button
             class="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold shrink-0"
-            @click="restaurar('deuda', d.id, d.concepto)"
             :disabled="restaurando === d.id"
+            @click="restaurar('deuda', d.id, d.concepto)"
           >{{ restaurando === d.id ? '...' : 'Restaurar' }}</button>
         </div>
       </div>

@@ -50,19 +50,19 @@ export function useOverlayBack(isVisible, closeFn) {
   }
 
   onMounted(() => {
-    if (!process.client) return
+    if (!import.meta.client) return
     window.addEventListener('popstate', onPopState)
     if (isVisible.value) lockScroll()
   })
 
   onUnmounted(() => {
-    if (!process.client) return
+    if (!import.meta.client) return
     window.removeEventListener('popstate', onPopState)
     unlockScroll()
   })
 
   watch(isVisible, (val, oldVal) => {
-    if (!process.client) return
+    if (!import.meta.client) return
     if (val && !oldVal) {
       const id = `overlay-${Math.random().toString(36).slice(2, 9)}`
       const current = window.history.state && typeof window.history.state === 'object' ? window.history.state : {}

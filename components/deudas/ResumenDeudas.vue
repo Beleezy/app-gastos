@@ -47,8 +47,8 @@
           </div>
           <button
             class="text-right shrink-0 group"
-            @click="toggleTab"
             :title="`Cambiar a ${tabActual === 'me_deben' ? 'Yo debo' : 'Me deben'}`"
+            @click="toggleTab"
           >
             <p class="text-[0.6875rem] text-theme-text-sec leading-tight group-hover:text-theme-text-muted transition-colors">
               {{ tabActual === 'me_deben' ? 'Yo debo' : 'Me deben' }}
@@ -188,7 +188,7 @@ const SNAPSHOT_KEY = 'deudas-balance-snapshot'
 const tendencia = ref(null)
 
 function actualizarTendencia() {
-  if (!process.client) return
+  if (!import.meta.client) return
   const balance = resumen.value.balanceNeto
   const hoyStr = useFechaPeru().fechaHoy()
   const [a, m] = hoyStr.split('-')

@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="submit" class="space-y-4">
+  <form class="space-y-4" @submit.prevent="submit">
     <div>
       <label for="fi-1" class="block text-xs text-theme-text-muted font-medium mb-1.5">Concepto</label>
       <input

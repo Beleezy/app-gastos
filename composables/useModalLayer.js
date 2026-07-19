@@ -1,5 +1,5 @@
 function syncModalDomState(isModalOpen) {
-  if (!process.client) return
+  if (!import.meta.client) return
 
   const html = document.documentElement
   const body = document.body

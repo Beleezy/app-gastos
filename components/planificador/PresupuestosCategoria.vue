@@ -58,9 +58,9 @@
               <button
                 v-if="presupuestoDe(c.id)"
                 class="w-11 h-11 -my-2 rounded-lg text-theme-text-muted hover:text-red-400 hover:bg-red-500/10"
-                @click="quitar(c.id)"
                 aria-label="Eliminar presupuesto"
                 title="Quitar presupuesto"
+                @click="quitar(c.id)"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9M4 7h16"/>

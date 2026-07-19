@@ -30,8 +30,8 @@
       <div :class="[personaSeleccionada ? 'hidden lg:block' : '', 'lg:sticky lg:top-20 lg:self-start lg:pt-4']">
         <!-- Vista lista: resumen general "Me deben / Yo debo" -->
         <component
-          v-if="!personaSeleccionada"
           :is="DeudasResumenDeudas"
+          v-if="!personaSeleccionada"
         />
 
         <!-- Vista detalle: card con info de la persona seleccionada (solo desktop; en móvil DetallePersona ya muestra la cabecera) -->
@@ -56,8 +56,8 @@
         <Transition name="page" mode="out-in">
           <div :key="personaSeleccionada ? 'detalle' : 'lista'">
             <component
-              v-if="personaSeleccionada"
               :is="DeudasDetallePersona"
+              v-if="personaSeleccionada"
               @registrar-pago="abrirFormPago"
               @agregar-deuda="showFormDeuda = true"
               @editar-deuda="abrirFormEditar"

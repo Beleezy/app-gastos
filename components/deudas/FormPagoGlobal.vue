@@ -95,7 +95,8 @@
       <p class="text-[0.6875rem] font-medium text-theme-text-sec uppercase tracking-wider mb-1">Vista previa de distribución</p>
       <div v-for="s in simulacion" :key="s.concepto" class="flex items-center justify-between text-xs">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="w-1.5 h-1.5 rounded-full shrink-0"
+          <span
+class="w-1.5 h-1.5 rounded-full shrink-0"
             :class="s.saldado ? 'bg-emerald-400' : 'bg-amber-400'"></span>
           <span class="text-theme-text-muted truncate">{{ s.concepto }}</span>
         </div>

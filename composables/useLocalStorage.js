@@ -12,7 +12,7 @@ if (typeof window !== 'undefined') {
     if (!e.key) return
     const subs = SUBSCRIPCIONES.get(e.key)
     if (!subs) return
-    let parsed = null
+    let parsed
     try {
       parsed = e.newValue ? JSON.parse(e.newValue) : null
     } catch {

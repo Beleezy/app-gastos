@@ -27,8 +27,9 @@ function generateNonce() {
 
 const COMMON_DIRECTIVES = {
   'default-src': ["'self'"],
-  'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+  // Inter es auto-hospedada (public/fonts) — sin orígenes de Google Fonts.
+  'style-src': ["'self'", "'unsafe-inline'"],
+  'font-src': ["'self'", 'data:'],
   // blob: necesario para preview de fotos del flujo de voucher
   // (BotonCamara crea un blob URL via URL.createObjectURL).
   'img-src': ["'self'", 'data:', 'blob:', 'https:'],

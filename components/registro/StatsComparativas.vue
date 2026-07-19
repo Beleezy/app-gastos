@@ -134,7 +134,7 @@
                 <svg v-else-if="cat.diff < 0" xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                 </svg>
-                <span class="w-3 h-3" v-else></span>
+                <span v-else class="w-3 h-3"></span>
                 <span class="text-xs font-semibold" :class="cat.diff > 0 ? 'text-red-400' : cat.diff < 0 ? 'text-emerald-400' : 'text-theme-text-sec'">
                   {{ currencySymbol }}&nbsp;{{ formatMonto(cat.actual) }}
                 </span>

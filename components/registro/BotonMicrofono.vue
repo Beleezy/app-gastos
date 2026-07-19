@@ -50,7 +50,8 @@
 
     <!-- Audio wave visualization (real AudioContext data) -->
     <div v-if="isListening" class="flex items-center gap-1.5 h-8">
-      <div v-for="(level, i) in audioLevels" :key="i"
+      <div
+v-for="(level, i) in audioLevels" :key="i"
         class="w-1 rounded-full transition-all duration-75"
         :class="i % 2 === 0 ? 'bg-theme-accent' : 'bg-indigo-400'"
         :style="{ height: `${level}px` }"

@@ -361,55 +361,6 @@
           </svg>
         </button>
 
-        <!-- Vista previa (V3) — interfaces rediseñadas, momentáneo -->
-        <div class="bg-theme-card rounded-2xl p-5 border border-theme-border lg:col-span-2">
-          <label class="flex items-center justify-between cursor-pointer">
-            <div class="flex items-center gap-2.5">
-              <span class="text-xl">🧪</span>
-              <div>
-                <span class="text-sm text-theme-text font-medium">Vista previa de la nueva interfaz (Versión 5)</span>
-                <p class="text-[0.6875rem] text-theme-text-sec leading-tight">Interfaces rediseñadas y funcionales: registra y edita con tus datos reales.</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors duration-200 focus:outline-none shrink-0 ml-3"
-              :class="uiPreviewEnabled ? 'bg-violet-500' : 'bg-theme-border-md'"
-              @click="toggleUiPreview"
-            >
-              <span
-                class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200"
-                :class="uiPreviewEnabled ? 'translate-x-6' : 'translate-x-1'"
-              />
-            </button>
-          </label>
-          <!-- Las tres versiones, siempre visibles cuando el flag está activo -->
-          <div v-if="uiPreviewEnabled" class="mt-4 space-y-2">
-            <button
-              class="w-full py-2.5 rounded-xl text-sm font-semibold bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors flex items-center justify-center gap-2"
-              @click="navigateTo('/preview')"
-            >
-              Abrir V5 — rediseño funcional
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-            <button
-              class="w-full py-2.5 rounded-xl text-sm font-semibold bg-violet-500/15 text-violet-300 hover:bg-violet-500/25 transition-colors flex items-center justify-center gap-2"
-              @click="navigateTo('/preview-v3')"
-            >
-              Abrir V3 — rediseño solo lectura
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </button>
-            <p class="text-[0.6875rem] text-theme-text-sec leading-snug text-center">
-              La <span class="text-theme-text font-semibold">V4</span> ya está aplicada a la app actual:
-              es el pulido visual que ves en todas las pantallas normales (Registro, Ingresos, Métricas, Deudas…).
-            </p>
-          </div>
-        </div>
-
           </div>
         </details>
 
@@ -425,7 +376,8 @@
 
         <!-- Toast -->
         <Transition name="toast">
-          <div v-if="toastMsg"
+          <div
+v-if="toastMsg"
             class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-emerald-500/90 text-white text-sm font-medium px-5 py-2.5 rounded-full shadow-lg backdrop-blur-sm"
           >
             {{ toastMsg }}
@@ -499,11 +451,6 @@ const { config, isLoading, fetchConfig, updateConfig } = useConfiguraciones()
 const { currencySymbol } = useCurrency()
 const { accentColor, setAccentColor, ACCENT_COLORS, fontSize, setFontSize, FONT_SIZES, isColorblind, setColorblindMode } = useTheme()
 const { logout } = useAuth()
-const { enabled: uiPreviewEnabled, initUiPreview, setUiPreview } = useUiPreview()
-
-function toggleUiPreview() {
-  setUiPreview(!uiPreviewEnabled.value)
-}
 
 async function cerrarSesion() {
   await logout()
@@ -606,7 +553,6 @@ function toggleVistaSemana() {
 }
 
 onMounted(async () => {
-  initUiPreview()
   // fetchConfig usa SWR cache (5 min). loadFromConfig sí necesita el dato
   // listo, así que sí esperamos. En revisitas el cache responde instant.
   await fetchConfig()

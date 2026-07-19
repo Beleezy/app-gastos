@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
       isNull(deudas.deletedAt),
       tipo ? eq(deudas.tipoDeuda, tipo) : undefined
     ))
-    .where(eq(personasEntidades.usuarioId, usuarioId))
+    .where(and(eq(personasEntidades.usuarioId, usuarioId), isNull(personasEntidades.deletedAt)))
     .groupBy(personasEntidades.id)
     .orderBy(sql`MAX(${deudas.updatedAt}) DESC NULLS LAST`)
 

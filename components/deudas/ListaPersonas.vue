@@ -44,7 +44,8 @@
         ]"
         @click="filtroEstado = f.value"
       >
-        <span v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
+        <span
+v-if="f.value === 'vencidas'" class="w-1.5 h-1.5 rounded-full bg-red-400"
           :class="{ 'animate-pulse': countVencidas > 0 }"
         ></span>
         {{ f.label }}
@@ -293,6 +294,8 @@
 </template>
 
 <script setup>
+import { getInitials } from '~/utils/constants'
+
 const emit = defineEmits(['seleccionar'])
 
 const { personas, isLoading, tabActual, filtroEstado, resumen } = useDeudas()
@@ -381,8 +384,6 @@ async function exportarPdf(persona) {
   }
 }
 
-import { getInitials } from '~/utils/constants'
-
 const { currencySymbol, formatMonto } = useCurrency()
 
 function isPhone(contacto) {
@@ -435,6 +436,7 @@ function onTouchMove(e, id) {
 
 function onTouchEnd(e, id) {
   if (!swipeStarts[id]) return
+  // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- mapa plano keyed por id
   delete swipeStarts[id]
   const offset = swipeOffsets[id] || 0
   // Snap: if swiped more than threshold, open; otherwise close

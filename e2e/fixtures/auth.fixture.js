@@ -11,6 +11,7 @@ export const E2E_USER_EMAIL =
   process.env.E2E_USER_EMAIL || 'demo1@test.local'
 
 export const test = base.extend({
+  // eslint-disable-next-line no-empty-pattern -- firma de fixture de Playwright
   authHeaders: async ({}, use) => {
     if (process.env.DEV_AUTH_BYPASS !== '1') {
       throw new Error(

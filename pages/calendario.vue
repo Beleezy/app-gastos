@@ -5,8 +5,8 @@
       <div class="relative flex items-center gap-3">
         <button
           class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="toggleDrawer"
           aria-label="Abrir menú"
+          @click="toggleDrawer"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -25,10 +25,10 @@
         <button
           v-for="f in filtros"
           :key="f.valor"
-          @click="toggleFiltro(f.valor)"
           class="px-3 min-h-[2.5rem] rounded-full text-[0.6875rem] font-semibold border transition-all"
           :class="filtrosActivos.has(f.valor) ? `border-transparent text-white` : 'border-theme-border text-theme-text-muted'"
           :style="filtrosActivos.has(f.valor) ? { backgroundColor: f.color } : {}"
+          @click="toggleFiltro(f.valor)"
         >
           {{ f.icono }} {{ f.etiqueta }}
         </button>
@@ -39,16 +39,16 @@
     <div class="px-5 lg:px-0 mb-3 flex items-center justify-between">
       <button
         class="w-10 h-10 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
-        @click="cambiarMes(-1)"
         aria-label="Mes anterior"
+        @click="cambiarMes(-1)"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
       </button>
       <p class="text-sm font-bold text-theme-text">{{ etiquetaMes }}</p>
       <button
         class="w-10 h-10 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
-        @click="cambiarMes(1)"
         aria-label="Mes siguiente"
+        @click="cambiarMes(1)"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
       </button>
@@ -63,13 +63,13 @@
         <button
           v-for="(cell, i) in celdas"
           :key="i"
-          @click="cell.dia ? abrirDia(cell.fecha) : null"
           :disabled="!cell.dia"
           class="aspect-square rounded-lg flex flex-col items-center justify-center text-[0.6875rem] relative transition-colors"
           :class="[
             cell.dia ? 'bg-theme-card border border-theme-border active:bg-theme-border-md' : '',
             cell.esHoy ? 'ring-2 ring-violet-400' : '',
           ]"
+          @click="cell.dia ? abrirDia(cell.fecha) : null"
         >
           <span v-if="cell.dia" :class="cell.esHoy ? 'text-violet-300 font-bold' : 'text-theme-text-sec'">{{ cell.dia }}</span>
           <div v-if="cell.eventos?.length" class="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
@@ -123,7 +123,7 @@
       <div class="w-full max-w-md bg-theme-card rounded-t-3xl lg:rounded-3xl border border-theme-border max-h-[80vh] overflow-y-auto overscroll-contain">
         <div class="sticky top-0 bg-theme-card border-b border-theme-border px-4 py-3 flex items-center justify-between z-10">
           <p class="text-sm font-bold text-theme-text">{{ fechaCorta(diaSel) }}</p>
-          <button class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md" @click="diaSel = null" aria-label="Cerrar">
+          <button class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md" aria-label="Cerrar" @click="diaSel = null">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
         </div>

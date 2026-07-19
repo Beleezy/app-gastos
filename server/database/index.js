@@ -8,8 +8,8 @@ export function getDb() {
   if (!_db) {
     const config = useRuntimeConfig()
     const databaseUrl = config.databaseUrl || process.env.DATABASE_URL || ''
-    let host = ''
-    let port = ''
+    let host
+    let port
     let sslMode
 
     try {

@@ -158,7 +158,8 @@
                   <div class="flex items-center gap-2 mt-0.5">
                     <span class="text-[0.6875rem] text-theme-text-muted">{{ formatFechaCorta(gasto.fecha) }}</span>
                     <span v-if="gasto.hora" class="text-[0.6875rem] text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
-                    <span v-if="getMetodoRegistroBadgeLabel(gasto)"
+                    <span
+v-if="getMetodoRegistroBadgeLabel(gasto)"
                       class="text-[0.625rem] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
                     >{{ getMetodoRegistroBadgeLabel(gasto) }}</span>
                   </div>
@@ -176,6 +177,9 @@
 <script setup>
 import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
 
+// ─── Filtro de mes ──────────────────────────────────────────
+import { MESES } from '~/utils/constants'
+
 const props = defineProps({
   datos: { type: Array, default: () => [] },
   gastos: { type: Array, default: () => [] },
@@ -189,9 +193,6 @@ const props = defineProps({
 const emit = defineEmits(['update:categoriaSeleccionada'])
 
 const { currencySymbol, formatMonto } = useCurrency()
-
-// ─── Filtro de mes ──────────────────────────────────────────
-import { MESES } from '~/utils/constants'
 
 const mesSeleccionado = ref('actual') // 'actual' o 'YYYY-M'
 const isLoadingMes = ref(false)

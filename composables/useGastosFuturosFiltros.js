@@ -15,9 +15,9 @@
  * 'prioridad' (alta > media > baja > sin), 'alfabetico' (concepto/tipo).
  */
 
-const PRIORIDAD_ORDER = { alta: 0, media: 1, baja: 2, sinDefinir: 3 }
-
 import { normalizar } from './utils/textNormalize.js'
+
+const PRIORIDAD_ORDER = { alta: 0, media: 1, baja: 2, sinDefinir: 3 }
 
 function precioMin(opciones) {
   if (!Array.isArray(opciones) || opciones.length === 0) return null

@@ -62,7 +62,7 @@ export function usePullToRefresh(onRefresh) {
   }
 
   onMounted(() => {
-    if (!process.client) return
+    if (!import.meta.client) return
     // Desactivar en desktop: gesto táctil sin sentido con mouse y puede interferir con scroll
     if (window.innerWidth >= 1024) return
     document.addEventListener('touchstart', onTouchStart, { passive: true })
@@ -71,7 +71,7 @@ export function usePullToRefresh(onRefresh) {
   })
 
   onUnmounted(() => {
-    if (!process.client) return
+    if (!import.meta.client) return
     document.removeEventListener('touchstart', onTouchStart)
     document.removeEventListener('touchmove', onTouchMove)
     document.removeEventListener('touchend', onTouchEnd)

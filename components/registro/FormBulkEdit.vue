@@ -26,7 +26,8 @@
             @click="form.categoriaId = cat.id"
           >
             <span class="text-base">{{ cat.icono || '📦' }}</span>
-            <span class="truncate w-full text-center"
+            <span
+class="truncate w-full text-center"
               :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
             >{{ cat.nombre }}</span>
           </button>

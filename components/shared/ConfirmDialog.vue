@@ -15,7 +15,8 @@
       class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border animate-slide-up"
       @keydown="onKeydown"
     >
-      <div v-if="icon" class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
+      <div
+v-if="icon" class="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3"
         :class="iconBg"
       >
         <svg class="w-5 h-5" :class="iconColor" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

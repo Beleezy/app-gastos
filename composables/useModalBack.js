@@ -57,7 +57,7 @@ export function useModalBack(closeCallback) {
   }
 
   onMounted(() => {
-    if (!process.client) return
+    if (!import.meta.client) return
 
     modalStateId = `modal-${Math.random().toString(36).slice(2, 9)}`
 
@@ -71,7 +71,7 @@ export function useModalBack(closeCallback) {
   })
 
   onUnmounted(() => {
-    if (!process.client) return
+    if (!import.meta.client) return
 
     window.removeEventListener('popstate', handlePopState)
 

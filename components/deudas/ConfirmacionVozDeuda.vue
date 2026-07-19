@@ -20,10 +20,12 @@
       <!-- Deudas nuevas -->
       <template v-if="deudasParseadas.length > 0">
         <p class="text-xs text-theme-text-sec font-medium uppercase tracking-wider">Deudas nuevas</p>
-        <div v-for="(d, i) in deudasParseadas" :key="'d-'+i"
+        <div
+v-for="(d, i) in deudasParseadas" :key="'d-'+i"
           class="bg-theme-input rounded-xl p-3 border border-theme-border">
           <div class="flex items-center gap-2 mb-2">
-            <span class="px-2 py-0.5 rounded-full text-[0.6875rem] font-medium"
+            <span
+class="px-2 py-0.5 rounded-full text-[0.6875rem] font-medium"
               :class="d.tipo === 'me_deben' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'">
               {{ d.tipo === 'me_deben' ? 'Me debe' : 'Yo debo' }}
             </span>
@@ -48,7 +50,8 @@
       <!-- Pagos -->
       <template v-if="pagosParseados.length > 0">
         <p class="text-xs text-theme-text-sec font-medium uppercase tracking-wider">Pagos</p>
-        <div v-for="(p, i) in pagosParseados" :key="'p-'+i"
+        <div
+v-for="(p, i) in pagosParseados" :key="'p-'+i"
           class="bg-theme-input rounded-xl p-3 border border-theme-accent">
           <div class="flex items-center gap-2 mb-2">
             <span class="px-2 py-0.5 rounded-full text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent">Pago</span>

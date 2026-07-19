@@ -64,7 +64,8 @@
             </div>
             <div class="flex items-center gap-2">
               <span class="text-sm font-semibold text-theme-accent">{{ currencySymbol }}&nbsp;{{ formatMonto(semana.total) }}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
+              <svg
+xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
                 :class="{ 'rotate-180': semanaExpandida === semana.key }"
                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
               >
@@ -121,7 +122,8 @@
                       </div>
                       <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                         <span class="text-[0.6875rem] text-theme-text-muted leading-none">{{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}</span>
-                        <span v-if="getStats(dia).topCat" class="text-[0.6875rem] px-1 py-0.5 rounded leading-none font-medium"
+                        <span
+v-if="getStats(dia).topCat" class="text-[0.6875rem] px-1 py-0.5 rounded leading-none font-medium"
                           :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
                         >
                           {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
@@ -144,7 +146,8 @@
                           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                         </svg>
                       </span>
-                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform shrink-0"
+                      <svg
+xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform shrink-0"
                         :class="{ 'rotate-180': diasExpandidos.has(dia.fecha) }"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                       >
@@ -227,7 +230,8 @@
                   <span class="text-[0.6875rem] px-1.5 py-0.5 rounded-md bg-theme-border-md text-theme-text-sec leading-none font-medium">
                     {{ dia.gastos.length }} {{ dia.gastos.length === 1 ? 'gasto' : 'gastos' }}
                   </span>
-                  <span v-if="getStats(dia).topCat" class="text-[0.6875rem] px-1.5 py-0.5 rounded-md leading-none font-medium"
+                  <span
+v-if="getStats(dia).topCat" class="text-[0.6875rem] px-1.5 py-0.5 rounded-md leading-none font-medium"
                     :style="{ backgroundColor: getStats(dia).topCat.color + '20', color: getStats(dia).topCat.color }"
                   >
                     {{ getStats(dia).topCat.icono }} {{ getStats(dia).topCat.nombre }}
@@ -252,7 +256,8 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                   </svg>
                 </span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
+                <svg
+xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-theme-text-sec transition-transform"
                   :class="{ 'rotate-180': diasExpandidos.has(dia.fecha) }"
                   fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
                 >
@@ -285,7 +290,8 @@
 
     <!-- Barra flotante de selección -->
     <Transition name="selection-bar">
-      <div v-if="seleccionActiva"
+      <div
+v-if="seleccionActiva"
         class="fixed left-1/2 -translate-x-1/2 bottom-24 z-40 flex items-center gap-2 bg-theme-card border border-theme-border shadow-xl shadow-black/40 backdrop-blur-sm rounded-2xl px-3 py-2.5 max-w-[calc(100%-1.5rem)]"
       >
         <button

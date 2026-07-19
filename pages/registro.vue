@@ -318,8 +318,8 @@
 
     <!-- Manual form modal (lazy) -->
     <component
-      v-if="showFormManual"
       :is="RegistroFormGastoManualAsync"
+      v-if="showFormManual"
       :categorias="categorias"
       :gasto-editar="gastoEditar"
       :gasto-duplicar="gastoDuplicar"
@@ -361,7 +361,8 @@
 
     <!-- Toast success -->
     <Transition name="toast">
-      <div v-if="toastMsg"
+      <div
+v-if="toastMsg"
         class="fixed left-1/2 -translate-x-1/2 z-50 bg-emerald-500/90 text-white text-sm font-semibold px-6 py-2.5 rounded-full shadow-lg shadow-emerald-500/20 backdrop-blur-sm border border-emerald-400/20"
         :class="undoPendiente ? 'bottom-40' : 'bottom-24'"
       >
@@ -371,7 +372,8 @@
 
     <!-- Undo toast -->
     <Transition name="toast">
-      <div v-if="undoPendiente"
+      <div
+v-if="undoPendiente"
         class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-theme-card text-theme-text text-sm px-4 py-3 rounded-2xl shadow-xl shadow-black/30 backdrop-blur-sm border border-theme-border"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -717,7 +719,7 @@ const showStickyResumen = ref(false)
 let resumenObserver = null
 
 function setupResumenObserver() {
-  if (!process.client || !resumenWrapperRef.value) return
+  if (!import.meta.client || !resumenWrapperRef.value) return
   // Solo mobile: si el viewport es lg+ no activamos el sticky
   const isDesktop = window.matchMedia('(min-width: 1024px)').matches
   if (isDesktop) return

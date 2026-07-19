@@ -52,6 +52,9 @@
 </template>
 
 <script setup>
+// SVG icon components usando render functions (evita necesitar el compilador Vue en runtime)
+import { h } from 'vue'
+
 const route = useRoute()
 
 const { resumen: resumenDeudas } = useDeudas()
@@ -76,9 +79,6 @@ function getBadge(path) {
   if (path === '/registro') return presupuestosCriticos.value
   return 0
 }
-
-// SVG icon components usando render functions (evita necesitar el compilador Vue en runtime)
-import { h } from 'vue'
 
 const makeIcon = (d) => () => h('svg', {
   xmlns: 'http://www.w3.org/2000/svg',

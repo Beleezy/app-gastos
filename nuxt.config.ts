@@ -19,6 +19,10 @@ export default defineNuxtConfig({
     '@vite-pwa/nuxt',
     '@nuxtjs/supabase',
     '@pinia/nuxt',
+    // Genera .nuxt/eslint.config.mjs con los globals de auto-imports del
+    // proyecto (h3, composables propios, Vue). Sin esto, no-undef daba 655
+    // falsos positivos y el lint no podía ser bloqueante en CI.
+    '@nuxt/eslint',
   ],
 
   // Flags experimentales que reducen tamaño de payload de hydration y
@@ -67,6 +71,7 @@ export default defineNuxtConfig({
     },
   },
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment -- ts-expect-error fallaría cuando los tipos sí existen
   // @ts-ignore — tipos generados por @nuxtjs/supabase tras `nuxt prepare`
   supabase: {
     url: process.env.SUPABASE_URL || process.env.NUXT_PUBLIC_SUPABASE_URL || '',
@@ -99,7 +104,11 @@ export default defineNuxtConfig({
       title: APP_NAME,
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' },
+        // Sin maximum-scale/user-scalable: bloquear el pinch-zoom viola
+        // WCAG 1.4.4 y castiga justo al usuario de "texto grande". El
+        // doble-tap accidental se controla con touch-action: manipulation
+        // en los controles, no bloqueando el zoom global.
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'description', content: 'Sistema de finanzas personales' },
         { name: 'theme-color', content: '#0f0f23', media: '(prefers-color-scheme: dark)' },
         { name: 'theme-color', content: '#ffffff', media: '(prefers-color-scheme: light)' },
@@ -111,23 +120,20 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: `/favicon.svg?v=${APP_VERSION}` },
-        // Preconnect a Google Fonts para reducir latencia DNS/TLS en el primer paint.
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         // Preconnect a Supabase para que el handshake TLS del primer fetch
         // a /auth y /rest empiece en paralelo con la descarga del JS.
         ...(process.env.SUPABASE_URL
           ? [{ rel: 'preconnect', href: process.env.SUPABASE_URL, crossorigin: '' }]
           : []),
-        // Cargar Inter sin bloquear el render: descargar como `print` y
-        // promover a `all` cuando esté listo. En PWA Android esto evitaba
-        // 1-3 s de splash blanco esperando el CSS de Google Fonts cuando
-        // la red móvil estaba lenta.
+        // Inter es auto-hospedada (@font-face en main.css + preload aquí):
+        // elimina Google Fonts como third-party y el splash de 1-3 s en PWA
+        // Android con red lenta que causaba el CSS remoto bloqueante.
         {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
-          media: 'print',
-          onload: "this.media='all'",
+          rel: 'preload',
+          as: 'font',
+          type: 'font/woff2',
+          href: '/fonts/inter-var-latin.woff2',
+          crossorigin: '',
         },
       ],
       script: [
@@ -214,11 +220,12 @@ export default defineNuxtConfig({
     },
     workbox: {
       navigateFallback: '/',
-      // Excluir assets pesados (fuentes auto-hospedadas, imágenes grandes
-      // y mapas) del precache para que la primera instalación del SW no
-      // descargue 5+ MB antes de servir la app. Lo crítico (JS/CSS/HTML)
-      // se sigue precacheando para offline.
-      globPatterns: ['**/*.{js,css,html,svg,ico}'],
+      // Excluir assets pesados (imágenes grandes y mapas) del precache
+      // para que la primera instalación del SW no descargue 5+ MB antes
+      // de servir la app. Lo crítico (JS/CSS/HTML) se precachea para
+      // offline; woff2 incluido: Inter auto-hospedada pesa 132 KB total
+      // y sin ella el modo offline renderiza con fallback del sistema.
+      globPatterns: ['**/*.{js,css,html,svg,ico,woff2}'],
       cleanupOutdatedCaches: true,
       // Opt-in update: en una app financiera, un SW comprometido
       // (build/dep poisoning) NO debe propagarse automáticamente. El
@@ -254,15 +261,6 @@ export default defineNuxtConfig({
             cacheName: 'api-dynamic',
             networkTimeoutSeconds: 3,
             expiration: { maxEntries: 80, maxAgeSeconds: 300 },
-          },
-        },
-        {
-          // Webfonts: CacheFirst, viven 1 año.
-          urlPattern: /^https:\/\/fonts\.gstatic\.com\//,
-          handler: 'CacheFirst',
-          options: {
-            cacheName: 'gfonts',
-            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
           },
         },
       ],

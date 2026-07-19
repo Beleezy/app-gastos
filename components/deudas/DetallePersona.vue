@@ -506,6 +506,8 @@
 </template>
 
 <script setup>
+import { getInitials } from '~/utils/constants'
+
 const emit = defineEmits(['registrarPago', 'agregarDeuda', 'editarDeuda', 'pagoGlobal'])
 
 const {
@@ -658,8 +660,6 @@ async function descargarHistorialPdf() {
     generandoHistorial.value = false
   }
 }
-
-import { getInitials } from '~/utils/constants'
 
 const { currencySymbol, formatMonto } = useCurrency()
 const { formatRelativo } = useFechaRelativa()
