@@ -115,7 +115,7 @@ jobs:
 
       - name: Upload Playwright report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-${{ matrix.project }}
           path: playwright-report/
@@ -123,7 +123,7 @@ jobs:
 
       - name: Upload dev server log on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nuxt-dev-log-${{ matrix.project }}
           path: nuxt-dev.log
@@ -245,7 +245,7 @@ jobs:
 
       - name: Upload Playwright report
         if: always() && steps.baselines.outputs.exist == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-report-visual
           path: playwright-report/
@@ -253,7 +253,7 @@ jobs:
 
       - name: Upload visual diffs
         if: failure() && steps.baselines.outputs.exist == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-visual-diffs
           path: test-results/
