@@ -39,9 +39,12 @@
               {{ currencySymbol }}&nbsp;{{ formatMonto(totalGlobal) }}
             </p>
           </div>
+          <!-- Compacto: con min-h 2.5rem + texto grande el botón dominaba
+               el hero y deformaba el card; .tap-target mantiene los 44px
+               de área táctil sin el tamaño visual -->
           <button
             type="button"
-            class="flex items-center gap-1 px-3 min-h-[2.5rem] rounded-lg bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-medium hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
+            class="tap-target flex items-center gap-1 px-2.5 py-1 rounded-lg bg-theme-accent-bg text-theme-accent text-[0.6875rem] font-medium hover:bg-theme-accent-bg-hover active:scale-95 transition-all border border-theme-accent/10"
             @click="$emit('abrir-metas')"
           >
             <svg

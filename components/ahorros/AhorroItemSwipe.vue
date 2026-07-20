@@ -71,7 +71,10 @@
         </div>
 
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug">
+          <!-- Sin line-clamp: el concepto es el identificador del ahorro y
+               debe leerse completo ("Ahorro quincenal para viaje a..." se
+               cortaba a 2 líneas) -->
+          <p class="text-sm font-medium text-theme-text break-words leading-snug">
             {{ ahorro.concepto || ahorro.medioNombre || 'Ahorro' }}
           </p>
           <p class="text-[0.6875rem] text-theme-text-sec">

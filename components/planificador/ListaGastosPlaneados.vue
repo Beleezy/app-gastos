@@ -430,13 +430,13 @@
                 </div>
               </div>
 
-              <!-- Actions -->
-              <div
-                class="flex justify-end items-center gap-x-1.5 mt-1 pt-1 border-t border-theme-border"
-              >
+              <!-- Actions: flex-1 por botón para repartir el ancho parejo
+                   (con "texto grande" la fila apretada a la derecha se veía
+                   aplastada); cada acción es un botón con fondo y aire. -->
+              <div class="flex items-stretch gap-1.5 mt-2 pt-2 border-t border-theme-border">
                 <button
                   v-if="gasto.estado === 'pendiente'"
-                  class="text-xs text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1 font-medium min-h-[2.75rem] px-1.5"
+                  class="flex-1 min-w-0 text-xs text-emerald-400 hover:text-emerald-300 bg-theme-input/40 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1 font-medium min-h-[2.75rem] px-1 leading-tight"
                   :title="
                     esCategoriaAhorro(gasto)
                       ? 'Registrar pago de ahorro'
@@ -460,7 +460,7 @@
                   Pagar
                 </button>
                 <button
-                  class="text-xs transition-colors flex items-center gap-1 min-h-[2.75rem] px-1.5"
+                  class="flex-1 min-w-0 text-xs bg-theme-input/40 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1 font-medium min-h-[2.75rem] px-1 leading-tight"
                   :class="
                     gasto.gastoRegistradoFecha
                       ? 'text-emerald-400 hover:text-emerald-300'
@@ -481,7 +481,7 @@
                   {{ gasto.gastoRegistradoFecha ? 'Editar registro' : 'Registrar' }}
                 </button>
                 <button
-                  class="text-xs text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1 min-h-[2.75rem] px-1.5"
+                  class="flex-1 min-w-0 text-xs text-theme-text-muted hover:text-theme-accent bg-theme-input/40 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1 font-medium min-h-[2.75rem] px-1 leading-tight"
                   data-testid="btn-editar-planificado"
                   @click="emit('editar', gasto)"
                 >
@@ -502,7 +502,7 @@
                   Editar
                 </button>
                 <button
-                  class="text-xs text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1 min-h-[2.75rem] px-1.5"
+                  class="flex-1 min-w-0 text-xs text-theme-text-muted hover:text-red-400 bg-theme-input/40 rounded-lg transition-all active:scale-95 flex items-center justify-center gap-1 font-medium min-h-[2.75rem] px-1 leading-tight"
                   data-testid="btn-eliminar-planificado"
                   @click="pedirConfirmarEliminar(gasto)"
                 >
@@ -566,10 +566,7 @@
     >
       <div
         class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="
-          gastoParaEliminar = null
-          showModalRecurrente = false
-        "
+        @click="((gastoParaEliminar = null), (showModalRecurrente = false))"
       ></div>
       <div
         class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border"
@@ -600,10 +597,7 @@
           </button>
           <button
             class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
-            @click="
-              gastoParaEliminar = null
-              showModalRecurrente = false
-            "
+            @click="((gastoParaEliminar = null), (showModalRecurrente = false))"
           >
             Cancelar
           </button>

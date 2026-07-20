@@ -286,10 +286,7 @@
               >
                 <button
                   class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                  @click="
-                    emit('editar', proyecto)
-                    cerrarMenuProyecto()
-                  "
+                  @click="(emit('editar', proyecto), cerrarMenuProyecto())"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -309,10 +306,7 @@
                 </button>
                 <button
                   class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                  @click="
-                    proyectoAEliminar = proyecto
-                    cerrarMenuProyecto()
-                  "
+                  @click="((proyectoAEliminar = proyecto), cerrarMenuProyecto())"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -473,10 +467,7 @@
                     >
                       <button
                         class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                        @click="
-                          iniciarEdicionDetalle(detalle)
-                          cerrarMenuDetalle()
-                        "
+                        @click="(iniciarEdicionDetalle(detalle), cerrarMenuDetalle())"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -496,10 +487,7 @@
                       </button>
                       <button
                         class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                        @click="
-                          eliminarDetalleInline(proyecto, detalle)
-                          cerrarMenuDetalle()
-                        "
+                        @click="(eliminarDetalleInline(proyecto, detalle), cerrarMenuDetalle())"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -788,8 +776,7 @@
                             v-if="detalle.opciones.length > 1 && idx > 0"
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
                             @click="
-                              moverOpcion(proyecto, detalle, opcion, -1)
-                              cerrarMenuOpcion()
+                              (moverOpcion(proyecto, detalle, opcion, -1), cerrarMenuOpcion())
                             "
                           >
                             <svg
@@ -811,10 +798,7 @@
                           <button
                             v-if="detalle.opciones.length > 1 && idx < detalle.opciones.length - 1"
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="
-                              moverOpcion(proyecto, detalle, opcion, 1)
-                              cerrarMenuOpcion()
-                            "
+                            @click="(moverOpcion(proyecto, detalle, opcion, 1), cerrarMenuOpcion())"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -834,10 +818,7 @@
                           </button>
                           <button
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="
-                              iniciarEdicionOpcion(opcion)
-                              cerrarMenuOpcion()
-                            "
+                            @click="(iniciarEdicionOpcion(opcion), cerrarMenuOpcion())"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -858,8 +839,7 @@
                           <button
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
                             @click="
-                              eliminarOpcionInline(proyecto, detalle, opcion)
-                              cerrarMenuOpcion()
+                              (eliminarOpcionInline(proyecto, detalle, opcion), cerrarMenuOpcion())
                             "
                           >
                             <svg

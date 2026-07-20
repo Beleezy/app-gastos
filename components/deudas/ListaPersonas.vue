@@ -210,53 +210,79 @@
                 {{ getInitials(persona.nombre) }}
               </div>
 
-              <!-- Info -->
+              <!-- Info. El nombre es el identificador principal: va como
+                   título a TODO el ancho (solo avatar y chevron a los
+                   lados); el badge VENCIDA y el monto bajan a la segunda
+                   fila para no comprimirlo (antes se partía "Angi/e"). -->
               <div class="flex-1 min-w-0">
-                <div class="flex items-start gap-1.5 min-w-0">
-                  <p
-                    class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0"
-                    :title="persona.nombre"
-                  >
-                    {{ persona.nombre }}
-                  </p>
-                  <span
-                    v-if="persona.tieneVencidas"
-                    class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-semibold bg-red-500/20 text-red-400"
-                  >
-                    <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
-                    VENCIDA
-                  </span>
-                </div>
-                <div class="flex items-center gap-1.5 mt-0.5">
-                  <span
-                    v-if="persona.tipo === 'organizacion'"
-                    class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted"
-                  >
-                    ORG
-                  </span>
-                  <span
-                    v-if="persona.vinculadoUsuarioId"
-                    class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent"
-                    title="Vinculado con usuario"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="w-3 h-3 inline"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2"
+                <p
+                  class="text-base font-semibold text-theme-text leading-snug line-clamp-2 break-words"
+                  :title="persona.nombre"
+                >
+                  {{ persona.nombre }}
+                </p>
+                <div class="flex items-end justify-between gap-2 mt-1">
+                  <div class="flex items-center flex-wrap gap-1.5 min-w-0">
+                    <span
+                      v-if="persona.tieneVencidas"
+                      class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[0.6875rem] font-semibold bg-red-500/20 text-red-400"
                     >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                      />
-                    </svg>
-                  </span>
-                  <span class="text-xs text-theme-text-sec">
-                    {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }}
-                  </span>
+                      <span class="w-1 h-1 rounded-full bg-red-400 animate-pulse"></span>
+                      VENCIDA
+                    </span>
+                    <span
+                      v-if="persona.tipo === 'organizacion'"
+                      class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted"
+                    >
+                      ORG
+                    </span>
+                    <span
+                      v-if="persona.vinculadoUsuarioId"
+                      class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-accent-bg text-theme-accent"
+                      title="Vinculado con usuario"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="w-3 h-3 inline"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                        />
+                      </svg>
+                    </span>
+                    <span class="text-xs text-theme-text-sec">
+                      {{ persona.deudasActivas }} deuda{{ persona.deudasActivas !== 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <p
+                      class="text-sm font-semibold whitespace-nowrap"
+                      :class="tabActual === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
+                    >
+                      {{ currencySymbol }}&nbsp;{{ formatMonto(persona.totalPendiente) }}
+                    </p>
+                    <div class="flex items-center justify-end gap-1 mt-0.5">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full"
+                        :class="
+                          persona.totalPendiente > 0
+                            ? tabActual === 'me_deben'
+                              ? 'bg-emerald-400'
+                              : 'bg-red-400'
+                            : 'bg-gray-600'
+                        "
+                      ></span>
+                      <span class="text-[0.6875rem] text-theme-text-sec">
+                        {{ persona.totalPendiente > 0 ? 'Pendiente' : 'Saldado' }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
                 <!-- Próxima a vencer (solo si NO está vencida) -->
                 <div
@@ -281,32 +307,6 @@
                       />
                     </svg>
                     {{ formatFechaCorta(persona.fechaProximaVencer) }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Amount -->
-              <div class="text-right shrink-0">
-                <p
-                  class="text-sm font-semibold"
-                  :class="tabActual === 'me_deben' ? 'text-emerald-400' : 'text-red-400'"
-                >
-                  {{ currencySymbol }}&nbsp;{{ formatMonto(persona.totalPendiente) }}
-                </p>
-                <!-- Status indicator -->
-                <div class="flex items-center justify-end gap-1 mt-1">
-                  <span
-                    class="w-1.5 h-1.5 rounded-full"
-                    :class="
-                      persona.totalPendiente > 0
-                        ? tabActual === 'me_deben'
-                          ? 'bg-emerald-400'
-                          : 'bg-red-400'
-                        : 'bg-gray-600'
-                    "
-                  ></span>
-                  <span class="text-[0.6875rem] text-theme-text-sec">
-                    {{ persona.totalPendiente > 0 ? 'Pendiente' : 'Saldado' }}
                   </span>
                 </div>
               </div>
@@ -442,28 +442,33 @@
                 >
                   {{ getInitials(persona.nombre) }}
                 </div>
-                <!-- Info -->
+                <!-- Info: mismo tratamiento de título a todo el ancho que
+                     las cards activas -->
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-start gap-2">
-                    <p
-                      class="text-sm font-medium text-theme-text leading-snug line-clamp-2 break-words min-w-0"
-                    >
-                      {{ persona.nombre }}
-                    </p>
-                    <span
-                      v-if="persona.tipo === 'organizacion'"
-                      class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted"
-                      >ORG</span
-                    >
-                  </div>
-                  <p class="text-xs text-theme-text-sec mt-0.5">Sin deudas activas</p>
-                </div>
-                <!-- Amount -->
-                <div class="text-right shrink-0">
-                  <p class="text-sm font-semibold text-theme-text-sec">{{ currencySymbol }} 0.00</p>
-                  <div class="flex items-center justify-end gap-1 mt-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
-                    <span class="text-[0.6875rem] text-theme-text-sec">Saldado</span>
+                  <p
+                    class="text-base font-semibold text-theme-text leading-snug line-clamp-2 break-words"
+                    :title="persona.nombre"
+                  >
+                    {{ persona.nombre }}
+                  </p>
+                  <div class="flex items-end justify-between gap-2 mt-1">
+                    <div class="flex items-center flex-wrap gap-1.5 min-w-0">
+                      <span
+                        v-if="persona.tipo === 'organizacion'"
+                        class="shrink-0 px-1.5 py-0.5 rounded text-[0.6875rem] font-medium bg-theme-border-md text-theme-text-muted"
+                        >ORG</span
+                      >
+                      <span class="text-xs text-theme-text-sec">Sin deudas activas</span>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <p class="text-sm font-semibold text-theme-text-sec whitespace-nowrap">
+                        {{ currencySymbol }} 0.00
+                      </p>
+                      <div class="flex items-center justify-end gap-1 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+                        <span class="text-[0.6875rem] text-theme-text-sec">Saldado</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <!-- Chevron -->
