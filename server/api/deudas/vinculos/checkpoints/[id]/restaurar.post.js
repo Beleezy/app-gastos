@@ -1,7 +1,17 @@
 import { db } from '../../../../../utils/db.js'
-import { vinculosCheckpoints, personasEntidades, deudas, pagosDeuda } from '../../../../../database/schema.js'
+import {
+  vinculosCheckpoints,
+  personasEntidades,
+  deudas,
+  pagosDeuda,
+} from '../../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../../utils/getUsuario.js'
-import { normalizarParPersonas, crearCheckpoint, registrarAuditoria, getNombreDisplay } from '../../../../../utils/vinculos.js'
+import {
+  normalizarParPersonas,
+  crearCheckpoint,
+  registrarAuditoria,
+  getNombreDisplay,
+} from '../../../../../utils/vinculos.js'
 import { eq, and, or, inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -23,13 +33,15 @@ export default defineEventHandler(async (event) => {
   const [miPersona] = await db
     .select()
     .from(personasEntidades)
-    .where(and(
-      or(
-        eq(personasEntidades.id, checkpoint.personaAId),
-        eq(personasEntidades.id, checkpoint.personaBId)
+    .where(
+      and(
+        or(
+          eq(personasEntidades.id, checkpoint.personaAId),
+          eq(personasEntidades.id, checkpoint.personaBId),
+        ),
+        eq(personasEntidades.usuarioId, usuarioId),
       ),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    )
     .limit(1)
 
   if (!miPersona) {
@@ -89,7 +101,7 @@ export default defineEventHandler(async (event) => {
 
       if (!personaExiste) continue
 
-      for (const deuda of (datoPersona.deudas || [])) {
+      for (const deuda of datoPersona.deudas || []) {
         const [nuevaDeuda] = await tx
           .insert(deudas)
           .values({
@@ -110,7 +122,7 @@ export default defineEventHandler(async (event) => {
         mapaDeudas[deuda.id] = nuevaDeuda.id
 
         // Insertar pagos de esta deuda (sin vinculoPagoId por ahora)
-        for (const pago of (deuda.pagos || [])) {
+        for (const pago of deuda.pagos || []) {
           const [nuevoPago] = await tx
             .insert(pagosDeuda)
             .values({
@@ -133,7 +145,7 @@ export default defineEventHandler(async (event) => {
       const datoPersona = snapshotData[lado]
       if (!datoPersona) continue
 
-      for (const deuda of (datoPersona.deudas || [])) {
+      for (const deuda of datoPersona.deudas || []) {
         if (!deuda.vinculoDeudaId) continue
 
         const newDeudaId = mapaDeudas[deuda.id]
@@ -153,8 +165,8 @@ export default defineEventHandler(async (event) => {
       const datoPersona = snapshotData[lado]
       if (!datoPersona) continue
 
-      for (const deuda of (datoPersona.deudas || [])) {
-        for (const pago of (deuda.pagos || [])) {
+      for (const deuda of datoPersona.deudas || []) {
+        for (const pago of deuda.pagos || []) {
           if (!pago.vinculoPagoId) continue
 
           const newPagoId = mapaPagos[pago.id]
@@ -171,9 +183,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // 6. Registrar auditoría
-    const tipoLabel = checkpoint.tipo === 'inicio_vinculo'
-      ? 'inicio de vínculo'
-      : 'punto de guardado anterior'
+    const tipoLabel =
+      checkpoint.tipo === 'inicio_vinculo' ? 'inicio de vínculo' : 'punto de guardado anterior'
 
     await registrarAuditoria(tx, {
       personaAId: miPersona.id,

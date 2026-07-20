@@ -36,12 +36,16 @@ test.describe('Navegación SPA — todas las rutas montan sin recarga', () => {
     // Detectar recargas de página: la navegación debe ser 100% SPA. Una
     // recarga (p. ej. disparada por el nav-watchdog) significa que alguna
     // vista no montó por sí sola.
-    await page.evaluate(() => { window.__spaAlive = true })
+    await page.evaluate(() => {
+      window.__spaAlive = true
+    })
 
     for (const vuelta of [1, 2]) {
       for (const [ruta, marker] of RUTAS) {
         await page.evaluate((r) => window.useNuxtApp().$router.push(r), ruta)
-        await expect(page, `vuelta ${vuelta}: URL debe cambiar a ${ruta}`).toHaveURL(new RegExp(`${ruta === '/' ? '/$' : ruta}`))
+        await expect(page, `vuelta ${vuelta}: URL debe cambiar a ${ruta}`).toHaveURL(
+          new RegExp(`${ruta === '/' ? '/$' : ruta}`),
+        )
         await expect(
           page.locator('h1').first(),
           `vuelta ${vuelta}: la vista de ${ruta} debe montar (h1 "${marker}")`,
@@ -50,6 +54,8 @@ test.describe('Navegación SPA — todas las rutas montan sin recarga', () => {
     }
 
     const sigueSPA = await page.evaluate(() => window.__spaAlive === true)
-    expect(sigueSPA, 'no debe haber ocurrido ninguna recarga completa durante el recorrido').toBe(true)
+    expect(sigueSPA, 'no debe haber ocurrido ninguna recarga completa durante el recorrido').toBe(
+      true,
+    )
   })
 })

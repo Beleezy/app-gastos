@@ -70,7 +70,11 @@ export function promedioDiario(gastos) {
  * Genera insights legibles para mostrar en la UI.
  * Devuelve array de { tipo: 'up'|'down'|'neutral'|'highlight', texto }.
  */
-export function generarInsights({ actuales = [], anteriores = [], etiquetaAnterior = 'el mes anterior' } = {}) {
+export function generarInsights({
+  actuales = [],
+  anteriores = [],
+  etiquetaAnterior = 'el mes anterior',
+} = {}) {
   const out = []
   const tA = totalGastos(actuales)
   const tB = totalGastos(anteriores)
@@ -79,7 +83,10 @@ export function generarInsights({ actuales = [], anteriores = [], etiquetaAnteri
   if (tA === 0 && tB === 0) return out
 
   if (pct == null) {
-    out.push({ tipo: 'neutral', texto: `Aún no tienes datos para comparar con ${etiquetaAnterior}.` })
+    out.push({
+      tipo: 'neutral',
+      texto: `Aún no tienes datos para comparar con ${etiquetaAnterior}.`,
+    })
   } else if (pct > 5) {
     out.push({
       tipo: 'up',

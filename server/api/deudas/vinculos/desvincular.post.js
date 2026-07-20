@@ -1,7 +1,17 @@
 import { db } from '../../../utils/db.js'
-import { personasEntidades, solicitudesVinculo, vinculosCheckpoints, auditoriaVinculos } from '../../../database/schema.js'
+import {
+  personasEntidades,
+  solicitudesVinculo,
+  vinculosCheckpoints,
+  auditoriaVinculos,
+} from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
-import { desvincularPersonas, registrarAuditoria, getNombreDisplay, normalizarParPersonas } from '../../../utils/vinculos.js'
+import {
+  desvincularPersonas,
+  registrarAuditoria,
+  getNombreDisplay,
+  normalizarParPersonas,
+} from '../../../utils/vinculos.js'
 import { eq, and, or } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
@@ -16,10 +26,12 @@ export default defineEventHandler(async (event) => {
   const [persona] = await db
     .select()
     .from(personasEntidades)
-    .where(and(
-      eq(personasEntidades.id, body.personaEntidadId),
-      eq(personasEntidades.usuarioId, usuarioId)
-    ))
+    .where(
+      and(
+        eq(personasEntidades.id, body.personaEntidadId),
+        eq(personasEntidades.usuarioId, usuarioId),
+      ),
+    )
     .limit(1)
 
   if (!persona) {
@@ -34,7 +46,11 @@ export default defineEventHandler(async (event) => {
 
   // Obtener persona par para confirmar que existe
   const [personaPar] = await db
-    .select({ id: personasEntidades.id, nombre: personasEntidades.nombre, usuarioId: personasEntidades.usuarioId })
+    .select({
+      id: personasEntidades.id,
+      nombre: personasEntidades.nombre,
+      usuarioId: personasEntidades.usuarioId,
+    })
     .from(personasEntidades)
     .where(eq(personasEntidades.id, personaParId))
     .limit(1)
@@ -48,36 +64,44 @@ export default defineEventHandler(async (event) => {
     await desvincularPersonas(tx, persona.id, personaParId)
 
     // Eliminar checkpoints del par (evitar acumulación al revincular)
-    await tx
-      .delete(vinculosCheckpoints)
-      .where(eq(vinculosCheckpoints.personaAId, normalizedAId))
+    await tx.delete(vinculosCheckpoints).where(eq(vinculosCheckpoints.personaAId, normalizedAId))
 
     // Eliminar auditoría del par (evitar datos sin sentido al revincular)
     await tx
       .delete(auditoriaVinculos)
-      .where(or(
-        and(eq(auditoriaVinculos.personaAId, persona.id), eq(auditoriaVinculos.personaBId, personaParId)),
-        and(eq(auditoriaVinculos.personaAId, personaParId), eq(auditoriaVinculos.personaBId, persona.id))
-      ))
+      .where(
+        or(
+          and(
+            eq(auditoriaVinculos.personaAId, persona.id),
+            eq(auditoriaVinculos.personaBId, personaParId),
+          ),
+          and(
+            eq(auditoriaVinculos.personaAId, personaParId),
+            eq(auditoriaVinculos.personaBId, persona.id),
+          ),
+        ),
+      )
 
     // Marcar solicitudes aceptadas entre estos usuarios como 'expirada'
     if (personaPar?.usuarioId) {
       await tx
         .update(solicitudesVinculo)
         .set({ estado: 'expirada', updatedAt: new Date() })
-        .where(and(
-          eq(solicitudesVinculo.estado, 'aceptada'),
-          or(
-            and(
-              eq(solicitudesVinculo.remitenteId, usuarioId),
-              eq(solicitudesVinculo.destinatarioId, personaPar.usuarioId)
+        .where(
+          and(
+            eq(solicitudesVinculo.estado, 'aceptada'),
+            or(
+              and(
+                eq(solicitudesVinculo.remitenteId, usuarioId),
+                eq(solicitudesVinculo.destinatarioId, personaPar.usuarioId),
+              ),
+              and(
+                eq(solicitudesVinculo.remitenteId, personaPar.usuarioId),
+                eq(solicitudesVinculo.destinatarioId, usuarioId),
+              ),
             ),
-            and(
-              eq(solicitudesVinculo.remitenteId, personaPar.usuarioId),
-              eq(solicitudesVinculo.destinatarioId, usuarioId)
-            )
-          )
-        ))
+          ),
+        )
     }
   })
 

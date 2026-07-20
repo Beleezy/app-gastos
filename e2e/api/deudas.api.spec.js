@@ -67,6 +67,8 @@ test.describe('Deudas', () => {
     const r = await page.goto('/deudas')
     expect(r.status()).toBeLessThan(500)
     await expect(page.getByText(/Deudas y Pagos/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByRole('heading', { name: /Balance global/i })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: /Balance global/i })).toBeVisible({
+      timeout: 10_000,
+    })
   })
 })

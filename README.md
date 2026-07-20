@@ -28,24 +28,24 @@ npm run dev           # http://localhost:3000
 
 Críticas (la app no arranca correctamente sin estas):
 
-| Variable | Descripción |
-|---|---|
-| `DATABASE_URL` | PostgreSQL (Supabase) connection string. |
-| `SUPABASE_URL` | URL del proyecto Supabase. |
-| `SUPABASE_ANON_KEY` | Public anon key (cliente). |
+| Variable            | Descripción                              |
+| ------------------- | ---------------------------------------- |
+| `DATABASE_URL`      | PostgreSQL (Supabase) connection string. |
+| `SUPABASE_URL`      | URL del proyecto Supabase.               |
+| `SUPABASE_ANON_KEY` | Public anon key (cliente).               |
 
 Recomendadas (algunas features quedan deshabilitadas si faltan):
 
-| Variable | Para qué sirve |
-|---|---|
-| `GEMINI_API_KEY` | Endpoints de voz/foto (`/api/voz/parse*`). |
-| `GEMINI_MODEL` | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`. |
-| `GEMINI_MAX_RETRIES` | Reintentos por modelo. Default `3`. |
-| `GEMINI_RATE_LIMITS` | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`. |
-| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza. |
-| `LLM_CACHE_TTL_SECONDS` | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h). |
-| `CRON_SECRET` | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM). |
-| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas. |
+| Variable                    | Para qué sirve                                                                                           |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`            | Endpoints de voz/foto (`/api/voz/parse*`).                                                               |
+| `GEMINI_MODEL`              | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`. |
+| `GEMINI_MAX_RETRIES`        | Reintentos por modelo. Default `3`.                                                                      |
+| `GEMINI_RATE_LIMITS`        | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`.                                                 |
+| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza.                   |
+| `LLM_CACHE_TTL_SECONDS`     | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h).                                 |
+| `CRON_SECRET`               | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM).                 |
+| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas.                                                                   |
 
 El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WARN/ERROR si falta alguna.
 
@@ -53,23 +53,24 @@ El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WA
 
 ## Scripts
 
-| Script | Acción |
-|---|---|
-| `npm run dev` | Servidor de desarrollo. |
-| `npm run build` | Build de producción. |
-| `npm run preview` | Preview local del build. |
-| `npm test` | Suite Vitest (unit). |
-| `npm run test:watch` | Vitest en modo watch. |
-| `npm run test:coverage` | Cobertura con `@vitest/coverage-v8`. |
-| `npm run lint` | ESLint flat config. |
-| `npm run lint:fix` | ESLint con `--fix`. |
-| `npm run format` | Prettier `--write`. |
-| `npm run format:check` | Prettier verificación. |
-| `npm run db:generate` | Generar migración Drizzle. |
-| `npm run db:push` | Aplicar schema a la DB. |
-| `npm run db:studio` | Drizzle Studio (UI). |
-| `npm run db:seed` | Cargar datos iniciales. |
-| `npm run db:seed:test` | Seed datos de prueba. |
+| Script                  | Acción                                                                           |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| `npm run dev`           | Servidor de desarrollo.                                                          |
+| `npm run build`         | Build de producción.                                                             |
+| `npm run preview`       | Preview local del build.                                                         |
+| `npm test`              | Suite Vitest (unit).                                                             |
+| `npm run test:watch`    | Vitest en modo watch.                                                            |
+| `npm run test:coverage` | Cobertura con `@vitest/coverage-v8`.                                             |
+| `npm run lint`          | ESLint flat config.                                                              |
+| `npm run lint:fix`      | ESLint con `--fix`.                                                              |
+| `npm run format`        | Prettier `--write`.                                                              |
+| `npm run format:check`  | Prettier verificación.                                                           |
+| `npm run db:generate`   | Generar migración Drizzle.                                                       |
+| `npm run db:apply`      | Aplicar migraciones SQL pendientes (tabla de control `_migraciones_aplicadas`).  |
+| `npm run db:push`       | Aplicar schema a la DB (solo dev exploratorio; en flujo normal usar `db:apply`). |
+| `npm run db:studio`     | Drizzle Studio (UI).                                                             |
+| `npm run db:seed`       | Cargar datos iniciales.                                                          |
+| `npm run db:seed:test`  | Seed datos de prueba.                                                            |
 
 ---
 
@@ -120,8 +121,44 @@ Variables de Supabase se setean a placeholders en CI para no exigir credenciales
 - **Captura por voz**: `composables/useVoiceRecognition.js` → `composables/useLLMParser.js` → `/api/voz/parse` → `ConfirmacionVoz.vue`.
 - **Captura por foto**: `BotonCamara.vue` → `composables/usePhotoDraft.js` → `/api/voz/parse-image`.
 - **Captura manual**: `FormGastoManual.vue` → `composables/useGastos.js` → `/api/gastos`.
-- **Crear deuda**: `FormDeuda.vue` → `useDeudas.js` → `/api/deudas` (servicio `crearGasto` análogo a venir en `services/deudas.service.js`).
+- **Crear deuda**: `FormDeuda.vue` → `useDeudas.js` → `/api/deudas` (lógica en `server/services/deudas.service.js`).
 - **Pagar deuda**: `FormPago.vue` o `FormPagoGlobal.vue` → `/api/deudas/pagos*`.
+
+---
+
+## Operaciones (producción en free tier)
+
+### Deploy y migraciones
+
+`vercel.json` define `buildCommand: npm run db:apply && npm run build` — **cada deploy aplica
+las migraciones pendientes antes de compilar**. El script lleva registro por archivo en la
+tabla `_migraciones_aplicadas` (hash + fecha): los aplicados se saltan, los nuevos van en
+transacción, y si uno falla el build aborta (la BD no queda a medias ni el código nuevo se
+despliega sin su columna). Reglas: no editar migraciones aplicadas; un prefijo numérico por
+migración (ante conflicto, sufijo letra: `0005a_...`).
+
+`/api/health` verifica columnas centinela del schema y responde 503 con `checks.schema='drift'`
+si la BD quedó desfasada — mantener la lista al añadir columnas críticas.
+
+### Backups (Supabase free no incluye)
+
+`.github/workflows/db-backup.yml` hace `pg_dump` semanal cifrado (GPG simétrico) y lo sube como
+artifact con 90 días de retención. Requiere secrets `BACKUP_DATABASE_URL` (cadena **directa** o
+session pooler — el pooler de transacción del puerto 6543 no sirve para pg*dump) y
+`BACKUP_PASSPHRASE` (guardarla fuera del repo; sin ella el backup es irrecuperable). Se puede
+disparar a mano con \_workflow_dispatch* para un backup pre-migración.
+
+### Uptime y keep-alive
+
+Supabase free pausa el proyecto tras ~7 días sin actividad. Configurar un monitor gratuito
+(p. ej. UptimeRobot, ping cada 5 min) contra `https://<app>/api/health`: el `SELECT 1` cuenta
+como actividad y el monitor avisa por email si la app o la BD caen (incluido el 503 por drift).
+
+### Rate limit distribuido (opcional pero recomendado en Vercel)
+
+Sin configurar nada, el rate limit usa un Map en memoria **por instancia** serverless. Crear
+una instancia gratuita en [Upstash](https://upstash.com/) y setear `UPSTASH_REDIS_REST_URL` +
+`UPSTASH_REDIS_REST_TOKEN` en Vercel — el código ya trae el driver.
 
 ---
 

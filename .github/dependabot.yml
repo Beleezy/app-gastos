@@ -1,0 +1,22 @@
+# Updates de dependencias agrupados para no inundar de PRs un repo
+# de mantenimiento personal. Ver docs/plan-mejoras-2026-07.md §3.3.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: America/Lima
+    open-pull-requests-limit: 3
+    groups:
+      # Parches y minors en un solo PR semanal; majors quedan en PRs
+      # individuales para revisarlos con calma.
+      minor-y-patch:
+        update-types: ['minor', 'patch']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

@@ -1,6 +1,10 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '../../../utils/db.js'
-import { gastosFuturos, gastosFuturosDetalles, gastosFuturosOpciones } from '../../../database/schema.js'
+import {
+  gastosFuturos,
+  gastosFuturosDetalles,
+  gastosFuturosOpciones,
+} from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import {
   fetchFutureExpenseById,
@@ -32,9 +36,7 @@ export default defineEventHandler(async (event) => {
     .where(eq(gastosFuturosDetalles.gastoFuturoId, id))
 
   const decididosPorId = new Map(
-    detallesExistentes
-      .filter(d => d.estadoDecision)
-      .map(d => [d.id, d])
+    detallesExistentes.filter((d) => d.estadoDecision).map((d) => [d.id, d]),
   )
 
   await db.transaction(async (tx) => {
@@ -49,9 +51,7 @@ export default defineEventHandler(async (event) => {
       })
       .where(eq(gastosFuturos.id, id))
 
-    const idsNoDecididos = detallesExistentes
-      .filter(d => !d.estadoDecision)
-      .map(d => d.id)
+    const idsNoDecididos = detallesExistentes.filter((d) => !d.estadoDecision).map((d) => d.id)
 
     if (idsNoDecididos.length > 0) {
       await tx
@@ -91,28 +91,24 @@ export default defineEventHandler(async (event) => {
         .returning({ id: gastosFuturosDetalles.id })
 
       for (const [optionIndex, opcion] of detalle.opciones.entries()) {
-        await tx
-          .insert(gastosFuturosOpciones)
-          .values({
-            detalleId: inserted.id,
-            nombre: opcion.nombre,
-            referenciaUrl: opcion.referenciaUrl,
-            imagenUrl: opcion.imagenUrl,
-            precioMinimo: opcion.precioMinimo !== null ? String(opcion.precioMinimo) : null,
-            precioMaximo: opcion.precioMaximo !== null ? String(opcion.precioMaximo) : null,
-            precioPromedio: opcion.precioPromedio !== null ? String(opcion.precioPromedio) : null,
-            notas: opcion.notas,
-            orden: optionIndex,
-          })
+        await tx.insert(gastosFuturosOpciones).values({
+          detalleId: inserted.id,
+          nombre: opcion.nombre,
+          referenciaUrl: opcion.referenciaUrl,
+          imagenUrl: opcion.imagenUrl,
+          precioMinimo: opcion.precioMinimo !== null ? String(opcion.precioMinimo) : null,
+          precioMaximo: opcion.precioMaximo !== null ? String(opcion.precioMaximo) : null,
+          precioPromedio: opcion.precioPromedio !== null ? String(opcion.precioPromedio) : null,
+          notas: opcion.notas,
+          orden: optionIndex,
+        })
       }
       orden++
     }
 
-    const idsHuerfanos = [...decididosPorId.keys()].filter(k => !idsDecididosVigentes.has(k))
+    const idsHuerfanos = [...decididosPorId.keys()].filter((k) => !idsDecididosVigentes.has(k))
     if (idsHuerfanos.length > 0) {
-      await tx
-        .delete(gastosFuturosDetalles)
-        .where(inArray(gastosFuturosDetalles.id, idsHuerfanos))
+      await tx.delete(gastosFuturosDetalles).where(inArray(gastosFuturosDetalles.id, idsHuerfanos))
     }
   })
 

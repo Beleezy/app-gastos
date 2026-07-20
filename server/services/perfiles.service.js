@@ -88,7 +88,11 @@ export async function crearPerfil(propietarioId, datos) {
   })
   await db
     .insert(configuraciones)
-    .values({ usuarioId: id, nombre: n, presupuestoMensualDefault: String(Number(datos?.presupuesto) || 0) })
+    .values({
+      usuarioId: id,
+      nombre: n,
+      presupuestoMensualDefault: String(Number(datos?.presupuesto) || 0),
+    })
     .onConflictDoNothing()
   return { id, nombre: n, ...contacto, presupuesto: Number(datos?.presupuesto) || 0 }
 }

@@ -19,7 +19,8 @@ export function parsePaginacionQuery(query = {}, { defaultLimit = 50, maxLimit =
   let limit = parseInt(query.limit, 10)
   if (!Number.isFinite(limit) || limit <= 0) limit = defaultLimit
   if (limit > maxLimit) limit = maxLimit
-  const cursor = typeof query.cursor === 'string' && query.cursor.trim() ? query.cursor.trim() : null
+  const cursor =
+    typeof query.cursor === 'string' && query.cursor.trim() ? query.cursor.trim() : null
   return { cursor, limit }
 }
 
@@ -44,7 +45,10 @@ export function paginarResultado(filas, limit, extractCursor) {
 export function encodeCursor(parts) {
   const json = JSON.stringify(parts)
   if (typeof btoa === 'function') {
-    return btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    return btoa(unescape(encodeURIComponent(json)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
   }
   return Buffer.from(json, 'utf8').toString('base64url')
 }

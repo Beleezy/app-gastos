@@ -17,7 +17,9 @@ export function useSideNavCollapsed() {
   function toggle() {
     collapsed.value = !collapsed.value
     if (import.meta.client) {
-      try { localStorage.setItem(STORAGE_KEY, collapsed.value ? '1' : '0') } catch {}
+      try {
+        localStorage.setItem(STORAGE_KEY, collapsed.value ? '1' : '0')
+      } catch {}
     }
   }
 

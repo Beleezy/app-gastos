@@ -68,7 +68,7 @@ export function useVirtualList({ source, itemHeight, containerHeight, overscan =
   }
 
   function scrollToIndex(index, container) {
-    const target = (container || event?.target)
+    const target = container || event?.target
     if (!target) return
     target.scrollTop = Math.max(0, index * itemHeight)
   }

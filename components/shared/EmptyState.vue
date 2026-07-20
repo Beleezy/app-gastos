@@ -11,7 +11,9 @@
     >
       <span class="text-2xl" aria-hidden="true">{{ displayIcon }}</span>
     </div>
-    <h3 v-if="title" class="text-base md:text-lg font-semibold text-theme-text mb-1">{{ title }}</h3>
+    <h3 v-if="title" class="text-base md:text-lg font-semibold text-theme-text mb-1">
+      {{ title }}
+    </h3>
     <p v-if="message" class="text-sm text-theme-text-sec max-w-xs">{{ message }}</p>
     <div v-if="actionLabel || $slots.actions" class="mt-4 flex flex-wrap gap-2 justify-center">
       <slot name="actions">

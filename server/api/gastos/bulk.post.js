@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
       ? 'foto'
       : 'voz'
 
-  const valores = body.gastos.map(g => ({
+  const valores = body.gastos.map((g) => ({
     usuarioId,
     categoriaId: g.categoriaId,
     concepto: g.concepto?.trim() || 'Gasto no especificado',
@@ -43,18 +43,15 @@ export default defineEventHandler(async (event) => {
 
   // Transacción atómica: si falla uno, se revierten todos
   const insertados = await db.transaction(async (tx) => {
-    return await tx
-      .insert(gastos)
-      .values(valores)
-      .returning()
+    return await tx.insert(gastos).values(valores).returning()
   })
 
   // Get category info for all
-  const catIds = [...new Set(insertados.map(g => g.categoriaId))]
+  const catIds = [...new Set(insertados.map((g) => g.categoriaId))]
   const cats = await db.select().from(categorias).where(inArray(categorias.id, catIds))
-  const catMap = Object.fromEntries(cats.map(c => [c.id, c]))
+  const catMap = Object.fromEntries(cats.map((c) => [c.id, c]))
 
-  const respuesta = insertados.map(g => ({
+  const respuesta = insertados.map((g) => ({
     ...g,
     monto: parseFloat(g.monto),
     categoriaNombre: catMap[g.categoriaId]?.nombre,

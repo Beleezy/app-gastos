@@ -6,11 +6,7 @@ const COMBINING_MARKS = /[̀-ͯ]/g
 
 export function normalizar(texto) {
   if (texto == null) return ''
-  return String(texto)
-    .normalize('NFD')
-    .replace(COMBINING_MARKS, '')
-    .toLowerCase()
-    .trim()
+  return String(texto).normalize('NFD').replace(COMBINING_MARKS, '').toLowerCase().trim()
 }
 
 export function sinDiacriticos(texto) {

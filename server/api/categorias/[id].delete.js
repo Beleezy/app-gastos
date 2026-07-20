@@ -37,7 +37,10 @@ export default defineEventHandler(async (event) => {
     .limit(1)
 
   if (planificadosAsociados.length > 0) {
-    throw createError({ statusCode: 409, message: 'No se puede eliminar: tiene gastos planificados asociados' })
+    throw createError({
+      statusCode: 409,
+      message: 'No se puede eliminar: tiene gastos planificados asociados',
+    })
   }
 
   const futurosAsociados = await db
@@ -47,7 +50,10 @@ export default defineEventHandler(async (event) => {
     .limit(1)
 
   if (futurosAsociados.length > 0) {
-    throw createError({ statusCode: 409, message: 'No se puede eliminar: tiene gastos futuros asociados' })
+    throw createError({
+      statusCode: 409,
+      message: 'No se puede eliminar: tiene gastos futuros asociados',
+    })
   }
 
   await db.delete(categorias).where(eq(categorias.id, id))

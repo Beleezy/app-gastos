@@ -16,10 +16,7 @@ export default defineEventHandler(async (event) => {
 
   const isGlobal = body.tipo === 'global'
 
-  const conditions = [
-    eq(metasAhorro.usuarioId, usuarioId),
-    eq(metasAhorro.tipo, body.tipo),
-  ]
+  const conditions = [eq(metasAhorro.usuarioId, usuarioId), eq(metasAhorro.tipo, body.tipo)]
   if (isGlobal) {
     conditions.push(isNull(metasAhorro.mes))
   } else {

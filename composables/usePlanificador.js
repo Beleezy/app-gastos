@@ -33,15 +33,18 @@ export function usePlanificador() {
 
   const resumen = computed(() => {
     const presupuesto = plan.value?.montoPresupuesto || 0
-    const totalPlanificado = gastosPlaneados.value.reduce((s, g) => s + (Number(g.montoEstimado) || 0), 0)
-    const pagados = gastosPlaneados.value.filter(g => g.estado === 'pagado')
-    const pendientes = gastosPlaneados.value.filter(g => g.estado === 'pendiente')
+    const totalPlanificado = gastosPlaneados.value.reduce(
+      (s, g) => s + (Number(g.montoEstimado) || 0),
+      0,
+    )
+    const pagados = gastosPlaneados.value.filter((g) => g.estado === 'pagado')
+    const pendientes = gastosPlaneados.value.filter((g) => g.estado === 'pendiente')
     const hoy = _hoyISO()
-    const vencidos = pendientes.filter(g => g.fechaProbablePago && g.fechaProbablePago < hoy)
-    const hoyItems = pendientes.filter(g => g.fechaProbablePago === hoy)
-    const porcentaje = presupuesto > 0 ? (totalPlanificado / presupuesto * 100) : 0
+    const vencidos = pendientes.filter((g) => g.fechaProbablePago && g.fechaProbablePago < hoy)
+    const hoyItems = pendientes.filter((g) => g.fechaProbablePago === hoy)
+    const porcentaje = presupuesto > 0 ? (totalPlanificado / presupuesto) * 100 : 0
     const gastoRealTotal = Object.values(gastosRealesPorCategoria.value).reduce((s, v) => s + v, 0)
-    const porcentajeGastadoReal = presupuesto > 0 ? (gastoRealTotal / presupuesto * 100) : 0
+    const porcentajeGastadoReal = presupuesto > 0 ? (gastoRealTotal / presupuesto) * 100 : 0
     return {
       presupuesto,
       totalPlanificado,
@@ -88,13 +91,15 @@ export function usePlanificador() {
     const presupuesto = plan.value?.montoPresupuesto || 0
     const gastoReal = totalGastoReal.value
     const now = new Date()
-    const esMesActual = mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
+    const esMesActual =
+      mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
     const diasTotales = new Date(anioActual.value, mesActual.value, 0).getDate()
     const diaActual = esMesActual ? now.getDate() : diasTotales
     const diasRestantes = Math.max(0, diasTotales - diaActual)
     // Proyección lineal: ritmo_diario * días_totales
     const proyeccionFinMes = diaActual > 0 ? (gastoReal / diaActual) * diasTotales : 0
-    const ritmoDiarioRecomendado = diasRestantes > 0 ? Math.max(0, (presupuesto - gastoReal) / diasRestantes) : 0
+    const ritmoDiarioRecomendado =
+      diasRestantes > 0 ? Math.max(0, (presupuesto - gastoReal) / diasRestantes) : 0
     const excedeProyeccion = proyeccionFinMes > presupuesto && presupuesto > 0 && esMesActual
     const excesoProyectado = Math.max(0, proyeccionFinMes - presupuesto)
     // Comparativa vs mes anterior
@@ -124,7 +129,7 @@ export function usePlanificador() {
     const total = resumen.value.totalPlanificado
     if (!(total > 0)) return []
     let acumulado = 0
-    return gastosPorCategoria.value.map(cat => {
+    return gastosPorCategoria.value.map((cat) => {
       const porcentaje = (cat.total / total) * 100
       const offset = -acumulado
       acumulado += porcentaje
@@ -142,13 +147,20 @@ export function usePlanificador() {
   async function fetchMesAnterior() {
     let m = mesActual.value - 1
     let a = anioActual.value
-    if (m === 0) { m = 12; a -= 1 }
+    if (m === 0) {
+      m = 12
+      a -= 1
+    }
     // SWR: si el resumen cacheado es del mismo (m, a) y aún es fresco,
     // no pedimos otra vez al backend. Datos de meses pasados son
     // efectivamente inmutables salvo edición manual.
     const cached = mesAnteriorResumen.value
-    if (cached && cached.mes === m && cached.anio === a &&
-        Date.now() - mesAnteriorFetchedAt.value < MES_ANTERIOR_TTL) {
+    if (
+      cached &&
+      cached.mes === m &&
+      cached.anio === a &&
+      Date.now() - mesAnteriorFetchedAt.value < MES_ANTERIOR_TTL
+    ) {
       return
     }
     try {
@@ -173,7 +185,7 @@ export function usePlanificador() {
     error.value = null
     try {
       const data = await apiFetch('/api/planificador', {
-        query: { mes: mesActual.value, anio: anioActual.value }
+        query: { mes: mesActual.value, anio: anioActual.value },
       })
       plan.value = data.plan
       gastosPlaneados.value = data.gastos
@@ -190,7 +202,7 @@ export function usePlanificador() {
     try {
       const updated = await apiFetch('/api/planificador', {
         method: 'PUT',
-        body: { id: plan.value.id, montoPresupuesto: monto }
+        body: { id: plan.value.id, montoPresupuesto: monto },
       })
       plan.value = updated
     } catch (e) {
@@ -203,17 +215,20 @@ export function usePlanificador() {
     try {
       const creado = await apiFetch('/api/planificador/gastos', {
         method: 'POST',
-        body: { ...data, planMensualId: plan.value.id }
+        body: { ...data, planMensualId: plan.value.id },
       })
       // Optimistic update: si es un único gasto (no recurrente), basta
       // con añadirlo al array local. Si es recurrente, el endpoint creó
       // varias instancias en meses futuros y necesitamos re-fetch para
       // mantener `gastosPlaneados` consistente con el mes actual.
       if (creado && !data.esRecurrente) {
-        gastosPlaneados.value = [...gastosPlaneados.value, {
-          ...creado,
-          montoEstimado: parseFloat(creado.montoEstimado),
-        }]
+        gastosPlaneados.value = [
+          ...gastosPlaneados.value,
+          {
+            ...creado,
+            montoEstimado: parseFloat(creado.montoEstimado),
+          },
+        ]
       } else {
         await fetchPlan()
       }
@@ -228,16 +243,16 @@ export function usePlanificador() {
       // data puede incluir alcanceEdicion: 'solo' | 'futuros' para recurrentes
       const actualizado = await apiFetch(`/api/planificador/gastos/${id}`, {
         method: 'PUT',
-        body: data
+        body: data,
       })
       // Optimistic update: si alcanceEdicion='solo' (o no es recurrente),
       // basta con reemplazar el item local. Para 'futuros' tocó otros
       // meses, así que conservador re-fetch.
       if (actualizado && data.alcanceEdicion !== 'futuros') {
-        gastosPlaneados.value = gastosPlaneados.value.map(g =>
+        gastosPlaneados.value = gastosPlaneados.value.map((g) =>
           g.id === id
             ? { ...g, ...actualizado, montoEstimado: parseFloat(actualizado.montoEstimado) }
-            : g
+            : g,
         )
       } else {
         await fetchPlan()
@@ -251,9 +266,9 @@ export function usePlanificador() {
     try {
       await apiFetch(`/api/planificador/gastos/${id}`, {
         method: 'DELETE',
-        query: eliminarFuturos ? { futuros: 'true' } : {}
+        query: eliminarFuturos ? { futuros: 'true' } : {},
       })
-      gastosPlaneados.value = gastosPlaneados.value.filter(g => g.id !== id)
+      gastosPlaneados.value = gastosPlaneados.value.filter((g) => g.id !== id)
     } catch (e) {
       error.value = e.message || 'Error al eliminar gasto'
     }
@@ -263,17 +278,21 @@ export function usePlanificador() {
   // difiere la eliminación en backend, permite cancelar.
   const _pendingDeletes = new Map()
   function softDeleteGastoPlaneado(id, delayMs = 5000) {
-    const gasto = gastosPlaneados.value.find(g => g.id === id)
+    const gasto = gastosPlaneados.value.find((g) => g.id === id)
     if (!gasto) return null
-    const index = gastosPlaneados.value.findIndex(g => g.id === id)
-    gastosPlaneados.value = gastosPlaneados.value.filter(g => g.id !== id)
+    const index = gastosPlaneados.value.findIndex((g) => g.id === id)
+    gastosPlaneados.value = gastosPlaneados.value.filter((g) => g.id !== id)
     const timeoutId = setTimeout(async () => {
       _pendingDeletes.delete(id)
       try {
         await apiFetch(`/api/planificador/gastos/${id}`, { method: 'DELETE' })
       } catch (e) {
         // Restaurar si el backend falla
-        gastosPlaneados.value = [...gastosPlaneados.value.slice(0, index), gasto, ...gastosPlaneados.value.slice(index)]
+        gastosPlaneados.value = [
+          ...gastosPlaneados.value.slice(0, index),
+          gasto,
+          ...gastosPlaneados.value.slice(index),
+        ]
         error.value = e.message || 'Error al eliminar gasto'
       }
     }, delayMs)
@@ -285,9 +304,13 @@ export function usePlanificador() {
         clearTimeout(entry.timeoutId)
         _pendingDeletes.delete(id)
         const idx = Math.min(entry.index, gastosPlaneados.value.length)
-        gastosPlaneados.value = [...gastosPlaneados.value.slice(0, idx), entry.gasto, ...gastosPlaneados.value.slice(idx)]
+        gastosPlaneados.value = [
+          ...gastosPlaneados.value.slice(0, idx),
+          entry.gasto,
+          ...gastosPlaneados.value.slice(idx),
+        ]
         return true
-      }
+      },
     }
   }
 
@@ -349,7 +372,7 @@ export function usePlanificador() {
           anioOrigen,
           mesDestino: mesActual.value,
           anioDestino: anioActual.value,
-        }
+        },
       })
       await fetchPlan()
       return result
@@ -360,13 +383,35 @@ export function usePlanificador() {
   }
 
   return {
-    plan, gastosPlaneados, gastosRealesPorCategoria, categorias, isLoading, error,
-    mesActual, anioActual, nombreMes, esHoy,
-    resumen, gastosPorCategoria, datosGrafico, totalGastoReal, analitica, mesAnteriorResumen, fetchMesAnterior,
-    fetchPlan, updatePresupuesto,
-    createGastoPlaneado, updateGastoPlaneado, deleteGastoPlaneado, softDeleteGastoPlaneado,
-    toggleEstado, registrarGastoEnRegistro,
-    fetchCategorias, mesSiguiente, mesAnterior, diasEnMes,
+    plan,
+    gastosPlaneados,
+    gastosRealesPorCategoria,
+    categorias,
+    isLoading,
+    error,
+    mesActual,
+    anioActual,
+    nombreMes,
+    esHoy,
+    resumen,
+    gastosPorCategoria,
+    datosGrafico,
+    totalGastoReal,
+    analitica,
+    mesAnteriorResumen,
+    fetchMesAnterior,
+    fetchPlan,
+    updatePresupuesto,
+    createGastoPlaneado,
+    updateGastoPlaneado,
+    deleteGastoPlaneado,
+    softDeleteGastoPlaneado,
+    toggleEstado,
+    registrarGastoEnRegistro,
+    fetchCategorias,
+    mesSiguiente,
+    mesAnterior,
+    diasEnMes,
     duplicarMes,
   }
 }

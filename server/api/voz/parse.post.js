@@ -3,10 +3,22 @@ import { categorias, configuraciones, personasEntidades } from '../../database/s
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { vozParseBodySchema } from '~/shared/schemas/gastos.js'
-import { parseModelList, getValidModels, selectBestModel, getFallbackModels, trackRequest, getWaitMessage } from '../../utils/geminiModels.js'
+import {
+  parseModelList,
+  getValidModels,
+  selectBestModel,
+  getFallbackModels,
+  trackRequest,
+  getWaitMessage,
+} from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
-import { sanitizeLlmInput, sanitizeForSystemPrompt, validateGastosLlm, validateDeudasLlm } from '../../utils/llmSafety.js'
+import {
+  sanitizeLlmInput,
+  sanitizeForSystemPrompt,
+  validateGastosLlm,
+  validateDeudasLlm,
+} from '../../utils/llmSafety.js'
 import { trackUsoLlm, assertCuotaMensual } from '../../utils/usoLlm.js'
 import { getCached, setCached, hashInput } from '../../utils/llmCache.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
@@ -50,7 +62,13 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select({ nombre: categorias.nombre })
     .from(categorias)
-    .where(or(eq(categorias.esPredefinida, true), eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)))
+    .where(
+      or(
+        eq(categorias.esPredefinida, true),
+        eq(categorias.usuarioId, usuarioId),
+        isNull(categorias.usuarioId),
+      ),
+    )
     .orderBy(categorias.nombre)
   // Categorías custom son texto libre del usuario; saneamos antes de
   // inyectarlas al system prompt (defensa contra stored prompt injection).
@@ -89,7 +107,9 @@ Reglas:
 - Si no puedes interpretar algo, usa concepto "Gasto no especificado" y categoría "Otros".`
 
   // Parsear lista de modelos configurados (separados por ";")
-  const configuredModels = parseModelList(runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview')
+  const configuredModels = parseModelList(
+    runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview',
+  )
 
   // Validar cuáles están disponibles para esta API key
   const validModels = await getValidModels(configuredModels, apiKey)
@@ -140,9 +160,10 @@ Reglas:
       logger.warn('No se pudieron cargar personas existentes', { error: e })
     }
 
-    const listaPersonas = personasExistentes.length > 0
-      ? `\nPersonas registradas en el sistema: ${personasExistentes.join(', ')}\n- IMPORTANTE: Si el nombre mencionado por voz suena similar o parecido a alguno de la lista, usa el nombre EXACTO de la lista. Los nombres por voz pueden tener errores de transcripción (ej: "Deilan" → "Dayllan", "Maicol" → "Michael"). Prioriza siempre hacer match con nombres existentes.`
-      : ''
+    const listaPersonas =
+      personasExistentes.length > 0
+        ? `\nPersonas registradas en el sistema: ${personasExistentes.join(', ')}\n- IMPORTANTE: Si el nombre mencionado por voz suena similar o parecido a alguno de la lista, usa el nombre EXACTO de la lista. Los nombres por voz pueden tener errores de transcripción (ej: "Deilan" → "Dayllan", "Maicol" → "Michael"). Prioriza siempre hacer match con nombres existentes.`
+        : ''
 
     finalSystemPrompt = `Eres un asistente de finanzas personales. El usuario te va a dar un texto transcrito por voz donde describe deudas nuevas O pagos de deudas existentes. Tu tarea es extraer los datos de cada operación mencionada.
 
@@ -186,7 +207,9 @@ Reglas:
   }
 
   const MAX_RETRIES = runtimeConfig.geminiMaxRetries || 3
-  const RETRY_DELAYS = Array.from({ length: MAX_RETRIES }, (_, i) => i === 0 ? 0 : Math.min(i * 2000, 10000))
+  const RETRY_DELAYS = Array.from({ length: MAX_RETRIES }, (_, i) =>
+    i === 0 ? 0 : Math.min(i * 2000, 10000),
+  )
   let lastError = null
   let lastErrorUserFriendly = null
 
@@ -208,7 +231,7 @@ Reglas:
   for (const currentModel of modelsToTry) {
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       if (attempt > 0) {
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAYS[attempt]))
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[attempt]))
       }
 
       try {
@@ -233,7 +256,7 @@ Reglas:
                 responseMimeType: 'application/json',
               },
             }),
-          }
+          },
         )
 
         if (!response.ok) {
@@ -248,18 +271,20 @@ Reglas:
 
           // Si es error 429 (cuota agotada), esperar más antes de reintentar
           if (response.status === 429) {
-            lastErrorUserFriendly = 'Límite de solicitudes alcanzado. Espera un momento e intenta de nuevo.'
+            lastErrorUserFriendly =
+              'Límite de solicitudes alcanzado. Espera un momento e intenta de nuevo.'
             // Extraer tiempo de espera sugerido del error si existe
             const waitMatch = errorText.match(/retry in (\d+)/i)
             const waitTime = waitMatch ? Math.min(parseInt(waitMatch[1]) * 1000, 60000) : 15000
             if (attempt < MAX_RETRIES - 1) {
-              await new Promise(resolve => setTimeout(resolve, waitTime))
+              await new Promise((resolve) => setTimeout(resolve, waitTime))
             }
             continue
           }
 
           if (response.status === 403) {
-            lastErrorUserFriendly = 'API key de Gemini sin permisos. Verifica tu clave en Google AI Studio.'
+            lastErrorUserFriendly =
+              'API key de Gemini sin permisos. Verifica tu clave en Google AI Studio.'
             break // No reintentar con la misma key
           }
 
@@ -343,13 +368,20 @@ Reglas:
         }).catch(() => {})
         return validados
       } catch (e) {
-        logger.error('Error invocando Gemini', { model: currentModel, attempt: attempt + 1, error: e })
+        logger.error('Error invocando Gemini', {
+          model: currentModel,
+          attempt: attempt + 1,
+          error: e,
+        })
         lastError = e.message
       }
     }
-    logger.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos`, { model: currentModel })
+    logger.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos`, {
+      model: currentModel,
+    })
   }
 
-  const userMessage = lastErrorUserFriendly || 'No se pudo procesar el texto. Intenta de nuevo en unos segundos.'
+  const userMessage =
+    lastErrorUserFriendly || 'No se pudo procesar el texto. Intenta de nuevo en unos segundos.'
   throw createError({ statusCode: 500, message: userMessage })
 })

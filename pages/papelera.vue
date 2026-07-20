@@ -2,14 +2,22 @@
   <div class="min-h-screen pb-4">
     <!-- Header -->
     <div class="px-5 pt-8 pb-3 relative overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-amber-500/10 rounded-full blur-3xl"></div>
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-amber-500/10 rounded-full blur-3xl"
+      ></div>
       <div class="relative flex items-center gap-3 mb-1">
         <button
           class="w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="$router.back()"
           aria-label="Volver"
+          @click="$router.back()"
         >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
         </button>
@@ -29,11 +37,15 @@
     </div>
 
     <div v-else-if="totalItems === 0" class="text-center py-16">
-      <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center mb-3">
+      <div
+        class="w-14 h-14 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center mb-3"
+      >
         <span class="text-2xl">🗑️</span>
       </div>
       <p class="text-sm text-theme-text-sec">La papelera está vacía</p>
-      <p class="text-[0.6875rem] text-theme-text-muted mt-1">Los registros eliminados aparecen aquí durante 30 días</p>
+      <p class="text-[0.6875rem] text-theme-text-muted mt-1">
+        Los registros eliminados aparecen aquí durante 30 días
+      </p>
     </div>
 
     <!-- Gastos eliminados -->
@@ -53,17 +65,27 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm text-theme-text font-medium truncate">{{ g.concepto }}</p>
             <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[0.6875rem] text-theme-text-muted">{{ formatFechaCorta(g.fecha) }}</span>
-              <span v-if="g.categoriaNombre" class="text-[0.6875rem] text-theme-text-muted">· {{ g.categoriaNombre }}</span>
-              <span class="text-[0.6875rem] text-amber-400">Eliminado {{ fechaRelativa(g.deletedAt) }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{
+                formatFechaCorta(g.fecha)
+              }}</span>
+              <span v-if="g.categoriaNombre" class="text-[0.6875rem] text-theme-text-muted"
+                >· {{ g.categoriaNombre }}</span
+              >
+              <span class="text-[0.6875rem] text-amber-400"
+                >Eliminado {{ fechaRelativa(g.deletedAt) }}</span
+              >
             </div>
           </div>
-          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(g.monto) }}</p>
+          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">
+            {{ currencySymbol }}&nbsp;{{ formatMonto(g.monto) }}
+          </p>
           <button
             class="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold shrink-0"
-            @click="restaurar('gasto', g.id, g.concepto)"
             :disabled="restaurando === g.id"
-          >{{ restaurando === g.id ? '...' : 'Restaurar' }}</button>
+            @click="restaurar('gasto', g.id, g.concepto)"
+          >
+            {{ restaurando === g.id ? '...' : 'Restaurar' }}
+          </button>
         </div>
       </div>
     </div>
@@ -85,16 +107,24 @@
           <div class="flex-1 min-w-0">
             <p class="text-sm text-theme-text font-medium truncate">{{ d.concepto }}</p>
             <div class="flex items-center gap-2 mt-0.5">
-              <span class="text-[0.6875rem] text-theme-text-muted">{{ d.tipoDeuda === 'me_deben' ? 'Me deben' : 'Yo debo' }}</span>
-              <span class="text-[0.6875rem] text-amber-400">Eliminada {{ fechaRelativa(d.deletedAt) }}</span>
+              <span class="text-[0.6875rem] text-theme-text-muted">{{
+                d.tipoDeuda === 'me_deben' ? 'Me deben' : 'Yo debo'
+              }}</span>
+              <span class="text-[0.6875rem] text-amber-400"
+                >Eliminada {{ fechaRelativa(d.deletedAt) }}</span
+              >
             </div>
           </div>
-          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">{{ currencySymbol }}&nbsp;{{ formatMonto(d.montoPendiente) }}</p>
+          <p class="text-sm font-semibold text-theme-text shrink-0 line-through opacity-60">
+            {{ currencySymbol }}&nbsp;{{ formatMonto(d.montoPendiente) }}
+          </p>
           <button
             class="px-3 py-1.5 rounded-lg bg-emerald-500/15 text-emerald-400 text-xs font-semibold shrink-0"
-            @click="restaurar('deuda', d.id, d.concepto)"
             :disabled="restaurando === d.id"
-          >{{ restaurando === d.id ? '...' : 'Restaurar' }}</button>
+            @click="restaurar('deuda', d.id, d.concepto)"
+          >
+            {{ restaurando === d.id ? '...' : 'Restaurar' }}
+          </button>
         </div>
       </div>
     </div>
@@ -119,7 +149,9 @@ const isLoading = ref(true)
 const restaurando = ref(null)
 const data = ref({ gastos: [], deudas: [] })
 
-const totalItems = computed(() => (data.value.gastos?.length || 0) + (data.value.deudas?.length || 0))
+const totalItems = computed(
+  () => (data.value.gastos?.length || 0) + (data.value.deudas?.length || 0),
+)
 
 async function cargar() {
   isLoading.value = true

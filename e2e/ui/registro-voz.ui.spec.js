@@ -23,9 +23,7 @@ test.describe('Registro por voz — UI', () => {
             this.onstart && this.onstart()
             const transcript = window.__e2eTranscript || 'almuerzo 25 soles'
             const event = {
-              results: [
-                [{ transcript, confidence: 0.95 }],
-              ],
+              results: [[{ transcript, confidence: 0.95 }]],
               resultIndex: 0,
             }
             // Marcamos como final
@@ -34,18 +32,30 @@ test.describe('Registro por voz — UI', () => {
             setTimeout(() => this.onend && this.onend(), 10)
           }, 30)
         }
-        stop() { this.onend && this.onend() }
-        abort() { this.onend && this.onend() }
+        stop() {
+          this.onend && this.onend()
+        }
+        abort() {
+          this.onend && this.onend()
+        }
       }
       window.SpeechRecognition = FakeRecognition
       window.webkitSpeechRecognition = FakeRecognition
     })
   })
 
-  test('mock LLM: la transcripcion abre la confirmacion con el item parseado', async ({ page, llmMock }) => {
+  test('mock LLM: la transcripcion abre la confirmacion con el item parseado', async ({
+    page,
+    llmMock,
+  }) => {
     llmMock.setVoz({
       gastos: [
-        { concepto: 'Almuerzo dictado', monto: 25, categoria: 'Comida', fecha: new Date().toISOString().slice(0, 10) },
+        {
+          concepto: 'Almuerzo dictado',
+          monto: 25,
+          categoria: 'Comida',
+          fecha: new Date().toISOString().slice(0, 10),
+        },
       ],
     })
 
@@ -65,7 +75,9 @@ test.describe('Registro por voz — UI', () => {
   test('descartar oculta la confirmacion sin persistir', async ({ page, llmMock, request }) => {
     const concepto = 'GastoDescartado E2E'
     llmMock.setVoz({
-      gastos: [{ concepto, monto: 10, categoria: 'Otros', fecha: new Date().toISOString().slice(0, 10) }],
+      gastos: [
+        { concepto, monto: 10, categoria: 'Otros', fecha: new Date().toISOString().slice(0, 10) },
+      ],
     })
 
     const registro = new RegistroPage(page)
@@ -83,6 +95,6 @@ test.describe('Registro por voz — UI', () => {
     const r = await request.get('/api/gastos')
     const data = await r.json()
     const lista = Array.isArray(data) ? data : data?.gastos || []
-    expect(lista.find(g => g.concepto === concepto)).toBeUndefined()
+    expect(lista.find((g) => g.concepto === concepto)).toBeUndefined()
   })
 })

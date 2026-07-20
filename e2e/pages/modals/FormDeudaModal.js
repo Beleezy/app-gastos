@@ -12,11 +12,21 @@ export class FormDeudaModal {
     await this.root.waitFor({ state: 'visible', timeout: 5000 })
   }
 
-  inputPersona() { return this.root.getByTestId(DEUDAS.INPUT_PERSONA) }
-  inputConcepto() { return this.root.getByTestId(DEUDAS.INPUT_CONCEPTO) }
-  inputMonto() { return this.root.getByTestId(DEUDAS.INPUT_MONTO) }
-  inputFecha() { return this.root.getByTestId(DEUDAS.INPUT_FECHA) }
-  btnGuardar() { return this.root.getByTestId(DEUDAS.BTN_GUARDAR_DEUDA) }
+  inputPersona() {
+    return this.root.getByTestId(DEUDAS.INPUT_PERSONA)
+  }
+  inputConcepto() {
+    return this.root.getByTestId(DEUDAS.INPUT_CONCEPTO)
+  }
+  inputMonto() {
+    return this.root.getByTestId(DEUDAS.INPUT_MONTO)
+  }
+  inputFecha() {
+    return this.root.getByTestId(DEUDAS.INPUT_FECHA)
+  }
+  btnGuardar() {
+    return this.root.getByTestId(DEUDAS.BTN_GUARDAR_DEUDA)
+  }
 
   /**
    * El "tipo deuda" es un par de botones toggle (Me debe / Yo debo), no <select>.

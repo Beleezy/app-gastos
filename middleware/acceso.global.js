@@ -3,7 +3,7 @@
 // (getUsuarioFromEvent devuelve 403); esto es solo para la UX del cliente.
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (!process.client) return
+  if (!import.meta.client) return
 
   const publicas = ['/login', '/dev-login', '/acceso-pendiente']
   if (publicas.includes(to.path) || to.path.startsWith('/auth')) return

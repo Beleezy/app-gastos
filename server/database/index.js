@@ -8,8 +8,8 @@ export function getDb() {
   if (!_db) {
     const config = useRuntimeConfig()
     const databaseUrl = config.databaseUrl || process.env.DATABASE_URL || ''
-    let host = ''
-    let port = ''
+    let host
+    let port
     let sslMode
 
     try {
@@ -27,7 +27,8 @@ export function getDb() {
     const isLocalAlias = ['localhost', '127.0.0.1', '::1', 'db', 'postgres'].includes(host)
     const isPrivateIPv4 = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[0-1])\.)/.test(host)
     const isLocalDatabase = isLocalAlias || isPrivateIPv4
-    const shouldDisableSsl = sslMode === 'disable' || sslMode === 'allow' || sslMode === 'prefer' || isLocalDatabase
+    const shouldDisableSsl =
+      sslMode === 'disable' || sslMode === 'allow' || sslMode === 'prefer' || isLocalDatabase
 
     // ── Detección de runtime serverless ──
     // Vercel/Netlify Functions arrancan una nueva instancia por petición
@@ -53,8 +54,8 @@ export function getDb() {
     if (isServerless && port === '5432' && !isLocalDatabase) {
       console.warn(
         '[db] DATABASE_URL apunta al puerto 5432 (direct) en serverless. ' +
-        'Usa el pooler de Supabase (puerto 6543) para evitar EMAXCONNSESSION. ' +
-        'Settings → Database → Connection string → Transaction mode.'
+          'Usa el pooler de Supabase (puerto 6543) para evitar EMAXCONNSESSION. ' +
+          'Settings → Database → Connection string → Transaction mode.',
       )
     }
 
@@ -78,10 +79,13 @@ export function getDb() {
   return _db
 }
 
-export const db = new Proxy({}, {
-  get(_, prop) {
-    const instance = getDb()
-    const value = instance[prop]
-    return typeof value === 'function' ? value.bind(instance) : value
-  }
-})
+export const db = new Proxy(
+  {},
+  {
+    get(_, prop) {
+      const instance = getDb()
+      const value = instance[prop]
+      return typeof value === 'function' ? value.bind(instance) : value
+    },
+  },
+)

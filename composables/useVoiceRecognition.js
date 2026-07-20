@@ -109,7 +109,11 @@ export function useVoiceRecognition() {
     baseTranscript = ''
     // En Android, la instancia no se puede reutilizar tras onend — siempre crear una nueva
     if (recognition) {
-      try { recognition.abort() } catch { /* noop */ }
+      try {
+        recognition.abort()
+      } catch {
+        /* noop */
+      }
       recognition = null
     }
     _beginRecognition()
@@ -149,7 +153,11 @@ export function useVoiceRecognition() {
     if (refCount === 0) {
       clearInactivityTimer()
       if (recognition) {
-        try { recognition.abort() } catch { /* noop */ }
+        try {
+          recognition.abort()
+        } catch {
+          /* noop */
+        }
         recognition = null
       }
       isListening.value = false

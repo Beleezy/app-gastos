@@ -32,7 +32,12 @@ export default defineEventHandler(async (event) => {
 
   await db
     .update(intencionesRegistro)
-    .set({ estado: 'aprobada', decididoPor: adminId, decididoEn: new Date(), updatedAt: new Date() })
+    .set({
+      estado: 'aprobada',
+      decididoPor: adminId,
+      decididoEn: new Date(),
+      updatedAt: new Date(),
+    })
     .where(eq(intencionesRegistro.id, id))
 
   invalidarAccesoCache(intent.supabaseUserId)

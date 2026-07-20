@@ -3,7 +3,7 @@ export function useLLMParser() {
   const isParsing = ref(false)
   const parsedExpenses = ref([])
   const error = ref(null)
-  const retryStatus = ref('')   // mensaje visible del estado del retry
+  const retryStatus = ref('') // mensaje visible del estado del retry
   let parseController = null
 
   async function parseVoiceText(texto) {

@@ -14,13 +14,13 @@ Cada sección incluye:
 
 Resumen rápido de las páginas y artefactos creados:
 
-| Submódulo | Página | Composable | Storage |
-|-----------|--------|------------|---------|
-| Suscripciones | `pages/suscripciones.vue` | `composables/useSuscripciones.js` | `subs.items.v1` |
-| Metas | `pages/metas.vue` | `composables/useMetas.js` | `metas.items.v1`, `metas.movs.v1` |
-| Presupuestos por categoría | `pages/presupuestos.vue` | `composables/usePresupuestosCategoria.js` | `pcat.items.v1` |
-| Calendario financiero | `pages/calendario.vue` | (lee de los anteriores + APIs existentes) | — |
-| Etiquetas | `pages/etiquetas.vue` | `composables/useEtiquetas.js` | `etq.items.v1`, `etq.asign.v1` |
+| Submódulo                  | Página                    | Composable                                | Storage                           |
+| -------------------------- | ------------------------- | ----------------------------------------- | --------------------------------- |
+| Suscripciones              | `pages/suscripciones.vue` | `composables/useSuscripciones.js`         | `subs.items.v1`                   |
+| Metas                      | `pages/metas.vue`         | `composables/useMetas.js`                 | `metas.items.v1`, `metas.movs.v1` |
+| Presupuestos por categoría | `pages/presupuestos.vue`  | `composables/usePresupuestosCategoria.js` | `pcat.items.v1`                   |
+| Calendario financiero      | `pages/calendario.vue`    | (lee de los anteriores + APIs existentes) | —                                 |
+| Etiquetas                  | `pages/etiquetas.vue`     | `composables/useEtiquetas.js`             | `etq.items.v1`, `etq.asign.v1`    |
 
 ---
 
@@ -30,29 +30,40 @@ Resumen rápido de las páginas y artefactos creados:
 
 ```js
 export const periodicidadSuscripcion = pgEnum('periodicidad_suscripcion', [
-  'semanal', 'quincenal', 'mensual', 'bimestral',
-  'trimestral', 'semestral', 'anual',
+  'semanal',
+  'quincenal',
+  'mensual',
+  'bimestral',
+  'trimestral',
+  'semestral',
+  'anual',
 ])
 
-export const suscripciones = pgTable('suscripciones', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  usuarioId: uuid('usuario_id').notNull().references(() => usuarios.id, { onDelete: 'cascade' }),
-  nombre: varchar('nombre', { length: 120 }).notNull(),
-  monto: numeric('monto', { precision: 12, scale: 2 }).notNull(),
-  periodicidad: periodicidadSuscripcion('periodicidad').notNull().default('mensual'),
-  fechaInicio: date('fecha_inicio').notNull(),
-  categoriaId: uuid('categoria_id').references(() => categorias.id, { onDelete: 'set null' }),
-  icono: varchar('icono', { length: 8 }).default('🔁'),
-  color: varchar('color', { length: 16 }).default('#3b82f6'),
-  url: text('url'),
-  notas: text('notas'),
-  activa: boolean('activa').notNull().default(true),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
-}, (t) => ({
-  porUsuario: index('suscripciones_usuario_idx').on(t.usuarioId, t.activa),
-}))
+export const suscripciones = pgTable(
+  'suscripciones',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    usuarioId: uuid('usuario_id')
+      .notNull()
+      .references(() => usuarios.id, { onDelete: 'cascade' }),
+    nombre: varchar('nombre', { length: 120 }).notNull(),
+    monto: numeric('monto', { precision: 12, scale: 2 }).notNull(),
+    periodicidad: periodicidadSuscripcion('periodicidad').notNull().default('mensual'),
+    fechaInicio: date('fecha_inicio').notNull(),
+    categoriaId: uuid('categoria_id').references(() => categorias.id, { onDelete: 'set null' }),
+    icono: varchar('icono', { length: 8 }).default('🔁'),
+    color: varchar('color', { length: 16 }).default('#3b82f6'),
+    url: text('url'),
+    notas: text('notas'),
+    activa: boolean('activa').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp('deleted_at', { withTimezone: true }),
+  },
+  (t) => ({
+    porUsuario: index('suscripciones_usuario_idx').on(t.usuarioId, t.activa),
+  }),
+)
 ```
 
 ### 1.2 Endpoints (crear `server/api/suscripciones/`)
@@ -68,10 +79,12 @@ import { eq, and, isNull, desc } from 'drizzle-orm'
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
-  const rows = await db.select().from(suscripciones)
+  const rows = await db
+    .select()
+    .from(suscripciones)
     .where(and(eq(suscripciones.usuarioId, usuarioId), isNull(suscripciones.deletedAt)))
     .orderBy(desc(suscripciones.createdAt))
-  return rows.map(s => ({ ...s, monto: parseFloat(s.monto) }))
+  return rows.map((s) => ({ ...s, monto: parseFloat(s.monto) }))
 })
 ```
 
@@ -88,11 +101,10 @@ En `composables/useSuscripciones.js`, reemplazar `useLocalStorage` por
 ```js
 export function useSuscripciones() {
   const { apiFetch } = useApiFetch()
-  const cache = useResourceCache(
-    'suscripciones',
-    () => apiFetch('/api/suscripciones'),
-    { ttl: 60_000, initial: [] },
-  )
+  const cache = useResourceCache('suscripciones', () => apiFetch('/api/suscripciones'), {
+    ttl: 60_000,
+    initial: [],
+  })
   const items = cache.data
 
   async function crear(data) {
@@ -114,7 +126,7 @@ después de cargar `gastosPlaneados.value`:
 ```js
 // Auto-añadir suscripciones del mes que aún no estén planificadas.
 const { proximos30Dias } = useSuscripciones()
-const ya = new Set(gastosPlaneados.value.map(g => `sub:${g.notas || ''}`))
+const ya = new Set(gastosPlaneados.value.map((g) => `sub:${g.notas || ''}`))
 for (const s of proximos30Dias.value) {
   if (s.proxima.getMonth() + 1 !== mesActual.value) continue
   if (ya.has(`sub:${s.id}`)) continue
@@ -159,7 +171,9 @@ export const tipoMeta = pgEnum('tipo_meta', ['ahorro', 'deuda', 'gasto_limite'])
 
 export const metas = pgTable('metas', {
   id: uuid('id').primaryKey().defaultRandom(),
-  usuarioId: uuid('usuario_id').notNull().references(() => usuarios.id, { onDelete: 'cascade' }),
+  usuarioId: uuid('usuario_id')
+    .notNull()
+    .references(() => usuarios.id, { onDelete: 'cascade' }),
   nombre: varchar('nombre', { length: 120 }).notNull(),
   tipo: tipoMeta('tipo').notNull(),
   montoObjetivo: numeric('monto_objetivo', { precision: 12, scale: 2 }).notNull(),
@@ -174,7 +188,9 @@ export const metas = pgTable('metas', {
 
 export const metaMovimientos = pgTable('meta_movimientos', {
   id: uuid('id').primaryKey().defaultRandom(),
-  metaId: uuid('meta_id').notNull().references(() => metas.id, { onDelete: 'cascade' }),
+  metaId: uuid('meta_id')
+    .notNull()
+    .references(() => metas.id, { onDelete: 'cascade' }),
   monto: numeric('monto', { precision: 12, scale: 2 }).notNull(),
   fecha: date('fecha').notNull(),
   nota: text('nota'),
@@ -199,7 +215,7 @@ guardar el ahorro:
 
 ```js
 const { items: metas, registrarMovimiento } = useMetas()
-const metaAhorro = metas.value.find(m => m.tipo === 'ahorro' && m.nombre === ahorro.concepto)
+const metaAhorro = metas.value.find((m) => m.tipo === 'ahorro' && m.nombre === ahorro.concepto)
 if (metaAhorro) {
   registrarMovimiento(metaAhorro.id, {
     monto: ahorro.monto,
@@ -214,7 +230,7 @@ En `composables/useDeudas.js` → `crearPago`, después del `await apiFetch`:
 
 ```js
 const { items: metas, registrarMovimiento } = useMetas()
-const metaDeuda = metas.value.find(m => m.tipo === 'deuda')
+const metaDeuda = metas.value.find((m) => m.tipo === 'deuda')
 if (metaDeuda) {
   registrarMovimiento(metaDeuda.id, {
     monto: nuevoPago.monto,
@@ -229,7 +245,7 @@ En `pages/registro.vue` dentro de `crearGasto`, antes de persistir:
 
 ```js
 const { items: metas } = useMetas()
-const topes = metas.value.filter(m => m.tipo === 'gasto_limite')
+const topes = metas.value.filter((m) => m.tipo === 'gasto_limite')
 // pintar warning si el gasto haría superar algún tope; no bloquear,
 // solo confirmar con el usuario.
 ```
@@ -246,17 +262,25 @@ En `pages/index.vue`, añadir una card que muestre `progresoActual` /
 ### 3.1 Schema
 
 ```js
-export const presupuestosCategoria = pgTable('presupuestos_categoria', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  usuarioId: uuid('usuario_id').notNull().references(() => usuarios.id, { onDelete: 'cascade' }),
-  categoriaId: uuid('categoria_id').notNull().references(() => categorias.id, { onDelete: 'cascade' }),
-  montoMensual: numeric('monto_mensual', { precision: 12, scale: 2 }).notNull(),
-  alertaUmbral: integer('alerta_umbral').notNull().default(80), // %
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  unicaPorUsuarioCat: uniqueIndex('pcat_usuario_categoria_uq').on(t.usuarioId, t.categoriaId),
-}))
+export const presupuestosCategoria = pgTable(
+  'presupuestos_categoria',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    usuarioId: uuid('usuario_id')
+      .notNull()
+      .references(() => usuarios.id, { onDelete: 'cascade' }),
+    categoriaId: uuid('categoria_id')
+      .notNull()
+      .references(() => categorias.id, { onDelete: 'cascade' }),
+    montoMensual: numeric('monto_mensual', { precision: 12, scale: 2 }).notNull(),
+    alertaUmbral: integer('alerta_umbral').notNull().default(80), // %
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    unicaPorUsuarioCat: uniqueIndex('pcat_usuario_categoria_uq').on(t.usuarioId, t.categoriaId),
+  }),
+)
 ```
 
 ### 3.2 Endpoints
@@ -291,15 +315,18 @@ const { porcentajeUsado, estadoSemaforo, cargarConsumo } = usePresupuestosCatego
 const hoy = new Date()
 await cargarConsumo(hoy.getMonth() + 1, hoy.getFullYear())
 
-watch(() => form.categoriaId, (id) => {
-  const pct = porcentajeUsado(id)
-  const estado = estadoSemaforo(id)
-  if (estado === 'critico') {
-    toastWarning(`Ya superaste el presupuesto de esta categoría (${pct.toFixed(0)}%).`)
-  } else if (estado === 'alerta') {
-    toastInfo(`Llevas ${pct.toFixed(0)}% del presupuesto de esta categoría.`)
-  }
-})
+watch(
+  () => form.categoriaId,
+  (id) => {
+    const pct = porcentajeUsado(id)
+    const estado = estadoSemaforo(id)
+    if (estado === 'critico') {
+      toastWarning(`Ya superaste el presupuesto de esta categoría (${pct.toFixed(0)}%).`)
+    } else if (estado === 'alerta') {
+      toastInfo(`Llevas ${pct.toFixed(0)}% del presupuesto de esta categoría.`)
+    }
+  },
+)
 ```
 
 **B. Badge en BottomNav.**
@@ -307,8 +334,8 @@ En `components/layout/BottomNav.vue`, añadir:
 
 ```js
 const { items: presupuestos, estadoSemaforo } = usePresupuestosCategoria()
-const alertasPresupuesto = computed(() =>
-  presupuestos.value.filter(p => estadoSemaforo(p.categoriaId) !== 'ok').length
+const alertasPresupuesto = computed(
+  () => presupuestos.value.filter((p) => estadoSemaforo(p.categoriaId) !== 'ok').length,
 )
 // Sumarlo al badge actual de /planificador.
 ```
@@ -318,13 +345,20 @@ Server-side: hook después de `POST /api/gastos`. En
 `server/api/gastos/index.post.js`, al final:
 
 ```js
-const total = await db.select({ s: sql`COALESCE(SUM(${gastos.monto}),0)` })
-  .from(gastos).where(/* mismo mes y categoria */)
-const [pcat] = await db.select().from(presupuestosCategoria)
-  .where(and(
-    eq(presupuestosCategoria.usuarioId, usuarioId),
-    eq(presupuestosCategoria.categoriaId, gasto.categoriaId),
-  )).limit(1)
+const total = await db
+  .select({ s: sql`COALESCE(SUM(${gastos.monto}),0)` })
+  .from(gastos)
+  .where(/* mismo mes y categoria */)
+const [pcat] = await db
+  .select()
+  .from(presupuestosCategoria)
+  .where(
+    and(
+      eq(presupuestosCategoria.usuarioId, usuarioId),
+      eq(presupuestosCategoria.categoriaId, gasto.categoriaId),
+    ),
+  )
+  .limit(1)
 if (pcat && (parseFloat(total[0].s) / parseFloat(pcat.montoMensual)) * 100 >= pcat.alertaUmbral) {
   await enviarNotificacionPush(usuarioId, {
     titulo: `Alerta de presupuesto`,
@@ -391,27 +425,39 @@ for (const ev of eventosDelMes.value) {
 ### 5.1 Schema
 
 ```js
-export const etiquetas = pgTable('etiquetas', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  usuarioId: uuid('usuario_id').notNull().references(() => usuarios.id, { onDelete: 'cascade' }),
-  nombre: varchar('nombre', { length: 40 }).notNull(),
-  color: varchar('color', { length: 16 }).notNull().default('#3b82f6'),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  unicaPorUsuario: uniqueIndex('etq_usuario_nombre_uq').on(t.usuarioId, t.nombre),
-}))
+export const etiquetas = pgTable(
+  'etiquetas',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    usuarioId: uuid('usuario_id')
+      .notNull()
+      .references(() => usuarios.id, { onDelete: 'cascade' }),
+    nombre: varchar('nombre', { length: 40 }).notNull(),
+    color: varchar('color', { length: 16 }).notNull().default('#3b82f6'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    unicaPorUsuario: uniqueIndex('etq_usuario_nombre_uq').on(t.usuarioId, t.nombre),
+  }),
+)
 
 // Tabla polimórfica: una asignación puede apuntar a gasto, planificado o futuro.
-export const etiquetasAsign = pgTable('etiquetas_asign', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  etiquetaId: uuid('etiqueta_id').notNull().references(() => etiquetas.id, { onDelete: 'cascade' }),
-  recursoTipo: varchar('recurso_tipo', { length: 24 }).notNull(), // 'gasto' | 'planificado' | 'futuro'
-  recursoId: uuid('recurso_id').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-}, (t) => ({
-  porRecurso: index('etq_asign_recurso_idx').on(t.recursoTipo, t.recursoId),
-  unica: uniqueIndex('etq_asign_uq').on(t.etiquetaId, t.recursoTipo, t.recursoId),
-}))
+export const etiquetasAsign = pgTable(
+  'etiquetas_asign',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    etiquetaId: uuid('etiqueta_id')
+      .notNull()
+      .references(() => etiquetas.id, { onDelete: 'cascade' }),
+    recursoTipo: varchar('recurso_tipo', { length: 24 }).notNull(), // 'gasto' | 'planificado' | 'futuro'
+    recursoId: uuid('recurso_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    porRecurso: index('etq_asign_recurso_idx').on(t.recursoTipo, t.recursoId),
+    unica: uniqueIndex('etq_asign_uq').on(t.etiquetaId, t.recursoTipo, t.recursoId),
+  }),
+)
 ```
 
 ### 5.2 Endpoints
@@ -440,7 +486,8 @@ Justo después del nombre del concepto en `components/registro/GastoItem.vue`:
       :key="e.id"
       class="px-1.5 py-0.5 rounded-full text-[9px] font-semibold text-white"
       :style="{ backgroundColor: e.color }"
-    >#{{ e.nombre }}</span>
+      >#{{ e.nombre }}</span
+    >
   </div>
 </template>
 
@@ -461,13 +508,13 @@ const etiquetaFiltro = ref(null) // id de etiqueta o null
 
 function aplicaEtiqueta(g) {
   if (!etiquetaFiltro.value) return true
-  return etiquetasDe('gasto', g.id).some(e => e.id === etiquetaFiltro.value)
+  return etiquetasDe('gasto', g.id).some((e) => e.id === etiquetaFiltro.value)
 }
 
 const gastosFiltrados = computed(() =>
   gastosPorDia.value
-    .map(d => ({ ...d, gastos: d.gastos.filter(aplicaEtiqueta) }))
-    .filter(d => d.gastos.length > 0),
+    .map((d) => ({ ...d, gastos: d.gastos.filter(aplicaEtiqueta) }))
+    .filter((d) => d.gastos.length > 0),
 )
 ```
 
@@ -493,9 +540,11 @@ columna "Etiquetas":
 
 ```js
 const { etiquetasDe } = useEtiquetas()
-const filas = gastos.map(g => ({
+const filas = gastos.map((g) => ({
   ...filaActual(g),
-  etiquetas: etiquetasDe('gasto', g.id).map(e => `#${e.nombre}`).join(' '),
+  etiquetas: etiquetasDe('gasto', g.id)
+    .map((e) => `#${e.nombre}`)
+    .join(' '),
 }))
 ```
 
@@ -503,24 +552,24 @@ const filas = gastos.map(g => ({
 
 ## Tabla maestra: qué módulos toca cada integración
 
-| Integración | Toca |
-|-------------|------|
+| Integración                              | Toca                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------ |
 | Suscripciones → sugerencias planificador | `composables/usePlanificador.js`, `components/planificador/ListaGastosPlaneados.vue` |
-| Suscripciones → suma dashboard | `pages/index.vue` |
-| Suscripciones → notificación push | `plugins/prefetch.client.js`, `composables/useNotificacionLocal.js` |
-| Metas → tracking desde ahorros | `composables/useAhorros.js` |
-| Metas → tracking desde deudas | `composables/useDeudas.js` |
-| Metas → tope gasto en /registro | `pages/registro.vue`, `components/registro/FormGastoManual.vue` |
-| Metas → card en dashboard | `pages/index.vue` |
-| Presupuestos → semáforo en /registro | `components/registro/FormGastoManual.vue` |
-| Presupuestos → badge BottomNav | `components/layout/BottomNav.vue` |
-| Presupuestos → push al cruzar umbral | `server/api/gastos/index.post.js` |
-| Calendario → reemplaza CalendarioMensual | `pages/planificador.vue`, `components/planificador/CalendarioMensual.vue` |
-| Calendario → quick-add | `components/calendario/CalendarioGlobal.vue` |
-| Calendario → sync Google Calendar | `composables/useGoogleCalendar.js` |
-| Etiquetas → chips en GastoItem | `components/registro/GastoItem.vue` |
-| Etiquetas → filtro en /registro | `composables/useRegistroFilters.js`, `pages/registro.vue` |
-| Etiquetas → exportes | `composables/useExportExcel.js`, `composables/useExportCsv.js` |
+| Suscripciones → suma dashboard           | `pages/index.vue`                                                                    |
+| Suscripciones → notificación push        | `plugins/prefetch.client.js`, `composables/useNotificacionLocal.js`                  |
+| Metas → tracking desde ahorros           | `composables/useAhorros.js`                                                          |
+| Metas → tracking desde deudas            | `composables/useDeudas.js`                                                           |
+| Metas → tope gasto en /registro          | `pages/registro.vue`, `components/registro/FormGastoManual.vue`                      |
+| Metas → card en dashboard                | `pages/index.vue`                                                                    |
+| Presupuestos → semáforo en /registro     | `components/registro/FormGastoManual.vue`                                            |
+| Presupuestos → badge BottomNav           | `components/layout/BottomNav.vue`                                                    |
+| Presupuestos → push al cruzar umbral     | `server/api/gastos/index.post.js`                                                    |
+| Calendario → reemplaza CalendarioMensual | `pages/planificador.vue`, `components/planificador/CalendarioMensual.vue`            |
+| Calendario → quick-add                   | `components/calendario/CalendarioGlobal.vue`                                         |
+| Calendario → sync Google Calendar        | `composables/useGoogleCalendar.js`                                                   |
+| Etiquetas → chips en GastoItem           | `components/registro/GastoItem.vue`                                                  |
+| Etiquetas → filtro en /registro          | `composables/useRegistroFilters.js`, `pages/registro.vue`                            |
+| Etiquetas → exportes                     | `composables/useExportExcel.js`, `composables/useExportCsv.js`                       |
 
 ---
 

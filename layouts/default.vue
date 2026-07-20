@@ -1,5 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200" :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'">
+  <div
+    class="min-h-screen flex flex-col bg-theme-bg transition-[padding] duration-200"
+    :class="collapsed ? 'lg:pl-16' : 'lg:pl-64'"
+  >
     <a
       href="#contenido-principal"
       class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-theme-accent focus:text-white focus:shadow-lg"
@@ -72,7 +75,9 @@ onMounted(() => {
   // Tour de onboarding: baja prioridad. Antes setTimeout(600) duro; ahora
   // esperamos idle real para no competir con TTI ni con los fetches del
   // dashboard.
-  const tarea = () => { if (debeMostrarTour()) iniciarTour() }
+  const tarea = () => {
+    if (debeMostrarTour()) iniciarTour()
+  }
   if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
     window.requestIdleCallback(tarea, { timeout: 2500 })
   } else {

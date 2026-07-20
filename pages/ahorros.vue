@@ -2,9 +2,25 @@
   <div>
     <Transition name="ptr">
       <div v-if="isRefreshing" class="flex justify-center py-2">
-        <svg class="h-5 w-5 animate-spin text-theme-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          class="h-5 w-5 animate-spin text-theme-accent"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
       </div>
     </Transition>
@@ -47,11 +63,7 @@
               @editar="editarAhorro"
               @eliminar="confirmarEliminar"
             />
-            <AhorrosTabSeisMeses
-              v-else
-              @editar="editarAhorro"
-              @eliminar="confirmarEliminar"
-            />
+            <AhorrosTabSeisMeses v-else @editar="editarAhorro" @eliminar="confirmarEliminar" />
           </div>
         </Transition>
       </div>
@@ -75,10 +87,7 @@
       @gestionar-medios="showFormMedio = true"
     />
 
-    <AhorrosFormMedioAhorro
-      v-if="showFormMedio"
-      @close="showFormMedio = false"
-    />
+    <AhorrosFormMedioAhorro v-if="showFormMedio" @close="showFormMedio = false" />
 
     <AhorrosFormMetaAhorro
       v-if="showFormMeta"
@@ -100,20 +109,33 @@
 definePageMeta({ layout: 'planificador' })
 
 const {
-  ahorrosList, medios,
-  fetchAhorros, fetchMedios, deleteAhorro,
-  mesActual, anioActual, esHoy,
-  mesSiguiente, mesAnterior,
-  mesSeleccionadoGrafico, fetchAhorrosMes,
+  ahorrosList,
+  medios,
+  fetchAhorros,
+  fetchMedios,
+  deleteAhorro,
+  mesActual,
+  anioActual,
+  esHoy,
+  mesSiguiente,
+  mesAnterior,
+  mesSeleccionadoGrafico,
+  fetchAhorrosMes,
 } = useAhorros()
 
 const esMesActual = computed(() => esHoy.value)
 
 const {
-  busquedaAhorro, medioFiltro, rangoRapido, rangosRapidos,
+  busquedaAhorro,
+  medioFiltro,
+  rangoRapido,
+  rangosRapidos,
   ordenarPor,
-  porMedioFiltrado, totalFiltrado,
-  tieneFiltrosActivos, conteoFiltrosActivos, limpiarFiltros,
+  porMedioFiltrado,
+  totalFiltrado,
+  tieneFiltrosActivos,
+  conteoFiltrosActivos,
+  limpiarFiltros,
 } = useAhorrosFilters({ ahorrosList, esMesActual })
 
 const { success, error: toastError } = useToast()
@@ -156,9 +178,11 @@ async function ejecutarEliminar() {
   if (!ahorroParaEliminar.value) return
   try {
     await deleteAhorro(ahorroParaEliminar.value.id)
-    if (mesSeleccionadoGrafico.value &&
-        (mesSeleccionadoGrafico.value.mes !== mesActual.value ||
-         mesSeleccionadoGrafico.value.anio !== anioActual.value)) {
+    if (
+      mesSeleccionadoGrafico.value &&
+      (mesSeleccionadoGrafico.value.mes !== mesActual.value ||
+        mesSeleccionadoGrafico.value.anio !== anioActual.value)
+    ) {
       await fetchAhorrosMes(mesSeleccionadoGrafico.value.mes, mesSeleccionadoGrafico.value.anio)
     }
     success('Ahorro eliminado')
@@ -199,10 +223,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.page-enter-active, .page-leave-active {
+.page-enter-active,
+.page-leave-active {
   transition: opacity 0.15s ease;
 }
-.page-enter-from, .page-leave-to {
+.page-enter-from,
+.page-leave-to {
   opacity: 0;
 }
 </style>

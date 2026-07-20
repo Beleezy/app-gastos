@@ -1,5 +1,12 @@
 import { z } from 'zod'
-import { fechaIso, horaHhmm, monto, conceptoSchema, notasSchema, metodoRegistroSchema } from './common.js'
+import {
+  fechaIso,
+  horaHhmm,
+  monto,
+  conceptoSchema,
+  notasSchema,
+  metodoRegistroSchema,
+} from './common.js'
 
 const gastoBaseSchema = z.object({
   concepto: conceptoSchema,
@@ -27,7 +34,10 @@ export const gastosBulkCreateSchema = z.object({
 })
 
 export const gastosBulkIdsSchema = z.object({
-  ids: z.array(z.union([z.string(), z.number()])).min(1).max(500),
+  ids: z
+    .array(z.union([z.string(), z.number()]))
+    .min(1)
+    .max(500),
 })
 
 // Body de /api/voz/parse y /api/voz/parse-stream.
@@ -41,5 +51,8 @@ export const vozParseBodySchema = z.object({
 // Body de /api/voz/parse-image. Aceptamos dataURI (data:image/...;base64,...)
 // o base64 crudo. Límite de longitud equivale a ~6 MB de imagen binaria.
 export const vozParseImageBodySchema = z.object({
-  image: z.string().min(1, 'Imagen obligatoria').max(8 * 1024 * 1024, 'Imagen demasiado grande'),
+  image: z
+    .string()
+    .min(1, 'Imagen obligatoria')
+    .max(8 * 1024 * 1024, 'Imagen demasiado grande'),
 })

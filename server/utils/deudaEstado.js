@@ -43,5 +43,7 @@ export function deudasParaRecordar(deudas, hoy = new Date()) {
   return deudas
     .map((d) => ({ ...d, _clasificacion: clasificarDeuda(d, hoy) }))
     .filter((d) => ['vencida', 'urgente', 'pronto'].includes(d._clasificacion.urgencia))
-    .sort((a, b) => (a._clasificacion.diasRestantes ?? 9999) - (b._clasificacion.diasRestantes ?? 9999))
+    .sort(
+      (a, b) => (a._clasificacion.diasRestantes ?? 9999) - (b._clasificacion.diasRestantes ?? 9999),
+    )
 }

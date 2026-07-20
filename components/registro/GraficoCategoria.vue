@@ -6,7 +6,11 @@
       <div class="flex items-center gap-1.5">
         <button
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-          :class="mesSeleccionado === 'actual' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'"
+          :class="
+            mesSeleccionado === 'actual'
+              ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
+              : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'
+          "
           @click="seleccionarMesGrafico('actual')"
         >
           Actual
@@ -15,19 +19,27 @@
           v-for="m in mesesRecientesGrafico"
           :key="m.key"
           class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
-          :class="m.key === mesSeleccionado ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'"
+          :class="
+            m.key === mesSeleccionado
+              ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
+              : 'bg-theme-card text-theme-text-sec border-theme-border hover:text-theme-text-sec'
+          "
           @click="seleccionarMesGrafico(m.key)"
         >
           {{ m.label }}
         </button>
         <select
           class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-theme-card text-theme-text-muted border-theme-border outline-none cursor-pointer appearance-none"
-          :class="mesGraficoEsAntiguo ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : ''"
+          :class="
+            mesGraficoEsAntiguo ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : ''
+          "
           :value="mesGraficoEsAntiguo ? mesSeleccionado : ''"
           @change="onSelectMesGraficoAntiguo($event)"
         >
           <option value="" disabled>Mes</option>
-          <option v-for="m in mesesAntiguosGrafico" :key="m.key" :value="m.key">{{ m.label }}</option>
+          <option v-for="m in mesesAntiguosGrafico" :key="m.key" :value="m.key">
+            {{ m.label }}
+          </option>
         </select>
       </div>
     </div>
@@ -35,7 +47,11 @@
     <!-- Loading -->
     <div v-if="isLoadingMes" class="flex flex-col items-center py-8">
       <div class="w-44 h-44 rounded-full bg-theme-border-md animate-pulse mx-auto mb-5"></div>
-      <div v-for="i in 3" :key="i" class="w-full h-12 bg-theme-border-md rounded-xl animate-pulse mb-2"></div>
+      <div
+        v-for="i in 3"
+        :key="i"
+        class="w-full h-12 bg-theme-border-md rounded-xl animate-pulse mb-2"
+      ></div>
     </div>
 
     <div v-else-if="datosEfectivos.length === 0" class="flex flex-col items-center py-8">
@@ -59,7 +75,9 @@
             <circle
               v-for="(seg, i) in segmentos"
               :key="i"
-              cx="50" cy="50" r="38"
+              cx="50"
+              cy="50"
+              r="38"
               fill="none"
               :stroke="seg.color"
               :stroke-width="seleccionada && seleccionada === seg.nombre ? 14 : 12"
@@ -75,16 +93,30 @@
             />
           </svg>
           <!-- Center text -->
-          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-5 text-center">
+          <div
+            class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-5 text-center"
+          >
             <template v-if="seleccionada">
-              <p class="text-xs text-theme-text-sec truncate max-w-full leading-tight">{{ seleccionada }}</p>
-              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(totalSeleccionada) }}</p>
-              <p class="text-[0.6875rem] text-theme-text-sec">{{ porcentajeSeleccionada.toFixed(1) }}%</p>
+              <p class="text-xs text-theme-text-sec truncate max-w-full leading-tight">
+                {{ seleccionada }}
+              </p>
+              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">
+                {{ currencySymbol }}&nbsp;{{ formatMonto(totalSeleccionada) }}
+              </p>
+              <p class="text-[0.6875rem] text-theme-text-sec">
+                {{ porcentajeSeleccionada.toFixed(1) }}%
+              </p>
             </template>
             <template v-else>
               <p class="text-xs text-theme-text-sec leading-tight">Gastado</p>
-              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">{{ currencySymbol }}&nbsp;{{ formatMonto(totalGeneral) }}</p>
-              <p v-if="presupuesto > 0" class="text-[0.6875rem] leading-tight" :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'">
+              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">
+                {{ currencySymbol }}&nbsp;{{ formatMonto(totalGeneral) }}
+              </p>
+              <p
+                v-if="presupuesto > 0"
+                class="text-[0.6875rem] leading-tight"
+                :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'"
+              >
                 de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
               </p>
             </template>
@@ -122,14 +154,22 @@
                   :style="{ backgroundColor: cat.color }"
                 ></div>
                 <span class="text-sm text-theme-text font-medium">{{ cat.nombre }}</span>
-                <span class="text-xs text-theme-text-muted">{{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}</span>
+                <span class="text-xs text-theme-text-muted"
+                  >{{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}</span
+                >
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}</span>
+                <span class="text-sm font-semibold text-theme-text"
+                  >{{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}</span
+                >
                 <svg
-                  xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200"
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200"
                   :class="{ 'rotate-180': expandida === cat.nombre }"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
                 >
                   <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -142,7 +182,9 @@
                 :style="{ width: cat.porcentaje + '%', backgroundColor: cat.color }"
               ></div>
             </div>
-            <p class="text-[0.6875rem] text-theme-text-muted mt-1 text-right">{{ cat.porcentaje.toFixed(1) }}%</p>
+            <p class="text-[0.6875rem] text-theme-text-muted mt-1 text-right">
+              {{ cat.porcentaje.toFixed(1) }}%
+            </p>
           </button>
 
           <!-- Expanded: expense detail list -->
@@ -156,14 +198,22 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-sm text-theme-text-sec truncate">{{ gasto.concepto }}</p>
                   <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-[0.6875rem] text-theme-text-muted">{{ formatFechaCorta(gasto.fecha) }}</span>
-                    <span v-if="gasto.hora" class="text-[0.6875rem] text-theme-text-muted">{{ formatHora(gasto.hora) }}</span>
-                    <span v-if="getMetodoRegistroBadgeLabel(gasto)"
+                    <span class="text-[0.6875rem] text-theme-text-muted">{{
+                      formatFechaCorta(gasto.fecha)
+                    }}</span>
+                    <span v-if="gasto.hora" class="text-[0.6875rem] text-theme-text-muted">{{
+                      formatHora(gasto.hora)
+                    }}</span>
+                    <span
+                      v-if="getMetodoRegistroBadgeLabel(gasto)"
                       class="text-[0.625rem] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
-                    >{{ getMetodoRegistroBadgeLabel(gasto) }}</span>
+                      >{{ getMetodoRegistroBadgeLabel(gasto) }}</span
+                    >
                   </div>
                 </div>
-                <span class="text-sm font-medium text-theme-text shrink-0 ml-3">{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}</span>
+                <span class="text-sm font-medium text-theme-text shrink-0 ml-3"
+                  >{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}</span
+                >
               </div>
             </div>
           </Transition>
@@ -175,6 +225,9 @@
 
 <script setup>
 import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
+
+// ─── Filtro de mes ──────────────────────────────────────────
+import { MESES } from '~/utils/constants'
 
 const props = defineProps({
   datos: { type: Array, default: () => [] },
@@ -190,9 +243,6 @@ const emit = defineEmits(['update:categoriaSeleccionada'])
 
 const { currencySymbol, formatMonto } = useCurrency()
 
-// ─── Filtro de mes ──────────────────────────────────────────
-import { MESES } from '~/utils/constants'
-
 const mesSeleccionado = ref('actual') // 'actual' o 'YYYY-M'
 const isLoadingMes = ref(false)
 const gastosOtroMes = ref([])
@@ -203,7 +253,10 @@ const mesesDisponiblesGrafico = computed(() => {
   let a = props.anioActual
   for (let i = 0; i < 24; i++) {
     m--
-    if (m === 0) { m = 12; a-- }
+    if (m === 0) {
+      m = 12
+      a--
+    }
     lista.push({
       key: `${a}-${m}`,
       mes: m,
@@ -218,7 +271,7 @@ const mesesRecientesGrafico = computed(() => mesesDisponiblesGrafico.value.slice
 const mesesAntiguosGrafico = computed(() => mesesDisponiblesGrafico.value.slice(3))
 
 const mesGraficoEsAntiguo = computed(() =>
-  mesesAntiguosGrafico.value.some(m => m.key === mesSeleccionado.value)
+  mesesAntiguosGrafico.value.some((m) => m.key === mesSeleccionado.value),
 )
 
 async function seleccionarMesGrafico(key) {
@@ -227,13 +280,19 @@ async function seleccionarMesGrafico(key) {
     gastosOtroMes.value = []
     return
   }
-  const obj = mesesDisponiblesGrafico.value.find(m => m.key === key)
+  const obj = mesesDisponiblesGrafico.value.find((m) => m.key === key)
   if (!obj) return
   isLoadingMes.value = true
   try {
-    gastosOtroMes.value = await $fetch('/api/gastos', { query: { mes: obj.mes, anio: obj.anio }, timeout: 15000 })
-  } catch { gastosOtroMes.value = [] }
-  finally { isLoadingMes.value = false }
+    gastosOtroMes.value = await $fetch('/api/gastos', {
+      query: { mes: obj.mes, anio: obj.anio },
+      timeout: 15000,
+    })
+  } catch {
+    gastosOtroMes.value = []
+  } finally {
+    isLoadingMes.value = false
+  }
 }
 
 function onSelectMesGraficoAntiguo(event) {
@@ -243,7 +302,7 @@ function onSelectMesGraficoAntiguo(event) {
 
 // Gastos efectivos según mes seleccionado
 const gastosEfectivos = computed(() =>
-  mesSeleccionado.value === 'actual' ? props.gastos : gastosOtroMes.value
+  mesSeleccionado.value === 'actual' ? props.gastos : gastosOtroMes.value,
 )
 
 // Datos de categoría recalculados
@@ -264,7 +323,7 @@ const datosEfectivos = computed(() => {
 
 const mesSeleccionadoLabel = computed(() => {
   if (mesSeleccionado.value === 'actual') return `${MESES[props.mesActual - 1]} ${props.anioActual}`
-  const obj = mesesDisponiblesGrafico.value.find(m => m.key === mesSeleccionado.value)
+  const obj = mesesDisponiblesGrafico.value.find((m) => m.key === mesSeleccionado.value)
   return obj ? `${MESES[obj.mes - 1]} ${obj.anio}` : ''
 })
 
@@ -277,33 +336,37 @@ const totalGeneral = computed(() => datosEfectivos.value.reduce((sum, c) => sum 
 
 const totalSeleccionada = computed(() => {
   if (!seleccionada.value) return totalGeneral.value
-  const cat = datosEfectivos.value.find(c => c.nombre === seleccionada.value)
+  const cat = datosEfectivos.value.find((c) => c.nombre === seleccionada.value)
   return cat ? cat.total : 0
 })
 
 const porcentajeSeleccionada = computed(() => {
   if (!seleccionada.value) return 100
-  const cat = datosEfectivos.value.find(c => c.nombre === seleccionada.value)
+  const cat = datosEfectivos.value.find((c) => c.nombre === seleccionada.value)
   return cat ? cat.porcentaje : 0
 })
 
 // Sync from parent: when categoriaSeleccionadaId changes, update local seleccionada
-watch(() => props.categoriaSeleccionadaId, (newId) => {
-  if (newId === null) {
-    seleccionada.value = null
-  } else {
-    const cat = props.categorias.find(c => c.id === newId)
-    if (cat) {
-      seleccionada.value = cat.nombre
+watch(
+  () => props.categoriaSeleccionadaId,
+  (newId) => {
+    if (newId === null) {
+      seleccionada.value = null
+    } else {
+      const cat = props.categorias.find((c) => c.id === newId)
+      if (cat) {
+        seleccionada.value = cat.nombre
+      }
     }
-  }
-}, { immediate: true })
+  },
+  { immediate: true },
+)
 
 function emitCategoriaChange(nombre) {
   if (!nombre) {
     emit('update:categoriaSeleccionada', null)
   } else {
-    const cat = props.categorias.find(c => c.nombre === nombre)
+    const cat = props.categorias.find((c) => c.nombre === nombre)
     emit('update:categoriaSeleccionada', cat?.id || null)
   }
 }
@@ -325,7 +388,7 @@ function toggleExpansion(nombre) {
 
 function gastosDeCategoria(categoriaNombre) {
   return gastosEfectivos.value
-    .filter(g => (g.categoriaNombre || 'Otros') === categoriaNombre)
+    .filter((g) => (g.categoriaNombre || 'Otros') === categoriaNombre)
     .sort((a, b) => {
       const cmpFecha = b.fecha.localeCompare(a.fecha)
       if (cmpFecha !== 0) return cmpFecha

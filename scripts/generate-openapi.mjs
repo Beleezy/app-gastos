@@ -98,7 +98,10 @@ function toOpenApi(schema) {
     const required = []
     for (const [key, value] of Object.entries(shape)) {
       properties[key] = toOpenApi(value)
-      const isOptional = value instanceof z.ZodOptional || value instanceof z.ZodNullable || value instanceof z.ZodDefault
+      const isOptional =
+        value instanceof z.ZodOptional ||
+        value instanceof z.ZodNullable ||
+        value instanceof z.ZodDefault
       if (!isOptional) required.push(key)
     }
     const out = { type: 'object', properties }
@@ -145,58 +148,115 @@ const standardErrors = {
 
 const paths = {
   '/api/health': {
-    get: { summary: 'Health check (sin auth)', responses: { ...ok200, 503: { description: 'DB inalcanzable' } } },
+    get: {
+      summary: 'Health check (sin auth)',
+      responses: { ...ok200, 503: { description: 'DB inalcanzable' } },
+    },
   },
   '/api/gastos': {
-    post: { summary: 'Crear gasto', requestBody: jsonRequest('GastoCreate'), responses: { ...created201, ...standardErrors } },
+    post: {
+      summary: 'Crear gasto',
+      requestBody: jsonRequest('GastoCreate'),
+      responses: { ...created201, ...standardErrors },
+    },
   },
   '/api/gastos/bulk': {
-    post: { summary: 'Crear gastos en lote', requestBody: jsonRequest('GastosBulkCreate'), responses: { ...created201, ...standardErrors } },
+    post: {
+      summary: 'Crear gastos en lote',
+      requestBody: jsonRequest('GastosBulkCreate'),
+      responses: { ...created201, ...standardErrors },
+    },
     put: { summary: 'Actualizar gastos en lote', responses: { ...ok200, ...standardErrors } },
-    delete: { summary: 'Eliminar gastos en lote', requestBody: jsonRequest('GastosBulkIds'), responses: { ...ok200, ...standardErrors } },
+    delete: {
+      summary: 'Eliminar gastos en lote',
+      requestBody: jsonRequest('GastosBulkIds'),
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/gastos/detectar-duplicados': {
-    post: { summary: 'Detecta posibles duplicados antes de confirmar voz/foto', responses: { ...ok200, ...standardErrors } },
+    post: {
+      summary: 'Detecta posibles duplicados antes de confirmar voz/foto',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/deudas': {
-    post: { summary: 'Crear deuda', requestBody: jsonRequest('DeudaCreate'), responses: { ...created201, ...standardErrors } },
+    post: {
+      summary: 'Crear deuda',
+      requestBody: jsonRequest('DeudaCreate'),
+      responses: { ...created201, ...standardErrors },
+    },
   },
   '/api/deudas/balance': {
     get: { summary: 'Balance global del usuario', responses: { ...ok200, ...standardErrors } },
   },
   '/api/deudas/{id}/pagos': {
-    post: { summary: 'Registrar pago contra una deuda', requestBody: jsonRequest('PagoCreate'), responses: { ...created201, ...standardErrors } },
+    post: {
+      summary: 'Registrar pago contra una deuda',
+      requestBody: jsonRequest('PagoCreate'),
+      responses: { ...created201, ...standardErrors },
+    },
   },
   '/api/deudas/personas/merge-sugerencias': {
-    get: { summary: 'Sugiere personas con nombres similares para merge', responses: { ...ok200, ...standardErrors } },
+    get: {
+      summary: 'Sugiere personas con nombres similares para merge',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/deudas/vinculos/solicitar': {
-    post: { summary: 'Solicitar vínculo con otro usuario', requestBody: jsonRequest('SolicitudVinculo'), responses: { ...created201, ...standardErrors } },
+    post: {
+      summary: 'Solicitar vínculo con otro usuario',
+      requestBody: jsonRequest('SolicitudVinculo'),
+      responses: { ...created201, ...standardErrors },
+    },
   },
   '/api/voz/parse': {
-    post: { summary: 'Parse de gastos por voz vía LLM', responses: { ...ok200, ...standardErrors } },
+    post: {
+      summary: 'Parse de gastos por voz vía LLM',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/voz/parse-image': {
-    post: { summary: 'Parse de gastos por imagen (multimodal LLM)', responses: { ...ok200, ...standardErrors } },
+    post: {
+      summary: 'Parse de gastos por imagen (multimodal LLM)',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/usuarios/uso-llm': {
-    get: { summary: 'Consumo del LLM del mes en curso', responses: { ...ok200, ...standardErrors } },
+    get: {
+      summary: 'Consumo del LLM del mes en curso',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/deudas/personas/merge': {
-    post: { summary: 'Fusiona personas duplicadas en una sola', responses: { ...ok200, ...standardErrors } },
+    post: {
+      summary: 'Fusiona personas duplicadas en una sola',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/planificador/plantillas': {
-    get: { summary: 'Lista plantillas de mes del usuario', responses: { ...ok200, ...standardErrors } },
-    post: { summary: 'Crea plantilla manual o desde un plan existente', responses: { ...created201, ...standardErrors } },
+    get: {
+      summary: 'Lista plantillas de mes del usuario',
+      responses: { ...ok200, ...standardErrors },
+    },
+    post: {
+      summary: 'Crea plantilla manual o desde un plan existente',
+      responses: { ...created201, ...standardErrors },
+    },
   },
   '/api/planificador/plantillas/{id}': {
     delete: { summary: 'Elimina una plantilla', responses: { ...ok200, ...standardErrors } },
   },
   '/api/planificador/plantillas/{id}/aplicar': {
-    post: { summary: 'Aplica una plantilla a un plan mensual existente', responses: { ...ok200, ...standardErrors } },
+    post: {
+      summary: 'Aplica una plantilla a un plan mensual existente',
+      responses: { ...ok200, ...standardErrors },
+    },
   },
   '/api/cron/expirar-solicitudes': {
-    post: { summary: 'Cron: marca solicitudes expiradas (header X-Cron-Secret)', responses: { ...ok200, 401: { description: 'Sin X-Cron-Secret válido' } } },
+    post: {
+      summary: 'Cron: marca solicitudes expiradas (header X-Cron-Secret)',
+      responses: { ...ok200, 401: { description: 'Sin X-Cron-Secret válido' } },
+    },
   },
 }
 
@@ -218,4 +278,6 @@ const outDir = resolve(__dirname, '..', 'docs')
 const outFile = resolve(outDir, 'openapi.json')
 await mkdir(outDir, { recursive: true })
 await writeFile(outFile, JSON.stringify(openapi, null, 2) + '\n')
-console.log(`Generado ${outFile} con ${Object.keys(components.schemas).length} schemas y ${Object.keys(paths).length} endpoints.`)
+console.log(
+  `Generado ${outFile} con ${Object.keys(components.schemas).length} schemas y ${Object.keys(paths).length} endpoints.`,
+)

@@ -2,8 +2,19 @@
   <div class="px-4 py-3">
     <div class="mb-2 flex items-center gap-2">
       <div class="relative flex-1">
-        <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-theme-text-sec"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
         </svg>
         <input
           v-model="busqueda"
@@ -17,29 +28,48 @@
         :title="`Ordenar por ${ordenLabel}`"
         @click="ciclarOrden"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-3.5 h-3.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+          />
         </svg>
         {{ ordenLabel }}
       </button>
     </div>
 
     <!-- Filtros por prioridad y estado (pr-4: el último chip no se corta al borde) -->
-    <div class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r">
+    <div
+      class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r"
+    >
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
         :class="[
-          filtroActual === f.value ? (f.accent || 'bg-violet-500 text-white') : 'bg-theme-card text-theme-text-muted',
-          f.count === 0 && filtroActual !== f.value ? 'opacity-50' : ''
+          filtroActual === f.value
+            ? f.accent || 'bg-violet-500 text-white'
+            : 'bg-theme-card text-theme-text-muted',
+          f.count === 0 && filtroActual !== f.value ? 'opacity-50' : '',
         ]"
         @click="filtroActual = f.value"
       >
         {{ f.label }}
         <span
           class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[0.6875rem] font-bold"
-          :class="filtroActual === f.value ? 'bg-black/15 text-inherit' : 'bg-theme-border-md text-theme-text'"
+          :class="
+            filtroActual === f.value
+              ? 'bg-black/15 text-inherit'
+              : 'bg-theme-border-md text-theme-text'
+          "
         >
           {{ f.count }}
         </span>
@@ -47,21 +77,47 @@
     </div>
 
     <div v-if="isLoading && gastosFuturos.length === 0" class="space-y-3">
-      <div v-for="i in 2" :key="i" class="rounded-2xl border border-theme-border bg-theme-card p-4 animate-pulse">
+      <div
+        v-for="i in 2"
+        :key="i"
+        class="rounded-2xl border border-theme-border bg-theme-card p-4 animate-pulse"
+      >
         <div class="h-4 w-2/3 rounded bg-theme-border-md"></div>
         <div class="mt-3 h-20 rounded-xl bg-theme-input"></div>
       </div>
     </div>
 
-    <div v-else-if="gastosFiltrados.length === 0" class="rounded-2xl border border-dashed border-theme-border bg-theme-card px-5 py-10 text-center">
-      <div class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-theme-input text-sky-300">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h10.5" />
+    <div
+      v-else-if="gastosFiltrados.length === 0"
+      class="rounded-2xl border border-dashed border-theme-border bg-theme-card px-5 py-10 text-center"
+    >
+      <div
+        class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-theme-input text-sky-300"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-7 w-7"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3.75 6.75h16.5m-16.5 5.25h16.5m-16.5 5.25h10.5"
+          />
         </svg>
       </div>
-      <p class="text-sm text-theme-text">{{ busqueda ? 'No hay coincidencias' : 'Crea tu primer gasto futuro' }}</p>
+      <p class="text-sm text-theme-text">
+        {{ busqueda ? 'No hay coincidencias' : 'Crea tu primer gasto futuro' }}
+      </p>
       <p class="mt-1 text-xs text-theme-text-sec">
-        {{ busqueda ? 'Prueba con otro termino o limpia el filtro.' : 'Ejemplos: PC nueva, outfit invierno, setup streaming.' }}
+        {{
+          busqueda
+            ? 'Prueba con otro termino o limpia el filtro.'
+            : 'Ejemplos: PC nueva, outfit invierno, setup streaming.'
+        }}
       </p>
     </div>
 
@@ -82,7 +138,9 @@
             </div>
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
-                <h3 class="text-sm font-semibold text-theme-text break-words">{{ proyecto.tipoGasto }}</h3>
+                <h3 class="text-sm font-semibold text-theme-text break-words">
+                  {{ proyecto.tipoGasto }}
+                </h3>
                 <span
                   v-if="prioridadBadge(proyecto.prioridad)"
                   class="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium"
@@ -94,13 +152,28 @@
                   {{ proyecto.categoriaNombre || 'Sin categoria' }}
                 </span>
               </div>
-              <p v-if="proyecto.descripcion" class="mt-0.5 truncate text-[0.6875rem] text-theme-text-muted">{{ proyecto.descripcion }}</p>
+              <p
+                v-if="proyecto.descripcion"
+                class="mt-0.5 truncate text-[0.6875rem] text-theme-text-muted"
+              >
+                {{ proyecto.descripcion }}
+              </p>
             </div>
             <!-- Decidido X/N en esquina superior derecha -->
             <div v-if="progresoProyecto(proyecto).total > 0" class="shrink-0 text-right">
-              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Decidido</p>
-              <p class="text-xs font-semibold whitespace-nowrap" :class="progresoProyecto(proyecto).porcentaje === 100 ? 'text-emerald-400' : 'text-sky-300'">
-                {{ progresoProyecto(proyecto).decididos }}/{{ progresoProyecto(proyecto).total }} · {{ progresoProyecto(proyecto).porcentaje }}%
+              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">
+                Decidido
+              </p>
+              <p
+                class="text-xs font-semibold whitespace-nowrap"
+                :class="
+                  progresoProyecto(proyecto).porcentaje === 100
+                    ? 'text-emerald-400'
+                    : 'text-sky-300'
+                "
+              >
+                {{ progresoProyecto(proyecto).decididos }}/{{ progresoProyecto(proyecto).total }} ·
+                {{ progresoProyecto(proyecto).porcentaje }}%
               </p>
               <span
                 v-if="progresoProyecto(proyecto).decididos === 0 && !estaExpandido(proyecto.id)"
@@ -118,25 +191,47 @@
           <div class="mt-3 flex items-stretch rounded-xl bg-theme-input">
             <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
               <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Mín</p>
-              <SharedMoney :value="proyecto.resumen.totalMinimo" compact entero class="mt-0.5 block text-xs font-semibold text-emerald-400" />
+              <SharedMoney
+                :value="proyecto.resumen.totalMinimo"
+                compact
+                entero
+                class="mt-0.5 block text-xs font-semibold text-emerald-400"
+              />
             </div>
             <div class="w-px bg-theme-border/60"></div>
             <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
               <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-              <SharedMoney :value="proyecto.resumen.totalPromedio" compact entero class="mt-0.5 block text-xs font-semibold text-sky-300" />
+              <SharedMoney
+                :value="proyecto.resumen.totalPromedio"
+                compact
+                entero
+                class="mt-0.5 block text-xs font-semibold text-sky-300"
+              />
             </div>
             <div class="w-px bg-theme-border/60"></div>
             <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
               <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Máx</p>
-              <SharedMoney :value="proyecto.resumen.totalMaximo" compact entero class="mt-0.5 block text-xs font-semibold text-amber-300" />
+              <SharedMoney
+                :value="proyecto.resumen.totalMaximo"
+                compact
+                entero
+                class="mt-0.5 block text-xs font-semibold text-amber-300"
+              />
             </div>
           </div>
 
           <!-- Barra slim de progreso -->
-          <div v-if="progresoProyecto(proyecto).total > 0" class="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-theme-input">
+          <div
+            v-if="progresoProyecto(proyecto).total > 0"
+            class="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-theme-input"
+          >
             <div
               class="h-full rounded-full transition-all duration-500"
-              :class="progresoProyecto(proyecto).porcentaje === 100 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : 'bg-gradient-to-r from-sky-500 to-sky-400'"
+              :class="
+                progresoProyecto(proyecto).porcentaje === 100
+                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+                  : 'bg-gradient-to-r from-sky-500 to-sky-400'
+              "
               :style="{ width: progresoProyecto(proyecto).porcentaje + '%' }"
             ></div>
           </div>
@@ -147,10 +242,26 @@
               class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] text-theme-text-sec transition-colors hover:text-theme-text"
               @click="toggleExpandido(proyecto.id)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 transition-transform" :class="estaExpandido(proyecto.id) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25L12 15.75 4.5 8.25" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-3.5 w-3.5 transition-transform"
+                :class="estaExpandido(proyecto.id) ? 'rotate-180' : ''"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19.5 8.25L12 15.75 4.5 8.25"
+                />
               </svg>
-              {{ estaExpandido(proyecto.id) ? 'Ocultar detalles' : `Ver ${proyecto.resumen.totalDetalles} detalle${proyecto.resumen.totalDetalles !== 1 ? 's' : ''}` }}
+              {{
+                estaExpandido(proyecto.id)
+                  ? 'Ocultar detalles'
+                  : `Ver ${proyecto.resumen.totalDetalles} detalle${proyecto.resumen.totalDetalles !== 1 ? 's' : ''}`
+              }}
             </button>
             <div class="relative">
               <button
@@ -158,7 +269,12 @@
                 :title="'Más acciones'"
                 @click="toggleMenuProyecto(proyecto.id)"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <circle cx="4" cy="10" r="1.6" />
                   <circle cx="10" cy="10" r="1.6" />
                   <circle cx="16" cy="10" r="1.6" />
@@ -170,16 +286,42 @@
               >
                 <button
                   class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                  @click="emit('editar', proyecto); cerrarMenuProyecto()"
+                  @click="(emit('editar', proyecto), cerrarMenuProyecto())"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
+                    />
+                  </svg>
                   Editar
                 </button>
                 <button
                   class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                  @click="proyectoAEliminar = proyecto; cerrarMenuProyecto()"
+                  @click="((proyectoAEliminar = proyecto), cerrarMenuProyecto())"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                    />
+                  </svg>
                   Eliminar
                 </button>
               </div>
@@ -196,10 +338,18 @@
               class="space-y-2"
             >
               <!-- Cabecera detalle: modo edición -->
-              <div v-if="detalleEditando?.detalleId === detalle.id" class="rounded-xl bg-theme-input p-3 space-y-2">
+              <div
+                v-if="detalleEditando?.detalleId === detalle.id"
+                class="rounded-xl bg-theme-input p-3 space-y-2"
+              >
                 <div class="flex items-center justify-between gap-2">
                   <p class="text-xs font-medium text-theme-text">Editando detalle</p>
-                  <button class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionDetalle">Cancelar</button>
+                  <button
+                    class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors"
+                    @click="cancelarEdicionDetalle"
+                  >
+                    Cancelar
+                  </button>
                 </div>
                 <input
                   v-model="detalleEditando.nombre"
@@ -213,7 +363,11 @@
                     :key="opt.value"
                     type="button"
                     class="flex-1 rounded-lg border px-2 py-1.5 text-[0.6875rem] font-medium transition-all"
-                    :class="detalleEditando.prioridad === opt.value ? opt.activo : 'border-theme-border bg-theme-input text-theme-text-muted'"
+                    :class="
+                      detalleEditando.prioridad === opt.value
+                        ? opt.activo
+                        : 'border-theme-border bg-theme-input text-theme-text-muted'
+                    "
                     @click="detalleEditando.prioridad = opt.value"
                   >
                     {{ opt.label }}
@@ -243,15 +397,28 @@
                       class="h-2 w-2 shrink-0 rounded-full"
                       :class="puntoDetalleColor(detalle)"
                     ></span>
-                    <h4 class="min-w-0 flex-1 text-base font-semibold text-theme-text leading-tight break-words">{{ detalle.nombre }}</h4>
+                    <h4
+                      class="min-w-0 flex-1 text-base font-semibold text-theme-text leading-tight break-words"
+                    >
+                      {{ detalle.nombre }}
+                    </h4>
                   </div>
                   <!-- Descripción (notas): subtítulo full-width que envuelve líneas -->
-                  <p v-if="detalle.notas" class="mt-1 pl-4 text-[0.6875rem] text-theme-text-sec break-words leading-snug">{{ detalle.notas }}</p>
+                  <p
+                    v-if="detalle.notas"
+                    class="mt-1 pl-4 text-[0.6875rem] text-theme-text-sec break-words leading-snug"
+                  >
+                    {{ detalle.notas }}
+                  </p>
                   <!-- Metadata + precio en fila inferior -->
                   <div class="mt-1 flex items-center justify-between gap-3 pl-4">
                     <div class="min-w-0 flex-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span class="text-[0.6875rem] text-theme-text-muted">
-                        {{ detalle.estadoDecision ? 'Opcion elegida' : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}` }}
+                        {{
+                          detalle.estadoDecision
+                            ? 'Opcion elegida'
+                            : `${detalle.opciones.length} opcion${detalle.opciones.length !== 1 ? 'es' : ''}`
+                        }}
                       </span>
                       <span
                         v-if="prioridadBadge(detalle.prioridad)"
@@ -268,7 +435,12 @@
                         {{ decisionBadge(detalle).label }}
                       </span>
                     </div>
-                    <SharedMoney :value="detalle.resumen.promedioReferencia || 0" compact entero class="shrink-0 text-sm font-semibold text-sky-300 leading-tight" />
+                    <SharedMoney
+                      :value="detalle.resumen.promedioReferencia || 0"
+                      compact
+                      entero
+                      class="shrink-0 text-sm font-semibold text-sky-300 leading-tight"
+                    />
                   </div>
                 </div>
                 <div class="flex shrink-0 items-center">
@@ -278,7 +450,12 @@
                       title="Más acciones"
                       @click="toggleMenuDetalle(detalle.id)"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        class="h-4 w-4"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
                         <circle cx="4" cy="10" r="1.6" />
                         <circle cx="10" cy="10" r="1.6" />
                         <circle cx="16" cy="10" r="1.6" />
@@ -290,16 +467,42 @@
                     >
                       <button
                         class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                        @click="iniciarEdicionDetalle(detalle); cerrarMenuDetalle()"
+                        @click="(iniciarEdicionDetalle(detalle), cerrarMenuDetalle())"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-3.5 w-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
+                          />
+                        </svg>
                         Editar
                       </button>
                       <button
                         class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                        @click="eliminarDetalleInline(proyecto, detalle); cerrarMenuDetalle()"
+                        @click="(eliminarDetalleInline(proyecto, detalle), cerrarMenuDetalle())"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          class="h-3.5 w-3.5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          stroke-width="2"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                          />
+                        </svg>
                         Eliminar
                       </button>
                     </div>
@@ -309,7 +512,11 @@
 
               <!-- Hint educativo cuando hay opciones por decidir -->
               <p
-                v-if="!detalle.estadoDecision && detalle.opciones.length > 1 && !haySeleccionEnDetalle(detalle.id)"
+                v-if="
+                  !detalle.estadoDecision &&
+                  detalle.opciones.length > 1 &&
+                  !haySeleccionEnDetalle(detalle.id)
+                "
                 class="pl-4 text-[0.6875rem] text-theme-text-muted italic"
               >
                 💡 Toca una opción para comparar y decidir
@@ -321,19 +528,26 @@
                   v-for="(opcion, idx) in detalle.opciones"
                   :key="opcion.id"
                   class="rounded-xl border bg-theme-input transition-all"
-                  :class="estaSeleccionada(detalle.id, opcion.id)
-                    ? (esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                  :class="
+                    estaSeleccionada(detalle.id, opcion.id)
+                      ? esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
                         ? 'border-emerald-400/70 bg-emerald-500/10 shadow-sm'
-                        : 'border-sky-400/60 bg-sky-500/5 shadow-sm')
-                    : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                      ? 'border-emerald-500/30'
-                      : 'border-theme-border'"
+                        : 'border-sky-400/60 bg-sky-500/5 shadow-sm'
+                      : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                        ? 'border-emerald-500/30'
+                        : 'border-theme-border'
+                  "
                 >
                   <!-- Opción: modo edición -->
                   <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
                     <div class="flex items-center justify-between gap-2">
                       <p class="text-xs font-medium text-theme-text">Editando opción</p>
-                      <button class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors" @click="cancelarEdicionOpcion">Cancelar</button>
+                      <button
+                        class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors"
+                        @click="cancelarEdicionOpcion"
+                      >
+                        Cancelar
+                      </button>
                     </div>
                     <input
                       v-model="opcionEditando.nombre"
@@ -356,15 +570,38 @@
                     <div class="grid grid-cols-3 gap-2">
                       <div>
                         <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
-                        <input v-model="opcionEditando.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
+                        <input
+                          v-model="opcionEditando.precioMinimo"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
+                        />
                       </div>
                       <div>
-                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Prom</label>
-                        <input v-model="opcionEditando.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
+                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted"
+                          >Prom</label
+                        >
+                        <input
+                          v-model="opcionEditando.precioPromedio"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="Auto"
+                          class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
+                        />
                       </div>
                       <div>
                         <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
-                        <input v-model="opcionEditando.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
+                        <input
+                          v-model="opcionEditando.precioMaximo"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="0.00"
+                          class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
+                        />
                       </div>
                     </div>
                     <textarea
@@ -390,19 +627,25 @@
                       :role="!detalle.estadoDecision ? 'button' : undefined"
                       :tabindex="!detalle.estadoDecision ? 0 : undefined"
                       @click="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
-                      @keydown.enter.prevent="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
-                      @keydown.space.prevent="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
+                      @keydown.enter.prevent="
+                        !detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)
+                      "
+                      @keydown.space.prevent="
+                        !detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)
+                      "
                     >
                       <!-- Número índice -->
                       <div
                         class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[0.6875rem] font-semibold"
-                        :class="estaSeleccionada(detalle.id, opcion.id)
-                          ? (esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                        :class="
+                          estaSeleccionada(detalle.id, opcion.id)
+                            ? esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
                               ? 'bg-emerald-500/30 text-emerald-200'
-                              : 'bg-sky-500/25 text-sky-200')
-                          : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                            ? 'bg-emerald-500/15 text-emerald-300'
-                            : 'bg-theme-card text-theme-text-sec'"
+                              : 'bg-sky-500/25 text-sky-200'
+                            : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                              ? 'bg-emerald-500/15 text-emerald-300'
+                              : 'bg-theme-card text-theme-text-sec'
+                        "
                       >
                         {{ idx + 1 }}
                       </div>
@@ -410,16 +653,37 @@
                       <!-- Bloque texto principal -->
                       <div class="min-w-0 flex-1">
                         <div class="flex items-baseline justify-between gap-3">
-                          <p class="min-w-0 text-sm font-medium text-theme-text break-words">{{ opcion.nombre }}</p>
-                          <SharedMoney v-if="Number(opcion.precioPromedio) > 0" :value="opcion.precioPromedio" compact entero class="shrink-0 text-sm font-semibold text-sky-300" />
+                          <p class="min-w-0 text-sm font-medium text-theme-text break-words">
+                            {{ opcion.nombre }}
+                          </p>
+                          <SharedMoney
+                            v-if="Number(opcion.precioPromedio) > 0"
+                            :value="opcion.precioPromedio"
+                            compact
+                            entero
+                            class="shrink-0 text-sm font-semibold text-sky-300"
+                          />
                         </div>
-                        <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem]">
+                        <div
+                          class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem]"
+                        >
                           <!-- Con un solo precio se muestra solo ese (antes "S/ 480 — S/ 0") -->
-                          <span v-if="rangoPrecios(opcion)" class="text-theme-text-sec whitespace-nowrap">
-                            <SharedMoney :value="rangoPrecios(opcion).min" compact entero /><template v-if="rangoPrecios(opcion).max !== null"> — <SharedMoney :value="rangoPrecios(opcion).max" compact entero /></template>
+                          <span
+                            v-if="rangoPrecios(opcion)"
+                            class="text-theme-text-sec whitespace-nowrap"
+                          >
+                            <SharedMoney
+                              :value="rangoPrecios(opcion).min"
+                              compact
+                              entero
+                            /><template v-if="rangoPrecios(opcion).max !== null">
+                              — <SharedMoney :value="rangoPrecios(opcion).max" compact entero
+                            /></template>
                           </span>
                           <span
-                            v-if="esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1"
+                            v-if="
+                              esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
+                            "
                             class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-emerald-300"
                           >
                             Mejor precio
@@ -433,12 +697,25 @@
                             @click.stop
                           >
                             <span class="truncate">{{ hostDeUrl(opcion.referenciaUrl) }}</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-2.5 w-2.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5"
+                              />
                             </svg>
                           </a>
                         </div>
-                        <p v-if="opcion.notas" class="mt-1 text-[0.6875rem] text-theme-text-muted">{{ opcion.notas }}</p>
+                        <p v-if="opcion.notas" class="mt-1 text-[0.6875rem] text-theme-text-muted">
+                          {{ opcion.notas }}
+                        </p>
                       </div>
 
                       <!-- Imagen miniatura -->
@@ -454,7 +731,11 @@
 
                     <!-- Acciones reveladas al seleccionar (o automáticas si hay solo 1 opción) -->
                     <div
-                      v-if="(estaSeleccionada(detalle.id, opcion.id) || detalle.opciones.length === 1) && !detalle.estadoDecision"
+                      v-if="
+                        (estaSeleccionada(detalle.id, opcion.id) ||
+                          detalle.opciones.length === 1) &&
+                        !detalle.estadoDecision
+                      "
                       class="flex items-center gap-1.5 border-t border-theme-border/60 px-3 py-2"
                       @click.stop
                     >
@@ -476,7 +757,12 @@
                           title="Más acciones"
                           @click.stop="toggleMenuOpcion(opcion.id)"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-3.5 w-3.5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
                             <circle cx="4" cy="10" r="1.6" />
                             <circle cx="10" cy="10" r="1.6" />
                             <circle cx="16" cy="10" r="1.6" />
@@ -489,31 +775,87 @@
                           <button
                             v-if="detalle.opciones.length > 1 && idx > 0"
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="moverOpcion(proyecto, detalle, opcion, -1); cerrarMenuOpcion()"
+                            @click="
+                              (moverOpcion(proyecto, detalle, opcion, -1), cerrarMenuOpcion())
+                            "
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" /></svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M4.5 15.75l7.5-7.5 7.5 7.5"
+                              />
+                            </svg>
                             Subir
                           </button>
                           <button
                             v-if="detalle.opciones.length > 1 && idx < detalle.opciones.length - 1"
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="moverOpcion(proyecto, detalle, opcion, 1); cerrarMenuOpcion()"
+                            @click="(moverOpcion(proyecto, detalle, opcion, 1), cerrarMenuOpcion())"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                              />
+                            </svg>
                             Bajar
                           </button>
                           <button
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="iniciarEdicionOpcion(opcion); cerrarMenuOpcion()"
+                            @click="(iniciarEdicionOpcion(opcion), cerrarMenuOpcion())"
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z" /></svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
+                              />
+                            </svg>
                             Editar
                           </button>
                           <button
                             class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                            @click="eliminarOpcionInline(proyecto, detalle, opcion); cerrarMenuOpcion()"
+                            @click="
+                              (eliminarOpcionInline(proyecto, detalle, opcion), cerrarMenuOpcion())
+                            "
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-3.5 w-3.5"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                              />
+                            </svg>
                             Eliminar
                           </button>
                         </div>
@@ -528,8 +870,19 @@
                   class="flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-theme-border bg-theme-input/50 py-2.5 text-[0.6875rem] font-medium text-theme-text-sec transition-colors hover:border-violet-500 hover:text-violet-400"
                   @click="abrirNuevaOpcion(proyecto, detalle)"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-3.5 w-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 4.5v15m7.5-7.5h-15"
+                    />
                   </svg>
                   Agregar opción
                 </button>
@@ -541,7 +894,14 @@
               class="flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-theme-border bg-theme-card/60 py-3 text-xs font-medium text-theme-text-sec transition-colors hover:border-violet-500 hover:text-violet-400"
               @click="abrirNuevoDetalle(proyecto)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
               Agregar detalle
@@ -555,17 +915,26 @@
 
     <!-- Overlay para cerrar menús kebab al hacer click fuera -->
     <div
-      v-if="menuProyectoAbierto !== null || menuDetalleAbierto !== null || menuOpcionAbierto !== null"
+      v-if="
+        menuProyectoAbierto !== null || menuDetalleAbierto !== null || menuOpcionAbierto !== null
+      "
       class="fixed inset-0 z-10"
       @click="cerrarTodosMenus"
     ></div>
 
     <!-- Modal: confirmar eliminar proyecto -->
     <div v-if="proyectoAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="proyectoAEliminar = null"></div>
-      <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="proyectoAEliminar = null"
+      ></div>
+      <div
+        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
+      >
         <h3 class="text-base font-semibold text-theme-text">Eliminar gasto futuro</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">Se eliminarán el proyecto, sus detalles y todas las opciones guardadas.</p>
+        <p class="mt-2 text-sm text-theme-text-sec">
+          Se eliminarán el proyecto, sus detalles y todas las opciones guardadas.
+        </p>
         <p class="mt-2 text-sm font-medium text-theme-text">{{ proyectoAEliminar.tipoGasto }}</p>
         <div class="mt-5 space-y-2">
           <button
@@ -575,7 +944,10 @@
           >
             {{ eliminando ? 'Eliminando...' : 'Eliminar proyecto' }}
           </button>
-          <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="proyectoAEliminar = null">
+          <button
+            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
+            @click="proyectoAEliminar = null"
+          >
             Cancelar
           </button>
         </div>
@@ -584,13 +956,28 @@
 
     <!-- Modal: confirmar eliminar detalle -->
     <div v-if="detalleAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="detalleAEliminar = null"></div>
-      <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="detalleAEliminar = null"
+      ></div>
+      <div
+        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
+      >
         <h3 class="text-base font-semibold text-theme-text">Eliminar detalle</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">Se eliminará el detalle y todas sus opciones guardadas.</p>
-        <p class="mt-2 text-sm font-medium text-theme-text">{{ detalleAEliminar.detalle.nombre }}</p>
-        <p v-if="detalleAEliminar.detalle.opciones?.length" class="mt-1 text-xs text-theme-text-muted">
-          {{ detalleAEliminar.detalle.opciones.length }} opcion{{ detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : '' }} se perderán
+        <p class="mt-2 text-sm text-theme-text-sec">
+          Se eliminará el detalle y todas sus opciones guardadas.
+        </p>
+        <p class="mt-2 text-sm font-medium text-theme-text">
+          {{ detalleAEliminar.detalle.nombre }}
+        </p>
+        <p
+          v-if="detalleAEliminar.detalle.opciones?.length"
+          class="mt-1 text-xs text-theme-text-muted"
+        >
+          {{ detalleAEliminar.detalle.opciones.length }} opcion{{
+            detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : ''
+          }}
+          se perderán
         </p>
         <div class="mt-5 space-y-2">
           <button
@@ -600,7 +987,10 @@
           >
             {{ guardandoInline ? 'Eliminando...' : 'Eliminar detalle' }}
           </button>
-          <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="detalleAEliminar = null">
+          <button
+            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
+            @click="detalleAEliminar = null"
+          >
             Cancelar
           </button>
         </div>
@@ -609,10 +999,17 @@
 
     <!-- Modal: confirmar eliminar opción -->
     <div v-if="opcionAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="opcionAEliminar = null"></div>
-      <div class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5">
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="opcionAEliminar = null"
+      ></div>
+      <div
+        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
+      >
         <h3 class="text-base font-semibold text-theme-text">Eliminar opción</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">Se eliminará esta opción de forma permanente.</p>
+        <p class="mt-2 text-sm text-theme-text-sec">
+          Se eliminará esta opción de forma permanente.
+        </p>
         <p class="mt-2 text-sm font-medium text-theme-text">{{ opcionAEliminar.opcion.nombre }}</p>
         <div class="mt-5 space-y-2">
           <button
@@ -622,7 +1019,10 @@
           >
             {{ guardandoInline ? 'Eliminando...' : 'Eliminar opción' }}
           </button>
-          <button class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text" @click="opcionAEliminar = null">
+          <button
+            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
+            @click="opcionAEliminar = null"
+          >
             Cancelar
           </button>
         </div>
@@ -631,17 +1031,35 @@
 
     <!-- Panel: nueva opción -->
     <div v-if="nuevaOpcionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevaOpcion"></div>
-      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 80dvh; overflow-y: auto; overscroll-behavior: contain;">
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="cancelarNuevaOpcion"
+      ></div>
+      <div
+        class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3"
+        style="max-height: 80dvh; overflow-y: auto; overscroll-behavior: contain"
+      >
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-theme-text">Nueva opción</h3>
-          <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevaOpcion">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <button
+            class="text-theme-text-sec hover:text-theme-text transition-colors"
+            @click="cancelarNuevaOpcion"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <p class="text-xs text-theme-text-sec">{{ nuevaOpcionCtx.proyecto.tipoGasto }} › {{ nuevaOpcionCtx.detalle.nombre }}</p>
+        <p class="text-xs text-theme-text-sec">
+          {{ nuevaOpcionCtx.proyecto.tipoGasto }} › {{ nuevaOpcionCtx.detalle.nombre }}
+        </p>
         <input
           v-model="nuevaOpcion.nombre"
           type="text"
@@ -663,15 +1081,36 @@
         <div class="grid grid-cols-3 gap-2">
           <div>
             <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
-            <input v-model="nuevaOpcion.precioMinimo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
+            <input
+              v-model="nuevaOpcion.precioMinimo"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
+            />
           </div>
           <div>
             <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Prom</label>
-            <input v-model="nuevaOpcion.precioPromedio" type="number" min="0" step="0.01" placeholder="Auto" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
+            <input
+              v-model="nuevaOpcion.precioPromedio"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Auto"
+              class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
+            />
           </div>
           <div>
             <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
-            <input v-model="nuevaOpcion.precioMaximo" type="number" min="0" step="0.01" placeholder="0.00" class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors" />
+            <input
+              v-model="nuevaOpcion.precioMaximo"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="0.00"
+              class="w-full rounded-xl border border-theme-border bg-theme-input px-3 py-2.5 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
+            />
           </div>
         </div>
         <textarea
@@ -693,12 +1132,28 @@
 
     <!-- Panel: nuevo detalle -->
     <div v-if="nuevoDetalleCtx" class="fixed inset-0 z-50 flex items-end justify-center">
-      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarNuevoDetalle"></div>
-      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;">
+      <div
+        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+        @click="cancelarNuevoDetalle"
+      ></div>
+      <div
+        class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3"
+        style="max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain"
+      >
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-theme-text">Nuevo detalle</h3>
-          <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarNuevoDetalle">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <button
+            class="text-theme-text-sec hover:text-theme-text transition-colors"
+            @click="cancelarNuevoDetalle"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -716,7 +1171,11 @@
             :key="opt.value"
             type="button"
             class="flex-1 rounded-lg border px-2 py-2 text-[0.6875rem] font-medium transition-all"
-            :class="nuevoDetalle.prioridad === opt.value ? opt.activo : 'border-theme-border bg-theme-input text-theme-text-muted'"
+            :class="
+              nuevoDetalle.prioridad === opt.value
+                ? opt.activo
+                : 'border-theme-border bg-theme-input text-theme-text-muted'
+            "
             @click="nuevoDetalle.prioridad = opt.value"
           >
             {{ opt.label }}
@@ -741,24 +1200,40 @@
     <!-- Modal: decidir opción -->
     <div v-if="decisionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarDecision"></div>
-      <div class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3" style="max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain;">
+      <div
+        class="relative w-full max-w-lg rounded-t-3xl border-t border-theme-border bg-theme-card p-5 pb-8 space-y-3"
+        style="max-height: 85dvh; overflow-y: auto; overscroll-behavior: contain"
+      >
         <div class="flex items-center justify-between">
           <h3 class="text-base font-semibold text-theme-text">
             {{ decisionCtx.tipo === 'comprar' ? 'Comprar ya' : 'Enviar al planificador' }}
           </h3>
-          <button class="text-theme-text-sec hover:text-theme-text transition-colors" @click="cancelarDecision">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <button
+            class="text-theme-text-sec hover:text-theme-text transition-colors"
+            @click="cancelarDecision"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
         <p class="text-xs text-theme-text-sec">
-          {{ decisionCtx.proyecto.tipoGasto }} › {{ decisionCtx.detalle.nombre }} › <span class="text-theme-text">{{ decisionCtx.opcion.nombre }}</span>
+          {{ decisionCtx.proyecto.tipoGasto }} › {{ decisionCtx.detalle.nombre }} ›
+          <span class="text-theme-text">{{ decisionCtx.opcion.nombre }}</span>
         </p>
         <p class="text-[0.6875rem] text-theme-text-muted">
-          {{ decisionCtx.tipo === 'comprar'
-            ? 'Se registrará como gasto real y el detalle quedará marcado como comprado. Las demás opciones se eliminarán.'
-            : 'Se creará un gasto planificado en el mes de la fecha elegida. Las demás opciones se eliminarán.' }}
+          {{
+            decisionCtx.tipo === 'comprar'
+              ? 'Se registrará como gasto real y el detalle quedará marcado como comprado. Las demás opciones se eliminarán.'
+              : 'Se creará un gasto planificado en el mes de la fecha elegida. Las demás opciones se eliminarán.'
+          }}
         </p>
         <div>
           <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Monto *</label>
@@ -789,11 +1264,21 @@
         <p v-if="errorPanel" class="text-xs text-red-400">{{ errorPanel }}</p>
         <button
           class="w-full rounded-xl py-3 text-sm font-semibold text-theme-text transition-colors disabled:opacity-60"
-          :class="decisionCtx.tipo === 'comprar' ? 'bg-emerald-500/80 hover:bg-emerald-500' : 'bg-sky-500/80 hover:bg-sky-500'"
+          :class="
+            decisionCtx.tipo === 'comprar'
+              ? 'bg-emerald-500/80 hover:bg-emerald-500'
+              : 'bg-sky-500/80 hover:bg-sky-500'
+          "
           :disabled="decidiendo"
           @click="confirmarDecision"
         >
-          {{ decidiendo ? 'Guardando...' : (decisionCtx.tipo === 'comprar' ? 'Registrar compra' : 'Crear gasto planificado') }}
+          {{
+            decidiendo
+              ? 'Guardando...'
+              : decisionCtx.tipo === 'comprar'
+                ? 'Registrar compra'
+                : 'Crear gasto planificado'
+          }}
         </button>
       </div>
     </div>
@@ -803,7 +1288,8 @@
 <script setup>
 const emit = defineEmits(['editar'])
 
-const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } = useGastosFuturos()
+const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura, isLoading } =
+  useGastosFuturos()
 const { success, error: toastError } = useToast()
 
 const busqueda = ref('')
@@ -816,22 +1302,26 @@ const ordenes = [
   { value: 'prom_asc', label: 'Menor $' },
   { value: 'nombre', label: 'Nombre' },
 ]
-const ordenLabel = computed(() => ordenes.find(o => o.value === ordenActual.value)?.label || 'Reciente')
+const ordenLabel = computed(
+  () => ordenes.find((o) => o.value === ordenActual.value)?.label || 'Reciente',
+)
 function ciclarOrden() {
-  const idx = ordenes.findIndex(o => o.value === ordenActual.value)
+  const idx = ordenes.findIndex((o) => o.value === ordenActual.value)
   ordenActual.value = ordenes[(idx + 1) % ordenes.length].value
 }
 
 function progresoProyecto(proyecto) {
   const total = proyecto.detalles?.length || 0
   if (total === 0) return { total: 0, decididos: 0, porcentaje: 0 }
-  const decididos = proyecto.detalles.filter(d => d.estadoDecision).length
+  const decididos = proyecto.detalles.filter((d) => d.estadoDecision).length
   return { total, decididos, porcentaje: Math.round((decididos / total) * 100) }
 }
 
-function proyectoTieneDecididos(p) { return p.detalles?.some(d => d.estadoDecision) }
+function proyectoTieneDecididos(p) {
+  return p.detalles?.some((d) => d.estadoDecision)
+}
 function proyectoCompletamenteDecidido(p) {
-  return p.detalles?.length > 0 && p.detalles.every(d => d.estadoDecision)
+  return p.detalles?.length > 0 && p.detalles.every((d) => d.estadoDecision)
 }
 
 const filtrosProyecto = computed(() => {
@@ -839,9 +1329,23 @@ const filtrosProyecto = computed(() => {
   const count = (pred) => all.filter(pred).length
   return [
     { value: 'todos', label: 'Todos', count: all.length },
-    { value: 'alta', label: 'Alta', count: count(p => p.prioridad === 3), accent: 'bg-red-500 text-white' },
-    { value: 'pendientes', label: 'Pendientes', count: count(p => !proyectoCompletamenteDecidido(p)) },
-    { value: 'decididos', label: 'Decididos', count: count(proyectoTieneDecididos), accent: 'bg-sky-500 text-white' },
+    {
+      value: 'alta',
+      label: 'Alta',
+      count: count((p) => p.prioridad === 3),
+      accent: 'bg-red-500 text-white',
+    },
+    {
+      value: 'pendientes',
+      label: 'Pendientes',
+      count: count((p) => !proyectoCompletamenteDecidido(p)),
+    },
+    {
+      value: 'decididos',
+      label: 'Decididos',
+      count: count(proyectoTieneDecididos),
+      accent: 'bg-sky-500 text-white',
+    },
   ]
 })
 
@@ -940,45 +1444,79 @@ const decisionForm = ref({ monto: '', fecha: '', notas: '' })
 const decidiendo = ref(false)
 
 // Botón atrás (Android) + bloqueo del scroll del body para cada modal/sheet
-useOverlayBack(computed(() => proyectoAEliminar.value !== null), () => { proyectoAEliminar.value = null })
-useOverlayBack(computed(() => detalleAEliminar.value !== null), () => { detalleAEliminar.value = null })
-useOverlayBack(computed(() => opcionAEliminar.value !== null), () => { opcionAEliminar.value = null })
-useOverlayBack(computed(() => nuevoDetalleCtx.value !== null), () => cancelarNuevoDetalle())
-useOverlayBack(computed(() => nuevaOpcionCtx.value !== null), () => cancelarNuevaOpcion())
-useOverlayBack(computed(() => decisionCtx.value !== null), () => cancelarDecision())
+useOverlayBack(
+  computed(() => proyectoAEliminar.value !== null),
+  () => {
+    proyectoAEliminar.value = null
+  },
+)
+useOverlayBack(
+  computed(() => detalleAEliminar.value !== null),
+  () => {
+    detalleAEliminar.value = null
+  },
+)
+useOverlayBack(
+  computed(() => opcionAEliminar.value !== null),
+  () => {
+    opcionAEliminar.value = null
+  },
+)
+useOverlayBack(
+  computed(() => nuevoDetalleCtx.value !== null),
+  () => cancelarNuevoDetalle(),
+)
+useOverlayBack(
+  computed(() => nuevaOpcionCtx.value !== null),
+  () => cancelarNuevaOpcion(),
+)
+useOverlayBack(
+  computed(() => decisionCtx.value !== null),
+  () => cancelarDecision(),
+)
 
-watch(gastosFuturos, (items) => {
-  if (!items.length) {
-    expandido.value = {}
-    opcionSeleccionadaPorDetalle.value = {}
-  }
-}, { immediate: true })
+watch(
+  gastosFuturos,
+  (items) => {
+    if (!items.length) {
+      expandido.value = {}
+      opcionSeleccionadaPorDetalle.value = {}
+    }
+  },
+  { immediate: true },
+)
 
 const gastosFiltrados = computed(() => {
   const term = (busquedaDebounced.value || '').trim().toLowerCase()
   let result = gastosFuturos.value
 
   // Filtro por prioridad/estado
-  if (filtroActual.value === 'alta') result = result.filter(p => p.prioridad === 3)
-  else if (filtroActual.value === 'media') result = result.filter(p => p.prioridad === 2)
-  else if (filtroActual.value === 'baja') result = result.filter(p => p.prioridad === 1)
-  else if (filtroActual.value === 'pendientes') result = result.filter(p => !proyectoCompletamenteDecidido(p))
+  if (filtroActual.value === 'alta') result = result.filter((p) => p.prioridad === 3)
+  else if (filtroActual.value === 'media') result = result.filter((p) => p.prioridad === 2)
+  else if (filtroActual.value === 'baja') result = result.filter((p) => p.prioridad === 1)
+  else if (filtroActual.value === 'pendientes')
+    result = result.filter((p) => !proyectoCompletamenteDecidido(p))
   else if (filtroActual.value === 'decididos') result = result.filter(proyectoTieneDecididos)
 
   // Búsqueda
   if (term) {
     result = result.filter((proyecto) => {
-      const hayEnProyecto = [proyecto.tipoGasto, proyecto.descripcion, proyecto.categoriaNombre]
-        .some(v => (v || '').toLowerCase().includes(term))
+      const hayEnProyecto = [
+        proyecto.tipoGasto,
+        proyecto.descripcion,
+        proyecto.categoriaNombre,
+      ].some((v) => (v || '').toLowerCase().includes(term))
       if (hayEnProyecto) return true
-      return proyecto.detalles.some(d =>
-        (d.nombre || '').toLowerCase().includes(term)
-        || (d.notas || '').toLowerCase().includes(term)
-        || d.opciones.some(o =>
-          (o.nombre || '').toLowerCase().includes(term)
-          || (o.notas || '').toLowerCase().includes(term)
-          || (o.referenciaUrl || '').toLowerCase().includes(term)
-        )
+      return proyecto.detalles.some(
+        (d) =>
+          (d.nombre || '').toLowerCase().includes(term) ||
+          (d.notas || '').toLowerCase().includes(term) ||
+          d.opciones.some(
+            (o) =>
+              (o.nombre || '').toLowerCase().includes(term) ||
+              (o.notas || '').toLowerCase().includes(term) ||
+              (o.referenciaUrl || '').toLowerCase().includes(term),
+          ),
       )
     })
   }
@@ -1024,15 +1562,23 @@ function esMejorOpcion(detalle, opcion) {
 
 function prioridadBadge(valor) {
   switch (valor) {
-    case 3: return { label: '● Alta', clases: 'bg-red-500/15 text-red-400' }
-    case 2: return { label: '● Media', clases: 'bg-amber-500/15 text-amber-300' }
-    case 1: return { label: '● Baja', clases: 'bg-emerald-500/15 text-emerald-400' }
-    default: return null
+    case 3:
+      return { label: '● Alta', clases: 'bg-red-500/15 text-red-400' }
+    case 2:
+      return { label: '● Media', clases: 'bg-amber-500/15 text-amber-300' }
+    case 1:
+      return { label: '● Baja', clases: 'bg-emerald-500/15 text-emerald-400' }
+    default:
+      return null
   }
 }
 
 function hostDeUrl(url) {
-  try { return new URL(url).hostname.replace(/^www\./, '') } catch { return 'Abrir enlace' }
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return 'Abrir enlace'
+  }
 }
 
 // Rango de precios legible: ambos → "min — max"; uno solo → ese precio;
@@ -1046,7 +1592,15 @@ function rangoPrecios(opcion) {
 }
 
 function opcionVacia() {
-  return { nombre: '', referenciaUrl: '', imagenUrl: '', precioMinimo: '', precioPromedio: '', precioMaximo: '', notas: '' }
+  return {
+    nombre: '',
+    referenciaUrl: '',
+    imagenUrl: '',
+    precioMinimo: '',
+    precioPromedio: '',
+    precioMaximo: '',
+    notas: '',
+  }
 }
 
 function parseAmount(value) {
@@ -1074,15 +1628,18 @@ function buildPayload(proyecto, overrides = {}) {
     tipoGasto: proyecto.tipoGasto,
     descripcion: proyecto.descripcion,
     prioridad: proyecto.prioridad ?? 0,
-    detalles: (overrides.detalles ?? proyecto.detalles).map(d => {
+    detalles: (overrides.detalles ?? proyecto.detalles).map((d) => {
       const detalleOverride = overrides.detalleId === d.id ? overrides : null
-      const useOverrideOpciones = overrides.opcionesDetalleId && d.id && overrides.opcionesDetalleId === d.id
+      const useOverrideOpciones =
+        overrides.opcionesDetalleId && d.id && overrides.opcionesDetalleId === d.id
       return {
         id: d.id,
         nombre: detalleOverride?.nombre ?? d.nombre,
         notas: detalleOverride?.notas ?? d.notas ?? null,
         prioridad: detalleOverride?.prioridad ?? d.prioridad ?? 0,
-        opciones: (useOverrideOpciones ? overrides.opciones : (d.opciones || [])).map(opcionToPayload),
+        opciones: (useOverrideOpciones ? overrides.opciones : d.opciones || []).map(
+          opcionToPayload,
+        ),
       }
     }),
   }
@@ -1091,7 +1648,12 @@ function buildPayload(proyecto, overrides = {}) {
 // ── Detalle: editar ──────────────────────────────────────────────
 function iniciarEdicionDetalle(detalle) {
   opcionEditando.value = null
-  detalleEditando.value = { detalleId: detalle.id, nombre: detalle.nombre, notas: detalle.notas || '', prioridad: detalle.prioridad ?? 0 }
+  detalleEditando.value = {
+    detalleId: detalle.id,
+    nombre: detalle.nombre,
+    notas: detalle.notas || '',
+    prioridad: detalle.prioridad ?? 0,
+  }
 }
 
 function cancelarEdicionDetalle() {
@@ -1100,16 +1662,22 @@ function cancelarEdicionDetalle() {
 
 async function guardarEdicionDetalle(proyecto, detalle) {
   const nombre = detalleEditando.value.nombre.trim()
-  if (!nombre) { toastError('El nombre del detalle es obligatorio'); return }
+  if (!nombre) {
+    toastError('El nombre del detalle es obligatorio')
+    return
+  }
 
   guardandoInline.value = true
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      detalleId: detalle.id,
-      nombre,
-      notas: detalleEditando.value.notas.trim() || null,
-      prioridad: detalleEditando.value.prioridad ?? 0,
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        detalleId: detalle.id,
+        nombre,
+        notas: detalleEditando.value.notas.trim() || null,
+        prioridad: detalleEditando.value.prioridad ?? 0,
+      }),
+    )
     detalleEditando.value = null
     success('Detalle actualizado')
   } catch (e) {
@@ -1133,9 +1701,12 @@ async function confirmarEliminarDetalle() {
   const { proyecto, detalle } = detalleAEliminar.value
   guardandoInline.value = true
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      detalles: proyecto.detalles.filter(d => d.id !== detalle.id),
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        detalles: proyecto.detalles.filter((d) => d.id !== detalle.id),
+      }),
+    )
     success('Detalle eliminado')
     detalleAEliminar.value = null
   } catch (e) {
@@ -1159,17 +1730,28 @@ function cancelarNuevoDetalle() {
 
 async function confirmarNuevoDetalle() {
   const nombre = nuevoDetalle.value.nombre.trim()
-  if (!nombre) { errorPanel.value = 'El nombre del detalle es obligatorio'; return }
+  if (!nombre) {
+    errorPanel.value = 'El nombre del detalle es obligatorio'
+    return
+  }
 
   const { proyecto } = nuevoDetalleCtx.value
-  const detalleNuevo = { nombre, notas: nuevoDetalle.value.notas.trim() || null, prioridad: nuevoDetalle.value.prioridad ?? 0, opciones: [] }
+  const detalleNuevo = {
+    nombre,
+    notas: nuevoDetalle.value.notas.trim() || null,
+    prioridad: nuevoDetalle.value.prioridad ?? 0,
+    opciones: [],
+  }
 
   guardandoInline.value = true
   errorPanel.value = ''
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      detalles: [...proyecto.detalles, detalleNuevo],
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        detalles: [...proyecto.detalles, detalleNuevo],
+      }),
+    )
     nuevoDetalleCtx.value = null
     success('Detalle agregado')
   } catch (e) {
@@ -1190,10 +1772,13 @@ async function moverOpcion(proyecto, detalle, opcion, direction) {
 
   guardandoInline.value = true
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      opcionesDetalleId: detalle.id,
-      opciones: reordered.map(opcionToPayload),
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        opcionesDetalleId: detalle.id,
+        opciones: reordered.map(opcionToPayload),
+      }),
+    )
   } catch (e) {
     toastError(e?.data?.message || e?.message || 'No se pudo reordenar')
   } finally {
@@ -1222,7 +1807,10 @@ function cancelarEdicionOpcion() {
 
 async function guardarEdicionOpcion(proyecto, detalle) {
   const nombre = opcionEditando.value.nombre.trim()
-  if (!nombre) { toastError('El nombre de la opcion es obligatorio'); return }
+  if (!nombre) {
+    toastError('El nombre de la opcion es obligatorio')
+    return
+  }
 
   const opcionActualizada = {
     nombre,
@@ -1234,16 +1822,19 @@ async function guardarEdicionOpcion(proyecto, detalle) {
     notas: opcionEditando.value.notas.trim() || null,
   }
 
-  const nuevasOpciones = detalle.opciones.map(o =>
-    o.id === opcionEditando.value.opcionId ? opcionActualizada : opcionToPayload(o)
+  const nuevasOpciones = detalle.opciones.map((o) =>
+    o.id === opcionEditando.value.opcionId ? opcionActualizada : opcionToPayload(o),
   )
 
   guardandoInline.value = true
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      opcionesDetalleId: detalle.id,
-      opciones: nuevasOpciones,
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        opcionesDetalleId: detalle.id,
+        opciones: nuevasOpciones,
+      }),
+    )
     opcionEditando.value = null
     success('Opcion actualizada')
   } catch (e) {
@@ -1261,14 +1852,17 @@ function eliminarOpcionInline(proyecto, detalle, opcion) {
 async function confirmarEliminarOpcion() {
   if (!opcionAEliminar.value) return
   const { proyecto, detalle, opcion } = opcionAEliminar.value
-  const nuevasOpciones = detalle.opciones.filter(o => o.id !== opcion.id).map(opcionToPayload)
+  const nuevasOpciones = detalle.opciones.filter((o) => o.id !== opcion.id).map(opcionToPayload)
 
   guardandoInline.value = true
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      opcionesDetalleId: detalle.id,
-      opciones: nuevasOpciones,
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        opcionesDetalleId: detalle.id,
+        opciones: nuevasOpciones,
+      }),
+    )
     success('Opcion eliminada')
     opcionAEliminar.value = null
   } catch (e) {
@@ -1292,7 +1886,10 @@ function cancelarNuevaOpcion() {
 
 async function confirmarNuevaOpcion() {
   const nombre = nuevaOpcion.value.nombre.trim()
-  if (!nombre) { errorPanel.value = 'El nombre de la opcion es obligatorio'; return }
+  if (!nombre) {
+    errorPanel.value = 'El nombre de la opcion es obligatorio'
+    return
+  }
 
   const { proyecto, detalle } = nuevaOpcionCtx.value
   const opcionNueva = {
@@ -1308,10 +1905,13 @@ async function confirmarNuevaOpcion() {
   guardandoInline.value = true
   errorPanel.value = ''
   try {
-    await updateGastoFuturo(proyecto.id, buildPayload(proyecto, {
-      opcionesDetalleId: detalle.id,
-      opciones: [...detalle.opciones.map(opcionToPayload), opcionNueva],
-    }))
+    await updateGastoFuturo(
+      proyecto.id,
+      buildPayload(proyecto, {
+        opcionesDetalleId: detalle.id,
+        opciones: [...detalle.opciones.map(opcionToPayload), opcionNueva],
+      }),
+    )
     nuevaOpcionCtx.value = null
     success('Opcion agregada')
   } catch (e) {
@@ -1343,8 +1943,14 @@ async function confirmarDecision() {
   const ctx = decisionCtx.value
   if (!ctx) return
   const monto = parseAmount(decisionForm.value.monto)
-  if (!monto || monto <= 0) { errorPanel.value = 'El monto debe ser mayor a 0'; return }
-  if (!decisionForm.value.fecha) { errorPanel.value = 'La fecha es obligatoria'; return }
+  if (!monto || monto <= 0) {
+    errorPanel.value = 'El monto debe ser mayor a 0'
+    return
+  }
+  if (!decisionForm.value.fecha) {
+    errorPanel.value = 'La fecha es obligatoria'
+    return
+  }
 
   decidiendo.value = true
   errorPanel.value = ''
@@ -1376,8 +1982,10 @@ function detallesOrdenados(detalles) {
 }
 
 function decisionBadge(detalle) {
-  if (detalle.estadoDecision === 'comprada') return { label: 'Elegida · Comprada', clases: 'bg-emerald-500/15 text-emerald-400' }
-  if (detalle.estadoDecision === 'planificada') return { label: 'Elegida · Planificada', clases: 'bg-sky-500/15 text-sky-300' }
+  if (detalle.estadoDecision === 'comprada')
+    return { label: 'Elegida · Comprada', clases: 'bg-emerald-500/15 text-emerald-400' }
+  if (detalle.estadoDecision === 'planificada')
+    return { label: 'Elegida · Planificada', clases: 'bg-sky-500/15 text-sky-300' }
   return null
 }
 

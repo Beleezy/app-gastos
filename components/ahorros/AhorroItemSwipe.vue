@@ -9,8 +9,19 @@
       :class="swipeOffset > 20 ? 'opacity-100' : 'opacity-0'"
     >
       <div class="flex items-center gap-2 text-theme-accent">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+          />
         </svg>
         <span class="text-xs font-semibold">Editar</span>
       </div>
@@ -23,8 +34,19 @@
     >
       <div class="flex items-center gap-2 text-red-400">
         <span class="text-xs font-semibold">Eliminar</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+          />
         </svg>
       </div>
     </div>
@@ -32,7 +54,10 @@
     <!-- Contenido principal -->
     <div
       class="group relative bg-theme-card border border-theme-border hover:border-theme-accent/30 transition-colors rounded-xl p-3"
-      :style="{ transform: `translateX(${swipeOffset}px)`, transition: isDragging ? 'none' : 'transform 0.25s ease' }"
+      :style="{
+        transform: `translateX(${swipeOffset}px)`,
+        transition: isDragging ? 'none' : 'transform 0.25s ease',
+      }"
       @touchstart.passive="onTouchStart"
       @touchmove.passive="onTouchMove"
       @touchend="onTouchEnd"
@@ -46,7 +71,10 @@
         </div>
 
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-theme-text line-clamp-2 break-words leading-snug">
+          <!-- Sin line-clamp: el concepto es el identificador del ahorro y
+               debe leerse completo ("Ahorro quincenal para viaje a..." se
+               cortaba a 2 líneas) -->
+          <p class="text-sm font-medium text-theme-text break-words leading-snug">
             {{ ahorro.concepto || ahorro.medioNombre || 'Ahorro' }}
           </p>
           <p class="text-[0.6875rem] text-theme-text-sec">
@@ -55,19 +83,36 @@
         </div>
 
         <div class="text-right shrink-0">
-          <p class="text-sm font-bold text-emerald-400">+{{ currencySymbol }}&nbsp;{{ formatMonto(ahorro.monto) }}</p>
-          <div v-if="ahorro.gastoPlanificadoId" class="text-[0.6875rem] text-theme-accent mt-0.5">vinculado</div>
+          <p class="text-sm font-bold text-emerald-400">
+            +{{ currencySymbol }}&nbsp;{{ formatMonto(ahorro.monto) }}
+          </p>
+          <div v-if="ahorro.gastoPlanificadoId" class="text-[0.6875rem] text-theme-accent mt-0.5">
+            vinculado
+          </div>
         </div>
       </div>
 
       <!-- Botones inline para desktop hover / accesibilidad -->
-      <div class="flex justify-end gap-2 mt-2 pt-2 border-t border-theme-border/50 opacity-0 group-hover:opacity-100 transition-opacity max-sm:hidden">
+      <div
+        class="flex justify-end gap-2 mt-2 pt-2 border-t border-theme-border/50 opacity-0 group-hover:opacity-100 transition-opacity max-sm:hidden"
+      >
         <button
           class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-theme-input text-theme-text-sec hover:text-theme-accent text-[0.6875rem] transition-colors"
           @click.stop="onEdit"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            />
           </svg>
           Editar
         </button>
@@ -75,8 +120,19 @@
           class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-theme-input text-theme-text-sec hover:text-red-400 text-[0.6875rem] transition-colors"
           @click.stop="onDelete"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
           </svg>
           Eliminar
         </button>

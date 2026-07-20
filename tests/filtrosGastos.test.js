@@ -2,9 +2,28 @@ import { describe, it, expect } from 'vitest'
 import { aplicarFiltros } from '../composables/useFiltrosGastos.js'
 
 const gastos = [
-  { concepto: 'Pan en panadería', monto: 5, fecha: '2026-04-01', categoriaId: 1, metodoRegistro: 'manual' },
-  { concepto: 'Uber al trabajo', monto: 15, fecha: '2026-04-15', categoriaId: 2, metodoRegistro: 'voz' },
-  { concepto: 'Cena restaurante', monto: 80, fecha: '2026-04-20', categoriaId: 1, metodoRegistro: 'foto', notas: 'cumple Ana' },
+  {
+    concepto: 'Pan en panadería',
+    monto: 5,
+    fecha: '2026-04-01',
+    categoriaId: 1,
+    metodoRegistro: 'manual',
+  },
+  {
+    concepto: 'Uber al trabajo',
+    monto: 15,
+    fecha: '2026-04-15',
+    categoriaId: 2,
+    metodoRegistro: 'voz',
+  },
+  {
+    concepto: 'Cena restaurante',
+    monto: 80,
+    fecha: '2026-04-20',
+    categoriaId: 1,
+    metodoRegistro: 'foto',
+    notas: 'cumple Ana',
+  },
   { concepto: 'Cine', monto: 25, fecha: '2026-03-30', categoriaId: 3, metodoRegistro: 'manual' },
 ]
 

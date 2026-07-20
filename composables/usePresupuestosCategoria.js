@@ -31,9 +31,9 @@ export function usePresupuestosCategoria() {
       method: 'POST',
       body: { categoriaId, montoMensual, alertaUmbral },
     })
-    const idx = items.value.findIndex(i => i.categoriaId === categoriaId)
+    const idx = items.value.findIndex((i) => i.categoriaId === categoriaId)
     if (idx === -1) cache.set([...items.value, row])
-    else cache.set(items.value.map(i => i.categoriaId === categoriaId ? row : i))
+    else cache.set(items.value.map((i) => (i.categoriaId === categoriaId ? row : i)))
     // Invalidar el estado del mes (su % cambia con el nuevo límite).
     ultimaCargaMes.value = ''
     return row
@@ -41,12 +41,12 @@ export function usePresupuestosCategoria() {
 
   async function eliminarPresupuesto(categoriaId) {
     await apiFetch(`/api/presupuestos-categoria/${categoriaId}`, { method: 'DELETE' })
-    cache.set(items.value.filter(i => i.categoriaId !== categoriaId))
-    estados.value = estados.value.filter(e => e.categoriaId !== categoriaId)
+    cache.set(items.value.filter((i) => i.categoriaId !== categoriaId))
+    estados.value = estados.value.filter((e) => e.categoriaId !== categoriaId)
   }
 
   function porCategoria(categoriaId) {
-    return items.value.find(i => i.categoriaId === categoriaId) || null
+    return items.value.find((i) => i.categoriaId === categoriaId) || null
   }
 
   // Carga consumo desde el endpoint /estado (un solo round-trip).
@@ -68,11 +68,11 @@ export function usePresupuestosCategoria() {
   }
 
   function consumoDe(categoriaId) {
-    return estados.value.find(e => e.categoriaId === categoriaId)?.consumido || 0
+    return estados.value.find((e) => e.categoriaId === categoriaId)?.consumido || 0
   }
 
   function porcentajeUsado(categoriaId) {
-    const e = estados.value.find(x => x.categoriaId === categoriaId)
+    const e = estados.value.find((x) => x.categoriaId === categoriaId)
     if (e) return e.porcentaje
     const p = porCategoria(categoriaId)
     if (!p || !p.montoMensual) return 0
@@ -80,7 +80,7 @@ export function usePresupuestosCategoria() {
   }
 
   function estadoSemaforo(categoriaId) {
-    const e = estados.value.find(x => x.categoriaId === categoriaId)
+    const e = estados.value.find((x) => x.categoriaId === categoriaId)
     if (e) return e.estado
     const pct = porcentajeUsado(categoriaId)
     const p = porCategoria(categoriaId)
@@ -98,8 +98,8 @@ export function usePresupuestosCategoria() {
   )
 
   // Alertas activas (estado != ok). Útil para badge en BottomNav.
-  const alertas = computed(() => estados.value.filter(e => e.estado !== 'ok'))
-  const countCriticas = computed(() => estados.value.filter(e => e.estado === 'critico').length)
+  const alertas = computed(() => estados.value.filter((e) => e.estado !== 'ok'))
+  const countCriticas = computed(() => estados.value.filter((e) => e.estado === 'critico').length)
 
   // Migración localStorage → backend.
   async function migrarLocalStorageSiHaceFalta() {
@@ -107,7 +107,11 @@ export function usePresupuestosCategoria() {
     const raw = localStorage.getItem(STORAGE_KEY_LEGACY)
     if (!raw) return
     let legacy
-    try { legacy = JSON.parse(raw) } catch { return }
+    try {
+      legacy = JSON.parse(raw)
+    } catch {
+      return
+    }
     if (!Array.isArray(legacy) || legacy.length === 0) {
       localStorage.removeItem(STORAGE_KEY_LEGACY)
       return
@@ -136,11 +140,21 @@ export function usePresupuestosCategoria() {
   }
 
   return {
-    items, estados, cargando,
-    totalPresupuestado, totalConsumido,
-    alertas, countCriticas,
-    fetchItems, setPresupuesto, eliminarPresupuesto, porCategoria,
-    cargarConsumo, consumoDe, porcentajeUsado, estadoSemaforo,
+    items,
+    estados,
+    cargando,
+    totalPresupuestado,
+    totalConsumido,
+    alertas,
+    countCriticas,
+    fetchItems,
+    setPresupuesto,
+    eliminarPresupuesto,
+    porCategoria,
+    cargarConsumo,
+    consumoDe,
+    porcentajeUsado,
+    estadoSemaforo,
     migrarLocalStorageSiHaceFalta,
   }
 }

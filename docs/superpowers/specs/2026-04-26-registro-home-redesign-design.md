@@ -17,12 +17,14 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
 ## Alcance
 
 **Incluye:**
+
 - Rediseño completo de [components/registro/ResumenMesRegistro.vue](../../../components/registro/ResumenMesRegistro.vue) según mockup.
 - Nuevo componente `components/registro/FabsCaptura.vue` con tres FABs (foto, micrófono, manual) — solo mobile.
 - Ajustes en [pages/registro.vue](../../../pages/registro.vue) para eliminar el FAB único actual y montar el nuevo `FabsCaptura`. El bloque mic+cámara del sidebar **se mantiene** en desktop (sigue oculto en mobile como hoy con `lg:` prefixes).
 - Reemplazo de tipografías hardcoded (`text-[10px]`, `text-[9px]`) por tokens basados en `rem` en los componentes tocados, para compatibilidad con el modo "Texto grande" (`useTheme.fontSize` modifica `document.documentElement.style.fontSize`).
 
 **No incluye:**
+
 - Cambios en la API o el esquema de datos. El campo `resumen.totalDia` ya existe en [server/api/gastos/resumen.get.js](../../../server/api/gastos/resumen.get.js).
 - Cambios en el tab "Categorías" del área principal (mantiene chart + drilldown completo).
 - Cambios en la lógica de captura por voz/foto (composables `useVoiceDraft`, `usePhotoDraft`).
@@ -67,6 +69,7 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
    - Animación: usa la transición `expand` ya definida en [pages/registro.vue:683-694](../../../pages/registro.vue#L683-L694) o equivalente local.
 
 **Props del componente (cambios):**
+
 - Añadir `gastos-hoy-count: Number` (cantidad de gastos del día actual).
 - Añadir `categorias-resumen: Array` (mismo shape que `gastosPorCategoria`).
 - Añadir `es-mes-actual: Boolean` (para condicionar el banner de proyección).
@@ -88,6 +91,7 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
 - **FAB Manual (der):** 48px círculo, fondo `bg-theme-card border border-theme-border` con icono `+` en color acento. `active:scale-90`.
 
 **Comportamiento:**
+
 - Foto: emite `photo` → la página dispara la cámara (delegando al composable `usePhotoDraft` ya conectado).
 - Mic: emite `voice-toggle` → si `isListening`, llama `onStopListening`, si no `onStartListening`.
 - Manual: emite `manual` → la página abre `showFormManual = true`.
@@ -95,6 +99,7 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
 - Si hay `hasDraft` (borrador de voz pendiente), mostrar un punto ámbar pequeño en la esquina superior del FAB de mic.
 
 **Props:**
+
 - `is-listening: Boolean`
 - `has-draft: Boolean`
 - `is-supported: Boolean` (deshabilitar mic si voz no soportada)
@@ -119,8 +124,8 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
 5. Cálculos a inyectar en el resumen:
    ```js
    const hoy = useFechaPeru().fechaHoy()
-   const gastosHoyCount = computed(() =>
-     gastosMensuales.value.filter(g => g.fecha === hoy).length
+   const gastosHoyCount = computed(
+     () => gastosMensuales.value.filter((g) => g.fecha === hoy).length,
    )
    const totalDia = computed(() => parseFloat(resumen.value.totalDia) || 0)
    const diasTranscurridos = computed(() => {
@@ -128,7 +133,7 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
      return new Date().getDate()
    })
    const diasDelMes = computed(() =>
-     new Date(anioSeleccionado.value, mesSeleccionado.value, 0).getDate()
+     new Date(anioSeleccionado.value, mesSeleccionado.value, 0).getDate(),
    )
    ```
 
@@ -144,16 +149,20 @@ El usuario aportó un mockup que ataca los tres puntos: tarjeta resumen reorgani
 ## Consideraciones técnicas
 
 ### Estado del colapsable de categorías
+
 Persistencia en `localStorage` (clave `registro:resumen-categorias-expanded`). Inicializa cerrado si la clave no existe. Si más adelante se requiere persistencia por usuario, migrar a la tabla `configuraciones`.
 
 ### Conteo de "gastos hoy" en optimistic UI
+
 `pushOptimisticGastos` ya inserta gastos temporales en `gastosMensuales` con `fecha = hoy` por defecto. El `filter(g => g.fecha === hoy).length` los cuenta correctamente. No requiere lógica especial.
 
 ### Proyección con poco data
+
 - Si `diasTranscurridos === 0` o no hay gastos → ocultar banner.
 - Si `diasTranscurridos < 3` → mostrar banner pero con una nota "(estimación con pocos días)" en menor tamaño, para no transmitir falsa precisión. **Decisión:** omitir esta nota en v1; el banner solo aparece cuando hay gastos, y eso ya implica que el usuario está en algún día > 1.
 
 ### Performance
+
 - `gastosPorCategoria` ya es `computed` reactivo. Pasar al resumen no añade carga.
 - El colapsable solo renderiza la lista cuando está expandido (`v-if`), no `v-show`.
 

@@ -8,16 +8,26 @@ function leerStorage() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? JSON.parse(raw) : []
-  } catch { return [] }
+  } catch {
+    return []
+  }
 }
 
 function escribirStorage(lista) {
   if (!import.meta.client) return
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lista)) } catch { /* ignore */ }
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lista))
+  } catch {
+    /* ignore */
+  }
 }
 
 function normalizar(texto) {
-  return (texto || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return (texto || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
 }
 
 export function useGastoFavoritos() {
@@ -32,14 +42,18 @@ export function useGastoFavoritos() {
     if (!concepto || !monto || !categoriaId) return
     const key = `${normalizar(concepto)}__${Number(monto).toFixed(2)}__${categoriaId}`
     const lista = leerStorage()
-    const existente = lista.find(f => f.key === key)
+    const existente = lista.find((f) => f.key === key)
     if (existente) {
       existente.count++
       existente.lastUsed = Date.now()
     } else {
       lista.push({
-        key, concepto, monto: Number(monto), categoriaId,
-        count: 1, lastUsed: Date.now(),
+        key,
+        concepto,
+        monto: Number(monto),
+        categoriaId,
+        count: 1,
+        lastUsed: Date.now(),
       })
     }
     // Mantener sólo los 30 más recientes en storage
@@ -55,7 +69,7 @@ export function useGastoFavoritos() {
   // Top N por frecuencia (count), sólo si aparecen al menos MIN_FRECUENCIA veces
   const topFavoritos = computed(() => {
     return [...favoritos.value]
-      .filter(f => f.count >= MIN_FRECUENCIA)
+      .filter((f) => f.count >= MIN_FRECUENCIA)
       .sort((a, b) => {
         if (b.count !== a.count) return b.count - a.count
         return b.lastUsed - a.lastUsed
@@ -64,7 +78,7 @@ export function useGastoFavoritos() {
   })
 
   function eliminarFavorito(key) {
-    const lista = leerStorage().filter(f => f.key !== key)
+    const lista = leerStorage().filter((f) => f.key !== key)
     escribirStorage(lista)
     favoritos.value = lista
   }

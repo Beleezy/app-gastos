@@ -28,17 +28,13 @@ describe('agregarBalance', () => {
   })
 
   it('redondea a 2 decimales', () => {
-    const rows = [
-      { personaId: 'a', persona: 'A', tipoDeuda: 'me_deben', total: '10.555' },
-    ]
+    const rows = [{ personaId: 'a', persona: 'A', tipoDeuda: 'me_deben', total: '10.555' }]
     const r = agregarBalance(rows)
     expect(r.totalMeDeben).toBe(10.56)
   })
 
   it('total inválido se trata como 0', () => {
-    const rows = [
-      { personaId: 'a', persona: 'A', tipoDeuda: 'me_deben', total: 'abc' },
-    ]
+    const rows = [{ personaId: 'a', persona: 'A', tipoDeuda: 'me_deben', total: 'abc' }]
     const r = agregarBalance(rows)
     expect(r.totalMeDeben).toBe(0)
   })

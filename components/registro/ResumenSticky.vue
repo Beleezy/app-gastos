@@ -1,8 +1,13 @@
 <template>
+  <!-- Overlay absoluto bajo el header: al estar fuera del flujo, la altura
+       del header sticky no cambia cuando aparece/desaparece — sin ese
+       cambio de altura, el scroll rápido hacia arriba ya no deja la banda
+       vacía con el resumen fantasma (fix 2026-07). El header (position:
+       sticky) es el contenedor posicionado de este absolute. -->
   <Transition name="slide-down">
     <div
       v-if="visible"
-      class="lg:hidden px-3 pb-2 border-b border-theme-border bg-theme-card"
+      class="absolute inset-x-0 top-full lg:hidden px-3 pb-2 border-b border-theme-border bg-theme-card shadow-lg shadow-black/20"
     >
       <div
         class="relative max-w-lg mx-auto bg-theme-input/40 border border-theme-border rounded-xl px-4 py-2 overflow-hidden"
@@ -10,7 +15,9 @@
         <!-- Glow decorativo -->
         <div
           class="absolute -top-8 -right-8 w-28 h-28 rounded-full blur-2xl pointer-events-none transition-colors duration-500"
-          :class="excedido ? 'bg-red-500/10' : porcentaje > 70 ? 'bg-amber-500/10' : 'bg-theme-accent-bg'"
+          :class="
+            excedido ? 'bg-red-500/10' : porcentaje > 70 ? 'bg-amber-500/10' : 'bg-theme-accent-bg'
+          "
         ></div>
 
         <!-- Fila 1: chip mes + navegacion -->
@@ -26,7 +33,14 @@
               aria-label="Mes anterior"
               @click="$emit('prev')"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -37,7 +51,14 @@
               aria-label="Mes siguiente"
               @click="$emit('next')"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3.5 h-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -52,10 +73,17 @@
           >
             {{ currencySymbol }}&nbsp;{{ formatMonto(totalMes) }}
           </p>
-          <p v-if="presupuesto > 0" class="text-[0.7rem] text-theme-text-sec leading-tight text-right">
+          <p
+            v-if="presupuesto > 0"
+            class="text-[0.7rem] text-theme-text-sec leading-tight text-right"
+          >
             de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
-            <span class="block font-semibold" :class="excedido ? 'text-red-400' : 'text-emerald-400'">
-              {{ excedido ? '+' : '' }}{{ formatMonto(Math.abs(saldo)) }} {{ excedido ? 'excedido' : 'restante' }}
+            <span
+              class="block font-semibold"
+              :class="excedido ? 'text-red-400' : 'text-emerald-400'"
+            >
+              {{ excedido ? '+' : '' }}{{ formatMonto(Math.abs(saldo)) }}
+              {{ excedido ? 'excedido' : 'restante' }}
             </span>
           </p>
           <p v-else class="text-[0.7rem] text-theme-text-muted italic">Sin presupuesto</p>
@@ -66,11 +94,13 @@
           <div class="w-full h-1 bg-theme-input rounded-full overflow-hidden">
             <div
               class="h-full rounded-full transition-all duration-700 ease-out"
-              :class="excedido
-                ? 'bg-gradient-to-r from-red-500 to-rose-400'
-                : porcentaje > 70
-                  ? 'bg-gradient-to-r from-amber-500 to-amber-400'
-                  : 'bg-gradient-to-r from-emerald-500 to-emerald-400'"
+              :class="
+                excedido
+                  ? 'bg-gradient-to-r from-red-500 to-rose-400'
+                  : porcentaje > 70
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-400'
+                    : 'bg-gradient-to-r from-emerald-500 to-emerald-400'
+              "
               :style="{ width: Math.min(porcentaje, 100) + '%' }"
             ></div>
           </div>
@@ -102,8 +132,13 @@ const porcentaje = computed(() => {
 </script>
 
 <style scoped>
-.slide-down-enter-active, .slide-down-leave-active {
+.slide-down-enter-active {
   transition: all 0.25s ease;
+}
+/* Salida casi instantánea: al volver arriba, un leave lento dejaba el
+   resumen fantasma flotando sobre el contenido real. */
+.slide-down-leave-active {
+  transition: all 0.12s ease;
 }
 .slide-down-enter-from {
   opacity: 0;

@@ -2,10 +2,17 @@ const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const API_BASE = 'https://www.googleapis.com/calendar/v3'
 
 class TokenExpiradoError extends Error {
-  constructor() { super('invalid_grant: refresh token expirado o revocado') }
+  constructor() {
+    super('invalid_grant: refresh token expirado o revocado')
+  }
 }
 
-export function createGcalClient({ refreshToken, clientId, clientSecret, sleep = (ms) => new Promise(r => setTimeout(r, ms)) }) {
+export function createGcalClient({
+  refreshToken,
+  clientId,
+  clientSecret,
+  sleep = (ms) => new Promise((r) => setTimeout(r, ms)),
+}) {
   let cachedToken = null
   let cachedExpMs = 0
 
@@ -30,7 +37,7 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
       throw new Error(`Refresh falló: ${JSON.stringify(data)}`)
     }
     cachedToken = data.access_token
-    cachedExpMs = Date.now() + (data.expires_in * 1000)
+    cachedExpMs = Date.now() + data.expires_in * 1000
     return cachedToken
   }
 
@@ -63,7 +70,9 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
   }
 
   async function deleteCalendar(calendarId) {
-    const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}`, { method: 'DELETE' })
+    const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}`, {
+      method: 'DELETE',
+    })
     if (!res.ok && res.status !== 404 && res.status !== 410) {
       throw new Error(`deleteCalendar falló: ${await res.text()}`)
     }
@@ -78,10 +87,13 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
 
   // ── Events ──
   async function insertEvent(calendarId, eventPayload) {
-    const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events`, {
-      method: 'POST',
-      body: JSON.stringify(eventPayload),
-    })
+    const res = await authedFetch(
+      `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events`,
+      {
+        method: 'POST',
+        body: JSON.stringify(eventPayload),
+      },
+    )
     if (!res.ok) throw new Error(`insertEvent falló (${res.status}): ${await res.text()}`)
     const data = await res.json()
     return data.id
@@ -90,7 +102,7 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
   async function patchEvent(calendarId, eventId, eventPayload) {
     const res = await authedFetch(
       `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
-      { method: 'PATCH', body: JSON.stringify(eventPayload) }
+      { method: 'PATCH', body: JSON.stringify(eventPayload) },
     )
     if (res.status === 404) {
       // Self-heal: recrear el evento
@@ -105,7 +117,7 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
   async function deleteEvent(calendarId, eventId) {
     const res = await authedFetch(
       `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
-      { method: 'DELETE' }
+      { method: 'DELETE' },
     )
     if (!res.ok && res.status !== 404 && res.status !== 410) {
       throw new Error(`deleteEvent falló: ${await res.text()}`)
@@ -119,7 +131,9 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
       const params = new URLSearchParams({ maxResults: '250', singleEvents: 'true' })
       if (timeMin) params.set('timeMin', timeMin)
       if (pageToken) params.set('pageToken', pageToken)
-      const res = await authedFetch(`${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`)
+      const res = await authedFetch(
+        `${API_BASE}/calendars/${encodeURIComponent(calendarId)}/events?${params}`,
+      )
       if (!res.ok) throw new Error(`listEvents falló: ${await res.text()}`)
       const data = await res.json()
       all.push(...(data.items || []))
@@ -130,8 +144,13 @@ export function createGcalClient({ refreshToken, clientId, clientSecret, sleep =
 
   return {
     getAccessToken,
-    createCalendar, deleteCalendar, getCalendar,
-    insertEvent, patchEvent, deleteEvent, listEvents,
+    createCalendar,
+    deleteCalendar,
+    getCalendar,
+    insertEvent,
+    patchEvent,
+    deleteEvent,
+    listEvents,
   }
 }
 

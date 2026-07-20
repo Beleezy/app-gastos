@@ -21,10 +21,13 @@ const props = defineProps({
   autoHide: { type: Boolean, default: true },
 })
 
-const positionClass = computed(() => ({
-  'bottom-right': 'right-4 bottom-24 lg:right-8 lg:bottom-8',
-  'bottom-left': 'left-4 bottom-24 lg:left-8 lg:bottom-8',
-}[props.position]))
+const positionClass = computed(
+  () =>
+    ({
+      'bottom-right': 'right-4 bottom-24 lg:right-8 lg:bottom-8',
+      'bottom-left': 'left-4 bottom-24 lg:left-8 lg:bottom-8',
+    })[props.position],
+)
 
 const scrollHidden = ref(false)
 let lastY = 0

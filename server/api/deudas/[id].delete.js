@@ -40,22 +40,46 @@ export default defineEventHandler(async (event) => {
       }
 
       // Desvincular ambos lados primero para evitar FK circular
-      await tx.update(deudas).set({ vinculoDeudaId: null }).where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
-      await tx.update(deudas).set({ vinculoDeudaId: null }).where(and(eq(deudas.id, id), isNull(deudas.deletedAt)))
+      await tx
+        .update(deudas)
+        .set({ vinculoDeudaId: null })
+        .where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
+      await tx
+        .update(deudas)
+        .set({ vinculoDeudaId: null })
+        .where(and(eq(deudas.id, id), isNull(deudas.deletedAt)))
       // Cascade soft-delete a pagos asociados de ambas deudas
       const ahora = new Date()
-      await tx.update(pagosDeuda).set({ deletedAt: ahora }).where(and(eq(pagosDeuda.deudaId, deuda.vinculoDeudaId), isNull(pagosDeuda.deletedAt)))
-      await tx.update(pagosDeuda).set({ deletedAt: ahora }).where(and(eq(pagosDeuda.deudaId, id), isNull(pagosDeuda.deletedAt)))
+      await tx
+        .update(pagosDeuda)
+        .set({ deletedAt: ahora })
+        .where(and(eq(pagosDeuda.deudaId, deuda.vinculoDeudaId), isNull(pagosDeuda.deletedAt)))
+      await tx
+        .update(pagosDeuda)
+        .set({ deletedAt: ahora })
+        .where(and(eq(pagosDeuda.deudaId, id), isNull(pagosDeuda.deletedAt)))
       // Soft-eliminar ambas deudas
-      await tx.update(deudas).set({ deletedAt: ahora }).where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
-      await tx.update(deudas).set({ deletedAt: ahora }).where(and(eq(deudas.id, id), isNull(deudas.deletedAt)))
+      await tx
+        .update(deudas)
+        .set({ deletedAt: ahora })
+        .where(and(eq(deudas.id, deuda.vinculoDeudaId), isNull(deudas.deletedAt)))
+      await tx
+        .update(deudas)
+        .set({ deletedAt: ahora })
+        .where(and(eq(deudas.id, id), isNull(deudas.deletedAt)))
     })
   } else {
     await db.transaction(async (tx) => {
       const ahora = new Date()
       // Cascade soft-delete a pagos asociados
-      await tx.update(pagosDeuda).set({ deletedAt: ahora }).where(and(eq(pagosDeuda.deudaId, id), isNull(pagosDeuda.deletedAt)))
-      await tx.update(deudas).set({ deletedAt: ahora }).where(and(eq(deudas.id, id), isNull(deudas.deletedAt)))
+      await tx
+        .update(pagosDeuda)
+        .set({ deletedAt: ahora })
+        .where(and(eq(pagosDeuda.deudaId, id), isNull(pagosDeuda.deletedAt)))
+      await tx
+        .update(deudas)
+        .set({ deletedAt: ahora })
+        .where(and(eq(deudas.id, id), isNull(deudas.deletedAt)))
     })
   }
 

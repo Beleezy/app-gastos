@@ -57,11 +57,7 @@ export default defineEventHandler(async (event) => {
   const [updated] = await db
     .update(deudas)
     .set(updateData)
-    .where(and(
-      eq(deudas.id, id),
-      eq(deudas.usuarioId, usuarioId),
-      isNull(deudas.deletedAt)
-    ))
+    .where(and(eq(deudas.id, id), eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
     .returning()
 
   // Sincronizar con deuda espejo si existe vínculo
@@ -73,7 +69,8 @@ export default defineEventHandler(async (event) => {
     if (updateData.notas !== undefined) espejoData.notas = updateData.notas
     if (updateData.estado !== undefined) espejoData.estado = updateData.estado
     if (updateData.montoOriginal !== undefined) espejoData.montoOriginal = updateData.montoOriginal
-    if (updateData.montoPendiente !== undefined) espejoData.montoPendiente = updateData.montoPendiente
+    if (updateData.montoPendiente !== undefined)
+      espejoData.montoPendiente = updateData.montoPendiente
 
     await db
       .update(deudas)
@@ -113,13 +110,14 @@ export default defineEventHandler(async (event) => {
       }
 
       // Build human-readable description
-      const partes = Object.values(cambiosDetallados).map(c => {
+      const partes = Object.values(cambiosDetallados).map((c) => {
         if (c.label === 'Monto') return `${c.label}: S/ ${c.antes} → S/ ${c.despues}`
         return `${c.label}: "${c.antes || '(vacío)'}" → "${c.despues || '(vacío)'}"`
       })
-      const descripcionDetallada = partes.length > 0
-        ? `Deuda editada: "${updated.concepto}" — ${partes.join(', ')}`
-        : `Deuda editada: "${updated.concepto}"`
+      const descripcionDetallada =
+        partes.length > 0
+          ? `Deuda editada: "${updated.concepto}" — ${partes.join(', ')}`
+          : `Deuda editada: "${updated.concepto}"`
 
       await registrarAuditoria(db, {
         personaAId: deudaActual.personaEntidadId,

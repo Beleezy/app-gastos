@@ -1,5 +1,13 @@
 import { db } from './db.js'
-import { deudas, pagosDeuda, personasEntidades, auditoriaVinculos, usuarios, configuraciones, vinculosCheckpoints } from '../database/schema.js'
+import {
+  deudas,
+  pagosDeuda,
+  personasEntidades,
+  auditoriaVinculos,
+  usuarios,
+  configuraciones,
+  vinculosCheckpoints,
+} from '../database/schema.js'
 import { eq, and, isNotNull, or } from 'drizzle-orm'
 
 /**
@@ -36,17 +44,18 @@ export async function getNombreDisplay(usuarioId) {
  * personaAId: la persona del usuario que realizó la acción
  * personaBId: la persona espejo (del otro usuario) - puede ser null
  */
-export async function registrarAuditoria(tx, { personaAId, personaBId, usuarioId, accion, descripcion, datos }) {
-  await tx
-    .insert(auditoriaVinculos)
-    .values({
-      personaAId,
-      personaBId: personaBId || null,
-      usuarioId,
-      accion,
-      descripcion: descripcion || null,
-      datos: datos ? JSON.stringify(datos) : null,
-    })
+export async function registrarAuditoria(
+  tx,
+  { personaAId, personaBId, usuarioId, accion, descripcion, datos },
+) {
+  await tx.insert(auditoriaVinculos).values({
+    personaAId,
+    personaBId: personaBId || null,
+    usuarioId,
+    accion,
+    descripcion: descripcion || null,
+    datos: datos ? JSON.stringify(datos) : null,
+  })
 }
 
 /**
@@ -61,32 +70,26 @@ export async function desvincularPersonas(tx, personaAId, personaBId) {
   const deudasA = await tx
     .select({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
     .from(deudas)
-    .where(and(
-      eq(deudas.personaEntidadId, personaAId),
-      isNotNull(deudas.vinculoDeudaId)
-    ))
+    .where(and(eq(deudas.personaEntidadId, personaAId), isNotNull(deudas.vinculoDeudaId)))
 
   const deudasB = await tx
     .select({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
     .from(deudas)
-    .where(and(
-      eq(deudas.personaEntidadId, personaBId),
-      isNotNull(deudas.vinculoDeudaId)
-    ))
+    .where(and(eq(deudas.personaEntidadId, personaBId), isNotNull(deudas.vinculoDeudaId)))
 
   // 2. Desvincular pagos de deudas de persona A
   for (const deuda of deudasA) {
     const pagosA = await tx
       .select({ id: pagosDeuda.id })
       .from(pagosDeuda)
-      .where(and(
-        eq(pagosDeuda.deudaId, deuda.id),
-        isNotNull(pagosDeuda.vinculoPagoId)
-      ))
+      .where(and(eq(pagosDeuda.deudaId, deuda.id), isNotNull(pagosDeuda.vinculoPagoId)))
 
     for (const pago of pagosA) {
       // Desvincular pago espejo primero
-      await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.vinculoPagoId, pago.id))
+      await tx
+        .update(pagosDeuda)
+        .set({ vinculoPagoId: null })
+        .where(eq(pagosDeuda.vinculoPagoId, pago.id))
       // Desvincular pago original
       await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pago.id))
     }
@@ -94,16 +97,16 @@ export async function desvincularPersonas(tx, personaAId, personaBId) {
 
   // 3. Desvincular pagos de deudas de persona B
   for (const deuda of deudasB) {
-    await tx
-      .update(pagosDeuda)
-      .set({ vinculoPagoId: null })
-      .where(eq(pagosDeuda.deudaId, deuda.id))
+    await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.deudaId, deuda.id))
   }
 
   // 4. Desvincular deudas de persona A
   for (const deuda of deudasA) {
     if (deuda.vinculoDeudaId) {
-      await tx.update(deudas).set({ vinculoDeudaId: null }).where(eq(deudas.id, deuda.vinculoDeudaId))
+      await tx
+        .update(deudas)
+        .set({ vinculoDeudaId: null })
+        .where(eq(deudas.id, deuda.vinculoDeudaId))
     }
     await tx.update(deudas).set({ vinculoDeudaId: null }).where(eq(deudas.id, deuda.id))
   }
@@ -176,7 +179,7 @@ export async function crearDeudaEspejo(tx, deudaOriginal, personaParId, destinoU
 export async function crearDeudasEspejoBulk(tx, deudasOriginales, personaParId, destinoUsuarioId) {
   if (!deudasOriginales.length) return new Map()
 
-  const filas = deudasOriginales.map(d => ({
+  const filas = deudasOriginales.map((d) => ({
     usuarioId: destinoUsuarioId,
     personaEntidadId: personaParId,
     tipoDeuda: flipTipoDeuda(d.tipoDeuda),
@@ -190,7 +193,10 @@ export async function crearDeudasEspejoBulk(tx, deudasOriginales, personaParId, 
     vinculoDeudaId: d.id,
   }))
 
-  const espejos = await tx.insert(deudas).values(filas).returning({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
+  const espejos = await tx
+    .insert(deudas)
+    .values(filas)
+    .returning({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
 
   // Map original → espejo
   const mapping = new Map()
@@ -229,11 +235,17 @@ export async function crearPagosEspejoBulk(tx, pagosConDeudaEspejo) {
     vinculoPagoId: pago.id,
   }))
 
-  const espejos = await tx.insert(pagosDeuda).values(filas).returning({ id: pagosDeuda.id, vinculoPagoId: pagosDeuda.vinculoPagoId })
+  const espejos = await tx
+    .insert(pagosDeuda)
+    .values(filas)
+    .returning({ id: pagosDeuda.id, vinculoPagoId: pagosDeuda.vinculoPagoId })
 
   // Update originales con vinculoPagoId apuntando al espejo
   for (const e of espejos) {
-    await tx.update(pagosDeuda).set({ vinculoPagoId: e.id }).where(eq(pagosDeuda.id, e.vinculoPagoId))
+    await tx
+      .update(pagosDeuda)
+      .set({ vinculoPagoId: e.id })
+      .where(eq(pagosDeuda.id, e.vinculoPagoId))
   }
 
   return espejos.length
@@ -270,9 +282,7 @@ export async function crearPagoEspejo(tx, pagoOriginal, deudaEspejoId) {
  * Garantiza consistencia al guardar/buscar checkpoints independientemente de qué usuario los crea.
  */
 export function normalizarParPersonas(id1, id2) {
-  return id1 < id2
-    ? { personaAId: id1, personaBId: id2 }
-    : { personaAId: id2, personaBId: id1 }
+  return id1 < id2 ? { personaAId: id1, personaBId: id2 } : { personaAId: id2, personaBId: id1 }
 }
 
 /**
@@ -281,12 +291,25 @@ export function normalizarParPersonas(id1, id2) {
  */
 export async function tomarSnapshot(tx, personaAId, personaBId) {
   const [perA] = await tx
-    .select({ id: personasEntidades.id, nombre: personasEntidades.nombre, usuarioId: personasEntidades.usuarioId })
-    .from(personasEntidades).where(eq(personasEntidades.id, personaAId)).limit(1)
+    .select({
+      id: personasEntidades.id,
+      nombre: personasEntidades.nombre,
+      usuarioId: personasEntidades.usuarioId,
+    })
+    .from(personasEntidades)
+    .where(eq(personasEntidades.id, personaAId))
+    .limit(1)
 
   const [perB] = personaBId
-    ? await tx.select({ id: personasEntidades.id, nombre: personasEntidades.nombre, usuarioId: personasEntidades.usuarioId })
-        .from(personasEntidades).where(eq(personasEntidades.id, personaBId)).limit(1)
+    ? await tx
+        .select({
+          id: personasEntidades.id,
+          nombre: personasEntidades.nombre,
+          usuarioId: personasEntidades.usuarioId,
+        })
+        .from(personasEntidades)
+        .where(eq(personasEntidades.id, personaBId))
+        .limit(1)
     : [null]
 
   async function getDeudasConPagos(personaId) {
@@ -305,7 +328,7 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
         estado: d.estado,
         notas: d.notas,
         vinculoDeudaId: d.vinculoDeudaId,
-        pagos: pagosD.map(p => ({
+        pagos: pagosD.map((p) => ({
           id: p.id,
           montoPagado: p.montoPagado,
           fechaPago: p.fechaPago,
@@ -319,8 +342,22 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
   }
 
   return {
-    personaA: perA ? { id: perA.id, nombre: perA.nombre, usuarioId: perA.usuarioId, deudas: await getDeudasConPagos(personaAId) } : null,
-    personaB: perB ? { id: perB.id, nombre: perB.nombre, usuarioId: perB.usuarioId, deudas: await getDeudasConPagos(personaBId) } : null,
+    personaA: perA
+      ? {
+          id: perA.id,
+          nombre: perA.nombre,
+          usuarioId: perA.usuarioId,
+          deudas: await getDeudasConPagos(personaAId),
+        }
+      : null,
+    personaB: perB
+      ? {
+          id: perB.id,
+          nombre: perB.nombre,
+          usuarioId: perB.usuarioId,
+          deudas: await getDeudasConPagos(personaBId),
+        }
+      : null,
     fechaSnapshot: new Date().toISOString(),
   }
 }
@@ -340,7 +377,10 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
  * @param {string} opts.creadoPorId - usuarioId que crea el checkpoint
  * @param {string} [opts.descripcion] - descripción opcional
  */
-export async function crearCheckpoint(tx, { personaAId, personaBId, tipo, creadoPorId, descripcion }) {
+export async function crearCheckpoint(
+  tx,
+  { personaAId, personaBId, tipo, creadoPorId, descripcion },
+) {
   const snapshot = await tomarSnapshot(tx, personaAId, personaBId)
 
   if (tipo === 'actual') {
@@ -348,10 +388,9 @@ export async function crearCheckpoint(tx, { personaAId, personaBId, tipo, creado
     const [actualExistente] = await tx
       .select({ id: vinculosCheckpoints.id })
       .from(vinculosCheckpoints)
-      .where(and(
-        eq(vinculosCheckpoints.personaAId, personaAId),
-        eq(vinculosCheckpoints.tipo, 'actual')
-      ))
+      .where(
+        and(eq(vinculosCheckpoints.personaAId, personaAId), eq(vinculosCheckpoints.tipo, 'actual')),
+      )
       .limit(1)
 
     if (actualExistente) {
@@ -360,17 +399,17 @@ export async function crearCheckpoint(tx, { personaAId, personaBId, tipo, creado
       const anteriores = await tx
         .select({ id: vinculosCheckpoints.id, createdAt: vinculosCheckpoints.createdAt })
         .from(vinculosCheckpoints)
-        .where(and(
-          eq(vinculosCheckpoints.personaAId, personaAId),
-          eq(vinculosCheckpoints.tipo, 'anterior')
-        ))
+        .where(
+          and(
+            eq(vinculosCheckpoints.personaAId, personaAId),
+            eq(vinculosCheckpoints.tipo, 'anterior'),
+          ),
+        )
         .orderBy(vinculosCheckpoints.createdAt)
 
       // Si ya hay 3 anteriores, eliminar el más antiguo para hacer hueco
       if (anteriores.length >= 3) {
-        await tx
-          .delete(vinculosCheckpoints)
-          .where(eq(vinculosCheckpoints.id, anteriores[0].id))
+        await tx.delete(vinculosCheckpoints).where(eq(vinculosCheckpoints.id, anteriores[0].id))
       }
 
       // Rotar: actual → anterior

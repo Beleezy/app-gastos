@@ -2,7 +2,11 @@
   <div class="px-4 py-2">
     <!-- Cabecera días de la semana -->
     <div class="grid grid-cols-7 mb-1">
-      <div v-for="d in DIAS" :key="d" class="text-center text-[0.6875rem] font-semibold text-theme-text-sec py-1">
+      <div
+        v-for="d in DIAS"
+        :key="d"
+        class="text-center text-[0.6875rem] font-semibold text-theme-text-sec py-1"
+      >
         {{ d }}
       </div>
     </div>
@@ -22,15 +26,15 @@
         @click="seleccionarDia(dia)"
       >
         <div class="flex items-center justify-between">
-          <span
-            class="text-[0.6875rem] font-semibold leading-none"
-            :class="claseNumero(dia)"
-          >{{ dia }}</span>
+          <span class="text-[0.6875rem] font-semibold leading-none" :class="claseNumero(dia)">{{
+            dia
+          }}</span>
           <span
             v-if="gastosDelDia(dia).length > 0 && !esDiaSeleccionado(dia)"
             class="text-[0.625rem] font-semibold leading-none"
             :class="esVencidoDia(dia) ? 'text-red-400' : 'text-theme-text-muted'"
-          >{{ formatCompact(totalDia(dia)) }}</span>
+            >{{ formatCompact(totalDia(dia)) }}</span
+          >
         </div>
 
         <!-- Dots por categoría -->
@@ -41,18 +45,27 @@
             class="w-1.5 h-1.5 rounded-full"
             :style="{ backgroundColor: g.categoriaColor || '#6b7280' }"
           ></span>
-          <span v-if="gastosDelDia(dia).length > 6" class="text-[0.625rem] text-theme-text-muted leading-none">+{{ gastosDelDia(dia).length - 6 }}</span>
+          <span
+            v-if="gastosDelDia(dia).length > 6"
+            class="text-[0.625rem] text-theme-text-muted leading-none"
+            >+{{ gastosDelDia(dia).length - 6 }}</span
+          >
         </div>
       </button>
     </div>
 
     <!-- Panel de día seleccionado -->
-    <div v-if="diaSel" class="mt-4 rounded-2xl bg-theme-card border border-theme-border overflow-hidden">
+    <div
+      v-if="diaSel"
+      class="mt-4 rounded-2xl bg-theme-card border border-theme-border overflow-hidden"
+    >
       <div class="flex items-center justify-between px-3 py-2.5 border-b border-theme-border">
         <div>
           <p class="text-xs font-semibold text-theme-text">{{ tituloDiaSel }}</p>
           <p class="text-[0.6875rem] text-theme-text-muted">
-            {{ gastosDelDia(diaSel).length }} gasto{{ gastosDelDia(diaSel).length === 1 ? '' : 's' }}
+            {{ gastosDelDia(diaSel).length }} gasto{{
+              gastosDelDia(diaSel).length === 1 ? '' : 's'
+            }}
             ·
             {{ currencySymbol }}&nbsp;{{ formatMonto(totalDia(diaSel)) }}
           </p>
@@ -61,7 +74,14 @@
           class="w-7 h-7 rounded-full text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors flex items-center justify-center"
           @click="diaSel = null"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -70,26 +90,34 @@
         <p class="text-xs text-theme-text-sec">Sin gastos planificados este día</p>
       </div>
       <div v-else class="divide-y divide-theme-border">
-        <div
-          v-for="g in gastosDelDia(diaSel)"
-          :key="g.id"
-          class="px-3 py-2.5"
-        >
+        <div v-for="g in gastosDelDia(diaSel)" :key="g.id" class="px-3 py-2.5">
           <!-- Info + monto + estado -->
           <div class="flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              <span class="w-1.5 h-1.5 rounded-full shrink-0" :style="{ backgroundColor: g.categoriaColor || '#6b7280' }"></span>
+              <span
+                class="w-1.5 h-1.5 rounded-full shrink-0"
+                :style="{ backgroundColor: g.categoriaColor || '#6b7280' }"
+              ></span>
               <div class="min-w-0">
                 <p class="text-xs text-theme-text truncate">{{ g.concepto }}</p>
-                <p class="text-[0.6875rem] text-theme-text-muted truncate">{{ g.categoriaNombre || 'Sin categoría' }}</p>
+                <p class="text-[0.6875rem] text-theme-text-muted truncate">
+                  {{ g.categoriaNombre || 'Sin categoría' }}
+                </p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               <span
                 class="text-[0.6875rem] px-1.5 py-0.5 rounded-full"
-                :class="g.estado === 'pagado' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-orange-500/15 text-orange-400'"
-              >{{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}</span>
-              <span class="text-xs font-semibold text-theme-text">{{ currencySymbol }}&nbsp;{{ formatMonto(g.montoEstimado) }}</span>
+                :class="
+                  g.estado === 'pagado'
+                    ? 'bg-emerald-500/15 text-emerald-400'
+                    : 'bg-orange-500/15 text-orange-400'
+                "
+                >{{ g.estado === 'pagado' ? 'Pagado' : 'Pendiente' }}</span
+              >
+              <span class="text-xs font-semibold text-theme-text"
+                >{{ currencySymbol }}&nbsp;{{ formatMonto(g.montoEstimado) }}</span
+              >
             </div>
           </div>
 
@@ -101,17 +129,35 @@
               title="Marcar como pagado"
               @click="marcarPagadoRapido(g)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
               Pagar
             </button>
             <button
               class="text-[0.6875rem] transition-colors flex items-center gap-1"
-              :class="g.gastoRegistradoFecha ? 'text-emerald-400 hover:text-emerald-300' : 'text-orange-400 hover:text-orange-300'"
+              :class="
+                g.gastoRegistradoFecha
+                  ? 'text-emerald-400 hover:text-emerald-300'
+                  : 'text-orange-400 hover:text-orange-300'
+              "
               @click="emit('registrar', g)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8" />
               </svg>
               {{ g.gastoRegistradoFecha ? 'Editar registro' : 'Registrar' }}
@@ -120,8 +166,19 @@
               class="text-[0.6875rem] text-theme-text-muted hover:text-theme-accent transition-colors flex items-center gap-1"
               @click="emit('editar', g)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
               </svg>
               Editar
             </button>
@@ -129,8 +186,19 @@
               class="text-[0.6875rem] text-theme-text-muted hover:text-red-400 transition-colors flex items-center gap-1"
               @click="pedirConfirmarEliminar(g)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3 h-3"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
               Eliminar
             </button>
@@ -143,28 +211,45 @@
     <SharedConfirmDialog
       v-model="showConfirmSimple"
       title="Eliminar gasto"
-      :message="gastoParaEliminar ? `¿Eliminar &quot;${gastoParaEliminar.concepto}&quot;? Tendrás 5 segundos para deshacer.` : ''"
+      :message="
+        gastoParaEliminar
+          ? `¿Eliminar &quot;${gastoParaEliminar.concepto}&quot;? Tendrás 5 segundos para deshacer.`
+          : ''
+      "
       confirm-label="Eliminar"
       variant="danger"
       @confirm="ejecutarEliminarSimple"
     >
       <template #message>
         <p>¿Eliminar "{{ gastoParaEliminar?.concepto }}"? Tendrás 5 segundos para deshacer.</p>
-        <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
-          ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
+        <p
+          v-if="gastoParaEliminar?.gastoRegistradoFecha"
+          class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20"
+        >
+          ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de
+          gastos.
         </p>
       </template>
     </SharedConfirmDialog>
 
     <!-- Confirm eliminar (gasto recurrente) -->
-    <div v-if="showModalRecurrente && gastoParaEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
+    <div
+      v-if="showModalRecurrente && gastoParaEliminar"
+      class="fixed inset-0 z-50 flex items-center justify-center px-6"
+    >
       <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarEliminar"></div>
-      <div class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border">
+      <div
+        class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border"
+      >
         <h3 class="text-base font-semibold text-theme-text mb-2">Eliminar gasto recurrente</h3>
         <div class="text-sm text-theme-text-muted mb-5">
           Este gasto se repite en meses futuros. ¿Qué deseas hacer?
-          <p v-if="gastoParaEliminar?.gastoRegistradoFecha" class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20">
-            ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de gastos.
+          <p
+            v-if="gastoParaEliminar?.gastoRegistradoFecha"
+            class="mt-3 text-[0.9375rem] font-bold text-red-500 bg-red-500/10 p-3 rounded-xl border border-red-500/20"
+          >
+            ⚠️ Advertencia: Este gasto ya ha sido registrado. También se eliminará del registro de
+            gastos.
           </p>
         </div>
         <div class="space-y-2">
@@ -229,19 +314,20 @@ function esHoy(dia) {
 }
 
 function esPasado(dia) {
-  const hoyD = new Date(); hoyD.setHours(0, 0, 0, 0)
+  const hoyD = new Date()
+  hoyD.setHours(0, 0, 0, 0)
   const d = new Date(anioActual.value, mesActual.value - 1, dia)
   return d < hoyD
 }
 
 const gastosConFecha = computed(() =>
   gastosPlaneados.value
-    .filter(g => g.fechaProbablePago)
-    .sort((a, b) => (a.fechaProbablePago || '').localeCompare(b.fechaProbablePago || ''))
+    .filter((g) => g.fechaProbablePago)
+    .sort((a, b) => (a.fechaProbablePago || '').localeCompare(b.fechaProbablePago || '')),
 )
 
 function gastosDelDia(dia) {
-  return gastosConFecha.value.filter(g => extraerDia(g.fechaProbablePago) === dia)
+  return gastosConFecha.value.filter((g) => extraerDia(g.fechaProbablePago) === dia)
 }
 
 function totalDia(dia) {
@@ -249,7 +335,7 @@ function totalDia(dia) {
 }
 
 function esVencidoDia(dia) {
-  return esPasado(dia) && gastosDelDia(dia).some(g => g.estado === 'pendiente')
+  return esPasado(dia) && gastosDelDia(dia).some((g) => g.estado === 'pendiente')
 }
 
 function extraerDia(fecha) {
@@ -264,17 +350,36 @@ function formatCompact(n) {
 
 // Selección de día
 const diaSel = ref(null)
-function seleccionarDia(dia) { diaSel.value = diaSel.value === dia ? null : dia }
-function esDiaSeleccionado(dia) { return diaSel.value === dia }
+function seleccionarDia(dia) {
+  diaSel.value = diaSel.value === dia ? null : dia
+}
+function esDiaSeleccionado(dia) {
+  return diaSel.value === dia
+}
 
 // Reset cuando cambia el mes
-watch([mesActual, anioActual], () => { diaSel.value = null })
+watch([mesActual, anioActual], () => {
+  diaSel.value = null
+})
 
 const tituloDiaSel = computed(() => {
   if (!diaSel.value) return ''
   const d = new Date(anioActual.value, mesActual.value - 1, diaSel.value)
   const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
-  const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  const meses = [
+    'enero',
+    'febrero',
+    'marzo',
+    'abril',
+    'mayo',
+    'junio',
+    'julio',
+    'agosto',
+    'septiembre',
+    'octubre',
+    'noviembre',
+    'diciembre',
+  ]
   return `${diasSemana[d.getDay()]} ${diaSel.value} de ${meses[d.getMonth()]}`
 })
 
@@ -312,7 +417,9 @@ const gastoParaEliminar = ref(null)
 const showConfirmSimple = ref(false)
 const showModalRecurrente = ref(false)
 const isEliminarOpen = computed(() => gastoParaEliminar.value !== null)
-useOverlayBack(isEliminarOpen, () => { cancelarEliminar() })
+useOverlayBack(isEliminarOpen, () => {
+  cancelarEliminar()
+})
 
 function cancelarEliminar() {
   gastoParaEliminar.value = null

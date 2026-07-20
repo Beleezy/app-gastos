@@ -1,5 +1,8 @@
 <template>
-  <SharedBaseBottomSheet :title="`Editar ${count} gasto${count === 1 ? '' : 's'}`" @close="$emit('close')">
+  <SharedBaseBottomSheet
+    :title="`Editar ${count} gasto${count === 1 ? '' : 's'}`"
+    @close="$emit('close')"
+  >
     <p class="text-xs text-theme-text-muted -mt-2">
       Solo se aplicarán los campos que actives. Los demás se mantendrán sin cambios.
     </p>
@@ -20,15 +23,19 @@
             v-for="cat in categorias"
             :key="cat.id"
             class="flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border text-xs transition-all"
-            :class="form.categoriaId === cat.id
-              ? 'border-theme-accent bg-theme-accent-bg'
-              : 'border-theme-border bg-theme-input hover:border-primary-600'"
+            :class="
+              form.categoriaId === cat.id
+                ? 'border-theme-accent bg-theme-accent-bg'
+                : 'border-theme-border bg-theme-input hover:border-primary-600'
+            "
             @click="form.categoriaId = cat.id"
           >
             <span class="text-base">{{ cat.icono || '📦' }}</span>
-            <span class="truncate w-full text-center"
+            <span
+              class="truncate w-full text-center"
               :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
-            >{{ cat.nombre }}</span>
+              >{{ cat.nombre }}</span
+            >
           </button>
         </div>
       </Transition>
@@ -37,11 +44,7 @@
     <!-- Fecha -->
     <div>
       <label class="flex items-center gap-2 mb-2">
-        <input
-          v-model="campos.fecha"
-          type="checkbox"
-          class="w-4 h-4 rounded accent-theme-accent"
-        />
+        <input v-model="campos.fecha" type="checkbox" class="w-4 h-4 rounded accent-theme-accent" />
         <span class="text-sm font-medium text-theme-text">Cambiar fecha</span>
       </label>
       <Transition name="expand">
@@ -57,11 +60,7 @@
     <!-- Hora -->
     <div>
       <label class="flex items-center gap-2 mb-2">
-        <input
-          v-model="campos.hora"
-          type="checkbox"
-          class="w-4 h-4 rounded accent-theme-accent"
-        />
+        <input v-model="campos.hora" type="checkbox" class="w-4 h-4 rounded accent-theme-accent" />
         <span class="text-sm font-medium text-theme-text">Cambiar hora</span>
       </label>
       <Transition name="expand">
@@ -77,11 +76,7 @@
     <!-- Notas -->
     <div>
       <label class="flex items-center gap-2 mb-2">
-        <input
-          v-model="campos.notas"
-          type="checkbox"
-          class="w-4 h-4 rounded accent-theme-accent"
-        />
+        <input v-model="campos.notas" type="checkbox" class="w-4 h-4 rounded accent-theme-accent" />
         <span class="text-sm font-medium text-theme-text">Cambiar notas</span>
       </label>
       <Transition name="expand">
@@ -100,13 +95,34 @@
 
       <button
         class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-        :class="saving ? 'bg-theme-accent/60 cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:scale-[0.98]'"
+        :class="
+          saving
+            ? 'bg-theme-accent/60 cursor-not-allowed'
+            : 'bg-theme-accent hover:bg-theme-accent-dark active:scale-[0.98]'
+        "
         :disabled="saving || !tieneCamposActivos"
         @click="guardar"
       >
-        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          v-if="saving"
+          class="animate-spin w-4 h-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
         {{ saving ? 'Guardando...' : `Aplicar a ${count} gasto${count === 1 ? '' : 's'}` }}
       </button>
@@ -167,15 +183,18 @@ async function guardar() {
 </script>
 
 <style scoped>
-.expand-enter-active, .expand-leave-active {
+.expand-enter-active,
+.expand-leave-active {
   transition: all 0.2s ease;
   overflow: hidden;
 }
-.expand-enter-from, .expand-leave-to {
+.expand-enter-from,
+.expand-leave-to {
   opacity: 0;
   max-height: 0;
 }
-.expand-enter-to, .expand-leave-from {
+.expand-enter-to,
+.expand-leave-from {
   opacity: 1;
   max-height: 500px;
 }

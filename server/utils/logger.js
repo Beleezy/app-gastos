@@ -27,7 +27,7 @@ const SENSITIVE_PATTERNS = [
   // en logs si no se redactan.
   /\b(?:postgres(?:ql)?|redis|mysql|mongodb):\/\/[^@\s]+:[^@\s]+@[^\s'"`]+/gi,
   // Bearer tokens en headers volcados a logs.
-  /\bBearer\s+[A-Za-z0-9._\-]{20,}/gi,
+  /\bBearer\s+[A-Za-z0-9._-]{20,}/gi,
   // GitHub PAT / OAuth secrets típicos.
   /\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{30,}/g,
 ]

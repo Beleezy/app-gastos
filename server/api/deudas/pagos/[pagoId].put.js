@@ -22,12 +22,14 @@ export default defineEventHandler(async (event) => {
     })
     .from(pagosDeuda)
     .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
-    .where(and(
-      eq(pagosDeuda.id, pagoId),
-      eq(deudas.usuarioId, usuarioId),
-      isNull(pagosDeuda.deletedAt),
-      isNull(deudas.deletedAt)
-    ))
+    .where(
+      and(
+        eq(pagosDeuda.id, pagoId),
+        eq(deudas.usuarioId, usuarioId),
+        isNull(pagosDeuda.deletedAt),
+        isNull(deudas.deletedAt),
+      ),
+    )
     .limit(1)
 
   if (!pago) {
@@ -58,30 +60,36 @@ export default defineEventHandler(async (event) => {
     const [result] = await db
       .select({ total: sum(pagosDeuda.montoPagado) })
       .from(pagosDeuda)
-      .where(and(
-        eq(pagosDeuda.deudaId, pago.deudaId),
-        isNull(pagosDeuda.deletedAt),
-        // Excluir el pago actual del cálculo (se reemplaza por el nuevo monto)
-      ))
+      .where(
+        and(
+          eq(pagosDeuda.deudaId, pago.deudaId),
+          isNull(pagosDeuda.deletedAt),
+          // Excluir el pago actual del cálculo (se reemplaza por el nuevo monto)
+        ),
+      )
 
     // Suma total excluyendo el pago actual + nuevo monto
     const totalSinEste = await db
       .select({ total: sum(pagosDeuda.montoPagado) })
       .from(pagosDeuda)
-      .where(and(
-        eq(pagosDeuda.deudaId, pago.deudaId),
-        eq(pagosDeuda.id, pagoId),
-        isNull(pagosDeuda.deletedAt)
-      ))
+      .where(
+        and(
+          eq(pagosDeuda.deudaId, pago.deudaId),
+          eq(pagosDeuda.id, pagoId),
+          isNull(pagosDeuda.deletedAt),
+        ),
+      )
 
     const pagosOtros = await db
       .select({ id: pagosDeuda.id, montoPagado: pagosDeuda.montoPagado })
       .from(pagosDeuda)
-      .where(and(
-        eq(pagosDeuda.deudaId, pago.deudaId),
-        eq(pagosDeuda.id, pagoId),
-        isNull(pagosDeuda.deletedAt)
-      ))
+      .where(
+        and(
+          eq(pagosDeuda.deudaId, pago.deudaId),
+          eq(pagosDeuda.id, pagoId),
+          isNull(pagosDeuda.deletedAt),
+        ),
+      )
 
     // Calcular total pagado (excluyendo este pago) + nuevo monto
     const [resultOtros] = await db

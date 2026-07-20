@@ -38,7 +38,7 @@ export function useAhorros() {
       const data = await apiFetch('/api/ahorros', {
         query: force
           ? { mes: mesActual.value, anio: anioActual.value, _t: Date.now() }
-          : { mes: mesActual.value, anio: anioActual.value }
+          : { mes: mesActual.value, anio: anioActual.value },
       })
       ahorrosList.value = data.ahorros
       totalMes.value = data.totalMes
@@ -62,10 +62,7 @@ export function useAhorros() {
       // Optimistic: si pertenece al mes/anio activo lo añadimos local.
       // Re-fetch en background para recalcular totales/porMedio/serie.
       if (creado && creado.mes === mesActual.value && creado.anio === anioActual.value) {
-        ahorrosList.value = [
-          { ...creado, monto: parseFloat(creado.monto) },
-          ...ahorrosList.value,
-        ]
+        ahorrosList.value = [{ ...creado, monto: parseFloat(creado.monto) }, ...ahorrosList.value]
         const m = parseFloat(creado.monto) || 0
         totalMes.value += m
         totalGlobal.value += m
@@ -81,8 +78,8 @@ export function useAhorros() {
     try {
       const actualizado = await apiFetch(`/api/ahorros/${id}`, { method: 'PUT', body: data })
       if (actualizado) {
-        ahorrosList.value = ahorrosList.value.map(a =>
-          a.id === id ? { ...actualizado, monto: parseFloat(actualizado.monto) } : a
+        ahorrosList.value = ahorrosList.value.map((a) =>
+          a.id === id ? { ...actualizado, monto: parseFloat(actualizado.monto) } : a,
         )
       }
       fetchAhorros(true).catch(() => {})
@@ -94,9 +91,9 @@ export function useAhorros() {
 
   async function deleteAhorro(id) {
     try {
-      const eliminado = ahorrosList.value.find(a => a.id === id)
+      const eliminado = ahorrosList.value.find((a) => a.id === id)
       await apiFetch(`/api/ahorros/${id}`, { method: 'DELETE' })
-      ahorrosList.value = ahorrosList.value.filter(a => a.id !== id)
+      ahorrosList.value = ahorrosList.value.filter((a) => a.id !== id)
       if (eliminado) {
         const m = parseFloat(eliminado.monto) || 0
         totalMes.value = Math.max(0, totalMes.value - m)
@@ -129,11 +126,10 @@ export function useAhorros() {
   }
 
   // Cache SWR para medios de ahorro: cambian raramente.
-  const mediosCache = useResourceCache(
-    'ahorros-medios',
-    () => apiFetch('/api/ahorros/medios'),
-    { ttl: 5 * 60 * 1000, initial: [] },
-  )
+  const mediosCache = useResourceCache('ahorros-medios', () => apiFetch('/api/ahorros/medios'), {
+    ttl: 5 * 60 * 1000,
+    initial: [],
+  })
 
   async function fetchMedios(force = false) {
     try {
@@ -157,7 +153,7 @@ export function useAhorros() {
   async function updateMedio(id, data) {
     try {
       const medio = await apiFetch(`/api/ahorros/medios/${id}`, { method: 'PUT', body: data })
-      mediosCache.set((mediosCache.data.value || []).map(m => m.id === id ? medio : m))
+      mediosCache.set((mediosCache.data.value || []).map((m) => (m.id === id ? medio : m)))
       return medio
     } catch (e) {
       error.value = e.message || 'Error al actualizar medio'
@@ -168,7 +164,7 @@ export function useAhorros() {
   async function deleteMedio(id) {
     try {
       await apiFetch(`/api/ahorros/medios/${id}`, { method: 'DELETE' })
-      mediosCache.set((mediosCache.data.value || []).filter(m => m.id !== id))
+      mediosCache.set((mediosCache.data.value || []).filter((m) => m.id !== id))
     } catch (e) {
       error.value = e.message || 'Error al eliminar medio'
       throw e
@@ -206,14 +202,37 @@ export function useAhorros() {
   const medios = mediosCache.data
 
   return {
-    ahorrosList, medios, totalMes, totalGlobal, porMedio,
-    metaMensual, metaGlobal, progresoMensual, progresoGlobal,
-    serie6Meses, isLoading, error,
-    mesActual, anioActual, nombreMes, esHoy,
-    ahorrosMesSeleccionado, mesSeleccionadoGrafico, isLoadingMesGrafico,
-    fetchAhorros, createAhorro, updateAhorro, deleteAhorro,
-    fetchMedios, createMedio, updateMedio, deleteMedio,
-    setMeta, mesSiguiente, mesAnterior,
-    fetchAhorrosMes, limpiarMesSeleccionado,
+    ahorrosList,
+    medios,
+    totalMes,
+    totalGlobal,
+    porMedio,
+    metaMensual,
+    metaGlobal,
+    progresoMensual,
+    progresoGlobal,
+    serie6Meses,
+    isLoading,
+    error,
+    mesActual,
+    anioActual,
+    nombreMes,
+    esHoy,
+    ahorrosMesSeleccionado,
+    mesSeleccionadoGrafico,
+    isLoadingMesGrafico,
+    fetchAhorros,
+    createAhorro,
+    updateAhorro,
+    deleteAhorro,
+    fetchMedios,
+    createMedio,
+    updateMedio,
+    deleteMedio,
+    setMeta,
+    mesSiguiente,
+    mesAnterior,
+    fetchAhorrosMes,
+    limpiarMesSeleccionado,
   }
 }

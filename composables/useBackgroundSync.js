@@ -17,10 +17,7 @@ export function useBackgroundSync() {
   const supported = ref(false)
 
   if (typeof window !== 'undefined') {
-    supported.value = (
-      'serviceWorker' in navigator &&
-      'SyncManager' in window
-    )
+    supported.value = 'serviceWorker' in navigator && 'SyncManager' in window
   }
 
   async function requestSync() {

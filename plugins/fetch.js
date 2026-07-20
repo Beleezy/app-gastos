@@ -22,7 +22,9 @@ export default defineNuxtPlugin(() => {
 
   async function getToken() {
     if (cachedToken && Date.now() - cachedAt < TOKEN_TTL) return cachedToken
-    const { data: { session } } = await supabase.auth.getSession()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
     cachedToken = session?.access_token || null
     cachedAt = session ? Date.now() : 0
     return cachedToken
@@ -53,9 +55,10 @@ export default defineNuxtPlugin(() => {
       // entrada de caché y la data se refresque al instante al cambiar de
       // perfil (sin servir datos del perfil anterior).
       try {
-        const m = typeof document !== 'undefined'
-          ? document.cookie.match(/(?:^|; )perfil-activo=([^;]*)/)
-          : null
+        const m =
+          typeof document !== 'undefined'
+            ? document.cookie.match(/(?:^|; )perfil-activo=([^;]*)/)
+            : null
         const perfilId = m ? decodeURIComponent(m[1]) : null
         if (perfilId) options.query = { ...(options.query || {}), _p: perfilId }
       } catch {}

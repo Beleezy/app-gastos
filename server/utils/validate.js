@@ -27,7 +27,7 @@ export function validate(schema, data) {
       const allTooBig =
         e.issues.length > 0 &&
         e.issues.every(
-          (i) => i.code === 'too_big' && (i.origin === 'string' || i.origin === 'array')
+          (i) => i.code === 'too_big' && (i.origin === 'string' || i.origin === 'array'),
         )
       throw createError({
         statusCode: allTooBig ? 413 : 400,

@@ -28,7 +28,9 @@ export function useSseStream({ onEvent, onComplete } = {}) {
     if (data.length === 0) return null
     const raw = data.join('\n')
     let parsed = raw
-    try { parsed = JSON.parse(raw) } catch {}
+    try {
+      parsed = JSON.parse(raw)
+    } catch {}
     return { event, data: parsed }
   }
 
@@ -89,7 +91,9 @@ export function useSseStream({ onEvent, onComplete } = {}) {
 
   function stop() {
     if (controller) {
-      try { controller.abort() } catch {}
+      try {
+        controller.abort()
+      } catch {}
       controller = null
     }
     isConnected.value = false

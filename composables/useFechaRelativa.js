@@ -23,11 +23,7 @@ export function formatRelativo(fecha, opts = {}) {
   if (fecha == null) return ''
   const { ahora = new Date() } = opts
   const esDateOnly = typeof fecha === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fecha)
-  const target = fecha instanceof Date
-    ? fecha
-    : esDateOnly
-      ? parseIsoDate(fecha)
-      : new Date(fecha)
+  const target = fecha instanceof Date ? fecha : esDateOnly ? parseIsoDate(fecha) : new Date(fecha)
 
   if (!target || Number.isNaN(target.getTime())) return ''
 

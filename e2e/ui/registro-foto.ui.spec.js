@@ -10,15 +10,25 @@ import { REGISTRO } from '../helpers/selectors.js'
 // el archivo y dispare el flujo de upload.
 const PNG_1x1 = Buffer.from(
   '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da6300010000000500015c0bcfb20000000049454e44ae426082',
-  'hex'
+  'hex',
 )
 
 test.describe('Registro por foto — UI', () => {
   test('mock LLM: subir foto abre confirmacion con items parseados', async ({ page, llmMock }) => {
     llmMock.setFoto({
       gastos: [
-        { concepto: 'Pan integral', monto: 4.5, categoria: 'Comida', fecha: new Date().toISOString().slice(0, 10) },
-        { concepto: 'Leche fresca', monto: 5.2, categoria: 'Comida', fecha: new Date().toISOString().slice(0, 10) },
+        {
+          concepto: 'Pan integral',
+          monto: 4.5,
+          categoria: 'Comida',
+          fecha: new Date().toISOString().slice(0, 10),
+        },
+        {
+          concepto: 'Leche fresca',
+          monto: 5.2,
+          categoria: 'Comida',
+          fecha: new Date().toISOString().slice(0, 10),
+        },
       ],
     })
 
@@ -43,7 +53,10 @@ test.describe('Registro por foto — UI', () => {
     await expect(confirmacion).toContainText('Leche fresca')
   })
 
-  test('foto con respuesta vacia muestra mensaje o no abre confirmacion', async ({ page, llmMock }) => {
+  test('foto con respuesta vacia muestra mensaje o no abre confirmacion', async ({
+    page,
+    llmMock,
+  }) => {
     llmMock.setFoto({ gastos: [] })
 
     const registro = new RegistroPage(page)

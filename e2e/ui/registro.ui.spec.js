@@ -8,7 +8,10 @@ import { NAV } from '../helpers/selectors.js'
 
 test.describe('Registro — UI', () => {
   test.describe('Smoke', () => {
-    test('la pagina /registro carga con BottomNav y pestañas visibles', async ({ page, viewport }) => {
+    test('la pagina /registro carga con BottomNav y pestañas visibles', async ({
+      page,
+      viewport,
+    }) => {
       const registro = new RegistroPage(page)
       await registro.goto()
 
@@ -21,7 +24,9 @@ test.describe('Registro — UI', () => {
       await expect(registro.btnCamara()).toBeVisible()
     })
 
-    test('el FAB de registro manual abre el bottom-sheet con campos esperados', async ({ page }) => {
+    test('el FAB de registro manual abre el bottom-sheet con campos esperados', async ({
+      page,
+    }) => {
       const registro = new RegistroPage(page)
       await registro.goto()
 
@@ -34,7 +39,11 @@ test.describe('Registro — UI', () => {
   })
 
   test.describe('FormGastoManual — happy path', () => {
-    test('crear gasto manual con campos minimos lo añade al historial', async ({ page, request, tracker }) => {
+    test('crear gasto manual con campos minimos lo añade al historial', async ({
+      page,
+      request,
+      tracker,
+    }) => {
       const sufijo = uniqueSuffix()
       const concepto = `Cafe ${sufijo}`
 
@@ -55,7 +64,7 @@ test.describe('Registro — UI', () => {
       expect(r.ok()).toBeTruthy()
       const data = await r.json()
       const lista = Array.isArray(data) ? data : data?.gastos || []
-      const creado = lista.find(g => g.concepto === concepto)
+      const creado = lista.find((g) => g.concepto === concepto)
       expect(creado, `debe existir gasto con concepto "${concepto}"`).toBeDefined()
       tracker.gastos.push(creado.id)
 

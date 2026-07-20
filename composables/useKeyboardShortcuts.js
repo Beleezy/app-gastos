@@ -67,11 +67,11 @@ export function useKeyboardShortcuts(map) {
   const keys = Object.keys(map)
 
   onMounted(() => {
-    keys.forEach(k => handlers.set(k, map[k]))
+    keys.forEach((k) => handlers.set(k, map[k]))
   })
 
   onUnmounted(() => {
-    keys.forEach(k => {
+    keys.forEach((k) => {
       if (handlers.get(k) === map[k]) handlers.delete(k)
     })
   })

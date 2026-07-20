@@ -29,7 +29,10 @@
         xmlns="http://www.w3.org/2000/svg"
         class="w-4 h-4 text-theme-text-sec shrink-0 transition-transform"
         :class="expanded ? 'rotate-180' : ''"
-        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
         aria-hidden="true"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -57,7 +60,11 @@
             stroke-width="2"
             aria-hidden="true"
           >
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9M20 20v-5h-.581m0 0a8.003 8.003 0 01-15.357-2" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9M20 20v-5h-.581m0 0a8.003 8.003 0 01-15.357-2"
+            />
           </svg>
         </button>
       </div>
@@ -92,9 +99,11 @@
           </div>
           <div
             class="rounded-xl p-3 text-center border"
-            :class="balance.balanceNeto >= 0
-              ? 'border-emerald-500/30 bg-emerald-500/5'
-              : 'border-red-500/30 bg-red-500/5'"
+            :class="
+              balance.balanceNeto >= 0
+                ? 'border-emerald-500/30 bg-emerald-500/5'
+                : 'border-red-500/30 bg-red-500/5'
+            "
           >
             <p class="text-[0.65rem] uppercase tracking-wide text-theme-text-sec">Neto</p>
             <p

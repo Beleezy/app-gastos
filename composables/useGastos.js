@@ -61,7 +61,9 @@ export function useGastos() {
   // época (entra en la query string) para que el siguiente fetch no pueda
   // servirse de la respuesta cacheada pre-mutación.
   const cacheEpoch = useState('gastos-cache-epoch', () => 0)
-  const bustCache = () => { cacheEpoch.value++ }
+  const bustCache = () => {
+    cacheEpoch.value++
+  }
 
   async function fetchGastos() {
     if (fetchGastosController) fetchGastosController.abort()
@@ -70,7 +72,10 @@ export function useGastos() {
     error.value = null
     try {
       const data = await apiFetch('/api/gastos', {
-        query: { fecha: fechaSeleccionada.value, ...(cacheEpoch.value ? { _v: cacheEpoch.value } : {}) },
+        query: {
+          fecha: fechaSeleccionada.value,
+          ...(cacheEpoch.value ? { _v: cacheEpoch.value } : {}),
+        },
         signal: fetchGastosController.signal,
       })
       gastos.value = data
@@ -88,7 +93,7 @@ export function useGastos() {
     const anioParam = anio || Number(a)
     try {
       const data = await apiFetch('/api/gastos/resumen', {
-        query: { fecha: f, mes: mesParam, anio: anioParam }
+        query: { fecha: f, mes: mesParam, anio: anioParam },
       })
       resumen.value = data
     } catch (e) {
@@ -108,7 +113,7 @@ export function useGastos() {
     try {
       const nuevo = await apiFetch('/api/gastos', {
         method: 'POST',
-        body: data
+        body: data,
       })
       bustCache()
       // Add optimistically if same date
@@ -127,11 +132,11 @@ export function useGastos() {
     try {
       const nuevos = await apiFetch('/api/gastos/bulk', {
         method: 'POST',
-        body: { gastos: gastosData, transcripcionVoz, metodoRegistro }
+        body: { gastos: gastosData, transcripcionVoz, metodoRegistro },
       })
       bustCache()
       // Add those matching current date
-      const mismaFecha = nuevos.filter(g => g.fecha === fechaSeleccionada.value)
+      const mismaFecha = nuevos.filter((g) => g.fecha === fechaSeleccionada.value)
       if (mismaFecha.length > 0) {
         gastos.value = [...mismaFecha, ...gastos.value]
       }
@@ -147,10 +152,10 @@ export function useGastos() {
     try {
       const updated = await apiFetch(`/api/gastos/${id}`, {
         method: 'PUT',
-        body: data
+        body: data,
       })
       bustCache()
-      const idx = gastos.value.findIndex(g => g.id === id)
+      const idx = gastos.value.findIndex((g) => g.id === id)
       if (idx !== -1) {
         gastos.value[idx] = updated
       }
@@ -166,7 +171,7 @@ export function useGastos() {
     try {
       await apiFetch(`/api/gastos/${id}`, { method: 'DELETE' })
       bustCache()
-      gastos.value = gastos.value.filter(g => g.id !== id)
+      gastos.value = gastos.value.filter((g) => g.id !== id)
       await fetchResumen()
     } catch (e) {
       error.value = e.message || 'Error al eliminar gasto'
@@ -183,9 +188,9 @@ export function useGastos() {
       })
       bustCache()
       // Actualizar estado local
-      const gastosMap = Object.fromEntries((res.gastos || []).map(g => [g.id, g]))
-      gastos.value = gastos.value.map(g => gastosMap[g.id] || g)
-      gastosMensuales.value = gastosMensuales.value.map(g => gastosMap[g.id] || g)
+      const gastosMap = Object.fromEntries((res.gastos || []).map((g) => [g.id, g]))
+      gastos.value = gastos.value.map((g) => gastosMap[g.id] || g)
+      gastosMensuales.value = gastosMensuales.value.map((g) => gastosMap[g.id] || g)
       await fetchResumen()
       return res
     } catch (e) {
@@ -203,8 +208,8 @@ export function useGastos() {
       })
       bustCache()
       const idsSet = new Set(res.ids || ids)
-      gastos.value = gastos.value.filter(g => !idsSet.has(g.id))
-      gastosMensuales.value = gastosMensuales.value.filter(g => !idsSet.has(g.id))
+      gastos.value = gastos.value.filter((g) => !idsSet.has(g.id))
+      gastosMensuales.value = gastosMensuales.value.filter((g) => !idsSet.has(g.id))
       await fetchResumen()
       return res
     } catch (e) {
@@ -219,7 +224,11 @@ export function useGastos() {
     isLoadingMensual.value = true
     try {
       const data = await apiFetch('/api/gastos', {
-        query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value, ...(cacheEpoch.value ? { _v: cacheEpoch.value } : {}) },
+        query: {
+          mes: mesSeleccionado.value,
+          anio: anioSeleccionado.value,
+          ...(cacheEpoch.value ? { _v: cacheEpoch.value } : {}),
+        },
         signal: fetchMensualController.signal,
       })
       gastosMensuales.value = data
@@ -236,7 +245,9 @@ export function useGastos() {
 
   const esMesActual = computed(() => {
     const hoy = new Date()
-    return mesSeleccionado.value === hoy.getMonth() + 1 && anioSeleccionado.value === hoy.getFullYear()
+    return (
+      mesSeleccionado.value === hoy.getMonth() + 1 && anioSeleccionado.value === hoy.getFullYear()
+    )
   })
 
   // Hash barato del array que identifica si cambió: longitud + último id +
@@ -305,7 +316,7 @@ export function useGastos() {
       semanas[lunesKey].diasConGastos[g.fecha].total += parseFloat(g.monto) || 0
     }
     const data = Object.values(semanas)
-      .map(s => ({
+      .map((s) => ({
         ...s,
         dias: Object.values(s.diasConGastos).sort((a, b) => b.fecha.localeCompare(a.fecha)),
       }))
@@ -334,7 +345,7 @@ export function useGastos() {
     }
     const lista = Object.values(agrupado).sort((a, b) => b.total - a.total)
     const totalGeneral = lista.reduce((sum, c) => sum + c.total, 0)
-    const data = lista.map(c => ({
+    const data = lista.map((c) => ({
       ...c,
       porcentaje: totalGeneral > 0 ? (c.total / totalGeneral) * 100 : 0,
     }))
@@ -396,30 +407,59 @@ export function useGastos() {
   }
 
   function getCategoriaById(id) {
-    return categorias.value.find(c => c.id === id)
+    return categorias.value.find((c) => c.id === id)
   }
 
   function normalizarTexto(texto) {
-    return texto.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
   }
 
   function getCategoriaPorNombre(nombre) {
     const normalizado = normalizarTexto(nombre)
-    return categorias.value.find(c =>
-      normalizarTexto(c.nombre) === normalizado
-    )
+    return categorias.value.find((c) => normalizarTexto(c.nombre) === normalizado)
   }
 
   return {
-    gastos, gastosMensuales, categorias, resumen, isLoading, isLoadingMensual, error,
-    fechaSeleccionada, fechaFormateada, esHoy, gastosPorHora,
-    mesSeleccionado, anioSeleccionado, mesFormateado, esMesActual,
-    gastosPorDia, gastosPorSemana, gastosPorCategoria,
-    fetchGastos, fetchResumen, fetchCategorias, fetchGastosMensuales,
-    createGasto, createGastosBulk, updateGasto, updateGastosBulk, deleteGasto, deleteGastosBulk,
-    diaAnterior, diaSiguiente, irAHoy,
-    mesAnterior, mesSiguiente, irAMesActual,
-    getCategoriaById, getCategoriaPorNombre,
-    formatFechaDia, formatRangoSemana,
+    gastos,
+    gastosMensuales,
+    categorias,
+    resumen,
+    isLoading,
+    isLoadingMensual,
+    error,
+    fechaSeleccionada,
+    fechaFormateada,
+    esHoy,
+    gastosPorHora,
+    mesSeleccionado,
+    anioSeleccionado,
+    mesFormateado,
+    esMesActual,
+    gastosPorDia,
+    gastosPorSemana,
+    gastosPorCategoria,
+    fetchGastos,
+    fetchResumen,
+    fetchCategorias,
+    fetchGastosMensuales,
+    createGasto,
+    createGastosBulk,
+    updateGasto,
+    updateGastosBulk,
+    deleteGasto,
+    deleteGastosBulk,
+    diaAnterior,
+    diaSiguiente,
+    irAHoy,
+    mesAnterior,
+    mesSiguiente,
+    irAMesActual,
+    getCategoriaById,
+    getCategoriaPorNombre,
+    formatFechaDia,
+    formatRangoSemana,
   }
 }

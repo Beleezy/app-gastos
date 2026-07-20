@@ -7,7 +7,10 @@ import { NAV } from '../helpers/selectors.js'
 test.describe('BottomNav — UI', () => {
   // El BottomNav lleva `lg:hidden` (visible solo bajo 1024px). En el project
   // desktop (viewport 1440x900) el SideNav lo reemplaza — el test no aplica.
-  test.skip(({ viewport }) => viewport && viewport.width >= 1024, 'BottomNav solo se muestra en mobile')
+  test.skip(
+    ({ viewport }) => viewport && viewport.width >= 1024,
+    'BottomNav solo se muestra en mobile',
+  )
 
   test('los 4 tabs navegan a sus paginas respectivas', async ({ page }) => {
     await page.goto('/registro')

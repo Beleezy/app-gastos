@@ -18,12 +18,15 @@
         <label class="block text-xs text-theme-text-sec mb-1.5">Tipo</label>
         <div class="flex gap-2">
           <button
-            v-for="opt in tipoOpts" :key="opt.value"
+            v-for="opt in tipoOpts"
+            :key="opt.value"
             type="button"
             class="flex-1 py-2.5 rounded-xl text-xs font-medium transition-colors border"
-            :class="form.tipo === opt.value
-              ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
-              : 'bg-theme-card text-theme-text-sec border-theme-border hover:border-primary-600/50'"
+            :class="
+              form.tipo === opt.value
+                ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
+                : 'bg-theme-card text-theme-text-sec border-theme-border hover:border-primary-600/50'
+            "
             @click="form.tipo = opt.value"
           >
             {{ opt.label }}
@@ -74,8 +77,19 @@
           @click="guardar"
         >
           <svg v-if="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            <circle
+              class="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
           </svg>
           {{ saving ? 'Guardando…' : 'Guardar' }}
         </button>
@@ -86,7 +100,7 @@
 
 <script setup>
 const props = defineProps({
-  persona: { type: Object, required: true }
+  persona: { type: Object, required: true },
 })
 const emit = defineEmits(['close', 'saved'])
 

@@ -14,7 +14,9 @@ export default defineEventHandler(async (event) => {
   const body = await validateBody(event, personaEntidadUpdateSchema)
 
   function capitalizarNombre(nombre) {
-    return nombre.trim().replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    return nombre
+      .trim()
+      .replace(/\w\S*/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
   }
 
   const updateData = { updatedAt: new Date() }

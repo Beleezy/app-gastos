@@ -49,7 +49,7 @@ function getClientIp(event) {
  * @param {string} [options.userId] requerido si scope='user'.
  */
 export async function rateLimit(event, { key, limit, windowMs, scope = 'ip', userId }) {
-  const subject = scope === 'user' ? (userId || 'anon') : getClientIp(event)
+  const subject = scope === 'user' ? userId || 'anon' : getClientIp(event)
   const bucketKey = `${key}:${scope}:${subject}`
 
   const { count, resetAt } = await incrBucket(bucketKey, windowMs)
@@ -89,13 +89,37 @@ export const rateLimits = {
   vozParse: (event, userId) =>
     rateLimit(event, { key: 'voz:parse', limit: 20, windowMs: 60_000, scope: 'user', userId }),
   vozParseHora: (event, userId) =>
-    rateLimit(event, { key: 'voz:parse:hora', limit: 60, windowMs: 60 * 60_000, scope: 'user', userId }),
+    rateLimit(event, {
+      key: 'voz:parse:hora',
+      limit: 60,
+      windowMs: 60 * 60_000,
+      scope: 'user',
+      userId,
+    }),
   vozParseImage: (event, userId) =>
-    rateLimit(event, { key: 'voz:parse-image', limit: 10, windowMs: 60_000, scope: 'user', userId }),
+    rateLimit(event, {
+      key: 'voz:parse-image',
+      limit: 10,
+      windowMs: 60_000,
+      scope: 'user',
+      userId,
+    }),
   vozParseImageHora: (event, userId) =>
-    rateLimit(event, { key: 'voz:parse-image:hora', limit: 30, windowMs: 60 * 60_000, scope: 'user', userId }),
+    rateLimit(event, {
+      key: 'voz:parse-image:hora',
+      limit: 30,
+      windowMs: 60 * 60_000,
+      scope: 'user',
+      userId,
+    }),
   vinculosSolicitar: (event, userId) =>
-    rateLimit(event, { key: 'vinculos:solicitar', limit: 5, windowMs: 60 * 60_000, scope: 'user', userId }),
+    rateLimit(event, {
+      key: 'vinculos:solicitar',
+      limit: 5,
+      windowMs: 60 * 60_000,
+      scope: 'user',
+      userId,
+    }),
   bulkOp: (event, userId) =>
     rateLimit(event, { key: 'bulk:op', limit: 30, windowMs: 60_000, scope: 'user', userId }),
   apiDefault: (event) =>
@@ -105,5 +129,11 @@ export const rateLimits = {
   apiPerUserMinute: (event, userId) =>
     rateLimit(event, { key: 'api:user:min', limit: 120, windowMs: 60_000, scope: 'user', userId }),
   apiPerUserHour: (event, userId) =>
-    rateLimit(event, { key: 'api:user:hour', limit: 3000, windowMs: 60 * 60_000, scope: 'user', userId }),
+    rateLimit(event, {
+      key: 'api:user:hour',
+      limit: 3000,
+      windowMs: 60 * 60_000,
+      scope: 'user',
+      userId,
+    }),
 }

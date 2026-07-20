@@ -15,9 +15,9 @@
  * 'prioridad' (alta > media > baja > sin), 'alfabetico' (concepto/tipo).
  */
 
-const PRIORIDAD_ORDER = { alta: 0, media: 1, baja: 2, sinDefinir: 3 }
-
 import { normalizar } from './utils/textNormalize.js'
+
+const PRIORIDAD_ORDER = { alta: 0, media: 1, baja: 2, sinDefinir: 3 }
 
 function precioMin(opciones) {
   if (!Array.isArray(opciones) || opciones.length === 0) return null
@@ -43,13 +43,26 @@ export function aplicarFiltrosFuturos(proyectos, filtros = {}, orden = 'reciente
       const detalles = Array.isArray(p.detalles) ? p.detalles : []
       const decididos = detalles.filter((d) => d.estadoDecision === 'decidido')
       if (estadoDecision === 'decididos' && decididos.length === 0) return false
-      if (estadoDecision === 'pendientes' && decididos.length === detalles.length && detalles.length > 0) return false
+      if (
+        estadoDecision === 'pendientes' &&
+        decididos.length === detalles.length &&
+        detalles.length > 0
+      )
+        return false
     }
     if (term) {
-      const blob = normalizar([
-        p.concepto, p.tipo,
-        ...(p.detalles || []).flatMap((d) => [d.concepto, ...(d.opciones || []).map((o) => o.nombre)]),
-      ].filter(Boolean).join(' '))
+      const blob = normalizar(
+        [
+          p.concepto,
+          p.tipo,
+          ...(p.detalles || []).flatMap((d) => [
+            d.concepto,
+            ...(d.opciones || []).map((o) => o.nombre),
+          ]),
+        ]
+          .filter(Boolean)
+          .join(' '),
+      )
       if (!blob.includes(term)) return false
     }
     return true
@@ -79,7 +92,11 @@ export function aplicarFiltrosFuturos(proyectos, filtros = {}, orden = 'reciente
 
 export function useGastosFuturosFiltros(source, filtros, orden) {
   const proyectosFiltrados = computed(() => {
-    return aplicarFiltrosFuturos(unref(source) || [], unref(filtros) || {}, unref(orden) || 'reciente')
+    return aplicarFiltrosFuturos(
+      unref(source) || [],
+      unref(filtros) || {},
+      unref(orden) || 'reciente',
+    )
   })
 
   const totales = computed(() => {

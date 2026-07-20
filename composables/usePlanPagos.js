@@ -32,7 +32,7 @@ export function sugerirPlanPagos({
 
   const inicio = fechaInicio ? new Date(fechaInicio) : new Date()
   let n = parseInt(cuotas, 10)
-  let stepDias = null
+  let stepDias
 
   if (!n || n < 1) {
     if (!fechaVencimiento) return { hitos: [] }

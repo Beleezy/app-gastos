@@ -21,8 +21,7 @@ export const useUsuarioStore = defineStore('usuario', {
     locale: (state) => state.configuracion?.locale || 'es-PE',
     monedaPreferida: (state) => state.configuracion?.monedaPreferida || 'PEN',
     zonaHoraria: (state) => state.configuracion?.zonaHoraria || 'America/Lima',
-    presupuestoDefault: (state) =>
-      parseFloat(state.configuracion?.presupuestoDefault ?? 0) || 0,
+    presupuestoDefault: (state) => parseFloat(state.configuracion?.presupuestoDefault ?? 0) || 0,
     diaInicioCiclo: (state) => state.configuracion?.diaInicioCiclo ?? 1,
     diasPdfSaldadas: (state) => state.configuracion?.diasPdfSaldadas ?? 30,
     estaCargado: (state) => state.perfil != null && state.configuracion != null,

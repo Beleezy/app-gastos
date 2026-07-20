@@ -14,8 +14,12 @@ export class FormPagoGlobalModal {
     await this.root.waitFor({ state: 'visible', timeout: 5000 })
   }
 
-  inputMonto() { return this.root.getByTestId(DEUDAS.INPUT_MONTO_GLOBAL) }
-  btnDistribuir() { return this.root.getByTestId(DEUDAS.BTN_DISTRIBUIR) }
+  inputMonto() {
+    return this.root.getByTestId(DEUDAS.INPUT_MONTO_GLOBAL)
+  }
+  btnDistribuir() {
+    return this.root.getByTestId(DEUDAS.BTN_DISTRIBUIR)
+  }
 
   async distribuir({ monto } = {}) {
     if (monto !== undefined) await this.inputMonto().fill(String(monto))

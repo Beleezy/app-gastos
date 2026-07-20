@@ -12,14 +12,26 @@ export class RegistroPage extends BasePage {
   }
 
   // ─── Tabs internos ──────────────────────────────────────
-  tabHistorial() { return this.page.getByTestId(REGISTRO.TAB_HISTORIAL) }
-  tabMapa() { return this.page.getByTestId(REGISTRO.TAB_MAPA) }
-  tabCategorias() { return this.page.getByTestId(REGISTRO.TAB_CATEGORIAS) }
-  tabStats() { return this.page.getByTestId(REGISTRO.TAB_STATS) }
+  tabHistorial() {
+    return this.page.getByTestId(REGISTRO.TAB_HISTORIAL)
+  }
+  tabMapa() {
+    return this.page.getByTestId(REGISTRO.TAB_MAPA)
+  }
+  tabCategorias() {
+    return this.page.getByTestId(REGISTRO.TAB_CATEGORIAS)
+  }
+  tabStats() {
+    return this.page.getByTestId(REGISTRO.TAB_STATS)
+  }
 
   // ─── Historial ──────────────────────────────────────────
-  historial() { return this.page.getByTestId(REGISTRO.HISTORIAL) }
-  itemsGasto() { return this.page.getByTestId(REGISTRO.GASTO_ITEM) }
+  historial() {
+    return this.page.getByTestId(REGISTRO.HISTORIAL)
+  }
+  itemsGasto() {
+    return this.page.getByTestId(REGISTRO.GASTO_ITEM)
+  }
 
   async cantidadGastosVisibles() {
     return this.itemsGasto().count()
@@ -66,16 +78,24 @@ export class RegistroPage extends BasePage {
   }
 
   // ─── Voz / foto ─────────────────────────────────────────
-  btnMicrofono() { return this.page.getByTestId(REGISTRO.BTN_MICROFONO) }
-  btnCamara() { return this.page.getByTestId(REGISTRO.BTN_CAMARA) }
-  inputFoto() { return this.page.getByTestId(REGISTRO.INPUT_FOTO) }
+  btnMicrofono() {
+    return this.page.getByTestId(REGISTRO.BTN_MICROFONO)
+  }
+  btnCamara() {
+    return this.page.getByTestId(REGISTRO.BTN_CAMARA)
+  }
+  inputFoto() {
+    return this.page.getByTestId(REGISTRO.INPUT_FOTO)
+  }
 
   /**
    * Inyecta una transcripcion via window y dispara el flujo de voz.
    * El stub de SpeechRecognition se instala via page.addInitScript en el spec.
    */
   async dictarTranscripcion(texto) {
-    await this.page.evaluate((t) => { window.__e2eTranscript = t }, texto)
+    await this.page.evaluate((t) => {
+      window.__e2eTranscript = t
+    }, texto)
     await this.btnMicrofono().click()
   }
 }

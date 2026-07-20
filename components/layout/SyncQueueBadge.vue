@@ -15,8 +15,19 @@
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        ></path>
       </svg>
       <svg
         v-else
@@ -30,9 +41,7 @@
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7M3 7h.01" />
       </svg>
-      <span>
-        {{ totalPending }} pendiente{{ totalPending === 1 ? '' : 's' }} de sincronizar
-      </span>
+      <span> {{ totalPending }} pendiente{{ totalPending === 1 ? '' : 's' }} de sincronizar </span>
       <button
         v-if="!isFlushing"
         type="button"

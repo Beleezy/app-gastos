@@ -42,7 +42,7 @@ export function useDeudaPdf() {
 
     // Active debts table
     if (deudasActivas.length > 0) {
-      const tieneAbonos = deudasActivas.some(d => d.montoOriginal > d.montoPendiente)
+      const tieneAbonos = deudasActivas.some((d) => d.montoOriginal > d.montoPendiente)
 
       doc.setFontSize(11)
       doc.setFont('helvetica', 'bold')
@@ -104,7 +104,10 @@ export function useDeudaPdf() {
 
       // Total abonado summary
       if (tieneAbonos) {
-        const totalAbonado = deudasActivas.reduce((sum, d) => sum + (d.montoOriginal - d.montoPendiente), 0)
+        const totalAbonado = deudasActivas.reduce(
+          (sum, d) => sum + (d.montoOriginal - d.montoPendiente),
+          0,
+        )
         if (totalAbonado > 0) {
           y += 3
           doc.setFontSize(9)
@@ -125,7 +128,7 @@ export function useDeudaPdf() {
     haceDias.setDate(haceDias.getDate() - diasPdf)
     const haceDiasStr = haceDias.toISOString().split('T')[0]
 
-    const saldadasRecientes = deudasSaldadas.filter(d => {
+    const saldadasRecientes = deudasSaldadas.filter((d) => {
       const fechaUpdate = d.updatedAt ? new Date(d.updatedAt).toISOString().split('T')[0] : null
       return fechaUpdate && fechaUpdate >= haceDiasStr
     })
@@ -210,10 +213,11 @@ export function useDeudaPdf() {
     doc.save(filename)
     const totalPendiente = deudasActivas.reduce((sum, d) => sum + d.montoPendiente, 0)
     const lineasDeudas = deudasActivas
-      .map(d => {
-        const pendiente = d.montoPendiente !== d.montoOriginal
-          ? ` (pendiente: ${currencySymbol.value} ${formatMonto(d.montoPendiente)})`
-          : ''
+      .map((d) => {
+        const pendiente =
+          d.montoPendiente !== d.montoOriginal
+            ? ` (pendiente: ${currencySymbol.value} ${formatMonto(d.montoPendiente)})`
+            : ''
         return `• ${d.concepto}: ${currencySymbol.value} ${formatMonto(d.montoOriginal)}${pendiente}`
       })
       .join('\n')

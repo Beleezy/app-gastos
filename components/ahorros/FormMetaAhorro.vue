@@ -1,7 +1,9 @@
 <template>
   <SharedBaseBottomSheet title="Metas de ahorro" @close="$emit('close')">
     <!-- Tabs -->
-    <div class="grid grid-cols-2 gap-2 rounded-2xl border border-theme-border bg-theme-card p-1 mb-4">
+    <div
+      class="grid grid-cols-2 gap-2 rounded-2xl border border-theme-border bg-theme-card p-1 mb-4"
+    >
       <button
         class="rounded-xl px-3 py-2 text-sm font-medium transition-colors"
         :class="tab === 'mensual' ? 'bg-theme-accent-bg text-theme-accent' : 'text-theme-text-sec'"
@@ -21,11 +23,11 @@
     <Transition name="page" mode="out-in">
       <div :key="tab">
         <div v-if="tab === 'mensual'">
-          <p class="text-xs text-theme-text-sec mb-3">
-            Meta para {{ nombreMes }} {{ anioActual }}
-          </p>
+          <p class="text-xs text-theme-text-sec mb-3">Meta para {{ nombreMes }} {{ anioActual }}</p>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{
+              currencySymbol
+            }}</span>
             <input
               v-model="montoMensual"
               type="number"
@@ -40,11 +42,11 @@
         </div>
 
         <div v-else>
-          <p class="text-xs text-theme-text-sec mb-3">
-            Meta acumulada de ahorro total
-          </p>
+          <p class="text-xs text-theme-text-sec mb-3">Meta acumulada de ahorro total</p>
           <div class="relative">
-            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{
+              currencySymbol
+            }}</span>
             <input
               v-model="montoGlobal"
               type="number"
@@ -68,9 +70,26 @@
         :disabled="saving"
         @click="guardar"
       >
-        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          v-if="saving"
+          class="animate-spin w-4 h-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
         {{ saving ? 'Guardando...' : 'Guardar meta' }}
       </button>

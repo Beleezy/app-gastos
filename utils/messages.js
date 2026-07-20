@@ -54,5 +54,5 @@ export const ETIQUETAS = {
 }
 
 export function pluralizar(n, singular, plural) {
-  return Math.abs(n) === 1 ? singular : (plural || `${singular}s`)
+  return Math.abs(n) === 1 ? singular : plural || `${singular}s`
 }

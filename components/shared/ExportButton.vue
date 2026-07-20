@@ -4,9 +4,11 @@
       ref="btnRef"
       type="button"
       class="min-h-[44px] px-4 rounded-lg flex items-center gap-1.5 text-xs font-medium transition-colors"
-      :class="loading
-        ? 'bg-theme-border-md text-theme-text-muted cursor-wait'
-        : 'bg-theme-border-md text-theme-text-sec hover:text-emerald-400'"
+      :class="
+        loading
+          ? 'bg-theme-border-md text-theme-text-muted cursor-wait'
+          : 'bg-theme-border-md text-theme-text-sec hover:text-emerald-400'
+      "
       :disabled="loading"
       :aria-label="abierto ? 'Cerrar opciones de exportación' : 'Abrir opciones de exportación'"
       :aria-expanded="abierto"
@@ -20,8 +22,19 @@
         viewBox="0 0 24 24"
         aria-hidden="true"
       >
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <circle
+          class="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        ></path>
       </svg>
       <svg
         v-else
@@ -70,7 +83,8 @@ const props = defineProps({
   formats: {
     type: Array,
     default: () => ['pdf', 'excel'],
-    validator: (arr) => arr.every((f) => ['pdf', 'excel', 'csv', 'json', 'historial-pdf', 'whatsapp'].includes(f)),
+    validator: (arr) =>
+      arr.every((f) => ['pdf', 'excel', 'csv', 'json', 'historial-pdf', 'whatsapp'].includes(f)),
   },
   label: { type: String, default: '' },
   loading: { type: Boolean, default: false },
@@ -92,14 +106,16 @@ const btnRef = ref(null)
 const dropUp = ref(false)
 
 function formatLabel(f) {
-  return {
-    pdf: 'PDF resumen',
-    excel: 'Excel',
-    csv: 'CSV',
-    json: 'JSON',
-    'historial-pdf': 'PDF historial completo',
-    whatsapp: 'WhatsApp',
-  }[f] || f.toUpperCase()
+  return (
+    {
+      pdf: 'PDF resumen',
+      excel: 'Excel',
+      csv: 'CSV',
+      json: 'JSON',
+      'historial-pdf': 'PDF historial completo',
+      whatsapp: 'WhatsApp',
+    }[f] || f.toUpperCase()
+  )
 }
 
 function onClick() {

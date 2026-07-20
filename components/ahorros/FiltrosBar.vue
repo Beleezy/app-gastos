@@ -6,15 +6,29 @@
         :class="[
           mostrarFiltros || tieneFiltrosActivos
             ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
-            : 'bg-theme-card text-theme-text-sec border-theme-border'
+            : 'bg-theme-card text-theme-text-sec border-theme-border',
         ]"
         @click="toggle"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+          />
         </svg>
         Filtros
-        <span v-if="conteoFiltrosActivos > 0" class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none">
+        <span
+          v-if="conteoFiltrosActivos > 0"
+          class="w-4 h-4 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] flex items-center justify-center font-bold leading-none"
+        >
           {{ conteoFiltrosActivos }}
         </span>
       </button>
@@ -27,15 +41,33 @@
           class="w-full pl-9 pr-8 py-2 rounded-xl bg-theme-card border border-theme-border text-theme-text placeholder-gray-600 text-sm focus:outline-none focus:border-theme-accent transition-all"
           @input="$emit('update:busqueda', $event.target.value)"
         />
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-theme-text-sec"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
         </svg>
         <button
           v-if="modelBusqueda"
           class="absolute right-2.5 top-1/2 -translate-y-1/2 text-theme-text-sec"
           @click="$emit('update:busqueda', '')"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -44,13 +76,28 @@
       <!-- Ordenar (cicla opciones, label visible como tooltip) -->
       <button
         class="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl border transition-colors"
-        :class="ordenActivo !== 'fecha_desc' ? 'bg-theme-accent-bg text-theme-accent border-theme-accent' : 'bg-theme-card text-theme-text-muted border-theme-border hover:bg-theme-border-md'"
+        :class="
+          ordenActivo !== 'fecha_desc'
+            ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
+            : 'bg-theme-card text-theme-text-muted border-theme-border hover:bg-theme-border-md'
+        "
         :title="`Orden: ${ordenLabelActual}`"
         :aria-label="`Orden: ${ordenLabelActual}`"
         @click="ciclarOrden"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+          />
         </svg>
       </button>
     </div>
@@ -63,7 +110,11 @@
             v-for="r in rangosRapidos"
             :key="r.value"
             class="flex-1 lg:flex-none lg:px-4 py-1.5 rounded-lg text-xs font-medium transition-colors"
-            :class="rangoActivo === r.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+            :class="
+              rangoActivo === r.value
+                ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+                : 'bg-theme-card text-theme-text-sec border border-theme-border'
+            "
             @click="$emit('update:rango', r.value)"
           >
             {{ r.label }}
@@ -78,10 +129,17 @@
         </div>
 
         <!-- Filtro por medio -->
-        <div v-if="medios.length > 0" class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 pl-1 pr-8 scrollbar-hide scroll-fade-r">
+        <div
+          v-if="medios.length > 0"
+          class="flex gap-1.5 overflow-x-auto pb-1 -mx-1 pl-1 pr-8 scrollbar-hide scroll-fade-r"
+        >
           <button
             class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-            :class="!medioActivo ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+            :class="
+              !medioActivo
+                ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+                : 'bg-theme-card text-theme-text-sec border border-theme-border'
+            "
             @click="$emit('update:medio', null)"
           >
             Todos
@@ -90,7 +148,11 @@
             v-for="m in medios"
             :key="m.id"
             class="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-            :class="medioActivo === m.id ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+            :class="
+              medioActivo === m.id
+                ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+                : 'bg-theme-card text-theme-text-sec border border-theme-border'
+            "
             @click="$emit('update:medio', m.id)"
           >
             <span>{{ m.icono || '💰' }}</span>
@@ -105,7 +167,11 @@
             v-for="o in opcionesOrden"
             :key="o.value"
             class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-            :class="ordenActivo === o.value ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent' : 'bg-theme-card text-theme-text-sec border border-theme-border'"
+            :class="
+              ordenActivo === o.value
+                ? 'bg-theme-accent-bg text-theme-accent border border-theme-accent'
+                : 'bg-theme-card text-theme-text-sec border border-theme-border'
+            "
             @click="$emit('update:orden', o.value)"
           >
             {{ o.label }}
@@ -131,13 +197,19 @@ const props = defineProps({
   tieneFiltrosActivos: { type: Boolean, default: false },
   conteoFiltrosActivos: { type: Number, default: 0 },
 })
-const emit = defineEmits(['update:busqueda', 'update:rango', 'update:medio', 'update:orden', 'limpiar'])
+const emit = defineEmits([
+  'update:busqueda',
+  'update:rango',
+  'update:medio',
+  'update:orden',
+  'limpiar',
+])
 
 const { vibrate } = useHaptic()
 const mostrarFiltros = ref(false)
 
-const ordenLabelActual = computed(() =>
-  opcionesOrden.find(o => o.value === props.ordenActivo)?.label || 'Más reciente'
+const ordenLabelActual = computed(
+  () => opcionesOrden.find((o) => o.value === props.ordenActivo)?.label || 'Más reciente',
 )
 
 function toggle() {
@@ -147,22 +219,25 @@ function toggle() {
 
 function ciclarOrden() {
   vibrate(10)
-  const idx = opcionesOrden.findIndex(o => o.value === props.ordenActivo)
+  const idx = opcionesOrden.findIndex((o) => o.value === props.ordenActivo)
   const next = opcionesOrden[(idx + 1) % opcionesOrden.length]
   emit('update:orden', next.value)
 }
 </script>
 
 <style scoped>
-.expand-enter-active, .expand-leave-active {
+.expand-enter-active,
+.expand-leave-active {
   transition: all 0.2s ease;
   overflow: hidden;
 }
-.expand-enter-from, .expand-leave-to {
+.expand-enter-from,
+.expand-leave-to {
   opacity: 0;
   max-height: 0;
 }
-.expand-enter-to, .expand-leave-from {
+.expand-enter-to,
+.expand-leave-from {
   opacity: 1;
   max-height: 500px;
 }

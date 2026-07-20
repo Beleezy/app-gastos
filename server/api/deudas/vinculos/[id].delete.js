@@ -10,20 +10,23 @@ export default defineEventHandler(async (event) => {
   const [solicitud] = await db
     .select()
     .from(solicitudesVinculo)
-    .where(and(
-      eq(solicitudesVinculo.id, solicitudId),
-      eq(solicitudesVinculo.remitenteId, usuarioId),
-      eq(solicitudesVinculo.estado, 'pendiente')
-    ))
+    .where(
+      and(
+        eq(solicitudesVinculo.id, solicitudId),
+        eq(solicitudesVinculo.remitenteId, usuarioId),
+        eq(solicitudesVinculo.estado, 'pendiente'),
+      ),
+    )
     .limit(1)
 
   if (!solicitud) {
-    throw createError({ statusCode: 404, message: 'Solicitud no encontrada o no se puede cancelar' })
+    throw createError({
+      statusCode: 404,
+      message: 'Solicitud no encontrada o no se puede cancelar',
+    })
   }
 
-  await db
-    .delete(solicitudesVinculo)
-    .where(eq(solicitudesVinculo.id, solicitudId))
+  await db.delete(solicitudesVinculo).where(eq(solicitudesVinculo.id, solicitudId))
 
   return { mensaje: 'Solicitud cancelada' }
 })

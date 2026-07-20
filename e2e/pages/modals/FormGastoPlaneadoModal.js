@@ -12,10 +12,18 @@ export class FormGastoPlaneadoModal {
     await this.root.waitFor({ state: 'visible', timeout: 5000 })
   }
 
-  inputConcepto() { return this.root.getByTestId(PLANIFICADOR.INPUT_CONCEPTO) }
-  inputMonto() { return this.root.getByTestId(PLANIFICADOR.INPUT_MONTO) }
-  inputNotas() { return this.root.getByTestId(PLANIFICADOR.INPUT_NOTAS) }
-  btnGuardar() { return this.root.getByTestId(PLANIFICADOR.BTN_GUARDAR) }
+  inputConcepto() {
+    return this.root.getByTestId(PLANIFICADOR.INPUT_CONCEPTO)
+  }
+  inputMonto() {
+    return this.root.getByTestId(PLANIFICADOR.INPUT_MONTO)
+  }
+  inputNotas() {
+    return this.root.getByTestId(PLANIFICADOR.INPUT_NOTAS)
+  }
+  btnGuardar() {
+    return this.root.getByTestId(PLANIFICADOR.BTN_GUARDAR)
+  }
 
   async seleccionarCategoria(nombre) {
     const opciones = this.root.getByRole('button', { name: nombre, exact: false })

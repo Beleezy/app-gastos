@@ -3,8 +3,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 export function useOnlineStatus() {
   const isOnline = ref(true)
 
-  const handleOnline = () => { isOnline.value = true }
-  const handleOffline = () => { isOnline.value = false }
+  const handleOnline = () => {
+    isOnline.value = true
+  }
+  const handleOffline = () => {
+    isOnline.value = false
+  }
 
   onMounted(() => {
     isOnline.value = navigator.onLine

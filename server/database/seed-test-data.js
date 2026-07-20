@@ -42,34 +42,92 @@ const db = drizzle(client)
 // ═════════════════════════════════════════════════════════════════════════════
 
 const predefinedCategories = [
-  { nombre: 'Alimentacion',    icono: '🍽️',  color: '#ef4444', esPredefinida: true },
-  { nombre: 'Transporte',      icono: '🚌',  color: '#3b82f6', esPredefinida: true },
-  { nombre: 'Vivienda',        icono: '🏠',  color: '#f59e0b', esPredefinida: true },
-  { nombre: 'Salud',           icono: '🏥',  color: '#10b981', esPredefinida: true },
-  { nombre: 'Educacion',       icono: '📚',  color: '#8b5cf6', esPredefinida: true },
-  { nombre: 'Entretenimiento', icono: '🎮',  color: '#ec4899', esPredefinida: true },
-  { nombre: 'Vestimenta',      icono: '👕',  color: '#f97316', esPredefinida: true },
-  { nombre: 'Servicios',       icono: '⚡',  color: '#06b6d4', esPredefinida: true },
-  { nombre: 'Ahorro',          icono: '💰',  color: '#22c55e', esPredefinida: true },
-  { nombre: 'Deudas',          icono: '💳',  color: '#e11d48', esPredefinida: true },
-  { nombre: 'Otros',           icono: '📦',  color: '#6b7280', esPredefinida: true },
+  { nombre: 'Alimentacion', icono: '🍽️', color: '#ef4444', esPredefinida: true },
+  { nombre: 'Transporte', icono: '🚌', color: '#3b82f6', esPredefinida: true },
+  { nombre: 'Vivienda', icono: '🏠', color: '#f59e0b', esPredefinida: true },
+  { nombre: 'Salud', icono: '🏥', color: '#10b981', esPredefinida: true },
+  { nombre: 'Educacion', icono: '📚', color: '#8b5cf6', esPredefinida: true },
+  { nombre: 'Entretenimiento', icono: '🎮', color: '#ec4899', esPredefinida: true },
+  { nombre: 'Vestimenta', icono: '👕', color: '#f97316', esPredefinida: true },
+  { nombre: 'Servicios', icono: '⚡', color: '#06b6d4', esPredefinida: true },
+  { nombre: 'Ahorro', icono: '💰', color: '#22c55e', esPredefinida: true },
+  { nombre: 'Deudas', icono: '💳', color: '#e11d48', esPredefinida: true },
+  { nombre: 'Otros', icono: '📦', color: '#6b7280', esPredefinida: true },
 ]
 
 // Datos de prueba para gastos registrados
 const gastosData = [
-  { cat: 'Alimentacion', conceptos: ['Desayuno en café', 'Almuerzo en restaurante', 'Cena', 'Snacks', 'Café con colega', 'Pastel en panadería', 'Comida rápida', 'Helado'], montos: [8.50, 18, 22, 5, 12, 4.50, 15, 6.50] },
-  { cat: 'Transporte', conceptos: ['Pasaje en taxi', 'Pasaje en bus', 'Uber', 'Carga de tarjeta Metropolitana', 'Estacionamiento'], montos: [15, 2.50, 18, 20, 10] },
-  { cat: 'Servicios', conceptos: ['Recibo de luz', 'Internet y teléfono', 'Agua', 'Gas'], montos: [180.50, 120, 45.50, 35] },
-  { cat: 'Salud', conceptos: ['Farmacia', 'Vitaminas', 'Consulta médica', 'Dentista'], montos: [35, 45, 80, 150] },
-  { cat: 'Entretenimiento', conceptos: ['Cine', 'Concierto', 'Bar', 'Videojuegos', 'Netflix', 'Spotify'], montos: [35, 80, 50, 25, 39.90, 10.99] },
-  { cat: 'Educacion', conceptos: ['Clases de inglés', 'Cursos online', 'Libros', 'Materiales escolares'], montos: [250, 100, 35, 45] },
-  { cat: 'Vestimenta', conceptos: ['Ropa en tienda', 'Zapatos', 'Accesorios', 'Ropa deportiva'], montos: [89.90, 150, 25, 120] },
-  { cat: 'Vivienda', conceptos: ['Alquiler', 'Mantenimiento', 'Reparación'], montos: [1500, 200, 150] },
+  {
+    cat: 'Alimentacion',
+    conceptos: [
+      'Desayuno en café',
+      'Almuerzo en restaurante',
+      'Cena',
+      'Snacks',
+      'Café con colega',
+      'Pastel en panadería',
+      'Comida rápida',
+      'Helado',
+    ],
+    montos: [8.5, 18, 22, 5, 12, 4.5, 15, 6.5],
+  },
+  {
+    cat: 'Transporte',
+    conceptos: [
+      'Pasaje en taxi',
+      'Pasaje en bus',
+      'Uber',
+      'Carga de tarjeta Metropolitana',
+      'Estacionamiento',
+    ],
+    montos: [15, 2.5, 18, 20, 10],
+  },
+  {
+    cat: 'Servicios',
+    conceptos: ['Recibo de luz', 'Internet y teléfono', 'Agua', 'Gas'],
+    montos: [180.5, 120, 45.5, 35],
+  },
+  {
+    cat: 'Salud',
+    conceptos: ['Farmacia', 'Vitaminas', 'Consulta médica', 'Dentista'],
+    montos: [35, 45, 80, 150],
+  },
+  {
+    cat: 'Entretenimiento',
+    conceptos: ['Cine', 'Concierto', 'Bar', 'Videojuegos', 'Netflix', 'Spotify'],
+    montos: [35, 80, 50, 25, 39.9, 10.99],
+  },
+  {
+    cat: 'Educacion',
+    conceptos: ['Clases de inglés', 'Cursos online', 'Libros', 'Materiales escolares'],
+    montos: [250, 100, 35, 45],
+  },
+  {
+    cat: 'Vestimenta',
+    conceptos: ['Ropa en tienda', 'Zapatos', 'Accesorios', 'Ropa deportiva'],
+    montos: [89.9, 150, 25, 120],
+  },
+  {
+    cat: 'Vivienda',
+    conceptos: ['Alquiler', 'Mantenimiento', 'Reparación'],
+    montos: [1500, 200, 150],
+  },
   { cat: 'Otros', conceptos: ['Compra variada', 'Regalos', 'Donación'], montos: [50, 100, 25] },
 ]
 
 // Horas variadas durante el día
-const horasDelDia = ['08:15', '10:30', '12:45', '13:30', '15:00', '16:30', '18:00', '19:45', '21:00', '22:30']
+const horasDelDia = [
+  '08:15',
+  '10:30',
+  '12:45',
+  '13:30',
+  '15:00',
+  '16:30',
+  '18:00',
+  '19:45',
+  '21:00',
+  '22:30',
+]
 
 // ═════════════════════════════════════════════════════════════════════════════
 // UTILIDADES
@@ -106,7 +164,11 @@ async function generateTestData(existingUserId = null) {
     // 1. Obtener o crear usuario
     let userId
     if (existingUserId) {
-      const existingUser = await db.select({ id: usuarios.id }).from(usuarios).where(eq(usuarios.id, existingUserId)).limit(1)
+      const existingUser = await db
+        .select({ id: usuarios.id })
+        .from(usuarios)
+        .where(eq(usuarios.id, existingUserId))
+        .limit(1)
       if (!existingUser || existingUser.length === 0) {
         console.error(`❌ Usuario con ID "${existingUserId}" no encontrado en la base de datos`)
         console.error('Por favor verifica que el ID sea correcto y que el usuario exista.')
@@ -126,7 +188,9 @@ async function generateTestData(existingUserId = null) {
 
     // 2. Obtener o crear categorías
     let catMap = {}
-    const existingCats = await db.select({ id: categorias.id, nombre: categorias.nombre }).from(categorias)
+    const existingCats = await db
+      .select({ id: categorias.id, nombre: categorias.nombre })
+      .from(categorias)
 
     if (existingCats.length === 0) {
       console.log('  Creando categorías predefinidas...')
@@ -134,22 +198,33 @@ async function generateTestData(existingUserId = null) {
         .insert(categorias)
         .values(predefinedCategories)
         .returning({ id: categorias.id, nombre: categorias.nombre })
-      insertedCats.forEach(cat => {
+      insertedCats.forEach((cat) => {
         catMap[cat.nombre] = cat.id
       })
       console.log(`✅ ${insertedCats.length} categorías predefinidas creadas`)
     } else {
-      existingCats.forEach(cat => {
+      existingCats.forEach((cat) => {
         catMap[cat.nombre] = cat.id
       })
       console.log(`✅ Usando ${existingCats.length} categorías existentes`)
     }
 
     // Validar que todas las categorías necesarias existan
-    const categoriasNecesarias = ['Alimentacion', 'Transporte', 'Vivienda', 'Salud', 'Educacion', 'Entretenimiento', 'Vestimenta', 'Servicios']
+    const categoriasNecesarias = [
+      'Alimentacion',
+      'Transporte',
+      'Vivienda',
+      'Salud',
+      'Educacion',
+      'Entretenimiento',
+      'Vestimenta',
+      'Servicios',
+    ]
     for (const cat of categoriasNecesarias) {
       if (!catMap[cat]) {
-        console.error(`❌ Categoría "${cat}" no encontrada. Asegúrate de ejecutar primero: npm run db:seed`)
+        console.error(
+          `❌ Categoría "${cat}" no encontrada. Asegúrate de ejecutar primero: npm run db:seed`,
+        )
         await client.end()
         process.exit(1)
       }
@@ -166,16 +241,17 @@ async function generateTestData(existingUserId = null) {
     console.log(`✅ Datos limpios`)
 
     // 4. Crear/actualizar configuración
-    const existingConfig = await db.select().from(configuraciones).where(eq(configuraciones.usuarioId, userId))
+    const existingConfig = await db
+      .select()
+      .from(configuraciones)
+      .where(eq(configuraciones.usuarioId, userId))
     if (existingConfig.length === 0) {
-      await db
-        .insert(configuraciones)
-        .values({
-          usuarioId: userId,
-          presupuestoMensualDefault: '4500.00',
-          monedaPreferida: 'PEN',
-          diaInicioCiclo: 1,
-        })
+      await db.insert(configuraciones).values({
+        usuarioId: userId,
+        presupuestoMensualDefault: '4500.00',
+        monedaPreferida: 'PEN',
+        diaInicioCiclo: 1,
+      })
       console.log(`✅ Configuración creada`)
     } else {
       console.log(`✅ Configuración actualizada`)
@@ -226,34 +302,80 @@ async function generateTestData(existingUserId = null) {
       // Recurrentes
       { cat: 'Vivienda', concepto: 'Alquiler del mes', monto: '1500.00', recurrente: true, dia: 1 },
       { cat: 'Servicios', concepto: 'Recibo de luz', monto: '180.50', recurrente: true, dia: 5 },
-      { cat: 'Servicios', concepto: 'Internet y teléfono', monto: '120.00', recurrente: true, dia: 10 },
+      {
+        cat: 'Servicios',
+        concepto: 'Internet y teléfono',
+        monto: '120.00',
+        recurrente: true,
+        dia: 10,
+      },
       { cat: 'Salud', concepto: 'Cuota de gimnasio', monto: '99.00', recurrente: true, dia: 15 },
       { cat: 'Educacion', concepto: 'Clases de inglés', monto: '250.00', recurrente: true, dia: 8 },
-      { cat: 'Entretenimiento', concepto: 'Suscripción Netflix', monto: '39.90', recurrente: true, dia: 12 },
-      { cat: 'Entretenimiento', concepto: 'Suscripción Spotify', monto: '10.99', recurrente: true, dia: 13 },
+      {
+        cat: 'Entretenimiento',
+        concepto: 'Suscripción Netflix',
+        monto: '39.90',
+        recurrente: true,
+        dia: 12,
+      },
+      {
+        cat: 'Entretenimiento',
+        concepto: 'Suscripción Spotify',
+        monto: '10.99',
+        recurrente: true,
+        dia: 13,
+      },
       // Únicos por mes
-      { cat: 'Alimentacion', concepto: 'Compra en supermercado', monto: '350.00', recurrente: false, dia: 20 },
-      { cat: 'Transporte', concepto: 'Mantenimiento del auto', monto: '200.00', recurrente: false, dia: 25 },
+      {
+        cat: 'Alimentacion',
+        concepto: 'Compra en supermercado',
+        monto: '350.00',
+        recurrente: false,
+        dia: 20,
+      },
+      {
+        cat: 'Transporte',
+        concepto: 'Mantenimiento del auto',
+        monto: '200.00',
+        recurrente: false,
+        dia: 25,
+      },
       { cat: 'Salud', concepto: 'Compra de vitaminas', monto: '65.00', recurrente: false, dia: 18 },
-      { cat: 'Vestimenta', concepto: 'Compra de ropa', monto: '150.00', recurrente: false, dia: 22 },
-      { cat: 'Entretenimiento', concepto: 'Salida al cine', monto: '60.00', recurrente: false, dia: 16 },
-      { cat: 'Educacion', concepto: 'Compra de materiales', monto: '45.00', recurrente: false, dia: 19 },
+      {
+        cat: 'Vestimenta',
+        concepto: 'Compra de ropa',
+        monto: '150.00',
+        recurrente: false,
+        dia: 22,
+      },
+      {
+        cat: 'Entretenimiento',
+        concepto: 'Salida al cine',
+        monto: '60.00',
+        recurrente: false,
+        dia: 16,
+      },
+      {
+        cat: 'Educacion',
+        concepto: 'Compra de materiales',
+        monto: '45.00',
+        recurrente: false,
+        dia: 19,
+      },
     ]
 
     for (const plan of planes) {
       for (const gasto of gastosPlaneados) {
         const estado = randomInt(1, 100) > 60 ? 'pagado' : 'pendiente'
-        await db
-          .insert(gastosPlanificados)
-          .values({
-            planMensualId: plan.id,
-            categoriaId: catMap[gasto.cat],
-            concepto: gasto.concepto,
-            montoEstimado: gasto.monto,
-            fechaProbablePago: formatDate(new Date(plan.anio, plan.mes - 1, gasto.dia)),
-            esRecurrente: gasto.recurrente,
-            estado,
-          })
+        await db.insert(gastosPlanificados).values({
+          planMensualId: plan.id,
+          categoriaId: catMap[gasto.cat],
+          concepto: gasto.concepto,
+          montoEstimado: gasto.monto,
+          fechaProbablePago: formatDate(new Date(plan.anio, plan.mes - 1, gasto.dia)),
+          esRecurrente: gasto.recurrente,
+          estado,
+        })
       }
     }
     console.log(`✅ ${planes.length * gastosPlaneados.length} gastos planificados creados`)
@@ -280,7 +402,8 @@ async function generateTestData(existingUserId = null) {
         fecha: formatDate(fecha),
         hora,
         metodoRegistro: metodo,
-        transcripcionVoz: metodo === 'voz' ? `Gasté ${monto} soles en ${concepto.toLowerCase()}` : null,
+        transcripcionVoz:
+          metodo === 'voz' ? `Gasté ${monto} soles en ${concepto.toLowerCase()}` : null,
       })
     }
 
@@ -459,7 +582,9 @@ async function generateTestData(existingUserId = null) {
         const numAbonos = randomInt(3, 5)
         let acumulado = 0
         for (let j = 0; j < numAbonos - 1; j++) {
-          const abono = parseFloat((montoDeuda / numAbonos * (0.7 + Math.random() * 0.6)).toFixed(2))
+          const abono = parseFloat(
+            ((montoDeuda / numAbonos) * (0.7 + Math.random() * 0.6)).toFixed(2),
+          )
           montoPagos.push(abono)
           acumulado += abono
         }
@@ -469,14 +594,12 @@ async function generateTestData(existingUserId = null) {
       // Registrar pagos
       for (const monto of montoPagos) {
         const fechaPago = addDays(today, -randomInt(0, 30))
-        await db
-          .insert(pagosDeuda)
-          .values({
-            deudaId: deuda.id,
-            montoPagado: monto.toString(),
-            fechaPago: formatDate(fechaPago),
-            metodoPago: randomItem(['efectivo', 'transferencia', 'tarjeta']),
-          })
+        await db.insert(pagosDeuda).values({
+          deudaId: deuda.id,
+          montoPagado: monto.toString(),
+          fechaPago: formatDate(fechaPago),
+          metodoPago: randomItem(['efectivo', 'transferencia', 'tarjeta']),
+        })
         contadorPagos++
       }
 
@@ -512,7 +635,6 @@ async function generateTestData(existingUserId = null) {
 
     await client.end()
     process.exit(0)
-
   } catch (err) {
     console.error('\n' + '═'.repeat(70))
     console.error('❌ ERROR DURANTE LA GENERACIÓN DE DATOS')

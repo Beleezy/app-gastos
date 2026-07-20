@@ -41,7 +41,10 @@ export default defineNitroPlugin(() => {
   // (variable seteada por error), el middleware 04 lo ignorará por
   // NODE_ENV, pero es señal de configuración rota — avisar siempre.
   if (isProd && process.env.DEV_AUTH_BYPASS === '1') {
-    logger.error('DEV_AUTH_BYPASS=1 detectado en producción — ignorado por NODE_ENV, pero revisa la configuración del deploy', {})
+    logger.error(
+      'DEV_AUTH_BYPASS=1 detectado en producción — ignorado por NODE_ENV, pero revisa la configuración del deploy',
+      {},
+    )
   }
 
   if (missing.length === 0 && missingOpt.length === 0) {

@@ -14,8 +14,14 @@
 
 import { db } from '../utils/db.js'
 import {
-  gastos, deudas, planesMensuales, gastosPlanificados,
-  categorias, configuraciones, ahorros, mediosAhorro,
+  gastos,
+  deudas,
+  planesMensuales,
+  gastosPlanificados,
+  categorias,
+  configuraciones,
+  ahorros,
+  mediosAhorro,
 } from '../database/schema.js'
 import { getUsuarioFromEvent } from '../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
@@ -54,12 +60,14 @@ export default defineEventHandler(async (event) => {
         totalMes: sql`COALESCE(SUM(${gastos.monto}), 0)`,
       })
       .from(gastos)
-      .where(and(
-        eq(gastos.usuarioId, usuarioId),
-        isNull(gastos.deletedAt),
-        between(gastos.fecha, primerDia, ultimaFecha),
-      ))
-      .then(r => r[0]),
+      .where(
+        and(
+          eq(gastos.usuarioId, usuarioId),
+          isNull(gastos.deletedAt),
+          between(gastos.fecha, primerDia, ultimaFecha),
+        ),
+      )
+      .then((r) => r[0]),
 
     db
       .select({
@@ -71,18 +79,20 @@ export default defineEventHandler(async (event) => {
       })
       .from(deudas)
       .where(and(eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
-      .then(r => r[0]),
+      .then((r) => r[0]),
 
     db
       .select()
       .from(planesMensuales)
-      .where(and(
-        eq(planesMensuales.usuarioId, usuarioId),
-        eq(planesMensuales.mes, mes),
-        eq(planesMensuales.anio, anio),
-      ))
+      .where(
+        and(
+          eq(planesMensuales.usuarioId, usuarioId),
+          eq(planesMensuales.mes, mes),
+          eq(planesMensuales.anio, anio),
+        ),
+      )
       .limit(1)
-      .then(r => r[0] || null),
+      .then((r) => r[0] || null),
 
     db
       .select({
@@ -92,7 +102,7 @@ export default defineEventHandler(async (event) => {
       .from(configuraciones)
       .where(eq(configuraciones.usuarioId, usuarioId))
       .limit(1)
-      .then(r => r[0] || null),
+      .then((r) => r[0] || null),
 
     db
       .select({
@@ -106,11 +116,13 @@ export default defineEventHandler(async (event) => {
       .from(gastosPlanificados)
       .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
       .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
-      .where(and(
-        eq(planesMensuales.usuarioId, usuarioId),
-        eq(planesMensuales.mes, mes),
-        eq(planesMensuales.anio, anio),
-      )),
+      .where(
+        and(
+          eq(planesMensuales.usuarioId, usuarioId),
+          eq(planesMensuales.mes, mes),
+          eq(planesMensuales.anio, anio),
+        ),
+      ),
 
     fetchFuturePortfolio(db, usuarioId).catch(() => ({ resumenFuturos: {} })),
 
@@ -118,13 +130,13 @@ export default defineEventHandler(async (event) => {
       .select({ total: sql`COALESCE(SUM(${ahorros.monto}), 0)` })
       .from(ahorros)
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
-      .then(r => r[0]),
+      .then((r) => r[0]),
 
     db
       .select({ total: sql`COALESCE(SUM(${ahorros.monto}), 0)` })
       .from(ahorros)
       .where(eq(ahorros.usuarioId, usuarioId))
-      .then(r => r[0]),
+      .then((r) => r[0]),
 
     db
       .select({
@@ -145,23 +157,22 @@ export default defineEventHandler(async (event) => {
   const totalMeDeben = parseFloat(deudasResumenRow?.totalMeDeben || 0)
   const totalYoDebo = parseFloat(deudasResumenRow?.totalYoDebo || 0)
 
-  const presupuesto = parseFloat(
-    planRow?.montoPresupuesto ?? configRow?.presupuestoMensualDefault ?? 0,
-  ) || 0
+  const presupuesto =
+    parseFloat(planRow?.montoPresupuesto ?? configRow?.presupuestoMensualDefault ?? 0) || 0
 
   const countTotal = plannedGastosRows.length
-  const countPagados = plannedGastosRows.filter(g => g.estado === 'pagado').length
+  const countPagados = plannedGastosRows.filter((g) => g.estado === 'pagado').length
 
   const ahorrosTotalMes = parseFloat(ahorrosMesRow?.total || 0)
   const ahorrosTotalGlobal = parseFloat(ahorrosGlobalRow?.total || 0)
   const ahorrosPorMedio = (ahorrosPorMedioRaw || [])
-    .map(m => ({
+    .map((m) => ({
       medioAhorroId: m.medioAhorroId,
       medioNombre: m.medioNombre,
       medioIcono: m.medioIcono,
       total: parseFloat(m.total || 0),
     }))
-    .filter(m => m.total > 0)
+    .filter((m) => m.total > 0)
 
   const totalIngresos = Number(ingresosTotal) || 0
   const saldoNeto = Math.round((totalIngresos - totalMes) * 100) / 100

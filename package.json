@@ -54,6 +54,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@nuxt/eslint": "^1.16.0",
     "@nuxt/eslint-config": "^1.15.2",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/forms": "^0.5.11",

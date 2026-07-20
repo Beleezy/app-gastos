@@ -18,7 +18,9 @@ export async function crearGastoPlanificado({ usuarioId, body }) {
   const [plan] = await db
     .select({ id: planesMensuales.id })
     .from(planesMensuales)
-    .where(and(eq(planesMensuales.id, body.planMensualId), eq(planesMensuales.usuarioId, usuarioId)))
+    .where(
+      and(eq(planesMensuales.id, body.planMensualId), eq(planesMensuales.usuarioId, usuarioId)),
+    )
     .limit(1)
 
   if (!plan) {

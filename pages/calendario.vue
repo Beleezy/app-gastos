@@ -1,15 +1,28 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <div class="relative px-5 pt-8 pb-4 overflow-hidden">
-      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-violet-500/15 rounded-full blur-3xl"></div>
+      <div
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-32 bg-violet-500/15 rounded-full blur-3xl"
+      ></div>
       <div class="relative flex items-center gap-3">
         <button
           class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md transition-colors shrink-0"
-          @click="toggleDrawer"
           aria-label="Abrir menú"
+          @click="toggleDrawer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+            />
           </svg>
         </button>
         <div class="flex-1 min-w-0">
@@ -25,10 +38,14 @@
         <button
           v-for="f in filtros"
           :key="f.valor"
-          @click="toggleFiltro(f.valor)"
           class="px-3 min-h-[2.5rem] rounded-full text-[0.6875rem] font-semibold border transition-all"
-          :class="filtrosActivos.has(f.valor) ? `border-transparent text-white` : 'border-theme-border text-theme-text-muted'"
+          :class="
+            filtrosActivos.has(f.valor)
+              ? `border-transparent text-white`
+              : 'border-theme-border text-theme-text-muted'
+          "
           :style="filtrosActivos.has(f.valor) ? { backgroundColor: f.color } : {}"
+          @click="toggleFiltro(f.valor)"
         >
           {{ f.icono }} {{ f.etiqueta }}
         </button>
@@ -39,47 +56,82 @@
     <div class="px-5 lg:px-0 mb-3 flex items-center justify-between">
       <button
         class="w-10 h-10 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
-        @click="cambiarMes(-1)"
         aria-label="Mes anterior"
+        @click="cambiarMes(-1)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 mx-auto"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
       </button>
       <p class="text-sm font-bold text-theme-text">{{ etiquetaMes }}</p>
       <button
         class="w-10 h-10 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
-        @click="cambiarMes(1)"
         aria-label="Mes siguiente"
+        @click="cambiarMes(1)"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 mx-auto"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
     </div>
 
     <!-- Grilla calendario -->
     <div class="px-3 lg:px-0 mb-4">
       <div class="grid grid-cols-7 gap-1 mb-1 px-1">
-        <div v-for="d in ['L','M','X','J','V','S','D']" :key="d" class="text-center text-[0.6875rem] font-semibold text-theme-text-muted">{{ d }}</div>
+        <div
+          v-for="d in ['L', 'M', 'X', 'J', 'V', 'S', 'D']"
+          :key="d"
+          class="text-center text-[0.6875rem] font-semibold text-theme-text-muted"
+        >
+          {{ d }}
+        </div>
       </div>
       <div class="grid grid-cols-7 gap-1">
         <button
           v-for="(cell, i) in celdas"
           :key="i"
-          @click="cell.dia ? abrirDia(cell.fecha) : null"
           :disabled="!cell.dia"
           class="aspect-square rounded-lg flex flex-col items-center justify-center text-[0.6875rem] relative transition-colors"
           :class="[
             cell.dia ? 'bg-theme-card border border-theme-border active:bg-theme-border-md' : '',
             cell.esHoy ? 'ring-2 ring-violet-400' : '',
           ]"
+          @click="cell.dia ? abrirDia(cell.fecha) : null"
         >
-          <span v-if="cell.dia" :class="cell.esHoy ? 'text-violet-300 font-bold' : 'text-theme-text-sec'">{{ cell.dia }}</span>
-          <div v-if="cell.eventos?.length" class="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5">
+          <span
+            v-if="cell.dia"
+            :class="cell.esHoy ? 'text-violet-300 font-bold' : 'text-theme-text-sec'"
+            >{{ cell.dia }}</span
+          >
+          <div
+            v-if="cell.eventos?.length"
+            class="absolute bottom-1 left-1/2 -translate-x-1/2 flex gap-0.5"
+          >
             <span
               v-for="(ev, j) in cell.eventos.slice(0, 3)"
               :key="j"
               class="w-1.5 h-1.5 rounded-full"
               :style="{ backgroundColor: ev.color }"
             ></span>
-            <span v-if="cell.eventos.length > 3" class="text-[0.625rem] text-theme-text-muted ml-0.5">+{{ cell.eventos.length - 3 }}</span>
+            <span
+              v-if="cell.eventos.length > 3"
+              class="text-[0.625rem] text-theme-text-muted ml-0.5"
+              >+{{ cell.eventos.length - 3 }}</span
+            >
           </div>
         </button>
       </div>
@@ -87,9 +139,15 @@
 
     <!-- Lista del mes -->
     <div class="px-5 lg:px-0 mb-4">
-      <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">Eventos del mes ({{ eventosDelMes.length }})</p>
+      <p class="text-[0.6875rem] uppercase tracking-wider text-theme-text-muted mb-2 px-1">
+        Eventos del mes ({{ eventosDelMes.length }})
+      </p>
       <div v-if="cargando" class="space-y-2">
-        <div v-for="i in 3" :key="i" class="h-14 w-full rounded-xl bg-theme-border-md shimmer"></div>
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="h-14 w-full rounded-xl bg-theme-border-md shimmer"
+        ></div>
       </div>
       <ul v-else-if="eventosDelMes.length" class="space-y-2">
         <li
@@ -100,31 +158,66 @@
           <div
             class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0"
             :style="{ backgroundColor: ev.color + '20' }"
-          >{{ ev.icono }}</div>
+          >
+            {{ ev.icono }}
+          </div>
           <div class="flex-1 min-w-0">
             <!-- 2 líneas: conceptos largos planificados se truncaban con texto grande -->
-            <p class="text-xs font-semibold text-theme-text line-clamp-2 break-words leading-snug">{{ ev.titulo }}</p>
-            <p class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }} · {{ fechaCorta(ev.fecha) }}</p>
+            <p class="text-xs font-semibold text-theme-text line-clamp-2 break-words leading-snug">
+              {{ ev.titulo }}
+            </p>
+            <p class="text-[0.6875rem] text-theme-text-muted">
+              {{ etiquetaTipo(ev.tipo) }} · {{ fechaCorta(ev.fecha) }}
+            </p>
           </div>
           <div class="text-right shrink-0">
-            <p class="text-xs font-bold" :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'">
-              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(ev.monto)) }}
+            <p
+              class="text-xs font-bold"
+              :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'"
+            >
+              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{
+                formatMonto(Math.abs(ev.monto))
+              }}
             </p>
           </div>
         </li>
       </ul>
-      <div v-else class="bg-theme-card rounded-2xl border border-theme-border p-6 text-center text-xs text-theme-text-muted">
+      <div
+        v-else
+        class="bg-theme-card rounded-2xl border border-theme-border p-6 text-center text-xs text-theme-text-muted"
+      >
         Sin eventos este mes con los filtros actuales.
       </div>
     </div>
 
     <!-- Modal día -->
-    <div v-if="diaSel" class="fixed inset-0 z-50 flex items-end lg:items-center justify-center bg-black/60" @click.self="diaSel = null">
-      <div class="w-full max-w-md bg-theme-card rounded-t-3xl lg:rounded-3xl border border-theme-border max-h-[80vh] overflow-y-auto overscroll-contain">
-        <div class="sticky top-0 bg-theme-card border-b border-theme-border px-4 py-3 flex items-center justify-between z-10">
+    <div
+      v-if="diaSel"
+      class="fixed inset-0 z-50 flex items-end lg:items-center justify-center bg-black/60"
+      @click.self="diaSel = null"
+    >
+      <div
+        class="w-full max-w-md bg-theme-card rounded-t-3xl lg:rounded-3xl border border-theme-border max-h-[80vh] overflow-y-auto overscroll-contain"
+      >
+        <div
+          class="sticky top-0 bg-theme-card border-b border-theme-border px-4 py-3 flex items-center justify-between z-10"
+        >
           <p class="text-sm font-bold text-theme-text">{{ fechaCorta(diaSel) }}</p>
-          <button class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md" @click="diaSel = null" aria-label="Cerrar">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          <button
+            class="w-8 h-8 rounded-lg text-theme-text-muted hover:text-theme-text hover:bg-theme-border-md"
+            aria-label="Cerrar"
+            @click="diaSel = null"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5 mx-auto"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
         <ul v-if="eventosDia.length" class="divide-y divide-theme-border/40">
@@ -133,17 +226,29 @@
             :key="`d-${ev.tipo}-${ev.id}`"
             class="px-4 py-3 flex items-center gap-3"
           >
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0" :style="{ backgroundColor: ev.color + '20' }">{{ ev.icono }}</div>
+            <div
+              class="w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0"
+              :style="{ backgroundColor: ev.color + '20' }"
+            >
+              {{ ev.icono }}
+            </div>
             <div class="flex-1 min-w-0">
               <p class="text-xs font-semibold text-theme-text truncate">{{ ev.titulo }}</p>
               <p class="text-[0.6875rem] text-theme-text-muted">{{ etiquetaTipo(ev.tipo) }}</p>
             </div>
-            <p class="text-xs font-bold" :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'">
-              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{ formatMonto(Math.abs(ev.monto)) }}
+            <p
+              class="text-xs font-bold"
+              :class="ev.signo > 0 ? 'text-emerald-400' : 'text-rose-400'"
+            >
+              {{ ev.signo > 0 ? '+' : '-' }}{{ currencySymbol }}&nbsp;{{
+                formatMonto(Math.abs(ev.monto))
+              }}
             </p>
           </li>
         </ul>
-        <p v-else class="px-4 py-6 text-center text-xs text-theme-text-muted">Sin eventos este día.</p>
+        <p v-else class="px-4 py-6 text-center text-xs text-theme-text-muted">
+          Sin eventos este día.
+        </p>
       </div>
     </div>
   </div>
@@ -160,7 +265,7 @@ const filtros = [
   { valor: 'planificado', etiqueta: 'Planificados', icono: '📋', color: '#8b5cf6' },
   { valor: 'deuda', etiqueta: 'Deudas', icono: '💳', color: '#f59e0b' },
 ]
-const filtrosActivos = ref(new Set(filtros.map(f => f.valor)))
+const filtrosActivos = ref(new Set(filtros.map((f) => f.valor)))
 
 function toggleFiltro(v) {
   const n = new Set(filtrosActivos.value)
@@ -178,8 +283,14 @@ const etiquetaMes = computed(() => `${MESES[mesVer.value - 1]} ${anioVer.value}`
 function cambiarMes(delta) {
   let m = mesVer.value + delta
   let a = anioVer.value
-  if (m < 1) { m = 12; a-- }
-  if (m > 12) { m = 1; a++ }
+  if (m < 1) {
+    m = 12
+    a--
+  }
+  if (m > 12) {
+    m = 1
+    a++
+  }
   mesVer.value = m
   anioVer.value = a
   cargar()
@@ -197,8 +308,13 @@ async function cargar() {
       apiFetch('/api/planificador', { query: { mes: mesVer.value, anio: anioVer.value } }),
       apiFetch('/api/deudas', { query: {} }),
     ])
-    planificados.value = planRes.status === 'fulfilled' ? (planRes.value?.gastos || []) : []
-    deudasConFecha.value = deudasRes.status === 'fulfilled' ? (Array.isArray(deudasRes.value) ? deudasRes.value : []) : []
+    planificados.value = planRes.status === 'fulfilled' ? planRes.value?.gastos || [] : []
+    deudasConFecha.value =
+      deudasRes.status === 'fulfilled'
+        ? Array.isArray(deudasRes.value)
+          ? deudasRes.value
+          : []
+        : []
   } catch (e) {
     console.warn('[calendario] error cargando:', e)
   } finally {
@@ -283,13 +399,20 @@ const celdas = computed(() => {
 })
 
 const diaSel = ref(null)
-useOverlayBack(computed(() => diaSel.value !== null), () => { diaSel.value = null })
+useOverlayBack(
+  computed(() => diaSel.value !== null),
+  () => {
+    diaSel.value = null
+  },
+)
 const eventosDia = computed(() => {
   if (!diaSel.value) return []
-  return eventosDelMes.value.filter(e => e.fecha === diaSel.value)
+  return eventosDelMes.value.filter((e) => e.fecha === diaSel.value)
 })
 
-function abrirDia(fecha) { diaSel.value = fecha }
+function abrirDia(fecha) {
+  diaSel.value = fecha
+}
 
 function fechaCorta(f) {
   if (!f) return ''
@@ -298,7 +421,7 @@ function fechaCorta(f) {
 }
 
 function etiquetaTipo(t) {
-  return filtros.find(f => f.valor === t)?.etiqueta || t
+  return filtros.find((f) => f.valor === t)?.etiqueta || t
 }
 
 onMounted(cargar)

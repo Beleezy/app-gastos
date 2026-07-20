@@ -24,11 +24,13 @@ async function obtenerOCrearPlan(tx, usuarioId, mes, anio) {
   const [existing] = await tx
     .select()
     .from(planesMensuales)
-    .where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      eq(planesMensuales.mes, mes),
-      eq(planesMensuales.anio, anio),
-    ))
+    .where(
+      and(
+        eq(planesMensuales.usuarioId, usuarioId),
+        eq(planesMensuales.mes, mes),
+        eq(planesMensuales.anio, anio),
+      ),
+    )
     .limit(1)
 
   if (existing) return existing
@@ -83,10 +85,12 @@ export default defineEventHandler(async (event) => {
   const [detalle] = await db
     .select()
     .from(gastosFuturosDetalles)
-    .where(and(
-      eq(gastosFuturosDetalles.id, detalleId),
-      eq(gastosFuturosDetalles.gastoFuturoId, proyectoId),
-    ))
+    .where(
+      and(
+        eq(gastosFuturosDetalles.id, detalleId),
+        eq(gastosFuturosDetalles.gastoFuturoId, proyectoId),
+      ),
+    )
     .limit(1)
 
   if (!detalle) {
@@ -100,10 +104,9 @@ export default defineEventHandler(async (event) => {
   const [opcion] = await db
     .select()
     .from(gastosFuturosOpciones)
-    .where(and(
-      eq(gastosFuturosOpciones.id, opcionId),
-      eq(gastosFuturosOpciones.detalleId, detalleId),
-    ))
+    .where(
+      and(eq(gastosFuturosOpciones.id, opcionId), eq(gastosFuturosOpciones.detalleId, detalleId)),
+    )
     .limit(1)
 
   if (!opcion) {
@@ -165,23 +168,19 @@ export default defineEventHandler(async (event) => {
 
     await tx
       .delete(gastosFuturosOpciones)
-      .where(and(
-        eq(gastosFuturosOpciones.detalleId, detalleId),
-      ))
+      .where(and(eq(gastosFuturosOpciones.detalleId, detalleId)))
 
-    await tx
-      .insert(gastosFuturosOpciones)
-      .values({
-        detalleId,
-        nombre: opcion.nombre,
-        referenciaUrl: opcion.referenciaUrl,
-        imagenUrl: opcion.imagenUrl,
-        precioMinimo: opcion.precioMinimo,
-        precioMaximo: opcion.precioMaximo,
-        precioPromedio: opcion.precioPromedio,
-        notas: opcion.notas,
-        orden: 0,
-      })
+    await tx.insert(gastosFuturosOpciones).values({
+      detalleId,
+      nombre: opcion.nombre,
+      referenciaUrl: opcion.referenciaUrl,
+      imagenUrl: opcion.imagenUrl,
+      precioMinimo: opcion.precioMinimo,
+      precioMaximo: opcion.precioMaximo,
+      precioPromedio: opcion.precioPromedio,
+      notas: opcion.notas,
+      orden: 0,
+    })
 
     await tx
       .update(gastosFuturosDetalles)

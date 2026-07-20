@@ -27,16 +27,13 @@ function generateNonce() {
 
 const COMMON_DIRECTIVES = {
   'default-src': ["'self'"],
-  'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-  'font-src': ["'self'", 'https://fonts.gstatic.com', 'data:'],
+  // Inter es auto-hospedada (public/fonts) — sin orígenes de Google Fonts.
+  'style-src': ["'self'", "'unsafe-inline'"],
+  'font-src': ["'self'", 'data:'],
   // blob: necesario para preview de fotos del flujo de voucher
   // (BotonCamara crea un blob URL via URL.createObjectURL).
   'img-src': ["'self'", 'data:', 'blob:', 'https:'],
-  'connect-src': [
-    "'self'",
-    'https://*.supabase.co',
-    'https://generativelanguage.googleapis.com',
-  ],
+  'connect-src': ["'self'", 'https://*.supabase.co', 'https://generativelanguage.googleapis.com'],
   'media-src': ["'self'", 'blob:'],
   'worker-src': ["'self'", 'blob:'],
   'frame-ancestors': ["'none'"],
@@ -67,9 +64,7 @@ function buildReportOnlyCsp({ nonce, reportUri }) {
   return serialize({
     ...COMMON_DIRECTIVES,
     'script-src': ["'self'", `'nonce-${nonce}'`, "'strict-dynamic'"],
-    ...(reportUri
-      ? { 'report-uri': [reportUri], 'report-to': ['csp-endpoint'] }
-      : {}),
+    ...(reportUri ? { 'report-uri': [reportUri], 'report-to': ['csp-endpoint'] } : {}),
   })
 }
 

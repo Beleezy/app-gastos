@@ -13,7 +13,7 @@
       <!-- Tour Card -->
       <div
         class="relative w-full sm:max-w-sm bg-theme-card border-t sm:border border-theme-border sm:rounded-2xl rounded-t-3xl shadow-2xl overflow-y-auto overscroll-contain"
-        style="max-height: 90vh;"
+        style="max-height: 90vh"
       >
         <!-- Progreso superior -->
         <div class="px-5 pt-5">
@@ -29,10 +29,7 @@
 
         <!-- Contenido del paso -->
         <div class="px-5 pb-5">
-          <div
-            v-if="pasoActivo"
-            class="text-center"
-          >
+          <div v-if="pasoActivo" class="text-center">
             <div
               class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center"
               :class="pasoActivo.iconoBg || 'bg-theme-accent-bg'"
@@ -56,7 +53,9 @@
                 :key="i"
                 class="flex items-start gap-2.5 px-1"
               >
-                <span class="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-theme-accent-bg text-theme-accent flex items-center justify-center text-[0.6875rem] font-bold">
+                <span
+                  class="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-theme-accent-bg text-theme-accent flex items-center justify-center text-[0.6875rem] font-bold"
+                >
                   {{ i + 1 }}
                 </span>
                 <p class="text-xs text-theme-text-sec leading-snug">{{ f }}</p>
@@ -111,18 +110,33 @@ const { vibrate } = useHaptic()
 // Bloquea el scroll del body mientras el tour está activo
 const { registerModal, unregisterModal } = useModalLayer()
 let tourLocked = false
-watch(() => state.value.activo, (v) => {
-  if (v && !tourLocked) { tourLocked = true; registerModal() }
-  else if (!v && tourLocked) { tourLocked = false; unregisterModal() }
-}, { immediate: true })
-onUnmounted(() => { if (tourLocked) { tourLocked = false; unregisterModal() } })
+watch(
+  () => state.value.activo,
+  (v) => {
+    if (v && !tourLocked) {
+      tourLocked = true
+      registerModal()
+    } else if (!v && tourLocked) {
+      tourLocked = false
+      unregisterModal()
+    }
+  },
+  { immediate: true },
+)
+onUnmounted(() => {
+  if (tourLocked) {
+    tourLocked = false
+    unregisterModal()
+  }
+})
 
 const pasos = [
   {
     icono: '👋',
     iconoBg: 'bg-theme-accent-bg',
     titulo: '¡Bienvenido a Mis Finanzas!',
-    descripcion: 'Registra, planifica y prospera. Una app simple para tomar el control de tu dinero, en menos de 1 minuto al día.',
+    descripcion:
+      'Registra, planifica y prospera. Una app simple para tomar el control de tu dinero, en menos de 1 minuto al día.',
   },
   {
     icono: '🧭',
@@ -140,25 +154,29 @@ const pasos = [
     icono: '🎤',
     iconoBg: 'bg-purple-500/15',
     titulo: 'Registrar gasto en segundos',
-    descripcion: 'Toca el micrófono y dicta: "almuerzo quince soles". La IA detecta concepto, monto y categoría. También puedes escanear un voucher o agregar manual.',
+    descripcion:
+      'Toca el micrófono y dicta: "almuerzo quince soles". La IA detecta concepto, monto y categoría. También puedes escanear un voucher o agregar manual.',
   },
   {
     icono: '📅',
     iconoBg: 'bg-amber-500/15',
     titulo: 'Planifica tu mes',
-    descripcion: 'Define presupuesto, agrega gastos esperados (luz, gimnasio, regalos) y compara contra lo real. Los gastos recurrentes se replican mes a mes.',
+    descripcion:
+      'Define presupuesto, agrega gastos esperados (luz, gimnasio, regalos) y compara contra lo real. Los gastos recurrentes se replican mes a mes.',
   },
   {
     icono: '💸',
     iconoBg: 'bg-red-500/15',
     titulo: 'Controla tus deudas',
-    descripcion: 'Registra quién te debe y a quién le debes. Marca pagos parciales, exporta historial a PDF y vincúlate con otros usuarios para compartir saldo en tiempo real.',
+    descripcion:
+      'Registra quién te debe y a quién le debes. Marca pagos parciales, exporta historial a PDF y vincúlate con otros usuarios para compartir saldo en tiempo real.',
   },
   {
     icono: '✨',
     iconoBg: 'bg-emerald-500/15',
     titulo: 'Más adentro encontrarás...',
-    descripcion: 'Gastos futuros (deseos planeados), Ahorros con metas, gráficos por categoría, modo oscuro, exportación a Excel y mucho más.',
+    descripcion:
+      'Gastos futuros (deseos planeados), Ahorros con metas, gráficos por categoría, modo oscuro, exportación a Excel y mucho más.',
     features: [
       'Funciona offline: lo que registras se sincroniza al volver',
       'Personaliza tema, color de acento y tipografía',

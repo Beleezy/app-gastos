@@ -1,12 +1,16 @@
 <template>
   <SharedBaseBottomSheet title="Vincular con usuario" @close="$emit('close')">
     <p class="text-sm text-theme-text-muted mb-4">
-      Envía una solicitud para vincular las deudas de <strong class="text-theme-text">{{ personaNombre }}</strong> con su cuenta en la app. Al aceptar, las deudas se sincronizarán automáticamente.
+      Envía una solicitud para vincular las deudas de
+      <strong class="text-theme-text">{{ personaNombre }}</strong> con su cuenta en la app. Al
+      aceptar, las deudas se sincronizarán automáticamente.
     </p>
 
     <!-- Email -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Email del usuario</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Email del usuario</label
+      >
       <input
         v-model="form.email"
         type="email"
@@ -17,7 +21,9 @@
 
     <!-- Mensaje opcional -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Mensaje (opcional)</label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Mensaje (opcional)</label
+      >
       <textarea
         v-model="form.mensaje"
         rows="2"
@@ -69,7 +75,11 @@
       <!-- Botón enviar -->
       <button
         class="w-full py-3 rounded-xl font-medium text-sm transition-all"
-        :class="isValid ? 'bg-theme-accent-dark text-theme-on-accent active:bg-theme-accent-dark' : 'bg-theme-card text-theme-text-muted cursor-not-allowed'"
+        :class="
+          isValid
+            ? 'bg-theme-accent-dark text-theme-on-accent active:bg-theme-accent-dark'
+            : 'bg-theme-card text-theme-text-muted cursor-not-allowed'
+        "
         :disabled="!isValid || vinculos.isLoading.value"
         @click="enviar"
       >
@@ -100,7 +110,7 @@ const isValid = computed(() => {
 
 const solicitudesPersona = computed(() => {
   return vinculos.solicitudesEnviadas.value.filter(
-    s => s.personaEntidadId === props.personaEntidadId
+    (s) => s.personaEntidadId === props.personaEntidadId,
   )
 })
 
@@ -111,7 +121,11 @@ onMounted(() => {
 async function enviar() {
   if (!isValid.value) return
   try {
-    await vinculos.enviarSolicitud(props.personaEntidadId, form.email.trim(), form.mensaje.trim() || null)
+    await vinculos.enviarSolicitud(
+      props.personaEntidadId,
+      form.email.trim(),
+      form.mensaje.trim() || null,
+    )
     form.email = ''
     form.mensaje = ''
     emit('enviada')

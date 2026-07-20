@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project: [api, mobile, desktop]
+        project: [smoke, api, mobile, desktop]
 
     services:
       postgres:

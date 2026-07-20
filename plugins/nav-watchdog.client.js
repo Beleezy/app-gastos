@@ -30,7 +30,9 @@ export default defineNuxtPlugin((nuxtApp) => {
   function armar(fullPath) {
     desarmar()
     timer = setTimeout(() => {
-      console.warn(`[nav-watchdog] la vista de ${fullPath} no montó en ${WATCHDOG_MS}ms — recuperando con carga completa`)
+      console.warn(
+        `[nav-watchdog] la vista de ${fullPath} no montó en ${WATCHDOG_MS}ms — recuperando con carga completa`,
+      )
       window.location.assign(fullPath)
     }, WATCHDOG_MS)
   }

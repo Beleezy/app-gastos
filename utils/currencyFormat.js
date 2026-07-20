@@ -35,12 +35,7 @@ export function getSymbol(moneda = 'PEN') {
  * @param {string} [opts.separadorDecimales='.']
  */
 export function formatMonto(valor, opts = {}) {
-  const {
-    moneda = 'PEN',
-    signo = false,
-    separadorMiles = ',',
-    separadorDecimales = '.',
-  } = opts
+  const { moneda = 'PEN', signo = false, separadorMiles = ',', separadorDecimales = '.' } = opts
 
   const n = parseFloat(valor)
   if (!Number.isFinite(n)) return `${getSymbol(moneda)} 0${separadorDecimales}00`
@@ -51,7 +46,7 @@ export function formatMonto(valor, opts = {}) {
   const enteroConMiles = entero.replace(/\B(?=(\d{3})+(?!\d))/g, separadorMiles)
 
   const sym = getSymbol(moneda)
-  const prefix = signo ? (n >= 0 ? '+' : '-') : (n < 0 ? '-' : '')
+  const prefix = signo ? (n >= 0 ? '+' : '-') : n < 0 ? '-' : ''
   return `${prefix}${sym} ${enteroConMiles}${separadorDecimales}${dec}`
 }
 
@@ -62,7 +57,7 @@ export function formatMonto(valor, opts = {}) {
 export function parseMonto(str) {
   if (typeof str !== 'string') return parseFloat(str)
   // quitar símbolos no numéricos excepto coma, punto y signo
-  let limpio = str.replace(/[^0-9,.\-]/g, '').trim()
+  let limpio = str.replace(/[^0-9,.-]/g, '').trim()
   if (!limpio) return NaN
   // Si tiene coma Y punto: el último separador es el decimal
   const lastComma = limpio.lastIndexOf(',')

@@ -60,8 +60,12 @@ export const test = base.extend({
     })
 
     await use({
-      setVoz: (data) => { respuestaVoz = data },
-      setFoto: (data) => { respuestaFoto = data },
+      setVoz: (data) => {
+        respuestaVoz = data
+      },
+      setFoto: (data) => {
+        respuestaFoto = data
+      },
       reset: () => {
         respuestaVoz = RESPUESTA_VOZ_DEFAULT
         respuestaFoto = RESPUESTA_FOTO_DEFAULT

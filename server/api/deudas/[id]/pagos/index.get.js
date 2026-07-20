@@ -12,11 +12,7 @@ export default defineEventHandler(async (event) => {
   const [deuda] = await db
     .select({ id: deudas.id })
     .from(deudas)
-    .where(and(
-      eq(deudas.id, deudaId),
-      eq(deudas.usuarioId, usuarioId),
-      isNull(deudas.deletedAt)
-    ))
+    .where(and(eq(deudas.id, deudaId), eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
     .limit(1)
 
   if (!deuda) {
@@ -29,7 +25,7 @@ export default defineEventHandler(async (event) => {
     .where(and(eq(pagosDeuda.deudaId, deudaId), isNull(pagosDeuda.deletedAt)))
     .orderBy(pagosDeuda.fechaPago)
 
-  return pagos.map(p => ({
+  return pagos.map((p) => ({
     ...p,
     montoPagado: parseFloat(p.montoPagado),
   }))

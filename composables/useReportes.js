@@ -10,8 +10,18 @@ export const MODULOS_REPORTE = [
 ]
 
 const MESES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Septiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre',
 ]
 
 export function useReportes() {
@@ -26,7 +36,9 @@ export function useReportes() {
     const perfil = nombrePerfilActivo.value
 
     if (modulo === 'registro') {
-      const data = await apiFetch('/api/gastos', { params: { mes, anio, limit: 2000, orden: 'fecha' } })
+      const data = await apiFetch('/api/gastos', {
+        params: { mes, anio, limit: 2000, orden: 'fecha' },
+      })
       const filas = Array.isArray(data) ? data : []
       const total = filas.reduce((s, g) => s + (Number(g.monto) || 0), 0)
       return {
@@ -69,9 +81,10 @@ export function useReportes() {
     if (modulo === 'ahorro') {
       const data = await apiFetch('/api/ahorros', { params: { mes, anio } })
       const filas = Array.isArray(data?.ahorros) ? data.ahorros : []
-      const total = data?.totalMes != null
-        ? Number(data.totalMes)
-        : filas.reduce((s, a) => s + (Number(a.monto) || 0), 0)
+      const total =
+        data?.totalMes != null
+          ? Number(data.totalMes)
+          : filas.reduce((s, a) => s + (Number(a.monto) || 0), 0)
       return {
         titulo: `Ahorros de ${perfil}`,
         subtitulo: periodo,
@@ -208,7 +221,11 @@ export function useReportes() {
 
   async function compartir(blob, nombre, textoWa, telefono) {
     const file = new File([blob], nombre, { type: blob.type })
-    if (typeof navigator !== 'undefined' && navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (
+      typeof navigator !== 'undefined' &&
+      navigator.canShare &&
+      navigator.canShare({ files: [file] })
+    ) {
       try {
         await navigator.share({ files: [file], title: nombre, text: textoWa })
         return
@@ -227,10 +244,12 @@ export function useReportes() {
   }
 
   function slug(s) {
-    return String(s || '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '') || 'perfil'
+    return (
+      String(s || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'perfil'
+    )
   }
 
   async function generar({ modulo, mes, anio, formato = 'pdf', accion = 'descargar' }) {

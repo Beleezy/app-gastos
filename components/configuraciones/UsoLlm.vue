@@ -2,9 +2,12 @@
   <section class="bg-theme-card rounded-2xl border border-theme-border p-4 md:p-5">
     <header class="mb-3 flex items-start justify-between gap-3">
       <div>
-        <h3 class="text-sm md:text-base font-semibold text-theme-text">Procesamiento por voz y foto</h3>
+        <h3 class="text-sm md:text-base font-semibold text-theme-text">
+          Procesamiento por voz y foto
+        </h3>
         <p class="text-xs text-theme-text-sec">
-          Uso del asistente de IA este mes. Si llegas al límite, podrás seguir registrando manualmente.
+          Uso del asistente de IA este mes. Si llegas al límite, podrás seguir registrando
+          manualmente.
         </p>
       </div>
       <button
@@ -53,7 +56,10 @@
         </p>
       </div>
 
-      <ul v-if="uso.detallesPorEndpoint?.length" class="space-y-1 pt-2 border-t border-theme-border">
+      <ul
+        v-if="uso.detallesPorEndpoint?.length"
+        class="space-y-1 pt-2 border-t border-theme-border"
+      >
         <li
           v-for="d in uso.detallesPorEndpoint"
           :key="d.endpoint"

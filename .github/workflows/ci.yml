@@ -32,10 +32,9 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-  # Lint y formato. Hoy hay errores legacy que deben limpiarse en un PR
-  # aparte: el job no es bloqueante (continue-on-error) hasta entonces.
-  # Cuando la base esté limpia, quitar `continue-on-error` y promover a
-  # check requerido.
+  # Lint y formato BLOQUEANTES desde la limpieza de julio 2026 (base en 0
+  # errores; los warnings no fallan). El config de ESLint usa los globals
+  # generados por @nuxt/eslint en `nuxt prepare` (postinstall).
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -55,11 +54,9 @@ jobs:
 
       - name: ESLint
         run: npm run lint
-        continue-on-error: true
 
       - name: Prettier check
         run: npm run format:check
-        continue-on-error: true
 
   build:
     runs-on: ubuntu-latest

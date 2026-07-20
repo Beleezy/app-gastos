@@ -1,8 +1,13 @@
 <template>
-  <SharedBaseBottomSheet :title="modoEdicion ? 'Editar ahorro' : 'Nuevo ahorro'" @close="$emit('close')">
+  <SharedBaseBottomSheet
+    :title="modoEdicion ? 'Editar ahorro' : 'Nuevo ahorro'"
+    @close="$emit('close')"
+  >
     <!-- Concepto -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Concepto <span class="text-theme-text-muted">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Concepto <span class="text-theme-text-muted">(opcional)</span></label
+      >
       <input
         v-model="form.concepto"
         type="text"
@@ -15,7 +20,9 @@
     <div>
       <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Monto</label>
       <div class="relative">
-        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{ currencySymbol }}</span>
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-theme-text-sec">{{
+          currencySymbol
+        }}</span>
         <input
           v-model="form.monto"
           type="number"
@@ -43,9 +50,11 @@
           v-for="medio in medios"
           :key="medio.id"
           class="flex flex-col items-center gap-1 p-2 rounded-xl border transition-all"
-          :class="form.medioAhorroId === medio.id
-            ? 'border-theme-accent bg-theme-accent-bg'
-            : 'border-theme-border bg-theme-input'"
+          :class="
+            form.medioAhorroId === medio.id
+              ? 'border-theme-accent bg-theme-accent-bg'
+              : 'border-theme-border bg-theme-input'
+          "
           @click="form.medioAhorroId = medio.id"
         >
           <div
@@ -54,7 +63,10 @@
           >
             <span class="text-sm">{{ medio.icono || '💰' }}</span>
           </div>
-          <span class="text-[0.6875rem] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-none w-full">{{ medio.nombre }}</span>
+          <span
+            class="text-[0.6875rem] text-theme-text-muted text-center leading-tight line-clamp-2 break-words hyphens-none w-full"
+            >{{ medio.nombre }}</span
+          >
         </button>
       </div>
     </div>
@@ -71,7 +83,9 @@
 
     <!-- Notas -->
     <div>
-      <label class="block text-sm font-medium text-theme-text-muted mb-1.5">Notas <span class="text-theme-text-muted">(opcional)</span></label>
+      <label class="block text-sm font-medium text-theme-text-muted mb-1.5"
+        >Notas <span class="text-theme-text-muted">(opcional)</span></label
+      >
       <textarea
         v-model="form.notas"
         rows="2"
@@ -85,13 +99,34 @@
 
       <button
         class="w-full py-3.5 rounded-xl text-theme-on-accent font-semibold text-sm transition-colors flex items-center justify-center gap-2"
-        :class="saving ? 'bg-theme-accent cursor-not-allowed' : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'"
+        :class="
+          saving
+            ? 'bg-theme-accent cursor-not-allowed'
+            : 'bg-theme-accent hover:bg-theme-accent-dark active:bg-theme-accent-dark'
+        "
         :disabled="saving"
         @click="guardar"
       >
-        <svg v-if="saving" class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        <svg
+          v-if="saving"
+          class="animate-spin w-4 h-4"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
         </svg>
         {{ saving ? 'Guardando...' : modoEdicion ? 'Guardar cambios' : 'Registrar ahorro' }}
       </button>

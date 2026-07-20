@@ -41,7 +41,10 @@ export default defineEventHandler(async (event) => {
   const inicioMes = mes - (ventana - 1)
   let inicioAnio = anio
   let inicioMesAjustado = inicioMes
-  while (inicioMesAjustado <= 0) { inicioMesAjustado += 12; inicioAnio -= 1 }
+  while (inicioMesAjustado <= 0) {
+    inicioMesAjustado += 12
+    inicioAnio -= 1
+  }
   const desde = `${inicioAnio}-${String(inicioMesAjustado).padStart(2, '0')}-01`
 
   // 1 sola query: traer (concepto, categoria, fecha, monto) de la ventana.
@@ -59,11 +62,7 @@ export default defineEventHandler(async (event) => {
     })
     .from(gastos)
     .leftJoin(categorias, eq(gastos.categoriaId, categorias.id))
-    .where(and(
-      eq(gastos.usuarioId, usuarioId),
-      isNull(gastos.deletedAt),
-      gte(gastos.fecha, desde),
-    ))
+    .where(and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), gte(gastos.fecha, desde)))
 
   const grupos = new Map()
   for (const r of rows) {

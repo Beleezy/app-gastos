@@ -10,10 +10,7 @@
         class="relative bg-theme-accent text-theme-on-accent text-[0.6875rem] font-medium rounded-xl px-3 py-2 shadow-lg max-w-[220px] leading-snug"
       >
         <!-- Flecha -->
-        <div
-          class="absolute w-2 h-2 bg-theme-accent rotate-45"
-          :class="arrowClass"
-        ></div>
+        <div class="absolute w-2 h-2 bg-theme-accent rotate-45" :class="arrowClass"></div>
         <div class="flex items-start gap-2">
           <span class="shrink-0 text-base leading-none">{{ icono }}</span>
           <div class="flex-1">
@@ -25,7 +22,14 @@
             class="shrink-0 -mt-0.5 -mr-1 text-theme-on-accent/80 hover:text-theme-on-accent transition-colors"
             @click="dismiss"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-3.5 h-3.5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="2.5"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -82,19 +86,25 @@ function dismiss() {
   }
 }
 
-const positionClass = computed(() => ({
-  top: 'bottom-full mb-2 left-1/2 -translate-x-1/2',
-  bottom: 'top-full mt-2 left-1/2 -translate-x-1/2',
-  left: 'right-full mr-2 top-1/2 -translate-y-1/2',
-  right: 'left-full ml-2 top-1/2 -translate-y-1/2',
-}[props.position]))
+const positionClass = computed(
+  () =>
+    ({
+      top: 'bottom-full mb-2 left-1/2 -translate-x-1/2',
+      bottom: 'top-full mt-2 left-1/2 -translate-x-1/2',
+      left: 'right-full mr-2 top-1/2 -translate-y-1/2',
+      right: 'left-full ml-2 top-1/2 -translate-y-1/2',
+    })[props.position],
+)
 
-const arrowClass = computed(() => ({
-  top: 'left-1/2 -translate-x-1/2 -bottom-1',
-  bottom: 'left-1/2 -translate-x-1/2 -top-1',
-  left: 'top-1/2 -translate-y-1/2 -right-1',
-  right: 'top-1/2 -translate-y-1/2 -left-1',
-}[props.position]))
+const arrowClass = computed(
+  () =>
+    ({
+      top: 'left-1/2 -translate-x-1/2 -bottom-1',
+      bottom: 'left-1/2 -translate-x-1/2 -top-1',
+      left: 'top-1/2 -translate-y-1/2 -right-1',
+      right: 'top-1/2 -translate-y-1/2 -left-1',
+    })[props.position],
+)
 </script>
 
 <style scoped>

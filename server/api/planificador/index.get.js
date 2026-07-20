@@ -1,5 +1,11 @@
 import { db } from '../../utils/db.js'
-import { planesMensuales, gastosPlanificados, categorias, configuraciones, gastos } from '../../database/schema.js'
+import {
+  planesMensuales,
+  gastosPlanificados,
+  categorias,
+  configuraciones,
+  gastos,
+} from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
@@ -14,12 +20,19 @@ export default defineEventHandler(async (event) => {
 
   // Buscar plan y config en paralelo (independientes hasta el insert).
   let [planRows, configRows] = await Promise.all([
-    db.select().from(planesMensuales).where(and(
-      eq(planesMensuales.usuarioId, usuarioId),
-      eq(planesMensuales.mes, mes),
-      eq(planesMensuales.anio, anio),
-    )).limit(1),
-    db.select({ presupuestoMensualDefault: configuraciones.presupuestoMensualDefault })
+    db
+      .select()
+      .from(planesMensuales)
+      .where(
+        and(
+          eq(planesMensuales.usuarioId, usuarioId),
+          eq(planesMensuales.mes, mes),
+          eq(planesMensuales.anio, anio),
+        ),
+      )
+      .limit(1),
+    db
+      .select({ presupuestoMensualDefault: configuraciones.presupuestoMensualDefault })
       .from(configuraciones)
       .where(eq(configuraciones.usuarioId, usuarioId))
       .limit(1),
@@ -41,14 +54,16 @@ export default defineEventHandler(async (event) => {
     }
 
     if (!plan) {
-      [plan] = await db
+      ;[plan] = await db
         .select()
         .from(planesMensuales)
-        .where(and(
-          eq(planesMensuales.usuarioId, usuarioId),
-          eq(planesMensuales.mes, mes),
-          eq(planesMensuales.anio, anio)
-        ))
+        .where(
+          and(
+            eq(planesMensuales.usuarioId, usuarioId),
+            eq(planesMensuales.mes, mes),
+            eq(planesMensuales.anio, anio),
+          ),
+        )
         .limit(1)
     }
   }
@@ -81,11 +96,14 @@ export default defineEventHandler(async (event) => {
       })
       .from(gastosPlanificados)
       .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
-      .leftJoin(gastos, and(
-        eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
-        eq(gastos.usuarioId, usuarioId),
-        isNull(gastos.deletedAt),
-      ))
+      .leftJoin(
+        gastos,
+        and(
+          eq(gastos.gastoPlanificadoId, gastosPlanificados.id),
+          eq(gastos.usuarioId, usuarioId),
+          isNull(gastos.deletedAt),
+        ),
+      )
       .where(eq(gastosPlanificados.planMensualId, plan.id))
       .orderBy(gastosPlanificados.fechaProbablePago),
 
@@ -95,11 +113,13 @@ export default defineEventHandler(async (event) => {
         totalReal: sql`COALESCE(SUM(${gastos.monto}), 0)`.as('totalReal'),
       })
       .from(gastos)
-      .where(and(
-        eq(gastos.usuarioId, usuarioId),
-        between(gastos.fecha, primerDia, ultimoDia),
-        isNull(gastos.deletedAt),
-      ))
+      .where(
+        and(
+          eq(gastos.usuarioId, usuarioId),
+          between(gastos.fecha, primerDia, ultimoDia),
+          isNull(gastos.deletedAt),
+        ),
+      )
       .groupBy(gastos.categoriaId),
   ])
 
@@ -117,7 +137,7 @@ export default defineEventHandler(async (event) => {
       ...plan,
       montoPresupuesto: parseFloat(plan.montoPresupuesto),
     },
-    gastos: gastosRaw.map(g => ({
+    gastos: gastosRaw.map((g) => ({
       ...g,
       estado: g.gastoRegistradoId ? 'pagado' : g.estado,
       montoEstimado: parseFloat(g.montoEstimado),

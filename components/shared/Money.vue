@@ -51,7 +51,8 @@ const display = computed(() => {
   const abs = Math.abs(n)
   const cuerpo = props.compact ? formatCompacto(abs) : cuerpoBase(abs)
   let prefijo = ''
-  if (n < 0) prefijo = '−' // signo menos tipografico
+  if (n < 0)
+    prefijo = '−' // signo menos tipografico
   else if (props.signo && n > 0) prefijo = '+'
   return `${prefijo}${currencySymbol.value}${NBSP}${cuerpo}`
 })

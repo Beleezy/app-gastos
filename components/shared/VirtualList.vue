@@ -3,12 +3,7 @@
        scroll/transform y mantiene transitions naturales. -->
   <div v-if="!shouldVirtualize" class="virtual-list-passthrough">
     <slot name="header" />
-    <slot
-      v-for="(item, idx) in source"
-      :key="getKey(item, idx)"
-      :item="item"
-      :index="idx"
-    />
+    <slot v-for="(item, idx) in source" :key="getKey(item, idx)" :item="item" :index="idx" />
     <slot name="footer" />
   </div>
 
@@ -62,7 +57,12 @@ function getKey(item, idx) {
 const sourceRef = computed(() => props.source)
 const maxHeightRef = computed(() => props.maxHeight)
 
-const { items: visibleItems, totalHeight, offsetY, onScroll } = useVirtualList({
+const {
+  items: visibleItems,
+  totalHeight,
+  offsetY,
+  onScroll,
+} = useVirtualList({
   source: sourceRef,
   itemHeight: props.itemHeight,
   containerHeight: maxHeightRef,

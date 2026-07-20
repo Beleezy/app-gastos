@@ -1,6 +1,6 @@
 export function useOptimisticGastos({ gastosMensuales, categorias, getCategoriaPorNombre }) {
   function mapGastosConIds(gastosEditados) {
-    return gastosEditados.map(g => {
+    return gastosEditados.map((g) => {
       const cat = getCategoriaPorNombre(g.categoria)
       return {
         concepto: g.concepto,
@@ -15,7 +15,7 @@ export function useOptimisticGastos({ gastosMensuales, categorias, getCategoriaP
     const now = new Date()
     const hora = now.toTimeString().slice(0, 5)
     const optimistas = gastosConIds.map((g, i) => {
-      const cat = categorias.value.find(c => c.id === g.categoriaId)
+      const cat = categorias.value.find((c) => c.id === g.categoriaId)
       return {
         id: `tmp-${Date.now()}-${i}`,
         concepto: g.concepto,
@@ -30,11 +30,11 @@ export function useOptimisticGastos({ gastosMensuales, categorias, getCategoriaP
       }
     })
     gastosMensuales.value = [...optimistas, ...gastosMensuales.value]
-    return optimistas.map(o => o.id)
+    return optimistas.map((o) => o.id)
   }
 
   function rollbackOptimistic(tempIds) {
-    gastosMensuales.value = gastosMensuales.value.filter(g => !tempIds.includes(g.id))
+    gastosMensuales.value = gastosMensuales.value.filter((g) => !tempIds.includes(g.id))
   }
 
   return { mapGastosConIds, pushOptimisticGastos, rollbackOptimistic }

@@ -23,19 +23,20 @@ export default defineEventHandler(async (event) => {
     db
       .select({ total: sql`COALESCE(SUM(${gastos.monto}), 0)` })
       .from(gastos)
-      .where(and(
-        eq(gastos.usuarioId, usuarioId),
-        isNull(gastos.deletedAt),
-        between(gastos.fecha, primerDia, ultimaFecha),
-      ))
+      .where(
+        and(
+          eq(gastos.usuarioId, usuarioId),
+          isNull(gastos.deletedAt),
+          between(gastos.fecha, primerDia, ultimaFecha),
+        ),
+      )
       .then((r) => r[0]),
   ])
 
   const totalGastos = parseFloat(gastosRow?.total || 0)
   const saldoNeto = Math.round((totalIngresos - totalGastos) * 100) / 100
-  const porcentajeAhorro = totalIngresos > 0
-    ? Math.round(((saldoNeto) / totalIngresos) * 1000) / 10
-    : 0
+  const porcentajeAhorro =
+    totalIngresos > 0 ? Math.round((saldoNeto / totalIngresos) * 1000) / 10 : 0
 
   return {
     totalIngresos: Math.round(totalIngresos * 100) / 100,

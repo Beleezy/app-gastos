@@ -70,7 +70,9 @@ test.describe('Planificador', () => {
     expect(r.status()).toBeLessThan(500)
 
     // Smoke de que la pagina principal cargo (heading H1 siempre presente).
-    await expect(page.getByRole('heading', { name: /Planificador/i, level: 1 })).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByRole('heading', { name: /Planificador/i, level: 1 })).toBeVisible({
+      timeout: 10_000,
+    })
 
     // Esperar hidratacion de Vue (sin esto, el HTML del boton ya existe pero
     // el handler @click aun no esta bindeado y el click es no-op).
@@ -80,7 +82,7 @@ test.describe('Planificador', () => {
     // GCal) detras del toggle "Ver mas". V2 las muestra siempre. Expandimos
     // si el toggle existe y entonces verificamos el boton de plantillas.
     const verMas = page.getByRole('button', { name: 'Ver más', exact: true })
-    if (await verMas.count() > 0) {
+    if ((await verMas.count()) > 0) {
       await verMas.first().click()
     }
     await expect(page.getByTestId('btn-abrir-plantillas')).toBeVisible({ timeout: 10_000 })

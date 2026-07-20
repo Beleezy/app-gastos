@@ -13,10 +13,7 @@
       :aria-controls="tab.controls"
       :data-testid="tab.testid || `tab-${tab.value}`"
       class="shrink-0 transition-colors flex items-center justify-center gap-1.5 font-medium"
-      :class="[
-        sizeClass,
-        modelValue === tab.value ? activeClass(tab) : inactiveClass(tab),
-      ]"
+      :class="[sizeClass, modelValue === tab.value ? activeClass(tab) : inactiveClass(tab)]"
       @click="select(tab)"
     >
       <slot name="prepend" :tab="tab" :active="modelValue === tab.value" />
@@ -24,8 +21,13 @@
       <span
         v-if="tab.badge != null && tab.badge !== 0"
         class="px-1.5 py-0 rounded-full text-[0.6875rem] font-bold"
-        :class="modelValue === tab.value ? 'bg-theme-on-accent/20' : 'bg-theme-border-md text-theme-text-muted'"
-      >{{ tab.badge }}</span>
+        :class="
+          modelValue === tab.value
+            ? 'bg-theme-on-accent/20'
+            : 'bg-theme-border-md text-theme-text-muted'
+        "
+        >{{ tab.badge }}</span
+      >
       <slot name="append" :tab="tab" :active="modelValue === tab.value" />
     </button>
   </div>
@@ -65,11 +67,14 @@ function select(tab) {
   emit('change', tab.value)
 }
 
-const sizeClass = computed(() => ({
-  xs: 'px-2.5 py-1 text-[0.6875rem] rounded-full',
-  sm: 'px-3 py-1.5 text-xs rounded-full',
-  md: 'px-4 py-2 text-sm rounded-xl',
-}[props.size]))
+const sizeClass = computed(
+  () =>
+    ({
+      xs: 'px-2.5 py-1 text-[0.6875rem] rounded-full',
+      sm: 'px-3 py-1.5 text-xs rounded-full',
+      md: 'px-4 py-2 text-sm rounded-xl',
+    })[props.size],
+)
 
 function activeClass(tab) {
   if (tab.activeClass) return tab.activeClass
@@ -85,7 +90,8 @@ function inactiveClass(tab) {
   return {
     pills: 'bg-theme-card text-theme-text-sec border border-theme-border hover:text-theme-text',
     card: 'bg-theme-card text-theme-text-sec border border-theme-border hover:text-theme-text',
-    underline: 'text-theme-text-muted border-b-2 border-transparent rounded-none hover:text-theme-text-sec',
+    underline:
+      'text-theme-text-muted border-b-2 border-transparent rounded-none hover:text-theme-text-sec',
   }[props.variant]
 }
 </script>

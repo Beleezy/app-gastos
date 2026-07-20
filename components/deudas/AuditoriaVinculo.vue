@@ -2,13 +2,18 @@
   <div v-if="auditoria.length > 0" :class="embedded ? '' : 'mb-5'">
     <button v-if="!embedded" class="flex items-center gap-2 mb-3 w-full" @click="show = !show">
       <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Auditoría del vínculo</h3>
+      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">
+        Auditoría del vínculo
+      </h3>
       <span class="text-xs text-theme-text-sec">{{ auditoria.length }}</span>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         class="w-3 h-3 text-theme-text-muted ml-auto transition-transform"
         :class="show ? 'rotate-180' : ''"
-        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="2"
       >
         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
       </svg>
@@ -33,27 +38,55 @@
               >
                 {{ getAccionLabel(entrada.accion) }}
               </span>
-              <span class="text-[0.65rem] text-theme-text-sec">{{ entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario }}</span>
+              <span class="text-[0.65rem] text-theme-text-sec">{{
+                entrada.esMiAccion ? 'Tú' : entrada.nombreUsuario
+              }}</span>
             </div>
-            <p v-if="!tieneDetallesColoreados(entrada)" class="text-[0.7rem] text-theme-text-sec">{{ entrada.descripcion }}</p>
+            <p v-if="!tieneDetallesColoreados(entrada)" class="text-[0.7rem] text-theme-text-sec">
+              {{ entrada.descripcion }}
+            </p>
             <!-- Detailed changes for edits -->
-            <div v-if="entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios)" class="mt-1 space-y-1">
-              <div v-for="(cambio, campo) in entrada.datos.cambios" :key="campo" class="text-[0.7rem] text-theme-text-sec flex items-center gap-1.5">
-                <span class="text-theme-text-muted font-semibold">{{ cambio.label || campo }}:</span>
+            <div
+              v-if="
+                entrada.datos?.cambios &&
+                typeof entrada.datos.cambios === 'object' &&
+                !Array.isArray(entrada.datos.cambios)
+              "
+              class="mt-1 space-y-1"
+            >
+              <div
+                v-for="(cambio, campo) in entrada.datos.cambios"
+                :key="campo"
+                class="text-[0.7rem] text-theme-text-sec flex items-center gap-1.5"
+              >
+                <span class="text-theme-text-muted font-semibold"
+                  >{{ cambio.label || campo }}:</span
+                >
                 <span class="text-red-400/80 line-through">{{ cambio.antes || '(vacío)' }}</span>
                 <span class="text-theme-text-sec">&rarr;</span>
-                <span class="text-emerald-400/80 font-medium">{{ cambio.despues || '(vacío)' }}</span>
+                <span class="text-emerald-400/80 font-medium">{{
+                  cambio.despues || '(vacío)'
+                }}</span>
               </div>
             </div>
             <!-- Detailed debts for global payments -->
-            <div v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)" class="mt-1.5 space-y-0.5">
-              <div v-for="(dp, idx) in entrada.datos.deudasPagadas" :key="idx" class="text-[0.65rem] text-theme-text-sec flex items-center gap-1">
+            <div
+              v-if="entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas)"
+              class="mt-1.5 space-y-0.5"
+            >
+              <div
+                v-for="(dp, idx) in entrada.datos.deudasPagadas"
+                :key="idx"
+                class="text-[0.65rem] text-theme-text-sec flex items-center gap-1"
+              >
                 <span class="text-teal-400/70">S/ {{ dp.monto }}</span>
                 <span class="text-theme-text-muted">&rarr;</span>
                 <span class="text-theme-text-muted">{{ dp.concepto }}</span>
               </div>
             </div>
-            <p class="text-[0.65rem] text-theme-text-muted mt-1">{{ formatFecha(entrada.createdAt) }}</p>
+            <p class="text-[0.65rem] text-theme-text-muted mt-1">
+              {{ formatFecha(entrada.createdAt) }}
+            </p>
           </div>
         </div>
       </div>
@@ -64,9 +97,19 @@
   <div v-else-if="auditoria.length === 0 && personaId" :class="embedded ? '' : 'mb-5'">
     <div v-if="!embedded" class="flex items-center gap-2 mb-2">
       <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">Auditoría del vínculo</h3>
+      <h3 class="text-xs font-semibold text-theme-text-muted uppercase tracking-wider">
+        Auditoría del vínculo
+      </h3>
     </div>
-    <p :class="embedded ? 'text-xs text-theme-text-muted text-center py-4' : 'text-xs text-theme-text-muted pl-3'">Sin actividad registrada aún.</p>
+    <p
+      :class="
+        embedded
+          ? 'text-xs text-theme-text-muted text-center py-4'
+          : 'text-xs text-theme-text-muted pl-3'
+      "
+    >
+      Sin actividad registrada aún.
+    </p>
   </div>
 </template>
 
@@ -80,8 +123,14 @@ defineProps({
 const show = ref(false)
 
 function tieneDetallesColoreados(entrada) {
-  return (entrada.datos?.cambios && typeof entrada.datos.cambios === 'object' && !Array.isArray(entrada.datos.cambios))
-    || (entrada.datos?.deudasPagadas && Array.isArray(entrada.datos.deudasPagadas) && entrada.datos.deudasPagadas.length > 0)
+  return (
+    (entrada.datos?.cambios &&
+      typeof entrada.datos.cambios === 'object' &&
+      !Array.isArray(entrada.datos.cambios)) ||
+    (entrada.datos?.deudasPagadas &&
+      Array.isArray(entrada.datos.deudasPagadas) &&
+      entrada.datos.deudasPagadas.length > 0)
+  )
 }
 
 function getAccionColor(accion) {
@@ -143,7 +192,9 @@ function formatFecha(fecha) {
 <style scoped>
 .collapse-enter-active,
 .collapse-leave-active {
-  transition: opacity 0.2s ease, max-height 0.3s ease;
+  transition:
+    opacity 0.2s ease,
+    max-height 0.3s ease;
   max-height: 2000px;
   overflow: hidden;
 }
