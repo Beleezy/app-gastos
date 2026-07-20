@@ -64,7 +64,7 @@ jobs:
       BASE_URL: http://localhost:3000
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -174,7 +174,7 @@ jobs:
       BASE_URL: http://localhost:3000
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Detect existing baselines
         id: baselines
