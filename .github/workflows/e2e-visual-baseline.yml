@@ -132,7 +132,7 @@ jobs:
 
       - name: Crear PR con baselines actualizados
         if: steps.changes.outputs.any == 'true'
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: chore/visual-baselines-${{ github.run_id }}
