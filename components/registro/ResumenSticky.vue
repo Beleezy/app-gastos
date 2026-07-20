@@ -1,6 +1,14 @@
 <template>
+  <!-- Overlay absoluto bajo el header: al estar fuera del flujo, la altura
+       del header sticky no cambia cuando aparece/desaparece — sin ese
+       cambio de altura, el scroll rápido hacia arriba ya no deja la banda
+       vacía con el resumen fantasma (fix 2026-07). El header (position:
+       sticky) es el contenedor posicionado de este absolute. -->
   <Transition name="slide-down">
-    <div v-if="visible" class="lg:hidden px-3 pb-2 border-b border-theme-border bg-theme-card">
+    <div
+      v-if="visible"
+      class="absolute inset-x-0 top-full lg:hidden px-3 pb-2 border-b border-theme-border bg-theme-card shadow-lg shadow-black/20"
+    >
       <div
         class="relative max-w-lg mx-auto bg-theme-input/40 border border-theme-border rounded-xl px-4 py-2 overflow-hidden"
       >
@@ -124,9 +132,13 @@ const porcentaje = computed(() => {
 </script>
 
 <style scoped>
-.slide-down-enter-active,
-.slide-down-leave-active {
+.slide-down-enter-active {
   transition: all 0.25s ease;
+}
+/* Salida casi instantánea: al volver arriba, un leave lento dejaba el
+   resumen fantasma flotando sobre el contenido real. */
+.slide-down-leave-active {
+  transition: all 0.12s ease;
 }
 .slide-down-enter-from {
   opacity: 0;

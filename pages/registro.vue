@@ -268,22 +268,19 @@
             </Transition>
           </div>
 
-          <!-- Tabs + export (sticky) -->
-          <div
-            class="sticky z-20 bg-theme-bg/95 backdrop-blur-sm lg:static lg:bg-transparent transition-[top] duration-200"
-            :class="showStickyResumen ? 'top-[8.5rem]' : 'top-14'"
-          >
-            <div class="px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
-              <SharedTabBar
-                :model-value="vistaRegistro"
-                :tabs="tabsVista"
-                variant="card"
-                size="md"
-                aria-label="Vista del registro"
-                container-class="grid grid-cols-2 min-[480px]:grid-cols-4 gap-2 lg:flex lg:items-center"
-                @change="onCambiarVista"
-              />
-            </div>
+          <!-- Tabs + export. NO sticky: apilados bajo el mini-resumen
+               ocupaban ~40% del viewport y se mezclaban con él (fix
+               2026-07); scrollean con el contenido como en el dashboard. -->
+          <div class="px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
+            <SharedTabBar
+              :model-value="vistaRegistro"
+              :tabs="tabsVista"
+              variant="card"
+              size="md"
+              aria-label="Vista del registro"
+              container-class="grid grid-cols-2 min-[480px]:grid-cols-4 gap-2 lg:flex lg:items-center"
+              @change="onCambiarVista"
+            />
           </div>
 
           <!-- Views -->
