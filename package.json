@@ -34,19 +34,19 @@
     "db:seed:temp-users": "node server/database/seed-temp-users.js"
   },
   "dependencies": {
-    "@nuxtjs/supabase": "^2.0.8",
+    "@nuxtjs/supabase": "^2.0.10",
     "@pinia/nuxt": "^0.11.3",
     "@vite-pwa/nuxt": "^1.1.1",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
     "jspdf": "^4.2.1",
-    "nuxt": "^4.4.6",
+    "nuxt": "^4.5.2",
     "pinia": "^3.0.4",
     "postgres": "^3.4.9",
     "vue": "^3.5.34",
     "vue-router": "^5.0.7",
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "version": "1.0.0",
   "description": "Sistema de finanzas personales - PWA",
@@ -54,16 +54,16 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@nuxt/eslint": "^1.16.0",
+    "@nuxt/eslint": "^1.17.0",
     "@nuxt/eslint-config": "^1.15.2",
-    "@playwright/test": "^1.60.0",
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/forms": "^0.5.11",
-    "@tailwindcss/vite": "^4.3.0",
+    "@tailwindcss/vite": "^4.3.3",
     "@vitest/coverage-v8": "^4.1.6",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^10.4.0",
-    "prettier": "^3.8.3",
-    "sharp": "^0.34.5",
+    "eslint": "^10.9.1",
+    "prettier": "^3.9.6",
+    "sharp": "^0.35.4",
     "tailwindcss": "^4.3.0",
     "vitest": "^4.1.6"
   }
