@@ -21,9 +21,9 @@ import { logger } from '../utils/logger.js'
 // Mantener al día: al añadir una migración con columna nueva crítica,
 // reemplazar la centinela más antigua por la nueva.
 const SENTINEL_COLUMNS = [
+  ['gastos', 'visibilidad'], // 0033_compartido
   ['personas_entidades', 'deleted_at'], // 0032_personas_soft_delete
   ['usuarios', 'correo_contacto'], // 0031_perfil_contacto
-  ['usuarios', 'telefono'], // 0030_perfil_telefono
 ]
 
 export default defineEventHandler(async (event) => {
