@@ -1,49 +1,53 @@
-// E2E del módulo Configuraciones (FeatureFlags + PushNotifications).
+// E2E del módulo Configuraciones (paneles vigentes + uso de LLM).
+//
+// El panel "Funciones experimentales" y las notificaciones push ya no existen
+// (ver el comentario en pages/configuraciones.vue y la migración
+// 0027_racionalizacion.sql, que dropea `suscripciones_push`). La página se
+// verifica ahora contra los acordeones que sí renderiza, y el mecanismo de
+// feature flags se cubre en tests/featureFlag.test.js (Vitest) porque ya no
+// tiene UI que lo alterne.
 
 import { test, expect } from '@playwright/test'
 
+/** Locator del <summary> de un acordeón de la página. */
+function seccion(page, nombre) {
+  return page.locator('details > summary').filter({ hasText: nombre })
+}
+
 test.describe('Configuraciones', () => {
-  test('UI: /configuraciones carga y muestra paneles nuevos', async ({ page }) => {
+  test('UI: /configuraciones carga y muestra los paneles vigentes', async ({ page }) => {
     const r = await page.goto('/configuraciones')
     expect(r.status()).toBeLessThan(500)
-    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByRole('heading', { name: /Notificaciones push/i })).toBeVisible()
-  })
 
-  test('UI: toggle de feature flag persiste', async ({ page }) => {
-    await page.goto('/configuraciones')
-    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
+    // "Perfil y región" abre por defecto (details[open]).
+    await expect(seccion(page, 'Perfil y región')).toBeVisible({ timeout: 10_000 })
+    await expect(page.locator('#cfg-nombre')).toBeVisible()
+    await expect(page.locator('#cfg-presupuesto')).toBeVisible()
+    await expect(page.locator('#cfg-moneda')).toBeVisible()
 
-    const flagKey = 'predictor_categoria'
-    const featureSection = page
-      .getByRole('heading', { name: /Funciones experimentales/i })
-      .locator('xpath=ancestor::section[1]')
+    // El resto de acordeones existe, colapsado.
+    for (const nombre of ['Apariencia', 'Registro y categorías', 'Integraciones', 'Avanzado']) {
+      await expect(seccion(page, nombre)).toBeVisible()
+    }
 
-    await featureSection.scrollIntoViewIfNeeded()
+    // Apariencia: acento, tamaño de letra y modo daltónico.
+    await seccion(page, 'Apariencia').click()
+    await expect(page.getByText('Color del tema')).toBeVisible()
+    await expect(page.getByText('Tamano de letra')).toBeVisible()
+    await expect(page.getByText('Modo daltonico')).toBeVisible()
 
-    const firstToggle = featureSection.locator('input[type="checkbox"]').first()
-    const before = await firstToggle.isChecked()
+    // Integraciones: tarjeta de Google Calendar (los recordatorios in-app
+    // viven dentro de ella una vez conectada la cuenta). El <label> del
+    // card se renderiza siempre, conectado o no — a diferencia del botón.
+    await seccion(page, 'Integraciones').click()
+    await expect(page.locator('label').filter({ hasText: 'Google Calendar' })).toBeVisible()
 
-    await page.evaluate(
-      ({ key, value }) => {
-        const raw = localStorage.getItem('gastos.featureFlags.v1')
-        const parsed = raw ? JSON.parse(raw) : {}
-        parsed[key] = value
-        localStorage.setItem('gastos.featureFlags.v1', JSON.stringify(parsed))
-      },
-      { key: flagKey, value: !before },
-    )
-
-    await page.reload()
-    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
-
-    const persisted = await page.evaluate((key) => {
-      const raw = localStorage.getItem('gastos.featureFlags.v1')
-      if (!raw) return undefined
-      return JSON.parse(raw)?.[key]
-    }, flagKey)
-
-    expect(persisted).toBe(!before)
+    // Avanzado: modo familiar + uso de IA.
+    await seccion(page, 'Avanzado').click()
+    await expect(
+      page.getByRole('heading', { name: /Familia: cómo cambiar de perfil/i }),
+    ).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Procesamiento por voz y foto/i })).toBeVisible()
   })
 
   test('API: /api/usuarios/uso-llm responde', async ({ request }) => {

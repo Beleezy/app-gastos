@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 
 globalThis.ref = ref
 globalThis.computed = computed
@@ -66,6 +66,27 @@ describe('useFeatureFlag', () => {
     expect(f.value).toBe(true)
     ff.setOverride('mi_feat', false)
     expect(f.value).toBe(false)
+  })
+
+  // Los overrides eran editables desde el panel "Funciones experimentales"
+  // de /configuraciones; ese panel se retiró, así que la persistencia (que
+  // antes cubría un E2E navegando la página) se verifica aquí.
+  it('setOverride persiste en localStorage bajo gastos.featureFlags.v1', async () => {
+    const ff = useFeatureFlag()
+    ff.setOverride('predictor_categoria', true)
+    await nextTick()
+
+    expect(JSON.parse(store.get('gastos.featureFlags.v1'))).toEqual({
+      predictor_categoria: true,
+    })
+  })
+
+  it('una instancia nueva relee los overrides del storage (equivale a recargar)', () => {
+    store.set('gastos.featureFlags.v1', JSON.stringify({ predictor_categoria: true }))
+
+    const ff = useFeatureFlag()
+    expect(ff.overrides.value).toEqual({ predictor_categoria: true })
+    expect(ff.isEnabled('predictor_categoria', false)).toBe(true)
   })
 
   it('clearOverrides limpia todo', () => {
