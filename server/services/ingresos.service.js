@@ -4,7 +4,6 @@
 import { eq, and, isNull, between, desc, sql } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { ingresos } from '../database/schema.js'
-import { assertOwner } from '../utils/assertOwner.js'
 
 export async function crearIngreso({ usuarioId, body }) {
   const [ingreso] = await db
@@ -24,8 +23,10 @@ export async function crearIngreso({ usuarioId, body }) {
   return { ...ingreso, monto: parseFloat(ingreso.monto) }
 }
 
+// Sin assertOwner: el .where() del UPDATE ya filtra por usuarioId y
+// deleted_at, y el `if (!ingreso)` de abajo devuelve el 404. Añadir el
+// helper aquí exigiría un SELECT previo — mismo resultado, un viaje más.
 export async function actualizarIngreso({ id, usuarioId, body }) {
-  await assertOwner(ingresos, id, usuarioId)
   const set = { updatedAt: new Date() }
   if (body.concepto !== undefined) set.concepto = body.concepto.trim()
   if (body.monto !== undefined) set.monto = String(body.monto)

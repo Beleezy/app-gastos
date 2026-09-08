@@ -10,6 +10,14 @@ export const fixtures = {
     metodoRegistro: 'manual',
   },
 
+  ingreso: {
+    concepto: 'Sueldo E2E',
+    monto: 1200,
+    fecha: '2026-04-28',
+    origen: 'salario',
+    metodoRegistro: 'manual',
+  },
+
   deuda: {
     personaNombre: 'E2E Tester',
     personaTipo: 'persona',
