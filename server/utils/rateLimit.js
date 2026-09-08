@@ -120,6 +120,16 @@ export const rateLimits = {
       scope: 'user',
       userId,
     }),
+  // Invitar dispara la aparición de tu nombre en la cuenta de un tercero a
+  // partir de un email escrito a mano: mismo techo que los vínculos de deudas.
+  compartidoInvitar: (event, userId) =>
+    rateLimit(event, {
+      key: 'compartido:invitar',
+      limit: 5,
+      windowMs: 60 * 60_000,
+      scope: 'user',
+      userId,
+    }),
   bulkOp: (event, userId) =>
     rateLimit(event, { key: 'bulk:op', limit: 30, windowMs: 60_000, scope: 'user', userId }),
   apiDefault: (event) =>

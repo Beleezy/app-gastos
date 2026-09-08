@@ -38,6 +38,10 @@ export async function crearGasto({ usuarioId, body }) {
       transcripcionVoz: body.transcripcionVoz || null,
       notas: body.notas || null,
       gastoPlanificadoId: body.gastoPlanificadoId || null,
+      // Módulo Compartido. El schema acepta el campo, así que el servicio
+      // tiene que persistirlo: si no, la API responde 200 a un
+      // `visibilidad: 'privado'` que nunca se guardó.
+      visibilidad: body.visibilidad || 'auto',
     })
     .returning()
 

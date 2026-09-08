@@ -85,6 +85,13 @@ export default defineNuxtPlugin((nuxtApp) => {
       tareas.push(fetchConfig().catch(() => {}))
     } catch {}
 
+    // 1b) Novedades de Compartido: alimenta el badge de navegación y el
+    //     banner de recordatorios. Una sola vez, compartido por ambos.
+    try {
+      const { fetchNovedades } = useCompartido()
+      tareas.push(fetchNovedades().catch(() => {}))
+    } catch {}
+
     // 2) Dashboard consolidado: saltarse si ya estamos en el home (la
     //    propia página acaba de hacer el fetch). Cualquier otra ruta:
     //    cachear para que volver al home sea instantáneo.

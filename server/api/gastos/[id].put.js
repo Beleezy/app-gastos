@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
   if (body.fecha !== undefined) updateData.fecha = body.fecha
   if (body.hora !== undefined) updateData.hora = body.hora
   if (body.notas !== undefined) updateData.notas = body.notas || null
+  if (body.visibilidad !== undefined) updateData.visibilidad = body.visibilidad
 
   const [updated] = await db
     .update(gastos)

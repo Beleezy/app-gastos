@@ -299,6 +299,7 @@
                   @edit="abrirEdicion"
                   @delete="confirmarEliminar"
                   @duplicate="duplicarGasto"
+                  @toggle-visibilidad="cambiarVisibilidad"
                   @bulk-edit="onBulkEditSolicitado"
                   @bulk-delete="onBulkDeleteSolicitado"
                   @request-voice="onStartListening"
@@ -515,6 +516,7 @@ const {
   fetchCategorias,
   fetchGastosMensuales,
   createGastosBulk,
+  updateGasto,
   updateGastosBulk,
   deleteGasto,
   deleteGastosBulk,
@@ -781,6 +783,24 @@ async function onQuickAdd(chip) {
 }
 
 // Duplicar gasto (E#2) — abre formulario con datos pre-cargados
+// Módulo Compartido: ciclo auto → privado → compartido desde el historial.
+// El toast nombra el estado nuevo; sin eso el ciclo de tres sería adivinanza.
+const TEXTO_VISIBILIDAD = {
+  auto: 'Sigue los rubros que compartes',
+  privado: 'Marcado como privado: nadie lo verá',
+  compartido: 'Marcado como compartido',
+}
+
+async function cambiarVisibilidad({ gasto, visibilidad }) {
+  try {
+    await updateGasto(gasto.id, { visibilidad })
+    await fetchGastosMensuales()
+    toastSuccess(TEXTO_VISIBILIDAD[visibilidad])
+  } catch (e) {
+    toastError(e?.data?.message || 'No se pudo cambiar la visibilidad')
+  }
+}
+
 function duplicarGasto(gasto) {
   vibrate([10, 30, 10])
   gastoDuplicar.value = gasto

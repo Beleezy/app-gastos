@@ -23,6 +23,7 @@ Navegación: [BottomNav.vue](components/layout/BottomNav.vue) (móvil) + [SideNa
 | [metricas.vue](pages/metricas.vue)                                                                 | Histórico y recurrentes                                                                                                                                         | `/api/metricas/*`                                                                                                                                                               |
 | [reportes.vue](pages/reportes.vue)                                                                 | Reportes/exportaciones                                                                                                                                          | [useReportes.js](composables/useReportes.js)                                                                                                                                    |
 | [papelera.vue](pages/papelera.vue)                                                                 | Soft-delete: restaurar/purgar gastos, deudas, pagos y personas (`deleted_at`)                                                                                   | `/api/papelera/*`, [softDelete.js](server/utils/softDelete.js), cron `purgar-papelera`                                                                                          |
+| [compartido.vue](pages/compartido.vue)                                                             | **Compartido**: visibilidad de gastos hacia otra cuenta (rubros, presupuesto, proyección) + avisos y umbrales del observador                                    | `components/compartido/`, [useCompartido.js](composables/useCompartido.js), `/api/compartido/**`                                                                                |
 | [familia.vue](pages/familia.vue)                                                                   | **Perfiles gestionados** (familiares sin cuenta propia): crear/editar perfiles, cambiar de perfil activo                                                        | [usePerfiles.js](composables/usePerfiles.js), [usePerfilModo.js](composables/usePerfilModo.js), `/api/perfiles`, [PerfilContextBar.vue](components/layout/PerfilContextBar.vue) |
 | [categorias.vue](pages/categorias.vue)                                                             | Categorías predefinidas globales (`usuario_id` NULL) + personalizadas                                                                                           | `/api/categorias`                                                                                                                                                               |
 | [configuraciones.vue](pages/configuraciones.vue)                                                   | Perfil, presupuesto default, moneda, ciclo, tema/acento/daltónico/tamaño letra, recordatorios, Google Calendar, uso LLM, panel superadmin                       | `components/configuraciones/`                                                                                                                                                   |
@@ -41,19 +42,27 @@ Navegación: [BottomNav.vue](components/layout/BottomNav.vue) (móvil) + [SideNa
 
 Una `persona_entidad` puede vincularse al usuario real de otra cuenta (`vinculado_usuario_id`, `vinculo_par_id`): solicitudes por email (`solicitudes_vinculo`), espejado de deudas/pagos (`vinculo_deuda_id`/`vinculo_pago_id`), checkpoints comparables (`vinculos_checkpoints`) y auditoría (`auditoria_vinculos`). API en `/api/deudas/vinculos`; helpers en [vinculos.js](server/utils/vinculos.js).
 
-### Compartido — visibilidad de gastos entre usuarios (en construcción)
+### Compartido — visibilidad de gastos entre usuarios
 
 Un usuario (emisor) le da a otro (receptor) visibilidad sobre parte de sus gastos para que pueda advertirle sobre el ritmo de consumo. **No es gasto compartido ni división de cuentas** — eso es Deudas.
 
-Capa de datos lista (migración `0033_compartido.sql`); API y UI pendientes. Decisiones que hay que respetar al construir encima:
+Página [compartido.vue](pages/compartido.vue) con dos pestañas ("Lo que veo" / "Lo que comparto"), `components/compartido/`, [useCompartido.js](composables/useCompartido.js), `/api/compartido/**`, servicios [compartido.service.js](server/services/compartido.service.js) (conexiones y avisos) y [compartidoVista.service.js](server/services/compartidoVista.service.js) (vista y novedades).
 
-- **Sin espejado.** A diferencia de los vínculos de deudas, no se replican filas: la vista lee los gastos del emisor con el permiso verificado en servidor. El botón "Sincronizar" de la UI es un refetch (`?fresh=1` saltea el `Cache-Control`).
-- **Conexión unidireccional** A→B en `compartido_conexiones` (una invitación aceptada _es_ la conexión). Visibilidad mutua = dos filas. Índice único parcial: una sola conexión viva por `(emisor, email)`.
-- **`gastos.visibilidad`** (`auto` | `compartido` | `privado`) es la excepción por gasto: `privado` gana siempre; `compartido` fuerza visible aunque su categoría no se comparta. Una conexión sin filas en `compartido_categorias` solo muestra los marcados a mano.
-- **Revocar no borra**: `estado='revocada'` conserva el historial. Los eventos de sistema ("dejó de compartir Comida") van en `compartido_avisos` con `tipo='sistema'` y `autor_id` NULL — el cliente no puede fabricarlos (`tipoAvisoSchema` los excluye).
-- **Es el primer módulo que cruza la frontera `usuario_id` a propósito.** Toda lectura cruzada debe pasar por un guard único y usar whitelist explícita de columnas — `notas` y `transcripcion_voz` nunca salen en el payload.
+Decisiones que hay que respetar al tocar el módulo:
 
-Schemas Zod en [compartido.js](shared/schemas/compartido.js); sus límites espejan los CHECK de la migración.
+- **Sin espejado.** A diferencia de los vínculos de deudas, no se replican filas: la vista lee los gastos del emisor con el permiso verificado en servidor. El botón "Sincronizar" es un refetch — manda `?fresh=1`, que saltea el `Cache-Control` (sin eso el usuario aprieta y no pasa nada).
+- **Guard único.** [server/utils/compartido.js](server/utils/compartido.js) es el ÚNICO lugar autorizado a leer datos de otro usuario: `cargarConexionLegible` (exige ser receptor de una conexión aceptada y no pausada) y `construirFiltroVisibilidad`. Las columnas salen por la whitelist `SELECT_GASTO_COMPARTIDO`; `notas` y `transcripcion_voz` no se comparten nunca. Todo negativo responde 404, no 403, para no confirmar que la conexión existe.
+- **Una sola regla de visibilidad, en dos formas.** La canónica es `esGastoVisible` ([shared/compartido/visibilidad.js](shared/compartido/visibilidad.js)); `construirFiltroVisibilidad` es su traducción a SQL para no traer filas de más. Si cambia una, cambia la otra: `tests/compartidoVisibilidad.test.js` fija la tabla de verdad.
+- **Conexión unidireccional** A→B en `compartido_conexiones` (una invitación aceptada _es_ la conexión). Visibilidad mutua = dos filas. Índice único parcial: una sola conexión viva por `(emisor, email)`, así que tras rechazar o revocar se puede reinvitar.
+- **`gastos.visibilidad`** (`auto` | `compartido` | `privado`) es la excepción por gasto: `privado` gana siempre; `compartido` fuerza visible aunque su categoría no se comparta. Una conexión sin filas en `compartido_categorias` solo muestra los marcados a mano. Se alterna desde el historial de `/registro` (ciclo de tres estados con toast).
+- **Alcance parcial ≠ total.** Una categoría que aparece solo porque el emisor marcó un gasto suelto llega con `alcance: 'solo_marcados'` y SIN proyección: mostrar "20 de 600 = 3%" mentiría, porque el receptor no ve todo el rubro.
+- **Zona horaria del emisor** para el mes en curso y los días transcurridos ([proyeccion.js](shared/compartido/proyeccion.js)): medir en la del observador hace mentir a la proyección cuando están en husos distintos.
+- **Revocar no borra**: `estado='revocada'` conserva el historial de avisos. Los eventos de sistema ("dejó de compartir Comida", "pausó") van en `compartido_avisos` con `tipo='sistema'` y `autor_id` NULL — el cliente no puede fabricarlos (`tipoAvisoSchema` excluye `sistema`).
+- **Solo el emisor manda sobre el alcance** (403 si lo intenta el receptor). Un aviso sobre una categoría no compartida o un gasto no visible responde 404: si no, el endpoint sería un oráculo para adivinar ids ajenos.
+- **Notificación in-app, no push** (el proyecto eliminó push en la migración 0027): `/api/compartido/novedades` alimenta el badge de navegación, una línea en el dashboard y el banner de [RecordatoriosBanner.vue](components/layout/RecordatoriosBanner.vue). Todos leen del MISMO estado, precargado en [prefetch.client.js](plugins/prefetch.client.js) — no se recalcula por consumidor ni se toca `/api/dashboard`.
+- Conexiones **solo entre cuentas reales**: los perfiles gestionados de familia no invitan ni aceptan, y sus gastos (filas de otro `usuario_id`) no se comparten.
+
+Schemas Zod en [compartido.js](shared/schemas/compartido.js); sus límites espejan los CHECK de la migración. Cobertura: `tests/compartido*.test.js` (unit), [compartido.api.spec.js](e2e/api/compartido.api.spec.js) (aislamiento entre cuentas — el grueso es negativo: qué NO se ve) y [compartido.ui.spec.js](e2e/ui/compartido.ui.spec.js).
 
 ---
 
@@ -103,18 +112,20 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 
 ```
 pages/          index(dashboard) · planificador · registro · deudas · ahorros · ingresos · futuros
-                calendario · metricas · reportes · papelera · familia · categorias · configuraciones
+                calendario · metricas · reportes · papelera · familia · compartido · categorias
+                configuraciones
                 informacion · login · auth/ · dev-login · control-acceso · acceso-pendiente · share
 components/     layout/ · shared/ · planificador/ · registro/ · deudas/ · ahorros/ · ingresos/
-                futuros/ · configuraciones/ · onboarding/
+                futuros/ · compartido/ · configuraciones/ · onboarding/
 composables/    ~90 archivos — useGastos · useDeudas · usePlanificador · useAhorros · useIngresos
                 useVinculos · usePerfiles · useLLMParser · useDraftManager · useApiFetch · useTheme ...
 stores/         usuario · plantillas (Pinia)
 shared/schemas/ Zod compartido cliente↔servidor
+shared/compartido/ regla de visibilidad y proyección (lógica pura, sin BD)
 server/api/     gastos · deudas · planificador · ahorros · ingresos · futuros · categorias
                 configuraciones · perfiles · metricas · papelera · voz · integraciones/google
                 acceso · superadmin · cron · dashboard · health · csp-report · errors
-server/services/  lógica de negocio (7 servicios)
+server/services/  lógica de negocio (9 servicios)
 server/utils/     30 helpers (auth, rate limit, LLM, crypto, fechas, soft delete, ...)
 server/database/  schema.js · migrations/ · seeds
 e2e/ · tests/     Playwright · Vitest

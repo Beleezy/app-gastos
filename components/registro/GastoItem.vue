@@ -160,8 +160,49 @@
                 class="text-[0.6875rem] bg-theme-accent-bg text-theme-accent px-1.5 py-0.5 rounded-full leading-none"
                 >{{ badgeLabel }}</span
               >
+              <!-- Módulo Compartido: solo se marca lo que se salió de 'auto' -->
+              <span
+                v-if="visibilidadInfo"
+                class="text-[0.6875rem] px-1.5 py-0.5 rounded-full leading-none"
+                :class="visibilidadInfo.clase"
+                :title="visibilidadInfo.titulo"
+                >{{ visibilidadInfo.etiqueta }}</span
+              >
             </div>
             <div v-if="!selectable" class="flex items-center gap-0.5 shrink-0">
+              <button
+                class="w-11 h-11 -my-2 flex items-center justify-center rounded-md active:scale-90 transition-all"
+                :class="
+                  visibilidadInfo
+                    ? visibilidadInfo.claseBoton
+                    : 'text-theme-text-muted hover:text-theme-accent hover:bg-theme-accent-bg'
+                "
+                :aria-label="`Visibilidad: ${visibilidadInfo?.titulo || 'según los rubros que compartes'}. Tocar para cambiar`"
+                data-testid="btn-visibilidad-gasto"
+                @click.stop="onToggleVisibilidad"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path
+                    v-if="gasto.visibilidad === 'privado'"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243"
+                  />
+                  <path
+                    v-else
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178zM15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </button>
               <button
                 class="w-11 h-11 -my-2 flex items-center justify-center rounded-md text-theme-text-muted hover:text-emerald-400 hover:bg-emerald-500/10 active:scale-90 transition-all"
                 aria-label="Duplicar"
@@ -241,7 +282,43 @@ const props = defineProps({
   selected: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['edit', 'delete', 'duplicate', 'toggle-select', 'long-press'])
+const emit = defineEmits([
+  'edit',
+  'delete',
+  'duplicate',
+  'toggle-select',
+  'long-press',
+  'toggle-visibilidad',
+])
+
+// Módulo Compartido. 'auto' es el default y no se anuncia: solo se marca lo
+// que el usuario sacó de esa regla, para que el historial no se llene de
+// insignias que no dicen nada.
+const VISIBILIDAD_INFO = {
+  compartido: {
+    etiqueta: 'Compartido',
+    titulo: 'Visible aunque su rubro no se comparta',
+    clase: 'bg-emerald-500/20 text-emerald-400',
+    claseBoton: 'text-emerald-400 hover:bg-emerald-500/10',
+  },
+  privado: {
+    etiqueta: 'Privado',
+    titulo: 'Nunca visible para nadie',
+    clase: 'bg-red-500/20 text-red-400',
+    claseBoton: 'text-red-400 hover:bg-red-500/10',
+  },
+}
+const visibilidadInfo = computed(() => VISIBILIDAD_INFO[props.gasto.visibilidad] || null)
+
+// Ciclo auto → privado → compartido → auto. El padre muestra un toast con el
+// estado nuevo, que es lo que hace descubrible el ciclo.
+const SIGUIENTE_VISIBILIDAD = { auto: 'privado', privado: 'compartido', compartido: 'auto' }
+
+function onToggleVisibilidad() {
+  if (props.gasto.pendiente) return
+  vibrate(10)
+  emit('toggle-visibilidad', SIGUIENTE_VISIBILIDAD[props.gasto.visibilidad || 'auto'])
+}
 
 const { vibrate } = useHaptic()
 
