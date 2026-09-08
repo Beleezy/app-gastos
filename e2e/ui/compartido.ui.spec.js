@@ -110,3 +110,151 @@ test.describe('Compartido — UI', () => {
     }
   })
 })
+
+// ── Vista del receptor ──────────────────────────────────────────────────
+// Es el camino que da sentido al módulo y el que más piezas mueve: tarjeta
+// de conexión, barra de presupuesto, proyección, detalle y feed de avisos.
+// Necesita dos cuentas, así que monta su propio contexto en vez de usar el
+// usuario único de playwright.config.
+const TOKEN = process.env.DEV_AUTH_TOKEN || 'dev-token'
+const ONBOARDING_LISTO = {
+  cookies: [],
+  origins: [
+    {
+      origin: 'http://localhost:3000',
+      localStorage: [
+        {
+          name: 'onboarding.v1',
+          value: JSON.stringify({ tourCompletado: true, tourSaltado: true, hintsVistos: [] }),
+        },
+      ],
+    },
+  ],
+}
+
+test.describe('Compartido — lo que ve el receptor', () => {
+  test('ve el rubro con su presupuesto, la proyección y el detalle', async ({
+    browser,
+    baseURL,
+  }) => {
+    const marca = Date.now()
+    const uid = (rol) => `00000000-0000-0000-0000-${String(marca).slice(-9)}${rol}`
+    // Emisor y receptor propios: el usuario por defecto del proyecto tiene una
+    // cuota de 5 invitaciones por hora que comparte con los demás specs.
+    const emisor = {
+      'x-dev-auth-token': TOKEN,
+      'x-dev-user-id': uid('881'),
+      'x-dev-user-email': `emisor.${marca}@test.local`,
+    }
+    const receptor = {
+      'x-dev-auth-token': TOKEN,
+      'x-dev-user-id': uid('882'),
+      'x-dev-user-email': `receptor.${marca}@test.local`,
+    }
+
+    const ctxEmisor = await browser.newContext({ baseURL, extraHTTPHeaders: emisor })
+    const ctxReceptor = await browser.newContext({
+      baseURL,
+      extraHTTPHeaders: receptor,
+      storageState: ONBOARDING_LISTO,
+    })
+
+    try {
+      const api = ctxEmisor.request
+      // Las categorías predefinidas son globales (usuario_id NULL), así que un
+      // usuario recién creado ya las tiene.
+      const cats = await (await api.get('/api/categorias')).json()
+      test.skip(!cats.length, 'Sin categorías sembradas')
+      const rubro = cats[0]
+
+      const PRESUPUESTO = 600
+      await api.post('/api/presupuestos-categoria', {
+        data: { categoriaId: rubro.id, montoMensual: PRESUPUESTO, alertaUmbral: 80 },
+      })
+
+      const hoy = new Date()
+      const dia = (d) =>
+        `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      const conceptos = [`Mercado ${marca}`, `Almuerzos ${marca}`]
+      for (const [i, concepto] of conceptos.entries()) {
+        const r = await api.post('/api/gastos', {
+          data: { concepto, monto: i === 0 ? 300 : 150, fecha: dia(1 + i), categoriaId: rubro.id },
+        })
+        expect(r.ok(), await r.text()).toBeTruthy()
+      }
+
+      const inv = await api.post('/api/compartido/conexiones', {
+        data: {
+          email: receptor['x-dev-user-email'],
+          nivelDetalle: 'detalle',
+          categorias: [{ categoriaId: rubro.id, umbralAviso: 70 }],
+        },
+      })
+      expect(inv.ok(), await inv.text()).toBeTruthy()
+      const conexion = await inv.json()
+
+      const acepta = await ctxReceptor.request.post(
+        `/api/compartido/conexiones/${conexion.id}/aceptar`,
+      )
+      expect(acepta.ok(), await acepta.text()).toBeTruthy()
+
+      const page = await ctxReceptor.newPage()
+      const errores = []
+      page.on('pageerror', (e) => errores.push(String(e).slice(0, 200)))
+      page.on('response', (r) => {
+        if (r.status() >= 500 && r.url().includes('/api/')) errores.push(`HTTP ${r.status()}`)
+      })
+
+      await page.goto('/compartido')
+      await new BasePage(page).waitForReady()
+
+      const sincronizar = page.getByTestId('compartido-sincronizar')
+      await expect(sincronizar).toBeVisible({ timeout: 20_000 })
+
+      const contenido = page.locator('#contenido-principal')
+      await expect(contenido).toContainText(rubro.nombre)
+      // 450 de 600 al día 2 del mes: la proyección se dispara y el semáforo
+      // avisa. Es el caso que motiva el módulo.
+      await expect(contenido).toContainText(/de S\/\s?600/)
+      await expect(contenido).toContainText(/A este ritmo cierra en/)
+      await expect(contenido).toContainText(/se agota el día/)
+      // Nivel detalle: los gastos, uno por uno.
+      await expect(contenido).toContainText(conceptos[0])
+
+      // Sincronizar no debe romper la vista ni quedarse mudo.
+      await sincronizar.click()
+      await expect(
+        page.getByText(/Sin novedades|gastos? nuevos?|actualizados/i).first(),
+      ).toBeVisible({ timeout: 15_000 })
+
+      // Un aviso enviado tiene que verse en el feed SIN recargar: los
+      // endpoints cachean, y antes el aviso no aparecía ni recargando.
+      const mensaje = `Ojo con esto ${marca}`
+      await page
+        .getByRole('button', { name: /Enviar aviso sobre/i })
+        .first()
+        .click()
+      await page.getByTestId('compartido-aviso-mensaje').fill(mensaje)
+      await page.getByTestId('compartido-enviar-aviso').click()
+      await expect(contenido).toContainText(mensaje, { timeout: 15_000 })
+
+      // Si el emisor pausa, el receptor merece una explicación, no una
+      // tarjeta muda ni un toast rojo. Se comprueba por Sincronizar porque es
+      // el camino que salta la caché del navegador (la vista se cachea 30s,
+      // así que recargar puede seguir mostrando lo anterior un rato).
+      await api.put(`/api/compartido/conexiones/${conexion.id}/alcance`, {
+        data: { pausada: true },
+      })
+      await sincronizar.click()
+      await expect(contenido).toContainText(/no está compartiendo sus gastos ahora mismo/i, {
+        timeout: 20_000,
+      })
+      await expect(page.getByText(/No se pudo (cargar|sincronizar)/i)).toHaveCount(0)
+
+      expect(errores, errores.join(' | ')).toHaveLength(0)
+    } finally {
+      await ctxReceptor.close()
+      await ctxEmisor.close()
+    }
+  })
+})

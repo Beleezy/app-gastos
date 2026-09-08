@@ -15,7 +15,7 @@
       <button
         type="button"
         class="tap-target flex items-center gap-1.5 px-3 py-2 rounded-xl bg-theme-input border border-theme-border text-xs font-medium text-theme-text-sec hover:border-theme-accent transition-colors disabled:opacity-50"
-        :disabled="sincronizando"
+        :disabled="sincronizando || sinAcceso"
         data-testid="compartido-sincronizar"
         @click="sincronizar"
       >
@@ -40,6 +40,7 @@
 
     <div class="px-4 pb-4 space-y-3">
       <SharedMonthSelector
+        v-if="!sinAcceso"
         :label="etiquetaMes"
         :es-actual="esMesActual"
         :disable-next="esMesActual"
@@ -48,7 +49,18 @@
         @go-to-current="irAlMesActual"
       />
 
-      <SharedSkeletonLoader v-if="cargando && !vista" variant="card" :count="3" />
+      <!-- El emisor puede pausar en cualquier momento: decirlo es mejor que
+           dejar la tarjeta vacía o soltar un toast de error. `noDisponible`
+           viene de un 404 en vivo y manda sobre la copia local de la
+           conexión, que puede llegar cacheada hasta 30s y decir lo contrario. -->
+      <SharedEmptyState
+        v-if="sinAcceso"
+        compact
+        title="Pausado"
+        :message="`${nombre} no está compartiendo sus gastos ahora mismo. Cuando lo reanude, volverás a ver cómo va su mes.`"
+      />
+
+      <SharedSkeletonLoader v-else-if="cargando && !vista" variant="card" :count="3" />
 
       <template v-else-if="vista">
         <div class="flex items-baseline justify-between">
@@ -115,7 +127,7 @@ const emit = defineEmits(['avisar'])
 const { fetchVista, marcarVisto } = useCompartido()
 const toast = useToast()
 const { vibrate } = useHaptic()
-const { formatFecha } = useFormatters()
+const { formatFecha, formatMesAnio } = useFormatters()
 const { formatRelativo } = useFechaRelativa()
 
 const hoy = new Date()
@@ -123,22 +135,31 @@ const mes = ref(hoy.getMonth() + 1)
 const anio = ref(hoy.getFullYear())
 const vista = ref(null)
 const cargando = ref(false)
+// Se enciende con un 404 de la vista: la conexión sigue listada pero ya no
+// deja ver nada (el emisor pausó). Es información más fresca que `conexion`.
+const noDisponible = ref(false)
 const sincronizando = ref(false)
 const limiteDetalle = ref(30)
 
 const nombre = computed(() => props.conexion.emisorNombre || 'Usuario')
 const inicial = computed(() => nombre.value.trim().charAt(0).toUpperCase() || '?')
 const detalleVisible = computed(() => (vista.value?.detalle || []).slice(0, limiteDetalle.value))
+const sinAcceso = computed(() => props.conexion.pausada || noDisponible.value)
+
+// La API responde 404 cuando el emisor pausó o dejó de compartir. Es un
+// estado normal del módulo, no un fallo: se refleja en la tarjeta y nunca
+// como un toast rojo.
+function esSinAcceso(e) {
+  return e?.statusCode === 404 || e?.response?.status === 404 || e?.data?.statusCode === 404
+}
 
 const esMesActual = computed(
   () => mes.value === hoy.getMonth() + 1 && anio.value === hoy.getFullYear(),
 )
-const etiquetaMes = computed(() =>
-  new Date(anio.value, mes.value - 1, 1).toLocaleDateString('es-PE', {
-    month: 'long',
-    year: 'numeric',
-  }),
-)
+// formatMesAnio y no toLocaleDateString: comparte el listado de meses con el
+// resto del app. Con locale es-PE el navegador devuelve "setiembre", que
+// chocaba con el "septiembre" de las fechas de abajo, en la misma tarjeta.
+const etiquetaMes = computed(() => formatMesAnio(mes.value, anio.value))
 
 const subtitulo = computed(() => {
   const nivel = props.conexion.nivelDetalle === 'detalle' ? 'detalle' : 'resumen'
@@ -156,6 +177,11 @@ function hace(iso) {
 }
 
 async function cargar({ fresh = false } = {}) {
+  // Pausada: la API responde 404 a propósito. Ni pedirla.
+  if (props.conexion.pausada) {
+    vista.value = null
+    return null
+  }
   cargando.value = true
   try {
     const { data } = await fetchVista(props.conexion.id, {
@@ -167,6 +193,11 @@ async function cargar({ fresh = false } = {}) {
     limiteDetalle.value = 30
     return data
   } catch (e) {
+    if (esSinAcceso(e)) {
+      vista.value = null
+      noDisponible.value = true
+      return null
+    }
     toast.error(e?.data?.message || 'No se pudo cargar la vista')
     return null
   } finally {
@@ -192,7 +223,15 @@ async function sincronizar() {
     else toast.info('Sin novedades')
     await marcarVisto(props.conexion.id)
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo sincronizar')
+    // Sincronizar es justo el camino que descubre que el otro pausó: manda
+    // ?fresh=1 y se salta la caché del navegador, que puede seguir sirviendo
+    // la vista anterior hasta 30s. Merece el mismo trato que la carga.
+    if (esSinAcceso(e)) {
+      vista.value = null
+      noDisponible.value = true
+    } else {
+      toast.error(e?.data?.message || 'No se pudo sincronizar')
+    }
   } finally {
     sincronizando.value = false
   }
@@ -212,6 +251,7 @@ function irAlMesActual() {
 }
 
 onMounted(async () => {
+  if (props.conexion.pausada) return
   await cargar()
   await marcarVisto(props.conexion.id)
 })

@@ -38,9 +38,18 @@ export const SELECT_GASTO_COMPARTIDO = {
   visibilidad: gastos.visibilidad,
 }
 
+// Un id que no es UUID no puede existir, y pasárselo a Postgres revienta la
+// query con un 500 que además filtra el error del driver. Se descarta antes.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
 function errorNoEncontrada() {
   // 404 y no 403: un 403 confirmaría que la conexión existe.
   return createError({ statusCode: 404, message: 'Conexión no encontrada' })
+}
+
+/** ¿Este id puede existir siquiera? Para descartarlo antes de ir a la BD. */
+export function esUuid(valor) {
+  return typeof valor === 'string' && UUID_RE.test(valor)
 }
 
 /**
@@ -50,7 +59,7 @@ function errorNoEncontrada() {
  * @returns {{ conexion: object, rol: 'emisor'|'receptor' }}
  */
 export async function cargarConexionDeLaQueEsParte(conexionId, usuarioId) {
-  if (!conexionId || !usuarioId) throw errorNoEncontrada()
+  if (!conexionId || !usuarioId || !UUID_RE.test(conexionId)) throw errorNoEncontrada()
 
   const [conexion] = await db
     .select()

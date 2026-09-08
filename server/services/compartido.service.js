@@ -260,6 +260,10 @@ async function validarCategoriasPropias(usuarioId, categoriaIds) {
 }
 
 export async function aceptarInvitacion({ conexionId, usuarioId }) {
+  // Un id malformado no puede existir; sin este corte, Postgres revienta la
+  // query y el usuario recibe un 500 en vez de un 404 limpio.
+  if (!esUuid(conexionId)) throw error(404, 'Invitación no encontrada o ya procesada')
+
   const [yo] = await db
     .select({ email: usuarios.email })
     .from(usuarios)
@@ -301,6 +305,8 @@ export async function aceptarInvitacion({ conexionId, usuarioId }) {
 }
 
 export async function rechazarInvitacion({ conexionId, usuarioId }) {
+  if (!esUuid(conexionId)) throw error(404, 'Invitación no encontrada o ya procesada')
+
   const [yo] = await db
     .select({ email: usuarios.email })
     .from(usuarios)
@@ -524,6 +530,8 @@ async function gastoVisibleEnConexion(conexion, gastoId) {
 }
 
 export async function marcarAvisoLeido({ avisoId, usuarioId }) {
+  if (!esUuid(avisoId)) throw error(404, 'Aviso no encontrado')
+
   const [aviso] = await db
     .select({ id: compartidoAvisos.id, conexionId: compartidoAvisos.conexionId })
     .from(compartidoAvisos)
