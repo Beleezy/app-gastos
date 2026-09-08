@@ -1,49 +1,23 @@
-// E2E del módulo Configuraciones (FeatureFlags + PushNotifications).
+// E2E del módulo Configuraciones.
+//
+// Los dos tests UI que había aquí comprobaban los paneles "Funciones
+// experimentales" y "Notificaciones push". Ambos se retiraron de
+// pages/configuraciones.vue (ver el comentario sobre <ConfiguracionesSuperadminPanel>:
+// sus funciones pasaron a ser parte del producto por defecto), así que
+// llevaban rojos en CI sin cubrir nada. Se sustituyen por las secciones que
+// la página renderiza hoy.
 
 import { test, expect } from '@playwright/test'
 
 test.describe('Configuraciones', () => {
-  test('UI: /configuraciones carga y muestra paneles nuevos', async ({ page }) => {
+  test('UI: /configuraciones carga y muestra sus secciones', async ({ page }) => {
     const r = await page.goto('/configuraciones')
     expect(r.status()).toBeLessThan(500)
-    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible({ timeout: 10_000 })
-    await expect(page.getByRole('heading', { name: /Notificaciones push/i })).toBeVisible()
-  })
-
-  test('UI: toggle de feature flag persiste', async ({ page }) => {
-    await page.goto('/configuraciones')
-    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
-
-    const flagKey = 'predictor_categoria'
-    const featureSection = page
-      .getByRole('heading', { name: /Funciones experimentales/i })
-      .locator('xpath=ancestor::section[1]')
-
-    await featureSection.scrollIntoViewIfNeeded()
-
-    const firstToggle = featureSection.locator('input[type="checkbox"]').first()
-    const before = await firstToggle.isChecked()
-
-    await page.evaluate(
-      ({ key, value }) => {
-        const raw = localStorage.getItem('gastos.featureFlags.v1')
-        const parsed = raw ? JSON.parse(raw) : {}
-        parsed[key] = value
-        localStorage.setItem('gastos.featureFlags.v1', JSON.stringify(parsed))
-      },
-      { key: flagKey, value: !before },
-    )
-
-    await page.reload()
-    await expect(page.getByText(/Funciones experimentales/i)).toBeVisible()
-
-    const persisted = await page.evaluate((key) => {
-      const raw = localStorage.getItem('gastos.featureFlags.v1')
-      if (!raw) return undefined
-      return JSON.parse(raw)?.[key]
-    }, flagKey)
-
-    expect(persisted).toBe(!before)
+    await expect(page.getByText(/Perfil y región/i).first()).toBeVisible({ timeout: 10_000 })
+    await expect(page.getByText(/Apariencia/i).first()).toBeVisible()
+    await expect(page.getByText(/Registro y categorías/i).first()).toBeVisible()
+    await expect(page.getByText(/Integraciones/i).first()).toBeVisible()
+    await expect(page.getByText(/Avanzado/i).first()).toBeVisible()
   })
 
   test('API: /api/usuarios/uso-llm responde', async ({ request }) => {

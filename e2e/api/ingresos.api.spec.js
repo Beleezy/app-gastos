@@ -116,6 +116,40 @@ test.describe('Ingresos', () => {
     expect(r.status()).toBe(404)
   })
 
+  test('API: un PUT parcial no borra el flag esRecurrente', async ({ request }) => {
+    const ingreso = await crearIngreso(request, {
+      concepto: 'Sueldo E2E recurrente',
+      esRecurrente: true,
+    })
+    expect(ingreso.esRecurrente).toBe(true)
+
+    // Solo el concepto. Los `.default()` del schema se colaban por `.partial()`
+    // y llegaban al service como `esRecurrente: false`, apagando el flag.
+    const r = await request.put(`/api/ingresos/${ingreso.id}`, {
+      data: { concepto: 'Sueldo E2E recurrente editado' },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBe(200)
+
+    const actualizado = await r.json()
+    expect(actualizado.concepto).toBe('Sueldo E2E recurrente editado')
+    expect(actualizado.esRecurrente).toBe(true)
+
+    await request.delete(`/api/ingresos/${ingreso.id}`).catch(() => {})
+  })
+
+  test('API: PUT sin ningún campo devuelve 400 (Sin cambios)', async ({ request }) => {
+    const ingreso = await crearIngreso(request, { concepto: 'Sueldo E2E sin cambios' })
+
+    const r = await request.put(`/api/ingresos/${ingreso.id}`, {
+      data: {},
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBe(400)
+
+    await request.delete(`/api/ingresos/${ingreso.id}`).catch(() => {})
+  })
+
   test('API: rechaza ingreso sin concepto (Zod)', async ({ request }) => {
     const r = await request.post('/api/ingresos', {
       data: { ...fixtures.ingreso, concepto: '' },

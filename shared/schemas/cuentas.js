@@ -16,7 +16,14 @@ const cuentaBaseSchema = z.object({
 })
 
 export const cuentaCreateSchema = cuentaBaseSchema
+
+// El `.default(0)` de saldoInicial sobrevive a `.partial()` (ZodDefault se
+// aplica igual con la clave ausente), así que un PUT parcial arrastraba
+// `saldoInicial: 0` y dejaba el `.refine` inalcanzable. Mismo idiom que
+// gastoUpdateSchema / ingresoUpdateSchema.
 export const cuentaUpdateSchema = cuentaBaseSchema
+  .omit({ saldoInicial: true })
+  .extend({ saldoInicial: z.coerce.number().finite().optional() })
   .partial()
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 
