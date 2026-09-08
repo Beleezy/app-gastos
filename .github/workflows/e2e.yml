@@ -23,6 +23,10 @@ concurrency:
 #    workflow "E2E Visual Baseline" (workflow_dispatch) para generarlos.
 #
 # Postgres efimera + dev server en localhost:3000 + auth bypass.
+#
+# Node 22 en todos los jobs: en Node 20 el job `lint` de ci.yml muere al
+# cargar el config de ESLint (`Object.groupBy` no existe). Se mantiene la
+# misma version en todos los workflows para no depurar sobre dos runtimes.
 
 jobs:
   fast:
@@ -69,7 +73,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -108,8 +112,15 @@ jobs:
             sleep 2
           done
 
+      # Sin `--reporter=...`: el flag de CLI pisa el `reporter` del config, que
+      # en CI es [['github'], ['html']]. Pasando --reporter=html se perdia el
+      # reporter `github` y el log del job no contenia UNA sola linea de
+      # salida de tests — saltaba del inicio del paso a subir artefactos, y el
+      # unico rastro de que fallaba quedaba dentro del zip del reporte. El
+      # HTML se sigue generando; ademas ahora los fallos se anotan en el log y
+      # en la UI del PR.
       - name: Run Playwright (project=${{ matrix.project }})
-        run: npx playwright test --project=${{ matrix.project }} --reporter=html
+        run: npx playwright test --project=${{ matrix.project }}
         env:
           CI: 'true'
 
@@ -191,7 +202,7 @@ jobs:
         if: steps.baselines.outputs.exist == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -237,9 +248,10 @@ jobs:
             sleep 2
           done
 
+      # Sin `--reporter=...` por el mismo motivo que en el job "fast".
       - name: Run Playwright visual
         if: steps.baselines.outputs.exist == 'true'
-        run: npx playwright test --project=visual --reporter=html
+        run: npx playwright test --project=visual
         env:
           CI: 'true'
 
