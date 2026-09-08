@@ -34,6 +34,13 @@ export default defineEventHandler(async (event) => {
   if (campos.fecha !== undefined) updateData.fecha = campos.fecha
   if (campos.hora !== undefined) updateData.hora = campos.hora
   if (campos.notas !== undefined) updateData.notas = campos.notas || null
+  // Módulo Compartido: marcar/desmarcar varios gastos de una vez.
+  if (campos.visibilidad !== undefined) {
+    if (!['auto', 'compartido', 'privado'].includes(campos.visibilidad)) {
+      throw createError({ statusCode: 400, message: 'Visibilidad inválida' })
+    }
+    updateData.visibilidad = campos.visibilidad
+  }
 
   if (Object.keys(updateData).length <= 1) {
     throw createError({

@@ -260,6 +260,9 @@
                       @edit="$emit('edit', gasto)"
                       @delete="$emit('delete', gasto)"
                       @duplicate="$emit('duplicate', gasto)"
+                      @toggle-visibilidad="
+                        $emit('toggle-visibilidad', { gasto, visibilidad: $event })
+                      "
                       @toggle-select="toggleSelect(gasto)"
                       @long-press="onItemLongPress(gasto)"
                     />
@@ -432,6 +435,7 @@
                 @edit="$emit('edit', gasto)"
                 @delete="$emit('delete', gasto)"
                 @duplicate="$emit('duplicate', gasto)"
+                @toggle-visibilidad="$emit('toggle-visibilidad', { gasto, visibilidad: $event })"
                 @toggle-select="toggleSelect(gasto)"
                 @long-press="onItemLongPress(gasto)"
               />
@@ -543,6 +547,7 @@ const emit = defineEmits([
   'edit',
   'delete',
   'duplicate',
+  'toggle-visibilidad',
   'request-voice',
   'request-manual',
   'bulk-delete',

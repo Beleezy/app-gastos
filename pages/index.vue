@@ -40,6 +40,25 @@
     </div>
 
     <!-- Dashboard summary cards -->
+    <!-- Módulo Compartido: solo aparece si hay algo que atender. Lee del
+         estado que ya cargó el badge de navegación, así que no añade un
+         request ni toca /api/dashboard, que sirve a seis módulos. -->
+    <NuxtLink
+      v-if="compartidoPendiente"
+      to="/compartido"
+      class="mx-5 lg:mx-0 mb-4 flex items-center gap-3 rounded-2xl bg-theme-card border border-theme-border p-3.5 active:bg-theme-border-md transition-colors"
+      data-testid="dashboard-compartido"
+    >
+      <div class="w-7 h-7 rounded-lg bg-theme-accent-bg flex items-center justify-center shrink-0">
+        <span class="text-sm" aria-hidden="true">👀</span>
+      </div>
+      <p class="flex-1 min-w-0 text-xs text-theme-text">{{ compartidoTexto }}</p>
+      <span
+        class="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-theme-accent text-theme-on-accent text-[0.6875rem] font-bold flex items-center justify-center"
+        >{{ compartidoPendiente }}</span
+      >
+    </NuxtLink>
+
     <div class="px-5 lg:px-0 mb-4 space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
       <!-- Gasto del mes vs presupuesto -->
       <div
@@ -482,6 +501,30 @@
 </template>
 
 <script setup>
+// Módulo Compartido: aviso compacto solo cuando hay algo que atender.
+const { novedades: novedadesCompartido, fetchNovedades: fetchNovedadesCompartido } = useCompartido()
+
+const compartidoPendiente = computed(() => {
+  const n = novedadesCompartido.value
+  if (!n) return 0
+  return n.totalAvisos + n.totalAlertas + n.invitacionesPendientes
+})
+
+const compartidoTexto = computed(() => {
+  const n = novedadesCompartido.value
+  if (!n) return ''
+  if (n.invitacionesPendientes > 0) {
+    return n.invitacionesPendientes === 1
+      ? 'Alguien quiere compartir sus gastos contigo'
+      : `${n.invitacionesPendientes} invitaciones para ver gastos`
+  }
+  for (const c of n.conexiones || []) {
+    const a = c.alertas.find((x) => x.estado === 'critico') || c.alertas[0]
+    if (a) return `${c.emisorNombre} va en ${a.categoriaNombre} al ${Math.round(a.porcentaje)}%`
+  }
+  return n.totalAvisos === 1 ? '1 aviso sin leer' : `${n.totalAvisos} avisos sin leer`
+})
+
 const { currencySymbol, formatMonto } = useCurrency()
 const { formatMesAnio } = useFormatters()
 const { toggle: toggleDrawer } = useMobileDrawer()
@@ -643,5 +686,7 @@ onMounted(() => {
   pintarDesdeCache()
   // 2) Revalidar siempre en background.
   cargarDashboard()
+  // 3) Novedades de Compartido, por si el prefetch en idle aún no corrió.
+  if (!novedadesCompartido.value) fetchNovedadesCompartido()
 })
 </script>

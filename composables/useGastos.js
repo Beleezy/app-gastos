@@ -253,20 +253,25 @@ export function useGastos() {
   // Hash barato del array que identifica si cambió: longitud + último id +
   // updatedAt agregado. Evita recalcular agrupaciones costosas cuando el
   // array no cambió (re-renders por otros estados).
-  function _hashGastosMensuales() {
-    const arr = gastosMensuales.value
-    if (!arr.length) return '0'
-    return `${arr.length}:${arr[0]?.id || ''}:${arr[arr.length - 1]?.id || ''}:${arr[0]?.updatedAt || ''}`
-  }
-
-  const _diaCache = shallowRef({ key: '', data: [] })
-  const _semanaCache = shallowRef({ key: '', data: [] })
-  const _categoriaCache = shallowRef({ key: '', data: [] })
+  // Memo por IDENTIDAD del array, no por una clave derivada.
+  //
+  // `gastosMensuales` siempre se reasigna al cambiar (fetchGastosMensuales y
+  // las actualizaciones optimistas crean un array nuevo), así que la misma
+  // referencia garantiza el mismo contenido y el memo no puede quedar viejo.
+  //
+  // La clave anterior era `largo + ids de los extremos + updatedAt del
+  // primero`, y sí podía quedar vieja: `updatedAt` ni siquiera viene en la
+  // respuesta de /api/gastos, así que editar un gasto sin cambiar el conteo
+  // dejaba la clave idéntica y el historial seguía pintado con los datos
+  // anteriores hasta cambiar de mes.
+  const _diaCache = shallowRef({ src: null, data: [] })
+  const _semanaCache = shallowRef({ src: null, data: [] })
+  const _categoriaCache = shallowRef({ src: null, data: [] })
 
   // Agrupa gastos mensuales por día
   const gastosPorDia = computed(() => {
-    const key = _hashGastosMensuales()
-    if (_diaCache.value.key === key) return _diaCache.value.data
+    const fuente = gastosMensuales.value
+    if (_diaCache.value.src === fuente) return _diaCache.value.data
     const agrupado = {}
     for (const g of gastosMensuales.value) {
       if (!agrupado[g.fecha]) {
@@ -276,14 +281,14 @@ export function useGastos() {
       agrupado[g.fecha].total += parseFloat(g.monto) || 0
     }
     const data = Object.values(agrupado).sort((a, b) => b.fecha.localeCompare(a.fecha))
-    _diaCache.value = { key, data }
+    _diaCache.value = { src: fuente, data }
     return data
   })
 
   // Agrupa gastos mensuales por semana
   const gastosPorSemana = computed(() => {
-    const key = _hashGastosMensuales()
-    if (_semanaCache.value.key === key) return _semanaCache.value.data
+    const fuente = gastosMensuales.value
+    if (_semanaCache.value.src === fuente) return _semanaCache.value.data
     const semanas = {}
     for (const g of gastosMensuales.value) {
       const [anio, mes, dia] = g.fecha.split('-').map(Number)
@@ -321,13 +326,13 @@ export function useGastos() {
         dias: Object.values(s.diasConGastos).sort((a, b) => b.fecha.localeCompare(a.fecha)),
       }))
       .sort((a, b) => b.key.localeCompare(a.key))
-    _semanaCache.value = { key, data }
+    _semanaCache.value = { src: fuente, data }
     return data
   })
 
   const gastosPorCategoria = computed(() => {
-    const key = _hashGastosMensuales()
-    if (_categoriaCache.value.key === key) return _categoriaCache.value.data
+    const fuente = gastosMensuales.value
+    if (_categoriaCache.value.src === fuente) return _categoriaCache.value.data
     const agrupado = {}
     for (const g of gastosMensuales.value) {
       const k = g.categoriaNombre || 'Otros'
@@ -349,7 +354,7 @@ export function useGastos() {
       ...c,
       porcentaje: totalGeneral > 0 ? (c.total / totalGeneral) * 100 : 0,
     }))
-    _categoriaCache.value = { key, data }
+    _categoriaCache.value = { src: fuente, data }
     return data
   })
 

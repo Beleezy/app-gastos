@@ -677,7 +677,7 @@
           <span class="text-sm font-semibold text-theme-text flex-1">
             <span class="mr-1.5">⚙️</span>Avanzado
             <span class="block text-[0.6875rem] font-normal text-theme-text-sec mt-0.5"
-              >Modo familiar y uso de IA</span
+              >Modo familiar, gastos compartidos y uso de IA</span
             >
           </span>
           <svg
@@ -693,6 +693,7 @@
         </summary>
         <div class="mt-3 space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
           <ConfiguracionesPerfilModoConfig />
+          <ConfiguracionesCompartidoResumen />
           <ConfiguracionesUsoLlm class="mt-4 lg:mt-0" />
         </div>
       </details>

@@ -53,12 +53,20 @@
 const { apiFetch } = useApiFetch()
 const { isOnline } = useOnlineStatus()
 const router = useRouter()
+// Módulo Compartido: las alertas ya vienen en el estado que carga el badge
+// de navegación. Leerlas de ahí evita recalcular lo mismo en el servidor
+// una segunda vez solo para este banner.
+const { novedades: novedadesCompartido, fetchNovedades } = useCompartido()
 
 const STORAGE_KEY = 'recordatorios.dismissed'
 const data = ref(null)
 const dismissed = ref(false)
 
-const visible = computed(() => !dismissed.value && (data.value?.total || 0) > 0)
+const alertasCompartido = computed(() => novedadesCompartido.value?.totalAlertas || 0)
+
+const visible = computed(
+  () => !dismissed.value && ((data.value?.total || 0) > 0 || alertasCompartido.value > 0),
+)
 
 const mensaje = computed(() => {
   const p = data.value?.planificados?.length || 0
@@ -66,11 +74,32 @@ const mensaje = computed(() => {
   const partes = []
   if (p) partes.push(`${p} gasto${p > 1 ? 's' : ''} planificado${p > 1 ? 's' : ''} para mañana`)
   if (d) partes.push(`${d} deuda${d > 1 ? 's' : ''} vencida${d > 1 ? 's' : ''}`)
+
+  // La alerta más urgente con nombre y cifras: "Ana va 450 de 600 en Comida"
+  // dice más que "1 alerta" y es justo el aviso que el módulo existe para dar.
+  const alerta = alertaDestacada.value
+  if (alerta) {
+    partes.push(
+      `${alerta.emisorNombre} va en ${alerta.categoriaNombre} al ${Math.round(alerta.porcentaje)}%`,
+    )
+    const otras = alertasCompartido.value - 1
+    if (otras > 0) partes.push(`+${otras} alerta${otras > 1 ? 's' : ''} más`)
+  }
   return partes.join(' · ')
 })
 
+const alertaDestacada = computed(() => {
+  for (const c of novedadesCompartido.value?.conexiones || []) {
+    const critica = c.alertas.find((a) => a.estado === 'critico') || c.alertas[0]
+    if (critica) return { ...critica, emisorNombre: c.emisorNombre }
+  }
+  return null
+})
+
 function irA() {
-  const ruta = data.value?.planificados?.length ? '/planificador' : '/deudas'
+  let ruta = '/deudas'
+  if (data.value?.planificados?.length) ruta = '/planificador'
+  else if (!data.value?.deudas?.length && alertasCompartido.value > 0) ruta = '/compartido'
   cerrar()
   router.push(ruta)
 }
@@ -93,6 +122,8 @@ onMounted(async () => {
   try {
     data.value = await apiFetch('/api/recordatorios')
   } catch {}
+  // Si el prefetch en idle aún no corrió, pedirlas acá.
+  if (!novedadesCompartido.value) await fetchNovedades()
 })
 </script>
 

@@ -39,6 +39,7 @@ export default defineEventHandler(async (event) => {
     metodoRegistro,
     transcripcionVoz: body.transcripcionVoz || null,
     notas: g.notas || null,
+    visibilidad: g.visibilidad || 'auto',
   }))
 
   // Transacción atómica: si falla uno, se revierten todos

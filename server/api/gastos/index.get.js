@@ -62,6 +62,9 @@ export default defineEventHandler(async (event) => {
       categoriaNombre: categorias.nombre,
       categoriaIcono: categorias.icono,
       categoriaColor: categorias.color,
+      // Módulo Compartido: el historial marca con un ojo los gastos que el
+      // usuario forzó a compartido o a privado.
+      visibilidad: gastos.visibilidad,
       createdAt: gastos.createdAt,
     })
     .from(gastos)

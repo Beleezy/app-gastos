@@ -159,6 +159,8 @@ const route = useRoute()
 const { personas } = useDeudas()
 const { resumen: resumenPlan } = usePlanificador()
 const { countPendientes: vinculosPendientes } = useVinculos()
+// Módulo Compartido: avisos sin leer + categorías en alerta + invitaciones.
+const { badge: compartidoBadge } = useCompartido()
 const { collapsed, toggle } = useSideNavCollapsed()
 const { formatMontoConSimbolo } = useCurrency()
 
@@ -175,6 +177,7 @@ const saldoFmt = computed(() => {
 })
 
 function getBadge(path) {
+  if (path === '/compartido') return compartidoBadge.value
   if (path === '/deudas') return deudasVencidas.value + vinculosPendientes.value
   if (path === '/planificador') return resumenPlan.value.countPendientes
   return 0
@@ -237,6 +240,10 @@ const IconCalendarDays = makeIcon(
   'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
 )
 
+const IconShare = makeIcon(
+  'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.769-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z',
+)
+
 const navItems = [
   { to: '/', icon: IconHome, label: 'Inicio' },
   { to: '/planificador', icon: IconClipboard, label: 'Planificador' },
@@ -249,6 +256,7 @@ const navItems = [
 ]
 
 const secondaryItems = [
+  { to: '/compartido', icon: IconShare, label: 'Compartido' },
   { to: '/metricas', icon: IconChartLine, label: 'Métricas' },
   { to: '/reportes', icon: IconReporte, label: 'Reportes' },
   { to: '/calendario', icon: IconCalendarDays, label: 'Calendario' },

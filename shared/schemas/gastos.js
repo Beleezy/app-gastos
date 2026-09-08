@@ -7,6 +7,7 @@ import {
   notasSchema,
   metodoRegistroSchema,
 } from './common.js'
+import { visibilidadGastoSchema } from './compartido.js'
 
 const gastoBaseSchema = z.object({
   concepto: conceptoSchema,
@@ -18,6 +19,8 @@ const gastoBaseSchema = z.object({
   metodoRegistro: metodoRegistroSchema.optional().default('manual'),
   gastoPlanificadoId: z.union([z.string(), z.number()]).nullable().optional(),
   transcripcionVoz: z.string().max(2000).optional().nullable(),
+  // Módulo Compartido: excepción por gasto sobre las reglas de categoría.
+  visibilidad: visibilidadGastoSchema.optional(),
 })
 
 export const gastoCreateSchema = gastoBaseSchema
