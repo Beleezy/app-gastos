@@ -10,6 +10,10 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Node 22: eslint-flat-config-utils (dependencia de ESLint 10) usa
+# `Object.groupBy`, que no existe en Node 20 — ESLint reventaba al cargar el
+# config aunque su propio `engines` admita ^20.19. No bajar de 22 sin
+# comprobar que `npm run lint` arranca.
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -19,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -35,6 +39,10 @@ jobs:
   # Lint y formato BLOQUEANTES desde la limpieza de julio 2026 (base en 0
   # errores; los warnings no fallan). El config de ESLint usa los globals
   # generados por @nuxt/eslint en `nuxt prepare` (postinstall).
+  #
+  # Requiere Node >= 21 (ver nota de node-version arriba): en Node 20 este
+  # job muere con `TypeError: Object.groupBy is not a function` antes de
+  # analizar un solo archivo.
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +51,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -67,7 +75,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -95,7 +103,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: npm audit (high+)
