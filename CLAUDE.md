@@ -41,11 +41,25 @@ Navegación: [BottomNav.vue](components/layout/BottomNav.vue) (móvil) + [SideNa
 
 Una `persona_entidad` puede vincularse al usuario real de otra cuenta (`vinculado_usuario_id`, `vinculo_par_id`): solicitudes por email (`solicitudes_vinculo`), espejado de deudas/pagos (`vinculo_deuda_id`/`vinculo_pago_id`), checkpoints comparables (`vinculos_checkpoints`) y auditoría (`auditoria_vinculos`). API en `/api/deudas/vinculos`; helpers en [vinculos.js](server/utils/vinculos.js).
 
+### Compartido — visibilidad de gastos entre usuarios (en construcción)
+
+Un usuario (emisor) le da a otro (receptor) visibilidad sobre parte de sus gastos para que pueda advertirle sobre el ritmo de consumo. **No es gasto compartido ni división de cuentas** — eso es Deudas.
+
+Capa de datos lista (migración `0033_compartido.sql`); API y UI pendientes. Decisiones que hay que respetar al construir encima:
+
+- **Sin espejado.** A diferencia de los vínculos de deudas, no se replican filas: la vista lee los gastos del emisor con el permiso verificado en servidor. El botón "Sincronizar" de la UI es un refetch (`?fresh=1` saltea el `Cache-Control`).
+- **Conexión unidireccional** A→B en `compartido_conexiones` (una invitación aceptada _es_ la conexión). Visibilidad mutua = dos filas. Índice único parcial: una sola conexión viva por `(emisor, email)`.
+- **`gastos.visibilidad`** (`auto` | `compartido` | `privado`) es la excepción por gasto: `privado` gana siempre; `compartido` fuerza visible aunque su categoría no se comparta. Una conexión sin filas en `compartido_categorias` solo muestra los marcados a mano.
+- **Revocar no borra**: `estado='revocada'` conserva el historial. Los eventos de sistema ("dejó de compartir Comida") van en `compartido_avisos` con `tipo='sistema'` y `autor_id` NULL — el cliente no puede fabricarlos (`tipoAvisoSchema` los excluye).
+- **Es el primer módulo que cruza la frontera `usuario_id` a propósito.** Toda lectura cruzada debe pasar por un guard único y usar whitelist explícita de columnas — `notas` y `transcripcion_voz` nunca salen en el payload.
+
+Schemas Zod en [compartido.js](shared/schemas/compartido.js); sus límites espejan los CHECK de la migración.
+
 ---
 
 ## Base de datos ([schema.js](server/database/schema.js))
 
-Tablas: `usuarios` (espejo de auth.users, + perfiles gestionados con contacto), `intenciones_registro`, `categorias`, `planes_mensuales` (UNIQUE usuario+mes+año), `gastos_planificados`, `gastos` (vínculo 1:1 opcional a planificado), `gastos_futuros`/`_detalles`/`_opciones`, `personas_entidades`, `deudas`, `pagos_deuda`, `configuraciones` (1:1 usuario), `auditoria_vinculos`, `vinculos_checkpoints`, `solicitudes_vinculo`, `ingresos`, `medios_ahorro`, `ahorros`, `metas_ahorro`, `plantillas_mes`, `uso_llm`, `llm_cache`, `google_calendar_conexiones`, `presupuestos_categoria`.
+Tablas: `usuarios` (espejo de auth.users, + perfiles gestionados con contacto), `intenciones_registro`, `categorias`, `planes_mensuales` (UNIQUE usuario+mes+año), `gastos_planificados`, `gastos` (vínculo 1:1 opcional a planificado), `gastos_futuros`/`_detalles`/`_opciones`, `personas_entidades`, `deudas`, `pagos_deuda`, `configuraciones` (1:1 usuario), `auditoria_vinculos`, `vinculos_checkpoints`, `solicitudes_vinculo`, `ingresos`, `medios_ahorro`, `ahorros`, `metas_ahorro`, `plantillas_mes`, `uso_llm`, `llm_cache`, `google_calendar_conexiones`, `presupuestos_categoria`, `compartido_conexiones`/`compartido_categorias`/`compartido_avisos`.
 
 Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — filtrar con `isNull()` en TODA query de lectura.
 

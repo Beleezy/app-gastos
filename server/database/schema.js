@@ -15,6 +15,7 @@ import {
   uniqueIndex,
   jsonb,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 // ── Enums ──
 export const estadoGastoPlanificado = pgEnum('estado_gasto_planificado', ['pendiente', 'pagado'])
@@ -30,6 +31,26 @@ export const estadoSolicitudVinculo = pgEnum('estado_solicitud_vinculo', [
 ])
 export const rolUsuario = pgEnum('rol_usuario', ['superadmin', 'usuario'])
 export const estadoIntencion = pgEnum('estado_intencion', ['pendiente', 'aprobada', 'rechazada'])
+
+// ── Enums del módulo Compartido (migración 0033) ──
+// Visibilidad por gasto: 'auto' sigue las reglas de categoría de cada
+// conexión; 'compartido' fuerza visible aunque la categoría no se comparta;
+// 'privado' oculta siempre y gana sobre todo lo demás.
+export const visibilidadGasto = pgEnum('visibilidad_gasto', ['auto', 'compartido', 'privado'])
+export const estadoConexionCompartido = pgEnum('estado_conexion_compartido', [
+  'pendiente',
+  'aceptada',
+  'rechazada',
+  'revocada',
+  'expirada',
+])
+export const nivelDetalleCompartido = pgEnum('nivel_detalle_compartido', ['resumen', 'detalle'])
+export const tipoAvisoCompartido = pgEnum('tipo_aviso_compartido', [
+  'aviso',
+  'pregunta',
+  'ok',
+  'sistema',
+])
 
 // ── Tabla 1: usuarios ──
 // NOTA: el id lo provee Supabase Auth (mismo UUID que auth.users)
@@ -175,6 +196,8 @@ export const gastos = pgTable(
     metodoRegistro: metodoRegistro('metodo_registro').default('manual').notNull(),
     transcripcionVoz: text('transcripcion_voz'),
     notas: text('notas'),
+    // Módulo Compartido: excepción por gasto sobre las reglas de categoría.
+    visibilidad: visibilidadGasto('visibilidad').default('auto').notNull(),
     deletedAt: timestamp('deleted_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -184,6 +207,12 @@ export const gastos = pgTable(
     index('gastos_usuario_categoria_idx').on(table.usuarioId, table.categoriaId),
     uniqueIndex('gastos_planificado_unique').on(table.gastoPlanificadoId),
     index('gastos_usuario_deleted_idx').on(table.usuarioId, table.deletedAt),
+    // Parcial: los gastos marcados a mano son una minoría diminuta frente a
+    // los 'auto', así que el índice pesa poco y resuelve la rama
+    // "OR visibilidad='compartido'" de la vista compartida.
+    index('gastos_visibilidad_marcados_idx')
+      .on(table.usuarioId, table.visibilidad)
+      .where(sql`${table.visibilidad} <> 'auto'`),
   ],
 )
 
@@ -668,4 +697,119 @@ export const presupuestosCategoria = pgTable(
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => [uniqueIndex('pcat_usuario_categoria_uq').on(table.usuarioId, table.categoriaId)],
+)
+
+// ── Módulo Compartido (migración 0033) ──────────────────────────────────
+// Visibilidad de gastos entre usuarios: el emisor deja que el receptor vea
+// parte de sus gastos para que pueda advertirle sobre el ritmo de consumo.
+// NO es gasto compartido ni división de cuentas — eso es Deudas.
+//
+// No hay espejado de filas (a diferencia de los vínculos de deudas): ambos
+// usuarios están en la misma BD, así que la vista lee los gastos del emisor
+// con el permiso verificado en servidor.
+
+// ── Tabla 21: compartido_conexiones — la invitación Y el vínculo ──
+// Una invitación aceptada ES la conexión; separarlas duplicaría el estado.
+// Dirección A→B: "el receptor ve los gastos del emisor". Visibilidad mutua
+// = dos filas, para no tener el caso ambiguo de "acepté que me vea pero yo
+// no quiero mostrar lo mío".
+export const compartidoConexiones = pgTable(
+  'compartido_conexiones',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    // 'emisorId', no 'usuarioId': una conexión tiene dos partes y llamarle
+    // "el usuario" a una de ellas invita justo al error que este módulo debe
+    // evitar — confundir al dueño de los gastos con el que hace la petición.
+    // assertOwner acepta { field: 'emisorId' }.
+    emisorId: uuid('emisor_id')
+      .references(() => usuarios.id, { onDelete: 'cascade' })
+      .notNull(),
+    // Siempre en minúsculas (hay CHECK en DB): permite invitar a alguien sin
+    // cuenta y resolverlo a receptorId cuando se registre.
+    receptorEmail: varchar('receptor_email', { length: 255 }).notNull(),
+    receptorId: uuid('receptor_id').references(() => usuarios.id, { onDelete: 'cascade' }),
+    estado: estadoConexionCompartido('estado').default('pendiente').notNull(),
+    // 'resumen' = solo agregados por categoría. 'detalle' = además la lista
+    // de gastos. Default deliberado: el caso de uso se cubre con agregados.
+    nivelDetalle: nivelDetalleCompartido('nivel_detalle').default('resumen').notNull(),
+    incluirMarcados: boolean('incluir_marcados').default(true).notNull(),
+    // Congela la visibilidad sin romper el vínculo (evita re-invitar).
+    pausada: boolean('pausada').default(false).notNull(),
+    mensaje: text('mensaje'),
+    // Última vez que el receptor abrió la vista: base de "qué hay de nuevo".
+    vistoHasta: timestamp('visto_hasta'),
+    aceptadaEn: timestamp('aceptada_en'),
+    revocadaEn: timestamp('revocada_en'),
+    revocadaPor: uuid('revocada_por').references(() => usuarios.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    // Una sola conexión viva por (emisor, email). Las rechazadas, revocadas
+    // y expiradas quedan fuera del índice, así que se puede reinvitar.
+    uniqueIndex('compartido_conexiones_activa_uq')
+      .on(table.emisorId, table.receptorEmail)
+      .where(sql`${table.estado} IN ('pendiente', 'aceptada')`),
+    index('compartido_conexiones_emisor_idx').on(table.emisorId, table.estado),
+    index('compartido_conexiones_receptor_idx').on(table.receptorId, table.estado),
+    // Invitaciones pendientes para un email que aún no tiene cuenta.
+    index('compartido_conexiones_email_idx').on(table.receptorEmail, table.estado),
+  ],
+)
+
+// ── Tabla 22: compartido_categorias — qué ve, por conexión ──
+// Sin filas para una conexión = solo se ven los gastos marcados a mano.
+// Ese es el "modo selección": no hace falta una columna de modo.
+export const compartidoCategorias = pgTable(
+  'compartido_categorias',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    conexionId: uuid('conexion_id')
+      .references(() => compartidoConexiones.id, { onDelete: 'cascade' })
+      .notNull(),
+    categoriaId: uuid('categoria_id')
+      .references(() => categorias.id, { onDelete: 'cascade' })
+      .notNull(),
+    // Umbral del OBSERVADOR, independiente del alertaUmbral que el emisor
+    // se puso en presupuestos_categoria. Admite >100 para "avísame solo si
+    // se pasa del presupuesto". CHECK 1..200 en DB.
+    umbralAviso: integer('umbral_aviso').default(75).notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('compartido_categorias_conexion_categoria_uq').on(
+      table.conexionId,
+      table.categoriaId,
+    ),
+  ],
+)
+
+// ── Tabla 23: compartido_avisos — canal "ojo con esto" + eventos ──
+// Los eventos de sistema (tipo='sistema', autorId NULL) viven acá para que
+// el receptor nunca vea desaparecer una categoría en silencio.
+export const compartidoAvisos = pgTable(
+  'compartido_avisos',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    conexionId: uuid('conexion_id')
+      .references(() => compartidoConexiones.id, { onDelete: 'cascade' })
+      .notNull(),
+    // NULL solo para tipo='sistema' (CHECK en DB). El destinatario se
+    // deriva: es la otra parte de la conexión, no hace falta persistirlo.
+    autorId: uuid('autor_id').references(() => usuarios.id, { onDelete: 'set null' }),
+    tipo: tipoAvisoCompartido('tipo').default('aviso').notNull(),
+    // Un aviso apunta a una categoría O a un gasto, nunca a ambos (CHECK).
+    categoriaId: uuid('categoria_id').references(() => categorias.id, { onDelete: 'set null' }),
+    gastoId: uuid('gasto_id').references(() => gastos.id, { onDelete: 'set null' }),
+    mensaje: text('mensaje').notNull(),
+    leidoAt: timestamp('leido_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('compartido_avisos_conexion_idx').on(table.conexionId, table.createdAt.desc()),
+    // Badge de no leídos: parcial, los leídos son mayoría con el tiempo.
+    index('compartido_avisos_no_leidos_idx')
+      .on(table.conexionId)
+      .where(sql`${table.leidoAt} IS NULL`),
+  ],
 )
