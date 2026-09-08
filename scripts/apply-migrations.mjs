@@ -22,7 +22,8 @@
  * Regla de nombres: un prefijo numérico = una migración. Ante conflicto de
  * numeración usar sufijo letra (`0005a_...`) para no alterar el orden.
  *
- * Variables: DATABASE_URL requerida.
+ * Variables: DATABASE_URL requerida (alias aceptados: POSTGRES_URL_NON_POOLING,
+ * POSTGRES_URL, NUXT_DATABASE_URL, SUPABASE_DB_URL — ver ALIAS_URL_BD).
  */
 
 import { readdir, readFile } from 'node:fs/promises'
@@ -48,14 +49,68 @@ const BOOTSTRAP_IGNORABLE_CODES = new Set([
   '42P16', // invalid table definition (re-add constraint)
 ])
 
-if (!process.env.DATABASE_URL) {
-  console.error('DATABASE_URL no definida')
+// La cadena de conexión no siempre llega con el nombre DATABASE_URL:
+//  - Vercel NO expone al paso de Build las variables marcadas como
+//    "Sensitive"; ahí solo existen en runtime.
+//  - La integración Supabase↔Vercel inyecta los nombres POSTGRES_*.
+//  - Nuxt permite sobrescribir runtimeConfig.databaseUrl con NUXT_DATABASE_URL.
+// Aceptar los alias evita que el deploy se caiga por el nombre de la variable
+// en vez de por un problema real. El orden manda: DATABASE_URL primero.
+const ALIAS_URL_BD = [
+  'DATABASE_URL',
+  'POSTGRES_URL_NON_POOLING',
+  'POSTGRES_URL',
+  'NUXT_DATABASE_URL',
+  'SUPABASE_DB_URL',
+]
+
+const origenUrl = ALIAS_URL_BD.find((nombre) => (process.env[nombre] || '').trim())
+
+if (!origenUrl) {
+  const enVercel = Boolean(process.env.VERCEL)
+  console.error(
+    [
+      '',
+      '[db:apply] Sin cadena de conexión: ninguna de estas variables está definida',
+      `           ${ALIAS_URL_BD.join(', ')}`,
+      '',
+      ...(enVercel
+        ? [
+            `Este build corre en Vercel (VERCEL_ENV=${process.env.VERCEL_ENV || '?'}).`,
+            'Las variables marcadas como "Sensitive" NO se exponen al paso de Build,',
+            'solo a runtime. Settings → Environment Variables: DATABASE_URL debe',
+            'existir para Production y Preview SIN la marca Sensitive.',
+            '',
+          ]
+        : []),
+      'El build se detiene a propósito. Desplegar sin migrar publica código que',
+      'apunta a columnas que todavía no existen — es el incidente 2bb83a7.',
+      '',
+    ].join('\n'),
+  )
   process.exit(1)
 }
 
+const DATABASE_URL = process.env[origenUrl].trim()
+
+// Solo host:puerto — `new URL().host` deja fuera usuario y contraseña, así que
+// el log de build dice contra qué BD se migró sin filtrar credenciales.
+function hostDe(url) {
+  try {
+    return new URL(url).host
+  } catch {
+    return '(cadena de conexión ilegible)'
+  }
+}
+
+console.log(
+  `[db:apply] destino ${hostDe(DATABASE_URL)}` +
+    (origenUrl === 'DATABASE_URL' ? '' : ` (DATABASE_URL ausente; uso ${origenUrl})`),
+)
+
 // onnotice vacío: CREATE TABLE IF NOT EXISTS emite NOTICE en cada corrida
 // y postgres.js lo imprime como objeto crudo — puro ruido en CI.
-const sql = postgres(process.env.DATABASE_URL, { max: 1, onnotice: () => {} })
+const sql = postgres(DATABASE_URL, { max: 1, onnotice: () => {} })
 
 function splitStatements(content) {
   return content
@@ -210,7 +265,26 @@ async function main() {
   await sql.end()
 }
 
+const CODIGOS_CONEXION = new Set([
+  'ENOTFOUND',
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+  'EHOSTUNREACH',
+  'ECONNRESET',
+  'CONNECT_TIMEOUT',
+  '28P01', // password de autenticación inválido
+  '3D000', // la base de datos no existe
+])
+
 main().catch((e) => {
-  console.error('Error fatal:', e)
+  if (CODIGOS_CONEXION.has(e.code)) {
+    console.error(
+      `\n[db:apply] No se pudo conectar a ${hostDe(DATABASE_URL)} (code=${e.code}).\n` +
+        `           La cadena vino de ${origenUrl}. Revisa que apunte al pooler de\n` +
+        '           Supabase y que la red del build tenga salida hacia él.\n',
+    )
+  } else {
+    console.error('Error fatal:', e)
+  }
   sql.end().finally(() => process.exit(1))
 })
