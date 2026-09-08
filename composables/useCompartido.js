@@ -16,6 +16,19 @@ export function useCompartido() {
   const vistas = useState('compartido-vistas', () => ({}))
   const cargando = ref(false)
   const error = ref(null)
+  // Epoch del módulo, con el mismo idiom que useGastos: toda mutación lo
+  // incrementa y viaja como `_v` en las lecturas.
+  //
+  // No es un lujo: estos endpoints responden con Cache-Control de 15–60s, así
+  // que sin él un refetch hecho justo después de mutar devuelve el estado
+  // ANTERIOR desde la caché del navegador. Se veía al pausar una conexión (la
+  // tarjeta seguía diciendo "Activo") y al mandar un aviso (no aparecía en el
+  // feed, ni siquiera recargando la página).
+  const epoch = useState('compartido-epoch', () => 0)
+  const bust = () => {
+    epoch.value++
+  }
+  const conV = (query = {}) => (epoch.value ? { ...query, _v: epoch.value } : query)
 
   const badge = computed(() => novedades.value?.badge || 0)
   const hayConexiones = computed(
@@ -27,7 +40,7 @@ export function useCompartido() {
     cargando.value = true
     error.value = null
     try {
-      const data = await apiFetch('/api/compartido/conexiones')
+      const data = await apiFetch('/api/compartido/conexiones', { query: conV() })
       compartoCon.value = data.compartoCon || []
       meComparten.value = data.meComparten || []
       invitacionesRecibidas.value = data.invitacionesRecibidas || []
@@ -40,15 +53,31 @@ export function useCompartido() {
     }
   }
 
+  // Varios sitios piden novedades al montar (badge de navegación, banner de
+  // recordatorios, dashboard, y cada tarjeta de conexión al marcar visto).
+  // Sin deduplicar, una carga de /compartido dispara media docena de
+  // peticiones idénticas, y si el endpoint falla los guardas
+  // `if (!novedades.value)` reintentan en cascada. Compartir la promesa en
+  // vuelo deja una sola petición por ráfaga.
+  const novedadesEnVuelo = useState('compartido-novedades-en-vuelo', () => null)
+
   async function fetchNovedades() {
-    try {
-      novedades.value = await apiFetch('/api/compartido/novedades')
-      return novedades.value
-    } catch (e) {
-      // El badge no debe romper la navegación si falla.
-      console.warn('[compartido] novedades falló:', e)
-      return null
-    }
+    if (novedadesEnVuelo.value) return novedadesEnVuelo.value
+    const promesa = apiFetch('/api/compartido/novedades', { query: conV() })
+      .then((data) => {
+        novedades.value = data
+        return data
+      })
+      .catch((e) => {
+        // El badge no debe romper la navegación si falla.
+        console.warn('[compartido] novedades falló:', e)
+        return null
+      })
+      .finally(() => {
+        novedadesEnVuelo.value = null
+      })
+    novedadesEnVuelo.value = promesa
+    return promesa
   }
 
   async function invitar({ email, mensaje, nivelDetalle = 'resumen', categorias = [] }) {
@@ -59,6 +88,7 @@ export function useCompartido() {
         method: 'POST',
         body: { email, mensaje, nivelDetalle, categorias },
       })
+      bust()
       await fetchConexiones()
       return conexion
     } catch (e) {
@@ -71,6 +101,7 @@ export function useCompartido() {
 
   async function aceptar(conexionId) {
     const r = await apiFetch(`/api/compartido/conexiones/${conexionId}/aceptar`, { method: 'POST' })
+    bust()
     await Promise.all([fetchConexiones(), fetchNovedades()])
     return r
   }
@@ -79,6 +110,7 @@ export function useCompartido() {
     const r = await apiFetch(`/api/compartido/conexiones/${conexionId}/rechazar`, {
       method: 'POST',
     })
+    bust()
     await Promise.all([fetchConexiones(), fetchNovedades()])
     return r
   }
@@ -89,6 +121,9 @@ export function useCompartido() {
       body: cambios,
     })
     compartoCon.value = compartoCon.value.map((c) => (c.id === conexionId ? { ...c, ...r } : c))
+    // Además del estado propio, cambiar el alcance deja eventos de sistema en
+    // el feed del receptor.
+    bust()
     return r
   }
 
@@ -97,6 +132,7 @@ export function useCompartido() {
     compartoCon.value = compartoCon.value.filter((c) => c.id !== conexionId)
     meComparten.value = meComparten.value.filter((c) => c.id !== conexionId)
     delete vistas.value[conexionId]
+    bust()
     await fetchNovedades()
   }
 
@@ -109,6 +145,7 @@ export function useCompartido() {
     if (mes) query.mes = mes
     if (anio) query.anio = anio
     if (fresh) query.fresh = '1'
+    if (epoch.value) query._v = epoch.value
 
     const anterior = vistas.value[conexionId]
     const data = await apiFetch(`/api/compartido/vista/${conexionId}`, { query })
@@ -137,7 +174,7 @@ export function useCompartido() {
   }
 
   async function fetchAvisos(conexionId) {
-    return apiFetch('/api/compartido/avisos', { query: { conexionId } })
+    return apiFetch('/api/compartido/avisos', { query: conV({ conexionId }) })
   }
 
   async function enviarAviso({ conexionId, tipo = 'aviso', categoriaId, gastoId, mensaje }) {
@@ -146,12 +183,14 @@ export function useCompartido() {
       body: { conexionId, tipo, categoriaId, gastoId, mensaje },
       headers: { 'Idempotency-Key': `aviso-${conexionId}-${Date.now()}` },
     })
+    bust()
     await fetchNovedades()
     return aviso
   }
 
   async function marcarAvisoLeido(avisoId) {
     await apiFetch(`/api/compartido/avisos/${avisoId}/leido`, { method: 'POST' })
+    bust()
     await fetchNovedades()
   }
 
@@ -181,6 +220,7 @@ export function useCompartido() {
     error,
     badge,
     hayConexiones,
+    epoch,
     fetchConexiones,
     fetchNovedades,
     invitar,

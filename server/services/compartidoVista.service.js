@@ -4,7 +4,7 @@
 // el guard de server/utils/compartido.js y proyecta columnas con la
 // whitelist SELECT_GASTO_COMPARTIDO. Nada de `select()` sin proyección.
 
-import { and, between, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm'
+import { and, between, desc, eq, gt, inArray, isNull, ne, or, sql } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import {
   compartidoAvisos,
@@ -394,7 +394,10 @@ async function contarGastosNuevos(conexion, categoriaIds) {
     .where(
       and(
         construirFiltroVisibilidad(conexion, categoriaIds),
-        sql`${gastos.createdAt} > ${conexion.vistoHasta}`,
+        // gt() y no una plantilla sql cruda: interpolar un Date de JS en
+        // `sql` lo manda como parámetro sin tipo y postgres.js revienta al
+        // serializarlo. gt() usa el tipo de la columna.
+        gt(gastos.createdAt, conexion.vistoHasta),
       ),
     )
   return fila?.total || 0

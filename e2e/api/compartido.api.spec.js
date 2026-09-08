@@ -332,6 +332,72 @@ test.describe('Compartido — avisos', () => {
   })
 })
 
+test.describe('Compartido — novedades y robustez', () => {
+  test('las novedades siguen funcionando después de marcar la vista como vista', async ({
+    request,
+  }) => {
+    const { conexion, compartida, ANA, BETO } = await escenario(request)
+    await aceptar(request, conexion.id, BETO)
+
+    // Antes de marcar visto, `vistoHasta` es null y el conteo de gastos
+    // nuevos ni se ejecuta. El 500 solo aparecía DESPUÉS de mirar la vista,
+    // que es el orden real de uso y el que ningún test cubría.
+    expect((await request.get('/api/compartido/novedades', { headers: BETO })).ok()).toBe(true)
+    await request.post(`/api/compartido/vista/${conexion.id}/visto`, { headers: BETO })
+
+    const r = await request.get('/api/compartido/novedades', { headers: BETO })
+    expect(r.ok(), `novedades tras visto: ${r.status()} ${await r.text()}`).toBeTruthy()
+    const antes = await r.json()
+    expect(antes.totalGastosNuevos).toBe(0)
+
+    // Y un gasto posterior a esa revisión sí se cuenta.
+    await crearGasto(request, ANA, {
+      concepto: `Posterior ${sufijo}`,
+      monto: 15,
+      categoriaId: compartida.id,
+    })
+    const despues = await (await request.get('/api/compartido/novedades', { headers: BETO })).json()
+    expect(despues.totalGastosNuevos).toBe(1)
+  })
+
+  test('las novedades del receptor reflejan la alerta de la categoría', async ({ request }) => {
+    const { conexion, BETO } = await escenario(request)
+    await aceptar(request, conexion.id, BETO)
+
+    const n = await (await request.get('/api/compartido/novedades', { headers: BETO })).json()
+    expect(n.conexiones).toHaveLength(1)
+    expect(n.badge).toBeGreaterThanOrEqual(0)
+  })
+
+  test('un id malformado responde 404, nunca 500', async ({ request }) => {
+    const { BETO } = await escenario(request)
+
+    // Sin este corte, el id llega a Postgres, la query revienta y el usuario
+    // recibe un 500 que además filtra el error del driver.
+    const rutas = [
+      ['get', '/api/compartido/vista/no-es-uuid'],
+      ['post', '/api/compartido/vista/no-es-uuid/visto'],
+      ['post', '/api/compartido/conexiones/no-es-uuid/aceptar'],
+      ['post', '/api/compartido/conexiones/no-es-uuid/rechazar'],
+      ['delete', '/api/compartido/conexiones/no-es-uuid'],
+      ['post', '/api/compartido/avisos/no-es-uuid/leido'],
+      ['get', '/api/compartido/avisos?conexionId=no-es-uuid'],
+    ]
+
+    for (const [metodo, ruta] of rutas) {
+      const r = await request[metodo](ruta, { headers: BETO, failOnStatusCode: false })
+      expect(r.status(), `${metodo.toUpperCase()} ${ruta}`).toBe(404)
+    }
+
+    const alcance = await request.put('/api/compartido/conexiones/no-es-uuid/alcance', {
+      headers: BETO,
+      data: { pausada: true },
+      failOnStatusCode: false,
+    })
+    expect(alcance.status()).toBe(404)
+  })
+})
+
 test.describe('Compartido — invitaciones', () => {
   test('no se puede compartir consigo mismo ni invitar dos veces', async ({ request }) => {
     const { ANA } = identidades()

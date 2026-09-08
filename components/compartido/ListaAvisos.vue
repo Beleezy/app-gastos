@@ -49,7 +49,7 @@
 <script setup>
 const props = defineProps({ conexionId: { type: String, required: true } })
 
-const { fetchAvisos, marcarAvisoLeido } = useCompartido()
+const { fetchAvisos, marcarAvisoLeido, epoch } = useCompartido()
 const { formatRelativo } = useFechaRelativa()
 
 const avisos = ref([])
@@ -88,6 +88,8 @@ async function marcar(aviso) {
 }
 
 onMounted(cargar)
-watch(() => props.conexionId, cargar)
+// Recargar al cambiar de conexión y al mutar el feed (aviso enviado, aviso
+// leído, cambio de alcance).
+watch([() => props.conexionId, epoch], cargar)
 defineExpose({ recargar: cargar })
 </script>
