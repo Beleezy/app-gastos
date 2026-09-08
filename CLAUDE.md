@@ -106,6 +106,17 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 - **Formato:** [useFormatters.js](composables/useFormatters.js)/[useCurrency.js](composables/useCurrency.js) respetan locale y `moneda_preferida`. Fechas de negocio en zona del usuario: [useFechaPeru.js](composables/useFechaPeru.js), [dateLocal.js](server/utils/dateLocal.js).
 - **Exportación:** Excel ([useExportExcel.js](composables/useExportExcel.js), exceljs), PDF (jspdf, `useDeudaPdf`/`useHistorialPdf`), CSV. Libs pesadas via `await import()` (chunks separados).
 
+## Dependencias
+
+`package.json` declara **`overrides`** para mantener el árbol libre de vulnerabilidades altas sin esperar a que los paquetes de arriba publiquen:
+
+- `vite: ^8.2.0` — el árbol arrastraba un vite 7.3.3 en la raíz (advisories de `server.fs.deny` y `launch-editor`) solo por inercia del lockfile: todos sus consumidores admiten `>=6`. Unificar en vite 8 deja una sola copia deduplicada.
+- `vite-plugin-pwa: ^1.3.0` — la versión que traía `@vite-pwa/nuxt` tenía un peer que excluía vite 8 y forzaba conservar el vite viejo.
+
+Queda aceptada una vulnerabilidad **moderada**: `uuid <11.1.1` vía `exceljs`. Su único arreglo es bajar exceljs a 3.4.0 (downgrade mayor que rompe el export a Excel) y la ruta afectada no se usa. Por eso el umbral de la auditoría es `high`; está documentado en [security-audit.yml](.github/workflows/security-audit.yml).
+
+Al tocar `overrides`, revalidar con `npm ci` + `npm run build` + la suite E2E completa: son paquetes del toolchain de build, no librerías de aplicación.
+
 ## Testing y CI
 
 - Unit: `npm test` (Vitest, `tests/*.test.js` — lógica pura extraída de composables/utils).

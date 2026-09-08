@@ -21,5 +21,12 @@ jobs:
           cache: 'npm'
 
       # Sin install: npm audit lee package-lock directamente vía registry.
+      #
+      # Umbral `high`: queda fuera a propósito una moderada conocida —
+      # uuid <11.1.1 (GHSA-w5hq-g745-h8pq, bounds check ausente en v3/v5/v6)
+      # que entra vía exceljs. Su único "arreglo" es bajar exceljs a 3.4.0,
+      # un downgrade mayor que rompería el export a Excel, y la ruta
+      # vulnerable (uuid con buffer explícito) no se usa en el proyecto.
+      # Revisar si exceljs publica una versión con uuid >=11.1.1.
       - name: npm audit (high+, prod deps)
         run: npm audit --audit-level=high --omit=dev
