@@ -9,9 +9,13 @@
 
     <!-- Mic button -->
     <div class="relative">
-      <!-- Outer glow ring -->
+      <!-- Outer glow ring. `pointer-events-none` NO es cosmético: los halos
+           miden hasta 144px y desbordan el botón, así que sin esto se comen
+           los taps de lo que tengan al lado (el botón de registro manual).
+           `opacity-0` oculta pero sigue capturando el puntero. -->
       <div
-        class="absolute inset-0 flex items-center justify-center transition-opacity duration-500"
+        aria-hidden="true"
+        class="absolute inset-0 flex items-center justify-center transition-opacity duration-500 pointer-events-none"
         :class="isListening ? 'opacity-100' : 'opacity-0'"
       >
         <div
@@ -25,7 +29,8 @@
       <!-- Idle ambient glow -->
       <div
         v-if="!isListening && !hasDraft"
-        class="absolute inset-0 flex items-center justify-center"
+        aria-hidden="true"
+        class="absolute inset-0 flex items-center justify-center pointer-events-none"
       >
         <div class="w-24 h-24 rounded-full bg-[var(--color-accent)]/8 blur-xl"></div>
       </div>
