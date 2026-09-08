@@ -133,6 +133,13 @@ const ONBOARDING_LISTO = {
 }
 
 test.describe('Compartido — lo que ve el receptor', () => {
+  // Sus propias esperas suman 70 s (20 + 15 + 15 + 20), por encima del tope
+  // global de 60 s de playwright.config: en cuanto un runner lento las agota
+  // de verdad, el test no puede terminar aunque todo funcione. Además monta
+  // dos cuentas, presupuesto y gastos antes de empezar. El tope va por
+  // encima de esa suma, no "por si acaso".
+  test.setTimeout(150_000)
+
   test('ve el rubro con su presupuesto, la proyección y el detalle', async ({
     browser,
     baseURL,
