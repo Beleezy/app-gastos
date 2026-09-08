@@ -80,6 +80,7 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 
 - Archivos SQL en [migrations/](server/database/migrations/); se aplican con `npm run db:apply` ([apply-migrations.mjs](scripts/apply-migrations.mjs)), que lleva registro en la tabla `_migraciones_aplicadas` (transaccional para archivos nuevos; los que contienen `CREATE INDEX CONCURRENTLY` van fuera de transacción).
 - **El deploy SÍ aplica migraciones**: `vercel.json` define `buildCommand: npm run db:apply && npm run build`. Nunca mergear código que dependa de una columna sin su migración en el mismo PR (causa del hotfix `2bb83a7`).
+- Corolario: **si la cadena de conexión no llega al paso de Build, no hay deploy**. El `&&` corta y `npm run build` no llega a correr — es a propósito: publicar sin migrar es justo el incidente `2bb83a7`. En Vercel, una variable marcada como _Sensitive_ existe solo en runtime, no en el build. `apply-migrations.mjs` acepta alias (`POSTGRES_URL_NON_POOLING`, `POSTGRES_URL`, `NUXT_DATABASE_URL`, `SUPABASE_DB_URL`) y, si no encuentra ninguno, el log del build dice exactamente qué falta.
 - Un prefijo numérico = una migración; ante conflicto usar sufijo letra (`0005a_...`). No editar migraciones ya aplicadas — crear una nueva.
 - Al añadir una columna crítica, actualizar las columnas centinela de [health.get.js](server/api/health.get.js) (check de drift → 503).
 
