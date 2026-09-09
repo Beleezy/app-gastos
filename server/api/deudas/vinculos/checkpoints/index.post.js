@@ -8,10 +8,11 @@ import {
   getNombreDisplay,
 } from '../../../../utils/vinculos.js'
 import { eq, and } from 'drizzle-orm'
+import { readBodyObjeto } from '../../../../utils/validate.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const body = await readBody(event)
+  const body = await readBodyObjeto(event)
   const { personaId, descripcion } = body
 
   if (!personaId) {

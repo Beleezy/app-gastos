@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { fechaIso, monto, conceptoSchema, notasSchema } from './common.js'
+import { fechaIso, monto, conceptoSchema, notasSchema, uuidSchema } from './common.js'
 
 // estado_gasto_planificado enum real de DB (server/database/schema.js:4):
 // solo `pendiente | pagado`. El schema legacy en este archivo aceptaba
@@ -32,16 +32,39 @@ export const planMensualSchema = z.object({
   montoPresupuesto: monto.optional(),
 })
 
+// Cuerpo de POST /api/planificador/gastos.
+//
+// Estaba exportado y sin usar mientras el handler leía `readBody` crudo, y
+// además describía OTRO endpoint: sus campos eran `planId`, `monto`,
+// `fechaProbable`, `recurrente`, cuando el servicio lee `planMensualId`,
+// `montoEstimado`, `fechaProbablePago` y `esRecurrente`. Cablearlo tal cual
+// habría roto la creación entera — un schema que nadie ejecuta se
+// desincroniza en silencio. Reescrito contra lo que manda `usePlanificador`
+// y consume `crearGastoPlanificado`.
+//
+// Los nueve cuerpos del fuzz (incluido `{}`) llegaban al INSERT y salían
+// como 500 con la consulta y sus parámetros en el mensaje.
 export const gastoPlanificadoSchema = z.object({
-  planId: z.union([z.string(), z.number()]).optional(),
+  planMensualId: uuidSchema,
   concepto: conceptoSchema,
-  monto,
-  fechaProbable: fechaIso.optional().nullable(),
-  categoriaId: z.union([z.string(), z.number()]).optional().nullable(),
-  estado: estadoPlanificadoSchema.optional().default('pendiente'),
-  recurrente: z.boolean().optional().default(false),
-  recurrenteGrupoId: z.union([z.string(), z.number()]).optional().nullable(),
+  montoEstimado: monto,
+  // La columna es NOT NULL: sin categoría el INSERT revienta.
+  categoriaId: uuidSchema,
+  fechaProbablePago: fechaIso,
+  esRecurrente: z.boolean().optional().default(false),
   notas: notasSchema,
+})
+
+// Cuerpo de PUT /api/planificador (cambiar el presupuesto del mes).
+//
+// `planMensualSchema` describe la CREACIÓN de un plan (mes + año), no esta
+// edición, que llega con el id del plan. El handler no validaba nada: el
+// `body.id` iba derecho a un `eq()` contra una columna uuid y
+// `String(body.montoPresupuesto)` producía "undefined" para una columna
+// NUMERIC, así que un cuerpo vacío bastaba para un 500 con el SQL dentro.
+export const presupuestoPlanUpdateSchema = z.object({
+  id: uuidSchema,
+  montoPresupuesto: monto,
 })
 
 export const gastoFuturoCreateSchema = z.object({

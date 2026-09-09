@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
-import { presupuestosCategoria, categorias } from '../../database/schema.js'
+import { presupuestosCategoria } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, or, isNull } from 'drizzle-orm'
+import { assertCategoriasPropias } from '../../utils/categorias.js'
 
 // Upsert: si ya existe para (usuario, categoria), actualiza; si no, crea.
 // Esto es lo que el composable necesita en el cliente (setPresupuesto).
@@ -18,18 +18,10 @@ export default defineEventHandler(async (event) => {
   if (!categoriaId) throw createError({ statusCode: 400, message: 'categoriaId es requerido' })
   if (!(monto > 0)) throw createError({ statusCode: 400, message: 'montoMensual debe ser > 0' })
 
-  // Validar que la categoría existe y pertenece al usuario o es predefinida.
-  const [cat] = await db
-    .select({ id: categorias.id })
-    .from(categorias)
-    .where(
-      and(
-        eq(categorias.id, categoriaId),
-        or(eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)),
-      ),
-    )
-    .limit(1)
-  if (!cat) throw createError({ statusCode: 404, message: 'Categoría no encontrada' })
+  // La regla vive en `utils/categorias.js`. La versión que había aquí a
+  // mano era MÁS ANCHA que la canónica: `isNull(usuarioId)` sin exigir
+  // `esPredefinida` acepta cualquier fila global, no solo las predefinidas.
+  await assertCategoriasPropias({ usuarioId, categoriaIds: [categoriaId] })
 
   // Upsert con ON CONFLICT.
   const [row] = await db

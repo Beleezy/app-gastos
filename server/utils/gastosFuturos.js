@@ -6,6 +6,7 @@ import {
   gastosFuturosDetalles,
   gastosFuturosOpciones,
 } from '../database/schema.js'
+import { assertCategoriasPropias, categoriasLegibles } from './categorias.js'
 
 function round2(value) {
   return Math.round((value + Number.EPSILON) * 100) / 100
@@ -203,7 +204,14 @@ export function normalizeGastoFuturoPayload(body) {
   }
 }
 
+// Cuarta redacción a mano de la misma regla, y otra vez más ancha que la
+// canónica: `if (categoria.usuarioId && ...)` deja pasar cualquier fila con
+// `usuario_id` NULL, sea predefinida o no. Delega en `utils/categorias.js`,
+// que es donde vive la regla, y devuelve 400 en vez de distinguir 404 de
+// 403 — esa distinción confirmaba la existencia de ids de otras cuentas.
 export async function validarCategoriaGastoFuturo(executor, categoriaId, usuarioId) {
+  await assertCategoriasPropias({ usuarioId, categoriaIds: [categoriaId], dbClient: executor })
+
   const [categoria] = await executor
     .select({
       id: categorias.id,
@@ -211,16 +219,8 @@ export async function validarCategoriaGastoFuturo(executor, categoriaId, usuario
       esPredefinida: categorias.esPredefinida,
     })
     .from(categorias)
-    .where(eq(categorias.id, categoriaId))
+    .where(and(eq(categorias.id, categoriaId), categoriasLegibles(usuarioId)))
     .limit(1)
-
-  if (!categoria) {
-    throw createError({ statusCode: 404, message: 'Categoria no encontrada' })
-  }
-
-  if (categoria.usuarioId && categoria.usuarioId !== usuarioId) {
-    throw createError({ statusCode: 403, message: 'Categoria no disponible para este usuario' })
-  }
 
   return categoria
 }

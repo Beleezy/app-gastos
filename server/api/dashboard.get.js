@@ -146,7 +146,12 @@ export default defineEventHandler(async (event) => {
         total: sql`COALESCE(SUM(${ahorros.monto}), 0)`,
       })
       .from(ahorros)
-      .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
+      // Cruza por id Y por dueño: sin el segundo filtro, una fila que
+      // apunte al medio de otra cuenta trae su nombre al dashboard.
+      .leftJoin(
+        mediosAhorro,
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+      )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .groupBy(ahorros.medioAhorroId, mediosAhorro.nombre, mediosAhorro.icono),
 

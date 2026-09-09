@@ -38,6 +38,11 @@ export default defineEventHandler(async (event) => {
     ...periodos.map((p) => and(eq(ahorros.mes, p.mes), eq(ahorros.anio, p.anio))),
   )
 
+  // Los leftJoin contra `mediosAhorro` cruzan por id Y por dueño. Filtrar
+  // solo por id devolvía el nombre del medio de otra cuenta si una fila
+  // quedó apuntando ahí (el POST no comprobaba la propiedad). Con el filtro,
+  // esa fila muestra "sin medio" en vez de filtrar un nombre ajeno.
+  //
   // Disparar todas las queries en paralelo. Antes había 8 round-trips
   // seriados (incluido un loop de 6 queries para serie6); ahora son
   // 6 paralelos + 1 agregado con GROUP BY para los 6 meses.
@@ -68,7 +73,10 @@ export default defineEventHandler(async (event) => {
         medioColor: mediosAhorro.color,
       })
       .from(ahorros)
-      .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
+      .leftJoin(
+        mediosAhorro,
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+      )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .orderBy(desc(ahorros.fecha)),
 
@@ -91,7 +99,10 @@ export default defineEventHandler(async (event) => {
         medioColor: mediosAhorro.color,
       })
       .from(ahorros)
-      .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
+      .leftJoin(
+        mediosAhorro,
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+      )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .groupBy(ahorros.medioAhorroId, mediosAhorro.nombre, mediosAhorro.icono, mediosAhorro.color),
 

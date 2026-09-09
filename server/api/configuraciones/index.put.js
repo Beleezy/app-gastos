@@ -2,9 +2,10 @@ import { db } from '../../utils/db.js'
 import { configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq } from 'drizzle-orm'
+import { readBodyObjeto } from '../../utils/validate.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
   const updateData = {}

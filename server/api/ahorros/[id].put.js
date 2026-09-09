@@ -3,6 +3,7 @@ import { ahorros, mediosAhorro } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { ahorroUpdateSchema } from '~/shared/schemas/categorias.js'
+import { assertMedioAhorroPropio } from '../../utils/ahorros.js'
 import { eq, and } from 'drizzle-orm'
 import { getUuidParam } from '../../utils/params.js'
 
@@ -12,6 +13,11 @@ export default defineEventHandler(async (event) => {
   // Whitelist + tipos via Zod: rechaza mes/anio del body (se derivan
   // de fecha) y campos no esperados como `usuarioId` (mass-assignment).
   const body = await validateBody(event, ahorroUpdateSchema)
+
+  // El schema valida la forma del uuid, no de quién es. Sin esto, editar un
+  // ahorro propio para apuntarlo al medio de otra cuenta devolvía su
+  // nombre —el mismo agujero que el POST, por la otra puerta.
+  await assertMedioAhorroPropio({ usuarioId, medioAhorroId: body.medioAhorroId })
 
   const updateData = { updatedAt: new Date() }
   if (body.concepto !== undefined) updateData.concepto = body.concepto?.trim() || null
@@ -41,7 +47,7 @@ export default defineEventHandler(async (event) => {
     ;[medio] = await db
       .select()
       .from(mediosAhorro)
-      .where(eq(mediosAhorro.id, updated.medioAhorroId))
+      .where(and(eq(mediosAhorro.id, updated.medioAhorroId), eq(mediosAhorro.usuarioId, usuarioId)))
       .limit(1)
   }
 

@@ -356,3 +356,216 @@ test.describe('Seguridad — schemas que existían sin cablear', () => {
     }
   })
 })
+
+test.describe('Seguridad — cookie perfil-activo', () => {
+  // `resolverPerfilEfectivo` (server/utils/getUsuario.js) decide el usuario
+  // EFECTIVO de la petición a partir de esta cookie. Pasaba su valor crudo
+  // a Postgres, así que una cookie malformada reventaba la query con un 500
+  // que además filtraba el SQL — y no en un endpoint, sino en TODOS los de
+  // perfil (gastos, ingresos, deudas, ahorros, futuros, dashboard,
+  // planificador), porque el guard corre en `getUsuarioFromEvent`.
+  const rutasDePerfil = [
+    '/api/gastos?fecha=2026-09-09',
+    '/api/dashboard',
+    '/api/deudas/resumen',
+    '/api/ingresos',
+  ]
+
+  for (const ruta of rutasDePerfil) {
+    test(`una cookie malformada no rompe ${ruta.split('?')[0]}`, async ({ request }) => {
+      const r = await request.get(ruta, {
+        headers: { Cookie: 'perfil-activo=no-soy-uuid' },
+        failOnStatusCode: false,
+      })
+      expect(r.status(), await r.text()).toBeLessThan(500)
+      const cuerpo = await r.text()
+      expect(cuerpo).not.toContain('Failed query')
+      expect(cuerpo).not.toContain('select "id" from "usuarios"')
+    })
+  }
+
+  test('una cookie vacía o basura cae al usuario real, no bloquea la app', async ({ request }) => {
+    for (const valor of ['', 'null', 'undefined', '../../etc/passwd', "' OR 1=1--"]) {
+      const r = await request.get('/api/gastos?fecha=2026-09-09', {
+        headers: { Cookie: `perfil-activo=${encodeURIComponent(valor)}` },
+        failOnStatusCode: false,
+      })
+      expect(r.ok(), `cookie "${valor}": ${r.status()}`).toBeTruthy()
+    }
+  })
+
+  test('un perfil que existe pero es de OTRO usuario se ignora', async ({ request }) => {
+    // El guard exige `gestionado_por_id = usuario real`. Un id de usuario
+    // real ajeno no es un perfil gestionado: debe caer al usuario propio,
+    // no leer los datos del otro.
+    const ajeno = '00000000-0000-0000-0000-000000000102'
+    const r = await request.get('/api/gastos?fecha=2026-09-09', {
+      headers: { Cookie: `perfil-activo=${ajeno}` },
+      failOnStatusCode: false,
+    })
+    expect(r.ok()).toBeTruthy()
+  })
+})
+
+test.describe('Seguridad — categorías ajenas en el planificador', () => {
+  // `assertCategoriasPropias` existía desde que se cerró el mismo agujero en
+  // /api/gastos, y el planificador no lo llamaba. Reproducido: crear un
+  // gasto planificado con el id de una categoría PRIVADA de otra cuenta
+  // devolvía su nombre en `categoriaNombre`. En una app de finanzas el
+  // nombre de una categoría privada ("Terapia psiquiátrica", "Abogado
+  // divorcio") es justo lo que no puede cruzar cuentas.
+  let categoriaAjena
+  let nombreAjeno
+  let planPropio
+  let categoriaPropia
+
+  test.beforeAll(async ({ playwright, baseURL }, testInfo) => {
+    // `beforeAll` corre una vez por worker Y otra vez en cada reintento, y
+    // el POST de categorías responde 409 ante un nombre repetido del mismo
+    // usuario: la segunda ejecución fallaba con "Ya tienes una categoría con
+    // ese nombre". Desambiguar por worker e intento lo vuelve determinista.
+    nombreAjeno = `Privada ${marca}-w${testInfo.workerIndex}r${testInfo.retry}`
+    const ctxAjeno = await playwright.request.newContext({
+      baseURL,
+      extraHTTPHeaders: usuario(31, `vecino.w${testInfo.workerIndex}`),
+    })
+    const r = await ctxAjeno.post('/api/categorias', {
+      data: { nombre: nombreAjeno, icono: '🔒', color: '#FF0000' },
+      failOnStatusCode: false,
+    })
+    expect(r.ok(), await r.text()).toBeTruthy()
+    categoriaAjena = (await r.json()).id
+    await ctxAjeno.dispose()
+  })
+
+  test.beforeEach(async ({ request }) => {
+    const d = new Date()
+    const plan = await request.get(
+      `/api/planificador?mes=${d.getMonth() + 1}&anio=${d.getFullYear()}`,
+    )
+    planPropio = (await plan.json()).plan.id
+    const cats = await request.get('/api/categorias')
+    categoriaPropia = (await cats.json())[0].id
+  })
+
+  test('crear un planificado con categoría ajena no devuelve su nombre', async ({ request }) => {
+    const r = await request.post('/api/planificador/gastos', {
+      data: {
+        planMensualId: planPropio,
+        categoriaId: categoriaAjena,
+        concepto: 'sonda',
+        montoEstimado: 10,
+        fechaProbablePago: hoyIso(),
+      },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBeGreaterThanOrEqual(400)
+    expect(r.status()).toBeLessThan(500)
+    expect(await r.text()).not.toContain(nombreAjeno)
+  })
+
+  test('editar un planificado propio para apuntarlo a una categoría ajena tampoco', async ({
+    request,
+  }) => {
+    // El agujero tenía dos puertas: el POST y el PUT.
+    const creado = await request.post('/api/planificador/gastos', {
+      data: {
+        planMensualId: planPropio,
+        categoriaId: categoriaPropia,
+        concepto: 'legítimo',
+        montoEstimado: 10,
+        fechaProbablePago: hoyIso(),
+      },
+      failOnStatusCode: false,
+    })
+    expect(creado.ok(), await creado.text()).toBeTruthy()
+    const id = (await creado.json()).id
+
+    const r = await request.put(`/api/planificador/gastos/${id}`, {
+      data: { categoriaId: categoriaAjena },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBeGreaterThanOrEqual(400)
+    expect(r.status()).toBeLessThan(500)
+    expect(await r.text()).not.toContain(nombreAjeno)
+  })
+
+  test('un presupuesto por categoría ajena se rechaza', async ({ request }) => {
+    const r = await request.post('/api/presupuestos-categoria', {
+      data: { categoriaId: categoriaAjena, montoMensual: 100 },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBeGreaterThanOrEqual(400)
+    expect(r.status()).toBeLessThan(500)
+  })
+
+  test('un gasto futuro con categoría ajena se rechaza', async ({ request }) => {
+    const r = await request.post('/api/planificador/futuros', {
+      data: {
+        categoriaId: categoriaAjena,
+        descripcion: 'sonda',
+        detalles: [{ concepto: 'x' }],
+      },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBeGreaterThanOrEqual(400)
+    expect(r.status()).toBeLessThan(500)
+    expect(await r.text()).not.toContain(nombreAjeno)
+  })
+
+  test('el camino legítimo sigue funcionando', async ({ request }) => {
+    // Un guard que rompe el caso normal no es un guard, es una avería.
+    const r = await request.post('/api/planificador/gastos', {
+      data: {
+        planMensualId: planPropio,
+        categoriaId: categoriaPropia,
+        concepto: `Alquiler ${marca}`,
+        montoEstimado: 1200,
+        fechaProbablePago: hoyIso(),
+      },
+      failOnStatusCode: false,
+    })
+    expect(r.ok(), await r.text()).toBeTruthy()
+    const gasto = await r.json()
+    expect(gasto.montoEstimado).toBe(1200)
+    expect(gasto.categoriaNombre).toBeTruthy()
+  })
+})
+
+test.describe('Seguridad — cuerpo ausente o no-objeto', () => {
+  // `readBody` devuelve undefined sin cuerpo y null con el literal `null`.
+  // Los handlers hacían acto seguido `body.campo` o destructuring, así que
+  // ambos casos salían como 500 en vez del 400 que esos mismos handlers ya
+  // devuelven para un cuerpo incompleto. La cola offline reintenta ante un
+  // 500 y no ante un 400: el código equivocado convertía un fallo
+  // permanente en un bucle de reintentos.
+  const rutas = [
+    ['PUT', '/api/planificador'],
+    ['POST', '/api/planificador/gastos'],
+    ['POST', '/api/planificador/duplicar'],
+    ['POST', '/api/categorias'],
+    ['POST', '/api/ahorros'],
+    ['POST', '/api/ahorros/medios'],
+    ['PUT', '/api/ahorros/metas'],
+    ['POST', '/api/deudas/vinculos/desvincular'],
+    ['POST', '/api/deudas/vinculos/checkpoints'],
+    ['PATCH', '/api/integraciones/google/config'],
+  ]
+
+  for (const [metodo, ruta] of rutas) {
+    test(`${metodo} ${ruta} sin cuerpo no es 500`, async ({ request }) => {
+      const r = await request.fetch(ruta, { method: metodo, failOnStatusCode: false })
+      expect(r.status(), `${metodo} ${ruta}`).toBeLessThan(500)
+      expect(await r.text()).not.toContain('Failed query')
+    })
+
+    test(`${metodo} ${ruta} con cuerpos basura no es 500`, async ({ request }) => {
+      for (const data of [null, [], 'texto', 42]) {
+        const r = await request.fetch(ruta, { method: metodo, data, failOnStatusCode: false })
+        const etiqueta = `${metodo} ${ruta} <- ${JSON.stringify(data)}`
+        expect(r.status(), etiqueta).toBeLessThan(500)
+        expect(await r.text(), etiqueta).not.toContain('Failed query')
+      }
+    })
+  }
+})

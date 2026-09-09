@@ -32,7 +32,10 @@ export default defineEventHandler(async (event) => {
       medioColor: mediosAhorro.color,
     })
     .from(ahorros)
-    .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
+    .leftJoin(
+      mediosAhorro,
+      and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+    )
     .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
     .orderBy(desc(ahorros.fecha))
 

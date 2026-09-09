@@ -1,17 +1,18 @@
 import { db } from '../../utils/db.js'
 import { categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { categoriaCreateSchema } from '~/shared/schemas/categorias.js'
 import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const body = await readBody(event)
 
-  const { nombre, icono, color } = body
-
-  if (!nombre || !icono || !color) {
-    throw createError({ statusCode: 400, message: 'nombre, icono y color son requeridos' })
-  }
+  // `categoriaCreateSchema` existía sin usar. Las tres comprobaciones a
+  // mano no acotaban longitudes (las columnas son varchar) ni validaban que
+  // `color` fuese hex, y una petición SIN cuerpo reventaba en el
+  // destructuring con un 500 en vez de un 400.
+  const { nombre, icono, color } = await validateBody(event, categoriaCreateSchema)
 
   // Verificar que no exista ya una categoría con ese nombre para este usuario
   const existe = await db

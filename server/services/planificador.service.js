@@ -4,6 +4,7 @@ import { eq, and } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { gastosPlanificados, planesMensuales, categorias } from '../database/schema.js'
 import { replicarGastoRecurrente, generarGrupoId } from '../utils/recurrente.js'
+import { assertCategoriasPropias, categoriasLegibles } from '../utils/categorias.js'
 
 /**
  * Crea un gasto planificado dentro de un plan mensual del usuario.
@@ -28,6 +29,14 @@ export async function crearGastoPlanificado({ usuarioId, body }) {
     err.statusCode = 403
     throw err
   }
+
+  // Mismo agujero que tenía POST /api/gastos antes de la ronda 1, y con la
+  // misma consecuencia: `categoriaId` entraba sin comprobar de quién era y
+  // la respuesta hace un join para devolver `categoriaNombre`. Mandando el
+  // id de una categoría privada ajena, el planificador devolvía su nombre
+  // —"Terapia psiquiátrica", "Abogado divorcio"—. En una app de finanzas el
+  // nombre de una categoría privada es justo lo que no debe cruzar cuentas.
+  await assertCategoriasPropias({ usuarioId, categoriaIds: [body.categoriaId] })
 
   const esRecurrente = !!body.esRecurrente
   const grupoId = esRecurrente ? generarGrupoId() : null
@@ -63,7 +72,10 @@ export async function crearGastoPlanificado({ usuarioId, body }) {
   const [cat] = await db
     .select()
     .from(categorias)
-    .where(eq(categorias.id, gasto.categoriaId))
+    // El filtro de legibilidad es defensa en profundidad: aunque una fila
+    // vieja apunte a una categoría ajena, la lectura devuelve undefined en
+    // vez de su nombre.
+    .where(and(eq(categorias.id, gasto.categoriaId), categoriasLegibles(usuarioId)))
     .limit(1)
 
   return {

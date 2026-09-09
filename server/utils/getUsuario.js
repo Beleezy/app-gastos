@@ -3,6 +3,7 @@ import { db } from './db.js'
 import { usuarios, intencionesRegistro } from '../database/schema.js'
 import { eq, and } from 'drizzle-orm'
 import { rateLimits } from './rateLimit.js'
+import { esUuid } from './params.js'
 
 // Aplica rate limit por usuario (minuto + hora) una sola vez por request.
 async function aplicarRateLimitUsuario(event, userId) {
@@ -87,6 +88,15 @@ async function resolverPerfilEfectivo(event, realId) {
 
   const perfilId = getCookie(event, 'perfil-activo')
   if (!perfilId) return realId
+
+  // La cookie la escribe el cliente y su valor va derecho a una query
+  // contra `usuarios.id`, que es uuid: sin este filtro, una cookie
+  // malformada —una escritura parcial, una extensión, un valor viejo—
+  // reventaba la query y devolvía un 500 con el SQL en el mensaje. Y no en
+  // un endpoint: en TODOS los de RUTAS_PERFIL, porque esto corre dentro de
+  // `getUsuarioFromEvent`. Un valor que no puede existir se ignora igual
+  // que uno ajeno: se sigue con el usuario real.
+  if (!esUuid(perfilId)) return realId
 
   const [p] = await db
     .select({ id: usuarios.id })

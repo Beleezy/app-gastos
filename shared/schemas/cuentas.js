@@ -1,3 +1,10 @@
+// OJO: este archivo describe tablas que NO existen en `schema.js`. Es de
+// una funcionalidad que nunca llegó a construirse. No lo cablees a un
+// handler dando por hecho que la tabla está: primero la migración.
+//
+// Se conserva porque `tests/updateSchemas.test.js` barre sus schemas *Update*
+// para fijar el invariante de `.default()` frente a `.partial()`.
+
 import { z } from 'zod'
 
 const tipoCuenta = z.enum(['efectivo', 'debito', 'credito', 'ahorros', 'inversion', 'otro'])

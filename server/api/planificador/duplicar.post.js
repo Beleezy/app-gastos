@@ -3,9 +3,10 @@ import { planesMensuales, gastosPlanificados } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
 import { obtenerOCrearPlan } from '../../utils/recurrente.js'
+import { readBodyObjeto } from '../../utils/validate.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
   const { mesOrigen, anioOrigen, mesDestino, anioDestino } = body

@@ -161,7 +161,38 @@ helper que la haga.
   no existe. Al cablearlos tal cual habrían borrado el contacto y
   rechazado todas las peticiones legítimas. Antes de conectar un schema
   que llevaba tiempo sin usarse, comprobar contra la tabla y contra lo que
-  manda el cliente.
+  manda el cliente. Y un schema que describe una tabla inexistente es una
+  trampa: `shared/schemas/cuentas.js` y `familia.js` llevan aviso en la
+  cabecera por eso.
+- **Una referencia a otra tabla se valida en propiedad, no solo en forma.**
+  El schema dice que `medioAhorroId` es un uuid; de quién es lo dice
+  [ahorros.js](server/utils/ahorros.js), igual que
+  [categorias.js](server/utils/categorias.js) lo dice de `categoriaId`. El
+  agujero aparece cuando la respuesta hace un join para devolver el nombre:
+  `POST /api/ahorros` con el id del medio de otra cuenta devolvía su
+  nombre, y `POST /api/planificador/gastos` con el de una categoría privada
+  ajena devolvía el suyo —"Terapia psiquiátrica"—. No es un oráculo de una
+  sola lectura: la fila queda guardada apuntando ahí y el nombre ajeno
+  reaparece en cada listado. Por eso los joins de LECTURA también filtran
+  por dueño: una fila envenenada de antes del arreglo lee "sin medio" en
+  vez de seguir filtrando.
+- **La regla, en un solo sitio, o se ensancha sola.** La de categorías
+  estaba escrita a mano en cuatro variantes; tres aceptaban filas con
+  `usuario_id IS NULL` sin exigir `es_predefinida`, que es más ancho que la
+  canónica. Ninguna era un bug visible — hasta que lo fuera.
+- **Sin cuerpo también es un caso.** `readBody` devuelve `undefined` sin
+  cuerpo y `null` con el literal `null`, y `body.campo` sobre eso es un
+  TypeError, es decir un 500 donde el propio handler ya tenía escrito el
+  400 correcto. Importa por la cola offline: reintenta ante un 500 y no
+  ante un 400, así que el código equivocado convierte un fallo permanente
+  en un bucle. Donde hay schema, `validateBody` (Zod rechaza `null`); donde
+  la validación a mano ya es correcta, `readBodyObjeto`
+  ([validate.js](server/utils/validate.js)).
+- **Un endpoint sin tests se audita con un fuzz, no leyéndolo.** Mandar
+  nueve cuerpos absurdos a cada handler que lee `readBody` crudo encontró
+  en un minuto lo que la lectura no vio: dos rutas del planificador
+  devolvían un 500 con la consulta y sus parámetros ante CUALQUIER cuerpo,
+  `{}` incluido.
 
 ## Capa servidor
 
