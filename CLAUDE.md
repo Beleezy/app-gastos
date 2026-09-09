@@ -130,6 +130,24 @@ helper que la haga.
 - **Caches de proceso con cota y TTL.** El de acceso solo se invalida en
   la instancia que atiende la petición: sin TTL, revocar un acceso no
   llegaba a las demás lambdas.
+- **Nada de `await` dentro de un `for` contra la BD.** Cuatro sitios
+  hacían N round trips donde bastaba uno, y todos dentro de transacciones,
+  así que además alargaban los locks. Uno llevaba un comentario que decía
+  "paralelizamos los UPDATEs" describiendo un bucle estrictamente
+  secuencial. Para actualizar N filas con N valores distintos: un solo
+  UPDATE con `CASE` por id.
+- **`RETURNING` no garantiza el orden del `VALUES`.** Postgres hoy lo
+  respeta para un INSERT simple, pero no está garantizado. Si se necesita
+  correlacionar lo insertado con la entrada, pedir de vuelta una columna
+  propia (un `orden`) y mapear por ella — el síntoma de equivocarse es
+  silencioso (filas hijas colgando del padre ajeno).
+- **Formatear con `useFormatters` / `useCurrency`.** `DetallePersona.vue`
+  llevaba su propia copia de `formatFecha`, idéntica en salida y con el
+  array de meses duplicado inline. Se descubrió al partir el componente,
+  cuando el hijo dejó de ver la función local.
+- **`?? ` y no `|| ` para "lo que informó el servidor".**
+  `res.eliminados || ids.length` trata el 0 como "no informado" y anuncia
+  "5 gastos eliminados" cuando no se eliminó ninguno.
 
 ## Capa servidor
 
