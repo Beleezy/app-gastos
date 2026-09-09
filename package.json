@@ -31,7 +31,8 @@
     "db:seed": "node server/database/seed.js",
     "db:seed:test": "node server/database/seed-test-data.js",
     "db:seed:test:user": "node server/database/seed-test-data.js",
-    "db:seed:temp-users": "node server/database/seed-temp-users.js"
+    "db:seed:temp-users": "node server/database/seed-temp-users.js",
+    "db:diagnostico": "node scripts/diagnostico-invariantes.mjs"
   },
   "dependencies": {
     "@nuxtjs/supabase": "^2.0.10",
