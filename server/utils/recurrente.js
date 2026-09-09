@@ -151,7 +151,11 @@ export async function replicarGastoRecurrente(usuarioId, gasto, grupoId) {
       .where(
         and(
           eq(planesMensuales.usuarioId, usuarioId),
-          or(...objetivos.map((o) => and(eq(planesMensuales.mes, o.mes), eq(planesMensuales.anio, o.anio)))),
+          or(
+            ...objetivos.map((o) =>
+              and(eq(planesMensuales.mes, o.mes), eq(planesMensuales.anio, o.anio)),
+            ),
+          ),
         ),
       )
 

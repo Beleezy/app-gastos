@@ -70,9 +70,7 @@ export default defineEventHandler(async (event) => {
     `),
       )
       const presentes = new Set(rows.map((r) => `${r.table_name}.${r.column_name}`))
-      faltantes = SENTINEL_COLUMNS.map(([t, c]) => `${t}.${c}`).filter(
-        (col) => !presentes.has(col),
-      )
+      faltantes = SENTINEL_COLUMNS.map(([t, c]) => `${t}.${c}`).filter((col) => !presentes.has(col))
       driftCache = { faltantes, expiresAt: Date.now() + DRIFT_TTL_MS }
     }
 

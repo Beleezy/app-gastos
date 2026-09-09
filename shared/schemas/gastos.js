@@ -84,7 +84,10 @@ export const gastosBulkUpdateSchema = z.object({
       notas: notasSchema,
       visibilidad: visibilidadGastoSchema.optional(),
     })
-    .refine((v) => Object.keys(v).length > 0, 'No se proporcionaron campos válidos para actualizar'),
+    .refine(
+      (v) => Object.keys(v).length > 0,
+      'No se proporcionaron campos válidos para actualizar',
+    ),
 })
 
 export const gastosBulkIdsSchema = z.object({

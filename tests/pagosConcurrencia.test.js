@@ -47,7 +47,8 @@ function selectChain(dentroDeTx) {
     then(resolve, reject) {
       // La primera lectura de la deuda devuelve la fila; el resto
       // (persona) devuelve una fila neutra sin vínculo.
-      const filas = registro.tabla === 'deudas' ? [estado.deuda] : [{ id: 'p1', vinculoParId: null }]
+      const filas =
+        registro.tabla === 'deudas' ? [estado.deuda] : [{ id: 'p1', vinculoParId: null }]
       return Promise.resolve(filas).then(resolve, reject)
     },
   }

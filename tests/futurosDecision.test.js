@@ -67,7 +67,10 @@ describe('proyectoTieneDecididos / proyectoCompletamenteDecidido', () => {
 
   it('con todos decididos, ambos son true', () => {
     const p = {
-      detalles: [detalle({ estadoDecision: 'comprada' }), detalle({ estadoDecision: 'planificada' })],
+      detalles: [
+        detalle({ estadoDecision: 'comprada' }),
+        detalle({ estadoDecision: 'planificada' }),
+      ],
     }
     expect(proyectoTieneDecididos(p)).toBe(true)
     expect(proyectoCompletamenteDecidido(p)).toBe(true)
