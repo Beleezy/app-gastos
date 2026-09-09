@@ -105,7 +105,10 @@ export default defineConfig({
       name: 'visual',
       testMatch: /\/visual\/.*\.visual\.spec\.js$/,
       use: { ...devices['Pixel 5'] },
-      // Los snapshots se almacenan junto al spec en e2e/visual/__screenshots__/
+      // Los snapshots se almacenan junto al spec, en un directorio por archivo:
+      // e2e/visual/pages.visual.spec.js-snapshots/registro-visual-linux.png
+      // El sufijo -linux es la plataforma: por eso tienen que generarse en el
+      // runner y no en una máquina local.
     },
   ],
   webServer: useWebServer
