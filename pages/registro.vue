@@ -797,7 +797,7 @@ async function cambiarVisibilidad({ gasto, visibilidad }) {
     await fetchGastosMensuales()
     toastSuccess(TEXTO_VISIBILIDAD[visibilidad])
   } catch (e) {
-    toastError(e?.data?.message || 'No se pudo cambiar la visibilidad')
+    toastError(handleApiError(e, 'No se pudo cambiar la visibilidad'))
   }
 }
 

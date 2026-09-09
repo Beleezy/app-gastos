@@ -198,7 +198,7 @@ async function cargar({ fresh = false } = {}) {
       noDisponible.value = true
       return null
     }
-    toast.error(e?.data?.message || 'No se pudo cargar la vista')
+    toast.error(handleApiError(e, 'No se pudo cargar la vista'))
     return null
   } finally {
     cargando.value = false
@@ -230,7 +230,7 @@ async function sincronizar() {
       vista.value = null
       noDisponible.value = true
     } else {
-      toast.error(e?.data?.message || 'No se pudo sincronizar')
+      toast.error(handleApiError(e, 'No se pudo sincronizar'))
     }
   } finally {
     sincronizando.value = false

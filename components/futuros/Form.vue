@@ -178,6 +178,7 @@
           >
             <input
               v-model="detalle.nombre"
+              aria-label="Nombre del detalle"
               type="text"
               placeholder="Ej: CPU, mouse, jean, casaca..."
               class="w-full rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
@@ -185,6 +186,7 @@
 
             <textarea
               v-model="detalle.notas"
+              aria-label="Notas del detalle"
               rows="2"
               placeholder="Notas del detalle (opcional)"
               class="w-full resize-none rounded-xl border border-theme-border bg-theme-input px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
@@ -225,6 +227,7 @@
                 <div class="mt-3 space-y-3">
                   <input
                     v-model="opcion.nombre"
+                    :aria-label="`Nombre de la opción ${optionIndex + 1}`"
                     type="text"
                     placeholder="Ej: Ryzen 7 7800X3D, Jean slim..."
                     class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
@@ -232,6 +235,7 @@
 
                   <input
                     v-model="opcion.referenciaUrl"
+                    :aria-label="`Link de referencia de la opción ${optionIndex + 1}`"
                     type="url"
                     placeholder="Link de referencia"
                     class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
@@ -239,6 +243,7 @@
 
                   <input
                     v-model="opcion.imagenUrl"
+                    :aria-label="`Link de imagen de la opción ${optionIndex + 1}`"
                     type="url"
                     placeholder="Link de imagen (opcional)"
                     class="w-full rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
@@ -249,6 +254,7 @@
                       <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
                       <input
                         v-model="opcion.precioMinimo"
+                        :aria-label="`Precio mínimo de la opción ${optionIndex + 1}`"
                         type="number"
                         min="0"
                         step="0.01"
@@ -260,6 +266,7 @@
                       <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Prom</label>
                       <input
                         v-model="opcion.precioPromedio"
+                        :aria-label="`Precio promedio de la opción ${optionIndex + 1}`"
                         type="number"
                         min="0"
                         step="0.01"
@@ -271,6 +278,7 @@
                       <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
                       <input
                         v-model="opcion.precioMaximo"
+                        :aria-label="`Precio máximo de la opción ${optionIndex + 1}`"
                         type="number"
                         min="0"
                         step="0.01"
@@ -282,6 +290,7 @@
 
                   <textarea
                     v-model="opcion.notas"
+                    :aria-label="`Notas de la opción ${optionIndex + 1}`"
                     rows="2"
                     placeholder="Notas de esta opción (tienda, color, talla, etc.)"
                     class="w-full resize-none rounded-xl border border-theme-border bg-theme-card px-4 py-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500 transition-colors"
@@ -647,7 +656,7 @@ async function guardar() {
     emit('saved')
     emit('close')
   } catch (error) {
-    const message = error?.data?.message || error?.message || 'Error al guardar el gasto futuro'
+    const message = handleApiError(error, 'Error al guardar el gasto futuro')
     errorMsg.value = message
     toastError(message)
   } finally {

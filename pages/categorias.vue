@@ -579,7 +579,7 @@ async function agregarPreseleccionada(cat) {
     await fetchCategorias()
     showCatToast(`${cat.icono} ${cat.nombre} agregada`)
   } catch (e) {
-    showCatToast(e?.data?.message || 'Error al agregar')
+    showCatToast(handleApiError(e, 'Error al agregar'))
   } finally {
     guardandoCategoria.value = false
   }
@@ -613,7 +613,7 @@ async function crearCategoriaPersonalizada() {
     await fetchCategorias()
     cerrarSelectorCategorias()
   } catch (e) {
-    showCatToast(e?.data?.message || 'Error al guardar')
+    showCatToast(handleApiError(e, 'Error al guardar'))
   } finally {
     guardandoCategoria.value = false
   }
@@ -640,7 +640,7 @@ async function confirmarEliminar() {
     await fetchCategorias()
     showCatToast('Categoria eliminada')
   } catch (e) {
-    showCatToast(e?.data?.message || 'Error al eliminar')
+    showCatToast(handleApiError(e, 'Error al eliminar'))
   } finally {
     eliminandoCategoria.value = false
     categoriaAEliminar.value = null

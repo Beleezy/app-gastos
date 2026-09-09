@@ -158,7 +158,7 @@ async function cargar() {
   try {
     data.value = await apiFetch('/api/papelera')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo cargar la papelera')
+    toast.error(handleApiError(e, 'No se pudo cargar la papelera'))
     data.value = { gastos: [], deudas: [] }
   } finally {
     isLoading.value = false
@@ -173,7 +173,7 @@ async function restaurar(entidad, id, concepto) {
     if (entidad === 'gasto') data.value.gastos = data.value.gastos.filter((g) => g.id !== id)
     else data.value.deudas = data.value.deudas.filter((d) => d.id !== id)
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo restaurar')
+    toast.error(handleApiError(e, 'No se pudo restaurar'))
   } finally {
     restaurando.value = null
   }

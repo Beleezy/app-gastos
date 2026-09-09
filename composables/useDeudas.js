@@ -85,7 +85,7 @@ export function useDeudas() {
         headers: noCache ? { 'Cache-Control': 'no-cache' } : undefined,
       })
     } catch (e) {
-      balanceError.value = e?.data?.message || e?.message || 'Error desconocido'
+      balanceError.value = handleApiError(e, 'Error desconocido')
     } finally {
       balanceCargando.value = false
     }

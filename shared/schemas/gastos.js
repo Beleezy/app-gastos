@@ -46,7 +46,14 @@ const gastoBulkItemSchema = z.object({
   monto: monto,
   fecha: fechaIso.optional().nullable(),
   hora: horaHhmm.optional().nullable(),
-  categoriaId: z.union([z.string(), z.number()]).nullable().optional(),
+  // Obligatoria, a diferencia de `gastoCreateSchema` donde es opcional:
+  // `gastos.categoria_id` es NOT NULL en la BD y el handler no le pone
+  // ningún valor por defecto. Sin exigirla aquí, un lote sin categoría
+  // llegaba al INSERT y salía como 500 del driver — mientras que el POST
+  // simple, que sí la comprueba a mano, devolvía un 400 claro.
+  categoriaId: z.union([z.string(), z.number()], {
+    error: 'La categoría es obligatoria',
+  }),
   notas: notasSchema,
   visibilidad: visibilidadGastoSchema.optional(),
 })

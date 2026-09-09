@@ -199,7 +199,7 @@ async function ejecutar(accion) {
       accion,
     })
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo generar el reporte')
+    toast.error(handleApiError(e, 'No se pudo generar el reporte'))
   } finally {
     generando.value = false
   }

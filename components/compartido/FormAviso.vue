@@ -90,7 +90,7 @@ async function enviar() {
     emit('enviado')
     emit('close')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo enviar el aviso')
+    toast.error(handleApiError(e, 'No se pudo enviar el aviso'))
   } finally {
     enviando.value = false
   }

@@ -134,7 +134,7 @@ async function guardar() {
     emit('guardado')
     emit('close')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo guardar')
+    toast.error(handleApiError(e, 'No se pudo guardar'))
   } finally {
     guardando.value = false
   }

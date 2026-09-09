@@ -205,7 +205,7 @@ async function confirmarRevocar() {
     toast.success('Dejaste de compartir')
     await recargar()
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo revocar')
+    toast.error(handleApiError(e, 'No se pudo revocar'))
   } finally {
     revocando.value = null
   }

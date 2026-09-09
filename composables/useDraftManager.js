@@ -69,7 +69,7 @@ export function useDraftManager({ parser, onResultMap = (d) => d?.gastos ?? d ??
       return data
     } catch (e) {
       if (e?.name === 'AbortError') return null
-      parseError.value = e?.data?.message || e?.message || 'Error procesando la solicitud'
+      parseError.value = handleApiError(e, 'Error procesando la solicitud')
       return null
     } finally {
       isParsing.value = false

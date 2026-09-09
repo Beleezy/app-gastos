@@ -65,7 +65,7 @@ async function responder(inv, aceptando) {
     }
     emit('respondida')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo procesar la invitación')
+    toast.error(handleApiError(e, 'No se pudo procesar la invitación'))
   } finally {
     procesando.value = null
   }

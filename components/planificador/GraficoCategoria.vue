@@ -4,7 +4,7 @@
       <h3 class="text-sm font-semibold text-theme-text mb-4">Distribución por categoría</h3>
 
       <!-- Empty state -->
-      <div v-if="datosGrafico.length === 0" class="text-center py-6">
+      <div v-if="datosGrafico.length === 0" role="status" class="text-center py-6">
         <p class="text-theme-text-sec text-sm">Sin datos para mostrar</p>
       </div>
 

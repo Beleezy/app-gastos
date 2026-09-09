@@ -1681,7 +1681,7 @@ async function guardarEdicionDetalle(proyecto, detalle) {
     detalleEditando.value = null
     success('Detalle actualizado')
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo guardar')
+    toastError(handleApiError(e, 'No se pudo guardar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1710,7 +1710,7 @@ async function confirmarEliminarDetalle() {
     success('Detalle eliminado')
     detalleAEliminar.value = null
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
+    toastError(handleApiError(e, 'No se pudo eliminar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1755,7 +1755,7 @@ async function confirmarNuevoDetalle() {
     nuevoDetalleCtx.value = null
     success('Detalle agregado')
   } catch (e) {
-    errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+    errorPanel.value = handleApiError(e, 'No se pudo agregar')
   } finally {
     guardandoInline.value = false
   }
@@ -1780,7 +1780,7 @@ async function moverOpcion(proyecto, detalle, opcion, direction) {
       }),
     )
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo reordenar')
+    toastError(handleApiError(e, 'No se pudo reordenar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1838,7 +1838,7 @@ async function guardarEdicionOpcion(proyecto, detalle) {
     opcionEditando.value = null
     success('Opcion actualizada')
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo guardar')
+    toastError(handleApiError(e, 'No se pudo guardar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1866,7 +1866,7 @@ async function confirmarEliminarOpcion() {
     success('Opcion eliminada')
     opcionAEliminar.value = null
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
+    toastError(handleApiError(e, 'No se pudo eliminar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1915,7 +1915,7 @@ async function confirmarNuevaOpcion() {
     nuevaOpcionCtx.value = null
     success('Opcion agregada')
   } catch (e) {
-    errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+    errorPanel.value = handleApiError(e, 'No se pudo agregar')
   } finally {
     guardandoInline.value = false
   }
@@ -1965,7 +1965,7 @@ async function confirmarDecision() {
     success(ctx.tipo === 'comprar' ? 'Opcion comprada y registrada' : 'Opcion planificada')
     decisionCtx.value = null
   } catch (e) {
-    errorPanel.value = e?.data?.message || e?.message || 'No se pudo decidir'
+    errorPanel.value = handleApiError(e, 'No se pudo decidir')
   } finally {
     decidiendo.value = false
   }
@@ -1998,7 +1998,7 @@ async function confirmarEliminar() {
     success('Gasto futuro eliminado')
     proyectoAEliminar.value = null
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo eliminar el gasto futuro')
+    toastError(handleApiError(e, 'No se pudo eliminar el gasto futuro'))
   } finally {
     eliminando.value = false
   }

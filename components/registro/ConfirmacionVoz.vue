@@ -1,26 +1,41 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-end justify-center" data-testid="confirmacion-voz">
     <!-- Backdrop -->
-    <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="$emit('close')"></div>
-
-    <!-- Modal Content -->
     <div
+      class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
+      aria-hidden="true"
+      @click="$emit('close')"
+    ></div>
+
+    <!-- Modal Content.
+         Este componente construye su propio modal en vez de usar
+         BaseBottomSheet, y por eso se había quedado sin los roles que aquel
+         sí trae: para un lector de pantalla no era un diálogo, solo más
+         contenido de la página. Se replican sus convenciones. -->
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirmacion-voz-titulo"
       class="relative w-full max-w-lg bg-theme-card rounded-t-3xl border-t border-theme-border max-h-[95vh] overflow-y-auto overscroll-contain animate-slide-up"
     >
       <!-- Handle -->
       <div class="flex justify-center pt-3 pb-1">
-        <div class="w-10 h-1 rounded-full bg-theme-border-md"></div>
+        <div class="w-10 h-1 rounded-full bg-theme-border-md" aria-hidden="true"></div>
       </div>
 
       <!-- Header -->
       <div class="flex items-center justify-between px-5 pb-3">
-        <h2 class="text-lg font-semibold text-theme-text">Confirmar gastos</h2>
+        <h2 id="confirmacion-voz-titulo" class="text-lg font-semibold text-theme-text">
+          Confirmar gastos
+        </h2>
         <button
+          aria-label="Cerrar"
           class="w-11 h-11 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted"
           @click="$emit('close')"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
             class="w-5 h-5"
             fill="none"
             viewBox="0 0 24 24"
@@ -280,7 +295,7 @@
         </div>
 
         <!-- Empty state -->
-        <div v-if="editableGastos.length === 0" class="text-center py-6">
+        <div v-if="editableGastos.length === 0" role="status" class="text-center py-6">
           <p class="text-sm text-theme-text-sec">No se encontraron gastos en el texto</p>
         </div>
 
