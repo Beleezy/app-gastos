@@ -18,7 +18,7 @@ concurrency:
 #  - Job "fast": api + mobile + desktop UI. Corre en PR y push a main.
 #    No requiere baselines de imagenes — siempre verde si los specs estan OK.
 #  - Job "visual": solo en push a main / cron / dispatch manual. Compara
-#    contra baselines en e2e/visual/__screenshots__/. Si los baselines aun
+#    contra baselines en e2e/visual/<spec>.js-snapshots/. Si los baselines aun
 #    no existen, este job se salta automaticamente y deja una nota; usa
 #    workflow "E2E Visual Baseline" para generarlos — a mano con
 #    workflow_dispatch, o empujando a la rama ci/generar-baselines-visuales.
