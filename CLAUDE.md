@@ -22,7 +22,7 @@ Navegación: [BottomNav.vue](components/layout/BottomNav.vue) (móvil) + [SideNa
 | [calendario.vue](pages/calendario.vue)                                                             | Vista calendario de planificados/gastos                                                                                                                         | [CalendarioMensual.vue](components/planificador/CalendarioMensual.vue)                                                                                                          |
 | [metricas.vue](pages/metricas.vue)                                                                 | Histórico y recurrentes                                                                                                                                         | `/api/metricas/*`                                                                                                                                                               |
 | [reportes.vue](pages/reportes.vue)                                                                 | Reportes/exportaciones                                                                                                                                          | [useReportes.js](composables/useReportes.js)                                                                                                                                    |
-| [papelera.vue](pages/papelera.vue)                                                                 | Soft-delete: restaurar/purgar gastos, deudas, pagos y personas (`deleted_at`)                                                                                   | `/api/papelera/*`, [softDelete.js](server/utils/softDelete.js), cron `purgar-papelera`                                                                                          |
+| [papelera.vue](pages/papelera.vue)                                                                 | Soft-delete: restaurar/purgar gastos, deudas, pagos y personas (`deleted_at`)                                                                                   | `/api/papelera/*`, cron `purgar-papelera`                                                                                                                                       |
 | [compartido.vue](pages/compartido.vue)                                                             | **Compartido**: visibilidad de gastos hacia otra cuenta (rubros, presupuesto, proyección) + avisos y umbrales del observador                                    | `components/compartido/`, [useCompartido.js](composables/useCompartido.js), `/api/compartido/**`                                                                                |
 | [familia.vue](pages/familia.vue)                                                                   | **Perfiles gestionados** (familiares sin cuenta propia): crear/editar perfiles, cambiar de perfil activo                                                        | [usePerfiles.js](composables/usePerfiles.js), [usePerfilModo.js](composables/usePerfilModo.js), `/api/perfiles`, [PerfilContextBar.vue](components/layout/PerfilContextBar.vue) |
 | [categorias.vue](pages/categorias.vue)                                                             | Categorías predefinidas globales (`usuario_id` NULL) + personalizadas                                                                                           | `/api/categorias`                                                                                                                                                               |
@@ -148,6 +148,20 @@ helper que la haga.
 - **`?? ` y no `|| ` para "lo que informó el servidor".**
   `res.eliminados || ids.length` trata el 0 como "no informado" y anuncia
   "5 gastos eliminados" cuando no se eliminó ninguno.
+- **Un helper que no acepta `tx` no sirve para soft-delete.** Existía
+  `server/utils/softDelete.js` con `softDeleteRow`/`restoreRow`, y no lo
+  usaba nadie: operan sobre `db`, mientras que todo borrado real ocurre
+  dentro de una transacción porque cascadea (los pagos de una deuda, la
+  persona huérfana). Era inusable por construcción; se eliminó. El patrón
+  vivo es `isNull(tabla.deletedAt)` en la lectura y el UPDATE dentro de la
+  misma `tx` que el resto de la cascada.
+- **Un schema que no coincide con su tabla es peor que no tenerlo.**
+  `personaEntidadCreateSchema` declaraba `telefono` y `email` (la tabla
+  tiene un solo `contacto`) y `pagoGlobalSchema` describía un endpoint que
+  no existe. Al cablearlos tal cual habrían borrado el contacto y
+  rechazado todas las peticiones legítimas. Antes de conectar un schema
+  que llevaba tiempo sin usarse, comprobar contra la tabla y contra lo que
+  manda el cliente.
 
 ## Capa servidor
 

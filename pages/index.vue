@@ -501,6 +501,12 @@
 </template>
 
 <script setup>
+// `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
+// el token de Supabase, añade el cache-buster del perfil activo y traduce
+// 401/429 a un toast. CLAUDE.md lo marca como obligatorio para todo
+// fetch autenticado.
+const { apiFetch } = useApiFetch()
+
 // Módulo Compartido: aviso compacto solo cuando hay algo que atender.
 const { novedades: novedadesCompartido, fetchNovedades: fetchNovedadesCompartido } = useCompartido()
 
@@ -662,7 +668,7 @@ async function cargarDashboard() {
     errorGastos.value = false
     errorDeudas.value = false
     errorPlan.value = false
-    const data = await $fetch('/api/dashboard')
+    const data = await apiFetch('/api/dashboard')
     aplicarSnapshot(data)
     dashboardCache.value = data
     try {

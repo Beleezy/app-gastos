@@ -10,7 +10,7 @@ export function usePresupuestoMes({ mesSeleccionado, anioSeleccionado }) {
     if (abortCtrl) abortCtrl.abort()
     abortCtrl = new AbortController()
     try {
-      const data = await $fetch('/api/planificador', {
+      const data = await apiFetch('/api/planificador', {
         query: { mes: mesSeleccionado.value, anio: anioSeleccionado.value },
         signal: abortCtrl.signal,
       })

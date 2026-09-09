@@ -2,25 +2,20 @@ import { db } from '../../utils/db.js'
 import { gastos, gastosPlanificados } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { rateLimits } from '../../utils/rateLimit.js'
+import { validateBody } from '../../utils/validate.js'
+import { gastosBulkIdsSchema } from '~/shared/schemas/gastos.js'
 import { eq, and, inArray, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
   await rateLimits.bulkOp(event, usuarioId)
 
-  if (!Array.isArray(body?.ids) || body.ids.length === 0) {
-    throw createError({ statusCode: 400, message: 'Se requiere un array de ids' })
-  }
-
-  // Sanitizar: solo strings/números
-  const ids = body.ids.filter((id) => typeof id === 'string' || typeof id === 'number').map(String)
-  if (ids.length === 0) {
-    throw createError({ statusCode: 400, message: 'Ids inválidos' })
-  }
-  if (ids.length > 500) {
-    throw createError({ statusCode: 400, message: 'Máximo 500 gastos por operación' })
-  }
+  // La cadena de `if` que había aquí hacía lo mismo que
+  // `gastosBulkIdsSchema`, que ya existía en shared/schemas y no usaba
+  // nadie. El schema además devuelve 413 en vez de 400 cuando lo que falla
+  // es el tope de 500, que es lo correcto a nivel HTTP.
+  const body = await validateBody(event, gastosBulkIdsSchema)
+  const ids = body.ids.map(String)
 
   const eliminados = await db.transaction(async (tx) => {
     const borrados = await tx

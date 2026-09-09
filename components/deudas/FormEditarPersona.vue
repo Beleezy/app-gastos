@@ -99,6 +99,12 @@
 </template>
 
 <script setup>
+// `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
+// el token de Supabase, añade el cache-buster del perfil activo y traduce
+// 401/429 a un toast. CLAUDE.md lo marca como obligatorio para todo
+// fetch autenticado.
+const { apiFetch } = useApiFetch()
+
 const props = defineProps({
   persona: { type: Object, required: true },
 })
@@ -124,7 +130,7 @@ async function guardar() {
   saving.value = true
   error.value = null
   try {
-    const updated = await $fetch(`/api/deudas/personas/${props.persona.id}`, {
+    const updated = await apiFetch(`/api/deudas/personas/${props.persona.id}`, {
       method: 'PUT',
       body: {
         nombre: form.nombre,

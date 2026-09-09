@@ -16,11 +16,16 @@ export const tipoPersonaEntidadDbSchema = z.enum(['persona', 'organizacion'])
 // estado_deuda enum real en DB (server/database/schema.js:8).
 export const estadoDeudaSchema = z.enum(['pendiente', 'parcial', 'pagado', 'archivado'])
 
+// El campo de contacto de `personas_entidades` es UNO solo (`contacto`,
+// varchar 255): este schema declaraba `telefono` y `email`, que no existen
+// en la tabla ni los manda nadie. Con Zod eliminando las claves que no
+// declara, cablearlo tal cual habría borrado el contacto en vez de
+// validarlo. Se alinea con `personaEntidadUpdateSchema`, que sí lo tenía
+// bien.
 export const personaEntidadCreateSchema = z.object({
-  nombre: z.string().trim().min(1, 'Nombre obligatorio').max(150),
+  nombre: z.string().trim().min(1, 'Nombre obligatorio').max(255),
   tipo: tipoPersonaSchema.optional().default('persona'),
-  telefono: z.string().trim().max(30).optional().nullable(),
-  email: z.string().email('Email inválido').optional().nullable(),
+  contacto: z.string().trim().max(255).optional().nullable(),
   notas: notasSchema,
 })
 
@@ -86,21 +91,22 @@ export const pagoCreateSchema = z.object({
   notas: notasSchema,
 })
 
+// Cuerpo de POST /api/deudas/personas/[id]/pago-global.
+//
+// La versión anterior de este schema describía un endpoint que no existe:
+// pedía `personaEntidadId` y `tipoDeuda` en el cuerpo (la persona viene de
+// la RUTA) y exigía `fechaPago` cuando el cliente manda `fecha` y el
+// servidor la rellena si falta. Cablearlo tal cual habría rechazado todas
+// las peticiones legítimas.
+//
+// El reparto entre deudas lo decide el servidor con
+// `priorizarDeudasParaPago`; no hay `estrategia` ni `asignaciones` en la
+// API real.
 export const pagoGlobalSchema = z.object({
-  personaEntidadId: z.union([z.string(), z.number()]),
-  tipoDeuda: tipoDeudaSchema,
   monto,
-  fechaPago: fechaIso,
+  fecha: fechaIso.optional().nullable(),
+  metodoPago: z.string().trim().max(50).optional().nullable(),
   notas: notasSchema,
-  estrategia: z.enum(['fifo', 'lifo', 'manual']).optional().default('fifo'),
-  asignaciones: z
-    .array(
-      z.object({
-        deudaId: z.union([z.string(), z.number()]),
-        monto,
-      }),
-    )
-    .optional(),
 })
 
 export const solicitudVinculoSchema = z.object({

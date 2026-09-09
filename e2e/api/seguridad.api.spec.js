@@ -269,3 +269,90 @@ test.describe('Seguridad — idempotencia entre instancias', () => {
     expect(coincidencias).toHaveLength(1)
   })
 })
+
+test.describe('Seguridad — schemas que existían sin cablear', () => {
+  // Los tres schemas de abajo estaban escritos en shared/schemas/ y ningún
+  // handler los usaba. Uno de ellos, `tipoPersonaSchema`, lleva un
+  // comentario que describe EXACTAMENTE el fallo que seguía vivo:
+  // "'entidad'/'banco'/'otro' pasaban la validación para luego reventar en
+  // el INSERT contra el pgEnum".
+
+  test('crear persona con un tipo inválido responde 400, no 500 con el SQL', async ({
+    request,
+  }) => {
+    const r = await request.post('/api/deudas/personas', {
+      data: { nombre: `Tipo malo ${marca}`, tipo: 'basura' },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBeGreaterThanOrEqual(400)
+    expect(r.status()).toBeLessThan(500)
+    const cuerpo = await r.text()
+    expect(cuerpo).not.toContain('Failed query')
+    expect(cuerpo).not.toContain('insert into')
+  })
+
+  test('los tipos legacy se aceptan y se traducen al enum de la BD', async ({ request }) => {
+    // `tipoPersonaSchema` transforma 'entidad'/'banco' → 'organizacion' y
+    // 'otro' → 'persona'. Sin cablearlo, esos valores llegaban crudos al
+    // INSERT y reventaban.
+    for (const [entrada, esperado] of [
+      ['entidad', 'organizacion'],
+      ['banco', 'organizacion'],
+      ['otro', 'persona'],
+    ]) {
+      const r = await request.post('/api/deudas/personas', {
+        data: { nombre: `Legacy ${entrada} ${marca}`, tipo: entrada },
+        failOnStatusCode: false,
+      })
+      expect(r.ok(), `${entrada}: ${await r.text()}`).toBeTruthy()
+      expect((await r.json()).tipo, `${entrada} debe guardarse como ${esperado}`).toBe(esperado)
+    }
+  })
+
+  test('crear persona sin nombre responde 400', async ({ request }) => {
+    const r = await request.post('/api/deudas/personas', {
+      data: { tipo: 'persona' },
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBe(400)
+  })
+
+  test('el borrado en lote valida la lista de ids', async ({ request }) => {
+    for (const data of [
+      {},
+      { ids: [] },
+      { ids: Array.from({ length: 501 }, (_, i) => `id-${i}`) },
+    ]) {
+      const r = await request.fetch('/api/gastos/bulk', {
+        method: 'DELETE',
+        data,
+        failOnStatusCode: false,
+      })
+      expect(r.status(), JSON.stringify(data).slice(0, 40)).toBeGreaterThanOrEqual(400)
+      expect(r.status()).toBeLessThan(500)
+    }
+  })
+
+  test('el pago global valida el cuerpo antes de tocar la BD', async ({ request }) => {
+    const persona = await request.post('/api/deudas/personas', {
+      data: { nombre: `PagoGlobal ${marca}` },
+      failOnStatusCode: false,
+    })
+    const personaId = (await persona.json()).id
+
+    for (const data of [
+      { monto: 'mucho' },
+      { monto: -5 },
+      { monto: 0 },
+      { monto: 10, fecha: 'el martes' },
+      {},
+    ]) {
+      const r = await request.post(`/api/deudas/personas/${personaId}/pago-global`, {
+        data,
+        failOnStatusCode: false,
+      })
+      expect(r.status(), JSON.stringify(data)).toBeGreaterThanOrEqual(400)
+      expect(r.status(), JSON.stringify(data)).toBeLessThan(500)
+    }
+  })
+})

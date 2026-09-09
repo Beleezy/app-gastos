@@ -387,6 +387,12 @@
 <script setup>
 import { MESES } from '~/utils/constants'
 
+// `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
+// el token de Supabase, añade el cache-buster del perfil activo y traduce
+// 401/429 a un toast. CLAUDE.md lo marca como obligatorio para todo
+// fetch autenticado.
+const { apiFetch } = useApiFetch()
+
 const props = defineProps({
   mesActual: { type: Number, required: true },
   anioActual: { type: Number, required: true },
@@ -453,7 +459,7 @@ const gastosComparar = ref([])
 async function fetchGastosComparar(mes, anio) {
   isLoadingComparar.value = true
   try {
-    gastosComparar.value = await $fetch('/api/gastos', { query: { mes, anio } })
+    gastosComparar.value = await apiFetch('/api/gastos', { query: { mes, anio } })
   } catch {
     /* silently */
   } finally {
@@ -603,7 +609,7 @@ async function fetchTendencia() {
 
     const resultados = await Promise.all(
       lista.map((item) =>
-        $fetch('/api/gastos/resumen', { query: { mes: item.mes, anio: item.anio } })
+        apiFetch('/api/gastos/resumen', { query: { mes: item.mes, anio: item.anio } })
           .then((r) => ({ ...item, total: parseFloat(r.totalMes) || 0 }))
           .catch(() => ({ ...item, total: 0 })),
       ),

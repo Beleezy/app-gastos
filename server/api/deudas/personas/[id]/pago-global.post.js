@@ -6,21 +6,23 @@ import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { priorizarDeudasParaPago } from '../../../../utils/pagosMath.js'
 import { eq, and, or, isNull } from 'drizzle-orm'
 import { getUuidParam } from '../../../../utils/params.js'
+import { validateBody } from '../../../../utils/validate.js'
+import { pagoGlobalSchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
   const personaId = getUuidParam(event, 'id', { recurso: 'Persona' })
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  const montoTotal = parseFloat(body.monto)
-  if (!montoTotal || montoTotal <= 0) {
-    throw createError({ statusCode: 400, message: 'El monto debe ser mayor a 0' })
-  }
+  // `pagoGlobalSchema` existía y describía otro endpoint (pedía la persona
+  // en el cuerpo, cuando viene de la ruta). Corregido y cableado: el
+  // `parseFloat` a mano no validaba la fecha ni acotaba metodoPago/notas.
+  const body = await validateBody(event, pagoGlobalSchema)
+  const montoTotal = body.monto
 
   const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const fechaPago = body.fecha || fechaLocal
-  const metodoPago = body.metodoPago?.trim() || null
-  const notas = body.notas?.trim() || null
+  const metodoPago = body.metodoPago || null
+  const notas = body.notas || null
   const hoy = fechaLocal
 
   // Verificar persona y si está vinculada
