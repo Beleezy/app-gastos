@@ -25,6 +25,10 @@ on:
     - cron: '0 9 * * 1' # lunes 09:00 UTC = 04:00 América/Lima
   workflow_dispatch:
 
+# El job solo hace pg_dump y sube un artifact: no toca el repositorio.
+permissions:
+  contents: read
+
 jobs:
   backup:
     runs-on: ubuntu-latest

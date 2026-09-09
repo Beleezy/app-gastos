@@ -20,6 +20,13 @@ on:
         required: false
         default: 'main'
 
+  # Empujar cualquier commit a esta rama equivale a lanzarlo a mano. Existe
+  # porque workflow_dispatch no está al alcance de todos los actores —un token
+  # de GitHub App sin permiso sobre Actions recibe 403— y sin baselines el job
+  # `visual` de e2e.yml se salta para siempre, que es lo que llevaba pasando.
+  push:
+    branches: ['ci/generar-baselines-visuales']
+
 permissions:
   contents: write
   pull-requests: write
@@ -61,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ inputs.branch || 'main' }}
           fetch-depth: 0
 
       - name: Setup Node
@@ -136,7 +143,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: chore/visual-baselines-${{ github.run_id }}
-          base: ${{ inputs.branch }}
+          base: ${{ inputs.branch || 'main' }}
           commit-message: 'chore(e2e): actualizar baselines visuales'
           title: 'chore(e2e): actualizar baselines visuales'
           body: |

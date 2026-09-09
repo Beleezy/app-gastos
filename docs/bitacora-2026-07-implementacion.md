@@ -53,11 +53,18 @@ había prefijos duplicados (`0005_*` ×2, `0013_*` ×2).
    # re-bootstrap: DROP TABLE _migraciones_aplicadas + re-corrida → OK
    ```
 4. Crear `vercel.json`:
+
    ```json
    { "buildCommand": "npm run db:apply && npm run build" }
    ```
+
    Con esto **cada deploy aplica migraciones antes de compilar**; si una
    falla, el build aborta y el código nuevo no se despliega.
+
+   > **Addendum (septiembre 2026):** revertido. Ese `&&` dejó el proyecto 51
+   > días sin publicar cuando `0020` empezó a fallar por datos, y además hacía
+   > que los deploys de preview migraran producción. Las migraciones se
+   > movieron a `.github/workflows/migrate.yml`. Ver `CLAUDE.md`.
 
 ## 2. Health check con detección de drift (§1.1.3)
 

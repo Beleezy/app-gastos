@@ -20,6 +20,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# El job solo habla con Postgres: no lee ni escribe nada del repositorio.
+permissions:
+  contents: read
+
 # Dos migraciones simultáneas contra la misma BD no; y no cancelar una a medias.
 concurrency:
   group: migraciones-produccion
