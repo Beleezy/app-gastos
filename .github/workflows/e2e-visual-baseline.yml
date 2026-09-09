@@ -2,8 +2,11 @@ name: E2E Visual Baseline
 
 # Genera o actualiza los baselines de imagenes para los tests visuales.
 # Pensado para correr enteramente en GitHub Actions — NO requiere ejecucion
-# local. Tras correr, abre un PR con los PNGs nuevos para que los revises
-# desde la interfaz de GitHub.
+# local. Los PNGs tienen que salir del runner: el renderizado de fuentes de
+# una maquina local no coincide y el job `visual` fallaria siempre.
+#
+# Al terminar deja los baselines en una rama y el enlace para abrir el PR en
+# el resumen del run.
 #
 # Cuando usar:
 #   - Primera vez (bootstrap): no hay baselines en la rama. Dispara este
@@ -27,9 +30,9 @@ on:
   push:
     branches: ['ci/generar-baselines-visuales']
 
+# Ya no abre PRs: solo empuja la rama con los PNG.
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   generate-baselines:
@@ -137,29 +140,45 @@ jobs:
             git diff --cached --stat e2e/visual
           fi
 
-      - name: Crear PR con baselines actualizados
+      # Publica la rama y deja que el PR lo abra una persona (o el agente que
+      # lanzó el workflow). Antes esto usaba peter-evans/create-pull-request y
+      # fallaba: crear PRs desde Actions depende de un permiso del repositorio
+      # —Settings → Actions → "Allow GitHub Actions to create and approve pull
+      # requests"— que no está activado. Empujar una rama solo necesita
+      # `contents: write`, que ya está concedido arriba, así que el trabajo
+      # caro (generar los PNG en el runner) no se tira a la basura por un
+      # permiso que falta.
+      - name: Publicar baselines en una rama
         if: steps.changes.outputs.any == 'true'
-        uses: peter-evans/create-pull-request@v8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: chore/visual-baselines-${{ github.run_id }}
-          base: ${{ inputs.branch || 'main' }}
-          commit-message: 'chore(e2e): actualizar baselines visuales'
-          title: 'chore(e2e): actualizar baselines visuales'
-          body: |
-            Actualizacion automatica de los baselines visuales generados por
-            el workflow `E2E Visual Baseline` (run [#${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})).
+        env:
+          RAMA: chore/visual-baselines-${{ github.run_id }}
+          BASE: ${{ inputs.branch || 'main' }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git checkout -b "$RAMA"
+          git add -A e2e/visual
+          git commit -m 'chore(e2e): actualizar baselines visuales'
+          git push origin "$RAMA"
 
-            Revisa cada PNG en la pestaña "Files changed" — GitHub muestra
-            comparativas lado a lado de imagenes nuevas vs anteriores.
+          {
+            echo "## Baselines generados"
+            echo ""
+            echo "Rama: \`$RAMA\`"
+            echo ""
+            echo "Abre el PR contra \`$BASE\` y revisa cada PNG en la pestaña"
+            echo "**Files changed** — GitHub muestra la comparativa lado a lado."
+            echo "Tras mergearlo, el job \`visual\` de \`e2e.yml\` empieza a comparar"
+            echo "contra estos baselines en vez de saltarse."
+            echo ""
+            echo "[Abrir el PR](${{ github.server_url }}/${{ github.repository }}/compare/$BASE...$RAMA?expand=1)"
+          } >> "$GITHUB_STEP_SUMMARY"
 
-            Si las nuevas imagenes son las correctas (la UI cambio
-            intencionalmente), aprueba y mergea este PR. Tras el merge, el
-            job `visual` de `e2e.yml` empezara a comparar contra estos
-            baselines.
-          labels: |
-            e2e
-            visual
-            automated
-          add-paths: |
-            e2e/visual/**
+      - name: Nada que actualizar
+        if: steps.changes.outputs.any != 'true'
+        run: |
+          {
+            echo "## Sin cambios"
+            echo ""
+            echo "Los baselines actuales ya coinciden con la UI."
+          } >> "$GITHUB_STEP_SUMMARY"
