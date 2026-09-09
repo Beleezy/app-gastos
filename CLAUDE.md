@@ -79,8 +79,10 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 ### Migraciones — REGLAS CRÍTICAS
 
 - Archivos SQL en [migrations/](server/database/migrations/); se aplican con `npm run db:apply` ([apply-migrations.mjs](scripts/apply-migrations.mjs)), que lleva registro en la tabla `_migraciones_aplicadas` (transaccional para archivos nuevos; los que contienen `CREATE INDEX CONCURRENTLY` van fuera de transacción).
-- **El deploy SÍ aplica migraciones**: `vercel.json` define `buildCommand: npm run db:apply && npm run build`. Nunca mergear código que dependa de una columna sin su migración en el mismo PR (causa del hotfix `2bb83a7`).
-- Corolario: **si la cadena de conexión no llega al paso de Build, no hay deploy**. El `&&` corta y `npm run build` no llega a correr — es a propósito: publicar sin migrar es justo el incidente `2bb83a7`. En Vercel, una variable marcada como _Sensitive_ existe solo en runtime, no en el build. `apply-migrations.mjs` acepta alias (`POSTGRES_URL_NON_POOLING`, `POSTGRES_URL`, `NUXT_DATABASE_URL`, `SUPABASE_DB_URL`) y, si no encuentra ninguno, el log del build dice exactamente qué falta.
+- **Las migraciones de producción las aplica GitHub Actions**, no el build: [migrate.yml](.github/workflows/migrate.yml) corre en cada push a `main` (y a mano con `workflow_dispatch`). Es el orden habitual — migrar primero, desplegar después — y aquí es seguro porque las migraciones solo añaden. El job tarda segundos; el build de Vercel, minutos.
+- Requiere el secret **`DATABASE_URL`** del repositorio: la cadena del **session pooler** de Supabase, puerto **5432**. No sirve el transaction pooler (6543) porque `0019` y `0020` usan `CREATE INDEX CONCURRENTLY` y postgres.js usa prepared statements; tampoco la directa `db.<ref>.supabase.co`, que es solo IPv6 y los runners son IPv4. El mismo secret alimenta [db-backup.yml](.github/workflows/db-backup.yml).
+- Si el workflow falla, la BD queda atrás del código: [health.get.js](server/api/health.get.js) devuelve 503 por drift de columnas centinela. Nunca mergear código que dependa de una columna sin su migración en el mismo PR (causa del hotfix `2bb83a7`).
+- Histórico: hasta septiembre de 2026 las migraciones vivían en `vercel.json` (`buildCommand: npm run db:apply && npm run build`). Como la cadena de conexión no llega al paso de Build en Vercel —una variable marcada _Sensitive_ existe solo en runtime—, el script salía con 1, el `&&` cortaba y no se publicó nada durante 51 días. `apply-migrations.mjs` acepta alias (`POSTGRES_URL_NON_POOLING`, `POSTGRES_URL`, `NUXT_DATABASE_URL`, `SUPABASE_DB_URL`) por si alguno sí llega, pero la fuente de verdad ya no es el build.
 - Un prefijo numérico = una migración; ante conflicto usar sufijo letra (`0005a_...`). No editar migraciones ya aplicadas — crear una nueva.
 - Al añadir una columna crítica, actualizar las columnas centinela de [health.get.js](server/api/health.get.js) (check de drift → 503).
 
@@ -122,7 +124,7 @@ Al tocar `overrides`, revalidar con `npm ci` + `npm run build` + la suite E2E co
 
 - Unit: `npm test` (Vitest, `tests/*.test.js` — lógica pura extraída de composables/utils).
 - E2E: Playwright (`e2e/`) con page objects; proyectos `smoke | api | mobile | desktop | visual`; auth bypass con `DEV_AUTH_BYPASS=1` + token; Postgres efímera en CI.
-- Workflows: `ci.yml` (unit + lint + build), `e2e.yml` (PRs y main), `e2e-visual-baseline.yml`, `db-backup.yml` (dump semanal cifrado).
+- Workflows: `ci.yml` (unit + lint + build), `e2e.yml` (PRs y main), `e2e-visual-baseline.yml`, `migrate.yml` (migraciones de producción en cada push a `main`), `db-backup.yml` (dump semanal cifrado). Los dos últimos fallan en rojo si les falta su secret: un backup o una migración que no ocurre no puede reportarse en verde.
 
 ## Estructura
 

@@ -30,23 +30,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Falla a propósito si falta un secret. Antes solo avisaba y el job
+      # quedaba en verde: ocho lunes seguidos "exitosos" de 6 segundos que no
+      # produjeron ni un backup, y nadie se enteró. Un respaldo que no ocurre
+      # tiene que verse en rojo.
       - name: Verificar secrets
-        id: check
         env:
           DB_URL: ${{ secrets.BACKUP_DATABASE_URL || secrets.DATABASE_URL }}
           PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
         run: |
-          if [ -z "$DB_URL" ] || [ -z "$PASSPHRASE" ]; then
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Backup omitido — configura los secrets BACKUP_DATABASE_URL (o DATABASE_URL) y BACKUP_PASSPHRASE."
-          else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
+          faltan=""
+          [ -z "$DB_URL" ] && faltan="$faltan BACKUP_DATABASE_URL (o DATABASE_URL)"
+          [ -z "$PASSPHRASE" ] && faltan="$faltan BACKUP_PASSPHRASE"
+          if [ -n "$faltan" ]; then
+            {
+              echo "## Backup NO realizado"
+              echo ""
+              echo "Faltan estos secrets del repositorio:$faltan"
+              echo ""
+              echo "Settings → Secrets and variables → Actions → New repository secret."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=Backup no realizado::Faltan secrets:$faltan"
+            exit 1
           fi
 
       # pg_dump debe ser >= versión del servidor. El cliente de PGDG 17
       # puede volcar servidores 14–17 (cubre cualquier proyecto Supabase).
       - name: Instalar postgresql-client 17
-        if: steps.check.outputs.configured == 'true'
         run: |
           sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
           curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo gpg --dearmor -o /usr/share/keyrings/pgdg.gpg
@@ -55,7 +65,6 @@ jobs:
           sudo apt-get install -y -qq postgresql-client-17
 
       - name: Dump + cifrado
-        if: steps.check.outputs.configured == 'true'
         env:
           DB_URL: ${{ secrets.BACKUP_DATABASE_URL || secrets.DATABASE_URL }}
           PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
@@ -71,7 +80,6 @@ jobs:
           ls -lh backup-*.gpg
 
       - name: Subir artifact (retención 90 días)
-        if: steps.check.outputs.configured == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: db-backup-${{ github.run_id }}

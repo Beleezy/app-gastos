@@ -1,0 +1,92 @@
+# Aplica las migraciones pendientes contra la BD de producción en cada push a
+# main, antes de que el deploy publique el código que las necesita.
+#
+# Por qué aquí y no dentro del build de Vercel, que es donde estaban: al build
+# no le llega la cadena de conexión, así que `npm run db:apply` salía con 1, el
+# `&&` de `vercel.json` cortaba y no se publicaba nada. 51 días en rojo.
+#
+# Secret requerido (Settings → Secrets and variables → Actions):
+#   DATABASE_URL — cadena del SESSION POOLER de Supabase, puerto 5432.
+#     · NO el transaction pooler (6543): 0019 y 0020 usan CREATE INDEX
+#       CONCURRENTLY, que no corre en modo transacción, y postgres.js usa
+#       prepared statements, que pgbouncer transaccional tampoco admite.
+#     · NO la conexión directa db.<ref>.supabase.co: es solo IPv6 y los
+#       runners de GitHub son IPv4.
+#   El mismo secret alimenta db-backup.yml, que lo toma como fallback.
+
+name: Migraciones
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Dos migraciones simultáneas contra la misma BD no; y no cancelar una a medias.
+concurrency:
+  group: migraciones-produccion
+  cancel-in-progress: false
+
+jobs:
+  aplicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Comprobar que existe el secret
+        env:
+          DB_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DB_URL" ]; then
+            {
+              echo "## Migraciones NO aplicadas"
+              echo ""
+              echo 'Falta el secret `DATABASE_URL` del repositorio.'
+              echo ""
+              echo "Créalo en **Settings → Secrets and variables → Actions → New repository secret**"
+              echo 'con la cadena del **session pooler** de Supabase (puerto `5432`).'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=Falta el secret DATABASE_URL::Sin él no se aplican las migraciones y el código desplegado puede quedar por delante del esquema."
+            exit 1
+          fi
+
+      # --omit=dev --ignore-scripts: el script solo necesita `postgres` y
+      # `dotenv`, que son dependencias de producción. Así el job termina en
+      # segundos — mucho antes de que el build de Vercel llegue a publicar.
+      - name: Instalar dependencias
+        run: npm ci --omit=dev --ignore-scripts
+
+      - name: Aplicar migraciones
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -o pipefail
+          ok=0
+          for intento in 1 2 3; do
+            if npm run db:apply 2>&1 | tee migraciones.log; then
+              ok=1
+              break
+            fi
+            if [ "$intento" -lt 3 ]; then
+              echo "::warning::Intento $intento sin éxito. Reintento en 15 s — los proyectos Supabase del plan free se pausan por inactividad y la primera conexión puede fallar."
+              sleep 15
+            fi
+          done
+
+          {
+            echo "## Migraciones"
+            echo ""
+            echo '```'
+            grep -E '^(✓|Total:|\[db:apply\])' migraciones.log | tail -n 40 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$ok" != "1" ]; then
+            echo "::error title=Migraciones fallidas::La BD NO quedó actualizada. El código en main espera un esquema que producción todavía no tiene."
+            exit 1
+          fi
