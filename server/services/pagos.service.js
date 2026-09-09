@@ -6,11 +6,22 @@ import { pagosDeuda, deudas, personasEntidades } from '../database/schema.js'
 import { crearPagoEspejo, registrarAuditoria } from '../utils/vinculos.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
 import { assertOwner } from '../utils/assertOwner.js'
+import { calcularSaldoTrasPago } from '../utils/pagosMath.js'
 
 /**
  * Registra un pago contra una deuda. Actualiza monto pendiente y estado
  * (parcial / pagado). Si la deuda tiene vinculo, replica el pago en la
  * deuda espejo y registra auditoría.
+ *
+ * CONCURRENCIA: la deuda se lee DENTRO de la transacción y con
+ * `FOR UPDATE`. Antes se leía fuera, se calculaba el saldo en JS y se
+ * escribía ese valor absoluto: dos pagos simultáneos leían el mismo
+ * `monto_pendiente`, calculaban sobre él y el segundo UPDATE pisaba al
+ * primero — se cobraban ambos y el saldo solo descontaba uno. No es
+ * hipotético: la cola offline (useSyncQueue) reintenta mutaciones y el
+ * doble tap en móvil manda dos POST casi a la vez. Con el lock, el
+ * segundo pago espera el commit del primero y recalcula sobre el saldo
+ * ya actualizado (o es rechazado por exceder el pendiente).
  *
  * @param {object} input
  * @param {string} input.usuarioId
@@ -18,36 +29,42 @@ import { assertOwner } from '../utils/assertOwner.js'
  * @param {object} input.body Body validado por Zod (pagoCreateSchema).
  */
 export async function registrarPago({ usuarioId, deudaId, body }) {
-  const [deuda] = await db
-    .select()
-    .from(deudas)
-    .where(and(eq(deudas.id, deudaId), eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
-    .limit(1)
-
-  assertOwner(deuda, usuarioId, { recurso: 'Deuda' })
-
-  const montoPago = parseFloat(body.monto)
-  const pendienteActual = parseFloat(deuda.montoPendiente)
-
-  if (montoPago > pendienteActual + 0.005) {
-    const err = new Error('El monto del pago excede la deuda pendiente')
-    err.statusCode = 400
-    throw err
-  }
-
-  const nuevoPendiente = Math.max(0, pendienteActual - montoPago)
-  const nuevoEstado = nuevoPendiente <= 0.005 ? 'pagado' : 'parcial'
-
-  const [persona] = await db
-    .select({ id: personasEntidades.id, vinculoParId: personasEntidades.vinculoParId })
-    .from(personasEntidades)
-    .where(eq(personasEntidades.id, deuda.personaEntidadId))
-    .limit(1)
-
   const fechaPago =
     body.fechaPago || body.fecha || (await getFechaHoraLocalUsuario(usuarioId)).fecha
 
   const resultado = await db.transaction(async (tx) => {
+    const [deuda] = await tx
+      .select()
+      .from(deudas)
+      .where(and(eq(deudas.id, deudaId), eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)))
+      .limit(1)
+      .for('update')
+
+    assertOwner(deuda, usuarioId, { recurso: 'Deuda' })
+
+    const montoPago = parseFloat(body.monto)
+
+    // El cálculo del saldo vive en pagosMath.calcularSaldoTrasPago, que es
+    // el que cubren los tests. Antes esta función lo reimplementaba inline
+    // y sin el redondeo a céntimos, así que lo verificado y lo desplegado
+    // no eran la misma aritmética.
+    const { nuevoPendiente, nuevoEstado, excede } = calcularSaldoTrasPago({
+      pendienteActual: deuda.montoPendiente,
+      montoPago,
+    })
+
+    if (excede) {
+      const err = new Error('El monto del pago excede la deuda pendiente')
+      err.statusCode = 400
+      throw err
+    }
+
+    const [persona] = await tx
+      .select({ id: personasEntidades.id, vinculoParId: personasEntidades.vinculoParId })
+      .from(personasEntidades)
+      .where(eq(personasEntidades.id, deuda.personaEntidadId))
+      .limit(1)
+
     const [pago] = await tx
       .insert(pagosDeuda)
       .values({

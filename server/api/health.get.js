@@ -26,6 +26,16 @@ const SENTINEL_COLUMNS = [
   ['usuarios', 'correo_contacto'], // 0031_perfil_contacto
 ]
 
+// El drift de schema solo cambia cuando corre una migración, es decir
+// nunca dentro de la vida de una instancia. Consultarlo en cada ping es
+// gasto puro, y este endpoint es el único de /api/* exento del rate limit
+// global (a propósito: si se throttlea, la métrica de disponibilidad
+// miente) — o sea, un endpoint sin auth y sin tope que hacía 2 queries por
+// petición. Cacheando el resultado, martillearlo deja de martillear la BD
+// sin tocar la exención, que sigue siendo lo correcto para el monitor.
+const DRIFT_TTL_MS = 60 * 1000
+let driftCache = null // { faltantes: string[], expiresAt: number }
+
 export default defineEventHandler(async (event) => {
   const isProd = process.env.NODE_ENV === 'production'
   const checks = { db: 'unknown', schema: 'unknown' }
@@ -48,17 +58,23 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const pares = SENTINEL_COLUMNS.map(([t, c]) => `('${t}','${c}')`).join(',')
-    const rows = await db.execute(
-      sql.raw(`
+    let faltantes
+    if (driftCache && driftCache.expiresAt > Date.now()) {
+      faltantes = driftCache.faltantes
+    } else {
+      const pares = SENTINEL_COLUMNS.map(([t, c]) => `('${t}','${c}')`).join(',')
+      const rows = await db.execute(
+        sql.raw(`
       SELECT table_name, column_name FROM information_schema.columns
       WHERE (table_name, column_name) IN (${pares})
     `),
-    )
-    const presentes = new Set(rows.map((r) => `${r.table_name}.${r.column_name}`))
-    const faltantes = SENTINEL_COLUMNS.map(([t, c]) => `${t}.${c}`).filter(
-      (col) => !presentes.has(col),
-    )
+      )
+      const presentes = new Set(rows.map((r) => `${r.table_name}.${r.column_name}`))
+      faltantes = SENTINEL_COLUMNS.map(([t, c]) => `${t}.${c}`).filter(
+        (col) => !presentes.has(col),
+      )
+      driftCache = { faltantes, expiresAt: Date.now() + DRIFT_TTL_MS }
+    }
 
     if (faltantes.length > 0) {
       checks.schema = 'drift'

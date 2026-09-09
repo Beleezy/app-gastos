@@ -16,9 +16,10 @@ import {
   crearCheckpoint,
 } from '../../../../utils/vinculos.js'
 import { eq, and, inArray } from 'drizzle-orm'
+import { getUuidParam } from '../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const solicitudId = getRouterParam(event, 'id')
+  const solicitudId = getUuidParam(event, 'id', { recurso: 'Solicitud' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   // Obtener email del usuario actual

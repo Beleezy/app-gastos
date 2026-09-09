@@ -4,9 +4,10 @@ import { eliminarRecurrentesFuturos } from '../../../utils/recurrente.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { syncDeleted } from '../../../utils/gcalAutoSync.js'
 import { and, eq } from 'drizzle-orm'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Gasto planificado' })
   const usuarioId = await getUsuarioFromEvent(event)
   const query = getQuery(event)
   const eliminarFuturos = query.futuros === 'true'

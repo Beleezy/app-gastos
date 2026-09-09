@@ -12,6 +12,7 @@ import {
 import { getUsuarioFromEvent } from '../../../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../../../utils/fechaLocal.js'
 import { fetchFutureExpenseById } from '../../../../../../utils/gastosFuturos.js'
+import { getUuidParam } from '../../../../../../utils/params.js'
 
 function parseAmount(value) {
   if (value === null || value === undefined || value === '') return null
@@ -52,8 +53,8 @@ async function obtenerOCrearPlan(tx, usuarioId, mes, anio) {
 }
 
 export default defineEventHandler(async (event) => {
-  const proyectoId = getRouterParam(event, 'id')
-  const detalleId = getRouterParam(event, 'detalleId')
+  const proyectoId = getUuidParam(event, 'id', { recurso: 'Proyecto' })
+  const detalleId = getUuidParam(event, 'detalleId', { recurso: 'Detalle' })
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 

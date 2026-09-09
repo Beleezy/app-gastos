@@ -4,9 +4,10 @@ import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { validateBody } from '../../../utils/validate.js'
 import { personaEntidadUpdateSchema } from '~/shared/schemas/deudas.js'
 import { eq, and } from 'drizzle-orm'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Persona' })
   const usuarioId = await getUsuarioFromEvent(event)
   // Whitelist + tipos via Zod. `tipo` queda restringido al enum real
   // de DB (persona | organizacion). Sin esto, un atacante podría

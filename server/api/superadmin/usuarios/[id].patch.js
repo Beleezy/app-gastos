@@ -4,10 +4,11 @@ import { db } from '../../../utils/db.js'
 import { usuarios } from '../../../database/schema.js'
 import { requireSuperadmin, invalidarAccesoCache } from '../../../utils/getUsuario.js'
 import { eq } from 'drizzle-orm'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
   const adminId = await requireSuperadmin(event)
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Usuario' })
   const body = await readBody(event)
   const permitido = !!body?.permitido
 

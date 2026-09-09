@@ -11,6 +11,7 @@ import {
 } from '../../../utils/recurrente.js'
 import { and, eq } from 'drizzle-orm'
 import { syncUpdated } from '../../../utils/gcalAutoSync.js'
+import { getUuidParam } from '../../../utils/params.js'
 
 // gastosPlanificados no tiene columna usuarioId directa; el ownership se
 // deriva de planMensualId → planesMensuales.usuarioId. Cargar con JOIN
@@ -27,7 +28,7 @@ async function cargarGastoPropio(id, usuarioId) {
 }
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Gasto planificado' })
   const usuarioId = await getUsuarioFromEvent(event)
   // Whitelist + tipos via Zod: `estado` queda restringido al enum real
   // (`pendiente | pagado`), monto debe ser finito y positivo, fecha

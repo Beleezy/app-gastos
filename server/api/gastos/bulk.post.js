@@ -4,10 +4,12 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { tryIdempotentReplay, rememberIdempotent } from '../../utils/idempotency.js'
+import { validateBody } from '../../utils/validate.js'
+import { assertCategoriasPropias } from '../../utils/categorias.js'
+import { gastosBulkCreateSchema } from '~/shared/schemas/gastos.js'
 import { inArray } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
   // Si el cliente reintenta esta misma mutación (Idempotency-Key igual,
   // típico desde la cola offline), devolvemos la respuesta original sin
@@ -15,13 +17,23 @@ export default defineEventHandler(async (event) => {
   const replay = tryIdempotentReplay(event, usuarioId)
   if (replay) return replay
   await rateLimits.bulkOp(event, usuarioId)
+
+  // `gastosBulkCreateSchema` existía en shared/schemas/gastos.js desde que
+  // se escribió el módulo, pero este handler leía `readBody` crudo y nunca
+  // lo usaba: un monto no numérico, una fecha inventada o un categoriaId
+  // nulo llegaban a Postgres y salían como 500 con el error del driver, en
+  // vez de un 400 explicando qué campo está mal.
+  const body = await validateBody(event, gastosBulkCreateSchema)
+
   const metodosPermitidos = new Set(['voz', 'foto', 'manual'])
 
-  if (!body.gastos || !Array.isArray(body.gastos) || body.gastos.length === 0) {
-    throw createError({ statusCode: 400, message: 'Se requiere un array de gastos' })
-  }
-
   const { fecha: fechaLocal, hora: horaActual } = await getFechaHoraLocalUsuario(usuarioId)
+
+  // Misma regla que en POST /api/gastos: una categoría ajena no se guarda.
+  await assertCategoriasPropias({
+    usuarioId,
+    categoriaIds: body.gastos.map((g) => g.categoriaId),
+  })
 
   const metodoRegistro = metodosPermitidos.has(body.metodoRegistro)
     ? body.metodoRegistro

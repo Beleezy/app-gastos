@@ -1,6 +1,6 @@
 import { db } from './db.js'
 import { planesMensuales, gastosPlanificados, configuraciones, gastos } from '../database/schema.js'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, or, inArray } from 'drizzle-orm'
 import crypto from 'crypto'
 
 const MESES_FUTUROS = 12
@@ -83,35 +83,142 @@ function ajustarDia(dia, mes, anio) {
 }
 
 /**
+ * Calcula a qué meses se proyecta un gasto recurrente y con qué fecha en
+ * cada uno, ajustando el día a la longitud del mes.
+ *
+ * Parte pura extraída del bucle: permite resolver los 12 meses de una vez
+ * en lugar de ir mes a mes contra la BD.
+ *
+ * @returns {Array<{mes: number, anio: number, fecha: string}>}
+ */
+export function planificarMesesRecurrentes({
+  mesOrigen,
+  anioOrigen,
+  diaOriginal,
+  cantidad = MESES_FUTUROS,
+}) {
+  return mesesFuturos(mesOrigen, anioOrigen, cantidad).map(({ mes, anio }) => {
+    const dia = ajustarDia(diaOriginal, mes, anio)
+    return {
+      mes,
+      anio,
+      fecha: `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`,
+    }
+  })
+}
+
+/**
  * Replicates a recurring expense to future months.
  * Called after creating a new recurring expense.
+ *
+ * Antes esto era un bucle de 12 iteraciones y cada una hacía su propio
+ * SELECT del plan mensual, su posible INSERT del plan y el INSERT del
+ * gasto: hasta ~36 round trips secuenciales contra Supabase (≈1-2 s en
+ * una función serverless) para crear UN gasto recurrente. Y todo fuera de
+ * transacción, así que un fallo en el mes 7 dejaba 6 meses replicados,
+ * sin error que los limpiara ni forma de distinguirlo de un recurrente
+ * que el usuario acortó a mano.
+ *
+ * Ahora son 3 queries dentro de una transacción: los planes existentes de
+ * los 12 meses en una, los que faltan en un INSERT múltiple, y los 12
+ * gastos planificados en otro.
  */
 export async function replicarGastoRecurrente(usuarioId, gasto, grupoId) {
   const fechaOrigen = new Date(gasto.fechaProbablePago + 'T00:00:00')
-  const diaOriginal = fechaOrigen.getDate()
-  const mesOrigen = fechaOrigen.getMonth() + 1
-  const anioOrigen = fechaOrigen.getFullYear()
+  const objetivos = planificarMesesRecurrentes({
+    mesOrigen: fechaOrigen.getMonth() + 1,
+    anioOrigen: fechaOrigen.getFullYear(),
+    diaOriginal: fechaOrigen.getDate(),
+  })
 
-  const futuros = mesesFuturos(mesOrigen, anioOrigen)
+  await db.transaction(async (tx) => {
+    const [config] = await tx
+      .select({ presupuesto: configuraciones.presupuestoMensualDefault })
+      .from(configuraciones)
+      .where(eq(configuraciones.usuarioId, usuarioId))
+      .limit(1)
+    const presupuesto = config?.presupuesto || '0'
 
-  for (const { mes, anio } of futuros) {
-    const plan = await obtenerOCrearPlan(usuarioId, mes, anio)
-    if (!plan?.id) continue
+    // Los planes de los 12 meses de una sola vez.
+    const clave = (mes, anio) => `${anio}-${mes}`
+    const existentes = await tx
+      .select({
+        id: planesMensuales.id,
+        mes: planesMensuales.mes,
+        anio: planesMensuales.anio,
+      })
+      .from(planesMensuales)
+      .where(
+        and(
+          eq(planesMensuales.usuarioId, usuarioId),
+          or(...objetivos.map((o) => and(eq(planesMensuales.mes, o.mes), eq(planesMensuales.anio, o.anio)))),
+        ),
+      )
 
-    const diaAjustado = ajustarDia(diaOriginal, mes, anio)
-    const fecha = `${anio}-${String(mes).padStart(2, '0')}-${String(diaAjustado).padStart(2, '0')}`
+    const planPorMes = new Map(existentes.map((p) => [clave(p.mes, p.anio), p.id]))
 
-    await db.insert(gastosPlanificados).values({
-      planMensualId: plan.id,
-      categoriaId: gasto.categoriaId,
-      concepto: gasto.concepto,
-      montoEstimado: String(gasto.montoEstimado),
-      fechaProbablePago: fecha,
-      esRecurrente: true,
-      recurrenteGrupoId: grupoId,
-      notas: gasto.notas || null,
-    })
-  }
+    const faltantes = objetivos.filter((o) => !planPorMes.has(clave(o.mes, o.anio)))
+    if (faltantes.length > 0) {
+      // onConflictDoNothing + returning: si otra petición creó el plan
+      // entremedias, el UNIQUE (usuario, mes, año) lo absorbe y la fila
+      // simplemente no vuelve — se resuelve en el re-select de abajo.
+      const creados = await tx
+        .insert(planesMensuales)
+        .values(
+          faltantes.map((o) => ({
+            usuarioId,
+            mes: o.mes,
+            anio: o.anio,
+            montoPresupuesto: presupuesto,
+          })),
+        )
+        .onConflictDoNothing()
+        .returning({ id: planesMensuales.id, mes: planesMensuales.mes, anio: planesMensuales.anio })
+
+      for (const p of creados) planPorMes.set(clave(p.mes, p.anio), p.id)
+
+      // Los que el conflicto absorbió: relectura de los que sigan sin id.
+      const sinResolver = objetivos.filter((o) => !planPorMes.has(clave(o.mes, o.anio)))
+      if (sinResolver.length > 0) {
+        const recuperados = await tx
+          .select({
+            id: planesMensuales.id,
+            mes: planesMensuales.mes,
+            anio: planesMensuales.anio,
+          })
+          .from(planesMensuales)
+          .where(
+            and(
+              eq(planesMensuales.usuarioId, usuarioId),
+              or(
+                ...sinResolver.map((o) =>
+                  and(eq(planesMensuales.mes, o.mes), eq(planesMensuales.anio, o.anio)),
+                ),
+              ),
+            ),
+          )
+        for (const p of recuperados) planPorMes.set(clave(p.mes, p.anio), p.id)
+      }
+    }
+
+    const filas = objetivos
+      .map((o) => ({ planMensualId: planPorMes.get(clave(o.mes, o.anio)), fecha: o.fecha }))
+      .filter((f) => f.planMensualId)
+      .map((f) => ({
+        planMensualId: f.planMensualId,
+        categoriaId: gasto.categoriaId,
+        concepto: gasto.concepto,
+        montoEstimado: String(gasto.montoEstimado),
+        fechaProbablePago: f.fecha,
+        esRecurrente: true,
+        recurrenteGrupoId: grupoId,
+        notas: gasto.notas || null,
+      }))
+
+    if (filas.length > 0) {
+      await tx.insert(gastosPlanificados).values(filas)
+    }
+  })
 }
 
 /**
@@ -134,33 +241,61 @@ export async function actualizarRecurrentesFuturos(grupoId, gastoActualId, datos
   const mesActual = hoy.getMonth() + 1
   const anioActual = hoy.getFullYear()
 
-  for (const gp of todos) {
-    if (gp.id === gastoActualId) continue
-
-    // Only update future months (don't touch past months)
+  // Solo meses futuros: los pasados son historial y no se tocan.
+  const futuros = todos.filter((gp) => {
+    if (gp.id === gastoActualId) return false
     const fechaGp = new Date(gp.fechaProbablePago + 'T00:00:00')
     const mesGp = fechaGp.getMonth() + 1
     const anioGp = fechaGp.getFullYear()
+    return !(anioGp < anioActual || (anioGp === anioActual && mesGp < mesActual))
+  })
 
-    if (anioGp < anioActual || (anioGp === anioActual && mesGp < mesActual)) continue
+  if (futuros.length === 0) return
 
-    // Only update pagado -> pendiente not needed; keep estado of future ones
-    const updateData = { updatedAt: new Date() }
-    if (datos.concepto !== undefined) updateData.concepto = datos.concepto
-    if (datos.montoEstimado !== undefined) updateData.montoEstimado = String(datos.montoEstimado)
-    if (datos.categoriaId !== undefined) updateData.categoriaId = datos.categoriaId
-    if (datos.notas !== undefined) updateData.notas = datos.notas
+  const comunes = { updatedAt: new Date() }
+  if (datos.concepto !== undefined) comunes.concepto = datos.concepto
+  if (datos.montoEstimado !== undefined) comunes.montoEstimado = String(datos.montoEstimado)
+  if (datos.categoriaId !== undefined) comunes.categoriaId = datos.categoriaId
+  if (datos.notas !== undefined) comunes.notas = datos.notas
 
-    // Adjust the day for this month if fecha changed
+  await db.transaction(async (tx) => {
+    // Los campos que no dependen del mes se aplican a todas las filas de
+    // una vez, en lugar de un UPDATE por mes (12 round trips secuenciales
+    // y sin transacción, así que un fallo a mitad dejaba meses con el
+    // concepto nuevo y meses con el viejo).
+    await tx
+      .update(gastosPlanificados)
+      .set(comunes)
+      .where(
+        inArray(
+          gastosPlanificados.id,
+          futuros.map((gp) => gp.id),
+        ),
+      )
+
+    // La fecha sí depende del mes: el día se recorta a la longitud de cada
+    // uno (un recurrente el 31 cae al 28 en febrero). Se agrupan los ids
+    // que comparten fecha resultante para no volver a una query por fila.
     if (datos.fechaProbablePago !== undefined) {
-      const nuevaFecha = new Date(datos.fechaProbablePago + 'T00:00:00')
-      const diaOriginal = nuevaFecha.getDate()
-      const diaAjustado = ajustarDia(diaOriginal, mesGp, anioGp)
-      updateData.fechaProbablePago = `${anioGp}-${String(mesGp).padStart(2, '0')}-${String(diaAjustado).padStart(2, '0')}`
+      const diaOriginal = new Date(datos.fechaProbablePago + 'T00:00:00').getDate()
+      const porFecha = new Map()
+      for (const gp of futuros) {
+        const fechaGp = new Date(gp.fechaProbablePago + 'T00:00:00')
+        const mesGp = fechaGp.getMonth() + 1
+        const anioGp = fechaGp.getFullYear()
+        const dia = ajustarDia(diaOriginal, mesGp, anioGp)
+        const fecha = `${anioGp}-${String(mesGp).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+        if (!porFecha.has(fecha)) porFecha.set(fecha, [])
+        porFecha.get(fecha).push(gp.id)
+      }
+      for (const [fecha, ids] of porFecha) {
+        await tx
+          .update(gastosPlanificados)
+          .set({ fechaProbablePago: fecha })
+          .where(inArray(gastosPlanificados.id, ids))
+      }
     }
-
-    await db.update(gastosPlanificados).set(updateData).where(eq(gastosPlanificados.id, gp.id))
-  }
+  })
 }
 
 /**
@@ -179,21 +314,26 @@ export async function eliminarRecurrentesFuturos(grupoId, gastoActualId) {
   const mesActual = hoy.getMonth() + 1
   const anioActual = hoy.getFullYear()
 
-  for (const gp of todos) {
-    if (gp.id === gastoActualId) continue
+  const aBorrar = todos
+    .filter((gp) => {
+      if (gp.id === gastoActualId) return false
+      const fechaGp = new Date(gp.fechaProbablePago + 'T00:00:00')
+      const mesGp = fechaGp.getMonth() + 1
+      const anioGp = fechaGp.getFullYear()
+      // Solo meses futuros: los pasados son historial.
+      return !(anioGp < anioActual || (anioGp === anioActual && mesGp < mesActual))
+    })
+    .map((gp) => gp.id)
 
-    const fechaGp = new Date(gp.fechaProbablePago + 'T00:00:00')
-    const mesGp = fechaGp.getMonth() + 1
-    const anioGp = fechaGp.getFullYear()
+  if (aBorrar.length === 0) return
 
-    // Only delete future months
-    if (anioGp < anioActual || (anioGp === anioActual && mesGp < mesActual)) continue
-
-    // Delete associated real expense if exists
-    await db.delete(gastos).where(eq(gastos.gastoPlanificadoId, gp.id))
-
-    await db.delete(gastosPlanificados).where(eq(gastosPlanificados.id, gp.id))
-  }
+  // Antes eran 2 DELETE por mes, secuenciales y sin transacción: borrar un
+  // recurrente de 12 meses hacía 24 round trips, y un fallo a mitad dejaba
+  // meses borrados y meses no.
+  await db.transaction(async (tx) => {
+    await tx.delete(gastos).where(inArray(gastos.gastoPlanificadoId, aBorrar))
+    await tx.delete(gastosPlanificados).where(inArray(gastosPlanificados.id, aBorrar))
+  })
 }
 
 /**

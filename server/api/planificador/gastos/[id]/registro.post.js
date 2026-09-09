@@ -10,9 +10,10 @@ import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
 import { syncUpdated } from '../../../../utils/gcalAutoSync.js'
+import { getUuidParam } from '../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Gasto planificado' })
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 

@@ -2,9 +2,10 @@ import { db } from '../../utils/db.js'
 import { ahorros } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Ahorro' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   const [deleted] = await db

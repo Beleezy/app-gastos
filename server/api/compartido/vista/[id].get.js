@@ -2,9 +2,10 @@ import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { validateQuery } from '../../../utils/validate.js'
 import { vistaCompartidaQuerySchema } from '~/shared/schemas/compartido.js'
 import { vistaCompartida } from '../../../services/compartidoVista.service.js'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const conexionId = getRouterParam(event, 'id')
+  const conexionId = getUuidParam(event, 'id', { recurso: 'Conexión' })
   const usuarioId = await getUsuarioFromEvent(event)
   const { mes, anio, fresh } = validateQuery(event, vistaCompartidaQuerySchema)
 

@@ -5,9 +5,10 @@ import { validateBody } from '../../utils/validate.js'
 import { deudaUpdateRealSchema } from '~/shared/schemas/deudas.js'
 import { registrarAuditoria } from '../../utils/vinculos.js'
 import { eq, and, sum, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Deuda' })
   const usuarioId = await getUsuarioFromEvent(event)
   // Whitelist + tipos via Zod: rechaza personaEntidadId/tipoDeuda
   // (no se permiten cambios de propietario via PUT), valida estado

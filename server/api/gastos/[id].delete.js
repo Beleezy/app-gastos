@@ -2,11 +2,12 @@ import { db } from '../../utils/db.js'
 import { gastos, gastosPlanificados } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 // Soft delete: marca deleted_at en vez de borrar. Recuperable desde la
 // papelera durante 30 días.
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Gasto' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   const [deleted] = await db.transaction(async (tx) => {

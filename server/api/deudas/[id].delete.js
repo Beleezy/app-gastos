@@ -3,9 +3,10 @@ import { deudas, personasEntidades, pagosDeuda } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { registrarAuditoria } from '../../utils/vinculos.js'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Deuda' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   const [deuda] = await db

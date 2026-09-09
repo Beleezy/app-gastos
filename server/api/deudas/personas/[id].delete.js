@@ -12,9 +12,10 @@ import {
   getNombreDisplay,
 } from '../../../utils/vinculos.js'
 import { eq, and, or, isNull, inArray } from 'drizzle-orm'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Persona' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   const [persona] = await db

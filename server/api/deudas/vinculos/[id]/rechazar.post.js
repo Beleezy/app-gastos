@@ -2,9 +2,10 @@ import { db } from '../../../../utils/db.js'
 import { solicitudesVinculo, usuarios } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
+import { getUuidParam } from '../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const solicitudId = getRouterParam(event, 'id')
+  const solicitudId = getUuidParam(event, 'id', { recurso: 'Solicitud' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   // Obtener email del usuario

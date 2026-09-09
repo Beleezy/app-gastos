@@ -4,9 +4,10 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { ahorroUpdateSchema } from '~/shared/schemas/categorias.js'
 import { eq, and } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Ahorro' })
   const usuarioId = await getUsuarioFromEvent(event)
   // Whitelist + tipos via Zod: rechaza mes/anio del body (se derivan
   // de fecha) y campos no esperados como `usuarioId` (mass-assignment).
