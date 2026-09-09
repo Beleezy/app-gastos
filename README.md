@@ -151,6 +151,16 @@ aplicadas; un prefijo numérico por migración (ante conflicto, sufijo letra: `0
 `/api/health` verifica columnas centinela del schema y responde 503 con `checks.schema='drift'`
 si la BD quedó desfasada — mantener la lista al añadir columnas críticas.
 
+### Tareas de mantenimiento
+
+`.github/workflows/mantenimiento.yml` llama semanalmente a los tres endpoints
+`/api/cron/*` (expirar solicitudes de vínculo, purgar caché LLM, purgar papelera).
+Necesita la variable de repositorio `APP_PUBLIC_URL` y el secret `CRON_SECRET`, que debe
+valer lo mismo que la variable de entorno homónima en Vercel.
+
+No se usa Vercel Cron porque manda `GET` con `Authorization: Bearer` y estos endpoints son
+`POST` con header `X-Cron-Secret`.
+
 ### Backups (Supabase free no incluye)
 
 `.github/workflows/db-backup.yml` hace `pg_dump` semanal cifrado (GPG simétrico) y lo sube como
