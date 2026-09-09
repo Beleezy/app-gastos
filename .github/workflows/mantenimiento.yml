@@ -1,0 +1,95 @@
+# Dispara las tareas de mantenimiento que la app expone en /api/cron/*.
+#
+# Existen tres desde hace meses —expirar solicitudes de vínculo, purgar la
+# caché LLM y vaciar la papelera de lo borrado hace más de 30 días— y nada las
+# llamaba nunca: vercel.json no declara `crons` y ningún workflow las tocaba.
+# Código escrito que no se ejecuta.
+#
+# Por qué aquí y no con Vercel Cron: Vercel manda GET con
+# `Authorization: Bearer`, y estos endpoints son POST y esperan el header
+# X-Cron-Secret. Adaptarlos sería tocar endpoints de producción que borran
+# filas; un curl desde Actions no toca nada de la app.
+#
+# Requiere dos cosas (Settings → Secrets and variables → Actions):
+#   Variable APP_PUBLIC_URL — la URL pública, sin barra final.
+#                             Pestaña "Variables", no es un secreto.
+#   Secret   CRON_SECRET    — el mismo valor que la variable de entorno
+#                             CRON_SECRET del proyecto en Vercel.
+#
+# Semanal y no diario a propósito: la papelera purga a los 30 días y la caché
+# LLM tiene su propio TTL, así que semanal basta y un fallo se ve una vez por
+# semana en vez de siete.
+
+name: Mantenimiento
+
+on:
+  schedule:
+    - cron: '0 10 * * 1' # lunes 10:00 UTC = 05:00 América/Lima
+  workflow_dispatch:
+
+# Solo hace peticiones HTTP a la app: nada del repositorio.
+permissions:
+  contents: read
+
+concurrency:
+  group: mantenimiento
+  cancel-in-progress: false
+
+jobs:
+  tareas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Falla en rojo si falta configuración, en vez de saltarse el paso. Una
+      # tarea de mantenimiento que no ocurre no puede reportarse en verde.
+      - name: Comprobar configuración
+        env:
+          URL: ${{ vars.APP_PUBLIC_URL }}
+          SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          faltan=""
+          [ -z "$URL" ] && faltan="$faltan APP_PUBLIC_URL (variable del repositorio)"
+          [ -z "$SECRET" ] && faltan="$faltan CRON_SECRET (secret del repositorio)"
+          if [ -n "$faltan" ]; then
+            {
+              echo "## Mantenimiento NO ejecutado"
+              echo ""
+              echo "Falta configurar:$faltan"
+              echo ""
+              echo "Settings → Secrets and variables → Actions."
+              echo "\`CRON_SECRET\` tiene que valer lo mismo que la variable de entorno del mismo nombre en Vercel."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=Mantenimiento sin configurar::Falta:$faltan"
+            exit 1
+          fi
+
+      - name: Ejecutar tareas
+        env:
+          URL: ${{ vars.APP_PUBLIC_URL }}
+          SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          fallos=0
+          echo "## Mantenimiento" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tarea | HTTP |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
+
+          for tarea in expirar-solicitudes purgar-llm-cache purgar-papelera; do
+            code=$(curl -sS -m 60 -o cuerpo.txt -w '%{http_code}' \
+              -X POST -H "X-Cron-Secret: $SECRET" \
+              "${URL%/}/api/cron/$tarea" || echo 000)
+
+            echo "| \`$tarea\` | $code |" >> "$GITHUB_STEP_SUMMARY"
+
+            case "$code" in
+              2*) echo "✓ $tarea → $code" ;;
+              *)
+                # El cuerpo solo se imprime cuando algo falló y recortado: este
+                # log es público. El logger del servidor ya redacta tokens.
+                echo "::error title=$tarea::HTTP $code — $(head -c 200 cuerpo.txt)"
+                fallos=$((fallos + 1))
+                ;;
+            esac
+          done
+
+          [ "$fallos" -eq 0 ] || exit 1

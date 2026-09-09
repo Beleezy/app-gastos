@@ -100,7 +100,7 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 - **Middleware** (orden): security-headers (CSP activa + estricta en Report-Only → `/api/csp-report`) · CORS allowlist · request-log · bypass E2E/dev · rate-limit global por IP ([rateLimit.js](server/utils/rateLimit.js), driver memoria o Upstash).
 - **Ownership:** [assertOwner.js](server/utils/assertOwner.js) contra IDOR; suite [seguridad.api.spec.js](e2e/api/seguridad.api.spec.js).
 - **Logger:** [logger.js](server/utils/logger.js) redacta tokens/keys — nunca `console.error` con cuerpos crudos.
-- **Cron** (`/api/cron/*`, header `X-Cron-Secret`): expirar solicitudes, purgar caché LLM, purgar papelera.
+- **Cron** (`/api/cron/*`, header `X-Cron-Secret`): expirar solicitudes, purgar caché LLM, purgar papelera. Los dispara [mantenimiento.yml](.github/workflows/mantenimiento.yml) semanalmente — hasta septiembre de 2026 no los llamaba nadie: `vercel.json` no declara `crons` y ningún workflow los tocaba. No se usa Vercel Cron porque manda `GET` con `Authorization: Bearer` y estos endpoints son `POST` con `X-Cron-Secret`; adaptarlos sería tocar endpoints que borran filas. Necesita la variable `APP_PUBLIC_URL` y el secret `CRON_SECRET` del repositorio.
 - **Integración Google Calendar:** OAuth propio, refresh tokens cifrados AES ([crypto.js](server/utils/crypto.js)), sync de planificados ([gcalAutoSync.js](server/utils/gcalAutoSync.js)).
 
 ## Convenciones cliente
