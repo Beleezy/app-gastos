@@ -20,7 +20,8 @@ concurrency:
 #  - Job "visual": solo en push a main / cron / dispatch manual. Compara
 #    contra baselines en e2e/visual/__screenshots__/. Si los baselines aun
 #    no existen, este job se salta automaticamente y deja una nota; usa
-#    workflow "E2E Visual Baseline" (workflow_dispatch) para generarlos.
+#    workflow "E2E Visual Baseline" para generarlos — a mano con
+#    workflow_dispatch, o empujando a la rama ci/generar-baselines-visuales.
 #
 # Postgres efimera + dev server en localhost:3000 + auth bypass.
 #
@@ -195,7 +196,7 @@ jobs:
             echo "Baselines encontrados — se ejecuta comparacion."
           else
             echo "exist=false" >> $GITHUB_OUTPUT
-            echo "::warning::No hay baselines visuales. Lanza el workflow 'E2E Visual Baseline' (workflow_dispatch) para crearlos."
+            echo "::warning::No hay baselines visuales. Lanza el workflow 'E2E Visual Baseline' (workflow_dispatch, o push a ci/generar-baselines-visuales) para crearlos."
           fi
 
       - name: Setup Node

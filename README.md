@@ -130,12 +130,23 @@ Variables de Supabase se setean a placeholders en CI para no exigir credenciales
 
 ### Deploy y migraciones
 
-`vercel.json` define `buildCommand: npm run db:apply && npm run build` — **cada deploy aplica
-las migraciones pendientes antes de compilar**. El script lleva registro por archivo en la
-tabla `_migraciones_aplicadas` (hash + fecha): los aplicados se saltan, los nuevos van en
-transacción, y si uno falla el build aborta (la BD no queda a medias ni el código nuevo se
-despliega sin su columna). Reglas: no editar migraciones aplicadas; un prefijo numérico por
-migración (ante conflicto, sufijo letra: `0005a_...`).
+Las migraciones **no** corren en el build. Las aplica `.github/workflows/migrate.yml` en cada
+push a `main` (y a mano con `workflow_dispatch`), usando el secret `DATABASE_URL` del
+repositorio — la cadena del _session pooler_ de Supabase, puerto 5432. `vercel.json` solo
+compila.
+
+Están separadas por dos razones. Una: mientras vivían en el `buildCommand`
+(`npm run db:apply && npm run build`), un fallo de datos tumbaba el despliegue — en julio de
+2026 dos filas con monto negativo hicieron fallar el `VALIDATE` de `0020` y dejaron el proyecto
+51 días sin publicar. Y dos, la más importante: los deploys de _preview_ corren el mismo
+comando con el mismo `DATABASE_URL`, así que **cualquier PR aplicaba sus migraciones a
+producción antes de ser revisado**.
+
+El script lleva registro por archivo en `_migraciones_aplicadas` (hash + fecha): los aplicados
+se saltan y los nuevos van en transacción, así que una migración fallida no deja la BD a
+medias. Si el workflow falla, el código puede quedar por delante del esquema: `/api/health`
+devuelve 503 con `checks.schema='drift'` y el monitor avisa. Reglas: no editar migraciones
+aplicadas; un prefijo numérico por migración (ante conflicto, sufijo letra: `0005a_...`).
 
 `/api/health` verifica columnas centinela del schema y responde 503 con `checks.schema='drift'`
 si la BD quedó desfasada — mantener la lista al añadir columnas críticas.
