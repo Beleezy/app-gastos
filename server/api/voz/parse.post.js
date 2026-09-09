@@ -22,7 +22,8 @@ import {
 import { trackUsoLlm, assertCuotaMensual } from '../../utils/usoLlm.js'
 import { getCached, setCached, hashInput } from '../../utils/llmCache.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
-import { eq, or, isNull } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 const MAX_INPUT_CHARS = 2000
 
@@ -62,13 +63,7 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select({ nombre: categorias.nombre })
     .from(categorias)
-    .where(
-      or(
-        eq(categorias.esPredefinida, true),
-        eq(categorias.usuarioId, usuarioId),
-        isNull(categorias.usuarioId),
-      ),
-    )
+    .where(categoriasLegibles(usuarioId))
     .orderBy(categorias.nombre)
   // Categorías custom son texto libre del usuario; saneamos antes de
   // inyectarlas al system prompt (defensa contra stored prompt injection).

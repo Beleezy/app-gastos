@@ -13,6 +13,9 @@ import {
   proyectoCompletamenteDecidido,
   detallesOrdenados,
   decisionBadge,
+  prioridadBadge,
+  hostDeUrl,
+  rangoPrecios,
 } from '../composables/useFuturosDecision.js'
 
 const detalle = (over = {}) => ({ id: 1, estadoDecision: null, ...over })
@@ -142,5 +145,74 @@ describe('decisionBadge', () => {
 
   it('un estado desconocido no inventa un badge', () => {
     expect(decisionBadge({ estadoDecision: 'algo_nuevo' })).toBeNull()
+  })
+})
+
+describe('prioridadBadge', () => {
+  it.each([
+    [3, '● Alta'],
+    [2, '● Media'],
+    [1, '● Baja'],
+  ])('prioridad %i tiene etiqueta propia', (valor, label) => {
+    expect(prioridadBadge(valor).label).toBe(label)
+  })
+
+  it('prioridad 0 o sin definir no pinta badge', () => {
+    expect(prioridadBadge(0)).toBeNull()
+    expect(prioridadBadge(null)).toBeNull()
+    expect(prioridadBadge(undefined)).toBeNull()
+  })
+
+  it('un valor fuera de rango tampoco inventa badge', () => {
+    expect(prioridadBadge(9)).toBeNull()
+    expect(prioridadBadge('alta')).toBeNull()
+  })
+})
+
+describe('hostDeUrl', () => {
+  it('devuelve el host sin www', () => {
+    expect(hostDeUrl('https://www.amazon.com/dp/123')).toBe('amazon.com')
+    expect(hostDeUrl('https://tienda.example.pe/p/1')).toBe('tienda.example.pe')
+  })
+
+  it('una URL inválida no rompe la fila', () => {
+    expect(hostDeUrl('no soy una url')).toBe('Abrir enlace')
+    expect(hostDeUrl('')).toBe('Abrir enlace')
+    expect(hostDeUrl(null)).toBe('Abrir enlace')
+  })
+})
+
+describe('rangoPrecios', () => {
+  it('con mínimo y máximo distintos devuelve ambos', () => {
+    expect(rangoPrecios({ precioMinimo: '100', precioMaximo: '200' })).toEqual({
+      min: 100,
+      max: 200,
+    })
+  })
+
+  it('con mínimo y máximo iguales devuelve uno solo', () => {
+    expect(rangoPrecios({ precioMinimo: '150', precioMaximo: '150' })).toEqual({
+      min: 150,
+      max: null,
+    })
+  })
+
+  it('un 0 cuenta como "sin precio", no como precio cero', () => {
+    // El bug que arregla: la UI mostraba "S/ 480 — S/ 0" cuando solo se
+    // había rellenado el mínimo.
+    expect(rangoPrecios({ precioMinimo: '480', precioMaximo: '0' })).toEqual({
+      min: 480,
+      max: null,
+    })
+  })
+
+  it('sin ningún precio devuelve null', () => {
+    expect(rangoPrecios({ precioMinimo: '0', precioMaximo: '0' })).toBeNull()
+    expect(rangoPrecios({})).toBeNull()
+    expect(rangoPrecios(undefined)).toBeNull()
+  })
+
+  it('solo máximo también vale', () => {
+    expect(rangoPrecios({ precioMaximo: '99' })).toEqual({ min: 99, max: null })
   })
 })

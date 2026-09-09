@@ -8,6 +8,7 @@ import {
 } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, inArray } from 'drizzle-orm'
+import { categoriasPredefinidasGlobales } from '../../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -30,7 +31,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // Obtener categorías predefinidas
-  const predefinidas = await db.select().from(categorias).where(eq(categorias.esPredefinida, true))
+  const predefinidas = await db.select().from(categorias).where(categoriasPredefinidasGlobales())
 
   if (predefinidas.length === 0) {
     return { provisioned: false, categories: [] }

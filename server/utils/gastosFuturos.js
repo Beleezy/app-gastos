@@ -225,32 +225,84 @@ export async function validarCategoriaGastoFuturo(executor, categoriaId, usuario
   return categoria
 }
 
-export async function persistGastoFuturoChildren(tx, gastoFuturoId, detalles) {
-  for (const [detalleIndex, detalle] of detalles.entries()) {
-    const [insertedDetail] = await tx
-      .insert(gastosFuturosDetalles)
-      .values({
-        gastoFuturoId,
-        nombre: detalle.nombre,
-        notas: detalle.notas,
-        prioridad: detalle.prioridad ?? 0,
-        orden: detalleIndex,
-      })
-      .returning({ id: gastosFuturosDetalles.id })
+/**
+ * Filas de `gastos_futuros_detalles` para un INSERT múltiple.
+ *
+ * El `orden` sale de la POSICIÓN en el array, no de lo que traiga el
+ * payload: es el orden que el usuario ve en pantalla.
+ */
+export function filasDetalles(gastoFuturoId, detalles) {
+  return (detalles || []).map((detalle, i) => ({
+    gastoFuturoId,
+    nombre: detalle.nombre,
+    notas: detalle.notas,
+    // `?? 0` y no `|| 0`: prioridad 0 es un valor válido. Y explícito y no
+    // undefined, porque en un INSERT múltiple Drizzle emite NULL para las
+    // claves ausentes en una fila aunque la columna tenga default.
+    prioridad: detalle.prioridad ?? 0,
+    orden: i,
+  }))
+}
 
-    for (const [optionIndex, opcion] of detalle.opciones.entries()) {
-      await tx.insert(gastosFuturosOpciones).values({
-        detalleId: insertedDetail.id,
+/**
+ * Filas de `gastos_futuros_opciones` para un INSERT múltiple.
+ *
+ * @param {Array} detalles los mismos que se pasaron a `filasDetalles`
+ * @param {Array<string>} idsDetalles ids devueltos por su INSERT, EN EL
+ *   MISMO ORDEN — que es lo que garantiza `returning` sobre un values().
+ */
+export function filasOpciones(detalles, idsDetalles) {
+  const filas = []
+  ;(detalles || []).forEach((detalle, i) => {
+    const detalleId = (idsDetalles || [])[i]
+    if (!detalleId) return
+    ;(detalle.opciones || []).forEach((opcion, j) => {
+      filas.push({
+        detalleId,
         nombre: opcion.nombre,
         referenciaUrl: opcion.referenciaUrl,
         imagenUrl: opcion.imagenUrl,
-        precioMinimo: opcion.precioMinimo !== null ? String(opcion.precioMinimo) : null,
-        precioMaximo: opcion.precioMaximo !== null ? String(opcion.precioMaximo) : null,
-        precioPromedio: opcion.precioPromedio !== null ? String(opcion.precioPromedio) : null,
+        // `!= null` cubre null y undefined pero NO el 0, que es un precio
+        // legítimo (algo regalado, un trámite gratuito).
+        precioMinimo: opcion.precioMinimo != null ? String(opcion.precioMinimo) : null,
+        precioMaximo: opcion.precioMaximo != null ? String(opcion.precioMaximo) : null,
+        precioPromedio: opcion.precioPromedio != null ? String(opcion.precioPromedio) : null,
         notas: opcion.notas,
-        orden: optionIndex,
+        orden: j,
       })
-    }
+    })
+  })
+  return filas
+}
+
+/**
+ * Persiste detalles y opciones de un gasto futuro en DOS inserts.
+ *
+ * Antes insertaba cada detalle y, dentro de él, cada opción, de una en
+ * una: un proyecto de 5 detalles con 4 opciones eran 25 INSERT
+ * secuenciales. Crear un gasto futuro es interactivo, así que ese coste
+ * lo pagaba el usuario esperando.
+ */
+export async function persistGastoFuturoChildren(tx, gastoFuturoId, detalles) {
+  const detalleRows = filasDetalles(gastoFuturoId, detalles)
+  if (!detalleRows.length) return
+
+  // Se pide `orden` de vuelta y se reordena por él en vez de confiar en
+  // que RETURNING devuelva las filas en el orden del VALUES: Postgres lo
+  // hace hoy para un INSERT simple, pero no lo garantiza, y si algún día
+  // cambiara el síntoma sería opciones colgando del detalle equivocado —
+  // silencioso y difícil de rastrear.
+  const insertados = await tx
+    .insert(gastosFuturosDetalles)
+    .values(detalleRows)
+    .returning({ id: gastosFuturosDetalles.id, orden: gastosFuturosDetalles.orden })
+
+  const idsPorOrden = []
+  for (const d of insertados) idsPorOrden[d.orden] = d.id
+
+  const opcionRows = filasOpciones(detalles, idsPorOrden)
+  if (opcionRows.length) {
+    await tx.insert(gastosFuturosOpciones).values(opcionRows)
   }
 }
 

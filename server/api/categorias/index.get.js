@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, or, and, isNull } from 'drizzle-orm'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -17,12 +17,7 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select()
     .from(categorias)
-    .where(
-      or(
-        eq(categorias.usuarioId, usuarioId),
-        and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
-      ),
-    )
+    .where(categoriasLegibles(usuarioId))
     .orderBy(categorias.nombre)
 
   const propias = cats.filter((c) => c.usuarioId === usuarioId)

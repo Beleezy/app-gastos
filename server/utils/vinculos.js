@@ -8,7 +8,7 @@ import {
   configuraciones,
   vinculosCheckpoints,
 } from '../database/schema.js'
-import { eq, and, isNotNull, or } from 'drizzle-orm'
+import { eq, and, isNotNull, inArray, sql } from 'drizzle-orm'
 
 /**
  * Invierte el tipo de deuda: me_deben ↔ yo_debo
@@ -204,13 +204,34 @@ export async function crearDeudasEspejoBulk(tx, deudasOriginales, personaParId, 
     mapping.set(e.vinculoDeudaId, e.id)
   }
 
-  // Update originales con su vinculoDeudaId apuntando al espejo. Drizzle
-  // no soporta UPDATE...FROM con un VALUES portable, así que paralelizamos
-  // los UPDATEs por ID (igual de costoso que un único batch dentro de tx).
-  for (const d of deudasOriginales) {
-    const espejoId = mapping.get(d.id)
-    if (!espejoId) continue
-    await tx.update(deudas).set({ vinculoDeudaId: espejoId }).where(eq(deudas.id, d.id))
+  // Update originales con su vinculoDeudaId apuntando al espejo, en UNA
+  // sentencia. El comentario anterior decía "paralelizamos los UPDATEs",
+  // pero el código hacía `await` dentro de un `for`: eran N round trips
+  // estrictamente secuenciales, y dentro de una transacción que mantenía
+  // los locks abiertos todo ese rato. Vincular una persona con 100 deudas
+  // eran 100 idas y vueltas.
+  //
+  // Drizzle no expone UPDATE...FROM (VALUES), así que se arma un CASE por
+  // id. Los valores van interpolados por Drizzle como parámetros, no
+  // concatenados: `sql` los parametriza.
+  const pares = deudasOriginales
+    .map((d) => ({ id: d.id, espejoId: mapping.get(d.id) }))
+    .filter((x) => x.espejoId)
+
+  if (pares.length) {
+    const ramas = sql.join(
+      pares.map((x) => sql`WHEN ${x.id}::uuid THEN ${x.espejoId}::uuid`),
+      sql` `,
+    )
+    await tx
+      .update(deudas)
+      .set({ vinculoDeudaId: sql`CASE ${deudas.id} ${ramas} END` })
+      .where(
+        inArray(
+          deudas.id,
+          pares.map((x) => x.id),
+        ),
+      )
   }
 
   return mapping
@@ -240,12 +261,23 @@ export async function crearPagosEspejoBulk(tx, pagosConDeudaEspejo) {
     .values(filas)
     .returning({ id: pagosDeuda.id, vinculoPagoId: pagosDeuda.vinculoPagoId })
 
-  // Update originales con vinculoPagoId apuntando al espejo
-  for (const e of espejos) {
+  // Update originales con vinculoPagoId apuntando al espejo, en UNA
+  // sentencia (mismo motivo que en crearDeudasEspejoBulk: el bucle con
+  // await era N round trips secuenciales dentro de la transacción).
+  if (espejos.length) {
+    const ramas = sql.join(
+      espejos.map((e) => sql`WHEN ${e.vinculoPagoId}::uuid THEN ${e.id}::uuid`),
+      sql` `,
+    )
     await tx
       .update(pagosDeuda)
-      .set({ vinculoPagoId: e.id })
-      .where(eq(pagosDeuda.id, e.vinculoPagoId))
+      .set({ vinculoPagoId: sql`CASE ${pagosDeuda.id} ${ramas} END` })
+      .where(
+        inArray(
+          pagosDeuda.id,
+          espejos.map((e) => e.vinculoPagoId),
+        ),
+      )
   }
 
   return espejos.length
@@ -275,6 +307,50 @@ export async function crearPagoEspejo(tx, pagoOriginal, deudaEspejoId) {
     .where(eq(pagosDeuda.id, pagoOriginal.id))
 
   return pagoEspejo
+}
+
+/**
+ * Arma la estructura del snapshot a partir de las deudas y de TODOS sus
+ * pagos traídos de una vez, en lugar de consultar los pagos deuda a deuda.
+ *
+ * La proyección de campos es explícita a propósito: el snapshot se
+ * serializa a JSON y se guarda en `vinculos_checkpoints`, que la otra
+ * parte del vínculo puede leer. Con un spread, cualquier columna que se
+ * agregue mañana a `deudas` o `pagos_deuda` acabaría dentro del checkpoint
+ * sin que nadie lo decidiera.
+ *
+ * @param {Array} deudasList
+ * @param {Array} pagosList pagos de (al menos) esas deudas
+ */
+export function agruparPagosPorDeuda(deudasList, pagosList) {
+  const porDeuda = new Map()
+  for (const d of deudasList || []) porDeuda.set(d.id, [])
+  for (const p of pagosList || []) {
+    // Un pago de una deuda que no está en la lista se descarta: la query
+    // puede traer de más, pero el snapshot no debe inventar deudas.
+    porDeuda.get(p.deudaId)?.push({
+      id: p.id,
+      montoPagado: p.montoPagado,
+      fechaPago: p.fechaPago,
+      metodoPago: p.metodoPago,
+      notas: p.notas,
+      vinculoPagoId: p.vinculoPagoId,
+    })
+  }
+
+  return (deudasList || []).map((d) => ({
+    id: d.id,
+    concepto: d.concepto,
+    tipoDeuda: d.tipoDeuda,
+    montoOriginal: d.montoOriginal,
+    montoPendiente: d.montoPendiente,
+    fechaCreacion: d.fechaCreacion,
+    fechaPago: d.fechaPago,
+    estado: d.estado,
+    notas: d.notas,
+    vinculoDeudaId: d.vinculoDeudaId,
+    pagos: porDeuda.get(d.id) || [],
+  }))
 }
 
 /**
@@ -312,34 +388,28 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
         .limit(1)
     : [null]
 
-  async function getDeudasConPagos(personaId) {
-    const deudasList = await tx.select().from(deudas).where(eq(deudas.personaEntidadId, personaId))
-    const result = []
-    for (const d of deudasList) {
-      const pagosD = await tx.select().from(pagosDeuda).where(eq(pagosDeuda.deudaId, d.id))
-      result.push({
-        id: d.id,
-        concepto: d.concepto,
-        tipoDeuda: d.tipoDeuda,
-        montoOriginal: d.montoOriginal,
-        montoPendiente: d.montoPendiente,
-        fechaCreacion: d.fechaCreacion,
-        fechaPago: d.fechaPago,
-        estado: d.estado,
-        notas: d.notas,
-        vinculoDeudaId: d.vinculoDeudaId,
-        pagos: pagosD.map((p) => ({
-          id: p.id,
-          montoPagado: p.montoPagado,
-          fechaPago: p.fechaPago,
-          metodoPago: p.metodoPago,
-          notas: p.notas,
-          vinculoPagoId: p.vinculoPagoId,
-        })),
-      })
-    }
-    return result
+  // Las deudas de AMBAS personas y todos sus pagos, en dos queries. Antes
+  // esto era, por persona: 1 query de deudas + 1 query de pagos POR DEUDA.
+  // Con el volumen del seed (119 deudas) eran ~240 round trips secuenciales
+  // dentro de una transacción, que además mantenía los locks abiertos todo
+  // ese rato.
+  const personaIds = [personaAId, personaBId].filter(Boolean)
+  const todasLasDeudas = personaIds.length
+    ? await tx.select().from(deudas).where(inArray(deudas.personaEntidadId, personaIds))
+    : []
+
+  const deudaIds = todasLasDeudas.map((d) => d.id)
+  const todosLosPagos = deudaIds.length
+    ? await tx.select().from(pagosDeuda).where(inArray(pagosDeuda.deudaId, deudaIds))
+    : []
+
+  const deudasPorPersona = new Map(personaIds.map((id) => [id, []]))
+  for (const d of todasLasDeudas) {
+    deudasPorPersona.get(d.personaEntidadId)?.push(d)
   }
+
+  const getDeudasConPagos = (personaId) =>
+    agruparPagosPorDeuda(deudasPorPersona.get(personaId) || [], todosLosPagos)
 
   return {
     personaA: perA
@@ -347,7 +417,7 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
           id: perA.id,
           nombre: perA.nombre,
           usuarioId: perA.usuarioId,
-          deudas: await getDeudasConPagos(personaAId),
+          deudas: getDeudasConPagos(personaAId),
         }
       : null,
     personaB: perB
@@ -355,7 +425,7 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
           id: perB.id,
           nombre: perB.nombre,
           usuarioId: perB.usuarioId,
-          deudas: await getDeudasConPagos(personaBId),
+          deudas: getDeudasConPagos(personaBId),
         }
       : null,
     fechaSnapshot: new Date().toISOString(),
