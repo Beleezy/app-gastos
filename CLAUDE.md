@@ -72,7 +72,7 @@ Schemas Zod en [compartido.js](shared/schemas/compartido.js); sus límites espej
 
 ## Base de datos ([schema.js](server/database/schema.js))
 
-Tablas: `usuarios` (espejo de auth.users, + perfiles gestionados con contacto), `intenciones_registro`, `categorias`, `planes_mensuales` (UNIQUE usuario+mes+año), `gastos_planificados`, `gastos` (vínculo 1:1 opcional a planificado), `gastos_futuros`/`_detalles`/`_opciones`, `personas_entidades`, `deudas`, `pagos_deuda`, `configuraciones` (1:1 usuario), `auditoria_vinculos`, `vinculos_checkpoints`, `solicitudes_vinculo`, `ingresos`, `medios_ahorro`, `ahorros`, `metas_ahorro`, `plantillas_mes`, `uso_llm`, `llm_cache`, `google_calendar_conexiones`, `presupuestos_categoria`, `compartido_conexiones`/`compartido_categorias`/`compartido_avisos`.
+Tablas: `usuarios` (espejo de auth.users, + perfiles gestionados con contacto), `intenciones_registro`, `categorias`, `planes_mensuales` (UNIQUE usuario+mes+año), `gastos_planificados`, `gastos` (vínculo 1:1 opcional a planificado), `gastos_futuros`/`_detalles`/`_opciones`, `personas_entidades`, `deudas`, `pagos_deuda`, `configuraciones` (1:1 usuario), `auditoria_vinculos`, `vinculos_checkpoints`, `solicitudes_vinculo`, `ingresos`, `medios_ahorro`, `ahorros`, `metas_ahorro`, `plantillas_mes`, `uso_llm`, `llm_cache`, `google_calendar_conexiones`, `presupuestos_categoria`, `compartido_conexiones`/`compartido_categorias`/`compartido_avisos`, `idempotency_keys`.
 
 Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — filtrar con `isNull()` en TODA query de lectura.
 
@@ -93,6 +93,44 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 
 ---
 
+## Invariantes que ya se rompieron una vez
+
+Cada punto de acá corresponde a un agujero real que estuvo abierto. El
+patrón que los une: **la abstracción correcta ya existía y no se estaba
+usando**. Antes de escribir una comprobación a mano, buscar si ya hay un
+helper que la haga.
+
+- **Dinero: leer dentro de la transacción y con `FOR UPDATE`.** Los pagos
+  leían `monto_pendiente` fuera y escribían el saldo como valor absoluto:
+  dos pagos concurrentes se pisaban y el dinero del primero desaparecía.
+  No es hipotético — la cola offline reintenta y el doble tap en móvil
+  manda dos POST casi a la vez. El cálculo del saldo vive en
+  [pagosMath.js](server/utils/pagosMath.js), no inline.
+- **`categoriaId` se valida.** La regla ("del usuario o predefinida
+  global") vive en [categorias.js](server/utils/categorias.js). Estaba
+  escrita a mano en cinco sitios y faltaba en los tres que más escriben.
+- **Ids de ruta: `getUuidParam`** ([params.js](server/utils/params.js)).
+  Un id que no es UUID reventaba la query y devolvía un 500 con el error
+  del driver. La lección estaba documentada solo para Compartido.
+- **`validateBody` siempre.** `gastosBulkCreateSchema` existía desde que
+  se escribió el módulo y el handler leía `readBody` crudo. Al añadir un
+  schema, cablearlo; al escribir un handler, buscar si ya hay uno.
+- **Errores al usuario: `handleApiError`** ([handleApiError.js](utils/handleApiError.js)),
+  nunca `e?.data?.message` a pelo — eso se salta el filtro que impide
+  enseñar `[POST] "/api/x": 500`. Acepta un fallback contextual.
+- **Idempotencia en BD, no en memoria** ([idempotency.js](server/utils/idempotency.js)).
+  `conIdempotencia(event, usuarioId, fn)` es un envoltorio: con un par
+  reservar/completar es fácil olvidar liberar la reserva si el handler
+  falla, y una reserva huérfana bloquea el reintento legítimo. Un `Map` de
+  proceso no protege entre lambdas, y el driver Upstash se degrada en
+  silencio a ese `Map` si no está configurado.
+- **Modales: `SharedConfirmDialog`**, que trae role, focus trap, Escape y
+  botón atrás. Tres modales escritos a mano en `futuros` no tenían nada de
+  eso.
+- **Caches de proceso con cota y TTL.** El de acceso solo se invalida en
+  la instancia que atiende la petición: sin TTL, revocar un acceso no
+  llegaba a las demás lambdas.
+
 ## Capa servidor
 
 - **Handlers delgados** en `server/api/**`: auth (`getUsuarioFromEvent`) + validación + delegar a `server/services/*.service.js` (gastos, deudas, pagos, ingresos, planificador, plantillasMes, perfiles).
@@ -100,7 +138,7 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 - **Middleware** (orden): security-headers (CSP activa + estricta en Report-Only → `/api/csp-report`) · CORS allowlist · request-log · bypass E2E/dev · rate-limit global por IP ([rateLimit.js](server/utils/rateLimit.js), driver memoria o Upstash).
 - **Ownership:** [assertOwner.js](server/utils/assertOwner.js) contra IDOR; suite [seguridad.api.spec.js](e2e/api/seguridad.api.spec.js).
 - **Logger:** [logger.js](server/utils/logger.js) redacta tokens/keys — nunca `console.error` con cuerpos crudos.
-- **Cron** (`/api/cron/*`, header `X-Cron-Secret`): expirar solicitudes, purgar caché LLM, purgar papelera. Los dispara [mantenimiento.yml](.github/workflows/mantenimiento.yml) semanalmente — hasta septiembre de 2026 no los llamaba nadie: `vercel.json` no declara `crons` y ningún workflow los tocaba. No se usa Vercel Cron porque manda `GET` con `Authorization: Bearer` y estos endpoints son `POST` con `X-Cron-Secret`; adaptarlos sería tocar endpoints que borran filas. Necesita la variable `APP_PUBLIC_URL` y el secret `CRON_SECRET` del repositorio.
+- **Cron** (`/api/cron/*`, header `X-Cron-Secret`): expirar solicitudes, purgar caché LLM, purgar papelera, purgar idempotencias. Los dispara [mantenimiento.yml](.github/workflows/mantenimiento.yml) semanalmente — hasta septiembre de 2026 no los llamaba nadie: `vercel.json` no declara `crons` y ningún workflow los tocaba. No se usa Vercel Cron porque manda `GET` con `Authorization: Bearer` y estos endpoints son `POST` con `X-Cron-Secret`; adaptarlos sería tocar endpoints que borran filas. Necesita la variable `APP_PUBLIC_URL` y el secret `CRON_SECRET` del repositorio.
 - **Integración Google Calendar:** OAuth propio, refresh tokens cifrados AES ([crypto.js](server/utils/crypto.js)), sync de planificados ([gcalAutoSync.js](server/utils/gcalAutoSync.js)).
 
 ## Convenciones cliente

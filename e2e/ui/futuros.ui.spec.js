@@ -128,6 +128,37 @@ test.describe('Gastos Futuros — lista', () => {
     await expect(page.getByText(baja, { exact: false })).toHaveCount(0)
   })
 
+  test('borrar un proyecto pasa por el diálogo compartido y lo quita de la lista', async ({
+    page,
+    request,
+  }) => {
+    // Las tres confirmaciones de este módulo estaban escritas a mano, sin
+    // role alertdialog ni cierre con Escape. Ahora usan SharedConfirmDialog
+    // igual que el resto del proyecto; este test fija ese contrato.
+    const aBorrar = `Borrable ${marca}`
+    await crearProyecto(request, aBorrar)
+    await irAFuturos(page)
+
+    const tarjeta = page.getByTestId('futuros-proyecto').filter({ hasText: aBorrar }).first()
+    await expect(tarjeta).toBeVisible({ timeout: 15000 })
+
+    // El menú kebab de la tarjeta abre la acción de eliminar.
+    await tarjeta.getByRole('button').last().click()
+    await page.getByText('Eliminar', { exact: false }).last().click()
+
+    const dialogo = page.getByTestId('confirm-dialog')
+    await expect(dialogo).toBeVisible({ timeout: 10000 })
+    await expect(dialogo).toHaveAttribute('role', 'alertdialog')
+    await expect(dialogo).toHaveAttribute('aria-modal', 'true')
+    await expect(dialogo).toContainText(aBorrar)
+
+    // Escape cancela sin borrar: es una de las cosas que el modal a mano
+    // no hacía.
+    await page.keyboard.press('Escape')
+    await expect(dialogo).toBeHidden({ timeout: 10000 })
+    await expect(tarjeta).toBeVisible()
+  })
+
   test('cambiar de filtro no deja la lista en un estado imposible', async ({ page, request }) => {
     await crearProyecto(request, `Ciclo ${marca}`)
     await irAFuturos(page)

@@ -928,112 +928,44 @@
       @click="cerrarTodosMenus"
     ></div>
 
-    <!-- Modal: confirmar eliminar proyecto -->
-    <div v-if="proyectoAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="proyectoAEliminar = null"
-      ></div>
-      <div
-        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
-      >
-        <h3 class="text-base font-semibold text-theme-text">Eliminar gasto futuro</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminarán el proyecto, sus detalles y todas las opciones guardadas.
-        </p>
-        <p class="mt-2 text-sm font-medium text-theme-text">{{ proyectoAEliminar.tipoGasto }}</p>
-        <div class="mt-5 space-y-2">
-          <button
-            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
-            :disabled="eliminando"
-            @click="confirmarEliminar"
-          >
-            {{ eliminando ? 'Eliminando...' : 'Eliminar proyecto' }}
-          </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="proyectoAEliminar = null"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Confirmaciones de borrado.
+         Antes eran tres modales escritos a mano aquí, casi idénticos entre
+         sí y sin nada de lo que SharedConfirmDialog ya trae: role
+         alertdialog, aria-modal, focus trap, cierre con Escape y con el
+         botón atrás. El componente compartido se usa en otros 10 archivos
+         del proyecto; este era el que se lo había perdido. -->
+    <SharedConfirmDialog
+      :model-value="proyectoAEliminar !== null"
+      title="Eliminar gasto futuro"
+      :message="`Se eliminarán «${proyectoAEliminar?.tipoGasto ?? ''}», sus detalles y todas las opciones guardadas.`"
+      :confirm-label="eliminando ? 'Eliminando...' : 'Eliminar proyecto'"
+      :loading="eliminando"
+      variant="danger"
+      @update:model-value="proyectoAEliminar = null"
+      @confirm="confirmarEliminar"
+    />
 
-    <!-- Modal: confirmar eliminar detalle -->
-    <div v-if="detalleAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="detalleAEliminar = null"
-      ></div>
-      <div
-        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
-      >
-        <h3 class="text-base font-semibold text-theme-text">Eliminar detalle</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminará el detalle y todas sus opciones guardadas.
-        </p>
-        <p class="mt-2 text-sm font-medium text-theme-text">
-          {{ detalleAEliminar.detalle.nombre }}
-        </p>
-        <p
-          v-if="detalleAEliminar.detalle.opciones?.length"
-          class="mt-1 text-xs text-theme-text-muted"
-        >
-          {{ detalleAEliminar.detalle.opciones.length }} opcion{{
-            detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : ''
-          }}
-          se perderán
-        </p>
-        <div class="mt-5 space-y-2">
-          <button
-            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
-            :disabled="guardandoInline"
-            @click="confirmarEliminarDetalle"
-          >
-            {{ guardandoInline ? 'Eliminando...' : 'Eliminar detalle' }}
-          </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="detalleAEliminar = null"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
+    <SharedConfirmDialog
+      :model-value="detalleAEliminar !== null"
+      title="Eliminar detalle"
+      :message="mensajeEliminarDetalle"
+      :confirm-label="guardandoInline ? 'Eliminando...' : 'Eliminar detalle'"
+      :loading="guardandoInline"
+      variant="danger"
+      @update:model-value="detalleAEliminar = null"
+      @confirm="confirmarEliminarDetalle"
+    />
 
-    <!-- Modal: confirmar eliminar opción -->
-    <div v-if="opcionAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="opcionAEliminar = null"
-      ></div>
-      <div
-        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
-      >
-        <h3 class="text-base font-semibold text-theme-text">Eliminar opción</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminará esta opción de forma permanente.
-        </p>
-        <p class="mt-2 text-sm font-medium text-theme-text">{{ opcionAEliminar.opcion.nombre }}</p>
-        <div class="mt-5 space-y-2">
-          <button
-            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
-            :disabled="guardandoInline"
-            @click="confirmarEliminarOpcion"
-          >
-            {{ guardandoInline ? 'Eliminando...' : 'Eliminar opción' }}
-          </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="opcionAEliminar = null"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
+    <SharedConfirmDialog
+      :model-value="opcionAEliminar !== null"
+      title="Eliminar opción"
+      :message="`Se eliminará «${opcionAEliminar?.opcion?.nombre ?? ''}» de forma permanente.`"
+      :confirm-label="guardandoInline ? 'Eliminando...' : 'Eliminar opción'"
+      :loading="guardandoInline"
+      variant="danger"
+      @update:model-value="opcionAEliminar = null"
+      @confirm="confirmarEliminarOpcion"
+    />
 
     <!-- Panel: nueva opción -->
     <div v-if="nuevaOpcionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
@@ -1317,6 +1249,16 @@ const ordenes = [
 const ordenLabel = computed(
   () => ordenes.find((o) => o.value === ordenActual.value)?.label || 'Reciente',
 )
+// El mensaje de borrado de detalle avisa cuántas opciones se pierden: es
+// la única de las tres confirmaciones cuyo texto no es una plantilla fija.
+const mensajeEliminarDetalle = computed(() => {
+  const d = detalleAEliminar.value?.detalle
+  if (!d) return ''
+  const n = d.opciones?.length || 0
+  const cola = n > 0 ? ` Se perderá${n !== 1 ? 'n' : ''} ${n} opcion${n !== 1 ? 'es' : ''}.` : ''
+  return `Se eliminará «${d.nombre ?? ''}» y todas sus opciones guardadas.${cola}`
+})
+
 function ciclarOrden() {
   const idx = ordenes.findIndex((o) => o.value === ordenActual.value)
   ordenActual.value = ordenes[(idx + 1) % ordenes.length].value
