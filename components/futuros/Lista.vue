@@ -18,12 +18,15 @@
         </svg>
         <input
           v-model="busqueda"
+          data-testid="futuros-buscar"
+          aria-label="Buscar proyecto, detalle u opción"
           type="text"
           placeholder="Buscar proyecto, detalle u opción..."
           class="w-full rounded-xl border border-theme-border bg-theme-card py-2 pl-9 pr-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
       </div>
       <button
+        data-testid="futuros-orden"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-theme-border bg-theme-card px-3 py-2 text-[0.6875rem] text-theme-text-sec hover:text-theme-text transition-colors"
         :title="`Ordenar por ${ordenLabel}`"
         @click="ciclarOrden"
@@ -53,6 +56,8 @@
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"
+        :data-testid="`futuros-filtro-${f.value}`"
+        :aria-pressed="filtroActual === f.value"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
         :class="[
           filtroActual === f.value
@@ -109,7 +114,7 @@
           />
         </svg>
       </div>
-      <p class="text-sm text-theme-text">
+      <p data-testid="futuros-vacio" class="text-sm text-theme-text">
         {{ busqueda ? 'No hay coincidencias' : 'Crea tu primer gasto futuro' }}
       </p>
       <p class="mt-1 text-xs text-theme-text-sec">
@@ -125,6 +130,7 @@
       <article
         v-for="proyecto in gastosFiltrados"
         :key="proyecto.id"
+        data-testid="futuros-proyecto"
         class="rounded-2xl border border-theme-border bg-theme-card"
       >
         <!-- Cabecera del proyecto (compacta) -->
@@ -1292,6 +1298,12 @@ const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura
   useGastosFuturos()
 const { success, error: toastError } = useToast()
 
+// progresoProyecto / proyectoTieneDecididos / proyectoCompletamenteDecidido /
+// detallesOrdenados / decisionBadge viven en composables/useFuturosDecision.js
+// (auto-importado). Estaban inline en este archivo, que es el más grande del
+// proyecto y el único módulo sin tests E2E: fuera son funciones puras con su
+// propia batería en tests/futurosDecision.test.js.
+
 const busqueda = ref('')
 const busquedaDebounced = useDebouncedRef(busqueda, 200)
 const filtroActual = ref('todos')
@@ -1308,20 +1320,6 @@ const ordenLabel = computed(
 function ciclarOrden() {
   const idx = ordenes.findIndex((o) => o.value === ordenActual.value)
   ordenActual.value = ordenes[(idx + 1) % ordenes.length].value
-}
-
-function progresoProyecto(proyecto) {
-  const total = proyecto.detalles?.length || 0
-  if (total === 0) return { total: 0, decididos: 0, porcentaje: 0 }
-  const decididos = proyecto.detalles.filter((d) => d.estadoDecision).length
-  return { total, decididos, porcentaje: Math.round((decididos / total) * 100) }
-}
-
-function proyectoTieneDecididos(p) {
-  return p.detalles?.some((d) => d.estadoDecision)
-}
-function proyectoCompletamenteDecidido(p) {
-  return p.detalles?.length > 0 && p.detalles.every((d) => d.estadoDecision)
 }
 
 const filtrosProyecto = computed(() => {
@@ -1969,24 +1967,6 @@ async function confirmarDecision() {
   } finally {
     decidiendo.value = false
   }
-}
-
-function detallesOrdenados(detalles) {
-  return [...detalles].sort((a, b) => {
-    const dp = (b.prioridad ?? 0) - (a.prioridad ?? 0)
-    if (dp !== 0) return dp
-    const dorden = (a.orden ?? 0) - (b.orden ?? 0)
-    if (dorden !== 0) return dorden
-    return new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-  })
-}
-
-function decisionBadge(detalle) {
-  if (detalle.estadoDecision === 'comprada')
-    return { label: 'Elegida · Comprada', clases: 'bg-emerald-500/15 text-emerald-400' }
-  if (detalle.estadoDecision === 'planificada')
-    return { label: 'Elegida · Planificada', clases: 'bg-sky-500/15 text-sky-300' }
-  return null
 }
 
 // ── Proyecto: eliminar ───────────────────────────────────────────
