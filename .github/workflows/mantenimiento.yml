@@ -74,7 +74,7 @@ jobs:
           echo "| Tarea | HTTP |" >> "$GITHUB_STEP_SUMMARY"
           echo "| --- | --- |" >> "$GITHUB_STEP_SUMMARY"
 
-          for tarea in expirar-solicitudes purgar-llm-cache purgar-papelera; do
+          for tarea in expirar-solicitudes purgar-llm-cache purgar-papelera purgar-idempotencias; do
             code=$(curl -sS -m 60 -o cuerpo.txt -w '%{http_code}' \
               -X POST -H "X-Cron-Secret: $SECRET" \
               "${URL%/}/api/cron/$tarea" || echo 000)

@@ -207,7 +207,7 @@ export function useCompartido() {
   }
 
   function mensajeError(e) {
-    return e?.data?.message || e?.message || 'Algo salió mal'
+    return handleApiError(e, 'Algo salió mal')
   }
 
   return {

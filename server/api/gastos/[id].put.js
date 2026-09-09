@@ -4,9 +4,10 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { gastoUpdateSchema } from '~/shared/schemas/gastos.js'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Gasto' })
   const usuarioId = await getUsuarioFromEvent(event)
   // Whitelist + tipos via Zod: rechaza campos extra, valida monto finito
   // y positivo, fecha/hora con regex, metodoRegistro como enum, etc.

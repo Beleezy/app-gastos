@@ -4,9 +4,10 @@ import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { validateBody } from '../../../utils/validate.js'
 import { medioAhorroUpdateSchema } from '~/shared/schemas/categorias.js'
 import { eq, and } from 'drizzle-orm'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Medio de ahorro' })
   const usuarioId = await getUsuarioFromEvent(event)
   const body = await validateBody(event, medioAhorroUpdateSchema)
 

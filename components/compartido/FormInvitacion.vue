@@ -118,7 +118,7 @@ async function enviar() {
     emit('enviada')
     emit('close')
   } catch (e) {
-    errorLocal.value = e?.data?.message || e?.message || 'No se pudo enviar la invitación'
+    errorLocal.value = handleApiError(e, 'No se pudo enviar la invitación')
   } finally {
     enviando.value = false
   }

@@ -100,7 +100,7 @@ async function cargar() {
   try {
     uso.value = await apiFetch('/api/voz/uso')
   } catch (e) {
-    error.value = e?.data?.message || e?.message || 'Error desconocido'
+    error.value = handleApiError(e, 'Error desconocido')
   } finally {
     loading.value = false
   }

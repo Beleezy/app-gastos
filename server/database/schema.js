@@ -657,6 +657,40 @@ export const llmCache = pgTable(
   ],
 )
 
+// ── Tabla: idempotency_keys (migración 0034) ──
+// Reserva de mutaciones reintentadas desde la cola offline. El índice
+// único es lo que hace la reserva atómica ENTRE INSTANCIAS: antes esto
+// era un Map de proceso y un retry que caía en otra lambda no encontraba
+// el slot, así que el gasto se insertaba dos veces.
+//
+// `responseJson` es NULL mientras la operación está en vuelo: la fila se
+// inserta ANTES de ejecutar el handler, para ganar la carrera, y se
+// completa después.
+export const idempotencyKeys = pgTable(
+  'idempotency_keys',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    usuarioId: uuid('usuario_id')
+      .references(() => usuarios.id, { onDelete: 'cascade' })
+      .notNull(),
+    clave: varchar('clave', { length: 200 }).notNull(),
+    metodo: varchar('metodo', { length: 10 }).notNull(),
+    path: varchar('path', { length: 500 }).notNull(),
+    responseJson: text('response_json'),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('idempotency_keys_lookup_uniq').on(
+      table.usuarioId,
+      table.metodo,
+      table.path,
+      table.clave,
+    ),
+    index('idempotency_keys_expires_idx').on(table.expiresAt),
+  ],
+)
+
 // ── Integraciones: Google Calendar ──
 export const googleCalendarConexiones = pgTable(
   'google_calendar_conexiones',

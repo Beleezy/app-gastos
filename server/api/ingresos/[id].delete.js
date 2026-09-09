@@ -1,8 +1,9 @@
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { softDeleteIngreso } from '../../services/ingresos.service.js'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Ingreso' })
   const usuarioId = await getUsuarioFromEvent(event)
   try {
     const r = await softDeleteIngreso({ id, usuarioId })

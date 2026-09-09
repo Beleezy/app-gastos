@@ -2,9 +2,10 @@ import { db } from '../../utils/db.js'
 import { deudas, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Deuda' })
   const usuarioId = await getUsuarioFromEvent(event)
   setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
 

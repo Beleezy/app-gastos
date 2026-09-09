@@ -5,7 +5,7 @@ import { eq, and, sql, isNull } from 'drizzle-orm'
 import { db } from '../utils/db.js'
 import { gastos, categorias } from '../database/schema.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
-import { assertOwner } from '../utils/assertOwner.js'
+import { assertCategoriasPropias } from '../utils/categorias.js'
 
 /**
  * Crea un gasto y devuelve la versión enriquecida con datos de categoría.
@@ -20,6 +20,11 @@ export async function crearGasto({ usuarioId, body }) {
     err.statusCode = 400
     throw err
   }
+
+  // Sin esto se guardaba cualquier categoriaId que mandara el cliente,
+  // incluida una categoría privada de otra cuenta — cuyo nombre volvía
+  // en `categoriaNombre` más abajo.
+  await assertCategoriasPropias({ usuarioId, categoriaIds: [body.categoriaId] })
 
   const { fecha: fechaLocal, hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const fechaHoy = body.fecha || fechaLocal

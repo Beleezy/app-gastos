@@ -5,9 +5,10 @@ import { crearPagoEspejo, registrarAuditoria } from '../../../../utils/vinculos.
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { priorizarDeudasParaPago } from '../../../../utils/pagosMath.js'
 import { eq, and, or, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const personaId = getRouterParam(event, 'id')
+  const personaId = getUuidParam(event, 'id', { recurso: 'Persona' })
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
@@ -37,25 +38,31 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Persona no encontrada' })
   }
 
-  const deudasActivas = await db
-    .select()
-    .from(deudas)
-    .where(
-      and(
-        eq(deudas.usuarioId, usuarioId),
-        eq(deudas.personaEntidadId, personaId),
-        isNull(deudas.deletedAt),
-        or(eq(deudas.estado, 'pendiente'), eq(deudas.estado, 'parcial')),
-      ),
-    )
-
-  if (deudasActivas.length === 0) {
-    throw createError({ statusCode: 400, message: 'No hay deudas pendientes para esta persona' })
-  }
-
-  const sorted = priorizarDeudasParaPago(deudasActivas, hoy)
-
   const result = await db.transaction(async (tx) => {
+    // Las deudas se leen DENTRO de la transacción y con FOR UPDATE. Leerlas
+    // fuera repetía el "lost update" de registrarPago, y aquí es peor: el
+    // pago se reparte entre VARIAS deudas, así que dos pagos globales
+    // concurrentes distribuyen ambos sobre los mismos saldos viejos y el
+    // segundo commit pisa los saldos del primero en bloque.
+    const deudasActivas = await tx
+      .select()
+      .from(deudas)
+      .where(
+        and(
+          eq(deudas.usuarioId, usuarioId),
+          eq(deudas.personaEntidadId, personaId),
+          isNull(deudas.deletedAt),
+          or(eq(deudas.estado, 'pendiente'), eq(deudas.estado, 'parcial')),
+        ),
+      )
+      .for('update')
+
+    if (deudasActivas.length === 0) {
+      throw createError({ statusCode: 400, message: 'No hay deudas pendientes para esta persona' })
+    }
+
+    const sorted = priorizarDeudasParaPago(deudasActivas, hoy)
+
     let montoRestante = montoTotal
     const pagosRealizados = []
     const deudasActualizadas = []

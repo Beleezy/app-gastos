@@ -3,6 +3,7 @@ import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { validateBody } from '../../../../utils/validate.js'
 import { registrarPago } from '../../../../services/pagos.service.js'
 import { fechaIso, monto, notasSchema } from '~/shared/schemas/common.js'
+import { getUuidParam } from '../../../../utils/params.js'
 
 const pagoEndpointSchema = z.object({
   monto,
@@ -13,7 +14,7 @@ const pagoEndpointSchema = z.object({
 })
 
 export default defineEventHandler(async (event) => {
-  const deudaId = getRouterParam(event, 'id')
+  const deudaId = getUuidParam(event, 'id', { recurso: 'Deuda' })
   const usuarioId = await getUsuarioFromEvent(event)
   const body = await validateBody(event, pagoEndpointSchema)
 

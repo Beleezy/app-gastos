@@ -4,10 +4,11 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { categoriaUpdateSchema } from '~/shared/schemas/categorias.js'
 import { eq, and } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Categoría' })
   // Whitelist + tipos via Zod: nombre/icono con longitudes acotadas
   // y color con regex hex. Rechaza propiedades extras.
   const { nombre, icono, color } = await validateBody(event, categoriaUpdateSchema)

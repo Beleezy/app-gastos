@@ -124,7 +124,7 @@ async function guardarComoPlantilla() {
     await crearDesdePlan({ nombre: nombre.trim(), planMensualId: props.planMensualId })
     toast.success('Plantilla guardada')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo guardar la plantilla')
+    toast.error(handleApiError(e, 'No se pudo guardar la plantilla'))
   } finally {
     guardando.value = false
   }
@@ -149,7 +149,7 @@ async function aplicarPlantilla(p) {
     }
     emit('aplicada', r)
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo aplicar la plantilla')
+    toast.error(handleApiError(e, 'No se pudo aplicar la plantilla'))
   } finally {
     aplicandoId.value = null
   }
@@ -171,7 +171,7 @@ async function ejecutarEliminarPlantilla() {
     await eliminar(p.id)
     toast.success('Plantilla eliminada')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo eliminar')
+    toast.error(handleApiError(e, 'No se pudo eliminar'))
   } finally {
     plantillaAEliminar.value = null
   }

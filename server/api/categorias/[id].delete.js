@@ -2,10 +2,11 @@ import { db } from '../../utils/db.js'
 import { categorias, gastos, gastosPlanificados, gastosFuturos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Categoría' })
 
   // Solo puede eliminar sus propias categorías (no predefinidas)
   const [cat] = await db

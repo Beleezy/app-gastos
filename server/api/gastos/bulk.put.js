@@ -2,31 +2,27 @@ import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { rateLimits } from '../../utils/rateLimit.js'
+import { validateBody } from '../../utils/validate.js'
+import { assertCategoriasPropias } from '../../utils/categorias.js'
+import { gastosBulkUpdateSchema } from '~/shared/schemas/gastos.js'
 import { eq, and, inArray, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
   await rateLimits.bulkOp(event, usuarioId)
 
-  if (!Array.isArray(body?.ids) || body.ids.length === 0) {
-    throw createError({ statusCode: 400, message: 'Se requiere un array de ids' })
-  }
+  // Antes esto era una cadena de `if` sobre el body crudo: validaba la
+  // forma pero no el CONTENIDO, así que `fecha: "el martes"` o un
+  // categoriaId no-UUID llegaban a Postgres y salían como 500 del driver.
+  const body = await validateBody(event, gastosBulkUpdateSchema)
 
-  const ids = body.ids.filter((id) => typeof id === 'string' || typeof id === 'number').map(String)
-  if (ids.length === 0) {
-    throw createError({ statusCode: 400, message: 'Ids inválidos' })
-  }
-  if (ids.length > 500) {
-    throw createError({ statusCode: 400, message: 'Máximo 500 gastos por operación' })
-  }
-
+  const ids = body.ids.map(String)
   const campos = body.campos
-  if (!campos || typeof campos !== 'object') {
-    throw createError({
-      statusCode: 400,
-      message: 'Se requiere un objeto "campos" con los valores a actualizar',
-    })
+
+  // Reasignar en lote a una categoría ajena era la vía más cómoda para el
+  // mismo IDOR que POST /api/gastos: un solo PUT movía todos los gastos.
+  if (campos.categoriaId !== undefined && campos.categoriaId !== null) {
+    await assertCategoriasPropias({ usuarioId, categoriaIds: [campos.categoriaId] })
   }
 
   const updateData = { updatedAt: new Date() }
@@ -35,19 +31,7 @@ export default defineEventHandler(async (event) => {
   if (campos.hora !== undefined) updateData.hora = campos.hora
   if (campos.notas !== undefined) updateData.notas = campos.notas || null
   // Módulo Compartido: marcar/desmarcar varios gastos de una vez.
-  if (campos.visibilidad !== undefined) {
-    if (!['auto', 'compartido', 'privado'].includes(campos.visibilidad)) {
-      throw createError({ statusCode: 400, message: 'Visibilidad inválida' })
-    }
-    updateData.visibilidad = campos.visibilidad
-  }
-
-  if (Object.keys(updateData).length <= 1) {
-    throw createError({
-      statusCode: 400,
-      message: 'No se proporcionaron campos válidos para actualizar',
-    })
-  }
+  if (campos.visibilidad !== undefined) updateData.visibilidad = campos.visibilidad
 
   const actualizados = await db.transaction(async (tx) => {
     const updated = await tx

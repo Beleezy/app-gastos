@@ -18,12 +18,15 @@
         </svg>
         <input
           v-model="busqueda"
+          data-testid="futuros-buscar"
+          aria-label="Buscar proyecto, detalle u opción"
           type="text"
           placeholder="Buscar proyecto, detalle u opción..."
           class="w-full rounded-xl border border-theme-border bg-theme-card py-2 pl-9 pr-3 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
         />
       </div>
       <button
+        data-testid="futuros-orden"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-xl border border-theme-border bg-theme-card px-3 py-2 text-[0.6875rem] text-theme-text-sec hover:text-theme-text transition-colors"
         :title="`Ordenar por ${ordenLabel}`"
         @click="ciclarOrden"
@@ -53,6 +56,8 @@
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"
+        :data-testid="`futuros-filtro-${f.value}`"
+        :aria-pressed="filtroActual === f.value"
         class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
         :class="[
           filtroActual === f.value
@@ -109,7 +114,7 @@
           />
         </svg>
       </div>
-      <p class="text-sm text-theme-text">
+      <p data-testid="futuros-vacio" class="text-sm text-theme-text">
         {{ busqueda ? 'No hay coincidencias' : 'Crea tu primer gasto futuro' }}
       </p>
       <p class="mt-1 text-xs text-theme-text-sec">
@@ -125,6 +130,7 @@
       <article
         v-for="proyecto in gastosFiltrados"
         :key="proyecto.id"
+        data-testid="futuros-proyecto"
         class="rounded-2xl border border-theme-border bg-theme-card"
       >
         <!-- Cabecera del proyecto (compacta) -->
@@ -922,112 +928,44 @@
       @click="cerrarTodosMenus"
     ></div>
 
-    <!-- Modal: confirmar eliminar proyecto -->
-    <div v-if="proyectoAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="proyectoAEliminar = null"
-      ></div>
-      <div
-        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
-      >
-        <h3 class="text-base font-semibold text-theme-text">Eliminar gasto futuro</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminarán el proyecto, sus detalles y todas las opciones guardadas.
-        </p>
-        <p class="mt-2 text-sm font-medium text-theme-text">{{ proyectoAEliminar.tipoGasto }}</p>
-        <div class="mt-5 space-y-2">
-          <button
-            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
-            :disabled="eliminando"
-            @click="confirmarEliminar"
-          >
-            {{ eliminando ? 'Eliminando...' : 'Eliminar proyecto' }}
-          </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="proyectoAEliminar = null"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Confirmaciones de borrado.
+         Antes eran tres modales escritos a mano aquí, casi idénticos entre
+         sí y sin nada de lo que SharedConfirmDialog ya trae: role
+         alertdialog, aria-modal, focus trap, cierre con Escape y con el
+         botón atrás. El componente compartido se usa en otros 10 archivos
+         del proyecto; este era el que se lo había perdido. -->
+    <SharedConfirmDialog
+      :model-value="proyectoAEliminar !== null"
+      title="Eliminar gasto futuro"
+      :message="`Se eliminarán «${proyectoAEliminar?.tipoGasto ?? ''}», sus detalles y todas las opciones guardadas.`"
+      :confirm-label="eliminando ? 'Eliminando...' : 'Eliminar proyecto'"
+      :loading="eliminando"
+      variant="danger"
+      @update:model-value="proyectoAEliminar = null"
+      @confirm="confirmarEliminar"
+    />
 
-    <!-- Modal: confirmar eliminar detalle -->
-    <div v-if="detalleAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="detalleAEliminar = null"
-      ></div>
-      <div
-        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
-      >
-        <h3 class="text-base font-semibold text-theme-text">Eliminar detalle</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminará el detalle y todas sus opciones guardadas.
-        </p>
-        <p class="mt-2 text-sm font-medium text-theme-text">
-          {{ detalleAEliminar.detalle.nombre }}
-        </p>
-        <p
-          v-if="detalleAEliminar.detalle.opciones?.length"
-          class="mt-1 text-xs text-theme-text-muted"
-        >
-          {{ detalleAEliminar.detalle.opciones.length }} opcion{{
-            detalleAEliminar.detalle.opciones.length !== 1 ? 'es' : ''
-          }}
-          se perderán
-        </p>
-        <div class="mt-5 space-y-2">
-          <button
-            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
-            :disabled="guardandoInline"
-            @click="confirmarEliminarDetalle"
-          >
-            {{ guardandoInline ? 'Eliminando...' : 'Eliminar detalle' }}
-          </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="detalleAEliminar = null"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
+    <SharedConfirmDialog
+      :model-value="detalleAEliminar !== null"
+      title="Eliminar detalle"
+      :message="mensajeEliminarDetalle"
+      :confirm-label="guardandoInline ? 'Eliminando...' : 'Eliminar detalle'"
+      :loading="guardandoInline"
+      variant="danger"
+      @update:model-value="detalleAEliminar = null"
+      @confirm="confirmarEliminarDetalle"
+    />
 
-    <!-- Modal: confirmar eliminar opción -->
-    <div v-if="opcionAEliminar" class="fixed inset-0 z-50 flex items-center justify-center px-6">
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="opcionAEliminar = null"
-      ></div>
-      <div
-        class="relative w-full max-w-sm rounded-2xl border border-theme-border bg-theme-card p-5"
-      >
-        <h3 class="text-base font-semibold text-theme-text">Eliminar opción</h3>
-        <p class="mt-2 text-sm text-theme-text-sec">
-          Se eliminará esta opción de forma permanente.
-        </p>
-        <p class="mt-2 text-sm font-medium text-theme-text">{{ opcionAEliminar.opcion.nombre }}</p>
-        <div class="mt-5 space-y-2">
-          <button
-            class="w-full rounded-xl bg-red-500/15 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/25"
-            :disabled="guardandoInline"
-            @click="confirmarEliminarOpcion"
-          >
-            {{ guardandoInline ? 'Eliminando...' : 'Eliminar opción' }}
-          </button>
-          <button
-            class="w-full rounded-xl py-2.5 text-sm text-theme-text-sec transition-colors hover:text-theme-text"
-            @click="opcionAEliminar = null"
-          >
-            Cancelar
-          </button>
-        </div>
-      </div>
-    </div>
+    <SharedConfirmDialog
+      :model-value="opcionAEliminar !== null"
+      title="Eliminar opción"
+      :message="`Se eliminará «${opcionAEliminar?.opcion?.nombre ?? ''}» de forma permanente.`"
+      :confirm-label="guardandoInline ? 'Eliminando...' : 'Eliminar opción'"
+      :loading="guardandoInline"
+      variant="danger"
+      @update:model-value="opcionAEliminar = null"
+      @confirm="confirmarEliminarOpcion"
+    />
 
     <!-- Panel: nueva opción -->
     <div v-if="nuevaOpcionCtx" class="fixed inset-0 z-50 flex items-end justify-center">
@@ -1292,6 +1230,12 @@ const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura
   useGastosFuturos()
 const { success, error: toastError } = useToast()
 
+// progresoProyecto / proyectoTieneDecididos / proyectoCompletamenteDecidido /
+// detallesOrdenados / decisionBadge viven en composables/useFuturosDecision.js
+// (auto-importado). Estaban inline en este archivo, que es el más grande del
+// proyecto y el único módulo sin tests E2E: fuera son funciones puras con su
+// propia batería en tests/futurosDecision.test.js.
+
 const busqueda = ref('')
 const busquedaDebounced = useDebouncedRef(busqueda, 200)
 const filtroActual = ref('todos')
@@ -1305,23 +1249,19 @@ const ordenes = [
 const ordenLabel = computed(
   () => ordenes.find((o) => o.value === ordenActual.value)?.label || 'Reciente',
 )
+// El mensaje de borrado de detalle avisa cuántas opciones se pierden: es
+// la única de las tres confirmaciones cuyo texto no es una plantilla fija.
+const mensajeEliminarDetalle = computed(() => {
+  const d = detalleAEliminar.value?.detalle
+  if (!d) return ''
+  const n = d.opciones?.length || 0
+  const cola = n > 0 ? ` Se perderá${n !== 1 ? 'n' : ''} ${n} opcion${n !== 1 ? 'es' : ''}.` : ''
+  return `Se eliminará «${d.nombre ?? ''}» y todas sus opciones guardadas.${cola}`
+})
+
 function ciclarOrden() {
   const idx = ordenes.findIndex((o) => o.value === ordenActual.value)
   ordenActual.value = ordenes[(idx + 1) % ordenes.length].value
-}
-
-function progresoProyecto(proyecto) {
-  const total = proyecto.detalles?.length || 0
-  if (total === 0) return { total: 0, decididos: 0, porcentaje: 0 }
-  const decididos = proyecto.detalles.filter((d) => d.estadoDecision).length
-  return { total, decididos, porcentaje: Math.round((decididos / total) * 100) }
-}
-
-function proyectoTieneDecididos(p) {
-  return p.detalles?.some((d) => d.estadoDecision)
-}
-function proyectoCompletamenteDecidido(p) {
-  return p.detalles?.length > 0 && p.detalles.every((d) => d.estadoDecision)
 }
 
 const filtrosProyecto = computed(() => {
@@ -1681,7 +1621,7 @@ async function guardarEdicionDetalle(proyecto, detalle) {
     detalleEditando.value = null
     success('Detalle actualizado')
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo guardar')
+    toastError(handleApiError(e, 'No se pudo guardar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1710,7 +1650,7 @@ async function confirmarEliminarDetalle() {
     success('Detalle eliminado')
     detalleAEliminar.value = null
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
+    toastError(handleApiError(e, 'No se pudo eliminar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1755,7 +1695,7 @@ async function confirmarNuevoDetalle() {
     nuevoDetalleCtx.value = null
     success('Detalle agregado')
   } catch (e) {
-    errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+    errorPanel.value = handleApiError(e, 'No se pudo agregar')
   } finally {
     guardandoInline.value = false
   }
@@ -1780,7 +1720,7 @@ async function moverOpcion(proyecto, detalle, opcion, direction) {
       }),
     )
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo reordenar')
+    toastError(handleApiError(e, 'No se pudo reordenar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1838,7 +1778,7 @@ async function guardarEdicionOpcion(proyecto, detalle) {
     opcionEditando.value = null
     success('Opcion actualizada')
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo guardar')
+    toastError(handleApiError(e, 'No se pudo guardar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1866,7 +1806,7 @@ async function confirmarEliminarOpcion() {
     success('Opcion eliminada')
     opcionAEliminar.value = null
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo eliminar')
+    toastError(handleApiError(e, 'No se pudo eliminar'))
   } finally {
     guardandoInline.value = false
   }
@@ -1915,7 +1855,7 @@ async function confirmarNuevaOpcion() {
     nuevaOpcionCtx.value = null
     success('Opcion agregada')
   } catch (e) {
-    errorPanel.value = e?.data?.message || e?.message || 'No se pudo agregar'
+    errorPanel.value = handleApiError(e, 'No se pudo agregar')
   } finally {
     guardandoInline.value = false
   }
@@ -1965,28 +1905,10 @@ async function confirmarDecision() {
     success(ctx.tipo === 'comprar' ? 'Opcion comprada y registrada' : 'Opcion planificada')
     decisionCtx.value = null
   } catch (e) {
-    errorPanel.value = e?.data?.message || e?.message || 'No se pudo decidir'
+    errorPanel.value = handleApiError(e, 'No se pudo decidir')
   } finally {
     decidiendo.value = false
   }
-}
-
-function detallesOrdenados(detalles) {
-  return [...detalles].sort((a, b) => {
-    const dp = (b.prioridad ?? 0) - (a.prioridad ?? 0)
-    if (dp !== 0) return dp
-    const dorden = (a.orden ?? 0) - (b.orden ?? 0)
-    if (dorden !== 0) return dorden
-    return new Date(a.createdAt || 0) - new Date(b.createdAt || 0)
-  })
-}
-
-function decisionBadge(detalle) {
-  if (detalle.estadoDecision === 'comprada')
-    return { label: 'Elegida · Comprada', clases: 'bg-emerald-500/15 text-emerald-400' }
-  if (detalle.estadoDecision === 'planificada')
-    return { label: 'Elegida · Planificada', clases: 'bg-sky-500/15 text-sky-300' }
-  return null
 }
 
 // ── Proyecto: eliminar ───────────────────────────────────────────
@@ -1998,7 +1920,7 @@ async function confirmarEliminar() {
     success('Gasto futuro eliminado')
     proyectoAEliminar.value = null
   } catch (e) {
-    toastError(e?.data?.message || e?.message || 'No se pudo eliminar el gasto futuro')
+    toastError(handleApiError(e, 'No se pudo eliminar el gasto futuro'))
   } finally {
     eliminando.value = false
   }

@@ -15,7 +15,7 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else-if="sinDatos" class="flex flex-col items-center py-10">
+    <div v-else-if="sinDatos" role="status" class="flex flex-col items-center py-10">
       <div
         class="w-20 h-20 rounded-2xl bg-gradient-to-br from-theme-card/80 to-theme-card/40 flex items-center justify-center mb-4 border border-theme-border"
       >

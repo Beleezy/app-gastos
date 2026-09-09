@@ -154,7 +154,7 @@ async function onAprobar(i) {
     await aprobar(i.id)
     toast.success(`${i.email} aprobado`)
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo aprobar')
+    toast.error(handleApiError(e, 'No se pudo aprobar'))
   } finally {
     ocupado.value = null
   }
@@ -166,7 +166,7 @@ async function onRechazar(i) {
     await rechazar(i.id)
     toast.success('Solicitud rechazada')
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo rechazar')
+    toast.error(handleApiError(e, 'No se pudo rechazar'))
   } finally {
     ocupado.value = null
   }
@@ -177,7 +177,7 @@ async function onToggle(u) {
   try {
     await setPermitidoUsuario(u.id, !u.permitido)
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo actualizar el acceso')
+    toast.error(handleApiError(e, 'No se pudo actualizar el acceso'))
   } finally {
     ocupado.value = null
   }

@@ -11,9 +11,10 @@ import {
   normalizeGastoFuturoPayload,
   validarCategoriaGastoFuturo,
 } from '../../../utils/gastosFuturos.js'
+import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Proyecto' })
   const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
   const payload = normalizeGastoFuturoPayload(body)

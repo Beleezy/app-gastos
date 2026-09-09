@@ -30,6 +30,7 @@
             }}</span>
             <input
               v-model="montoMensual"
+              :aria-label="`Meta de ahorro para ${nombreMes} ${anioActual}`"
               type="number"
               step="0.01"
               :placeholder="metaMensual ? String(metaMensual) : '0.00'"
@@ -49,6 +50,7 @@
             }}</span>
             <input
               v-model="montoGlobal"
+              aria-label="Meta acumulada de ahorro total"
               type="number"
               step="0.01"
               :placeholder="metaGlobal ? String(metaGlobal) : '0.00'"

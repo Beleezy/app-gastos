@@ -13,9 +13,10 @@ import {
   getNombreDisplay,
 } from '../../../../../utils/vinculos.js'
 import { eq, and, or, inArray } from 'drizzle-orm'
+import { getUuidParam } from '../../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
-  const checkpointId = getRouterParam(event, 'id')
+  const checkpointId = getUuidParam(event, 'id', { recurso: 'Checkpoint' })
   const usuarioId = await getUsuarioFromEvent(event)
 
   // Obtener el checkpoint

@@ -380,7 +380,7 @@ async function guardar() {
     }
     cerrarForm()
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo guardar el perfil')
+    toast.error(handleApiError(e, 'No se pudo guardar el perfil'))
   } finally {
     guardando.value = false
   }
@@ -405,7 +405,7 @@ async function ejecutarEliminar() {
     showConfirmEliminar.value = false
     perfilAEliminar.value = null
   } catch (e) {
-    toast.error(e?.data?.message || 'No se pudo eliminar')
+    toast.error(handleApiError(e, 'No se pudo eliminar'))
   } finally {
     eliminandoPerfil.value = false
   }

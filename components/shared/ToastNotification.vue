@@ -1,11 +1,24 @@
 <template>
+  <!-- Región live: el toast es el canal principal de feedback de la app
+       (gasto guardado, error al sincronizar, límite de LLM alcanzado) y sin
+       esto un lector de pantalla no anuncia NADA — la acción parece no
+       haber tenido efecto.
+
+       `polite` y no `assertive` porque no interrumpe lo que el usuario esté
+       leyendo; los toasts de error los marca cada uno con role="alert".
+       El contenedor está siempre en el DOM (aunque vacío) a propósito: una
+       región live que aparece junto con su contenido no se anuncia. -->
   <div
+    role="status"
+    aria-live="polite"
+    aria-atomic="false"
     class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 w-full max-w-xs px-4 pointer-events-none"
   >
     <TransitionGroup name="toast">
       <div
         v-for="toast in toasts"
         :key="toast.id"
+        :role="toast.type === 'error' ? 'alert' : undefined"
         class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl shadow-2xl text-sm font-medium w-full pointer-events-auto"
         :class="{
           'bg-emerald-500 text-white': toast.type === 'success',
@@ -17,6 +30,7 @@
         <!-- Icon -->
         <svg
           v-if="toast.type === 'success'"
+          aria-hidden="true"
           class="w-4 h-4 shrink-0"
           fill="none"
           viewBox="0 0 24 24"
@@ -27,6 +41,7 @@
         </svg>
         <svg
           v-else-if="toast.type === 'error'"
+          aria-hidden="true"
           class="w-4 h-4 shrink-0"
           fill="none"
           viewBox="0 0 24 24"
@@ -37,6 +52,7 @@
         </svg>
         <svg
           v-else-if="toast.type === 'warning'"
+          aria-hidden="true"
           class="w-4 h-4 shrink-0"
           fill="none"
           viewBox="0 0 24 24"
@@ -51,6 +67,7 @@
         </svg>
         <svg
           v-else
+          aria-hidden="true"
           class="w-4 h-4 shrink-0"
           fill="none"
           viewBox="0 0 24 24"

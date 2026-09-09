@@ -13,7 +13,38 @@ async function aplicarRateLimitUsuario(event, userId) {
 }
 
 // Cache in-memory de usuarios con acceso confirmado (aprobados / superadmin).
-const accesoConfirmado = new Set()
+//
+// Dos límites conscientes:
+//
+//  1. Es un Map de proceso, así que `invalidarAccesoCache` solo vacía la
+//     instancia que atiende esa petición. En un despliegue multi-instancia
+//     (Vercel) revocar un acceso NO lo revoca en las demás lambdas: el
+//     usuario sigue entrando hasta que esa instancia se recicla. Se acota
+//     con un TTL para que la ventana sea de minutos y no indefinida.
+//  2. Sin cota crecía sin fin. El TTL ya lo purga, y el tope protege el
+//     caso de muchos usuarios distintos dentro de una misma ventana.
+const ACCESO_TTL_MS = 5 * 60 * 1000
+const MAX_ACCESOS = 1000
+const accesoConfirmado = new Map() // userId -> expiresAt
+
+function accesoVigente(userId) {
+  const exp = accesoConfirmado.get(userId)
+  if (exp === undefined) return false
+  if (exp < Date.now()) {
+    accesoConfirmado.delete(userId)
+    return false
+  }
+  return true
+}
+
+function recordarAcceso(userId) {
+  accesoConfirmado.set(userId, Date.now() + ACCESO_TTL_MS)
+  while (accesoConfirmado.size > MAX_ACCESOS) {
+    const primera = accesoConfirmado.keys().next()
+    if (primera.done) break
+    accesoConfirmado.delete(primera.value)
+  }
+}
 
 function controlAccesoActivo() {
   return !!(process.env.SUPERADMIN_EMAIL || '').trim()
@@ -119,26 +150,26 @@ export async function getUsuarioFromEvent(event) {
 
   // Modo abierto: sin control de acceso, se autoprovisiona y permite.
   if (!controlAccesoActivo()) {
-    if (!accesoConfirmado.has(userId)) {
+    if (!accesoVigente(userId)) {
       await db
         .insert(usuarios)
         .values({ id: userId, nombre, email, permitido: true })
         .onConflictDoNothing()
-      accesoConfirmado.add(userId)
+      recordarAcceso(userId)
     }
     return resolverPerfilEfectivo(event, userId)
   }
 
   // Superadmin: siempre permitido.
   if (esSuperadminEmail(email)) {
-    if (!accesoConfirmado.has(userId)) {
+    if (!accesoVigente(userId)) {
       await asegurarSuperadmin(userId, email, nombre)
-      accesoConfirmado.add(userId)
+      recordarAcceso(userId)
     }
     return resolverPerfilEfectivo(event, userId)
   }
 
-  if (accesoConfirmado.has(userId)) return resolverPerfilEfectivo(event, userId)
+  if (accesoVigente(userId)) return resolverPerfilEfectivo(event, userId)
 
   const [u] = await db
     .select({ permitido: usuarios.permitido, rol: usuarios.rol })
@@ -147,7 +178,7 @@ export async function getUsuarioFromEvent(event) {
     .limit(1)
 
   if (u && (u.permitido || u.rol === 'superadmin')) {
-    accesoConfirmado.add(userId)
+    recordarAcceso(userId)
     return resolverPerfilEfectivo(event, userId)
   }
 

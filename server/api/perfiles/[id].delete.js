@@ -1,9 +1,10 @@
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eliminarPerfil } from '../../services/perfiles.service.js'
+import { getUuidParam } from '../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
   const propietarioId = await getUsuarioFromEvent(event)
-  const id = getRouterParam(event, 'id')
+  const id = getUuidParam(event, 'id', { recurso: 'Perfil' })
   try {
     return await eliminarPerfil(propietarioId, id)
   } catch (e) {

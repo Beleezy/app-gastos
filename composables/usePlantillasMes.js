@@ -16,7 +16,7 @@ export function usePlantillasMes() {
     try {
       plantillas.value = await apiFetch('/api/planificador/plantillas')
     } catch (e) {
-      error.value = e?.data?.message || e?.message || 'Error cargando plantillas'
+      error.value = handleApiError(e, 'Error cargando plantillas')
     } finally {
       isLoading.value = false
     }
