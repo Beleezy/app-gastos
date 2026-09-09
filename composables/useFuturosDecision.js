@@ -67,3 +67,48 @@ const BADGES = {
 export function decisionBadge(detalle) {
   return BADGES[detalle?.estadoDecision] || null
 }
+
+const PRIORIDADES = {
+  3: { label: '● Alta', clases: 'bg-red-500/15 text-red-400' },
+  2: { label: '● Media', clases: 'bg-amber-500/15 text-amber-300' },
+  1: { label: '● Baja', clases: 'bg-emerald-500/15 text-emerald-400' },
+}
+
+/**
+ * Etiqueta de prioridad de un proyecto, o null si no tiene (0 / sin
+ * definir). Tabla en vez de `switch` por la misma razón que
+ * `decisionBadge`: un valor que el código no conoce no debe caer por
+ * casualidad en el `default`.
+ */
+export function prioridadBadge(valor) {
+  return PRIORIDADES[valor] || null
+}
+
+/**
+ * Host legible de una URL de referencia, para no enseñar la URL entera en
+ * una fila estrecha. Una URL inválida no rompe la fila: cae a un texto
+ * genérico.
+ */
+export function hostDeUrl(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '')
+  } catch {
+    return 'Abrir enlace'
+  }
+}
+
+/**
+ * Rango de precios legible de una opción.
+ *
+ * Devuelve `{min, max}` cuando hay dos precios distintos, `{min, max:null}`
+ * cuando solo hay uno, y null cuando no hay ninguno. El 0 se trata como
+ * "sin precio" a propósito: la UI mostraba "S/ 480 — S/ 0" cuando solo se
+ * había rellenado el mínimo.
+ */
+export function rangoPrecios(opcion) {
+  const min = Number(opcion?.precioMinimo) > 0 ? Number(opcion.precioMinimo) : null
+  const max = Number(opcion?.precioMaximo) > 0 ? Number(opcion.precioMaximo) : null
+  if (min !== null && max !== null && max !== min) return { min, max }
+  const unico = min ?? max
+  return unico !== null ? { min: unico, max: null } : null
+}

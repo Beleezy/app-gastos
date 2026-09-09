@@ -14,7 +14,7 @@
 //
 // El cliente debería timeout después de 9s para no chocar con Vercel.
 
-import { eq, or, isNull } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { db } from '../../utils/db.js'
 import { categorias, configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
@@ -37,6 +37,7 @@ import {
 } from '../../utils/llmSafety.js'
 import { trackUsoLlm } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 const MAX_INPUT_CHARS = 2000
 
@@ -89,13 +90,7 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select({ nombre: categorias.nombre })
     .from(categorias)
-    .where(
-      or(
-        eq(categorias.esPredefinida, true),
-        eq(categorias.usuarioId, usuarioId),
-        isNull(categorias.usuarioId),
-      ),
-    )
+    .where(categoriasLegibles(usuarioId))
     .orderBy(categorias.nombre)
   // Saneamos nombres custom (texto libre del usuario) antes de inyectarlos
   // al system prompt — evita stored prompt injection.

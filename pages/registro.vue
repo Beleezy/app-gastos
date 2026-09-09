@@ -699,66 +699,28 @@ function confirmarEliminar(gasto) {
 }
 
 // ─── Bulk delete ────────────────────────────────────────
-const showBulkDeleteConfirm = ref(false)
-const bulkDeleteLoading = ref(false)
-const bulkDeletePayload = ref(null)
-
-const mensajeBulkEliminar = computed(() => {
-  if (!bulkDeletePayload.value) return ''
-  const n = bulkDeletePayload.value.count
-  return `Vas a eliminar ${n} ${n === 1 ? 'gasto' : 'gastos'} de forma permanente. Esta acción no tiene undo.`
+// Borrado y edición en lote: composables/useBulkGastos.js. Estaban aquí
+// inline, y sus textos —lo que el usuario lee justo antes de borrar de
+// forma permanente— no los cubría ningún test.
+const {
+  showBulkDeleteConfirm,
+  bulkDeleteLoading,
+  textoBulkEliminar: mensajeBulkEliminar,
+  onBulkDeleteSolicitado,
+  ejecutarBulkEliminar,
+  showBulkEdit,
+  bulkEditPayload,
+  onBulkEditSolicitado,
+  cerrarBulkEdit,
+  ejecutarBulkEdit,
+} = useBulkGastos({
+  deleteGastosBulk,
+  updateGastosBulk,
+  onToast: showToast,
+  onError: toastError,
+  onRefrescar: () => fetchResumenMensual(),
+  onRefrescarCompleto: () => Promise.all([fetchGastosMensuales(), fetchResumenMensual()]),
 })
-
-function onBulkDeleteSolicitado(payload) {
-  bulkDeletePayload.value = payload
-  showBulkDeleteConfirm.value = true
-}
-
-async function ejecutarBulkEliminar() {
-  if (!bulkDeletePayload.value) return
-  const { ids, onDone } = bulkDeletePayload.value
-  bulkDeleteLoading.value = true
-  try {
-    const res = await deleteGastosBulk(ids)
-    showBulkDeleteConfirm.value = false
-    showToast(`${res.eliminados || ids.length} gastos eliminados`)
-    onDone?.()
-    await fetchResumenMensual()
-  } catch (e) {
-    toastError(handleApiError(e) || 'No se pudieron eliminar los gastos')
-  } finally {
-    bulkDeleteLoading.value = false
-    bulkDeletePayload.value = null
-  }
-}
-
-// ─── Bulk edit ──────────────────────────────────────────
-const showBulkEdit = ref(false)
-const bulkEditPayload = ref(null)
-
-function onBulkEditSolicitado(payload) {
-  bulkEditPayload.value = payload
-  showBulkEdit.value = true
-}
-
-function cerrarBulkEdit() {
-  showBulkEdit.value = false
-  bulkEditPayload.value = null
-}
-
-async function ejecutarBulkEdit({ ids, campos }) {
-  try {
-    const res = await updateGastosBulk(ids, campos)
-    showBulkEdit.value = false
-    showToast(`${res.actualizados || ids.length} gastos actualizados`)
-    bulkEditPayload.value?.onDone?.()
-    await Promise.all([fetchGastosMensuales(), fetchResumenMensual()])
-  } catch (e) {
-    toastError(handleApiError(e) || 'No se pudieron actualizar los gastos')
-  } finally {
-    bulkEditPayload.value = null
-  }
-}
 
 // Quick-add: registrar rápidamente un favorito
 async function onQuickAdd(chip) {

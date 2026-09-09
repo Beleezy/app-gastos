@@ -173,3 +173,120 @@ test.describe('Gastos Futuros — lista', () => {
     }
   })
 })
+
+// ── Interacción con detalles y opciones ──
+//
+// Esta parte de la UI —el bloque más anidado de la lista, proyecto →
+// detalle → opción— se extrajo a FuturosOpcionFila.vue y
+// FuturosProyectoCabecera.vue. Los tests de arriba cubrían la lista pero
+// NO estas interacciones, así que el corte se habría hecho a ciegas.
+
+test.describe('Gastos Futuros — detalles y opciones', () => {
+  test('desplegar un proyecto muestra su detalle y sus opciones', async ({ page, request }) => {
+    const nombre = `Desplegable ${marca}`
+    await crearProyecto(request, nombre, {
+      detalles: [
+        {
+          nombre: 'Detalle con opciones',
+          opciones: [
+            { nombre: 'Opción barata', precioPromedio: 100 },
+            { nombre: 'Opción cara', precioPromedio: 500 },
+          ],
+        },
+      ],
+    })
+    await irAFuturos(page)
+
+    const tarjeta = page.getByTestId('futuros-proyecto').filter({ hasText: nombre }).first()
+    await expect(tarjeta).toBeVisible({ timeout: 15000 })
+
+    const expandir = tarjeta.getByTestId('futuros-expandir')
+    await expect(expandir).toHaveAttribute('aria-expanded', 'false')
+    await expandir.click()
+    await expect(expandir).toHaveAttribute('aria-expanded', 'true')
+
+    await expect(tarjeta.getByText('Detalle con opciones')).toBeVisible()
+    await expect(tarjeta.getByTestId('futuros-opcion')).toHaveCount(2)
+    await expect(tarjeta.getByText('Opción barata')).toBeVisible()
+    await expect(tarjeta.getByText('Opción cara')).toBeVisible()
+  })
+
+  test('plegar vuelve a ocultar las opciones', async ({ page, request }) => {
+    const nombre = `Plegable ${marca}`
+    await crearProyecto(request, nombre)
+    await irAFuturos(page)
+
+    const tarjeta = page.getByTestId('futuros-proyecto').filter({ hasText: nombre }).first()
+    const expandir = tarjeta.getByTestId('futuros-expandir')
+
+    await expandir.click()
+    await expect(tarjeta.getByTestId('futuros-opcion').first()).toBeVisible({ timeout: 10000 })
+    await expandir.click()
+    await expect(tarjeta.getByTestId('futuros-opcion')).toHaveCount(0)
+  })
+
+  test('el menú de una opción se abre y ofrece editar y eliminar', async ({ page, request }) => {
+    // Con una sola opción las acciones se revelan automáticamente; con dos
+    // hay que seleccionar primero. Se usan dos para ejercitar el camino
+    // completo (seleccionar → revelar → menú), que es el que pasa por los
+    // emits nuevos del componente extraído.
+    const nombre = `ConMenu ${marca}`
+    await crearProyecto(request, nombre, {
+      detalles: [
+        {
+          nombre: 'D',
+          opciones: [
+            { nombre: 'Primera', precioPromedio: 10 },
+            { nombre: 'Segunda', precioPromedio: 20 },
+          ],
+        },
+      ],
+    })
+    await irAFuturos(page)
+
+    const tarjeta = page.getByTestId('futuros-proyecto').filter({ hasText: nombre }).first()
+    await tarjeta.getByTestId('futuros-expandir').click()
+
+    const primera = tarjeta.getByTestId('futuros-opcion').first()
+    await expect(primera).toBeVisible({ timeout: 10000 })
+
+    // Seleccionar revela las acciones de esa opción.
+    await primera.getByTestId('futuros-opcion-fila').click()
+    const menu = primera.getByTestId('futuros-opcion-menu')
+    await expect(menu).toBeVisible({ timeout: 10000 })
+
+    await menu.click()
+    await expect(primera.getByText('Editar', { exact: false })).toBeVisible({ timeout: 10000 })
+    await expect(primera.getByText('Eliminar', { exact: false })).toBeVisible()
+  })
+
+  test('editar una opción abre el formulario con sus valores', async ({ page, request }) => {
+    // El borrador de edición vive en la lista y baja al componente como
+    // v-model; este test fija que ese cableado funciona.
+    const nombre = `Editable ${marca}`
+    await crearProyecto(request, nombre, {
+      detalles: [{ nombre: 'D', opciones: [{ nombre: 'Única opción', precioPromedio: 42 }] }],
+    })
+    await irAFuturos(page)
+
+    const tarjeta = page.getByTestId('futuros-proyecto').filter({ hasText: nombre }).first()
+    await tarjeta.getByTestId('futuros-expandir').click()
+
+    const fila = tarjeta.getByTestId('futuros-opcion').first()
+    await expect(fila).toBeVisible({ timeout: 10000 })
+
+    // Con una sola opción el menú ya está revelado.
+    await fila.getByTestId('futuros-opcion-menu').click()
+    await fila.getByText('Editar', { exact: false }).click()
+
+    await expect(tarjeta.getByText('Editando opción')).toBeVisible({ timeout: 10000 })
+    await expect(tarjeta.locator('input[placeholder="Nombre de la opción *"]')).toHaveValue(
+      'Única opción',
+    )
+
+    // Cancelar vuelve al modo lectura sin guardar.
+    await tarjeta.getByText('Cancelar', { exact: true }).click()
+    await expect(tarjeta.getByText('Editando opción')).toBeHidden({ timeout: 10000 })
+    await expect(tarjeta.getByText('Única opción')).toBeVisible()
+  })
+})

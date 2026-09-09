@@ -17,7 +17,8 @@ import { sanitizeForSystemPrompt } from '../../utils/llmSafety.js'
 import { assertImagePayload } from '../../utils/imageMagic.js'
 import { trackUsoLlm, assertCuotaMensual } from '../../utils/usoLlm.js'
 import { hoyConReferencias } from '../../utils/dateLocal.js'
-import { eq, or, isNull } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   // Shape + tamaño via Zod. La validación de magic bytes es aparte
@@ -52,13 +53,7 @@ export default defineEventHandler(async (event) => {
   const cats = await db
     .select({ nombre: categorias.nombre })
     .from(categorias)
-    .where(
-      or(
-        eq(categorias.esPredefinida, true),
-        eq(categorias.usuarioId, usuarioId),
-        isNull(categorias.usuarioId),
-      ),
-    )
+    .where(categoriasLegibles(usuarioId))
     .orderBy(categorias.nombre)
   // Saneamos nombres custom (texto libre del usuario) antes de inyectarlos
   // al system prompt — evita stored prompt injection.

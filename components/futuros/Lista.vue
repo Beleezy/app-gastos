@@ -133,207 +133,20 @@
         data-testid="futuros-proyecto"
         class="rounded-2xl border border-theme-border bg-theme-card"
       >
-        <!-- Cabecera del proyecto (compacta) -->
-        <div class="p-4">
-          <div class="flex min-w-0 gap-3">
-            <div
-              class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
-              :style="{ backgroundColor: (proyecto.categoriaColor || '#6b7280') + '22' }"
-            >
-              <span class="text-lg">{{ proyecto.categoriaIcono || '📦' }}</span>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-2">
-                <h3 class="text-sm font-semibold text-theme-text break-words">
-                  {{ proyecto.tipoGasto }}
-                </h3>
-                <span
-                  v-if="prioridadBadge(proyecto.prioridad)"
-                  class="rounded-full px-2 py-0.5 text-[0.6875rem] font-medium"
-                  :class="prioridadBadge(proyecto.prioridad).clases"
-                >
-                  {{ prioridadBadge(proyecto.prioridad).label }}
-                </span>
-                <span class="truncate text-[0.6875rem] text-theme-text-sec">
-                  {{ proyecto.categoriaNombre || 'Sin categoria' }}
-                </span>
-              </div>
-              <p
-                v-if="proyecto.descripcion"
-                class="mt-0.5 truncate text-[0.6875rem] text-theme-text-muted"
-              >
-                {{ proyecto.descripcion }}
-              </p>
-            </div>
-            <!-- Decidido X/N en esquina superior derecha -->
-            <div v-if="progresoProyecto(proyecto).total > 0" class="shrink-0 text-right">
-              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">
-                Decidido
-              </p>
-              <p
-                class="text-xs font-semibold whitespace-nowrap"
-                :class="
-                  progresoProyecto(proyecto).porcentaje === 100
-                    ? 'text-emerald-400'
-                    : 'text-sky-300'
-                "
-              >
-                {{ progresoProyecto(proyecto).decididos }}/{{ progresoProyecto(proyecto).total }} ·
-                {{ progresoProyecto(proyecto).porcentaje }}%
-              </p>
-              <span
-                v-if="progresoProyecto(proyecto).decididos === 0 && !estaExpandido(proyecto.id)"
-                class="mt-0.5 inline-flex items-center gap-1 rounded-full bg-violet-500/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-violet-300"
-              >
-                <span class="h-1 w-1 rounded-full bg-violet-400 animate-pulse"></span>
-                Por decidir
-              </span>
-            </div>
-          </div>
-
-          <!-- Min/Prom/Max densos en una fila. Enteros via SharedMoney: con texto
-               grande a 380px los montos de 4 cifras con decimales se truncaban
-               ("S/ 4,34..."); "k" solo aplica desde 5 cifras. -->
-          <div class="mt-3 flex items-stretch rounded-xl bg-theme-input">
-            <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
-              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Mín</p>
-              <SharedMoney
-                :value="proyecto.resumen.totalMinimo"
-                compact
-                entero
-                class="mt-0.5 block text-xs font-semibold text-emerald-400"
-              />
-            </div>
-            <div class="w-px bg-theme-border/60"></div>
-            <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
-              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Prom</p>
-              <SharedMoney
-                :value="proyecto.resumen.totalPromedio"
-                compact
-                entero
-                class="mt-0.5 block text-xs font-semibold text-sky-300"
-              />
-            </div>
-            <div class="w-px bg-theme-border/60"></div>
-            <div class="min-w-0 flex-1 px-1.5 py-2 text-center">
-              <p class="text-[0.6875rem] uppercase tracking-[0.16em] text-theme-text-muted">Máx</p>
-              <SharedMoney
-                :value="proyecto.resumen.totalMaximo"
-                compact
-                entero
-                class="mt-0.5 block text-xs font-semibold text-amber-300"
-              />
-            </div>
-          </div>
-
-          <!-- Barra slim de progreso -->
-          <div
-            v-if="progresoProyecto(proyecto).total > 0"
-            class="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-theme-input"
-          >
-            <div
-              class="h-full rounded-full transition-all duration-500"
-              :class="
-                progresoProyecto(proyecto).porcentaje === 100
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400'
-                  : 'bg-gradient-to-r from-sky-500 to-sky-400'
-              "
-              :style="{ width: progresoProyecto(proyecto).porcentaje + '%' }"
-            ></div>
-          </div>
-
-          <!-- Footer: Ver detalles + kebab -->
-          <div class="mt-3 flex items-center gap-2">
-            <button
-              class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] text-theme-text-sec transition-colors hover:text-theme-text"
-              @click="toggleExpandido(proyecto.id)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-3.5 w-3.5 transition-transform"
-                :class="estaExpandido(proyecto.id) ? 'rotate-180' : ''"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M19.5 8.25L12 15.75 4.5 8.25"
-                />
-              </svg>
-              {{
-                estaExpandido(proyecto.id)
-                  ? 'Ocultar detalles'
-                  : `Ver ${proyecto.resumen.totalDetalles} detalle${proyecto.resumen.totalDetalles !== 1 ? 's' : ''}`
-              }}
-            </button>
-            <div class="relative">
-              <button
-                class="tap-target flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
-                :title="'Más acciones'"
-                @click="toggleMenuProyecto(proyecto.id)"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="h-4 w-4"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <circle cx="4" cy="10" r="1.6" />
-                  <circle cx="10" cy="10" r="1.6" />
-                  <circle cx="16" cy="10" r="1.6" />
-                </svg>
-              </button>
-              <div
-                v-if="menuProyectoAbierto === proyecto.id"
-                class="absolute right-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
-              >
-                <button
-                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                  @click="(emit('editar', proyecto), cerrarMenuProyecto())"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-3.5 w-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
-                    />
-                  </svg>
-                  Editar
-                </button>
-                <button
-                  class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                  @click="((proyectoAEliminar = proyecto), cerrarMenuProyecto())"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="h-3.5 w-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                    />
-                  </svg>
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Cabecera: extraída a FuturosProyectoCabecera.vue. El menú y el
+             despliegue siguen siendo estado de ESTA lista (son excluyentes
+             entre tarjetas), así que viajan como props y vuelven como
+             eventos. -->
+        <FuturosProyectoCabecera
+          :proyecto="proyecto"
+          :expandido="estaExpandido(proyecto.id)"
+          :menu-abierto="menuProyectoAbierto === proyecto.id"
+          @toggle-expandir="toggleExpandido(proyecto.id)"
+          @toggle-menu="toggleMenuProyecto(proyecto.id)"
+          @cerrar-menu="cerrarMenuProyecto()"
+          @editar="(emit('editar', proyecto), cerrarMenuProyecto())"
+          @eliminar="((proyectoAEliminar = proyecto), cerrarMenuProyecto())"
+        />
 
         <!-- Detalles expandidos (jerarquía plana, sin cards anidadas) -->
         <div v-if="estaExpandido(proyecto.id)" class="border-t border-theme-border px-4 pt-3 pb-4">
@@ -530,345 +343,31 @@
 
               <!-- Opciones del detalle (siempre visibles dentro del proyecto expandido) -->
               <div class="space-y-2">
-                <div
+                <!-- Fila de opción: extraída a FuturosOpcionFila.vue. El
+                     estado exclusivo entre filas (menú abierto, opción en
+                     edición, selección) sigue viviendo aquí. -->
+                <FuturosOpcionFila
                   v-for="(opcion, idx) in detalle.opciones"
                   :key="opcion.id"
-                  class="rounded-xl border bg-theme-input transition-all"
-                  :class="
-                    estaSeleccionada(detalle.id, opcion.id)
-                      ? esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                        ? 'border-emerald-400/70 bg-emerald-500/10 shadow-sm'
-                        : 'border-sky-400/60 bg-sky-500/5 shadow-sm'
-                      : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                        ? 'border-emerald-500/30'
-                        : 'border-theme-border'
-                  "
-                >
-                  <!-- Opción: modo edición -->
-                  <div v-if="opcionEditando?.opcionId === opcion.id" class="p-3 space-y-2">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="text-xs font-medium text-theme-text">Editando opción</p>
-                      <button
-                        class="text-[0.6875rem] text-theme-text-muted hover:text-theme-text transition-colors"
-                        @click="cancelarEdicionOpcion"
-                      >
-                        Cancelar
-                      </button>
-                    </div>
-                    <input
-                      v-model="opcionEditando.nombre"
-                      type="text"
-                      placeholder="Nombre de la opción *"
-                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
-                    />
-                    <input
-                      v-model="opcionEditando.referenciaUrl"
-                      type="url"
-                      placeholder="Link de referencia (opcional)"
-                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
-                    />
-                    <input
-                      v-model="opcionEditando.imagenUrl"
-                      type="url"
-                      placeholder="Link de imagen (opcional)"
-                      class="w-full rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
-                    />
-                    <div class="grid grid-cols-3 gap-2">
-                      <div>
-                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Min</label>
-                        <input
-                          v-model="opcionEditando.precioMinimo"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted"
-                          >Prom</label
-                        >
-                        <input
-                          v-model="opcionEditando.precioPromedio"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="Auto"
-                          class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
-                        />
-                      </div>
-                      <div>
-                        <label class="mb-1 block text-[0.6875rem] text-theme-text-muted">Max</label>
-                        <input
-                          v-model="opcionEditando.precioMaximo"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          placeholder="0.00"
-                          class="w-full rounded-lg border border-theme-border bg-theme-card px-2 py-2 text-sm text-theme-text focus:outline-none focus:border-violet-500 transition-colors"
-                        />
-                      </div>
-                    </div>
-                    <textarea
-                      v-model="opcionEditando.notas"
-                      rows="2"
-                      placeholder="Notas (tienda, color, talla, etc.)"
-                      class="w-full resize-none rounded-lg border border-theme-border bg-theme-card px-3 py-2 text-sm text-theme-text placeholder-gray-600 focus:outline-none focus:border-violet-500 transition-colors"
-                    ></textarea>
-                    <button
-                      class="w-full rounded-lg bg-violet-500 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-600 disabled:opacity-60"
-                      :disabled="guardandoInline"
-                      @click="guardarEdicionOpcion(proyecto, detalle)"
-                    >
-                      {{ guardandoInline ? 'Guardando...' : 'Guardar cambios' }}
-                    </button>
-                  </div>
-
-                  <!-- Opción: modo lectura (fila densa, tap-to-reveal) -->
-                  <template v-else>
-                    <div
-                      class="flex items-stretch gap-3 px-3 py-2.5"
-                      :class="!detalle.estadoDecision ? 'cursor-pointer' : ''"
-                      :role="!detalle.estadoDecision ? 'button' : undefined"
-                      :tabindex="!detalle.estadoDecision ? 0 : undefined"
-                      @click="!detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)"
-                      @keydown.enter.prevent="
-                        !detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)
-                      "
-                      @keydown.space.prevent="
-                        !detalle.estadoDecision && seleccionarOpcion(detalle.id, opcion.id)
-                      "
-                    >
-                      <!-- Número índice -->
-                      <div
-                        class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-[0.6875rem] font-semibold"
-                        :class="
-                          estaSeleccionada(detalle.id, opcion.id)
-                            ? esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                              ? 'bg-emerald-500/30 text-emerald-200'
-                              : 'bg-sky-500/25 text-sky-200'
-                            : esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                              ? 'bg-emerald-500/15 text-emerald-300'
-                              : 'bg-theme-card text-theme-text-sec'
-                        "
-                      >
-                        {{ idx + 1 }}
-                      </div>
-
-                      <!-- Bloque texto principal -->
-                      <div class="min-w-0 flex-1">
-                        <div class="flex items-baseline justify-between gap-3">
-                          <p class="min-w-0 text-sm font-medium text-theme-text break-words">
-                            {{ opcion.nombre }}
-                          </p>
-                          <SharedMoney
-                            v-if="Number(opcion.precioPromedio) > 0"
-                            :value="opcion.precioPromedio"
-                            compact
-                            entero
-                            class="shrink-0 text-sm font-semibold text-sky-300"
-                          />
-                        </div>
-                        <div
-                          class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[0.6875rem]"
-                        >
-                          <!-- Con un solo precio se muestra solo ese (antes "S/ 480 — S/ 0") -->
-                          <span
-                            v-if="rangoPrecios(opcion)"
-                            class="text-theme-text-sec whitespace-nowrap"
-                          >
-                            <SharedMoney
-                              :value="rangoPrecios(opcion).min"
-                              compact
-                              entero
-                            /><template v-if="rangoPrecios(opcion).max !== null">
-                              — <SharedMoney :value="rangoPrecios(opcion).max" compact entero
-                            /></template>
-                          </span>
-                          <span
-                            v-if="
-                              esMejorOpcion(detalle, opcion) && (detalle.opciones || []).length > 1
-                            "
-                            class="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[0.6875rem] font-medium text-emerald-300"
-                          >
-                            Mejor precio
-                          </span>
-                          <a
-                            v-if="opcion.referenciaUrl"
-                            :href="opcion.referenciaUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            class="inline-flex items-center gap-0.5 text-violet-400 hover:text-violet-300 max-w-[9rem]"
-                            @click.stop
-                          >
-                            <span class="truncate">{{ hostDeUrl(opcion.referenciaUrl) }}</span>
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-2.5 w-2.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              stroke-width="2.5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M13.5 6H18m0 0v4.5M18 6l-7.5 7.5"
-                              />
-                            </svg>
-                          </a>
-                        </div>
-                        <p v-if="opcion.notas" class="mt-1 text-[0.6875rem] text-theme-text-muted">
-                          {{ opcion.notas }}
-                        </p>
-                      </div>
-
-                      <!-- Imagen miniatura -->
-                      <img
-                        v-if="opcion.imagenUrl"
-                        :src="opcion.imagenUrl"
-                        :alt="opcion.nombre"
-                        class="h-12 w-12 shrink-0 self-center rounded-lg object-cover"
-                        loading="lazy"
-                        @click.stop
-                      />
-                    </div>
-
-                    <!-- Acciones reveladas al seleccionar (o automáticas si hay solo 1 opción) -->
-                    <div
-                      v-if="
-                        (estaSeleccionada(detalle.id, opcion.id) ||
-                          detalle.opciones.length === 1) &&
-                        !detalle.estadoDecision
-                      "
-                      class="flex items-center gap-1.5 border-t border-theme-border/60 px-3 py-2"
-                      @click.stop
-                    >
-                      <button
-                        class="flex-1 rounded-lg bg-sky-500/15 px-3 py-1.5 text-[0.6875rem] font-medium text-sky-300 transition-colors hover:bg-sky-500/25"
-                        @click="abrirDecision(proyecto, detalle, opcion, 'planificar')"
-                      >
-                        Planificar
-                      </button>
-                      <button
-                        class="flex-1 rounded-lg bg-emerald-500/15 px-3 py-1.5 text-[0.6875rem] font-medium text-emerald-400 transition-colors hover:bg-emerald-500/25"
-                        @click="abrirDecision(proyecto, detalle, opcion, 'comprar')"
-                      >
-                        Comprar ya
-                      </button>
-                      <div class="relative">
-                        <button
-                          class="tap-target flex h-8 w-8 items-center justify-center rounded-lg border border-theme-border bg-theme-card text-theme-text-sec transition-colors hover:border-violet-500 hover:text-theme-text"
-                          title="Más acciones"
-                          @click.stop="toggleMenuOpcion(opcion.id)"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-3.5 w-3.5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <circle cx="4" cy="10" r="1.6" />
-                            <circle cx="10" cy="10" r="1.6" />
-                            <circle cx="16" cy="10" r="1.6" />
-                          </svg>
-                        </button>
-                        <div
-                          v-if="menuOpcionAbierto === opcion.id"
-                          class="absolute right-0 bottom-full z-20 mb-1 w-36 overflow-hidden rounded-xl border border-theme-border bg-theme-card shadow-lg"
-                        >
-                          <button
-                            v-if="detalle.opciones.length > 1 && idx > 0"
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="
-                              (moverOpcion(proyecto, detalle, opcion, -1), cerrarMenuOpcion())
-                            "
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-3.5 w-3.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              stroke-width="2.5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M4.5 15.75l7.5-7.5 7.5 7.5"
-                              />
-                            </svg>
-                            Subir
-                          </button>
-                          <button
-                            v-if="detalle.opciones.length > 1 && idx < detalle.opciones.length - 1"
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="(moverOpcion(proyecto, detalle, opcion, 1), cerrarMenuOpcion())"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-3.5 w-3.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              stroke-width="2.5"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                              />
-                            </svg>
-                            Bajar
-                          </button>
-                          <button
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-theme-text transition-colors hover:bg-theme-input"
-                            @click="(iniciarEdicionOpcion(opcion), cerrarMenuOpcion())"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-3.5 w-3.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              stroke-width="2"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"
-                              />
-                            </svg>
-                            Editar
-                          </button>
-                          <button
-                            class="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-red-400 transition-colors hover:bg-red-500/10"
-                            @click="
-                              (eliminarOpcionInline(proyecto, detalle, opcion), cerrarMenuOpcion())
-                            "
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              class="h-3.5 w-3.5"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              stroke-width="2"
-                            >
-                              <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                              />
-                            </svg>
-                            Eliminar
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </template>
-                </div>
+                  v-model:borrador="opcionEditando"
+                  :opcion="opcion"
+                  :detalle="detalle"
+                  :idx="idx"
+                  :seleccionada="estaSeleccionada(detalle.id, opcion.id)"
+                  :es-mejor="esMejorOpcion(detalle, opcion)"
+                  :editando="opcionEditando?.opcionId === opcion.id"
+                  :menu-abierto="menuOpcionAbierto === opcion.id"
+                  :guardando-inline="guardandoInline"
+                  @seleccionar="seleccionarOpcion(detalle.id, opcion.id)"
+                  @toggle-menu="toggleMenuOpcion(opcion.id)"
+                  @cerrar-menu="cerrarMenuOpcion()"
+                  @editar="iniciarEdicionOpcion(opcion)"
+                  @eliminar="eliminarOpcionInline(proyecto, detalle, opcion)"
+                  @mover="(dir) => moverOpcion(proyecto, detalle, opcion, dir)"
+                  @decidir="(tipo) => abrirDecision(proyecto, detalle, opcion, tipo)"
+                  @cancelar-edicion="cancelarEdicionOpcion()"
+                  @guardar-edicion="guardarEdicionOpcion(proyecto, detalle)"
+                />
 
                 <!-- Botón agregar opción -->
                 <button
@@ -1231,7 +730,8 @@ const { gastosFuturos, updateGastoFuturo, deleteGastoFuturo, decidirOpcionFutura
 const { success, error: toastError } = useToast()
 
 // progresoProyecto / proyectoTieneDecididos / proyectoCompletamenteDecidido /
-// detallesOrdenados / decisionBadge viven en composables/useFuturosDecision.js
+// detallesOrdenados / decisionBadge / prioridadBadge / hostDeUrl /
+// rangoPrecios viven en composables/useFuturosDecision.js
 // (auto-importado). Estaban inline en este archivo, que es el más grande del
 // proyecto y el único módulo sin tests E2E: fuera son funciones puras con su
 // propia batería en tests/futurosDecision.test.js.
@@ -1498,37 +998,6 @@ function esMejorOpcion(detalle, opcion) {
   const ranked = rankearOpcionesHelper(opciones)
   if (!ranked.length) return false
   return ranked[0]?.id === opcion?.id
-}
-
-function prioridadBadge(valor) {
-  switch (valor) {
-    case 3:
-      return { label: '● Alta', clases: 'bg-red-500/15 text-red-400' }
-    case 2:
-      return { label: '● Media', clases: 'bg-amber-500/15 text-amber-300' }
-    case 1:
-      return { label: '● Baja', clases: 'bg-emerald-500/15 text-emerald-400' }
-    default:
-      return null
-  }
-}
-
-function hostDeUrl(url) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '')
-  } catch {
-    return 'Abrir enlace'
-  }
-}
-
-// Rango de precios legible: ambos → "min — max"; uno solo → ese precio;
-// 0/vacío se ignora (null = no mostrar nada).
-function rangoPrecios(opcion) {
-  const min = Number(opcion?.precioMinimo) > 0 ? Number(opcion.precioMinimo) : null
-  const max = Number(opcion?.precioMaximo) > 0 ? Number(opcion.precioMaximo) : null
-  if (min !== null && max !== null && max !== min) return { min, max }
-  const unico = min ?? max
-  return unico !== null ? { min: unico, max: null } : null
 }
 
 function opcionVacia() {

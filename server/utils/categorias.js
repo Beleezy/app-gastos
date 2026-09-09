@@ -18,6 +18,42 @@ import { db } from './db.js'
 import { categorias } from '../database/schema.js'
 
 /**
+ * Condición Drizzle de las categorías que un usuario puede LEER: las
+ * suyas más las predefinidas globales.
+ *
+ * Es la misma regla que aplica `assertCategoriasPropias` al escribir; se
+ * expone como condición para que las lecturas no la vuelvan a escribir a
+ * mano. Estaba redactada de cuatro formas distintas —y tres de ellas más
+ * amplias que esta— en /api/voz/parse, parse-image, parse-stream y
+ * /api/categorias/provision:
+ *
+ *   or(esPredefinida, usuarioId = me, usuarioId IS NULL)
+ *
+ * Esa versión acepta una categoría de OTRA cuenta con `es_predefinida`
+ * en true. Hoy no es alcanzable porque el POST de categorías fuerza
+ * `esPredefinida: false`, pero la diferencia no es intencionada: en los
+ * endpoints de voz el nombre de la categoría se inyecta en el prompt que
+ * se manda a Gemini, así que una fila así se llevaría el nombre de una
+ * categoría ajena a la petición de otro usuario.
+ */
+export function categoriasLegibles(usuarioId) {
+  return or(
+    eq(categorias.usuarioId, usuarioId),
+    and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
+  )
+}
+
+/**
+ * Condición de las categorías predefinidas globales (las que se clonan al
+ * aprovisionar una cuenta nueva). `isNull` no es decorativo: sin él, una
+ * categoría de otro usuario marcada como predefinida se clonaría a todas
+ * las cuentas nuevas.
+ */
+export function categoriasPredefinidasGlobales() {
+  return and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId))
+}
+
+/**
  * Parte pura: dados los ids pedidos y las filas accesibles que devolvió la
  * BD, devuelve los ids que el usuario NO puede usar (deduplicados).
  *
