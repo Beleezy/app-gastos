@@ -188,6 +188,16 @@ helper que la haga.
   en un bucle. Donde hay schema, `validateBody` (Zod rechaza `null`); donde
   la validación a mano ya es correcta, `readBodyObjeto`
   ([validate.js](server/utils/validate.js)).
+- **En CI, la primera visita a una ruta compila esa ruta.** El servidor de
+  desarrollo compila bajo demanda, así que la primera petición a una página
+  tarda muchísimo más que en local. Un test que hace `goto` y afirma contra
+  el DATO —no contra el esqueleto— tiene que esperar a que las llamadas del
+  montaje terminen (`BasePage.waitForReady()`, que incluye `networkidle`),
+  no confiar en un timeout corto. `categorias.ui.spec.js` afirmaba a los 5 s
+  que se veía una categoría, cuando la página primero hace
+  `POST /api/categorias/provision` y solo después `GET /api/categorias`:
+  falló en CI 25 s después de arrancar la suite, siendo la primera spec en
+  tocar esa ruta, y pasaba siempre en local.
 - **Los tests también miden las fechas en la zona del usuario.** Las specs
   construían el "hoy" con `new Date()`, que en el runner es UTC, mientras
   la app lo mide en `America/Lima`. Entre las 00:00 y las 05:00 UTC —las
