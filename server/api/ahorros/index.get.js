@@ -3,6 +3,7 @@ import { ahorros, mediosAhorro, metasAhorro } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, or, sql, desc } from 'drizzle-orm'
+import { medioAhorroPropio } from '../../utils/ahorros.js'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -75,7 +76,7 @@ export default defineEventHandler(async (event) => {
       .from(ahorros)
       .leftJoin(
         mediosAhorro,
-        and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), medioAhorroPropio(usuarioId)),
       )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .orderBy(desc(ahorros.fecha)),
@@ -101,7 +102,7 @@ export default defineEventHandler(async (event) => {
       .from(ahorros)
       .leftJoin(
         mediosAhorro,
-        and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), medioAhorroPropio(usuarioId)),
       )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .groupBy(ahorros.medioAhorroId, mediosAhorro.nombre, mediosAhorro.icono, mediosAhorro.color),

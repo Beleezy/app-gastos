@@ -28,6 +28,7 @@ import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
 import { fetchFuturePortfolio } from '../utils/gastosFuturos.js'
 import { totalIngresosMes } from '../services/ingresos.service.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
+import { medioAhorroPropio } from '../utils/ahorros.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -150,7 +151,7 @@ export default defineEventHandler(async (event) => {
       // apunte al medio de otra cuenta trae su nombre al dashboard.
       .leftJoin(
         mediosAhorro,
-        and(eq(ahorros.medioAhorroId, mediosAhorro.id), eq(mediosAhorro.usuarioId, usuarioId)),
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), medioAhorroPropio(usuarioId)),
       )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .groupBy(ahorros.medioAhorroId, mediosAhorro.nombre, mediosAhorro.icono),
