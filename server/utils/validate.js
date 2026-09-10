@@ -49,6 +49,28 @@ export async function validateBody(event, schema) {
 }
 
 /**
+ * Lee el body y garantiza que sea un objeto.
+ *
+ * `readBody` devuelve `undefined` cuando la petición no trae cuerpo y
+ * `null` cuando trae el literal `null`. Los handlers que leen el body
+ * crudo hacen acto seguido `body.campo` o `const { campo } = body`, así
+ * que ambos casos lanzaban un TypeError y salían como 500 — cuando lo
+ * correcto es el 400 que esos mismos handlers ya devuelven para un cuerpo
+ * incompleto. No es un caso rebuscado: una petición sin cuerpo es lo que
+ * manda un cliente al que se le perdió el payload, y la cola offline
+ * reintenta ante un 500 pero no ante un 400, así que el error equivocado
+ * convierte un fallo permanente en un bucle de reintentos.
+ *
+ * Esto NO sustituye a un schema: donde haya uno, `validateBody`. Sirve
+ * para los handlers cuya validación a mano ya es correcta y solo falla en
+ * que nunca llega a ejecutarse.
+ */
+export async function readBodyObjeto(event) {
+  const body = await readBody(event)
+  return body && typeof body === 'object' && !Array.isArray(body) ? body : {}
+}
+
+/**
  * Valida el query string contra el schema.
  */
 export function validateQuery(event, schema) {

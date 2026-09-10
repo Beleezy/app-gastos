@@ -13,9 +13,10 @@ import {
   normalizarParPersonas,
 } from '../../../utils/vinculos.js'
 import { eq, and, or } from 'drizzle-orm'
+import { readBodyObjeto } from '../../../utils/validate.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
+  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
   if (!body.personaEntidadId) {

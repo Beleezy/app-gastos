@@ -1,14 +1,18 @@
 import { db } from '../../../utils/db.js'
 import { personasEntidades } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { validateBody } from '../../../utils/validate.js'
+import { personaEntidadCreateSchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  if (!body.nombre?.trim()) {
-    throw createError({ statusCode: 400, message: 'El nombre es obligatorio' })
-  }
+  // `tipo` va a un pgEnum ('persona' | 'organizacion'). Sin validar, un
+  // valor cualquiera llegaba al INSERT y salía como 500 con el SQL crudo
+  // en el mensaje. El schema además traduce los valores legacy
+  // ('entidad'/'banco' → organizacion, 'otro' → persona), que es
+  // exactamente lo que su comentario decía resolver desde que se escribió.
+  const body = await validateBody(event, personaEntidadCreateSchema)
 
   function capitalizarNombre(nombre) {
     return nombre
@@ -21,9 +25,9 @@ export default defineEventHandler(async (event) => {
     .values({
       usuarioId,
       nombre: capitalizarNombre(body.nombre),
-      tipo: body.tipo || 'persona',
-      contacto: body.contacto?.trim() || null,
-      notas: body.notas?.trim() || null,
+      tipo: body.tipo,
+      contacto: body.contacto || null,
+      notas: body.notas || null,
     })
     .returning()
 

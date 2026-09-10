@@ -28,6 +28,8 @@ import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
 import { fetchFuturePortfolio } from '../utils/gastosFuturos.js'
 import { totalIngresosMes } from '../services/ingresos.service.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
+import { medioAhorroPropio } from '../utils/ahorros.js'
+import { categoriasLegibles } from '../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -114,7 +116,11 @@ export default defineEventHandler(async (event) => {
         categoriaColor: categorias.color,
       })
       .from(gastosPlanificados)
-      .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
+      // Por id Y por legibilidad (defensa en profundidad).
+      .leftJoin(
+        categorias,
+        and(eq(gastosPlanificados.categoriaId, categorias.id), categoriasLegibles(usuarioId)),
+      )
       .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
       .where(
         and(
@@ -146,7 +152,12 @@ export default defineEventHandler(async (event) => {
         total: sql`COALESCE(SUM(${ahorros.monto}), 0)`,
       })
       .from(ahorros)
-      .leftJoin(mediosAhorro, eq(ahorros.medioAhorroId, mediosAhorro.id))
+      // Cruza por id Y por dueño: sin el segundo filtro, una fila que
+      // apunte al medio de otra cuenta trae su nombre al dashboard.
+      .leftJoin(
+        mediosAhorro,
+        and(eq(ahorros.medioAhorroId, mediosAhorro.id), medioAhorroPropio(usuarioId)),
+      )
       .where(and(eq(ahorros.usuarioId, usuarioId), eq(ahorros.mes, mes), eq(ahorros.anio, anio)))
       .groupBy(ahorros.medioAhorroId, mediosAhorro.nombre, mediosAhorro.icono),
 

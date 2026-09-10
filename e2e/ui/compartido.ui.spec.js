@@ -7,6 +7,7 @@
 
 import { test, expect } from '../fixtures/index.js'
 import { BasePage } from '../pages/BasePage.js'
+import { hoyNegocio } from '../fechaNegocio.js'
 
 async function abrirTabComparto(page) {
   await page.goto('/compartido')
@@ -46,6 +47,11 @@ test.describe('Compartido — UI', () => {
     await expect(page.getByTestId('compartido-guia-empezar')).toBeVisible()
   })
 
+  // OJO al correr esta spec en bucle contra una BD local: invitar tiene un
+  // techo de 5 por hora y usuario (`compartidoInvitar` en rateLimit.js), y
+  // al agotarlo el test falla con la invitación ausente, que parece un bug
+  // de la lista y es un 429. En CI no pasa: la BD y el limitador nacen
+  // limpios en cada run.
   test('invitar a alguien deja la conexión listada con su alcance', async ({ page }) => {
     await abrirTabComparto(page)
     await page.getByTestId('compartido-fab-invitar').click()
@@ -69,10 +75,11 @@ test.describe('Compartido — UI', () => {
     // del historial: el usuario E2E es compartido entre specs y su primer
     // gasto puede venir ya marcado de otra corrida.
     const concepto = `Visibilidad UI ${Date.now()}`
-    const hoy = new Date()
-    const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(
-      hoy.getDate(),
-    ).padStart(2, '0')}`
+    // La fecha se mide en la zona del USUARIO, no en la del runner. Con
+    // `new Date()` en un runner UTC, entre las 19:00 y las 24:00 de Lima el
+    // gasto nacía con la fecha de mañana y el historial —que muestra el hoy
+    // del usuario— no lo enseñaba nunca.
+    const fecha = await hoyNegocio(page.request)
 
     const cats = await (await page.request.get('/api/categorias')).json()
     test.skip(!cats.length, 'Sin categorías sembradas')
@@ -179,9 +186,9 @@ test.describe('Compartido — lo que ve el receptor', () => {
         data: { categoriaId: rubro.id, montoMensual: PRESUPUESTO, alertaUmbral: 80 },
       })
 
-      const hoy = new Date()
-      const dia = (d) =>
-        `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+      // Mismo motivo: el mes tiene que ser el del usuario, no el del runner.
+      const [anio, mes] = (await hoyNegocio(api)).split('-')
+      const dia = (d) => `${anio}-${mes}-${String(d).padStart(2, '0')}`
       const conceptos = [`Mercado ${marca}`, `Almuerzos ${marca}`]
       for (const [i, concepto] of conceptos.entries()) {
         const r = await api.post('/api/gastos', {

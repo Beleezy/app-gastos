@@ -1,3 +1,9 @@
+// OJO: este archivo describe tablas que NO existen en `schema.js`. Es de
+// una funcionalidad que nunca llegó a construirse. No lo cablees a un
+// handler dando por hecho que la tabla está: primero la migración.
+//
+// No lo importa nadie.
+
 import { z } from 'zod'
 
 export const espacioCreateSchema = z.object({

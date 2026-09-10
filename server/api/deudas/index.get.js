@@ -2,13 +2,18 @@ import { db } from '../../utils/db.js'
 import { deudas, personasEntidades, pagosDeuda } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, sql, isNull } from 'drizzle-orm'
+import { validateQuery } from '../../utils/validate.js'
+import { deudasListQuerySchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const query = getQuery(event)
-  const personaId = query.personaId
-  const tipo = query.tipo // 'me_deben' | 'yo_debo'
-  const estado = query.estado // 'pendiente' | 'parcial' | 'pagado' | 'archivado'
+
+  // `personaId` iba crudo a un `eq()` contra una columna uuid y
+  // `tipo`/`estado` contra columnas enum de Postgres: `?personaId=abc` o
+  // `?estado=basura` devolvían un 500 con la consulta dentro. Los dos enums
+  // ya estaban escritos en `shared/schemas/deudas.js` sin usarse.
+  const query = validateQuery(event, deudasListQuerySchema)
+  const { personaId, tipo, estado } = query
 
   const conditions = [eq(deudas.usuarioId, usuarioId), isNull(deudas.deletedAt)]
   if (personaId) conditions.push(eq(deudas.personaEntidadId, personaId))

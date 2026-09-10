@@ -35,3 +35,30 @@ export const paginacionQuerySchema = z.object({
   cursor: z.string().max(500).optional().nullable(),
   limit: z.coerce.number().int().min(1).max(200).optional(),
 })
+
+// Los parámetros de query llegan SIEMPRE como string, y el cliente manda
+// `?fecha=` (vacío) cuando el filtro no está puesto. Sin esto, un '' entra
+// como valor y acaba en un `eq()` contra una columna date o uuid.
+export const vacioComoAusente = (schema) =>
+  z.preprocess((v) => (v === '' || v === null ? undefined : v), schema.optional())
+
+// Query params compartidos por los listados: el cliente los manda para
+// saltarse su propio Cache-Control. No los lee ningún handler, pero tienen
+// que pasar la validación.
+export const cacheBusters = {
+  _v: z.any().optional(),
+  _t: z.any().optional(),
+  fresh: z.any().optional(),
+}
+
+// Query de los listados por mes. `parseInt(q.mes) || mesLocal` acota lo que
+// NO es número, pero deja pasar un `?mes=99&anio=1`, que arma un rango de
+// fechas imposible ("0001-99-01") y revienta la consulta con un 500 que
+// arrastra el SQL. El clamp correcto es este, en un solo sitio.
+export const mesAnioQuerySchema = z.object({
+  mes: vacioComoAusente(z.coerce.number().int().min(1).max(12)),
+  anio: vacioComoAusente(z.coerce.number().int().min(2000).max(2100)),
+  limit: vacioComoAusente(z.coerce.number().int().min(1).max(1000)),
+  offset: vacioComoAusente(z.coerce.number().int().min(0)),
+  ...cacheBusters,
+})

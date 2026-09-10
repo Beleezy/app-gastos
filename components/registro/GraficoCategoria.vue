@@ -229,6 +229,12 @@ import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
 // ─── Filtro de mes ──────────────────────────────────────────
 import { MESES } from '~/utils/constants'
 
+// `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
+// el token de Supabase, añade el cache-buster del perfil activo y traduce
+// 401/429 a un toast. CLAUDE.md lo marca como obligatorio para todo
+// fetch autenticado.
+const { apiFetch } = useApiFetch()
+
 const props = defineProps({
   datos: { type: Array, default: () => [] },
   gastos: { type: Array, default: () => [] },
@@ -284,7 +290,7 @@ async function seleccionarMesGrafico(key) {
   if (!obj) return
   isLoadingMes.value = true
   try {
-    gastosOtroMes.value = await $fetch('/api/gastos', {
+    gastosOtroMes.value = await apiFetch('/api/gastos', {
       query: { mes: obj.mes, anio: obj.anio },
       timeout: 15000,
     })

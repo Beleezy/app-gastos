@@ -1,27 +1,34 @@
 import { db } from '../../utils/db.js'
 import { ahorros, mediosAhorro } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq } from 'drizzle-orm'
+import { validateBody } from '../../utils/validate.js'
+import { assertMedioAhorroPropio } from '../../utils/ahorros.js'
+import { ahorroCreateSchema } from '~/shared/schemas/categorias.js'
+import { eq, and } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  if (!body.monto || !body.fecha) {
-    throw createError({ statusCode: 400, message: 'Monto y fecha son obligatorios' })
-  }
+  // `ahorroCreateSchema` existía desde que se escribió el módulo y este
+  // handler leía `readBody` crudo, con dos comprobaciones a mano
+  // (`!body.monto || !body.fecha`) que dejaban pasar todo lo demás. Cinco
+  // cuerpos distintos —monto "mucho", monto negativo, fecha "no-es-fecha",
+  // medioAhorroId "abc-123", monto 1e30— llegaban al INSERT y devolvían un
+  // 500 con la consulta y sus parámetros en el mensaje.
+  const body = await validateBody(event, ahorroCreateSchema)
 
-  const fechaObj = new Date(body.fecha + 'T00:00:00')
-  const mes = fechaObj.getMonth() + 1
-  const anio = fechaObj.getFullYear()
+  // El schema valida la FORMA del id; esto valida de quién es.
+  await assertMedioAhorroPropio({ usuarioId, medioAhorroId: body.medioAhorroId })
+
+  // `fecha` ya viene con formato YYYY-MM-DD garantizado por el schema, así
+  // que mes/anio no pueden salir NaN.
+  const [anio, mes] = body.fecha.split('-').map(Number)
 
   const [ahorro] = await db
     .insert(ahorros)
     .values({
       usuarioId,
       medioAhorroId: body.medioAhorroId || null,
-      gastoPlanificadoId: body.gastoPlanificadoId || null,
-      gastoId: body.gastoId || null,
       concepto: body.concepto?.trim() || null,
       monto: String(body.monto),
       fecha: body.fecha,
@@ -36,7 +43,7 @@ export default defineEventHandler(async (event) => {
     ;[medio] = await db
       .select()
       .from(mediosAhorro)
-      .where(eq(mediosAhorro.id, ahorro.medioAhorroId))
+      .where(and(eq(mediosAhorro.id, ahorro.medioAhorroId), eq(mediosAhorro.usuarioId, usuarioId)))
       .limit(1)
   }
 

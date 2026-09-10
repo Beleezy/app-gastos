@@ -1,7 +1,7 @@
 import { db } from '../../../utils/db.js'
 import { mediosAhorro } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
-import { eq, and, asc } from 'drizzle-orm'
+import { eq, asc } from 'drizzle-orm'
 
 const MEDIOS_DEFAULT = [
   { nombre: 'Yape', tipo: 'billetera_digital', icono: '📱', color: '#7C3AED' },

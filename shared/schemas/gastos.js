@@ -1,5 +1,8 @@
 import { z } from 'zod'
 import {
+  vacioComoAusente,
+  cacheBusters,
+  uuidSchema,
   fechaIso,
   horaHhmm,
   monto,
@@ -112,4 +115,30 @@ export const vozParseImageBodySchema = z.object({
     .string()
     .min(1, 'Imagen obligatoria')
     .max(8 * 1024 * 1024, 'Imagen demasiado grande'),
+})
+
+// Query de GET /api/gastos y /api/gastos/resumen.
+//
+// Estos parámetros iban CRUDOS del query string a la consulta: `fecha` y
+// `mes`/`anio` a un `between()` contra una columna date, y `categoriaId` a
+// un `eq()` contra una uuid. `?fecha=no-es-fecha` o `?categoriaId=abc-123`
+// devolvían un 500 con la consulta y sus parámetros en el mensaje — y
+// /api/gastos es el endpoint que carga el historial en cada visita a
+// /registro, así que basta una URL vieja guardada en favoritos.
+//
+// `busqueda` sí estaba saneada (`sqlSafe.js`); el resto no.
+export const gastosListQuerySchema = z.object({
+  fecha: vacioComoAusente(fechaIso),
+  fechaDesde: vacioComoAusente(fechaIso),
+  fechaHasta: vacioComoAusente(fechaIso),
+  mes: vacioComoAusente(z.coerce.number().int().min(1).max(12)),
+  anio: vacioComoAusente(z.coerce.number().int().min(2000).max(2100)),
+  busqueda: vacioComoAusente(z.string().max(200)),
+  categoriaId: vacioComoAusente(uuidSchema),
+  limit: vacioComoAusente(z.coerce.number().int().min(1).max(1000)),
+  offset: vacioComoAusente(z.coerce.number().int().min(0)),
+  orden: vacioComoAusente(
+    z.enum(['fecha_desc', 'fecha_asc', 'monto_asc', 'monto_desc', 'concepto_asc']),
+  ),
+  ...cacheBusters,
 })

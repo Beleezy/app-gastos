@@ -3,13 +3,20 @@ import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, between, sql, desc, ilike, asc, isNull } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
+import { categoriasLegibles } from '../../utils/categorias.js'
+import { validateQuery } from '../../utils/validate.js'
+import { gastosListQuerySchema } from '~/shared/schemas/gastos.js'
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
+  // Estos parámetros iban CRUDOS a la consulta: `fecha` y `mes`/`anio` a un
+  // `between()` contra una columna date, `categoriaId` a un `eq()` contra
+  // una uuid. `?fecha=no-es-fecha` devolvía un 500 con la consulta y sus
+  // parámetros dentro — y este endpoint carga el historial en cada visita a
+  // /registro, así que basta una URL vieja guardada en favoritos.
   const { fecha, fechaDesde, fechaHasta, mes, anio, busqueda, categoriaId, limit, offset, orden } =
-    query
+    validateQuery(event, gastosListQuerySchema)
 
   let whereConditions = [eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)]
 
@@ -68,7 +75,11 @@ export default defineEventHandler(async (event) => {
       createdAt: gastos.createdAt,
     })
     .from(gastos)
-    .leftJoin(categorias, eq(gastos.categoriaId, categorias.id))
+    // Cruza por id Y por legibilidad. Los caminos de escritura ya validan
+    // la propiedad de `categoriaId`, así que esto es defensa en
+    // profundidad: una fila legacy que apunte a una categoría privada
+    // ajena lee "sin categoría" en vez de traer su nombre.
+    .leftJoin(categorias, and(eq(gastos.categoriaId, categorias.id), categoriasLegibles(usuarioId)))
     .where(and(...whereConditions))
     .orderBy(...orderBy)
 

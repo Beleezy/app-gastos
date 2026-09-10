@@ -10,11 +10,14 @@ import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
 import { syncUpdated } from '../../../../utils/gcalAutoSync.js'
+import { categoriasLegibles } from '../../../../utils/categorias.js'
+import { assertMedioAhorroPropio } from '../../../../utils/ahorros.js'
 import { getUuidParam } from '../../../../utils/params.js'
+import { readBodyObjeto } from '../../../../utils/validate.js'
 
 export default defineEventHandler(async (event) => {
   const id = getUuidParam(event, 'id', { recurso: 'Gasto planificado' })
-  const body = await readBody(event)
+  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
   if (!body.fechaPago) {
@@ -97,10 +100,16 @@ export default defineEventHandler(async (event) => {
   const [categoria] = await db
     .select()
     .from(categorias)
-    .where(eq(categorias.id, gastoGuardado.categoriaId))
+    // Filtrada por legibilidad: el nombre de esta categoría no se devuelve,
+    // pero decide si se crea un ahorro. Una categoría ajena llamada "Ahorro"
+    // no debe poder disparar esa rama.
+    .where(and(eq(categorias.id, gastoGuardado.categoriaId), categoriasLegibles(usuarioId)))
     .limit(1)
 
   if (categoria?.nombre?.toLowerCase() === 'ahorro') {
+    // Tercera puerta al mismo agujero de `medioAhorroId`: aquí también se
+    // insertaba tal cual, sin comprobar de quién era el medio.
+    await assertMedioAhorroPropio({ usuarioId, medioAhorroId: body.medioAhorroId })
     const fechaObj = new Date(gastoGuardado.fecha + 'T00:00:00')
     try {
       await db.insert(ahorros).values({

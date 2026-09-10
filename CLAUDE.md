@@ -22,7 +22,7 @@ Navegación: [BottomNav.vue](components/layout/BottomNav.vue) (móvil) + [SideNa
 | [calendario.vue](pages/calendario.vue)                                                             | Vista calendario de planificados/gastos                                                                                                                         | [CalendarioMensual.vue](components/planificador/CalendarioMensual.vue)                                                                                                          |
 | [metricas.vue](pages/metricas.vue)                                                                 | Histórico y recurrentes                                                                                                                                         | `/api/metricas/*`                                                                                                                                                               |
 | [reportes.vue](pages/reportes.vue)                                                                 | Reportes/exportaciones                                                                                                                                          | [useReportes.js](composables/useReportes.js)                                                                                                                                    |
-| [papelera.vue](pages/papelera.vue)                                                                 | Soft-delete: restaurar/purgar gastos, deudas, pagos y personas (`deleted_at`)                                                                                   | `/api/papelera/*`, [softDelete.js](server/utils/softDelete.js), cron `purgar-papelera`                                                                                          |
+| [papelera.vue](pages/papelera.vue)                                                                 | Soft-delete: restaurar/purgar gastos, deudas, pagos y personas (`deleted_at`)                                                                                   | `/api/papelera/*`, cron `purgar-papelera`                                                                                                                                       |
 | [compartido.vue](pages/compartido.vue)                                                             | **Compartido**: visibilidad de gastos hacia otra cuenta (rubros, presupuesto, proyección) + avisos y umbrales del observador                                    | `components/compartido/`, [useCompartido.js](composables/useCompartido.js), `/api/compartido/**`                                                                                |
 | [familia.vue](pages/familia.vue)                                                                   | **Perfiles gestionados** (familiares sin cuenta propia): crear/editar perfiles, cambiar de perfil activo                                                        | [usePerfiles.js](composables/usePerfiles.js), [usePerfilModo.js](composables/usePerfilModo.js), `/api/perfiles`, [PerfilContextBar.vue](components/layout/PerfilContextBar.vue) |
 | [categorias.vue](pages/categorias.vue)                                                             | Categorías predefinidas globales (`usuario_id` NULL) + personalizadas                                                                                           | `/api/categorias`                                                                                                                                                               |
@@ -148,6 +148,89 @@ helper que la haga.
 - **`?? ` y no `|| ` para "lo que informó el servidor".**
   `res.eliminados || ids.length` trata el 0 como "no informado" y anuncia
   "5 gastos eliminados" cuando no se eliminó ninguno.
+- **Un helper que no acepta `tx` no sirve para soft-delete.** Existía
+  `server/utils/softDelete.js` con `softDeleteRow`/`restoreRow`, y no lo
+  usaba nadie: operan sobre `db`, mientras que todo borrado real ocurre
+  dentro de una transacción porque cascadea (los pagos de una deuda, la
+  persona huérfana). Era inusable por construcción; se eliminó. El patrón
+  vivo es `isNull(tabla.deletedAt)` en la lectura y el UPDATE dentro de la
+  misma `tx` que el resto de la cascada.
+- **Un schema que no coincide con su tabla es peor que no tenerlo.**
+  `personaEntidadCreateSchema` declaraba `telefono` y `email` (la tabla
+  tiene un solo `contacto`) y `pagoGlobalSchema` describía un endpoint que
+  no existe. Al cablearlos tal cual habrían borrado el contacto y
+  rechazado todas las peticiones legítimas. Antes de conectar un schema
+  que llevaba tiempo sin usarse, comprobar contra la tabla y contra lo que
+  manda el cliente. Y un schema que describe una tabla inexistente es una
+  trampa: `shared/schemas/cuentas.js` y `familia.js` llevan aviso en la
+  cabecera por eso.
+- **Una referencia a otra tabla se valida en propiedad, no solo en forma.**
+  El schema dice que `medioAhorroId` es un uuid; de quién es lo dice
+  [ahorros.js](server/utils/ahorros.js), igual que
+  [categorias.js](server/utils/categorias.js) lo dice de `categoriaId`. El
+  agujero aparece cuando la respuesta hace un join para devolver el nombre:
+  `POST /api/ahorros` con el id del medio de otra cuenta devolvía su
+  nombre, y `POST /api/planificador/gastos` con el de una categoría privada
+  ajena devolvía el suyo —"Terapia psiquiátrica"—. No es un oráculo de una
+  sola lectura: la fila queda guardada apuntando ahí y el nombre ajeno
+  reaparece en cada listado. Por eso los joins de LECTURA también filtran
+  por dueño: una fila envenenada de antes del arreglo lee "sin medio" en
+  vez de seguir filtrando.
+- **La regla, en un solo sitio, o se ensancha sola.** La de categorías
+  estaba escrita a mano en cuatro variantes; tres aceptaban filas con
+  `usuario_id IS NULL` sin exigir `es_predefinida`, que es más ancho que la
+  canónica. Ninguna era un bug visible — hasta que lo fuera.
+- **Sin cuerpo también es un caso.** `readBody` devuelve `undefined` sin
+  cuerpo y `null` con el literal `null`, y `body.campo` sobre eso es un
+  TypeError, es decir un 500 donde el propio handler ya tenía escrito el
+  400 correcto. Importa por la cola offline: reintenta ante un 500 y no
+  ante un 400, así que el código equivocado convierte un fallo permanente
+  en un bucle. Donde hay schema, `validateBody` (Zod rechaza `null`); donde
+  la validación a mano ya es correcta, `readBodyObjeto`
+  ([validate.js](server/utils/validate.js)).
+- **En CI, la primera visita a una ruta compila esa ruta.** El servidor de
+  desarrollo compila bajo demanda, así que la primera petición a una página
+  tarda muchísimo más que en local. Un test que hace `goto` y afirma contra
+  el DATO —no contra el esqueleto— tiene que esperar a que las llamadas del
+  montaje terminen (`BasePage.waitForReady()`, que incluye `networkidle`),
+  no confiar en un timeout corto. `categorias.ui.spec.js` afirmaba a los 5 s
+  que se veía una categoría, cuando la página primero hace
+  `POST /api/categorias/provision` y solo después `GET /api/categorias`:
+  falló en CI 25 s después de arrancar la suite, siendo la primera spec en
+  tocar esa ruta, y pasaba siempre en local.
+- **Los tests también miden las fechas en la zona del usuario.** Las specs
+  construían el "hoy" con `new Date()`, que en el runner es UTC, mientras
+  la app lo mide en `America/Lima`. Entre las 00:00 y las 05:00 UTC —las
+  19:00 y 24:00 de Lima— el test creaba un gasto con la fecha de MAÑANA y
+  después lo buscaba en un historial que muestra el hoy del usuario: no
+  aparecía. Son cinco horas de cada día en las que la suite se cae, y el
+  runner arranca a la hora que le toque; parece flake y no lo es. El
+  helper es [fechaNegocio.js](e2e/fechaNegocio.js), que le pregunta la zona
+  a la API en vez de fijarla.
+- **La query también es entrada del usuario.** `validateQuery` existía en
+  [validate.js](server/utils/validate.js) y lo usaba UN endpoint. En el
+  resto, `fecha`, `mes`/`anio`, `categoriaId`, `personaId`, `estado` y
+  `tipo` iban crudos del query string a la consulta: once combinaciones
+  devolvían un 500 con el SQL, y en los dos endpoints de LECTURA más
+  golpeados —`/api/gastos` carga el historial en cada visita a /registro—,
+  así que basta una URL vieja guardada en favoritos. Dos detalles que hay
+  que respetar al añadir un schema de query: los valores llegan SIEMPRE
+  como string (`z.coerce`) y el cliente manda `?fecha=` vacío cuando el
+  filtro no está puesto, que no es lo mismo que mandarlo — de ahí
+  `vacioComoAusente`. Y `_v`/`_t` (los cache busters) tienen que pasar.
+- **Autenticar antes de validar.** Un listado validaba la query primero, así
+  que una petición sin sesión recibía un 400 que confirma la ruta y describe
+  sus parámetros — y se saltaba el rate limit por usuario, que vive dentro
+  de `getUsuarioFromEvent`. El orden correcto es auth, validación, consulta.
+- **`parseInt(x) || default` no es un clamp.** Acota lo que no es número y
+  deja pasar `?mes=99&anio=1`, que arma el rango "0001-99-01" y revienta la
+  consulta igual. El clamp de verdad vive en `mesAnioQuerySchema`.
+- **Un endpoint sin tests se audita con un fuzz, no leyéndolo.** Mandar
+  cuerpos absurdos a cada handler que lee `readBody` crudo, y parámetros
+  absurdos a cada GET, encontró en dos minutos lo que la lectura no vio en
+  tres rondas: 16 respuestas 500 con la consulta y sus parámetros dentro,
+  dos de ellas ante CUALQUIER cuerpo, `{}` incluido. El barrido está en el
+  historial de la ronda 4; repetirlo cuesta un minuto.
 
 ## Capa servidor
 
@@ -200,13 +283,14 @@ components/     layout/ · shared/ · planificador/ · registro/ · deudas/ · a
 composables/    ~90 archivos — useGastos · useDeudas · usePlanificador · useAhorros · useIngresos
                 useVinculos · usePerfiles · useLLMParser · useDraftManager · useApiFetch · useTheme ...
 stores/         usuario · plantillas (Pinia)
-shared/schemas/ Zod compartido cliente↔servidor
+shared/schemas/ Zod compartido cliente↔servidor (cuerpos Y query params)
 shared/compartido/ regla de visibilidad y proyección (lógica pura, sin BD)
 server/api/     gastos · deudas · planificador · ahorros · ingresos · futuros · categorias
                 configuraciones · perfiles · metricas · papelera · voz · integraciones/google
                 acceso · superadmin · cron · dashboard · health · csp-report · errors
 server/services/  lógica de negocio (9 servicios)
-server/utils/     30 helpers (auth, rate limit, LLM, crypto, fechas, soft delete, ...)
+server/utils/     32 helpers (auth, rate limit, LLM, crypto, fechas, propiedad de
+                  categorías y medios de ahorro, idempotencia, ...)
 server/database/  schema.js · migrations/ · seeds
-e2e/ · tests/     Playwright · Vitest
+e2e/ · tests/     Playwright (+ fechaNegocio.js: el "hoy" en la zona del usuario) · Vitest
 ```

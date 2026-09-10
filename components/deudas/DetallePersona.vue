@@ -599,6 +599,12 @@
 <script setup>
 import { getInitials } from '~/utils/constants'
 
+// `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
+// el token de Supabase, añade el cache-buster del perfil activo y traduce
+// 401/429 a un toast. CLAUDE.md lo marca como obligatorio para todo
+// fetch autenticado.
+const { apiFetch } = useApiFetch()
+
 const emit = defineEmits(['registrarPago', 'agregarDeuda', 'editarDeuda', 'pagoGlobal'])
 
 const {
@@ -759,7 +765,9 @@ async function descargarHistorialPdf() {
     ]
     const pagos = []
     try {
-      const r = await $fetch(`/api/deudas/personas/${personaSeleccionada.value.id}/pagos-historial`)
+      const r = await apiFetch(
+        `/api/deudas/personas/${personaSeleccionada.value.id}/pagos-historial`,
+      )
       if (Array.isArray(r)) {
         pagos.push(...r)
       } else if (Array.isArray(r?.pagos)) {

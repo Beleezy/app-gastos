@@ -10,6 +10,7 @@ import { createGcalClient } from '../../../utils/googleCalendar.js'
 import { logger } from '../../../utils/logger.js'
 import { recordatorioToMinutes } from '../../../utils/planificadorToGcalEvent.js'
 import { eq, and, isNotNull } from 'drizzle-orm'
+import { readBodyObjeto } from '../../../utils/validate.js'
 
 const TIPOS = new Set(['mismo_dia', 'dia_anterior', 'dos_dias_antes', 'una_semana_antes'])
 
@@ -32,7 +33,7 @@ function validar(recordatorios) {
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const body = await readBody(event)
+  const body = await readBodyObjeto(event)
   validar(body.recordatorios)
 
   const [conexion] = await db

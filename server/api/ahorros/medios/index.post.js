@@ -1,14 +1,17 @@
 import { db } from '../../../utils/db.js'
 import { mediosAhorro } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
+import { validateBody } from '../../../utils/validate.js'
+import { medioAhorroCreateSchema } from '~/shared/schemas/categorias.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  if (!body.nombre?.trim()) {
-    throw createError({ statusCode: 400, message: 'El nombre es obligatorio' })
-  }
+  // `medioAhorroCreateSchema` existía sin usar mientras el handler
+  // comprobaba solo `nombre`. `orden` entraba sin validar a una columna
+  // integer (un `orden: "x"` reventaba el INSERT) y nombre/icono/color no
+  // tenían tope de longitud pese a ser varchar.
+  const body = await validateBody(event, medioAhorroCreateSchema)
 
   const [medio] = await db
     .insert(mediosAhorro)

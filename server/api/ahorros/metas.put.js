@@ -1,18 +1,19 @@
 import { db } from '../../utils/db.js'
 import { metasAhorro } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { validateBody } from '../../utils/validate.js'
+import { metaAhorroSchema } from '~/shared/schemas/categorias.js'
 import { eq, and, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  if (!body.tipo || !['global', 'mensual'].includes(body.tipo)) {
-    throw createError({ statusCode: 400, message: 'Tipo debe ser "global" o "mensual"' })
-  }
-  if (!body.montoObjetivo || body.montoObjetivo <= 0) {
-    throw createError({ statusCode: 400, message: 'Monto objetivo debe ser mayor a 0' })
-  }
+  // El handler validaba a mano `tipo` y `montoObjetivo` pero NO `mes` ni
+  // `anio`, que en una meta mensual van derechos a un `eq()` contra
+  // columnas integer: `{tipo:'mensual', mes:'abc'}` reventaba la query. Y
+  // una meta mensual sin mes/anio se guardaba con NULL, invisible para la
+  // lectura que la busca por (mes, anio).
+  const body = await validateBody(event, metaAhorroSchema)
 
   const isGlobal = body.tipo === 'global'
 

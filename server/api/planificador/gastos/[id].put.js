@@ -12,6 +12,7 @@ import {
 import { and, eq } from 'drizzle-orm'
 import { syncUpdated } from '../../../utils/gcalAutoSync.js'
 import { getUuidParam } from '../../../utils/params.js'
+import { assertCategoriasPropias, categoriasLegibles } from '../../../utils/categorias.js'
 
 // gastosPlanificados no tiene columna usuarioId directa; el ownership se
 // deriva de planMensualId → planesMensuales.usuarioId. Cargar con JOIN
@@ -41,6 +42,14 @@ export default defineEventHandler(async (event) => {
 
   if (!gastoAnterior) {
     throw createError({ statusCode: 404, message: 'Gasto planificado no encontrado' })
+  }
+
+  // `gastoPlanificadoUpdateSchema` valida la forma de `categoriaId`, no de
+  // quién es. Sin esto, editar un planificado propio para apuntarlo a una
+  // categoría privada ajena devolvía su nombre — el mismo agujero que el
+  // POST, por la otra puerta.
+  if (body.categoriaId !== undefined) {
+    await assertCategoriasPropias({ usuarioId, categoriaIds: [body.categoriaId] })
   }
 
   const eraRecurrente = gastoAnterior.esRecurrente
@@ -75,7 +84,7 @@ export default defineEventHandler(async (event) => {
       .returning()
 
     syncUpdated(usuarioId, id)
-    return await respuestaConCategoria(updated)
+    return await respuestaConCategoria(updated, usuarioId)
   }
 
   // Handle recurrence transitions
@@ -103,7 +112,7 @@ export default defineEventHandler(async (event) => {
     )
 
     syncUpdated(usuarioId, id)
-    return await respuestaConCategoria(updated)
+    return await respuestaConCategoria(updated, usuarioId)
   } else if (eraRecurrente && !seraRecurrente) {
     // Turned OFF: remove future copies, clear group
     if (grupoAnterior) {
@@ -118,7 +127,7 @@ export default defineEventHandler(async (event) => {
       .returning()
 
     syncUpdated(usuarioId, id)
-    return await respuestaConCategoria(updated)
+    return await respuestaConCategoria(updated, usuarioId)
   } else if (eraRecurrente && seraRecurrente && grupoAnterior) {
     // Was and still is recurring: propagate changes to future months
     const [updated] = await db
@@ -141,7 +150,7 @@ export default defineEventHandler(async (event) => {
     }
 
     syncUpdated(usuarioId, id)
-    return await respuestaConCategoria(updated)
+    return await respuestaConCategoria(updated, usuarioId)
   } else {
     // Not recurring, simple update
     const [updated] = await db
@@ -151,15 +160,17 @@ export default defineEventHandler(async (event) => {
       .returning()
 
     syncUpdated(usuarioId, id)
-    return await respuestaConCategoria(updated)
+    return await respuestaConCategoria(updated, usuarioId)
   }
 })
 
-async function respuestaConCategoria(gasto) {
+async function respuestaConCategoria(gasto, usuarioId) {
   const [cat] = await db
     .select()
     .from(categorias)
-    .where(eq(categorias.id, gasto.categoriaId))
+    // Filtrar por legibilidad además de por id: una fila que ya apunte a una
+    // categoría ajena lee undefined en vez de arrastrar su nombre.
+    .where(and(eq(categorias.id, gasto.categoriaId), categoriasLegibles(usuarioId)))
     .limit(1)
   return {
     ...gasto,

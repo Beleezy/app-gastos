@@ -9,10 +9,19 @@ import {
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
+import { categoriasLegibles } from '../../utils/categorias.js'
+import { validateQuery } from '../../utils/validate.js'
+import { mesAnioQuerySchema } from '~/shared/schemas/common.js'
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
+  // Autenticar ANTES de validar: al revés, una petición sin sesión recibe
+  // un 400 que confirma la ruta y describe sus parámetros, y además se
+  // salta el rate limit por usuario, que vive dentro de
+  // `getUsuarioFromEvent`. El orden lo comparten los otros cinco listados.
   const usuarioId = await getUsuarioFromEvent(event)
+  // `parseInt(x) || default` acota lo que no es número pero deja pasar un
+  // `?mes=99&anio=1`, que arma un rango imposible y revienta la consulta.
+  const query = validateQuery(event, mesAnioQuerySchema)
   const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const [anioLocal, mesLocal] = fechaLocal.split('-').map(Number)
   const mes = parseInt(query.mes) || mesLocal
@@ -95,7 +104,12 @@ export default defineEventHandler(async (event) => {
         gastoRegistradoNotas: gastos.notas,
       })
       .from(gastosPlanificados)
-      .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
+      // Por id Y por legibilidad: defensa en profundidad frente a filas
+      // legacy que apunten a una categoría de otra cuenta.
+      .leftJoin(
+        categorias,
+        and(eq(gastosPlanificados.categoriaId, categorias.id), categoriasLegibles(usuarioId)),
+      )
       .leftJoin(
         gastos,
         and(
