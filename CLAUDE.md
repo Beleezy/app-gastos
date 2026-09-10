@@ -269,13 +269,14 @@ components/     layout/ · shared/ · planificador/ · registro/ · deudas/ · a
 composables/    ~90 archivos — useGastos · useDeudas · usePlanificador · useAhorros · useIngresos
                 useVinculos · usePerfiles · useLLMParser · useDraftManager · useApiFetch · useTheme ...
 stores/         usuario · plantillas (Pinia)
-shared/schemas/ Zod compartido cliente↔servidor
+shared/schemas/ Zod compartido cliente↔servidor (cuerpos Y query params)
 shared/compartido/ regla de visibilidad y proyección (lógica pura, sin BD)
 server/api/     gastos · deudas · planificador · ahorros · ingresos · futuros · categorias
                 configuraciones · perfiles · metricas · papelera · voz · integraciones/google
                 acceso · superadmin · cron · dashboard · health · csp-report · errors
 server/services/  lógica de negocio (9 servicios)
-server/utils/     30 helpers (auth, rate limit, LLM, crypto, fechas, soft delete, ...)
+server/utils/     32 helpers (auth, rate limit, LLM, crypto, fechas, propiedad de
+                  categorías y medios de ahorro, idempotencia, ...)
 server/database/  schema.js · migrations/ · seeds
-e2e/ · tests/     Playwright · Vitest
+e2e/ · tests/     Playwright (+ fechaNegocio.js: el "hoy" en la zona del usuario) · Vitest
 ```
