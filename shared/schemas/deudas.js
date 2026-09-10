@@ -1,5 +1,13 @@
 import { z } from 'zod'
-import { fechaIso, monto, conceptoSchema, notasSchema } from './common.js'
+import {
+  fechaIso,
+  monto,
+  conceptoSchema,
+  notasSchema,
+  vacioComoAusente,
+  cacheBusters,
+  uuidSchema,
+} from './common.js'
 
 export const tipoDeudaSchema = z.enum(['me_deben', 'yo_debo'])
 // El enum real de DB es `persona | organizacion`. El front envía esos dos
@@ -113,4 +121,19 @@ export const solicitudVinculoSchema = z.object({
   email: z.string().email('Email inválido').max(254),
   personaEntidadId: z.union([z.string(), z.number()]),
   mensaje: z.string().trim().max(500).optional().nullable(),
+})
+
+// Query de GET /api/deudas.
+//
+// `personaId` iba crudo a un `eq()` contra una columna uuid y `estado`/
+// `tipo` a un `eq()` contra columnas enum de Postgres: `?personaId=abc` y
+// `?estado=basura` devolvían un 500 con la consulta dentro. Los dos enums
+// ya existían en este archivo desde que se escribió el módulo.
+export const deudasListQuerySchema = z.object({
+  personaId: vacioComoAusente(uuidSchema),
+  tipo: vacioComoAusente(tipoDeudaSchema),
+  estado: vacioComoAusente(estadoDeudaSchema),
+  limit: vacioComoAusente(z.coerce.number().int().min(1).max(500)),
+  offset: vacioComoAusente(z.coerce.number().int().min(0)),
+  ...cacheBusters,
 })

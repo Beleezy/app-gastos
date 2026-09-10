@@ -3,12 +3,16 @@ import { presupuestosCategoria, categorias, gastos } from '../../database/schema
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, isNull, sql } from 'drizzle-orm'
+import { validateQuery } from '../../utils/validate.js'
+import { mesAnioQuerySchema } from '~/shared/schemas/common.js'
 
 // Devuelve por cada presupuesto: monto, consumo del mes, % usado, estado.
 // Una sola query con LEFT JOIN agregado para evitar N+1.
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const q = getQuery(event)
+  // `parseInt(x) || default` acota lo que no es número pero deja pasar un
+  // `?mes=99&anio=1`, que arma un rango imposible y revienta la consulta.
+  const q = validateQuery(event, mesAnioQuerySchema)
   const { fecha: hoyStr } = await getFechaHoraLocalUsuario(usuarioId)
   const [anioLocal, mesLocal] = hoyStr.split('-').map(Number)
   const mes = parseInt(q.mes) || mesLocal

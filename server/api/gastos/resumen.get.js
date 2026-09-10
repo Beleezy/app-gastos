@@ -2,11 +2,14 @@ import { db } from '../../utils/db.js'
 import { gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
+import { validateQuery } from '../../utils/validate.js'
+import { gastosListQuerySchema } from '~/shared/schemas/gastos.js'
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
   const usuarioId = await getUsuarioFromEvent(event)
-  const { fecha, mes, anio } = query
+  // `fecha` se interpola en un `sql` crudo del CASE y `mes`/`anio` arman
+  // el rango: sin validar, cualquiera de los tres reventaba la consulta.
+  const { fecha, mes, anio } = validateQuery(event, gastosListQuerySchema)
 
   // Cache-Control: el resumen del día/mes cambia con cada gasto, pero un
   // valor cacheado de hasta 30s es aceptable y reduce carga en

@@ -197,11 +197,26 @@ helper que la haga.
   runner arranca a la hora que le toque; parece flake y no lo es. El
   helper es [fechaNegocio.js](e2e/fechaNegocio.js), que le pregunta la zona
   a la API en vez de fijarla.
+- **La query también es entrada del usuario.** `validateQuery` existía en
+  [validate.js](server/utils/validate.js) y lo usaba UN endpoint. En el
+  resto, `fecha`, `mes`/`anio`, `categoriaId`, `personaId`, `estado` y
+  `tipo` iban crudos del query string a la consulta: once combinaciones
+  devolvían un 500 con el SQL, y en los dos endpoints de LECTURA más
+  golpeados —`/api/gastos` carga el historial en cada visita a /registro—,
+  así que basta una URL vieja guardada en favoritos. Dos detalles que hay
+  que respetar al añadir un schema de query: los valores llegan SIEMPRE
+  como string (`z.coerce`) y el cliente manda `?fecha=` vacío cuando el
+  filtro no está puesto, que no es lo mismo que mandarlo — de ahí
+  `vacioComoAusente`. Y `_v`/`_t` (los cache busters) tienen que pasar.
+- **`parseInt(x) || default` no es un clamp.** Acota lo que no es número y
+  deja pasar `?mes=99&anio=1`, que arma el rango "0001-99-01" y revienta la
+  consulta igual. El clamp de verdad vive en `mesAnioQuerySchema`.
 - **Un endpoint sin tests se audita con un fuzz, no leyéndolo.** Mandar
-  nueve cuerpos absurdos a cada handler que lee `readBody` crudo encontró
-  en un minuto lo que la lectura no vio: dos rutas del planificador
-  devolvían un 500 con la consulta y sus parámetros ante CUALQUIER cuerpo,
-  `{}` incluido.
+  cuerpos absurdos a cada handler que lee `readBody` crudo, y parámetros
+  absurdos a cada GET, encontró en dos minutos lo que la lectura no vio en
+  tres rondas: 16 respuestas 500 con la consulta y sus parámetros dentro,
+  dos de ellas ante CUALQUIER cuerpo, `{}` incluido. El barrido está en el
+  historial de la ronda 4; repetirlo cuesta un minuto.
 
 ## Capa servidor
 

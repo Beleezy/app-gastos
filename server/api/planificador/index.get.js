@@ -10,9 +10,13 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
 import { categoriasLegibles } from '../../utils/categorias.js'
+import { validateQuery } from '../../utils/validate.js'
+import { mesAnioQuerySchema } from '~/shared/schemas/common.js'
 
 export default defineEventHandler(async (event) => {
-  const query = getQuery(event)
+  // `parseInt(x) || default` acota lo que no es número pero deja pasar un
+  // `?mes=99&anio=1`, que arma un rango imposible y revienta la consulta.
+  const query = validateQuery(event, mesAnioQuerySchema)
   const usuarioId = await getUsuarioFromEvent(event)
   const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const [anioLocal, mesLocal] = fechaLocal.split('-').map(Number)

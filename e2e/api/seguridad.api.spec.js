@@ -577,3 +577,68 @@ test.describe('Seguridad — cuerpo ausente o no-objeto', () => {
     })
   }
 })
+
+test.describe('Seguridad — query params de los listados', () => {
+  // Los parámetros iban CRUDOS del query string a la consulta: `fecha` y
+  // `mes`/`anio` a rangos contra columnas date, `categoriaId`/`personaId` a
+  // `eq()` contra uuid, `estado`/`tipo` contra enums de Postgres. Once
+  // combinaciones devolvían un 500 con la consulta y sus parámetros dentro,
+  // y en los dos endpoints de LECTURA más golpeados: /api/gastos carga el
+  // historial en cada visita a /registro. Basta una URL vieja en favoritos.
+  const casos = [
+    ['/api/gastos', '?mes=abc&anio=xyz'],
+    ['/api/gastos', '?categoriaId=abc-123'],
+    ['/api/gastos', '?fecha=no-es-fecha'],
+    ['/api/gastos', '?mes=99&anio=1'],
+    ['/api/gastos', '?limit=-1'],
+    ['/api/gastos', '?orden=basura'],
+    ['/api/gastos/resumen', '?mes=abc&anio=xyz'],
+    ['/api/gastos/resumen', '?fecha=no-es-fecha'],
+    ['/api/deudas', '?personaId=abc'],
+    ['/api/deudas', '?estado=basura'],
+    ['/api/deudas', '?tipo=inventado'],
+    ['/api/ingresos', '?mes=99&anio=1'],
+    ['/api/ingresos', '?offset=-5'],
+    ['/api/planificador', '?mes=99&anio=1'],
+    ['/api/presupuestos-categoria/estado', '?mes=99&anio=1'],
+  ]
+
+  for (const [ruta, query] of casos) {
+    test(`GET ${ruta}${query} responde 4xx sin enseñar el SQL`, async ({ request }) => {
+      const r = await request.get(`${ruta}${query}`, { failOnStatusCode: false })
+      expect(r.status(), `${ruta}${query}`).toBeGreaterThanOrEqual(400)
+      expect(r.status(), `${ruta}${query}`).toBeLessThan(500)
+      expect(await r.text(), `${ruta}${query}`).not.toContain('Failed query')
+    })
+  }
+
+  test('los filtros legítimos siguen funcionando', async ({ request }) => {
+    // Un guard que rompe el caso normal no es un guard. `_v` y `_t` son los
+    // cache busters que el cliente manda en cada petición.
+    const [anio, mes] = (await hoyIso(request)).split('-')
+    const rutas = [
+      `/api/gastos?mes=${Number(mes)}&anio=${anio}`,
+      `/api/gastos?mes=${Number(mes)}&anio=${anio}&_v=7`,
+      `/api/gastos?fecha=${await hoyIso(request)}`,
+      '/api/gastos',
+      `/api/gastos/resumen?mes=${Number(mes)}&anio=${anio}&fecha=${await hoyIso(request)}`,
+      '/api/deudas',
+      '/api/deudas?tipo=me_deben',
+      '/api/deudas?tipo=yo_debo&_t=1',
+      `/api/ingresos?mes=${Number(mes)}&anio=${anio}`,
+      `/api/planificador?mes=${Number(mes)}&anio=${anio}`,
+    ]
+    for (const ruta of rutas) {
+      const r = await request.get(ruta, { failOnStatusCode: false })
+      expect(r.ok(), `${ruta}: ${await r.text()}`).toBeTruthy()
+    }
+  })
+
+  test('el filtro vacío se ignora en vez de filtrar por cadena vacía', async ({ request }) => {
+    // El cliente manda `?fecha=` cuando el filtro no está puesto.
+    const r = await request.get('/api/gastos?fecha=&categoriaId=&busqueda=', {
+      failOnStatusCode: false,
+    })
+    expect(r.ok(), await r.text()).toBeTruthy()
+  })
+})
