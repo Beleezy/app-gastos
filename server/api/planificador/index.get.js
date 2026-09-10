@@ -9,6 +9,7 @@ import {
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -95,7 +96,12 @@ export default defineEventHandler(async (event) => {
         gastoRegistradoNotas: gastos.notas,
       })
       .from(gastosPlanificados)
-      .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
+      // Por id Y por legibilidad: defensa en profundidad frente a filas
+      // legacy que apunten a una categoría de otra cuenta.
+      .leftJoin(
+        categorias,
+        and(eq(gastosPlanificados.categoriaId, categorias.id), categoriasLegibles(usuarioId)),
+      )
       .leftJoin(
         gastos,
         and(

@@ -29,6 +29,7 @@ import { fetchFuturePortfolio } from '../utils/gastosFuturos.js'
 import { totalIngresosMes } from '../services/ingresos.service.js'
 import { eq, and, between, sql, isNull } from 'drizzle-orm'
 import { medioAhorroPropio } from '../utils/ahorros.js'
+import { categoriasLegibles } from '../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -115,7 +116,11 @@ export default defineEventHandler(async (event) => {
         categoriaColor: categorias.color,
       })
       .from(gastosPlanificados)
-      .leftJoin(categorias, eq(gastosPlanificados.categoriaId, categorias.id))
+      // Por id Y por legibilidad (defensa en profundidad).
+      .leftJoin(
+        categorias,
+        and(eq(gastosPlanificados.categoriaId, categorias.id), categoriasLegibles(usuarioId)),
+      )
       .innerJoin(planesMensuales, eq(gastosPlanificados.planMensualId, planesMensuales.id))
       .where(
         and(

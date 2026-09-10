@@ -3,6 +3,7 @@ import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, between, sql, desc, ilike, asc, isNull } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
@@ -68,7 +69,11 @@ export default defineEventHandler(async (event) => {
       createdAt: gastos.createdAt,
     })
     .from(gastos)
-    .leftJoin(categorias, eq(gastos.categoriaId, categorias.id))
+    // Cruza por id Y por legibilidad. Los caminos de escritura ya validan
+    // la propiedad de `categoriaId`, así que esto es defensa en
+    // profundidad: una fila legacy que apunte a una categoría privada
+    // ajena lee "sin categoría" en vez de traer su nombre.
+    .leftJoin(categorias, and(eq(gastos.categoriaId, categorias.id), categoriasLegibles(usuarioId)))
     .where(and(...whereConditions))
     .orderBy(...orderBy)
 

@@ -18,6 +18,7 @@ import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { eq, and, isNull, gte, sql } from 'drizzle-orm'
+import { categoriasLegibles } from '../../utils/categorias.js'
 
 function normalizar(s) {
   return String(s || '')
@@ -61,7 +62,8 @@ export default defineEventHandler(async (event) => {
       categoriaColor: categorias.color,
     })
     .from(gastos)
-    .leftJoin(categorias, eq(gastos.categoriaId, categorias.id))
+    // Por id Y por legibilidad (defensa en profundidad).
+    .leftJoin(categorias, and(eq(gastos.categoriaId, categorias.id), categoriasLegibles(usuarioId)))
     .where(and(eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt), gte(gastos.fecha, desde)))
 
   const grupos = new Map()
