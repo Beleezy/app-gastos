@@ -7,6 +7,7 @@
 // cascada de borrado, comparando timestamps.
 
 import { test, expect } from '@playwright/test'
+import { hoyNegocioSeguro } from '../fechaNegocio.js'
 
 const marca = Date.now()
 
@@ -17,10 +18,10 @@ const otroUsuario = {
   'x-dev-user-id': `00000000-0000-0000-0000-${String(marca).slice(-8)}7001`,
   'x-dev-user-email': `vecino.${marca}@test.local`,
 }
-const hoy = () => {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(Math.min(d.getDate(), 28)).padStart(2, '0')}`
-}
+// La fecha va en la zona del usuario, no en la del runner: en un runner
+// UTC, entre las 19:00 y las 24:00 de Lima `new Date()` da el día
+// siguiente y el gasto no cae en el mes/día que la lectura consulta.
+const hoy = (request) => hoyNegocioSeguro(request)
 
 async function primeraCategoria(request) {
   const r = await request.get('/api/categorias')
@@ -78,7 +79,7 @@ test.describe('Dashboard', () => {
       data: {
         concepto: `Dashboard ${marca}`,
         monto: 12.34,
-        fecha: hoy(),
+        fecha: await hoy(request),
         categoriaId: await primeraCategoria(request),
       },
       failOnStatusCode: false,
@@ -105,7 +106,7 @@ test.describe('Ahorros', () => {
     // schema los descarta si vienen, para que el cuerpo no pueda colocar un
     // ahorro en un mes distinto al de su propia fecha.
     const ahorro = await request.post('/api/ahorros', {
-      data: { medioAhorroId: medioId, monto: 250, fecha: hoy() },
+      data: { medioAhorroId: medioId, monto: 250, fecha: await hoy(request) },
       failOnStatusCode: false,
     })
     expect(ahorro.ok(), await ahorro.text()).toBeTruthy()
@@ -121,12 +122,12 @@ test.describe('Ahorros', () => {
     // ella el handler cortaba antes por su comprobación a mano y el test
     // pasaba sin llegar a ejercitar nada.
     const cuerpos = [
-      { monto: 'mucho', fecha: hoy() },
-      { monto: -10, fecha: hoy() },
-      { monto: 0, fecha: hoy() },
-      { monto: 1e30, fecha: hoy() },
+      { monto: 'mucho', fecha: await hoy(request) },
+      { monto: -10, fecha: await hoy(request) },
+      { monto: 0, fecha: await hoy(request) },
+      { monto: 1e30, fecha: await hoy(request) },
       { monto: 10, fecha: 'no-es-fecha' },
-      { monto: 10, fecha: hoy(), medioAhorroId: 'abc-123' },
+      { monto: 10, fecha: await hoy(request), medioAhorroId: 'abc-123' },
     ]
     for (const data of cuerpos) {
       const r = await request.post('/api/ahorros', { data, failOnStatusCode: false })
@@ -173,7 +174,7 @@ test.describe('Ahorros', () => {
     const medioAjenoId = (await ajeno.json()).id
 
     const r = await request.post('/api/ahorros', {
-      data: { monto: 10, fecha: hoy(), medioAhorroId: medioAjenoId },
+      data: { monto: 10, fecha: await hoy(request), medioAhorroId: medioAjenoId },
       failOnStatusCode: false,
     })
     expect(r.status()).toBeGreaterThanOrEqual(400)
@@ -200,7 +201,7 @@ test.describe('Papelera', () => {
       data: {
         concepto: `Papelera ${marca}`,
         monto: 9.99,
-        fecha: hoy(),
+        fecha: await hoy(request),
         categoriaId: await primeraCategoria(request),
       },
       failOnStatusCode: false,
@@ -211,7 +212,9 @@ test.describe('Papelera', () => {
     expect(borrado.ok(), await borrado.text()).toBeTruthy()
 
     // Ya no está entre los activos…
-    const activos = await (await request.get(`/api/gastos?fecha=${hoy()}&_v=${Date.now()}`)).json()
+    const activos = await (
+      await request.get(`/api/gastos?fecha=${await hoy(request)}&_v=${Date.now()}`)
+    ).json()
     expect(activos.some((g) => g.id === gastoId)).toBe(false)
 
     // …pero sí en la papelera.
@@ -225,7 +228,7 @@ test.describe('Papelera', () => {
       data: {
         concepto: `Restaurable ${marca}`,
         monto: 5.55,
-        fecha: hoy(),
+        fecha: await hoy(request),
         categoriaId: await primeraCategoria(request),
       },
       failOnStatusCode: false,
@@ -239,7 +242,9 @@ test.describe('Papelera', () => {
     })
     expect(r.ok(), await r.text()).toBeTruthy()
 
-    const activos = await (await request.get(`/api/gastos?fecha=${hoy()}&_v=${Date.now()}`)).json()
+    const activos = await (
+      await request.get(`/api/gastos?fecha=${await hoy(request)}&_v=${Date.now()}`)
+    ).json()
     expect(activos.some((g) => g.id === gastoId)).toBe(true)
   })
 
@@ -248,7 +253,7 @@ test.describe('Papelera', () => {
       data: {
         concepto: `NoBorrado ${marca}`,
         monto: 1.11,
-        fecha: hoy(),
+        fecha: await hoy(request),
         categoriaId: await primeraCategoria(request),
       },
       failOnStatusCode: false,

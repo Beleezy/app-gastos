@@ -188,6 +188,15 @@ helper que la haga.
   en un bucle. Donde hay schema, `validateBody` (Zod rechaza `null`); donde
   la validación a mano ya es correcta, `readBodyObjeto`
   ([validate.js](server/utils/validate.js)).
+- **Los tests también miden las fechas en la zona del usuario.** Las specs
+  construían el "hoy" con `new Date()`, que en el runner es UTC, mientras
+  la app lo mide en `America/Lima`. Entre las 00:00 y las 05:00 UTC —las
+  19:00 y 24:00 de Lima— el test creaba un gasto con la fecha de MAÑANA y
+  después lo buscaba en un historial que muestra el hoy del usuario: no
+  aparecía. Son cinco horas de cada día en las que la suite se cae, y el
+  runner arranca a la hora que le toque; parece flake y no lo es. El
+  helper es [fechaNegocio.js](e2e/fechaNegocio.js), que le pregunta la zona
+  a la API en vez de fijarla.
 - **Un endpoint sin tests se audita con un fuzz, no leyéndolo.** Mandar
   nueve cuerpos absurdos a cada handler que lee `readBody` crudo encontró
   en un minuto lo que la lectura no vio: dos rutas del planificador

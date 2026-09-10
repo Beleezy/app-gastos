@@ -1,6 +1,7 @@
 // E2E de seguridad: rate limit, headers, IDOR, validación.
 
 import { test, expect } from '@playwright/test'
+import { hoyNegocioSeguro } from '../fechaNegocio.js'
 
 test.describe('Seguridad', () => {
   test('API: rate limit en /api/voz/parse devuelve 429 al excederse', async ({ request }) => {
@@ -87,10 +88,9 @@ function usuario(n, nombre) {
   }
 }
 
-const hoyIso = () => {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(Math.min(d.getDate(), 28)).padStart(2, '0')}`
-}
+// En la zona del usuario, no en la del runner: en un runner UTC, entre
+// las 19:00 y las 24:00 de Lima `new Date()` devuelve el día siguiente.
+const hoyIso = (request) => hoyNegocioSeguro(request)
 
 test.describe('Seguridad — ids de ruta malformados', () => {
   // Un id que no es UUID llegaba crudo a Postgres: la query reventaba con
@@ -149,7 +149,7 @@ test.describe('Seguridad — categoría de otra cuenta (IDOR)', () => {
       data: {
         concepto: 'Sondeo',
         monto: 10,
-        fecha: hoyIso(),
+        fecha: await hoyIso(request),
         categoriaId: categoriaDeAna,
       },
       failOnStatusCode: false,
@@ -174,7 +174,12 @@ test.describe('Seguridad — categoría de otra cuenta (IDOR)', () => {
       headers: BETO,
       data: {
         gastos: [
-          { concepto: 'Sondeo lote', monto: 5, fecha: hoyIso(), categoriaId: categoriaDeAna },
+          {
+            concepto: 'Sondeo lote',
+            monto: 5,
+            fecha: await hoyIso(request),
+            categoriaId: categoriaDeAna,
+          },
         ],
       },
       failOnStatusCode: false,
@@ -185,7 +190,7 @@ test.describe('Seguridad — categoría de otra cuenta (IDOR)', () => {
     // Y la vía cómoda: mover TODOS los gastos propios a la categoría ajena.
     const propio = await request.post('/api/gastos', {
       headers: BETO,
-      data: { concepto: 'Propio', monto: 7, fecha: hoyIso(), categoriaId: null },
+      data: { concepto: 'Propio', monto: 7, fecha: await hoyIso(request), categoriaId: null },
       failOnStatusCode: false,
     })
     if (propio.ok()) {
@@ -240,7 +245,9 @@ test.describe('Seguridad — idempotencia entre instancias', () => {
     const categoriaId = (await cat.json()).id
 
     const data = {
-      gastos: [{ concepto: `Único ${marca}`, monto: 33.33, fecha: hoyIso(), categoriaId }],
+      gastos: [
+        { concepto: `Único ${marca}`, monto: 33.33, fecha: await hoyIso(request), categoriaId },
+      ],
       metodoRegistro: 'manual',
     }
 
@@ -264,7 +271,7 @@ test.describe('Seguridad — idempotencia entre instancias', () => {
     expect((await reintento.json())[0].id).toBe(creados[0].id)
 
     // Y en la BD hay uno solo.
-    const lista = await request.get(`/api/gastos?fecha=${hoyIso()}`, { headers: YO })
+    const lista = await request.get(`/api/gastos?fecha=${await hoyIso(request)}`, { headers: YO })
     const coincidencias = (await lista.json()).filter((g) => g.concepto === `Único ${marca}`)
     expect(coincidencias).toHaveLength(1)
   })
@@ -439,10 +446,11 @@ test.describe('Seguridad — categorías ajenas en el planificador', () => {
   })
 
   test.beforeEach(async ({ request }) => {
-    const d = new Date()
-    const plan = await request.get(
-      `/api/planificador?mes=${d.getMonth() + 1}&anio=${d.getFullYear()}`,
-    )
+    // El mes que consulta el plan tiene que ser el del USUARIO. En la noche
+    // de Lima, el runner UTC ya está en el día —y el 30 o 31, en el mes—
+    // siguiente, y el plan que devolvería sería otro.
+    const [anio, mes] = (await hoyIso(request)).split('-')
+    const plan = await request.get(`/api/planificador?mes=${Number(mes)}&anio=${anio}`)
     planPropio = (await plan.json()).plan.id
     const cats = await request.get('/api/categorias')
     categoriaPropia = (await cats.json())[0].id
@@ -455,7 +463,7 @@ test.describe('Seguridad — categorías ajenas en el planificador', () => {
         categoriaId: categoriaAjena,
         concepto: 'sonda',
         montoEstimado: 10,
-        fechaProbablePago: hoyIso(),
+        fechaProbablePago: await hoyIso(request),
       },
       failOnStatusCode: false,
     })
@@ -474,7 +482,7 @@ test.describe('Seguridad — categorías ajenas en el planificador', () => {
         categoriaId: categoriaPropia,
         concepto: 'legítimo',
         montoEstimado: 10,
-        fechaProbablePago: hoyIso(),
+        fechaProbablePago: await hoyIso(request),
       },
       failOnStatusCode: false,
     })
@@ -521,7 +529,7 @@ test.describe('Seguridad — categorías ajenas en el planificador', () => {
         categoriaId: categoriaPropia,
         concepto: `Alquiler ${marca}`,
         montoEstimado: 1200,
-        fechaProbablePago: hoyIso(),
+        fechaProbablePago: await hoyIso(request),
       },
       failOnStatusCode: false,
     })

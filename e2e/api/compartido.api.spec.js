@@ -8,6 +8,7 @@
 // autoprovisiona el usuario en la primera petición.
 
 import { test, expect } from '@playwright/test'
+import { fechaEnZona } from '../fechaNegocio.js'
 
 const TOKEN = process.env.DEV_AUTH_TOKEN || 'dev-token'
 const sufijo = Date.now()
@@ -34,10 +35,16 @@ function identidades() {
   return { ANA: persona(1, 'ana'), BETO: persona(2, 'beto'), CARLA: persona(3, 'carla') }
 }
 
-const hoy = new Date()
-const FECHA = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(
-  Math.min(hoy.getDate(), 28),
-).padStart(2, '0')}`
+// La fecha se mide en la zona del usuario, no en la del runner: con
+// `new Date()` en un runner UTC, entre las 19:00 y las 24:00 de Lima el
+// gasto nace con la fecha de MAÑANA y las lecturas del mes en curso no lo
+// ven. Acá es una constante de módulo, así que se usa la zona por defecto
+// —la misma que aplica el servidor— en vez de preguntarla.
+const FECHA = (() => {
+  const iso = fechaEnZona(new Date(), 'America/Lima')
+  const [a, m, d] = iso.split('-')
+  return `${a}-${m}-${String(Math.min(Number(d), 28)).padStart(2, '0')}`
+})()
 
 async function categoriasDe(request, headers) {
   const r = await request.get('/api/categorias', { headers })
