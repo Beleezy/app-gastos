@@ -208,6 +208,10 @@ helper que la haga.
   como string (`z.coerce`) y el cliente manda `?fecha=` vacío cuando el
   filtro no está puesto, que no es lo mismo que mandarlo — de ahí
   `vacioComoAusente`. Y `_v`/`_t` (los cache busters) tienen que pasar.
+- **Autenticar antes de validar.** Un listado validaba la query primero, así
+  que una petición sin sesión recibía un 400 que confirma la ruta y describe
+  sus parámetros — y se saltaba el rate limit por usuario, que vive dentro
+  de `getUsuarioFromEvent`. El orden correcto es auth, validación, consulta.
 - **`parseInt(x) || default` no es un clamp.** Acota lo que no es número y
   deja pasar `?mes=99&anio=1`, que arma el rango "0001-99-01" y revienta la
   consulta igual. El clamp de verdad vive en `mesAnioQuerySchema`.

@@ -14,10 +14,14 @@ import { validateQuery } from '../../utils/validate.js'
 import { mesAnioQuerySchema } from '~/shared/schemas/common.js'
 
 export default defineEventHandler(async (event) => {
+  // Autenticar ANTES de validar: al revés, una petición sin sesión recibe
+  // un 400 que confirma la ruta y describe sus parámetros, y además se
+  // salta el rate limit por usuario, que vive dentro de
+  // `getUsuarioFromEvent`. El orden lo comparten los otros cinco listados.
+  const usuarioId = await getUsuarioFromEvent(event)
   // `parseInt(x) || default` acota lo que no es número pero deja pasar un
   // `?mes=99&anio=1`, que arma un rango imposible y revienta la consulta.
   const query = validateQuery(event, mesAnioQuerySchema)
-  const usuarioId = await getUsuarioFromEvent(event)
   const { fecha: fechaLocal } = await getFechaHoraLocalUsuario(usuarioId)
   const [anioLocal, mesLocal] = fechaLocal.split('-').map(Number)
   const mes = parseInt(query.mes) || mesLocal
