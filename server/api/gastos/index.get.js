@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
-import { gastos, categorias } from '../../database/schema.js'
+import { gastos, categorias, usuarios } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, between, desc, ilike, asc, isNull } from 'drizzle-orm'
+import { eq, and, between, desc, ilike, asc, isNull, sql } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
 import { categoriasLegibles } from '../../utils/categorias.js'
 import { validateQuery } from '../../utils/validate.js'
@@ -72,9 +72,14 @@ export default defineEventHandler(async (event) => {
       // Módulo Compartido: el historial marca con un ojo los gastos que el
       // usuario forzó a compartido o a privado.
       visibilidad: gastos.visibilidad,
+      // Perfiles de familia: quién anotó el gasto cuando no fue el dueño de
+      // la fila (la cuenta real anotando por un perfil, o al revés). NULL
+      // cuando coinciden, así el cliente solo lo pinta cuando aporta algo.
+      registradoPorNombre: sql`CASE WHEN ${gastos.registradoPorId} IS NOT NULL AND ${gastos.registradoPorId} <> ${gastos.usuarioId} THEN ${usuarios.nombre} END`,
       createdAt: gastos.createdAt,
     })
     .from(gastos)
+    .leftJoin(usuarios, eq(usuarios.id, gastos.registradoPorId))
     // Cruza por id Y por legibilidad. Los caminos de escritura ya validan
     // la propiedad de `categoriaId`, así que esto es defensa en
     // profundidad: una fila legacy que apunte a una categoría privada

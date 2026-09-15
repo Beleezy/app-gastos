@@ -105,6 +105,33 @@
               </svg>
               Ahorros
             </NuxtLink>
+            <NuxtLink
+              to="/compartido"
+              data-testid="tab-compartido"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
+              :class="
+                activeTab === 'compartido'
+                  ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
+                  : 'text-theme-text-muted hover:text-theme-text-sec'
+              "
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-3.5 h-3.5 shrink-0"
+                :class="activeTab === 'compartido' ? '' : 'text-sky-400'"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z"
+                />
+              </svg>
+              Compartido
+            </NuxtLink>
           </div>
         </div>
 
@@ -165,21 +192,23 @@ onMounted(() => {
 
 const route = useRoute()
 
+// Compartido vive en este layout por la barra de pestañas, pero es un módulo
+// propio: sin su rama aquí el header decía "Planificador" con el subtítulo
+// del presupuesto en una página que no muestra ninguno.
 const activeTab = computed(() => {
   if (route.path.includes('/ahorros')) return 'ahorros'
   if (route.path.includes('/futuros')) return 'futuros'
+  if (route.path.includes('/compartido')) return 'compartido'
   return 'mensual'
 })
 
-const pageTitle = computed(() => {
-  if (activeTab.value === 'ahorros') return 'Ahorros'
-  if (activeTab.value === 'futuros') return 'Gastos futuros'
-  return 'Planificador'
-})
+const TITULOS = {
+  mensual: ['Planificador', 'Tu presupuesto y gastos esperados del mes'],
+  ahorros: ['Ahorros', 'Tus metas y depósitos mensuales'],
+  futuros: ['Gastos futuros', 'Deseos y decisiones pendientes'],
+  compartido: ['Compartido', 'Lo que ves de otros y lo que compartes'],
+}
 
-const tabSubtitulo = computed(() => {
-  if (activeTab.value === 'ahorros') return 'Tus metas y depósitos mensuales'
-  if (activeTab.value === 'futuros') return 'Deseos y decisiones pendientes'
-  return 'Tu presupuesto y gastos esperados del mes'
-})
+const pageTitle = computed(() => TITULOS[activeTab.value][0])
+const tabSubtitulo = computed(() => TITULOS[activeTab.value][1])
 </script>

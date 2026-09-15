@@ -201,6 +201,14 @@ export async function getUsuarioFromEvent(event) {
   })
 }
 
+// Quién está anotando de verdad: con un perfil de familia activo,
+// `usuarioId` es el perfil (dueño de la fila) y el que escribe es la cuenta
+// real. Sin perfil activo son la misma persona. Va a `registrado_por_id` de
+// gastos para que el historial diga "por Juan" cuando anotó otro.
+export function registradoPorDe(event, usuarioId) {
+  return event?.context?.usuarioReal || usuarioId
+}
+
 // Usuario real autenticado, ignorando el perfil activo. Útil para auditoría.
 export async function getUsuarioRealFromEvent(event) {
   await getUsuarioFromEvent(event)

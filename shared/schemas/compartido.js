@@ -64,6 +64,9 @@ export const alcanceCompartidoSchema = z
     incluirMarcados: z.boolean(),
     pausada: z.boolean(),
     categorias: categoriasCompartidasSchema,
+    // Perfiles de familia del emisor incluidos (reemplazo completo, como
+    // categorías). El servidor comprueba que sean suyos.
+    perfiles: z.array(uuidSchema).max(20),
   })
   .partial()
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')

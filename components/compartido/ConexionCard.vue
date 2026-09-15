@@ -95,7 +95,12 @@
             >
               <div class="min-w-0">
                 <p class="text-sm text-theme-text truncate">{{ g.concepto }}</p>
-                <p class="text-[0.6875rem] text-theme-text-muted">{{ formatFecha(g.fecha) }}</p>
+                <p class="text-[0.6875rem] text-theme-text-muted">
+                  {{ formatFecha(g.fecha) }}
+                  <span v-if="g.deQuien" data-testid="compartido-de-quien">
+                    · de {{ g.deQuien }}</span
+                  >
+                </p>
               </div>
               <SharedMoney :value="g.monto" class="text-sm text-theme-text-sec shrink-0" />
             </li>

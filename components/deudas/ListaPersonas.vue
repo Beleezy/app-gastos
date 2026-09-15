@@ -62,7 +62,32 @@
           />
         </svg>
       </button>
+      <!-- Fusionar duplicados: los endpoints existían sin pantalla -->
+      <button
+        class="shrink-0 w-10 h-10 flex items-center justify-center rounded-xl bg-theme-card border border-theme-border text-theme-text-muted hover:bg-theme-border-md hover:text-theme-text transition-colors"
+        title="Fusionar personas duplicadas"
+        aria-label="Fusionar personas duplicadas"
+        data-testid="btn-fusionar-duplicados"
+        @click="showFusion = true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
+          />
+        </svg>
+      </button>
     </div>
+
+    <DeudasFusionDuplicados v-model="showFusion" @fusionado="onFusionado" />
 
     <!-- Filtros de estado (pr-4: el último chip no queda cortado al borde) -->
     <div
@@ -505,7 +530,13 @@ const { apiFetch } = useApiFetch()
 
 const emit = defineEmits(['seleccionar'])
 
-const { personas, isLoading, tabActual, filtroEstado, resumen } = useDeudas()
+const { personas, isLoading, tabActual, filtroEstado, resumen, fetchPersonas, fetchResumen } =
+  useDeudas()
+
+const showFusion = ref(false)
+async function onFusionado() {
+  await Promise.all([fetchPersonas({ noCache: true }), fetchResumen({ noCache: true })])
+}
 const { descargarPdf } = useDeudaPdf()
 
 const busqueda = ref('')

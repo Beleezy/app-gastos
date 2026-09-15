@@ -104,7 +104,7 @@
           </div>
 
           <!-- Quick-add chips (E#1): favoritos frecuentes -->
-          <div v-if="topFavoritos.length > 0" class="px-4 lg:px-0 mb-3 lg:mb-0">
+          <div v-if="topFavoritos.length > 0 && !modoSimple" class="px-4 lg:px-0 mb-3 lg:mb-0">
             <RegistroQuickAddChips
               :favoritos="topFavoritos"
               :categorias="categorias"
@@ -135,8 +135,9 @@
 
         <!-- Área principal derecha -->
         <div class="pb-2 lg:pb-0">
-          <!-- Barra unificada de filtros (colapsable) -->
-          <div class="px-4 lg:px-0 mb-3">
+          <!-- Barra unificada de filtros (colapsable). Modo simple: no hay
+               filtros, solo el historial del día. -->
+          <div v-if="!modoSimple" class="px-4 lg:px-0 mb-3">
             <div class="flex items-center gap-2">
               <button
                 class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors"
@@ -271,7 +272,7 @@
           <!-- Tabs + export. NO sticky: apilados bajo el mini-resumen
                ocupaban ~40% del viewport y se mezclaban con él (fix
                2026-07); scrollean con el contenido como en el dashboard. -->
-          <div class="px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
+          <div v-if="!modoSimple" class="px-4 lg:px-0 py-2 lg:pt-0 mb-2 lg:mb-4">
             <SharedTabBar
               :model-value="vistaRegistro"
               :tabs="tabsVista"
@@ -631,6 +632,17 @@ const {
 
 // Estado de UI
 const vistaRegistro = ref('historial')
+
+// Modo simple: solo la lista del día, sin filtros, pestañas ni chips. Si el
+// usuario venía de otra vista, se vuelve al historial.
+const { activo: modoSimple } = useModoSimple()
+watch(
+  modoSimple,
+  (v) => {
+    if (v && vistaRegistro.value !== 'historial') vistaRegistro.value = 'historial'
+  },
+  { immediate: true },
+)
 const mostrarFiltros = ref(false)
 const showFormManual = ref(false)
 const gastoEditar = ref(null)

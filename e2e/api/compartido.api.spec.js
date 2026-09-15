@@ -229,9 +229,12 @@ test.describe('Compartido — qué sale en el payload', () => {
     expect(cuerpo).not.toContain('PrivadoSecreto')
 
     for (const g of vista.detalle) {
+      // `deQuien` (0038): nombre del perfil de familia dueño del gasto, o
+      // null si es del propio emisor. Nunca notas ni transcripción.
       expect(Object.keys(g).sort()).toEqual(
-        ['categoriaId', 'concepto', 'fecha', 'id', 'monto', 'visibilidad'].sort(),
+        ['categoriaId', 'concepto', 'deQuien', 'fecha', 'id', 'monto', 'visibilidad'].sort(),
       )
+      expect(g.deQuien).toBeNull()
     }
   })
 

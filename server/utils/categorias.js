@@ -13,9 +13,9 @@
 // Este módulo es el único sitio donde vive la regla, para que la próxima
 // escritura que acepte categoriaId no tenga que volver a deducirla.
 
-import { and, eq, inArray, isNull, or } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 import { db } from './db.js'
-import { categorias } from '../database/schema.js'
+import { categorias, usuarios } from '../database/schema.js'
 import { esUuid } from './params.js'
 
 /**
@@ -38,9 +38,31 @@ import { esUuid } from './params.js'
  * categoría ajena a la petición de otro usuario.
  */
 export function categoriasLegibles(usuarioId) {
+  return or(condicionDueno(usuarioId), categoriasPredefinidasGlobales())
+}
+
+/**
+ * Categorías "propias" de un usuario: las suyas y, si es un perfil
+ * gestionado de familia, las de la cuenta que lo administra.
+ *
+ * Las categorías son una ruta de usuario REAL (ver RUTAS_PERFIL en
+ * getUsuario.js): con un perfil activo, /api/categorias lista las de la
+ * cuenta que administra. Sin esta rama, el cliente ofrecía esas categorías
+ * y POST /api/gastos las rechazaba con 400 porque `usuario_id` de la fila
+ * era el perfil — un perfil de familia solo podía anotar en categorías
+ * predefinidas. La subconsulta devuelve una fila solo para perfiles
+ * (gestionado_por_id no nulo), así que para una cuenta real es un IN vacío.
+ */
+function condicionDueno(usuarioId) {
   return or(
     eq(categorias.usuarioId, usuarioId),
-    and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
+    inArray(
+      categorias.usuarioId,
+      db
+        .select({ id: usuarios.gestionadoPorId })
+        .from(usuarios)
+        .where(and(eq(usuarios.id, usuarioId), isNotNull(usuarios.gestionadoPorId))),
+    ),
   )
 }
 
@@ -110,13 +132,8 @@ export async function assertCategoriasPropias({ usuarioId, categoriaIds, dbClien
     .select({ id: categorias.id })
     .from(categorias)
     .where(
-      and(
-        inArray(categorias.id, unicos),
-        or(
-          eq(categorias.usuarioId, usuarioId),
-          and(eq(categorias.esPredefinida, true), isNull(categorias.usuarioId)),
-        ),
-      ),
+      // Misma regla que `categoriasLegibles`: no se reescribe aquí.
+      and(inArray(categorias.id, unicos), categoriasLegibles(usuarioId)),
     )
 
   const invalidos = filtrarCategoriasInvalidas(unicos, accesibles)

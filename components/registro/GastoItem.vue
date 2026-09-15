@@ -168,6 +168,14 @@
                 :title="visibilidadInfo.titulo"
                 >{{ visibilidadInfo.etiqueta }}</span
               >
+              <!-- Perfiles de familia: quién lo anotó, solo si no fue el dueño -->
+              <span
+                v-if="gasto.registradoPorNombre"
+                class="text-[0.6875rem] px-1.5 py-0.5 rounded-full leading-none bg-theme-border-md text-theme-text-sec"
+                :title="`Registrado por ${gasto.registradoPorNombre}`"
+                data-testid="gasto-registrado-por"
+                >por {{ gasto.registradoPorNombre }}</span
+              >
             </div>
             <div v-if="!selectable" class="flex items-center gap-0.5 shrink-0">
               <button

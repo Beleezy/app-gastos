@@ -370,7 +370,7 @@ const IconShare = makeIcon(
   'M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.769-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z',
 )
 
-const navItems = [
+const NAV_ITEMS = [
   { to: '/', icon: IconHome, label: 'Inicio' },
   { to: '/planificador', icon: IconClipboard, label: 'Planificador' },
   { to: '/registro', icon: IconMic, label: 'Registro' },
@@ -381,7 +381,7 @@ const navItems = [
   { to: '/familia', icon: IconUsers, label: 'Familia' },
 ]
 
-const secondaryItems = [
+const SECONDARY_ITEMS = [
   { to: '/compartido', icon: IconShare, label: 'Compartido' },
   { to: '/metricas', icon: IconChartLine, label: 'Métricas' },
   { to: '/reportes', icon: IconReporte, label: 'Reportes' },
@@ -391,6 +391,25 @@ const secondaryItems = [
   { to: '/configuraciones', icon: IconCog, label: 'Configuraciones' },
   { to: '/informacion', icon: IconInfo, label: 'Información' },
 ]
+
+// Modo simple: lo esencial. Todo lo demás sigue existiendo por URL y
+// vuelve al menú al desactivar el modo desde Configuraciones.
+const RUTAS_SIMPLE = new Set([
+  '/',
+  '/registro',
+  '/ingresos',
+  '/deudas',
+  '/ahorros',
+  '/planificador',
+])
+const RUTAS_SIMPLE_SEC = new Set(['/configuraciones', '/informacion'])
+const { activo: modoSimple } = useModoSimple()
+const navItems = computed(() =>
+  modoSimple.value ? NAV_ITEMS.filter((i) => RUTAS_SIMPLE.has(i.to)) : NAV_ITEMS,
+)
+const secondaryItems = computed(() =>
+  modoSimple.value ? SECONDARY_ITEMS.filter((i) => RUTAS_SIMPLE_SEC.has(i.to)) : SECONDARY_ITEMS,
+)
 
 function isActive(itemTo) {
   if (itemTo === '/') return route.path === '/'

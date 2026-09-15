@@ -17,6 +17,7 @@ import {
 import {
   SELECT_GASTO_COMPARTIDO,
   cargarCategoriasCompartidas,
+  cargarPerfilesIncluidosPorConexiones,
   cargarConexionLegible,
   construirFiltroVisibilidad,
 } from '../utils/compartido.js'
@@ -161,17 +162,30 @@ export async function vistaCompartida({ conexionId, usuarioId, mes, anio }) {
 
   const detalle =
     conexion.nivelDetalle === 'detalle'
-      ? await db
-          .select(SELECT_GASTO_COMPARTIDO)
-          .from(gastos)
-          .where(
-            and(
-              construirFiltroVisibilidad(conexion, categoriaIds),
-              between(gastos.fecha, desde, hasta),
-            ),
-          )
-          .orderBy(desc(gastos.fecha), desc(gastos.createdAt))
-          .limit(500)
+      ? (
+          await db
+            // La whitelist más el dueño de la fila, solo para saber si el
+            // gasto es de un perfil de familia incluido: se traduce a
+            // `deQuien` (nombre) y el id no sale.
+            .select({
+              ...SELECT_GASTO_COMPARTIDO,
+              duenoId: gastos.usuarioId,
+              duenoNombre: usuarios.nombre,
+            })
+            .from(gastos)
+            .leftJoin(usuarios, eq(usuarios.id, gastos.usuarioId))
+            .where(
+              and(
+                construirFiltroVisibilidad(conexion, categoriaIds),
+                between(gastos.fecha, desde, hasta),
+              ),
+            )
+            .orderBy(desc(gastos.fecha), desc(gastos.createdAt))
+            .limit(500)
+        ).map(({ duenoId, duenoNombre, ...g }) => ({
+          ...g,
+          deQuien: duenoId === conexion.emisorId ? null : duenoNombre,
+        }))
       : []
 
   const totalVisible = filas.reduce((acc, f) => acc + f.consumido, 0)
@@ -262,6 +276,10 @@ export async function novedades({ usuarioId }) {
       ),
     )
 
+  // Las conexiones se leen aquí sin pasar por el guard, así que los perfiles
+  // incluidos se pegan a mano (una sola query para todas).
+  const perfilesPor = await cargarPerfilesIncluidosPorConexiones(conexiones.map((c) => c.id))
+  for (const c of conexiones) c.perfilIds = (perfilesPor.get(c.id) || []).map((p) => p.id)
   // Invitaciones que me llegaron y aún no acepté. Se buscan por email
   // porque la invitación puede ser anterior a que existiera mi cuenta.
   const [yo] = await db

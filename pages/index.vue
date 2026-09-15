@@ -59,7 +59,16 @@
       >
     </NuxtLink>
 
-    <div class="px-5 lg:px-0 mb-4 space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
+    <!-- Modo simple: tres números y tres botones en vez de las tarjetas -->
+    <DashboardSimple
+      v-if="modoSimple"
+      :total-mes="totalMes"
+      :presupuesto="presupuesto"
+      :total-me-deben="totalMeDeben"
+      :count-me-deben="countMeDeben"
+      :loading="loadingGastos"
+    />
+    <div v-else class="px-5 lg:px-0 mb-4 space-y-2.5 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-4">
       <!-- Gasto del mes vs presupuesto -->
       <div
         class="bg-gradient-to-br from-theme-card to-theme-card/80 rounded-2xl p-4 border border-theme-border lg:col-span-3"
@@ -420,7 +429,7 @@
     <!-- Accesos rápidos: Configuraciones / Métricas / Información en una sola
          fila compacta (las 3 cards apiladas consumían una pantalla de scroll
          y duplican destinos del drawer). -->
-    <div class="px-5 lg:px-0 mt-4 mb-5 grid grid-cols-3 gap-2">
+    <div v-if="!modoSimple" class="px-5 lg:px-0 mt-4 mb-5 grid grid-cols-3 gap-2">
       <NuxtLink
         to="/configuraciones"
         class="flex flex-col items-center gap-1.5 rounded-2xl px-2 py-3 border border-theme-border bg-theme-card active:bg-theme-border-md transition-colors"
@@ -534,6 +543,7 @@ const compartidoTexto = computed(() => {
 const { currencySymbol, formatMonto } = useCurrency()
 const { formatMesAnio } = useFormatters()
 const { toggle: toggleDrawer } = useMobileDrawer()
+const { activo: modoSimple } = useModoSimple()
 
 const { ahora: ahoraPeru } = useFechaPeru()
 

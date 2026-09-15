@@ -14,7 +14,7 @@ import { assertCategoriasPropias } from '../utils/categorias.js'
  * @param {string} input.usuarioId
  * @param {object} input.body Body validado por Zod (gastoCreateSchema).
  */
-export async function crearGasto({ usuarioId, body }) {
+export async function crearGasto({ usuarioId, body, registradoPorId = null }) {
   if (!body.categoriaId) {
     const err = new Error('La categoría es obligatoria')
     err.statusCode = 400
@@ -34,6 +34,7 @@ export async function crearGasto({ usuarioId, body }) {
     .insert(gastos)
     .values({
       usuarioId,
+      registradoPorId: registradoPorId || usuarioId,
       categoriaId: body.categoriaId,
       concepto: body.concepto.trim(),
       monto: String(body.monto),

@@ -21,6 +21,8 @@ import {
   compartidoConexiones,
   categorias,
   gastos,
+  compartidoPerfiles,
+  usuarios,
 } from '../database/schema.js'
 import { esUuid } from './params.js'
 
@@ -59,18 +61,49 @@ function errorNoEncontrada() {
  */
 export async function cargarConexionDeLaQueEsParte(conexionId, usuarioId) {
   if (!conexionId || !usuarioId || !esUuid(conexionId)) throw errorNoEncontrada()
-
   const [conexion] = await db
     .select()
     .from(compartidoConexiones)
     .where(eq(compartidoConexiones.id, conexionId))
     .limit(1)
-
   if (!conexion) throw errorNoEncontrada()
+  if (conexion.emisorId !== usuarioId && conexion.receptorId !== usuarioId) {
+    throw errorNoEncontrada()
+  }
+  // Perfiles de familia incluidos (0038): viajan pegados a la conexión para
+  // que `construirFiltroVisibilidad` los tenga sin que cada llamador tenga
+  // que acordarse de cargarlos.
+  conexion.perfilIds = await cargarPerfilesIncluidos(conexion.id)
+  return { conexion, rol: conexion.emisorId === usuarioId ? 'emisor' : 'receptor' }
+}
 
-  if (conexion.emisorId === usuarioId) return { conexion, rol: 'emisor' }
-  if (conexion.receptorId === usuarioId) return { conexion, rol: 'receptor' }
-  throw errorNoEncontrada()
+/** Ids de los perfiles gestionados del emisor incluidos en una conexión. */
+export async function cargarPerfilesIncluidos(conexionId) {
+  const filas = await db
+    .select({ perfilId: compartidoPerfiles.perfilId })
+    .from(compartidoPerfiles)
+    .where(eq(compartidoPerfiles.conexionId, conexionId))
+  return filas.map((f) => f.perfilId)
+}
+
+/** Lo mismo para varias conexiones a la vez: Map<conexionId, [{id, nombre}]>. */
+export async function cargarPerfilesIncluidosPorConexiones(conexionIds) {
+  const porConexion = new Map()
+  if (!conexionIds.length) return porConexion
+  const filas = await db
+    .select({
+      conexionId: compartidoPerfiles.conexionId,
+      id: compartidoPerfiles.perfilId,
+      nombre: usuarios.nombre,
+    })
+    .from(compartidoPerfiles)
+    .innerJoin(usuarios, eq(usuarios.id, compartidoPerfiles.perfilId))
+    .where(inArray(compartidoPerfiles.conexionId, conexionIds))
+  for (const f of filas) {
+    if (!porConexion.has(f.conexionId)) porConexion.set(f.conexionId, [])
+    porConexion.get(f.conexionId).push({ id: f.id, nombre: f.nombre })
+  }
+  return porConexion
 }
 
 /**
@@ -108,9 +141,10 @@ export async function cargarCategoriasCompartidas(conexionId) {
  * `esGastoVisible` (shared/compartido/visibilidad.js) — si cambia una,
  * cambia la otra.
  *
- * Nota sobre perfiles gestionados: filtra por `emisorId`, o sea SOLO los
- * gastos de la cuenta real. Los de sus perfiles de familia son filas de
- * otro usuarioId y no se comparten.
+ * Perfiles gestionados: por defecto solo los gastos de la cuenta real del
+ * emisor. Los de sus perfiles de familia son filas de otro usuarioId y
+ * entran únicamente si el emisor los incluyó en la conexión
+ * (`conexion.perfilIds`, tabla compartido_perfiles).
  *
  * @param {object} conexion - fila de compartido_conexiones
  * @param {string[]} categoriaIds - categorías compartidas
@@ -125,8 +159,11 @@ export function construirFiltroVisibilidad(conexion, categoriaIds = []) {
   // que en Drizzle colapsaría a "sin condición" y mostraría TODO.
   if (!ramas.length) return sql`false`
 
+  const duenos = [conexion.emisorId, ...(conexion.perfilIds || [])]
   return and(
-    eq(gastos.usuarioId, conexion.emisorId),
+    duenos.length === 1
+      ? eq(gastos.usuarioId, conexion.emisorId)
+      : inArray(gastos.usuarioId, duenos),
     isNull(gastos.deletedAt),
     ne(gastos.visibilidad, 'privado'),
     ramas.length === 1 ? ramas[0] : or(...ramas),

@@ -4,7 +4,6 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { vozParseBodySchema } from '~/shared/schemas/gastos.js'
 import {
-  parseModelList,
   getValidModels,
   selectBestModel,
   getFallbackModels,
@@ -13,6 +12,7 @@ import {
 } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { listarModelosActivos, registrarExito, registrarFallo } from '../../utils/modelosLlm.js'
 import {
   sanitizeLlmInput,
   sanitizeForSystemPrompt,
@@ -101,10 +101,9 @@ Reglas:
 - Los montos deben ser números decimales (ej: 2.50, no "dos soles con cincuenta").
 - Si no puedes interpretar algo, usa concepto "Gasto no especificado" y categoría "Otros".`
 
-  // Parsear lista de modelos configurados (separados por ";")
-  const configuredModels = parseModelList(
-    runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview',
-  )
+  // Catálogo en BD (modelos_llm) por prioridad; cae a GEMINI_MODEL si la
+  // tabla está vacía o no responde.
+  const configuredModels = await listarModelosActivos({ runtimeConfig })
 
   // Validar cuáles están disponibles para esta API key
   const validModels = await getValidModels(configuredModels, apiKey)
@@ -330,6 +329,7 @@ Reglas:
             inputHash,
             response: validados,
           }).catch(() => {})
+          registrarExito(currentModel).catch(() => {})
           return validados
         }
 
@@ -361,6 +361,7 @@ Reglas:
           inputHash,
           response: validados,
         }).catch(() => {})
+        registrarExito(currentModel).catch(() => {})
         return validados
       } catch (e) {
         logger.error('Error invocando Gemini', {
@@ -374,6 +375,9 @@ Reglas:
     logger.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos`, {
       model: currentModel,
     })
+    // Cuenta contra el modelo salvo cuota (429) o clave (403): al llegar al
+    // umbral se apaga solo (server/utils/modelosLlm.js).
+    registrarFallo(currentModel, lastError).catch(() => {})
   }
 
   logger.error('Todos los modelos fallaron (texto)', { lastError })
