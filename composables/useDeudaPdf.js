@@ -1,6 +1,9 @@
+import { toIsoDate, addDias } from './useDateUtils'
+
 export function useDeudaPdf() {
   const { config, fetchConfig } = useConfiguraciones()
   const { currencySymbol, formatMonto } = useCurrency()
+  const { fechaHoy } = useFechaPeru()
 
   async function generarPdfDeuda(persona, deudasActivas, deudasSaldadas = []) {
     // Ensure config is loaded to get user name
@@ -30,7 +33,7 @@ export function useDeudaPdf() {
       doc.text(`Contacto: ${persona.contacto}`, 20, y)
       y += 7
     }
-    doc.text(`Fecha de emision: ${formatFechaCorta(new Date().toISOString().split('T')[0])}`, 20, y)
+    doc.text(`Fecha de emision: ${formatFechaCorta(fechaHoy())}`, 20, y)
     y += 12
 
     // Total pendiente
@@ -124,12 +127,10 @@ export function useDeudaPdf() {
 
     // Settled debts (configurable days)
     const diasPdf = config.value?.diasPdfSaldadas || 7
-    const haceDias = new Date()
-    haceDias.setDate(haceDias.getDate() - diasPdf)
-    const haceDiasStr = haceDias.toISOString().split('T')[0]
+    const haceDiasStr = addDias(fechaHoy(), -diasPdf)
 
     const saldadasRecientes = deudasSaldadas.filter((d) => {
-      const fechaUpdate = d.updatedAt ? new Date(d.updatedAt).toISOString().split('T')[0] : null
+      const fechaUpdate = d.updatedAt ? toIsoDate(new Date(d.updatedAt)) : null
       return fechaUpdate && fechaUpdate >= haceDiasStr
     })
 
@@ -180,7 +181,7 @@ export function useDeudaPdf() {
 
     // Return doc and filename for sharing
     const nombre = persona.nombre.replace(/\s+/g, '_')
-    const filename = `deuda_${nombre}_${new Date().toISOString().split('T')[0]}.pdf`
+    const filename = `deuda_${nombre}_${fechaHoy()}.pdf`
 
     return { doc, filename }
   }

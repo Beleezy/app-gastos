@@ -46,7 +46,7 @@ export function useGastosFuturos() {
         resumenFuturos.value = data.resumenFuturos || resumenFuturos.value
         _fetchedAt.value = Date.now()
       } catch (e) {
-        error.value = e.data?.message || e.message || 'Error al cargar gastos futuros'
+        error.value = handleApiError(e, 'Error al cargar gastos futuros')
       } finally {
         isLoading.value = false
         _inFlight = null
@@ -67,7 +67,7 @@ export function useGastosFuturos() {
       })
       await fetchGastosFuturos(true)
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al crear gasto futuro'
+      error.value = handleApiError(e, 'Error al crear gasto futuro')
       throw e
     }
   }
@@ -80,7 +80,7 @@ export function useGastosFuturos() {
       })
       await fetchGastosFuturos(true)
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al actualizar gasto futuro'
+      error.value = handleApiError(e, 'Error al actualizar gasto futuro')
       throw e
     }
   }
@@ -92,7 +92,7 @@ export function useGastosFuturos() {
       })
       await fetchGastosFuturos(true)
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al eliminar gasto futuro'
+      error.value = handleApiError(e, 'Error al eliminar gasto futuro')
       throw e
     }
   }
@@ -109,7 +109,7 @@ export function useGastosFuturos() {
       await fetchGastosFuturos(true)
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al decidir la opción'
+      error.value = handleApiError(e, 'Error al decidir la opción')
       throw e
     }
   }

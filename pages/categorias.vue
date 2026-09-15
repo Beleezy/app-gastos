@@ -362,7 +362,6 @@
 <script setup>
 const { apiFetch } = useApiFetch()
 const { invalidateCategorias } = useCategorias()
-const router = useRouter()
 
 const CATEGORIAS_PRESELECCIONADAS = [
   { nombre: 'Alimentacion', icono: '🍽️', color: '#ef4444' },

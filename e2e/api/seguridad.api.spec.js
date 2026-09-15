@@ -642,3 +642,393 @@ test.describe('Seguridad — query params de los listados', () => {
     expect(r.ok(), await r.text()).toBeTruthy()
   })
 })
+
+// ── Regresiones de la ronda 5 ──
+//
+// Un segundo fuzz —esta vez sobre los handlers que quedaban con `readBody`
+// crudo y sobre los ids declarados como `string | number` en los schemas—
+// devolvió 28 respuestas 500 con la consulta y sus parámetros dentro, más
+// una categoría ajena aceptada por el PUT de gastos.
+
+test.describe('Seguridad — ronda 5: ids que no son uuid y cuerpos sin schema', () => {
+  // Cada fila es un caso que respondía 500 con el SQL en el mensaje.
+  const casos = [
+    ['POST', '/api/gastos', { concepto: 'x', monto: 1, fecha: '2026-01-01', categoriaId: 'abc' }],
+    [
+      'POST',
+      '/api/gastos',
+      { concepto: 'x', monto: 1, fecha: '2026-01-01', gastoPlanificadoId: 'abc' },
+    ],
+    ['DELETE', '/api/gastos/bulk', { ids: ['abc'] }],
+    ['PUT', '/api/gastos/bulk', { ids: ['abc'], campos: { notas: 'x' } }],
+    ['POST', '/api/gastos/bulk', { gastos: [{ concepto: 'x', monto: 1, categoriaId: 'abc' }] }],
+    [
+      'POST',
+      '/api/deudas',
+      { tipoDeuda: 'me_deben', concepto: 'x', monto: 1, personaEntidadId: 'abc' },
+    ],
+    ['POST', '/api/deudas/vinculos/solicitar', undefined],
+    ['POST', '/api/deudas/vinculos/solicitar', { email: 'a@b.com', personaEntidadId: 'abc' }],
+    [
+      'POST',
+      '/api/deudas/vinculos/solicitar',
+      { email: 'no-es-email', personaEntidadId: '3f51518f-b0ef-4c4f-a0f0-b3a7c3caa01c' },
+    ],
+    ['POST', '/api/deudas/vinculos/desvincular', { personaEntidadId: 'abc' }],
+    ['POST', '/api/deudas/vinculos/checkpoints', { personaId: 'abc' }],
+    ['POST', '/api/deudas/personas/merge', { destinoId: 'abc', origenIds: ['def'] }],
+    [
+      'POST',
+      '/api/planificador/duplicar',
+      { mesOrigen: 'a', anioOrigen: 'b', mesDestino: 'c', anioDestino: 'd' },
+    ],
+    [
+      'POST',
+      '/api/planificador/duplicar',
+      { mesOrigen: 9, anioOrigen: 2026, mesDestino: 9, anioDestino: 2026 },
+    ],
+    ['POST', '/api/planificador/plantillas', { nombre: 'x', desdePlanId: 'abc' }],
+    ['POST', '/api/presupuestos-categoria', { categoriaId: 'abc', montoMensual: 5 }],
+    ['PUT', '/api/configuraciones', { presupuestoMensualDefault: 'abc' }],
+    ['PUT', '/api/configuraciones', { monedaPreferida: 'x'.repeat(30) }],
+    ['PUT', '/api/configuraciones', { diaInicioCiclo: 'x' }],
+    ['PUT', '/api/configuraciones', { locale: 'x'.repeat(30) }],
+  ]
+
+  for (const [metodo, ruta, data] of casos) {
+    test(`${metodo} ${ruta} <- ${JSON.stringify(data)?.slice(0, 50)} responde 4xx sin el SQL`, async ({
+      request,
+    }) => {
+      const r = await request.fetch(ruta, { method: metodo, data, failOnStatusCode: false })
+      expect(r.status()).toBeGreaterThanOrEqual(400)
+      expect(r.status()).toBeLessThan(500)
+      const cuerpo = await r.text()
+      expect(cuerpo).not.toContain('Failed query')
+      expect(cuerpo).not.toContain('invalid input syntax')
+    })
+  }
+
+  test('GET /api/deudas/personas?tipo=basura responde 400, no 500', async ({ request }) => {
+    const r = await request.get('/api/deudas/personas?tipo=basura', { failOnStatusCode: false })
+    expect(r.status()).toBe(400)
+    const ok = await request.get('/api/deudas/personas?tipo=me_deben&_t=1', {
+      failOnStatusCode: false,
+    })
+    expect(ok.ok(), await ok.text()).toBeTruthy()
+  })
+
+  test('GET /api/deudas/vinculos/checkpoints?personaId=abc responde 400', async ({ request }) => {
+    const r = await request.get('/api/deudas/vinculos/checkpoints?personaId=abc', {
+      failOnStatusCode: false,
+    })
+    expect(r.status()).toBe(400)
+    expect(await r.text()).not.toContain('Failed query')
+  })
+
+  test('PUT /api/configuraciones con el cuerpo completo de la pantalla sigue funcionando', async ({
+    request,
+  }) => {
+    const r = await request.put('/api/configuraciones', {
+      data: {
+        nombre: 'E2E',
+        presupuestoMensualDefault: 4500,
+        monedaPreferida: 'PEN',
+        diaInicioCiclo: 1,
+        zonaHoraria: 'America/Lima',
+        locale: 'es-PE',
+        diasPdfSaldadas: 7,
+        vistaRegistroDia: true,
+        vistaRegistroSemana: false,
+        tamanoLetra: 'normal',
+        modoDaltonico: false,
+      },
+      failOnStatusCode: false,
+    })
+    expect(r.ok(), await r.text()).toBeTruthy()
+    expect((await r.json()).zonaHoraria).toBe('America/Lima')
+  })
+})
+
+test.describe('Seguridad — ronda 5: categoría ajena por el PUT de gastos', () => {
+  test('editar un gasto propio para apuntarlo a una categoría privada ajena se rechaza', async ({
+    request,
+  }) => {
+    const ANA = usuario(41, 'ana-put')
+    const BETO = usuario(42, 'beto-put')
+
+    const cat = await request.post('/api/categorias', {
+      headers: ANA,
+      data: { nombre: `Reservada ${marca}`, icono: '🔒', color: '#ff00ff' },
+      failOnStatusCode: false,
+    })
+    expect(cat.ok(), await cat.text()).toBeTruthy()
+    const categoriaDeAna = (await cat.json()).id
+
+    const propia = await request.post('/api/categorias', {
+      headers: BETO,
+      data: { nombre: `Mía ${marca}`, icono: '🙂', color: '#00ffff' },
+      failOnStatusCode: false,
+    })
+    const categoriaDeBeto = (await propia.json()).id
+
+    const gasto = await request.post('/api/gastos', {
+      headers: BETO,
+      data: {
+        concepto: 'Propio',
+        monto: 7,
+        fecha: await hoyIso(request),
+        categoriaId: categoriaDeBeto,
+      },
+      failOnStatusCode: false,
+    })
+    expect(gasto.ok(), await gasto.text()).toBeTruthy()
+    const gastoId = (await gasto.json()).id
+
+    // Antes: 200, la fila quedaba apuntando a la categoría ajena y la
+    // respuesta traía `categoriaNombre: "Reservada ..."`.
+    const put = await request.put(`/api/gastos/${gastoId}`, {
+      headers: BETO,
+      data: { categoriaId: categoriaDeAna },
+      failOnStatusCode: false,
+    })
+    expect(put.status()).toBe(400)
+    expect(await put.text()).not.toContain('Reservada')
+
+    // Y el gasto sigue con su categoría.
+    const lista = await request.get(`/api/gastos?fecha=${await hoyIso(request)}`, { headers: BETO })
+    const fila = (await lista.json()).find((g) => g.id === gastoId)
+    expect(fila?.categoriaId).toBe(categoriaDeBeto)
+  })
+
+  test('aplicar una plantilla con una categoría ajena no la usa', async ({ request }) => {
+    const ANA = usuario(43, 'ana-tpl')
+    const BETO = usuario(44, 'beto-tpl')
+
+    const cat = await request.post('/api/categorias', {
+      headers: ANA,
+      data: { nombre: `Oculta ${marca}`, icono: '🔒', color: '#123456' },
+      failOnStatusCode: false,
+    })
+    const categoriaDeAna = (await cat.json()).id
+
+    // Beto necesita al menos una categoría propia como reserva.
+    await request.post('/api/categorias', {
+      headers: BETO,
+      data: { nombre: `Otros ${marca}`, icono: '📦', color: '#654321' },
+      failOnStatusCode: false,
+    })
+
+    const [anio, mes] = (await hoyIso(request)).split('-')
+    const plan = await request.get(`/api/planificador?mes=${Number(mes)}&anio=${anio}`, {
+      headers: BETO,
+    })
+    const planId = (await plan.json()).plan.id
+
+    const tpl = await request.post('/api/planificador/plantillas', {
+      headers: BETO,
+      data: {
+        nombre: `Ajena ${marca}`,
+        gastos: [
+          { concepto: 'Sonda', montoEstimado: 5, categoriaId: categoriaDeAna, diaProbable: 1 },
+        ],
+      },
+      failOnStatusCode: false,
+    })
+    expect(tpl.ok(), await tpl.text()).toBeTruthy()
+
+    const apl = await request.post(
+      `/api/planificador/plantillas/${(await tpl.json()).id}/aplicar`,
+      {
+        headers: BETO,
+        data: { planMensualId: planId },
+        failOnStatusCode: false,
+      },
+    )
+    expect(apl.ok(), await apl.text()).toBeTruthy()
+    // Antes: `categoriasReemplazadas: 0` y el planificado quedaba apuntando
+    // a la categoría privada de Ana.
+    expect((await apl.json()).categoriasReemplazadas).toBe(1)
+
+    const planificados = (
+      await (
+        await request.get(`/api/planificador?mes=${Number(mes)}&anio=${anio}`, { headers: BETO })
+      ).json()
+    ).gastos
+    expect(planificados.some((g) => g.categoriaId === categoriaDeAna)).toBe(false)
+  })
+})
+
+test.describe('Seguridad — ronda 5: saldos y papelera', () => {
+  test('editar y revertir un pago recalculan el saldo desde los pagos vivos', async ({
+    request,
+  }) => {
+    const YO = usuario(45, 'saldos')
+    const deuda = await request.post('/api/deudas', {
+      headers: YO,
+      data: {
+        tipoDeuda: 'me_deben',
+        concepto: `Saldo ${marca}`,
+        monto: 100,
+        personaNombre: 'Saldos',
+      },
+      failOnStatusCode: false,
+    })
+    expect(deuda.ok(), await deuda.text()).toBeTruthy()
+    const deudaId = (await deuda.json()).id
+    const fecha = await hoyIso(request)
+
+    const p1 = await request.post(`/api/deudas/${deudaId}/pagos`, {
+      headers: YO,
+      data: { monto: 30, fechaPago: fecha },
+    })
+    const pago1 = (await p1.json()).pago.id
+    await request.post(`/api/deudas/${deudaId}/pagos`, {
+      headers: YO,
+      data: { monto: 20, fechaPago: fecha },
+    })
+
+    // Editar el primer pago a 50: pagado 70, pendiente 30.
+    const edit = await request.put(`/api/deudas/pagos/${pago1}`, {
+      headers: YO,
+      data: { monto: 50 },
+      failOnStatusCode: false,
+    })
+    expect(edit.ok(), await edit.text()).toBeTruthy()
+    expect((await edit.json()).deuda.montoPendiente).toBe(30)
+
+    // Un monto que deje la deuda pagada de más se rechaza y no toca nada.
+    const exceso = await request.put(`/api/deudas/pagos/${pago1}`, {
+      headers: YO,
+      data: { monto: 90 },
+      failOnStatusCode: false,
+    })
+    expect(exceso.status()).toBe(400)
+
+    // Revertir el primer pago: queda solo el de 20 → pendiente 80.
+    const rev = await request.delete(`/api/deudas/pagos/${pago1}`, {
+      headers: YO,
+      failOnStatusCode: false,
+    })
+    expect(rev.ok(), await rev.text()).toBeTruthy()
+    expect((await rev.json()).nuevoPendiente).toBe(80)
+
+    const detalle = await request.get(`/api/deudas/${deudaId}`, { headers: YO })
+    expect((await detalle.json()).montoPendiente).toBe(80)
+    expect((await detalle.json()).estado).toBe('parcial')
+  })
+
+  test('PUT de un pago sin cuerpo o con fecha inventada responde 400', async ({ request }) => {
+    const YO = usuario(46, 'pago-put')
+    const deuda = await request.post('/api/deudas', {
+      headers: YO,
+      data: { tipoDeuda: 'yo_debo', concepto: `Put ${marca}`, monto: 10, personaNombre: 'Put' },
+    })
+    const deudaId = (await deuda.json()).id
+    const p = await request.post(`/api/deudas/${deudaId}/pagos`, {
+      headers: YO,
+      data: { monto: 5, fechaPago: await hoyIso(request) },
+    })
+    const pagoId = (await p.json()).pago.id
+
+    for (const data of [undefined, null, { fechaPago: 'el martes' }, { monto: 'mucho' }]) {
+      const r = await request.fetch(`/api/deudas/pagos/${pagoId}`, {
+        method: 'PUT',
+        data,
+        failOnStatusCode: false,
+      })
+      expect(r.status(), JSON.stringify(data)).toBe(400)
+    }
+  })
+
+  test('borrar un planificado pagado manda su gasto real a la papelera, no lo destruye', async ({
+    request,
+  }) => {
+    const YO = usuario(47, 'papelera-plan')
+    const cat = await request.post('/api/categorias', {
+      headers: YO,
+      data: { nombre: `Plan ${marca}`, icono: '📅', color: '#0f0f0f' },
+    })
+    const categoriaId = (await cat.json()).id
+    const hoy = await hoyIso(request)
+    const [anio, mes] = hoy.split('-')
+    const plan = await request.get(`/api/planificador?mes=${Number(mes)}&anio=${anio}`, {
+      headers: YO,
+    })
+    const planId = (await plan.json()).plan.id
+
+    const creado = await request.post('/api/planificador/gastos', {
+      headers: YO,
+      data: {
+        planMensualId: planId,
+        categoriaId,
+        concepto: `Pagado ${marca}`,
+        montoEstimado: 42,
+        fechaProbablePago: hoy,
+      },
+    })
+    const planificadoId = (await creado.json()).id
+
+    const registro = await request.post(`/api/planificador/gastos/${planificadoId}/registro`, {
+      headers: YO,
+      data: { fechaPago: hoy },
+      failOnStatusCode: false,
+    })
+    expect(registro.ok(), await registro.text()).toBeTruthy()
+    const gastoId = (await registro.json()).gasto.id
+
+    const borrar = await request.delete(`/api/planificador/gastos/${planificadoId}`, {
+      headers: YO,
+    })
+    expect(borrar.ok()).toBeTruthy()
+
+    // Antes: DELETE físico del gasto. Ahora está en la papelera y se puede
+    // restaurar.
+    const papelera = await (await request.get('/api/papelera', { headers: YO })).json()
+    expect(papelera.gastos.some((g) => g.id === gastoId)).toBe(true)
+    const restaurar = await request.post('/api/papelera/restaurar', {
+      headers: YO,
+      data: { entidad: 'gasto', id: gastoId },
+      failOnStatusCode: false,
+    })
+    expect(restaurar.ok(), await restaurar.text()).toBeTruthy()
+  })
+
+  test('fusionar personas conserva en la papelera las deudas borradas de la persona origen', async ({
+    request,
+  }) => {
+    const YO = usuario(48, 'merge-papelera')
+    const origen = await request.post('/api/deudas/personas', {
+      headers: YO,
+      data: { nombre: `Origen ${marca}` },
+    })
+    const destino = await request.post('/api/deudas/personas', {
+      headers: YO,
+      data: { nombre: `Destino ${marca}` },
+    })
+    const origenId = (await origen.json()).id
+    const destinoId = (await destino.json()).id
+
+    const deuda = await request.post('/api/deudas', {
+      headers: YO,
+      data: {
+        tipoDeuda: 'me_deben',
+        concepto: `Borrada ${marca}`,
+        monto: 15,
+        personaEntidadId: origenId,
+      },
+    })
+    const deudaId = (await deuda.json()).id
+    await request.delete(`/api/deudas/${deudaId}`, { headers: YO })
+
+    const merge = await request.post('/api/deudas/personas/merge', {
+      headers: YO,
+      data: { destinoId, origenIds: [origenId] },
+      failOnStatusCode: false,
+    })
+    expect(merge.ok(), await merge.text()).toBeTruthy()
+
+    // Antes el cascade de la persona origen purgaba la deuda de la papelera.
+    const papelera = await (await request.get('/api/papelera', { headers: YO })).json()
+    expect(papelera.deudas.some((d) => d.id === deudaId)).toBe(true)
+  })
+})

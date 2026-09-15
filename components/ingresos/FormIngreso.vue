@@ -122,7 +122,10 @@ const ORIGENES = [
   { value: 'otro', label: 'Otro', icon: '💰' },
 ]
 
-const hoy = new Date().toISOString().split('T')[0]
+// Hoy en la zona del usuario: la fecha UTC del dispositivo es MAÑANA desde
+// las 19:00 en Lima y el ingreso caía en el día siguiente.
+const { fechaHoy } = useFechaPeru()
+const hoy = fechaHoy()
 const form = ref({
   concepto: '',
   monto: null,

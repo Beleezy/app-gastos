@@ -301,7 +301,7 @@ Reglas:
         let parsed
         try {
           parsed = JSON.parse(text)
-        } catch (jsonErr) {
+        } catch {
           logger.warn('JSON inválido del LLM', { model: currentModel, attempt: attempt + 1 })
           lastError = 'La respuesta del LLM no es JSON válido'
           continue
@@ -376,6 +376,7 @@ Reglas:
     })
   }
 
+  logger.error('Todos los modelos fallaron (texto)', { lastError })
   const userMessage =
     lastErrorUserFriendly || 'No se pudo procesar el texto. Intenta de nuevo en unos segundos.'
   throw createError({ statusCode: 500, message: userMessage })

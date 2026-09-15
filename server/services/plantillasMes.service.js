@@ -12,6 +12,7 @@ import {
   gastosPlanificados,
   categorias,
 } from '../database/schema.js'
+import { categoriasLegibles } from '../utils/categorias.js'
 
 function parseGastosJson(raw) {
   if (Array.isArray(raw)) return raw
@@ -139,12 +140,15 @@ export async function aplicarPlantilla({ usuarioId, plantillaId, planMensualId }
   const items = parseGastosJson(plantilla.gastos)
   if (items.length === 0) return { creados: 0 }
 
-  // Validar categorías existentes (predefinidas + del usuario).
-  // Comparamos como string para que UUIDs vs IDs serializados como
-  // string en JSON no rompan el match.
+  // Solo las categorías que el usuario puede LEER (las suyas más las
+  // predefinidas globales). Antes se aceptaba CUALQUIER fila de la tabla:
+  // una plantilla con el id de una categoría privada de otra cuenta la
+  // aplicaba tal cual, y el "Otros" de reserva podía ser el de cualquier
+  // usuario. La regla vive en utils/categorias.js.
   const categoriasValidas = await db
     .select({ id: categorias.id, nombre: categorias.nombre })
     .from(categorias)
+    .where(categoriasLegibles(usuarioId))
   const setValidas = new Set(categoriasValidas.map((c) => String(c.id)))
   const fallbackCategoriaId =
     categoriasValidas.find((c) => /otros/i.test(c.nombre))?.id || categoriasValidas[0]?.id || null

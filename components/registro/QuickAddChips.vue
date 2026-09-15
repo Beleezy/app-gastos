@@ -48,14 +48,14 @@ const props = defineProps({
   favoritos: { type: Array, default: () => [] },
   categorias: { type: Array, default: () => [] },
 })
-const emit = defineEmits(['add', 'remove'])
+defineEmits(['add', 'remove'])
 
 const { currencySymbol, formatMonto } = useCurrency()
 
 const editMode = ref(false)
 let longPressTimer = null
 
-function onTouchStart(key) {
+function onTouchStart() {
   longPressTimer = setTimeout(() => {
     editMode.value = true
   }, 500)

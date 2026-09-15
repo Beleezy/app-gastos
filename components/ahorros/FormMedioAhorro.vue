@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-const emit = defineEmits(['close'])
+defineEmits(['close'])
 
 const { medios, createMedio, deleteMedio } = useAhorros()
 const { success, error: toastError } = useToast()
@@ -140,7 +140,7 @@ async function agregar() {
     })
     nuevoNombre.value = ''
     success('Medio agregado')
-  } catch (e) {
+  } catch {
     errorMsg.value = 'Error al agregar medio'
   } finally {
     saving.value = false
@@ -151,7 +151,7 @@ async function eliminar(medio) {
   try {
     await deleteMedio(medio.id)
     success('Medio eliminado')
-  } catch (e) {
+  } catch {
     toastError('Error al eliminar medio')
   }
 }

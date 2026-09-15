@@ -11,6 +11,7 @@ import {
   usuarios,
 } from '../database/schema.js'
 import { cargarConexionDeLaQueEsParte, cargarCategoriasCompartidas } from '../utils/compartido.js'
+import { assertCategoriasPropias } from '../utils/categorias.js'
 // Reusado, no duplicado: el nombre a mostrar sale de configuraciones.nombre
 // con fallback a usuarios.nombre, igual que en los vínculos de deudas.
 import { getNombreDisplay } from '../utils/vinculos.js'
@@ -239,23 +240,21 @@ export async function crearInvitacion({ usuarioId, body }) {
 }
 
 /**
- * Las categorías compartibles son las del usuario o las globales
- * (usuario_id NULL). Sin esto, alguien podría compartir la categoría
- * personalizada de otra cuenta y descubrir su nombre en la respuesta.
+ * Las categorías compartibles son las del usuario o las predefinidas
+ * globales. Sin esto, alguien podría compartir la categoría personalizada
+ * de otra cuenta y descubrir su nombre en la respuesta.
+ *
+ * Delegado en utils/categorias.js: la redacción propia que había aquí era
+ * la quinta copia de la regla y, otra vez, más ancha que la canónica
+ * (aceptaba cualquier fila con usuario_id NULL sin exigir es_predefinida) —
+ * y además rechazaba una lista con un id repetido, porque comparaba
+ * longitudes.
  */
 async function validarCategoriasPropias(usuarioId, categoriaIds) {
-  const validas = await db
-    .select({ id: categorias.id })
-    .from(categorias)
-    .where(
-      and(
-        inArray(categorias.id, categoriaIds),
-        or(eq(categorias.usuarioId, usuarioId), isNull(categorias.usuarioId)),
-      ),
-    )
-
-  if (validas.length !== categoriaIds.length) {
-    throw error(400, 'Alguna categoría no existe o no es tuya')
+  try {
+    await assertCategoriasPropias({ usuarioId, categoriaIds })
+  } catch (e) {
+    throw error(e?.statusCode || 400, e?.message || 'Alguna categoría no existe o no es tuya')
   }
 }
 

@@ -34,7 +34,7 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
     try {
       await deleteGasto(gastoPrev.id)
       await fetchResumenMensual()
-    } catch (e) {
+    } catch {
       gastosMensuales.value = [...gastosMensuales.value, gastoPrev].sort((a, b) => {
         if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
         return (b.hora || '').localeCompare(a.hora || '')
@@ -80,7 +80,7 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
       try {
         await deleteGasto(gastoActual.id)
         await fetchResumenMensual()
-      } catch (e) {
+      } catch {
         gastosMensuales.value = [...gastosMensuales.value, gastoActual].sort((a, b) => {
           if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha)
           return (b.hora || '').localeCompare(a.hora || '')
@@ -111,7 +111,7 @@ export function useGastoDelete({ gastosMensuales, deleteGasto, fetchResumenMensu
     if (!gastoPrev) return
     try {
       await deleteGasto(gastoPrev.id)
-    } catch (e) {
+    } catch {
       // best effort
     }
   }

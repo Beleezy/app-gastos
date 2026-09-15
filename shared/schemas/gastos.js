@@ -3,6 +3,7 @@ import {
   vacioComoAusente,
   cacheBusters,
   uuidSchema,
+  uuidRequerido,
   fechaIso,
   horaHhmm,
   monto,
@@ -12,15 +13,18 @@ import {
 } from './common.js'
 import { visibilidadGastoSchema } from './compartido.js'
 
+// `categoriaId` y `gastoPlanificadoId` son columnas uuid. Eran
+// `z.union([z.string(), z.number()])`: un "abc" pasaba el schema, llegaba a
+// `assertCategoriasPropias` (o al INSERT) y salía como 500 con el SQL.
 const gastoBaseSchema = z.object({
   concepto: conceptoSchema,
   monto,
   fecha: fechaIso,
   hora: horaHhmm.optional().nullable(),
-  categoriaId: z.union([z.string(), z.number()]).nullable().optional(),
+  categoriaId: uuidSchema.nullable().optional(),
   notas: notasSchema,
   metodoRegistro: metodoRegistroSchema.optional().default('manual'),
-  gastoPlanificadoId: z.union([z.string(), z.number()]).nullable().optional(),
+  gastoPlanificadoId: uuidSchema.nullable().optional(),
   transcripcionVoz: z.string().max(2000).optional().nullable(),
   // Módulo Compartido: excepción por gasto sobre las reglas de categoría.
   visibilidad: visibilidadGastoSchema.optional(),
@@ -54,9 +58,7 @@ const gastoBulkItemSchema = z.object({
   // ningún valor por defecto. Sin exigirla aquí, un lote sin categoría
   // llegaba al INSERT y salía como 500 del driver — mientras que el POST
   // simple, que sí la comprueba a mano, devolvía un 400 claro.
-  categoriaId: z.union([z.string(), z.number()], {
-    error: 'La categoría es obligatoria',
-  }),
+  categoriaId: uuidRequerido('La categoría es obligatoria'),
   notas: notasSchema,
   visibilidad: visibilidadGastoSchema.optional(),
 })
@@ -70,18 +72,20 @@ export const gastosBulkCreateSchema = z.object({
   transcripcionVoz: z.string().max(2000).optional().nullable(),
 })
 
+const listaDeIds = z
+  .array(uuidSchema)
+  .min(1, 'Lista vacía')
+  .max(500, 'Máximo 500 gastos por operación')
+
 // Campos que PUT /api/gastos/bulk admite cambiar en lote. Whitelist
 // explícita: el handler ya solo copiaba estos, pero sin validar su tipo,
 // así que un `fecha: "el martes"` o un categoriaId no-UUID llegaban a
 // Postgres como 500 del driver en vez de 400.
 export const gastosBulkUpdateSchema = z.object({
-  ids: z
-    .array(z.union([z.string(), z.number()]))
-    .min(1, 'Lista vacía')
-    .max(500, 'Máximo 500 gastos por operación'),
+  ids: listaDeIds,
   campos: z
     .object({
-      categoriaId: z.union([z.string(), z.number()]).nullable().optional(),
+      categoriaId: uuidSchema.nullable().optional(),
       fecha: fechaIso.optional(),
       hora: horaHhmm.optional().nullable(),
       notas: notasSchema,
@@ -94,10 +98,7 @@ export const gastosBulkUpdateSchema = z.object({
 })
 
 export const gastosBulkIdsSchema = z.object({
-  ids: z
-    .array(z.union([z.string(), z.number()]))
-    .min(1)
-    .max(500),
+  ids: listaDeIds,
 })
 
 // Body de /api/voz/parse y /api/voz/parse-stream.

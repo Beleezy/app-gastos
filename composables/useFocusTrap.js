@@ -54,7 +54,7 @@ export function useFocusTrap(containerRef, { onEscape } = {}) {
     if (previousActive && typeof previousActive.focus === 'function') {
       try {
         previousActive.focus()
-      } catch (_) {
+      } catch {
         // ignore
       }
     }

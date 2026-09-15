@@ -54,10 +54,12 @@ export async function crearDeuda({ usuarioId, body }) {
   const personaId = await resolverPersonaId({ usuarioId, body })
   const monto = parseFloat(body.monto)
 
+  // Una persona en la papelera no recibe deudas nuevas: quedarían
+  // invisibles (el listado filtra por persona viva) hasta restaurarla.
   const [persona] = await db
     .select()
     .from(personasEntidades)
-    .where(eq(personasEntidades.id, personaId))
+    .where(and(eq(personasEntidades.id, personaId), isNull(personasEntidades.deletedAt)))
     .limit(1)
 
   assertOwner(persona, usuarioId, { recurso: 'Persona' })
@@ -238,17 +240,16 @@ export async function mergePersonas({ usuarioId, destinoId, origenIds }) {
   }
 
   const result = await db.transaction(async (tx) => {
+    // TODAS las deudas de las personas origen, también las de la papelera:
+    // la persona origen se borra físicamente y su FK cascadea. Reasignar
+    // solo las vivas dejaba que el cascade purgara las borradas — el mismo
+    // bug N12 que ya se había cerrado en "eliminar persona". Se cuenta
+    // aparte cuántas estaban vivas, que es lo que el usuario ve.
     const upd = await tx
       .update(deudas)
       .set({ personaEntidadId: destinoId, updatedAt: new Date() })
-      .where(
-        and(
-          eq(deudas.usuarioId, usuarioId),
-          inArray(deudas.personaEntidadId, ids),
-          isNull(deudas.deletedAt),
-        ),
-      )
-      .returning({ id: deudas.id })
+      .where(and(eq(deudas.usuarioId, usuarioId), inArray(deudas.personaEntidadId, ids)))
+      .returning({ id: deudas.id, deletedAt: deudas.deletedAt })
 
     const del = await tx
       .delete(personasEntidades)
@@ -257,7 +258,7 @@ export async function mergePersonas({ usuarioId, destinoId, origenIds }) {
 
     return {
       destinoId,
-      deudasReasignadas: upd.length,
+      deudasReasignadas: upd.filter((d) => !d.deletedAt).length,
       personasEliminadas: del.length,
     }
   })

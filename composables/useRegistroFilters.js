@@ -1,6 +1,8 @@
 import { useDebouncedRef } from './useDebounce'
+import { addDias } from './useDateUtils'
 
 export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual }) {
+  const { fechaHoy } = useFechaPeru()
   const busquedaGasto = ref('')
   const categoriaFiltro = ref(null)
   const rangoRapido = ref('mes') // 'hoy' | '7d' | 'mes'
@@ -20,18 +22,16 @@ export function useRegistroFilters({ gastosPorDia, gastosPorSemana, esMesActual 
     if (!v && rangoRapido.value !== 'mes') rangoRapido.value = 'mes'
   })
 
+  // Rangos relativos medidos en la zona del usuario (strings ISO comparables),
+  // no con `Date` del dispositivo: "Hoy" debe ser el mismo día que muestra
+  // el historial diario.
   function fechaDentroRango(fecha) {
     if (rangoRapido.value === 'mes') return true
-    const hoy = new Date()
-    const d = new Date(`${fecha}T00:00:00`)
-    if (rangoRapido.value === 'hoy') {
-      return d.toDateString() === hoy.toDateString()
-    }
+    const hoy = fechaHoy()
+    if (rangoRapido.value === 'hoy') return fecha === hoy
     if (rangoRapido.value === '7d') {
-      const desde = new Date(hoy)
-      desde.setDate(desde.getDate() - 6)
-      desde.setHours(0, 0, 0, 0)
-      return d >= desde && d <= hoy
+      const desde = addDias(hoy, -6)
+      return fecha >= desde && fecha <= hoy
     }
     return true
   }

@@ -204,7 +204,7 @@ Reglas:
         let parsed
         try {
           parsed = JSON.parse(text)
-        } catch (jsonErr) {
+        } catch {
           logger.warn('JSON inválido del LLM (image)', {
             model: currentModel,
             attempt: attempt + 1,
@@ -270,6 +270,7 @@ Reglas:
     })
   }
 
+  logger.error('Todos los modelos fallaron (image)', { lastError })
   const userMessage =
     lastErrorUserFriendly ||
     'No se pudo procesar la imagen. Intenta de nuevo con una foto más clara.'

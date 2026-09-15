@@ -518,7 +518,7 @@ function formatFecha(fecha) {
   if (!fecha) return ''
   const { fechaHoy } = useFechaPeru()
   if (fecha === fechaHoy()) return 'Hoy'
-  const [a, m, d] = fecha.split('-')
+  const [, m, d] = fecha.split('-')
   return `${d}/${m}`
 }
 

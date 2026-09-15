@@ -110,8 +110,8 @@
 const emit = defineEmits(['start', 'stop', 'continue'])
 const props = defineProps({
   isListening: Boolean,
-  transcript: String,
-  error: String,
+  transcript: { type: String, default: '' },
+  error: { type: String, default: '' },
   hasDraft: Boolean,
   isSupported: { type: Boolean, default: true },
   hideStatus: { type: Boolean, default: false },

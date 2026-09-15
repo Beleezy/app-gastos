@@ -1,6 +1,6 @@
 import { db } from './db.js'
 import { planesMensuales, gastosPlanificados, configuraciones, gastos } from '../database/schema.js'
-import { eq, and, or, inArray } from 'drizzle-orm'
+import { eq, and, or, inArray, isNull } from 'drizzle-orm'
 import crypto from 'crypto'
 
 const MESES_FUTUROS = 12
@@ -333,9 +333,14 @@ export async function eliminarRecurrentesFuturos(grupoId, gastoActualId) {
 
   // Antes eran 2 DELETE por mes, secuenciales y sin transacción: borrar un
   // recurrente de 12 meses hacía 24 round trips, y un fallo a mitad dejaba
-  // meses borrados y meses no.
+  // meses borrados y meses no. Los gastos reales ya registrados contra esos
+  // meses van a la papelera (soft-delete), no a un DELETE físico: es dinero
+  // registrado. La FK ON DELETE SET NULL los deja como gastos sueltos.
   await db.transaction(async (tx) => {
-    await tx.delete(gastos).where(inArray(gastos.gastoPlanificadoId, aBorrar))
+    await tx
+      .update(gastos)
+      .set({ deletedAt: new Date() })
+      .where(and(inArray(gastos.gastoPlanificadoId, aBorrar), isNull(gastos.deletedAt)))
     await tx.delete(gastosPlanificados).where(inArray(gastosPlanificados.id, aBorrar))
   })
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import 'dotenv/config'
+import { randomUUID } from 'node:crypto'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { eq } from 'drizzle-orm'
 import postgres from 'postgres'
@@ -178,9 +179,18 @@ async function generateTestData(existingUserId = null) {
       userId = existingUserId
       console.log(`✅ Usando usuario existente: ${userId}`)
     } else {
+      // `usuarios.id` espeja auth.users y no tiene default: sin un uuid
+      // explícito el INSERT fallaba con NOT NULL y `db:seed:test` sin
+      // argumento nunca funcionó. El usuario nace permitido para poder
+      // entrar con él en dev-login.
       const [newUser] = await db
         .insert(usuarios)
-        .values({ nombre: 'Usuario Prueba', email: `test-${Date.now()}@misfinanzas.app` })
+        .values({
+          id: randomUUID(),
+          nombre: 'Usuario Prueba',
+          email: `test-${Date.now()}@misfinanzas.app`,
+          permitido: true,
+        })
         .returning({ id: usuarios.id })
       userId = newUser.id
       console.log(`✅ Usuario creado: ${userId}`)
@@ -552,7 +562,6 @@ async function generateTestData(existingUserId = null) {
 
     // 8. PAGOS DE DEUDAS (mínimo 10, con diferentes patrones)
     console.log('\n💳 Generando pagos de deudas...')
-    const pagos = []
     let contadorPagos = 0
 
     // Seleccionar deudas aleatorias para crear pagos
@@ -650,7 +659,7 @@ async function generateTestData(existingUserId = null) {
 
     try {
       await client.end()
-    } catch (e) {
+    } catch {
       // Ignorar errores al cerrar
     }
     process.exit(1)

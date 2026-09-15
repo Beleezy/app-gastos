@@ -12,6 +12,8 @@
  *     Si no se configura, usa defaults conservadores (10 RPM, 250 RPD).
  */
 
+import { logger } from './logger.js'
+
 // Conteo de peticiones por modelo por minuto: Map<modelo, Map<minuteKey, count>>
 const requestCountsPerMinute = new Map()
 
@@ -125,13 +127,14 @@ async function fetchAvailableModels(apiKey) {
       `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
     )
     if (!response.ok) {
-      console.error('Error al consultar modelos disponibles:', response.status)
+      logger.error('Error al consultar modelos disponibles', { status: response.status })
       return null
     }
     const data = await response.json()
     return (data.models || []).map((m) => m.name.replace('models/', ''))
   } catch (e) {
-    console.error('Error al consultar modelos disponibles:', e.message)
+    // El logger redacta la API key si el mensaje del fetch la incluyera.
+    logger.error('Error al consultar modelos disponibles', { error: e })
     return null
   }
 }
@@ -150,7 +153,7 @@ export async function getValidModels(configuredModels, apiKey) {
 
   const available = await fetchAvailableModels(apiKey)
   if (!available) {
-    console.warn('No se pudo validar modelos, usando todos los configurados')
+    logger.warn('No se pudo validar modelos, usando todos los configurados')
     return configuredModels
   }
 
@@ -160,15 +163,16 @@ export async function getValidModels(configuredModels, apiKey) {
   const valid = configuredModels.filter((m) => available.includes(m))
 
   if (valid.length === 0) {
-    console.warn(
-      `Ninguno de los modelos configurados está disponible. Configurados: [${configuredModels.join(', ')}]. Disponibles: [${available.slice(0, 10).join(', ')}...]`,
-    )
+    logger.warn('Ninguno de los modelos configurados está disponible', {
+      configurados: configuredModels,
+      disponibles: available.slice(0, 10),
+    })
     return configuredModels
   }
 
   const invalid = configuredModels.filter((m) => !available.includes(m))
   if (invalid.length > 0) {
-    console.warn(`Modelos no disponibles (ignorados): [${invalid.join(', ')}]`)
+    logger.warn('Modelos no disponibles (ignorados)', { modelos: invalid })
   }
 
   return valid

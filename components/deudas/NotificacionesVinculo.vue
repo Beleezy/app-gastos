@@ -68,7 +68,7 @@ async function aceptar(id) {
   try {
     await vinculos.aceptarSolicitud(id)
     emit('vinculo-aceptado')
-  } catch (e) {
+  } catch {
     // error ya en vinculos.error
   } finally {
     procesando.value = null
@@ -79,7 +79,7 @@ async function rechazar(id) {
   procesando.value = id
   try {
     await vinculos.rechazarSolicitud(id)
-  } catch (e) {
+  } catch {
     // error ya en vinculos.error
   } finally {
     procesando.value = null

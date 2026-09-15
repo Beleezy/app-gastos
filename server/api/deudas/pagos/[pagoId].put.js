@@ -1,205 +1,23 @@
-import { db } from '../../../utils/db.js'
-import { deudas, pagosDeuda, personasEntidades } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
-import { registrarAuditoria } from '../../../utils/vinculos.js'
-import { eq, and, sum, isNull } from 'drizzle-orm'
+import { validateBody } from '../../../utils/validate.js'
+import { pagoUpdateSchema } from '~/shared/schemas/deudas.js'
+import { actualizarPago } from '../../../services/pagos.service.js'
 import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
   const pagoId = getUuidParam(event, 'pagoId', { recurso: 'Pago' })
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
+  // Leía `readBody` crudo: sin cuerpo era un TypeError y `fechaPago: "el
+  // martes"` un 500 con el SQL dentro. La lógica —con la deuda bloqueada,
+  // ver pagos.service.js— vive en el servicio.
+  const body = await validateBody(event, pagoUpdateSchema)
 
-  // Obtener pago con su deuda (verificar propiedad)
-  const [pago] = await db
-    .select({
-      id: pagosDeuda.id,
-      montoPagado: pagosDeuda.montoPagado,
-      fechaPago: pagosDeuda.fechaPago,
-      metodoPago: pagosDeuda.metodoPago,
-      notas: pagosDeuda.notas,
-      deudaId: pagosDeuda.deudaId,
-      vinculoPagoId: pagosDeuda.vinculoPagoId,
-    })
-    .from(pagosDeuda)
-    .innerJoin(deudas, eq(pagosDeuda.deudaId, deudas.id))
-    .where(
-      and(
-        eq(pagosDeuda.id, pagoId),
-        eq(deudas.usuarioId, usuarioId),
-        isNull(pagosDeuda.deletedAt),
-        isNull(deudas.deletedAt),
-      ),
-    )
-    .limit(1)
-
-  if (!pago) {
-    throw createError({ statusCode: 404, message: 'Pago no encontrado' })
-  }
-
-  const updateData = {}
-  if (body.fechaPago !== undefined) updateData.fechaPago = body.fechaPago
-  if (body.metodoPago !== undefined) updateData.metodoPago = body.metodoPago?.trim() || null
-  if (body.notas !== undefined) updateData.notas = body.notas?.trim() || null
-
-  // Si se cambia el monto, hay que recalcular la deuda
-  let deudaActualizada = null
-  if (body.monto !== undefined && parseFloat(body.monto) !== parseFloat(pago.montoPagado)) {
-    const nuevoMonto = parseFloat(body.monto)
-    if (nuevoMonto <= 0) {
-      throw createError({ statusCode: 400, message: 'El monto debe ser mayor a 0' })
+  try {
+    return await actualizarPago({ usuarioId, pagoId, body })
+  } catch (e) {
+    if (e?.statusCode) {
+      throw createError({ statusCode: e.statusCode, message: e.message })
     }
-    updateData.montoPagado = String(nuevoMonto)
-
-    // Recalcular monto pendiente de la deuda
-    const [deudaActual] = await db
-      .select()
-      .from(deudas)
-      .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
-      .limit(1)
-
-    const [result] = await db
-      .select({ total: sum(pagosDeuda.montoPagado) })
-      .from(pagosDeuda)
-      .where(
-        and(
-          eq(pagosDeuda.deudaId, pago.deudaId),
-          isNull(pagosDeuda.deletedAt),
-          // Excluir el pago actual del cálculo (se reemplaza por el nuevo monto)
-        ),
-      )
-
-    // Suma total excluyendo el pago actual + nuevo monto
-    const totalSinEste = await db
-      .select({ total: sum(pagosDeuda.montoPagado) })
-      .from(pagosDeuda)
-      .where(
-        and(
-          eq(pagosDeuda.deudaId, pago.deudaId),
-          eq(pagosDeuda.id, pagoId),
-          isNull(pagosDeuda.deletedAt),
-        ),
-      )
-
-    const pagosOtros = await db
-      .select({ id: pagosDeuda.id, montoPagado: pagosDeuda.montoPagado })
-      .from(pagosDeuda)
-      .where(
-        and(
-          eq(pagosDeuda.deudaId, pago.deudaId),
-          eq(pagosDeuda.id, pagoId),
-          isNull(pagosDeuda.deletedAt),
-        ),
-      )
-
-    // Calcular total pagado (excluyendo este pago) + nuevo monto
-    const [resultOtros] = await db
-      .select({ total: sum(pagosDeuda.montoPagado) })
-      .from(pagosDeuda)
-      .where(and(eq(pagosDeuda.deudaId, pago.deudaId), isNull(pagosDeuda.deletedAt)))
-
-    const totalActualIncluyendo = parseFloat(resultOtros?.total || 0)
-    const totalSinEstePago = totalActualIncluyendo - parseFloat(pago.montoPagado)
-    const nuevoTotalPagado = totalSinEstePago + nuevoMonto
-    const montoOriginal = parseFloat(deudaActual.montoOriginal)
-    const nuevoPendiente = Math.max(0, montoOriginal - nuevoTotalPagado)
-
-    let nuevoEstado = 'pendiente'
-    if (nuevoPendiente <= 0) nuevoEstado = 'pagado'
-    else if (nuevoTotalPagado > 0) nuevoEstado = 'parcial'
-
-    deudaActualizada = {
-      id: deudaActual.id,
-      montoPendiente: String(Math.round(nuevoPendiente * 100) / 100),
-      estado: nuevoEstado,
-      vinculoDeudaId: deudaActual.vinculoDeudaId,
-    }
-  }
-
-  if (Object.keys(updateData).length === 0) {
-    return { ok: true, pago }
-  }
-
-  // Obtener persona para auditoría
-  const [deudaInfo] = await db
-    .select({
-      vinculoDeudaId: deudas.vinculoDeudaId,
-      personaEntidadId: deudas.personaEntidadId,
-      concepto: deudas.concepto,
-    })
-    .from(deudas)
-    .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
-    .limit(1)
-
-  const [persona] = await db
-    .select({ vinculoParId: personasEntidades.vinculoParId })
-    .from(personasEntidades)
-    .where(eq(personasEntidades.id, deudaInfo.personaEntidadId))
-    .limit(1)
-
-  const [pagoActualizado] = await db.transaction(async (tx) => {
-    // Actualizar pago original
-    const [updated] = await tx
-      .update(pagosDeuda)
-      .set(updateData)
-      .where(and(eq(pagosDeuda.id, pagoId), isNull(pagosDeuda.deletedAt)))
-      .returning()
-
-    // Actualizar deuda si cambia el monto
-    if (deudaActualizada) {
-      await tx
-        .update(deudas)
-        .set({
-          montoPendiente: deudaActualizada.montoPendiente,
-          estado: deudaActualizada.estado,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(deudas.id, pago.deudaId), isNull(deudas.deletedAt)))
-    }
-
-    // Sincronizar con pago espejo si existe
-    if (pago.vinculoPagoId) {
-      await tx
-        .update(pagosDeuda)
-        .set(updateData)
-        .where(and(eq(pagosDeuda.id, pago.vinculoPagoId), isNull(pagosDeuda.deletedAt)))
-
-      // Actualizar deuda espejo si cambia el monto
-      if (deudaActualizada?.vinculoDeudaId) {
-        await tx
-          .update(deudas)
-          .set({
-            montoPendiente: deudaActualizada.montoPendiente,
-            estado: deudaActualizada.estado,
-            updatedAt: new Date(),
-          })
-          .where(and(eq(deudas.id, deudaActualizada.vinculoDeudaId), isNull(deudas.deletedAt)))
-      }
-    }
-
-    // Registrar auditoría si hay vínculo
-    if (deudaInfo?.vinculoDeudaId && persona?.vinculoParId) {
-      await registrarAuditoria(tx, {
-        personaAId: deudaInfo.personaEntidadId,
-        personaBId: persona.vinculoParId,
-        usuarioId,
-        accion: 'pago_editado',
-        descripcion: `Pago editado para "${deudaInfo.concepto}"`,
-        datos: {
-          pagoId,
-          deudaId: pago.deudaId,
-          cambios: updateData,
-        },
-      })
-    }
-
-    return [updated]
-  })
-
-  return {
-    pago: {
-      ...pagoActualizado,
-      montoPagado: parseFloat(pagoActualizado.montoPagado),
-    },
+    throw e
   }
 })

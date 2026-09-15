@@ -225,7 +225,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved'])
 
 const { currencySymbol } = useCurrency()
-const { createDeuda, personas, tabActual } = useDeudas()
+const { createDeuda, tabActual } = useDeudas()
 
 const form = reactive({
   tipoDeuda: props.personaPredefinida ? tabActual.value : 'me_deben',
@@ -309,7 +309,7 @@ async function guardar() {
   }
 }
 
-function handleClickOutside(e) {
+function handleClickOutside() {
   showSugerencias.value = false
 }
 onMounted(() => document.addEventListener('click', handleClickOutside))

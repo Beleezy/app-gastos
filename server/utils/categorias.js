@@ -16,6 +16,7 @@
 import { and, eq, inArray, isNull, or } from 'drizzle-orm'
 import { db } from './db.js'
 import { categorias } from '../database/schema.js'
+import { esUuid } from './params.js'
 
 /**
  * Condición Drizzle de las categorías que un usuario puede LEER: las
@@ -93,6 +94,17 @@ export async function assertCategoriasPropias({ usuarioId, categoriaIds, dbClien
     ...new Set((categoriaIds || []).filter((id) => id !== null && id !== undefined && id !== '')),
   ].map(String)
   if (unicos.length === 0) return
+
+  // La forma se comprueba aquí y no solo en los schemas: no todos los que
+  // llaman validan el cuerpo con Zod, y un id que no es uuid no "no
+  // existe" — revienta el `inArray` con un 500 que arrastra el SQL. Mismo
+  // mensaje que un id ajeno, para no confirmar qué formato tienen los
+  // ids de otras cuentas.
+  if (unicos.some((id) => !esUuid(id))) {
+    const err = new Error('La categoría indicada no existe o no es tuya')
+    err.statusCode = 400
+    throw err
+  }
 
   const accesibles = await dbClient
     .select({ id: categorias.id })

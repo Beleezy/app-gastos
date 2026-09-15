@@ -339,7 +339,7 @@ function onDuplicate() {
   emit('duplicate')
 }
 
-function onWrapperClick(e) {
+function onWrapperClick() {
   if (props.gasto.pendiente) return
   if (!props.selectable) return
   // En modo selección, el wrapper intercepta el click (los botones internos tienen .stop)

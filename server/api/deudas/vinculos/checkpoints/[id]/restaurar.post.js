@@ -7,12 +7,11 @@ import {
 } from '../../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../../utils/getUsuario.js'
 import {
-  normalizarParPersonas,
   crearCheckpoint,
   registrarAuditoria,
   getNombreDisplay,
 } from '../../../../../utils/vinculos.js'
-import { eq, and, or, inArray } from 'drizzle-orm'
+import { eq, and, or } from 'drizzle-orm'
 import { getUuidParam } from '../../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {

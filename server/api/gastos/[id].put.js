@@ -5,6 +5,7 @@ import { validateBody } from '../../utils/validate.js'
 import { gastoUpdateSchema } from '~/shared/schemas/gastos.js'
 import { eq, and, isNull } from 'drizzle-orm'
 import { getUuidParam } from '../../utils/params.js'
+import { assertCategoriasPropias, categoriasLegibles } from '../../utils/categorias.js'
 
 export default defineEventHandler(async (event) => {
   const id = getUuidParam(event, 'id', { recurso: 'Gasto' })
@@ -13,11 +14,22 @@ export default defineEventHandler(async (event) => {
   // y positivo, fecha/hora con regex, metodoRegistro como enum, etc.
   const body = await validateBody(event, gastoUpdateSchema)
 
+  // Tercera puerta al mismo IDOR de categorías que cerraron las rondas 1 y
+  // 4 en el POST y en los lotes: este PUT copiaba `categoriaId` tal cual y
+  // el join de abajo devolvía el nombre. Editar un gasto propio para
+  // apuntarlo a la categoría privada de otra cuenta respondía 200 con
+  // `categoriaNombre` ajeno — y la fila quedaba guardada apuntando ahí.
+  if (body.categoriaId !== undefined && body.categoriaId !== null) {
+    await assertCategoriasPropias({ usuarioId, categoriaIds: [body.categoriaId] })
+  }
+
   const updateData = { updatedAt: new Date() }
 
   if (body.concepto !== undefined) updateData.concepto = body.concepto.trim()
   if (body.monto !== undefined) updateData.monto = String(body.monto)
-  if (body.categoriaId !== undefined) updateData.categoriaId = body.categoriaId
+  if (body.categoriaId !== undefined && body.categoriaId !== null) {
+    updateData.categoriaId = body.categoriaId
+  }
   if (body.fecha !== undefined) updateData.fecha = body.fecha
   if (body.hora !== undefined) updateData.hora = body.hora
   if (body.notas !== undefined) updateData.notas = body.notas || null
@@ -33,10 +45,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Gasto no encontrado' })
   }
 
+  // Por id Y por legibilidad: una fila que ya apunte a una categoría ajena
+  // lee undefined en vez de arrastrar su nombre.
   const [cat] = await db
     .select()
     .from(categorias)
-    .where(eq(categorias.id, updated.categoriaId))
+    .where(and(eq(categorias.id, updated.categoriaId), categoriasLegibles(usuarioId)))
     .limit(1)
 
   return {

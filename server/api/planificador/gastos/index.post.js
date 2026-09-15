@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const gasto = await crearGastoPlanificado({ usuarioId, body })
-    syncCreated(usuarioId, gasto.id)
+    syncCreated(usuarioId, gasto.id, event)
     return gasto
   } catch (e) {
     if (e?.statusCode) {

@@ -3,7 +3,7 @@ import { gastosPlanificados, gastos, planesMensuales } from '../../../database/s
 import { eliminarRecurrentesFuturos } from '../../../utils/recurrente.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { syncDeleted } from '../../../utils/gcalAutoSync.js'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { getUuidParam } from '../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
@@ -34,15 +34,26 @@ export default defineEventHandler(async (event) => {
     await eliminarRecurrentesFuturos(gasto.recurrenteGrupoId, id)
   }
 
-  // Delete associated real expense if exists (ya validamos ownership del
-  // planificado; el gasto real está restringido por usuarioId vía la FK).
-  await db
-    .delete(gastos)
-    .where(and(eq(gastos.gastoPlanificadoId, id), eq(gastos.usuarioId, usuarioId)))
+  // El gasto real que se creó al marcarlo como pagado va a la PAPELERA, no
+  // a un DELETE físico: es dinero registrado y el usuario puede querer
+  // recuperarlo. La FK del planificado es ON DELETE SET NULL, así que el
+  // gasto en papelera queda sin vínculo y se restaura como uno suelto.
+  // Las dos escrituras van juntas: antes, un fallo entre ambas dejaba el
+  // gasto borrado y el planificado vivo.
+  await db.transaction(async (tx) => {
+    await tx
+      .update(gastos)
+      .set({ deletedAt: new Date() })
+      .where(
+        and(
+          eq(gastos.gastoPlanificadoId, id),
+          eq(gastos.usuarioId, usuarioId),
+          isNull(gastos.deletedAt),
+        ),
+      )
+    await tx.delete(gastosPlanificados).where(eq(gastosPlanificados.id, id))
+  })
 
-  // Delete the current one
-  await db.delete(gastosPlanificados).where(eq(gastosPlanificados.id, id))
-
-  syncDeleted(usuarioId, gasto.googleEventId)
+  syncDeleted(usuarioId, gasto.googleEventId, event)
   return { success: true }
 })

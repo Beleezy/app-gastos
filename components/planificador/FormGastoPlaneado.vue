@@ -406,7 +406,7 @@ async function ejecutarGuardado(alcanceEdicion = null) {
     }
     emit('saved')
     emit('close')
-  } catch (e) {
+  } catch {
     errorMsg.value = 'Error al guardar el gasto'
   } finally {
     saving.value = false

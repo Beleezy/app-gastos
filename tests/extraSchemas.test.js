@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { uuidSchema, idSchema, paginacionQuerySchema } from '../shared/schemas/common.js'
+import { uuidSchema, uuidRequerido, paginacionQuerySchema } from '../shared/schemas/common.js'
 
 describe('uuidSchema', () => {
   it('acepta UUIDs válidos', () => {
@@ -11,16 +11,23 @@ describe('uuidSchema', () => {
   })
 })
 
-describe('idSchema', () => {
-  it('acepta UUID, entero o string numérico', () => {
-    expect(idSchema.safeParse('550e8400-e29b-41d4-a716-446655440000').success).toBe(true)
-    expect(idSchema.safeParse(42).success).toBe(true)
-    expect(idSchema.safeParse('42').success).toBe(true)
+describe('uuidRequerido', () => {
+  // `idSchema` (uuid | entero | string numérico) se eliminó: todos los ids de
+  // la base son uuid y la unión dejaba pasar valores que reventaban en
+  // Postgres. Lo que queda es un uuid con mensaje propio para la ausencia.
+  it('acepta un UUID', () => {
+    expect(uuidRequerido('Falta').safeParse('550e8400-e29b-41d4-a716-446655440000').success).toBe(
+      true,
+    )
   })
-  it('rechaza otros formatos', () => {
-    expect(idSchema.safeParse('abc').success).toBe(false)
-    expect(idSchema.safeParse(-1).success).toBe(false)
-    expect(idSchema.safeParse(1.5).success).toBe(false)
+  it('usa el mensaje propio cuando falta y uno genérico cuando la forma es mala', () => {
+    const ausente = uuidRequerido('La categoría es obligatoria').safeParse(undefined)
+    expect(ausente.success).toBe(false)
+    expect(ausente.error.issues[0].message).toBe('La categoría es obligatoria')
+    const malo = uuidRequerido('La categoría es obligatoria').safeParse('abc')
+    expect(malo.success).toBe(false)
+    expect(malo.error.issues[0].message).toBe('Identificador inválido')
+    expect(uuidRequerido('Falta').safeParse(42).success).toBe(false)
   })
 })
 

@@ -1,6 +1,6 @@
 # Sistema de Finanzas Personales
 
-PWA mobile-first de finanzas personales construida con **Nuxt 3 + Vue 3 (Composition API)**, Tailwind, Drizzle ORM sobre **PostgreSQL (Supabase)**, autenticación Supabase y service worker vía `@vite-pwa/nuxt`.
+PWA mobile-first de finanzas personales construida con **Nuxt 4 + Vue 3 (Composition API)**, Tailwind, Drizzle ORM sobre **PostgreSQL (Supabase)**, autenticación Supabase y service worker vía `@vite-pwa/nuxt`.
 
 Moneda por defecto: **Soles peruanos (S/)** — locale `es-PE`, zona horaria `America/Lima`.
 
@@ -16,7 +16,7 @@ Más detalle de la arquitectura en [`CLAUDE.md`](./CLAUDE.md) y plan estratégic
 
 ## Setup
 
-Requisitos: Node 20+, npm.
+Requisitos: Node 22+ (`engines` en `package.json`; ESLint 10 usa `Object.groupBy`), npm.
 
 ```bash
 npm install
@@ -36,16 +36,16 @@ Críticas (la app no arranca correctamente sin estas):
 
 Recomendadas (algunas features quedan deshabilitadas si faltan):
 
-| Variable                    | Para qué sirve                                                                                           |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `GEMINI_API_KEY`            | Endpoints de voz/foto (`/api/voz/parse*`).                                                               |
-| `GEMINI_MODEL`              | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`. |
-| `GEMINI_MAX_RETRIES`        | Reintentos por modelo. Default `3`.                                                                      |
-| `GEMINI_RATE_LIMITS`        | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`.                                                 |
-| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza.                   |
-| `LLM_CACHE_TTL_SECONDS`     | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h).                                 |
-| `CRON_SECRET`               | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM).                 |
-| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas.                                                                   |
+| Variable                    | Para qué sirve                                                                                                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`            | Endpoints de voz/foto (`/api/voz/parse*`).                                                                                                                                  |
+| `GEMINI_MODEL`              | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`.                                                                    |
+| `GEMINI_MAX_RETRIES`        | Reintentos por modelo. Default `3`.                                                                                                                                         |
+| `GEMINI_RATE_LIMITS`        | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`.                                                                                                                    |
+| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza.                                                                                      |
+| `LLM_CACHE_TTL_SECONDS`     | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h).                                                                                                    |
+| `CRON_SECRET`               | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM, papelera e idempotencias). En la suite E2E se fija uno de prueba para ejercitarlos. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas.                                                                                                                                      |
 
 El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WARN/ERROR si falta alguna.
 
@@ -70,13 +70,13 @@ El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WA
 | `npm run db:push`       | Aplicar schema a la DB (solo dev exploratorio; en flujo normal usar `db:apply`). |
 | `npm run db:studio`     | Drizzle Studio (UI).                                                             |
 | `npm run db:seed`       | Cargar datos iniciales.                                                          |
-| `npm run db:seed:test`  | Seed datos de prueba.                                                            |
+| `npm run db:seed:test`  | Seed datos de prueba (`[usuarioId]` opcional; sin él crea un usuario nuevo).     |
 
 ---
 
 ## Convenciones de código
 
-- **Stack:** Nuxt 3 + JavaScript (no TS en composables/componentes), Vue 3 Composition API, Tailwind, Drizzle, Supabase Auth, `@vite-pwa/nuxt`.
+- **Stack:** Nuxt 4 + JavaScript (no TS en composables/componentes), Vue 3 Composition API, Tailwind, Drizzle, Supabase Auth, `@vite-pwa/nuxt`.
 - **Schemas Zod compartidos:** `shared/schemas/*` se importan tanto en cliente (validación de form en vivo con `useForm`) como en servidor (`validateBody` en handlers).
 - **Server services:** la lógica de negocio vive en `server/services/*.service.js` y los handlers `server/api/**` son delgados (auth + validate + delegación).
 - **Logger seguro:** usar `logger` de `server/utils/logger.js` (redacta tokens, JWT, api keys de Gemini). Evitar `console.error` con cuerpos completos de respuesta de APIs.

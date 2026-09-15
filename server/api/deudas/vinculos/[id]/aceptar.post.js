@@ -15,7 +15,7 @@ import {
   normalizarParPersonas,
   crearCheckpoint,
 } from '../../../../utils/vinculos.js'
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq, and, inArray, isNull } from 'drizzle-orm'
 import { getUuidParam } from '../../../../utils/params.js'
 
 export default defineEventHandler(async (event) => {
@@ -122,13 +122,16 @@ export default defineEventHandler(async (event) => {
       .set({ vinculoParId: personaRemitente.id })
       .where(eq(personasEntidades.id, personaEspejo.id))
 
-    // 4. Espejar deudas activas del remitente para esta persona
+    // 4. Espejar deudas activas del remitente para esta persona. Las de la
+    //    papelera no: sin `isNull(deletedAt)` una deuda borrada (invisible
+    //    para su dueño) aparecía como viva en la cuenta del otro usuario.
     const deudasActivas = await tx
       .select()
       .from(deudas)
       .where(
         and(
           eq(deudas.personaEntidadId, personaRemitente.id),
+          isNull(deudas.deletedAt),
           inArray(deudas.estado, ['pendiente', 'parcial']),
         ),
       )
@@ -148,9 +151,12 @@ export default defineEventHandler(async (event) => {
         .select()
         .from(pagosDeuda)
         .where(
-          inArray(
-            pagosDeuda.deudaId,
-            deudasActivas.map((d) => d.id),
+          and(
+            inArray(
+              pagosDeuda.deudaId,
+              deudasActivas.map((d) => d.id),
+            ),
+            isNull(pagosDeuda.deletedAt),
           ),
         )
 

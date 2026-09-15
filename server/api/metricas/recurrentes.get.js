@@ -17,7 +17,7 @@ import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
-import { eq, and, isNull, gte, sql } from 'drizzle-orm'
+import { eq, and, isNull, gte } from 'drizzle-orm'
 import { categoriasLegibles } from '../../utils/categorias.js'
 
 function normalizar(s) {

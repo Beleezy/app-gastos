@@ -50,7 +50,9 @@ export const personaEntidadUpdateSchema = z
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 
 const deudaBaseSchema = z.object({
-  personaEntidadId: z.union([z.string(), z.number()]).optional().nullable(),
+  // uuid o nada: un "abc" pasaba el schema y reventaba el SELECT de la
+  // persona con un 500 que arrastraba el SQL.
+  personaEntidadId: uuidSchema.optional().nullable(),
   personaNombre: z.string().trim().max(150).optional(),
   personaTipo: tipoPersonaSchema.optional(),
   tipoDeuda: tipoDeudaSchema,
@@ -93,11 +95,28 @@ export const deudaUpdateSchema = deudaBaseSchema
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 
 export const pagoCreateSchema = z.object({
-  deudaId: z.union([z.string(), z.number()]),
+  deudaId: uuidSchema,
   monto,
   fechaPago: fechaIso,
   notas: notasSchema,
 })
+
+// Cuerpo de PUT /api/deudas/pagos/[pagoId].
+//
+// El handler leía `readBody` crudo: sin cuerpo era un TypeError (500),
+// `fechaPago: "el martes"` iba derecho a una columna date (500 con el SQL)
+// y `monto: "mucho"` pasaba el `parseFloat` como NaN. Lo que manda
+// HistorialPagosPersona es `{ fechaPago?, metodoPago: null|string,
+// notas: null|string }`; el monto lo edita otro flujo.
+export const pagoUpdateSchema = z
+  .object({
+    monto,
+    fechaPago: fechaIso,
+    metodoPago: z.string().trim().max(100).nullable(),
+    notas: notasSchema,
+  })
+  .partial()
+  .refine((v) => Object.keys(v).length > 0, 'Sin cambios')
 
 // Cuerpo de POST /api/deudas/personas/[id]/pago-global.
 //
@@ -117,11 +136,47 @@ export const pagoGlobalSchema = z.object({
   notas: notasSchema,
 })
 
+// Cuerpo de POST /api/deudas/vinculos/solicitar. Existía sin cablear: el
+// handler aceptaba "no-es-email" como destinatario (quedaba guardado y la
+// invitación no podía llegar a nadie) y un personaEntidadId que no era uuid
+// reventaba la consulta. El email se normaliza a minúsculas aquí, que es
+// como se compara al aceptar.
 export const solicitudVinculoSchema = z.object({
-  email: z.string().email('Email inválido').max(254),
-  personaEntidadId: z.union([z.string(), z.number()]),
+  email: z.string().trim().toLowerCase().email('Email inválido').max(254),
+  personaEntidadId: uuidSchema,
   mensaje: z.string().trim().max(500).optional().nullable(),
 })
+
+export const desvincularSchema = z.object({
+  personaEntidadId: uuidSchema,
+})
+
+export const checkpointCreateSchema = z.object({
+  personaId: uuidSchema,
+  descripcion: z.string().trim().max(500).optional().nullable(),
+})
+
+export const checkpointsQuerySchema = z.object({
+  personaId: uuidSchema,
+  ...cacheBusters,
+})
+
+// Query de GET /api/deudas/personas. `tipo` iba crudo a un `eq()` contra el
+// enum de Postgres: `?tipo=basura` devolvía un 500 con la consulta dentro.
+export const personasListQuerySchema = z.object({
+  tipo: vacioComoAusente(tipoDeudaSchema),
+  ...cacheBusters,
+})
+
+export const mergePersonasSchema = z
+  .object({
+    destinoId: uuidSchema,
+    origenIds: z.array(uuidSchema).min(1, 'origenIds vacío').max(20),
+  })
+  .refine((v) => !v.origenIds.includes(v.destinoId), {
+    message: 'La persona destino no puede estar entre las de origen',
+    path: ['origenIds'],
+  })
 
 // Query de GET /api/deudas.
 //

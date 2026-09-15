@@ -26,6 +26,14 @@ const SENTINEL_COLUMNS = [
   ['personas_entidades', 'deleted_at'], // 0032_personas_soft_delete
 ]
 
+// Triggers que NO deben existir. 0027 borró las tablas de etiquetas y dejó
+// vivos dos triggers AFTER DELETE que las referenciaban: cualquier DELETE
+// físico en `gastos` o `gastos_planificados` reventaba (eliminar un
+// planificado, purgar la papelera, borrar un perfil). 0035 los quita; si
+// esa migración no llegó a producción, el síntoma vuelve, así que se
+// vigila igual que una columna que falta.
+const SENTINEL_TRIGGERS_AUSENTES = ['etq_asign_limpiar_gasto', 'etq_asign_limpiar_planif'] // 0035
+
 // El drift de schema solo cambia cuando corre una migración, es decir
 // nunca dentro de la vida de una instancia. Consultarlo en cada ping es
 // gasto puro, y este endpoint es el único de /api/* exento del rate limit
@@ -71,6 +79,15 @@ export default defineEventHandler(async (event) => {
       )
       const presentes = new Set(rows.map((r) => `${r.table_name}.${r.column_name}`))
       faltantes = SENTINEL_COLUMNS.map(([t, c]) => `${t}.${c}`).filter((col) => !presentes.has(col))
+
+      const nombres = SENTINEL_TRIGGERS_AUSENTES.map((t) => `'${t}'`).join(',')
+      const triggers = await db.execute(
+        sql.raw(`SELECT tgname FROM pg_trigger WHERE tgname IN (${nombres})`),
+      )
+      // Un trigger huérfano se reporta con la misma forma que una columna
+      // ausente: el monitor solo mira el código HTTP.
+      for (const t of triggers) faltantes.push(`trigger huérfano: ${t.tgname}`)
+
       driftCache = { faltantes, expiresAt: Date.now() + DRIFT_TTL_MS }
     }
 

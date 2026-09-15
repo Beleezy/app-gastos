@@ -186,7 +186,7 @@ async function ejecutarEliminar() {
       await fetchAhorrosMes(mesSeleccionadoGrafico.value.mes, mesSeleccionadoGrafico.value.anio)
     }
     success('Ahorro eliminado')
-  } catch (e) {
+  } catch {
     toastError('Error al eliminar')
   } finally {
     ahorroParaEliminar.value = null

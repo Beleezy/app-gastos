@@ -433,7 +433,7 @@ export function useDeudas() {
       checkpoints.value = await apiFetch('/api/deudas/vinculos/checkpoints', {
         query: { personaId },
       })
-    } catch (e) {
+    } catch {
       if (!esRecarga) checkpoints.value = []
     } finally {
       cargandoCheckpoints.value = false

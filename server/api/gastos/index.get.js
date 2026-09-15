@@ -1,7 +1,7 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq, and, between, sql, desc, ilike, asc, isNull } from 'drizzle-orm'
+import { eq, and, between, desc, ilike, asc, isNull } from 'drizzle-orm'
 import { escapeLikePattern, sanitizeString } from '../../utils/sqlSafe.js'
 import { categoriasLegibles } from '../../utils/categorias.js'
 import { validateQuery } from '../../utils/validate.js'

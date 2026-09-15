@@ -12,16 +12,17 @@ import {
 } from '../database/schema.js'
 import { getUsuarioFromEvent } from '../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../utils/fechaLocal.js'
+import { addDias } from '../utils/dateLocal.js'
 import { eq, and, lt, sql, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
   const { fecha: hoyStr } = await getFechaHoraLocalUsuario(usuarioId)
 
-  const hoy = new Date(`${hoyStr}T00:00:00`)
-  const manana = new Date(hoy)
-  manana.setDate(hoy.getDate() + 1)
-  const mananaStr = manana.toISOString().split('T')[0]
+  // Aritmética de fechas sobre el string YYYY-MM-DD, sin pasar por `Date` +
+  // `toISOString()`: eso mezclaba la zona del proceso con UTC y en un
+  // servidor con offset negativo "mañana" salía como hoy.
+  const mananaStr = addDias(hoyStr, 1)
 
   setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')
 

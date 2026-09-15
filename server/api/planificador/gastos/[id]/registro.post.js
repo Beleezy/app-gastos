@@ -13,16 +13,15 @@ import { syncUpdated } from '../../../../utils/gcalAutoSync.js'
 import { categoriasLegibles } from '../../../../utils/categorias.js'
 import { assertMedioAhorroPropio } from '../../../../utils/ahorros.js'
 import { getUuidParam } from '../../../../utils/params.js'
-import { readBodyObjeto } from '../../../../utils/validate.js'
+import { validateBody } from '../../../../utils/validate.js'
+import { registroPlanificadoSchema } from '~/shared/schemas/planificador.js'
 
 export default defineEventHandler(async (event) => {
   const id = getUuidParam(event, 'id', { recurso: 'Gasto planificado' })
-  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
-
-  if (!body.fechaPago) {
-    throw createError({ statusCode: 400, message: 'La fecha de pago es obligatoria' })
-  }
+  // `fechaPago` iba crudo a una columna date ("el martes" → 500 con el SQL)
+  // y las notas no tenían tope.
+  const body = await validateBody(event, registroPlanificadoSchema)
 
   const [gastoPlanificado] = await db
     .select({
@@ -123,12 +122,12 @@ export default defineEventHandler(async (event) => {
         mes: fechaObj.getMonth() + 1,
         anio: fechaObj.getFullYear(),
       })
-    } catch (_) {
+    } catch {
       // No bloquear si falla la creación del ahorro vinculado
     }
   }
 
-  syncUpdated(usuarioId, gastoPlanificado.id)
+  syncUpdated(usuarioId, gastoPlanificado.id, event)
   return {
     gasto: {
       ...gastoGuardado,

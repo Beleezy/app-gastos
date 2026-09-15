@@ -16,8 +16,9 @@ export function useIngresos() {
   const isLoading = ref(false)
   const error = ref(null)
 
-  const mesSeleccionado = useState('ingresos-mes', () => new Date().getMonth() + 1)
-  const anioSeleccionado = useState('ingresos-anio', () => new Date().getFullYear())
+  const { partesHoy } = useFechaPeru()
+  const mesSeleccionado = useState('ingresos-mes', () => partesHoy().mes)
+  const anioSeleccionado = useState('ingresos-anio', () => partesHoy().anio)
 
   const mesLabel = computed(() => `${MESES[mesSeleccionado.value - 1]} ${anioSeleccionado.value}`)
 
@@ -113,15 +114,13 @@ export function useIngresos() {
   }
 
   function irAMesActual() {
-    const hoy = new Date()
-    cambiarMes(hoy.getMonth() + 1, hoy.getFullYear())
+    const hoy = partesHoy()
+    cambiarMes(hoy.mes, hoy.anio)
   }
 
   const esMesActual = computed(() => {
-    const hoy = new Date()
-    return (
-      mesSeleccionado.value === hoy.getMonth() + 1 && anioSeleccionado.value === hoy.getFullYear()
-    )
+    const hoy = partesHoy()
+    return mesSeleccionado.value === hoy.mes && anioSeleccionado.value === hoy.anio
   })
 
   return {
