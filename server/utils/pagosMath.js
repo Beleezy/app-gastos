@@ -27,6 +27,33 @@ export function calcularSaldoTrasPago({ pendienteActual, montoPago } = {}) {
 }
 
 /**
+ * Saldo y estado de una deuda a partir de la SUMA de sus pagos vivos.
+ *
+ * Es la regla que usan editar y revertir un pago: en vez de sumar o
+ * restar sobre el `monto_pendiente` leído antes (que otra petición pudo
+ * haber cambiado entremedias), se recalcula desde el total pagado, que se
+ * suma dentro de la misma transacción con la deuda bloqueada.
+ *
+ * @param {object} input
+ * @param {number|string} input.montoOriginal
+ * @param {number|string|null} input.totalPagado suma de pagos no borrados
+ * @returns {{ nuevoPendiente: number, nuevoEstado: 'pendiente'|'parcial'|'pagado' }}
+ */
+export function calcularSaldoDesdePagos({ montoOriginal, totalPagado } = {}) {
+  const original = parseFloat(montoOriginal)
+  const pagadoRaw = parseFloat(totalPagado)
+  const pagado = Number.isFinite(pagadoRaw) ? pagadoRaw : 0
+  if (!Number.isFinite(original)) {
+    return { nuevoPendiente: 0, nuevoEstado: 'pagado' }
+  }
+  const nuevoPendiente = Math.max(0, Math.round((original - pagado) * 100) / 100)
+  let nuevoEstado = 'pendiente'
+  if (nuevoPendiente <= TOLERANCIA) nuevoEstado = 'pagado'
+  else if (pagado > TOLERANCIA) nuevoEstado = 'parcial'
+  return { nuevoPendiente, nuevoEstado }
+}
+
+/**
  * Distribuye un monto global entre varias deudas con estrategia FIFO
  * (más antigua primero) o LIFO. Útil en `FormPagoGlobal`.
  *

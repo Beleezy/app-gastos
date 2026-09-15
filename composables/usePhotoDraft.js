@@ -59,7 +59,7 @@ export function usePhotoDraft() {
       return data.gastos || []
     } catch (e) {
       if (e?.name !== 'AbortError') {
-        parseError.value = e.data?.message || e.message || 'Error al procesar la imagen'
+        parseError.value = handleApiError(e, 'Error al procesar la imagen')
         retryStatus.value = ''
       }
       return []

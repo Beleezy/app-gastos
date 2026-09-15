@@ -35,7 +35,7 @@ export function useVinculos() {
       await fetchEnviadas()
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al enviar solicitud'
+      error.value = handleApiError(e, 'Error al enviar solicitud')
       throw e
     } finally {
       isLoading.value = false
@@ -52,7 +52,7 @@ export function useVinculos() {
       await fetchPendientes()
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al aceptar solicitud'
+      error.value = handleApiError(e, 'Error al aceptar solicitud')
       throw e
     } finally {
       isLoading.value = false
@@ -69,7 +69,7 @@ export function useVinculos() {
       await fetchPendientes()
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al rechazar solicitud'
+      error.value = handleApiError(e, 'Error al rechazar solicitud')
       throw e
     } finally {
       isLoading.value = false
@@ -83,7 +83,7 @@ export function useVinculos() {
       await apiFetch(`/api/deudas/vinculos/${id}`, { method: 'DELETE' })
       await fetchEnviadas()
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al cancelar solicitud'
+      error.value = handleApiError(e, 'Error al cancelar solicitud')
       throw e
     } finally {
       isLoading.value = false

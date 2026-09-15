@@ -148,9 +148,11 @@ export default defineNuxtPlugin((nuxtApp) => {
     // 7) Submódulos integrados — pre-cargar para que los badges y chips
     //    aparezcan inmediato. Todos son endpoints chicos (< 5KB típico).
     try {
-      const hoy = new Date()
+      // Mes en la zona del usuario, como el resto de la app: con `new Date()`
+      // el día 1 a las 00:00 de Lima (05:00 UTC) se pedía el mes anterior.
+      const hoy = useFechaPeru().partesHoy()
       const { cargarConsumo } = usePresupuestosCategoria()
-      tareas.push(cargarConsumo(hoy.getMonth() + 1, hoy.getFullYear()).catch(() => {}))
+      tareas.push(cargarConsumo(hoy.mes, hoy.anio).catch(() => {}))
     } catch {}
     // Esperar todo en paralelo. Cada uno ya está silenciado.
     await Promise.allSettled(tareas)

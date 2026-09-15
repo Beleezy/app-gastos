@@ -1,4 +1,5 @@
 import { DIAS_SEMANA, MESES } from '~/utils/constants'
+import { toIsoDate, addDias } from './useDateUtils'
 
 export function useGastos() {
   const { apiFetch } = useApiFetch()
@@ -18,26 +19,19 @@ export function useGastos() {
   // puede estar en el dia siguiente y la fecha seleccionada no coincide
   // con la del gasto recien creado — el optimistic add lo filtra y el
   // historial se ve vacio aunque la API lo persistio.
-  const { fechaHoy } = useFechaPeru()
-  const partesHoyPe = () => {
-    const [a, m, d] = fechaHoy().split('-').map(Number)
-    return { mes: m, anio: a }
-  }
+  const { fechaHoy, fechaAyer, partesHoy: partesHoyPe } = useFechaPeru()
   const mesSeleccionado = useState('registro-mes', () => partesHoyPe().mes)
   const anioSeleccionado = useState('registro-anio', () => partesHoyPe().anio)
   const fechaSeleccionada = useState('registro-fecha', () => fechaHoy())
 
   const fechaFormateada = computed(() => {
-    const [anio, mes, dia] = fechaSeleccionada.value.split('-').map(Number)
-    const fecha = new Date(anio, mes - 1, dia)
-    const hoy = new Date()
-    hoy.setHours(0, 0, 0, 0)
-    const ayer = new Date(hoy)
-    ayer.setDate(ayer.getDate() - 1)
+    // Comparar strings ISO en la zona del usuario, no `Date` del dispositivo:
+    // "Hoy" tiene que ser el mismo día que la API considera hoy.
+    if (fechaSeleccionada.value === fechaHoy()) return 'Hoy'
+    if (fechaSeleccionada.value === fechaAyer()) return 'Ayer'
 
-    if (fecha.toDateString() === hoy.toDateString()) return 'Hoy'
-    if (fecha.toDateString() === ayer.toDateString()) return 'Ayer'
-
+    const [, mes, dia] = fechaSeleccionada.value.split('-').map(Number)
+    const fecha = new Date(fechaSeleccionada.value + 'T12:00:00')
     const diaSemana = DIAS_SEMANA[fecha.getDay()]
     return `${diaSemana} ${dia}/${String(mes).padStart(2, '0')}`
   })
@@ -96,7 +90,7 @@ export function useGastos() {
         query: { fecha: f, mes: mesParam, anio: anioParam },
       })
       resumen.value = data
-    } catch (e) {
+    } catch {
       // silently fail
     }
   }
@@ -244,10 +238,8 @@ export function useGastos() {
   })
 
   const esMesActual = computed(() => {
-    const hoy = new Date()
-    return (
-      mesSeleccionado.value === hoy.getMonth() + 1 && anioSeleccionado.value === hoy.getFullYear()
-    )
+    const hoy = partesHoyPe()
+    return mesSeleccionado.value === hoy.mes && anioSeleccionado.value === hoy.anio
   })
 
   // Hash barato del array que identifica si cambió: longitud + último id +
@@ -298,15 +290,18 @@ export function useGastos() {
       const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1
       const lunes = new Date(fecha)
       lunes.setDate(fecha.getDate() - diffToMonday)
-      const lunesKey = lunes.toISOString().split('T')[0]
+      // `toIsoDate` y no `toISOString`: `lunes` es medianoche LOCAL y en UTC
+      // puede ser el día anterior (zonas al este de Greenwich) — la semana
+      // arrancaba en domingo y el rango mostrado no coincidía con los días.
+      const lunesKey = toIsoDate(lunes)
 
       if (!semanas[lunesKey]) {
         const domingo = new Date(lunes)
         domingo.setDate(lunes.getDate() + 6)
         semanas[lunesKey] = {
           key: lunesKey,
-          desde: lunes.toISOString().split('T')[0],
-          hasta: domingo.toISOString().split('T')[0],
+          desde: lunesKey,
+          hasta: toIsoDate(domingo),
           gastos: [],
           total: 0,
           diasConGastos: {},
@@ -377,25 +372,23 @@ export function useGastos() {
   }
 
   function irAMesActual() {
-    const hoy = new Date()
-    mesSeleccionado.value = hoy.getMonth() + 1
-    anioSeleccionado.value = hoy.getFullYear()
+    const hoy = partesHoyPe()
+    mesSeleccionado.value = hoy.mes
+    anioSeleccionado.value = hoy.anio
   }
 
   function diaAnterior() {
-    const d = new Date(fechaSeleccionada.value + 'T12:00:00')
-    d.setDate(d.getDate() - 1)
-    fechaSeleccionada.value = d.toISOString().split('T')[0]
+    fechaSeleccionada.value = addDias(fechaSeleccionada.value, -1)
   }
 
   function diaSiguiente() {
-    const d = new Date(fechaSeleccionada.value + 'T12:00:00')
-    d.setDate(d.getDate() + 1)
-    fechaSeleccionada.value = d.toISOString().split('T')[0]
+    fechaSeleccionada.value = addDias(fechaSeleccionada.value, 1)
   }
 
+  // El botón "Hoy" iba a la fecha UTC del dispositivo: desde las 19:00 en
+  // Lima mostraba el historial de MAÑANA (vacío) y `esHoy` quedaba en falso.
   function irAHoy() {
-    fechaSeleccionada.value = new Date().toISOString().split('T')[0]
+    fechaSeleccionada.value = fechaHoy()
   }
 
   function formatFechaDia(fechaStr) {

@@ -1,14 +1,9 @@
 export function useVoiceDeuda() {
-  const {
-    isListening,
-    transcript,
-    startListening,
-    continueListening,
-    stopListening,
-    resetTranscript,
-  } = useVoiceRecognition()
+  const { isListening, transcript, startListening, stopListening, resetTranscript } =
+    useVoiceRecognition()
 
   const { apiFetch } = useApiFetch()
+  const { fechaHoy } = useFechaPeru()
   const {
     createDeuda,
     fetchResumen,
@@ -126,9 +121,10 @@ export function useVoiceDeuda() {
       deudasParseadas.value = result.deudas || []
       pagosParseados.value = result.pagos || []
     } catch (e) {
-      vozError.value =
-        e.data?.message ||
-        'Error al interpretar el audio. Intenta de nuevo con frases claras como "Juan me debe 20 soles por almuerzo".'
+      vozError.value = handleApiError(
+        e,
+        'Error al interpretar el audio. Intenta de nuevo con frases claras como "Juan me debe 20 soles por almuerzo".',
+      )
     } finally {
       vozParsing.value = false
     }
@@ -149,18 +145,25 @@ export function useVoiceDeuda() {
   async function confirmarDeudasVoz() {
     guardando.value = true
     try {
+      const hoy = fechaHoy()
       for (const d of deudasParseadas.value) {
         await createDeuda({
           personaNombre: d.persona,
           tipoDeuda: d.tipo,
           concepto: d.concepto,
           monto: d.monto,
-          fecha: d.fecha || new Date().toISOString().split('T')[0],
+          fecha: d.fecha || hoy,
         })
       }
 
+      // Una sola lectura de personas para todos los pagos (antes se pedía la
+      // lista completa dentro del bucle, una vez por pago). Va DESPUÉS de
+      // crear las deudas para que un pago a una persona recién creada la
+      // encuentre.
+      const todasPersonas = pagosParseados.value.length
+        ? await apiFetch('/api/deudas/personas')
+        : []
       for (const p of pagosParseados.value) {
-        const todasPersonas = await apiFetch('/api/deudas/personas')
         const nombreLower = p.persona.toLowerCase()
         const personaMatch = todasPersonas.find((pe) => pe.nombre.toLowerCase() === nombreLower)
         if (personaMatch && personaMatch.totalPendiente > 0) {
@@ -168,7 +171,7 @@ export function useVoiceDeuda() {
             method: 'POST',
             body: {
               monto: p.monto,
-              fecha: p.fecha || new Date().toISOString().split('T')[0],
+              fecha: p.fecha || hoy,
               notas: p.notas || 'Pago registrado por voz',
             },
           })
@@ -183,7 +186,7 @@ export function useVoiceDeuda() {
           fetchPagosPersona(personaSeleccionada.value.id),
         ])
       }
-    } catch (e) {
+    } catch {
       vozError.value = 'Error al guardar'
     } finally {
       guardando.value = false

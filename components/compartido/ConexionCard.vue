@@ -122,7 +122,7 @@
 const props = defineProps({
   conexion: { type: Object, required: true },
 })
-const emit = defineEmits(['avisar'])
+defineEmits(['avisar'])
 
 const { fetchVista, marcarVisto } = useCompartido()
 const toast = useToast()

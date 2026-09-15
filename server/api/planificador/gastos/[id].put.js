@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
-    syncUpdated(usuarioId, id)
+    syncUpdated(usuarioId, id, event)
     return await respuestaConCategoria(updated, usuarioId)
   }
 
@@ -111,7 +111,7 @@ export default defineEventHandler(async (event) => {
       nuevoGrupoId,
     )
 
-    syncUpdated(usuarioId, id)
+    syncUpdated(usuarioId, id, event)
     return await respuestaConCategoria(updated, usuarioId)
   } else if (eraRecurrente && !seraRecurrente) {
     // Turned OFF: remove future copies, clear group
@@ -126,7 +126,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
-    syncUpdated(usuarioId, id)
+    syncUpdated(usuarioId, id, event)
     return await respuestaConCategoria(updated, usuarioId)
   } else if (eraRecurrente && seraRecurrente && grupoAnterior) {
     // Was and still is recurring: propagate changes to future months
@@ -149,7 +149,7 @@ export default defineEventHandler(async (event) => {
       await actualizarRecurrentesFuturos(grupoAnterior, id, datosParaPropagar)
     }
 
-    syncUpdated(usuarioId, id)
+    syncUpdated(usuarioId, id, event)
     return await respuestaConCategoria(updated, usuarioId)
   } else {
     // Not recurring, simple update
@@ -159,7 +159,7 @@ export default defineEventHandler(async (event) => {
       .where(eq(gastosPlanificados.id, id))
       .returning()
 
-    syncUpdated(usuarioId, id)
+    syncUpdated(usuarioId, id, event)
     return await respuestaConCategoria(updated, usuarioId)
   }
 })

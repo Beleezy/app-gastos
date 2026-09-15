@@ -17,18 +17,18 @@ export function usePlanificador() {
   const isLoading = ref(false)
   const error = ref(null)
 
-  const mesActual = useState('planificador-mes', () => new Date().getMonth() + 1)
-  const anioActual = useState('planificador-anio', () => new Date().getFullYear())
+  const { fechaHoy, partesHoy } = useFechaPeru()
+  const mesActual = useState('planificador-mes', () => partesHoy().mes)
+  const anioActual = useState('planificador-anio', () => partesHoy().anio)
 
   const nombreMes = computed(() => MESES[mesActual.value - 1] || '')
   const esHoy = computed(() => {
-    const now = new Date()
-    return mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
+    const hoy = partesHoy()
+    return mesActual.value === hoy.mes && anioActual.value === hoy.anio
   })
 
   function _hoyISO() {
-    const d = new Date()
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    return fechaHoy()
   }
 
   const resumen = computed(() => {
@@ -90,11 +90,10 @@ export function usePlanificador() {
   const analitica = computed(() => {
     const presupuesto = plan.value?.montoPresupuesto || 0
     const gastoReal = totalGastoReal.value
-    const now = new Date()
-    const esMesActual =
-      mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
+    const hoy = partesHoy()
+    const esMesActual = mesActual.value === hoy.mes && anioActual.value === hoy.anio
     const diasTotales = new Date(anioActual.value, mesActual.value, 0).getDate()
-    const diaActual = esMesActual ? now.getDate() : diasTotales
+    const diaActual = esMesActual ? hoy.dia : diasTotales
     const diasRestantes = Math.max(0, diasTotales - diaActual)
     // Proyección lineal: ritmo_diario * días_totales
     const proyeccionFinMes = diaActual > 0 ? (gastoReal / diaActual) * diasTotales : 0
@@ -175,7 +174,7 @@ export function usePlanificador() {
         presupuesto: data.plan?.montoPresupuesto || 0,
       }
       mesAnteriorFetchedAt.value = Date.now()
-    } catch (e) {
+    } catch {
       mesAnteriorResumen.value = null
     }
   }
@@ -328,7 +327,7 @@ export function usePlanificador() {
       await fetchPlan()
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al registrar el gasto'
+      error.value = handleApiError(e, 'Error al registrar el gasto')
       throw e
     }
   }
@@ -377,7 +376,7 @@ export function usePlanificador() {
       await fetchPlan()
       return result
     } catch (e) {
-      error.value = e.data?.message || e.message || 'Error al duplicar mes'
+      error.value = handleApiError(e, 'Error al duplicar mes')
       throw e
     }
   }

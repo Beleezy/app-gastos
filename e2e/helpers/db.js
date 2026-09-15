@@ -40,7 +40,9 @@ export async function cleanupDeudas(request, ids) {
 export async function cleanupGastosPlanificados(request, ids) {
   for (const id of ids) {
     try {
-      await request.delete(`/api/planificador/${id}`)
+      // La ruta real es /api/planificador/gastos/[id]; la anterior no
+      // existía y el cleanup fallaba en silencio.
+      await request.delete(`/api/planificador/gastos/${id}`)
     } catch {}
   }
 }

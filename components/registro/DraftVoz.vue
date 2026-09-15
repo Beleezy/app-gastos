@@ -135,7 +135,7 @@
 <script setup>
 const emit = defineEmits(['send', 'discard', 'overwrite', 'update:transcript'])
 const props = defineProps({
-  transcript: String,
+  transcript: { type: String, default: '' },
   hasDraft: Boolean,
   isListening: Boolean,
 })

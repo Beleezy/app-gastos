@@ -883,7 +883,7 @@ async function marcarPagadoRapido(gasto) {
         onClick: () => updateGastoPlaneado(gasto.id, { estado: 'pendiente' }).catch(() => {}),
       },
     })
-  } catch (e) {
+  } catch {
     // error queda en composable
   }
 }

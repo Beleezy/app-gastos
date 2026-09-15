@@ -135,7 +135,7 @@ async function guardar() {
     toastSuccess(`Meta ${tab.value} guardada`)
     emit('saved')
     emit('close')
-  } catch (e) {
+  } catch {
     errorMsg.value = 'Error al guardar la meta'
   } finally {
     saving.value = false

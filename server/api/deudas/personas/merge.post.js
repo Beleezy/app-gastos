@@ -1,25 +1,19 @@
-import { z } from 'zod'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { validateBody } from '../../../utils/validate.js'
+import { mergePersonasSchema } from '~/shared/schemas/deudas.js'
 import { mergePersonas } from '../../../services/deudas.service.js'
-
-const bodySchema = z.object({
-  destinoId: z.union([z.string(), z.number()]),
-  origenIds: z
-    .array(z.union([z.string(), z.number()]))
-    .min(1)
-    .max(20),
-})
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const body = await validateBody(event, bodySchema)
+  // Los ids son uuid: `z.union([z.string(), z.number()])` dejaba pasar "abc",
+  // que reventaba el `inArray` con un 500 y el SQL en el mensaje.
+  const body = await validateBody(event, mergePersonasSchema)
 
   try {
     return await mergePersonas({
       usuarioId,
-      destinoId: String(body.destinoId),
-      origenIds: body.origenIds.map(String),
+      destinoId: body.destinoId,
+      origenIds: body.origenIds,
     })
   } catch (e) {
     if (e?.statusCode) {

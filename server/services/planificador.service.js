@@ -25,8 +25,9 @@ export async function crearGastoPlanificado({ usuarioId, body }) {
     .limit(1)
 
   if (!plan) {
+    // 404 y no 403: un 403 confirmaría que el plan existe en otra cuenta.
     const err = new Error('Plan no encontrado')
-    err.statusCode = 403
+    err.statusCode = 404
     throw err
   }
 

@@ -726,7 +726,6 @@ const {
   fontSize,
   setFontSize,
   FONT_SIZES,
-  isColorblind,
   setColorblindMode,
 } = useTheme()
 const { logout } = useAuth()
@@ -756,12 +755,13 @@ const toastMsg = ref('')
 const hasChanges = computed(() => {
   return (
     form.nombre !== originalValues.value.nombre ||
-    form.presupuestoMensualDefault != originalValues.value.presupuestoMensualDefault ||
+    Number(form.presupuestoMensualDefault) !==
+      Number(originalValues.value.presupuestoMensualDefault) ||
     form.monedaPreferida !== originalValues.value.monedaPreferida ||
-    form.diaInicioCiclo != originalValues.value.diaInicioCiclo ||
+    Number(form.diaInicioCiclo) !== Number(originalValues.value.diaInicioCiclo) ||
     form.zonaHoraria !== originalValues.value.zonaHoraria ||
     form.locale !== originalValues.value.locale ||
-    form.diasPdfSaldadas != originalValues.value.diasPdfSaldadas ||
+    Number(form.diasPdfSaldadas) !== Number(originalValues.value.diasPdfSaldadas) ||
     form.vistaRegistroDia !== originalValues.value.vistaRegistroDia ||
     form.vistaRegistroSemana !== originalValues.value.vistaRegistroSemana ||
     form.tamanoLetra !== originalValues.value.tamanoLetra ||

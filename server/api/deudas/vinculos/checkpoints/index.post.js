@@ -8,16 +8,14 @@ import {
   getNombreDisplay,
 } from '../../../../utils/vinculos.js'
 import { eq, and } from 'drizzle-orm'
-import { readBodyObjeto } from '../../../../utils/validate.js'
+import { validateBody } from '../../../../utils/validate.js'
+import { checkpointCreateSchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const body = await readBodyObjeto(event)
-  const { personaId, descripcion } = body
-
-  if (!personaId) {
-    throw createError({ statusCode: 400, message: 'personaId requerido' })
-  }
+  // `personaId` iba crudo a un `eq()` contra uuid: "abc" era un 500 con el
+  // SQL dentro. La descripción tampoco tenía tope.
+  const { personaId, descripcion } = await validateBody(event, checkpointCreateSchema)
 
   // Verificar que la persona pertenece al usuario y tiene vínculo activo
   const [persona] = await db

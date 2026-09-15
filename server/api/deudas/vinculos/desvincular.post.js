@@ -6,22 +6,16 @@ import {
   auditoriaVinculos,
 } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
-import {
-  desvincularPersonas,
-  registrarAuditoria,
-  getNombreDisplay,
-  normalizarParPersonas,
-} from '../../../utils/vinculos.js'
+import { desvincularPersonas, normalizarParPersonas } from '../../../utils/vinculos.js'
 import { eq, and, or } from 'drizzle-orm'
-import { readBodyObjeto } from '../../../utils/validate.js'
+import { validateBody } from '../../../utils/validate.js'
+import { desvincularSchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
-
-  if (!body.personaEntidadId) {
-    throw createError({ statusCode: 400, message: 'Se requiere el ID de la persona a desvincular' })
-  }
+  // `personaEntidadId` iba crudo a un `eq()` contra uuid: "abc" devolvía un
+  // 500 con la consulta dentro. Un id que no puede existir es un 400.
+  const body = await validateBody(event, desvincularSchema)
 
   // Verificar que la persona pertenece al usuario y está vinculada
   const [persona] = await db
@@ -55,8 +49,6 @@ export default defineEventHandler(async (event) => {
     .from(personasEntidades)
     .where(eq(personasEntidades.id, personaParId))
     .limit(1)
-
-  const nombreDisplay = await getNombreDisplay(usuarioId)
 
   const { personaAId: normalizedAId } = normalizarParPersonas(persona.id, personaParId)
 

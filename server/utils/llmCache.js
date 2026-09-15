@@ -110,8 +110,14 @@ export async function setCached({ usuarioId, endpoint, modelo, inputHash, respon
  */
 export async function purgeExpired() {
   try {
-    const result = await db.delete(llmCache).where(lt(llmCache.expiresAt, new Date()))
-    return result?.rowCount ?? 0
+    // `.returning()` y no `result.rowCount`: eso es de node-postgres. Con
+    // postgres.js el resultado no trae `rowCount`, así que el cron
+    // reportaba "0 purgadas" siempre, borrara lo que borrara.
+    const borradas = await db
+      .delete(llmCache)
+      .where(lt(llmCache.expiresAt, new Date()))
+      .returning({ id: llmCache.id })
+    return borradas.length
   } catch (e) {
     logger.warn('llmCache.purgeExpired fallo', { error: e?.message })
     return 0

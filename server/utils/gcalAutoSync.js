@@ -10,6 +10,7 @@ import { eq, and } from 'drizzle-orm'
 import { decrypt } from './crypto.js'
 import { createGcalClient, TokenExpiradoError } from './googleCalendar.js'
 import { buildEvent } from './planificadorToGcalEvent.js'
+import { logger } from './logger.js'
 
 async function loadContext(usuarioId) {
   const [conexion] = await db
@@ -43,7 +44,7 @@ async function setUltimoError(usuarioId, msg) {
       .set({ ultimoError: msg, updatedAt: new Date() })
       .where(eq(googleCalendarConexiones.usuarioId, usuarioId))
   } catch (e) {
-    console.error('[gcal] no se pudo guardar ultimoError', e)
+    logger.error('[gcal] no se pudo guardar ultimoError', { error: e })
   }
 }
 
@@ -92,8 +93,14 @@ function appUrl() {
   return process.env.APP_PUBLIC_URL || ''
 }
 
-function fireAndForget(usuarioId, label, fn) {
-  Promise.resolve().then(async () => {
+// La sincronización corre DESPUÉS de responder para no sumarle a cada
+// escritura del planificador la latencia de Google. En serverless eso tiene
+// un precio: la plataforma puede congelar la instancia en cuanto sale la
+// respuesta, y la promesa suelta muere a medias. `event.waitUntil` (Nitro)
+// le pide a la plataforma que espere a que termine; donde no existe, se
+// sigue con el fire-and-forget de siempre.
+function fireAndForget(usuarioId, label, fn, event) {
+  const tarea = Promise.resolve().then(async () => {
     try {
       await fn()
       await clearUltimoError(usuarioId).catch(() => {})
@@ -102,72 +109,90 @@ function fireAndForget(usuarioId, label, fn) {
         err instanceof TokenExpiradoError
           ? 'Token expirado, reconecta tu Google Calendar'
           : `${label}: ${err.message || err}`
-      console.error(`[gcal] ${label} usuarioId=${usuarioId}`, err)
+      // El logger redacta tokens; `console.error(err)` volcaba el cuerpo
+      // de la respuesta de Google tal cual.
+      logger.error(`[gcal] ${label}`, { usuarioId, error: err })
       await setUltimoError(usuarioId, msg)
     }
   })
+  if (typeof event?.waitUntil === 'function') event.waitUntil(tarea)
 }
 
-export function syncCreated(usuarioId, planificadoId) {
-  fireAndForget(usuarioId, 'syncCreated', async () => {
-    const ctx = await loadContext(usuarioId)
-    if (!ctx) return
-    const data = await loadGastoEnriquecido(planificadoId, usuarioId)
-    if (!data) return
-    const payload = buildEvent({
-      ...data,
-      moneda: ctx.moneda,
-      recordatorios: ctx.conexion.recordatoriosConfig,
-      appUrl: appUrl(),
-    })
-    const eventId = await ctx.client.insertEvent(ctx.conexion.calendarId, payload)
-    await db
-      .update(gastosPlanificados)
-      .set({ googleEventId: eventId })
-      .where(eq(gastosPlanificados.id, planificadoId))
-  })
-}
-
-export function syncUpdated(usuarioId, planificadoId) {
-  fireAndForget(usuarioId, 'syncUpdated', async () => {
-    const ctx = await loadContext(usuarioId)
-    if (!ctx) return
-    const data = await loadGastoEnriquecido(planificadoId, usuarioId)
-    if (!data) return
-    const payload = buildEvent({
-      ...data,
-      moneda: ctx.moneda,
-      recordatorios: ctx.conexion.recordatoriosConfig,
-      appUrl: appUrl(),
-    })
-    const existingId = data.gasto.googleEventId
-    if (!existingId) {
+export function syncCreated(usuarioId, planificadoId, event) {
+  fireAndForget(
+    usuarioId,
+    'syncCreated',
+    async () => {
+      const ctx = await loadContext(usuarioId)
+      if (!ctx) return
+      const data = await loadGastoEnriquecido(planificadoId, usuarioId)
+      if (!data) return
+      const payload = buildEvent({
+        ...data,
+        moneda: ctx.moneda,
+        recordatorios: ctx.conexion.recordatoriosConfig,
+        appUrl: appUrl(),
+      })
       const eventId = await ctx.client.insertEvent(ctx.conexion.calendarId, payload)
       await db
         .update(gastosPlanificados)
         .set({ googleEventId: eventId })
         .where(eq(gastosPlanificados.id, planificadoId))
-    } else {
-      const { id: newId, recreated } = await ctx.client.patchEvent(
-        ctx.conexion.calendarId,
-        existingId,
-        payload,
-      )
-      if (recreated) {
-        await db
-          .update(gastosPlanificados)
-          .set({ googleEventId: newId })
-          .where(eq(gastosPlanificados.id, planificadoId))
-      }
-    }
-  })
+    },
+    event,
+  )
 }
 
-export function syncDeleted(usuarioId, googleEventId) {
+export function syncUpdated(usuarioId, planificadoId, event) {
+  fireAndForget(
+    usuarioId,
+    'syncUpdated',
+    async () => {
+      const ctx = await loadContext(usuarioId)
+      if (!ctx) return
+      const data = await loadGastoEnriquecido(planificadoId, usuarioId)
+      if (!data) return
+      const payload = buildEvent({
+        ...data,
+        moneda: ctx.moneda,
+        recordatorios: ctx.conexion.recordatoriosConfig,
+        appUrl: appUrl(),
+      })
+      const existingId = data.gasto.googleEventId
+      if (!existingId) {
+        const eventId = await ctx.client.insertEvent(ctx.conexion.calendarId, payload)
+        await db
+          .update(gastosPlanificados)
+          .set({ googleEventId: eventId })
+          .where(eq(gastosPlanificados.id, planificadoId))
+      } else {
+        const { id: newId, recreated } = await ctx.client.patchEvent(
+          ctx.conexion.calendarId,
+          existingId,
+          payload,
+        )
+        if (recreated) {
+          await db
+            .update(gastosPlanificados)
+            .set({ googleEventId: newId })
+            .where(eq(gastosPlanificados.id, planificadoId))
+        }
+      }
+    },
+    event,
+  )
+}
+
+export function syncDeleted(usuarioId, googleEventId, event) {
   if (!googleEventId) return
-  fireAndForget(usuarioId, 'syncDeleted', async () => {
-    const ctx = await loadContext(usuarioId)
-    if (!ctx) return
-    await ctx.client.deleteEvent(ctx.conexion.calendarId, googleEventId)
-  })
+  fireAndForget(
+    usuarioId,
+    'syncDeleted',
+    async () => {
+      const ctx = await loadContext(usuarioId)
+      if (!ctx) return
+      await ctx.client.deleteEvent(ctx.conexion.calendarId, googleEventId)
+    },
+    event,
+  )
 }

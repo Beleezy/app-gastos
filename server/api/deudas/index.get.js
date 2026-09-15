@@ -1,5 +1,5 @@
 import { db } from '../../utils/db.js'
-import { deudas, personasEntidades, pagosDeuda } from '../../database/schema.js'
+import { deudas, personasEntidades } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, sql, isNull } from 'drizzle-orm'
 import { validateQuery } from '../../utils/validate.js'

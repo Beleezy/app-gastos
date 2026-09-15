@@ -1,37 +1,31 @@
 import { db } from '../../utils/db.js'
 import { configuraciones } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
-import { eq } from 'drizzle-orm'
-import { readBodyObjeto } from '../../utils/validate.js'
+import { validateBody } from '../../utils/validate.js'
+import { configuracionUpdateSchema } from '~/shared/schemas/configuraciones.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  const updateData = {}
-  if (body.nombre !== undefined) updateData.nombre = String(body.nombre).slice(0, 100)
-  if (body.presupuestoMensualDefault !== undefined)
-    updateData.presupuestoMensualDefault = String(body.presupuestoMensualDefault)
-  if (body.monedaPreferida !== undefined) updateData.monedaPreferida = body.monedaPreferida
-  if (body.diaInicioCiclo !== undefined) updateData.diaInicioCiclo = body.diaInicioCiclo
-  if (body.zonaHoraria !== undefined) updateData.zonaHoraria = String(body.zonaHoraria).slice(0, 50)
-  if (body.locale !== undefined) updateData.locale = String(body.locale).slice(0, 10)
-  if (body.diasPdfSaldadas !== undefined)
-    updateData.diasPdfSaldadas = Math.max(1, Math.min(90, parseInt(body.diasPdfSaldadas) || 7))
-  if (body.vistaRegistroDia !== undefined) updateData.vistaRegistroDia = !!body.vistaRegistroDia
-  if (body.vistaRegistroSemana !== undefined)
-    updateData.vistaRegistroSemana = !!body.vistaRegistroSemana
-  if (body.tamanoLetra !== undefined) {
-    const valid = ['normal', 'grande']
-    updateData.tamanoLetra = valid.includes(body.tamanoLetra) ? body.tamanoLetra : 'normal'
-  }
-  if (body.modoDaltonico !== undefined) updateData.modoDaltonico = !!body.modoDaltonico
-  updateData.updatedAt = new Date()
+  // El handler copiaba cada campo a mano con `String()`/`!!` y sin
+  // comprobar nada más: `presupuestoMensualDefault: "abc"` iba a una
+  // columna NUMERIC, una moneda de 30 caracteres a un varchar(10) y
+  // `diaInicioCiclo: "x"` a un integer. Los tres salían como 500 con la
+  // consulta y sus parámetros en el mensaje. Es la pantalla de ajustes.
+  const body = await validateBody(event, configuracionUpdateSchema)
 
+  const set = { updatedAt: new Date() }
+  for (const [clave, valor] of Object.entries(body)) {
+    set[clave] = clave === 'presupuestoMensualDefault' ? String(valor) : valor
+  }
+
+  // Upsert: el GET crea la fila si no existe, pero un PUT que llegue antes
+  // (cola offline, primera visita directa a /configuraciones) no
+  // encontraba nada que actualizar y respondía vacío.
   const [updated] = await db
-    .update(configuraciones)
-    .set(updateData)
-    .where(eq(configuraciones.usuarioId, usuarioId))
+    .insert(configuraciones)
+    .values({ usuarioId, ...set })
+    .onConflictDoUpdate({ target: configuraciones.usuarioId, set })
     .returning()
 
   return updated

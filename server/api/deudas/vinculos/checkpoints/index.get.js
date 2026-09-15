@@ -7,17 +7,16 @@ import {
   configuraciones,
 } from '../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
-import { normalizarParPersonas } from '../../../../utils/vinculos.js'
-import { eq, and, or, gte, lt, asc } from 'drizzle-orm'
+import { normalizarParPersonas, agruparAuditoriaPorCheckpoint } from '../../../../utils/vinculos.js'
+import { eq, and, or, gte, asc, inArray } from 'drizzle-orm'
+import { validateQuery } from '../../../../utils/validate.js'
+import { checkpointsQuerySchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const { personaId } = getQuery(event)
+  // `personaId` iba crudo del query string a un `eq()` contra uuid.
+  const { personaId } = validateQuery(event, checkpointsQuerySchema)
   setHeader(event, 'Cache-Control', 'private, max-age=300, stale-while-revalidate=1800')
-
-  if (!personaId) {
-    throw createError({ statusCode: 400, message: 'personaId requerido' })
-  }
 
   // Verificar que la persona pertenece al usuario
   const [persona] = await db
@@ -55,81 +54,70 @@ export default defineEventHandler(async (event) => {
       .orderBy(asc(vinculosCheckpoints.createdAt))
   }
 
-  // Para cada checkpoint, obtener auditoría del período que cubre
-  // El período es: desde checkpoint.createdAt hasta el siguiente checkpoint (o ahora si es el último)
-  const checkpointsConAuditoria = []
+  if (checkpoints.length === 0) return []
 
-  for (let i = 0; i < checkpoints.length; i++) {
-    const cp = checkpoints[i]
-    const siguiente = checkpoints[i + 1]
-
-    // Auditoría: acciones que ocurrieron DESPUÉS de este checkpoint y ANTES del siguiente
-    const condiciones = [
-      or(
-        eq(auditoriaVinculos.personaAId, personaId),
-        eq(auditoriaVinculos.personaBId, personaId),
-        eq(auditoriaVinculos.personaAId, parPersonaId),
-        eq(auditoriaVinculos.personaBId, parPersonaId),
-      ),
-      gte(auditoriaVinculos.createdAt, new Date(cp.createdAt)),
-    ]
-
-    if (siguiente) {
-      condiciones.push(lt(auditoriaVinculos.createdAt, new Date(siguiente.createdAt)))
-    }
-
-    const auditoria = await db
-      .select({
-        id: auditoriaVinculos.id,
-        accion: auditoriaVinculos.accion,
-        descripcion: auditoriaVinculos.descripcion,
-        datos: auditoriaVinculos.datos,
-        createdAt: auditoriaVinculos.createdAt,
-        usuarioId: auditoriaVinculos.usuarioId,
-      })
-      .from(auditoriaVinculos)
-      .where(and(...condiciones))
-      .orderBy(asc(auditoriaVinculos.createdAt))
-
-    // Enriquecer cada entrada con nombre del usuario que actuó
-    const auditoriaEnriquecida = await Promise.all(
-      auditoria.map(async (entrada) => {
-        const [config] = await db
-          .select({ nombre: configuraciones.nombre })
-          .from(configuraciones)
-          .where(eq(configuraciones.usuarioId, entrada.usuarioId))
-          .limit(1)
-
-        const [user] = await db
-          .select({ nombre: usuarios.nombre })
-          .from(usuarios)
-          .where(eq(usuarios.id, entrada.usuarioId))
-          .limit(1)
-
-        const nombreActor = config?.nombre?.trim() || user?.nombre?.trim() || 'Usuario'
-        const esTuyo = entrada.usuarioId === usuarioId
-
-        return {
-          ...entrada,
-          datos: entrada.datos ? JSON.parse(entrada.datos) : null,
-          nombreActor,
-          esTuyo,
-        }
-      }),
-    )
-
-    checkpointsConAuditoria.push({
-      id: cp.id,
-      tipo: cp.tipo,
-      descripcion: cp.descripcion,
-      createdAt: cp.createdAt,
-      creadoPorId: cp.creadoPorId,
-      snapshotResumen: calcularResumenSnapshot(cp.snapshotDatos),
-      auditoria: auditoriaEnriquecida,
+  // Toda la auditoría del par desde el primer checkpoint, en UNA query, y
+  // los nombres de los actores en OTRA. Antes era una query por checkpoint
+  // y dos por entrada (configuraciones + usuarios): con cinco checkpoints
+  // de veinte entradas, más de doscientos round trips para pintar la
+  // lista. La partición entre checkpoints se hace en memoria
+  // (`agruparAuditoriaPorCheckpoint`).
+  const entradas = await db
+    .select({
+      id: auditoriaVinculos.id,
+      accion: auditoriaVinculos.accion,
+      descripcion: auditoriaVinculos.descripcion,
+      datos: auditoriaVinculos.datos,
+      createdAt: auditoriaVinculos.createdAt,
+      usuarioId: auditoriaVinculos.usuarioId,
     })
-  }
+    .from(auditoriaVinculos)
+    .where(
+      and(
+        or(
+          eq(auditoriaVinculos.personaAId, personaId),
+          eq(auditoriaVinculos.personaBId, personaId),
+          eq(auditoriaVinculos.personaAId, parPersonaId),
+          eq(auditoriaVinculos.personaBId, parPersonaId),
+        ),
+        gte(auditoriaVinculos.createdAt, new Date(checkpoints[0].createdAt)),
+      ),
+    )
+    .orderBy(asc(auditoriaVinculos.createdAt))
 
-  return checkpointsConAuditoria
+  const actores = [...new Set(entradas.map((e) => e.usuarioId).filter(Boolean))]
+  const filasNombres = actores.length
+    ? await db
+        .select({
+          id: usuarios.id,
+          nombre: usuarios.nombre,
+          nombreConfig: configuraciones.nombre,
+        })
+        .from(usuarios)
+        .leftJoin(configuraciones, eq(configuraciones.usuarioId, usuarios.id))
+        .where(inArray(usuarios.id, actores))
+    : []
+  // Misma prioridad que getNombreDisplay: configuraciones.nombre → usuarios.nombre.
+  const nombrePorActor = new Map(
+    filasNombres.map((f) => [f.id, f.nombreConfig?.trim() || f.nombre?.trim() || 'Usuario']),
+  )
+
+  const grupos = agruparAuditoriaPorCheckpoint(checkpoints, entradas)
+
+  return checkpoints.map((cp, i) => ({
+    id: cp.id,
+    tipo: cp.tipo,
+    descripcion: cp.descripcion,
+    createdAt: cp.createdAt,
+    creadoPorId: cp.creadoPorId,
+    snapshotResumen: calcularResumenSnapshot(cp.snapshotDatos),
+    auditoria: grupos[i].map((entrada) => ({
+      ...entrada,
+      datos: entrada.datos ? JSON.parse(entrada.datos) : null,
+      nombreActor: nombrePorActor.get(entrada.usuarioId) || 'Usuario',
+      esTuyo: entrada.usuarioId === usuarioId,
+    })),
+  }))
 })
 
 /**

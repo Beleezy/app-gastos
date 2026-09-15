@@ -56,7 +56,7 @@
 </template>
 
 <script setup>
-const props = defineProps({
+defineProps({
   bottomOffset: {
     type: String,
     default: '5rem',

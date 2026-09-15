@@ -50,7 +50,7 @@ export function usePwaUpdate() {
           window.location.reload()
         }
       })
-    } catch (e) {
+    } catch {
       // SW no disponible (dev o navegador sin soporte)
     }
   }

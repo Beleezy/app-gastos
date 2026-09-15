@@ -191,7 +191,7 @@ async function guardar() {
     }
     emit('saved')
     emit('close')
-  } catch (e) {
+  } catch {
     errorMsg.value = 'Error al guardar el ahorro'
   } finally {
     saving.value = false

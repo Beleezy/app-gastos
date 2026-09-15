@@ -576,10 +576,6 @@ const personasInactivas = computed(() => {
   return aplicarFiltros(personas.value.filter((p) => p.deudasActivas === 0))
 })
 
-const personasFiltradas = computed(() => {
-  return [...personasActivas.value, ...personasInactivas.value]
-})
-
 async function exportarPdf(persona) {
   try {
     const deudas = await apiFetch('/api/deudas', {

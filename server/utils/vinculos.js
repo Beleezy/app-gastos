@@ -8,7 +8,8 @@ import {
   configuraciones,
   vinculosCheckpoints,
 } from '../database/schema.js'
-import { eq, and, isNotNull, inArray, sql } from 'drizzle-orm'
+import { eq, and, isNotNull, isNull, inArray } from 'drizzle-orm'
+import { caseUuidPorId } from './sqlBatch.js'
 
 /**
  * Invierte el tipo de deuda: me_deben ↔ yo_debo
@@ -66,58 +67,51 @@ export async function registrarAuditoria(
  * @param {string} personaBId - ID de la persona espejo (usuario B)
  */
 export async function desvincularPersonas(tx, personaAId, personaBId) {
-  // 1. Obtener IDs de todas las deudas vinculadas entre estas dos personas
-  const deudasA = await tx
+  // Antes esto hacía, por cada deuda vinculada de A, una query de pagos y
+  // DOS UPDATE por pago, más dos UPDATE por deuda: await dentro de for,
+  // dentro de una transacción que mantenía los locks abiertos todo ese
+  // rato. Con 100 deudas y 3 pagos cada una eran ~800 round trips.
+  //
+  // Todo lo vinculado entre las dos personas se resuelve con conjuntos:
+  // 1. Deudas vinculadas de ambas personas (y a qué deuda apuntan).
+  const deudasAB = await tx
     .select({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
     .from(deudas)
-    .where(and(eq(deudas.personaEntidadId, personaAId), isNotNull(deudas.vinculoDeudaId)))
+    .where(
+      and(
+        inArray(deudas.personaEntidadId, [personaAId, personaBId]),
+        isNotNull(deudas.vinculoDeudaId),
+      ),
+    )
 
-  const deudasB = await tx
-    .select({ id: deudas.id, vinculoDeudaId: deudas.vinculoDeudaId })
-    .from(deudas)
-    .where(and(eq(deudas.personaEntidadId, personaBId), isNotNull(deudas.vinculoDeudaId)))
+  // Las deudas vinculadas de A y B más las que ellas referencian (por si
+  // alguna quedó apuntando fuera del par). Y sus pagos vinculados, más
+  // los espejos que esos pagos referencian.
+  const idsDeudas = [...new Set(deudasAB.flatMap((d) => [d.id, d.vinculoDeudaId]).filter(Boolean))]
 
-  // 2. Desvincular pagos de deudas de persona A
-  for (const deuda of deudasA) {
-    const pagosA = await tx
-      .select({ id: pagosDeuda.id })
+  if (idsDeudas.length) {
+    const pagosVinculados = await tx
+      .select({ id: pagosDeuda.id, vinculoPagoId: pagosDeuda.vinculoPagoId })
       .from(pagosDeuda)
-      .where(and(eq(pagosDeuda.deudaId, deuda.id), isNotNull(pagosDeuda.vinculoPagoId)))
+      .where(and(inArray(pagosDeuda.deudaId, idsDeudas), isNotNull(pagosDeuda.vinculoPagoId)))
 
-    for (const pago of pagosA) {
-      // Desvincular pago espejo primero
+    const idsPagos = [
+      ...new Set(pagosVinculados.flatMap((p) => [p.id, p.vinculoPagoId]).filter(Boolean)),
+    ]
+
+    // 2. Desvincular pagos (originales y espejos) en UN UPDATE.
+    if (idsPagos.length) {
       await tx
         .update(pagosDeuda)
         .set({ vinculoPagoId: null })
-        .where(eq(pagosDeuda.vinculoPagoId, pago.id))
-      // Desvincular pago original
-      await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.id, pago.id))
+        .where(inArray(pagosDeuda.id, idsPagos))
     }
+
+    // 3. Desvincular deudas (originales y espejos) en UN UPDATE.
+    await tx.update(deudas).set({ vinculoDeudaId: null }).where(inArray(deudas.id, idsDeudas))
   }
 
-  // 3. Desvincular pagos de deudas de persona B
-  for (const deuda of deudasB) {
-    await tx.update(pagosDeuda).set({ vinculoPagoId: null }).where(eq(pagosDeuda.deudaId, deuda.id))
-  }
-
-  // 4. Desvincular deudas de persona A
-  for (const deuda of deudasA) {
-    if (deuda.vinculoDeudaId) {
-      await tx
-        .update(deudas)
-        .set({ vinculoDeudaId: null })
-        .where(eq(deudas.id, deuda.vinculoDeudaId))
-    }
-    await tx.update(deudas).set({ vinculoDeudaId: null }).where(eq(deudas.id, deuda.id))
-  }
-
-  // 5. Desvincular deudas de persona B (por si acaso quedan referencias)
-  await tx
-    .update(deudas)
-    .set({ vinculoDeudaId: null })
-    .where(eq(deudas.personaEntidadId, personaBId))
-
-  // 6. Desvincular personas
+  // 4. Desvincular personas
   await tx
     .update(personasEntidades)
     .set({ vinculadoUsuarioId: null, vinculoParId: null, updatedAt: new Date() })
@@ -212,24 +206,19 @@ export async function crearDeudasEspejoBulk(tx, deudasOriginales, personaParId, 
   // eran 100 idas y vueltas.
   //
   // Drizzle no expone UPDATE...FROM (VALUES), así que se arma un CASE por
-  // id. Los valores van interpolados por Drizzle como parámetros, no
-  // concatenados: `sql` los parametriza.
+  // id (utils/sqlBatch.js). Los valores van parametrizados, no concatenados.
   const pares = deudasOriginales
-    .map((d) => ({ id: d.id, espejoId: mapping.get(d.id) }))
-    .filter((x) => x.espejoId)
+    .map((d) => [d.id, mapping.get(d.id)])
+    .filter(([, espejoId]) => espejoId)
 
   if (pares.length) {
-    const ramas = sql.join(
-      pares.map((x) => sql`WHEN ${x.id}::uuid THEN ${x.espejoId}::uuid`),
-      sql` `,
-    )
     await tx
       .update(deudas)
-      .set({ vinculoDeudaId: sql`CASE ${deudas.id} ${ramas} END` })
+      .set({ vinculoDeudaId: caseUuidPorId(deudas.id, pares) })
       .where(
         inArray(
           deudas.id,
-          pares.map((x) => x.id),
+          pares.map(([id]) => id),
         ),
       )
   }
@@ -265,13 +254,14 @@ export async function crearPagosEspejoBulk(tx, pagosConDeudaEspejo) {
   // sentencia (mismo motivo que en crearDeudasEspejoBulk: el bucle con
   // await era N round trips secuenciales dentro de la transacción).
   if (espejos.length) {
-    const ramas = sql.join(
-      espejos.map((e) => sql`WHEN ${e.vinculoPagoId}::uuid THEN ${e.id}::uuid`),
-      sql` `,
-    )
     await tx
       .update(pagosDeuda)
-      .set({ vinculoPagoId: sql`CASE ${pagosDeuda.id} ${ramas} END` })
+      .set({
+        vinculoPagoId: caseUuidPorId(
+          pagosDeuda.id,
+          espejos.map((e) => [e.vinculoPagoId, e.id]),
+        ),
+      })
       .where(
         inArray(
           pagosDeuda.id,
@@ -354,6 +344,34 @@ export function agruparPagosPorDeuda(deudasList, pagosList) {
 }
 
 /**
+ * Reparte las entradas de auditoría entre los checkpoints que las
+ * preceden: cada checkpoint recibe lo ocurrido desde su creación hasta la
+ * del siguiente (inclusivo por abajo, exclusivo por arriba, como el par
+ * gte/lt que antes se consultaba checkpoint a checkpoint).
+ *
+ * @param {Array<{createdAt: Date|string}>} checkpoints ordenados por createdAt asc
+ * @param {Array<{createdAt: Date|string}>} entradas ordenadas por createdAt asc
+ * @returns {Array<Array>} un array de entradas por checkpoint, en el mismo orden
+ */
+export function agruparAuditoriaPorCheckpoint(checkpoints, entradas) {
+  const ms = (v) => new Date(v).getTime()
+  const grupos = (checkpoints || []).map(() => [])
+  if (!grupos.length) return grupos
+  const inicios = checkpoints.map((c) => ms(c.createdAt))
+  for (const e of entradas || []) {
+    const t = ms(e.createdAt)
+    // El último checkpoint cuyo inicio es <= t.
+    let indice = -1
+    for (let i = 0; i < inicios.length; i++) {
+      if (inicios[i] <= t) indice = i
+      else break
+    }
+    if (indice >= 0) grupos[indice].push(e)
+  }
+  return grupos
+}
+
+/**
  * Normaliza el par de personas para que personaAId sea siempre el UUID menor (orden lexicográfico).
  * Garantiza consistencia al guardar/buscar checkpoints independientemente de qué usuario los crea.
  */
@@ -393,14 +411,24 @@ export async function tomarSnapshot(tx, personaAId, personaBId) {
   // Con el volumen del seed (119 deudas) eran ~240 round trips secuenciales
   // dentro de una transacción, que además mantenía los locks abiertos todo
   // ese rato.
+  //
+  // Solo lo vivo: el snapshot es lo que cada parte VE. Sin `isNull(deletedAt)`
+  // una deuda o un pago en la papelera entraba al checkpoint y, al
+  // restaurarlo, resucitaba como activo.
   const personaIds = [personaAId, personaBId].filter(Boolean)
   const todasLasDeudas = personaIds.length
-    ? await tx.select().from(deudas).where(inArray(deudas.personaEntidadId, personaIds))
+    ? await tx
+        .select()
+        .from(deudas)
+        .where(and(inArray(deudas.personaEntidadId, personaIds), isNull(deudas.deletedAt)))
     : []
 
   const deudaIds = todasLasDeudas.map((d) => d.id)
   const todosLosPagos = deudaIds.length
-    ? await tx.select().from(pagosDeuda).where(inArray(pagosDeuda.deudaId, deudaIds))
+    ? await tx
+        .select()
+        .from(pagosDeuda)
+        .where(and(inArray(pagosDeuda.deudaId, deudaIds), isNull(pagosDeuda.deletedAt)))
     : []
 
   const deudasPorPersona = new Map(personaIds.map((id) => [id, []]))

@@ -22,14 +22,22 @@ export const notasSchema = z.string().trim().max(1000).optional().nullable()
 
 export const metodoRegistroSchema = z.enum(['voz', 'foto', 'manual'])
 
+// Todos los ids de esta base son uuid. Un id con otra forma no es "otro
+// formato de id": es un valor que no puede existir, y pasárselo a Postgres
+// revienta la consulta con un 500 que arrastra el error del driver. Los
+// schemas declaraban los ids como `z.union([z.string(), z.number()])`, que
+// deja pasar "abc" y 7 — el fuzz de la ronda 5 encontró 16 handlers así.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 export const uuidSchema = z.string().regex(UUID_RE, 'UUID inválido')
 
-export const idSchema = z.union([
-  uuidSchema,
-  z.number().int().positive(),
-  z.string().regex(/^\d+$/, 'ID inválido'),
-])
+/**
+ * uuid obligatorio con mensaje propio para cuando falta: `uuidSchema` a
+ * secas responde "Invalid input" ante `undefined`, que no le dice nada al
+ * usuario. El mensaje de forma inválida se mantiene genérico a propósito
+ * (no repite el valor recibido).
+ */
+export const uuidRequerido = (mensajeAusente) =>
+  z.string({ error: mensajeAusente }).regex(UUID_RE, 'Identificador inválido')
 
 export const paginacionQuerySchema = z.object({
   cursor: z.string().max(500).optional().nullable(),
@@ -48,6 +56,7 @@ export const vacioComoAusente = (schema) =>
 export const cacheBusters = {
   _v: z.any().optional(),
   _t: z.any().optional(),
+  _p: z.any().optional(),
   fresh: z.any().optional(),
 }
 

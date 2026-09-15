@@ -3,22 +3,19 @@ import { planesMensuales, gastosPlanificados } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and } from 'drizzle-orm'
 import { obtenerOCrearPlan } from '../../utils/recurrente.js'
-import { readBodyObjeto } from '../../utils/validate.js'
+import { validateBody } from '../../utils/validate.js'
+import { duplicarMesSchema } from '~/shared/schemas/planificador.js'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBodyObjeto(event)
   const usuarioId = await getUsuarioFromEvent(event)
-
-  const { mesOrigen, anioOrigen, mesDestino, anioDestino } = body
-
-  if (!mesOrigen || !anioOrigen || !mesDestino || !anioDestino) {
-    throw createError({ statusCode: 400, message: 'Se requieren mes/año de origen y destino' })
-  }
-
-  const mesO = Number(mesOrigen)
-  const anioO = Number(anioOrigen)
-  const mesD = Number(mesDestino)
-  const anioD = Number(anioDestino)
+  // `Number('a')` es NaN, y un NaN en un `eq()` contra integer reventaba la
+  // consulta con el SQL dentro; un mes 99 pasaba el `!mes` y llegaba igual.
+  const {
+    mesOrigen: mesO,
+    anioOrigen: anioO,
+    mesDestino: mesD,
+    anioDestino: anioD,
+  } = await validateBody(event, duplicarMesSchema)
 
   // Obtener plan de origen
   const [planOrigen] = await db

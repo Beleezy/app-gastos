@@ -2,7 +2,6 @@ import crypto from 'node:crypto'
 
 const ALGO = 'aes-256-gcm'
 const IV_LEN = 12
-const TAG_LEN = 16
 
 function getKey() {
   // En tests caemos al process.env; en producción Nuxt expone runtimeConfig.

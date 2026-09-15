@@ -3,7 +3,6 @@
 import { test, expect } from '../fixtures/index.js'
 import { DeudasPage } from '../pages/DeudasPage.js'
 import { uniqueSuffix } from '../helpers/db.js'
-import { DEUDAS } from '../helpers/selectors.js'
 
 test.describe('Deudas — UI', () => {
   test.describe('Smoke', () => {

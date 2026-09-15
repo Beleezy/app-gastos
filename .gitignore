@@ -34,3 +34,5 @@ update.md
 test-results/
 playwright-report/
 playwright/.cache/
+# Vitest --coverage
+coverage/

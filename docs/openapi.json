@@ -24,6 +24,7 @@
           "monto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
           "fecha": {
@@ -31,40 +32,38 @@
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "hora": {
+            "nullable": true,
             "type": "string",
             "pattern": "^([01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d)?$"
           },
           "categoriaId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "nullable": true,
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
           },
           "metodoRegistro": {
+            "default": "manual",
             "type": "string",
             "enum": ["voz", "foto", "manual"]
           },
           "gastoPlanificadoId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "nullable": true,
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "transcripcionVoz": {
+            "nullable": true,
             "type": "string",
             "maxLength": 2000
+          },
+          "visibilidad": {
+            "type": "string",
+            "enum": ["auto", "compartido", "privado"]
           }
         },
         "required": ["concepto", "monto", "fecha"]
@@ -80,6 +79,7 @@
           "monto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
           "fecha": {
@@ -87,40 +87,37 @@
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "hora": {
+            "nullable": true,
             "type": "string",
             "pattern": "^([01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d)?$"
           },
           "categoriaId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "nullable": true,
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
+          },
+          "gastoPlanificadoId": {
+            "nullable": true,
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "transcripcionVoz": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 2000
+          },
+          "visibilidad": {
+            "type": "string",
+            "enum": ["auto", "compartido", "privado"]
           },
           "metodoRegistro": {
             "type": "string",
             "enum": ["voz", "foto", "manual"]
-          },
-          "gastoPlanificadoId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
-          },
-          "transcripcionVoz": {
-            "type": "string",
-            "maxLength": 2000
           }
         }
       },
@@ -128,6 +125,8 @@
         "type": "object",
         "properties": {
           "gastos": {
+            "minItems": 1,
+            "maxItems": 500,
             "type": "array",
             "items": {
               "type": "object",
@@ -140,55 +139,44 @@
                 "monto": {
                   "type": "number",
                   "minimum": 0,
+                  "exclusiveMinimum": true,
                   "maximum": 10000000
                 },
                 "fecha": {
+                  "nullable": true,
                   "type": "string",
                   "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
                 },
                 "hora": {
+                  "nullable": true,
                   "type": "string",
                   "pattern": "^([01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d)?$"
                 },
                 "categoriaId": {
-                  "oneOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ]
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
                 },
                 "notas": {
+                  "nullable": true,
                   "type": "string",
                   "maxLength": 1000
                 },
-                "metodoRegistro": {
+                "visibilidad": {
                   "type": "string",
-                  "enum": ["voz", "foto", "manual"]
-                },
-                "gastoPlanificadoId": {
-                  "oneOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ]
-                },
-                "transcripcionVoz": {
-                  "type": "string",
-                  "maxLength": 2000
+                  "enum": ["auto", "compartido", "privado"]
                 }
               },
-              "required": ["concepto", "monto", "fecha"]
+              "required": ["monto", "categoriaId"]
             }
           },
           "metodoRegistro": {
             "type": "string",
             "enum": ["voz", "foto", "manual"]
+          },
+          "transcripcionVoz": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 2000
           }
         },
         "required": ["gastos"]
@@ -197,16 +185,12 @@
         "type": "object",
         "properties": {
           "ids": {
+            "minItems": 1,
+            "maxItems": 500,
             "type": "array",
             "items": {
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "number"
-                }
-              ]
+              "type": "string",
+              "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
             }
           }
         },
@@ -216,14 +200,9 @@
         "type": "object",
         "properties": {
           "personaEntidadId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "nullable": true,
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "personaNombre": {
             "type": "string",
@@ -231,7 +210,7 @@
           },
           "personaTipo": {
             "type": "string",
-            "enum": ["persona", "entidad", "banco", "otro"]
+            "enum": ["persona", "organizacion", "entidad", "banco", "otro"]
           },
           "tipoDeuda": {
             "type": "string",
@@ -245,6 +224,7 @@
           "monto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
           "fecha": {
@@ -252,14 +232,17 @@
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "fechaPago": {
+            "nullable": true,
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "fechaVencimiento": {
+            "nullable": true,
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
           }
@@ -270,14 +253,9 @@
         "type": "object",
         "properties": {
           "personaEntidadId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "nullable": true,
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "personaNombre": {
             "type": "string",
@@ -285,7 +263,7 @@
           },
           "personaTipo": {
             "type": "string",
-            "enum": ["persona", "entidad", "banco", "otro"]
+            "enum": ["persona", "organizacion", "entidad", "banco", "otro"]
           },
           "tipoDeuda": {
             "type": "string",
@@ -299,6 +277,7 @@
           "monto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
           "fecha": {
@@ -306,14 +285,17 @@
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "fechaPago": {
+            "nullable": true,
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "fechaVencimiento": {
+            "nullable": true,
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
           }
@@ -323,18 +305,13 @@
         "type": "object",
         "properties": {
           "deudaId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "monto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
           "fechaPago": {
@@ -342,6 +319,7 @@
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
           }
@@ -351,83 +329,45 @@
       "PagoGlobal": {
         "type": "object",
         "properties": {
-          "personaEntidadId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
-          },
-          "tipoDeuda": {
-            "type": "string",
-            "enum": ["me_deben", "yo_debo"]
-          },
           "monto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
-          "fechaPago": {
+          "fecha": {
+            "nullable": true,
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
+          "metodoPago": {
+            "nullable": true,
+            "type": "string",
+            "maxLength": 50
+          },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
-          },
-          "estrategia": {
-            "type": "string",
-            "enum": ["fifo", "lifo", "manual"]
-          },
-          "asignaciones": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "deudaId": {
-                  "oneOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "number"
-                    }
-                  ]
-                },
-                "monto": {
-                  "type": "number",
-                  "minimum": 0,
-                  "maximum": 10000000
-                }
-              },
-              "required": ["deudaId", "monto"]
-            }
           }
         },
-        "required": ["personaEntidadId", "tipoDeuda", "monto", "fechaPago"]
+        "required": ["monto"]
       },
       "SolicitudVinculo": {
         "type": "object",
         "properties": {
           "email": {
             "type": "string",
+            "maxLength": 254,
             "format": "email",
-            "maxLength": 254
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
           },
           "personaEntidadId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "mensaje": {
+            "nullable": true,
             "type": "string",
             "maxLength": 500
           }
@@ -450,6 +390,7 @@
           "montoPresupuesto": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           }
         },
@@ -458,63 +399,46 @@
       "GastoPlanificado": {
         "type": "object",
         "properties": {
-          "planId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
+          "planMensualId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
           },
           "concepto": {
             "type": "string",
             "minLength": 1,
             "maxLength": 200
           },
-          "monto": {
+          "montoEstimado": {
             "type": "number",
             "minimum": 0,
+            "exclusiveMinimum": true,
             "maximum": 10000000
           },
-          "fechaProbable": {
+          "categoriaId": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+          },
+          "fechaProbablePago": {
             "type": "string",
             "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
           },
-          "categoriaId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
-          },
-          "estado": {
-            "type": "string",
-            "enum": ["pendiente", "pagado", "archivado", "cancelado"]
-          },
-          "recurrente": {
+          "esRecurrente": {
+            "default": false,
             "type": "boolean"
           },
-          "recurrenteGrupoId": {
-            "oneOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "number"
-              }
-            ]
-          },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
           }
         },
-        "required": ["concepto", "monto"]
+        "required": [
+          "planMensualId",
+          "concepto",
+          "montoEstimado",
+          "categoriaId",
+          "fechaProbablePago"
+        ]
       },
       "GastoFuturoCreate": {
         "type": "object",
@@ -525,10 +449,12 @@
             "maxLength": 100
           },
           "prioridad": {
+            "default": "media",
             "type": "string",
             "enum": ["baja", "media", "alta", "critica"]
           },
           "notas": {
+            "nullable": true,
             "type": "string",
             "maxLength": 1000
           }

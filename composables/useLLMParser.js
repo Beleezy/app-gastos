@@ -49,7 +49,7 @@ export function useLLMParser() {
       return data.gastos || []
     } catch (e) {
       if (e?.name !== 'AbortError') {
-        error.value = e.data?.message || e.message || 'Error al procesar el texto'
+        error.value = handleApiError(e, 'Error al procesar el texto')
         retryStatus.value = ''
       }
       return []

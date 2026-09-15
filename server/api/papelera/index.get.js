@@ -3,7 +3,7 @@
 // se purgan físicamente a los 30 días vía /api/cron/purgar-papelera.
 
 import { db } from '../../utils/db.js'
-import { gastos, deudas, pagosDeuda, categorias } from '../../database/schema.js'
+import { gastos, deudas, categorias } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, sql, desc } from 'drizzle-orm'
 

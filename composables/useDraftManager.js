@@ -38,7 +38,7 @@ export function useDraftManager({ parser, onResultMap = (d) => d?.gastos ?? d ??
     if (controller) {
       try {
         controller.abort()
-      } catch (_) {
+      } catch {
         // noop
       }
       controller = null

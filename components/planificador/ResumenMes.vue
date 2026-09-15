@@ -498,8 +498,7 @@ const {
 
 const { success, error: toastError } = useToast()
 
-const { config, fetchConfig: fetchConfigData } = useConfiguraciones()
-const presupuestoDefault = computed(() => parseFloat(config.value?.presupuestoMensualDefault) || 0)
+const { fetchConfig: fetchConfigData } = useConfiguraciones()
 
 // Google Calendar — solo aparece el boton si hay conexion activa
 const {
@@ -528,11 +527,6 @@ async function onSincronizarGcal() {
   }
 }
 
-async function sincronizarPresupuesto() {
-  await updatePresupuesto(presupuestoDefault.value)
-  success('Presupuesto sincronizado con configuracion')
-}
-
 const editandoPresupuesto = ref(false)
 const presupuestoTemp = ref(0)
 const inputPresupuesto = ref(null)
@@ -555,18 +549,6 @@ const mesAnteriorNombre = computed(() => {
   const m = mesActual.value === 1 ? 12 : mesActual.value - 1
   return MESES[m - 1]?.toLowerCase() || ''
 })
-
-// Helpers para formato de monto grande: parte entera y decimal
-function formatParteEntera(valor) {
-  const num = parseFloat(valor) || 0
-  return Math.floor(num).toLocaleString('es-PE')
-}
-
-function formatParteDecimal(valor) {
-  const num = parseFloat(valor) || 0
-  const dec = num.toFixed(2).split('.')[1]
-  return dec
-}
 
 function iniciarEdicion() {
   presupuestoTemp.value = resumen.value.presupuesto

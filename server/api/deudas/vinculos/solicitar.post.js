@@ -3,22 +3,23 @@ import { solicitudesVinculo, personasEntidades, usuarios } from '../../../databa
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { getNombreDisplay } from '../../../utils/vinculos.js'
 import { rateLimits } from '../../../utils/rateLimit.js'
-import { eq, and, or } from 'drizzle-orm'
+import { validateBody } from '../../../utils/validate.js'
+import { solicitudVinculoSchema } from '~/shared/schemas/deudas.js'
+import { eq, and, or, isNull } from 'drizzle-orm'
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
   await rateLimits.vinculosSolicitar(event, usuarioId)
 
-  const email = body.email?.trim()?.toLowerCase()
-  if (!email) {
-    throw createError({ statusCode: 400, message: 'El email es obligatorio' })
-  }
-  if (!body.personaEntidadId) {
-    throw createError({ statusCode: 400, message: 'Se requiere la persona a vincular' })
-  }
+  // `solicitudVinculoSchema` existía sin cablear. El handler leía el cuerpo
+  // crudo: sin cuerpo era un TypeError (500), un personaEntidadId que no
+  // era uuid reventaba el SELECT con el SQL en el mensaje, y "no-es-email"
+  // se guardaba como destinatario de una invitación que no podía llegar a
+  // nadie. El email sale ya en minúsculas, que es como se compara al aceptar.
+  const body = await validateBody(event, solicitudVinculoSchema)
+  const email = body.email
 
-  // Verificar que la persona pertenece al usuario
+  // Verificar que la persona pertenece al usuario y no está en la papelera.
   const [persona] = await db
     .select()
     .from(personasEntidades)
@@ -26,6 +27,7 @@ export default defineEventHandler(async (event) => {
       and(
         eq(personasEntidades.id, body.personaEntidadId),
         eq(personasEntidades.usuarioId, usuarioId),
+        isNull(personasEntidades.deletedAt),
       ),
     )
     .limit(1)

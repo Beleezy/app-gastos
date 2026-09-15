@@ -14,7 +14,7 @@ export const gastoPlanificadoUpdateSchema = z
   .object({
     concepto: conceptoSchema,
     montoEstimado: monto,
-    categoriaId: z.union([z.string(), z.number()]),
+    categoriaId: uuidSchema,
     fechaProbablePago: fechaIso,
     esRecurrente: z.boolean(),
     estado: estadoGastoPlanificadoDbSchema,
@@ -67,6 +67,91 @@ export const presupuestoPlanUpdateSchema = z.object({
   montoPresupuesto: monto,
 })
 
+const mesSchema = z.coerce.number().int().min(1).max(12)
+const anioSchema = z.coerce.number().int().min(2000).max(2100)
+
+// Cuerpo de POST /api/planificador/duplicar. `Number('a')` es NaN, y un NaN
+// en un `eq()` contra la columna integer reventaba la consulta con el SQL
+// en el mensaje. Origen = destino duplicaría el mes sobre sí mismo.
+export const duplicarMesSchema = z
+  .object({
+    mesOrigen: mesSchema,
+    anioOrigen: anioSchema,
+    mesDestino: mesSchema,
+    anioDestino: anioSchema,
+  })
+  .refine((v) => v.mesOrigen !== v.mesDestino || v.anioOrigen !== v.anioDestino, {
+    message: 'El mes de origen y el de destino no pueden ser el mismo',
+    path: ['mesDestino'],
+  })
+
+// Cuerpo de POST /api/planificador/gastos/[id]/registro (marcar como pagado
+// creando el gasto real). Lo que manda FormRegistrarPago: fechaPago, notas
+// y, si la categoría es Ahorro, medioAhorroId.
+export const registroPlanificadoSchema = z.object({
+  fechaPago: fechaIso,
+  notas: notasSchema,
+  medioAhorroId: uuidSchema.optional().nullable(),
+})
+
+// Cuerpo de POST /api/planificador/futuros/[id]/detalles/[detalleId]/decidir.
+// `opcionId` iba crudo a un `eq()` contra uuid. Lista.vue manda `fecha: ''`
+// cuando el campo está vacío, que para "comprar" significa "hoy".
+export const decisionFuturoSchema = z
+  .object({
+    tipo: z.enum(['planificar', 'comprar']),
+    opcionId: uuidSchema,
+    monto,
+    fecha: z
+      .union([fechaIso, z.literal('')])
+      .optional()
+      .nullable(),
+    notas: notasSchema,
+  })
+  .refine((v) => v.tipo !== 'planificar' || (v.fecha && v.fecha !== ''), {
+    message: 'La fecha probable es obligatoria',
+    path: ['fecha'],
+  })
+
+// Cuerpo de POST /api/presupuestos-categoria (upsert).
+export const presupuestoCategoriaSchema = z.object({
+  categoriaId: uuidSchema,
+  montoMensual: monto,
+  alertaUmbral: z.coerce.number().int().min(0).max(100).optional().default(80),
+})
+
+// Plantillas de mes. Los ids del plan y de las categorías son uuid: un
+// `desdePlanId: "abc"` reventaba el SELECT del plan con el SQL dentro.
+const plantillaItemSchema = z.object({
+  concepto: z.string().trim().min(1).max(200),
+  montoEstimado: z.number().finite().positive().max(10_000_000),
+  categoriaId: uuidSchema,
+  diaProbable: z.number().int().min(1).max(31).optional().nullable(),
+  notas: z.string().trim().max(1000).optional().nullable(),
+})
+
+export const plantillaCreateSchema = z.union([
+  z.object({
+    nombre: z.string().trim().min(1).max(150),
+    desdePlanId: uuidSchema,
+    notas: z.string().trim().max(1000).optional().nullable(),
+  }),
+  z.object({
+    nombre: z.string().trim().min(1).max(150),
+    montoPresupuesto: z.number().finite().nonnegative().optional().nullable(),
+    gastos: z.array(plantillaItemSchema).max(200),
+    notas: z.string().trim().max(1000).optional().nullable(),
+  }),
+])
+
+export const plantillaAplicarSchema = z.object({
+  planMensualId: uuidSchema,
+})
+
+// OJO: los tres schemas de abajo describen una forma de gastos futuros que
+// la API NO tiene (la real es tipoGasto + prioridad 0..3 + detalles con
+// opciones, normalizada en server/utils/gastosFuturos.js). Los conserva
+// scripts/generate-openapi.mjs; no cablearlos a un handler.
 export const gastoFuturoCreateSchema = z.object({
   tipo: z.string().trim().min(1).max(100),
   prioridad: z.enum(['baja', 'media', 'alta', 'critica']).optional().default('media'),
@@ -74,7 +159,7 @@ export const gastoFuturoCreateSchema = z.object({
 })
 
 export const gastoFuturoDetalleSchema = z.object({
-  gastoFuturoId: z.union([z.string(), z.number()]),
+  gastoFuturoId: uuidSchema,
   concepto: conceptoSchema,
   estadoDecision: z.enum(['pendiente', 'descartado', 'decidido']).optional().default('pendiente'),
   fecha: fechaIso.optional().nullable(),
@@ -82,7 +167,7 @@ export const gastoFuturoDetalleSchema = z.object({
 })
 
 export const gastoFuturoOpcionSchema = z.object({
-  detalleId: z.union([z.string(), z.number()]),
+  detalleId: uuidSchema,
   nombre: z.string().trim().min(1).max(200),
   precioMin: monto.optional().nullable(),
   precioMax: monto.optional().nullable(),

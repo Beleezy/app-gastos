@@ -3,9 +3,8 @@
  * Genera un archivo OpenAPI 3.0 mínimo a partir de los schemas Zod
  * compartidos. Ver §6.7 de planifica.md.
  *
- * No usamos zod-to-openapi para mantener cero dependencias adicionales.
- * Cubrimos los tipos que existen hoy en shared/schemas/* (objetos,
- * strings con regex, números, enums, arrays, refines, partials).
+ * No usamos zod-to-openapi para mantener cero dependencias adicionales:
+ * Zod 4 ya sabe emitir JSON Schema y aquí solo se fija el dialecto.
  *
  * Salida: docs/openapi.json
  */
@@ -34,81 +33,22 @@ import {
   gastoFuturoCreateSchema,
 } from '../shared/schemas/planificador.js'
 
-function unwrap(schema) {
-  let s = schema
-  while (true) {
-    if (s instanceof z.ZodEffects) {
-      s = s._def.schema
-      continue
-    }
-    if (s instanceof z.ZodOptional || s instanceof z.ZodNullable) {
-      s = s._def.innerType
-      continue
-    }
-    if (s instanceof z.ZodDefault) {
-      s = s._def.innerType
-      continue
-    }
-    break
-  }
-  return s
-}
-
+// Zod 4 trae su propio conversor (`z.toJSONSchema`); el recorrido a mano
+// que había aquí usaba clases internas de Zod 3 (`z.ZodEffects`, `_def.shape()`)
+// y llevaba roto desde la migración a Zod 4: reventaba en la primera línea.
+// `target: 'openapi-3.0'` evita los constructos de JSON Schema 2020 que
+// OpenAPI 3.0 no entiende; `io: 'input'` describe lo que ACEPTA el endpoint
+// (con `z.coerce` el tipo de entrada y el de salida difieren);
+// `unrepresentable: 'any'` deja `{}` donde no hay traducción (refines,
+// transforms) en vez de abortar.
 function toOpenApi(schema) {
-  const s = unwrap(schema)
-
-  if (s instanceof z.ZodString) {
-    const def = s._def
-    const out = { type: 'string' }
-    if (def.checks) {
-      for (const check of def.checks) {
-        if (check.kind === 'min') out.minLength = check.value
-        if (check.kind === 'max') out.maxLength = check.value
-        if (check.kind === 'regex') out.pattern = check.regex.source
-        if (check.kind === 'email') out.format = 'email'
-        if (check.kind === 'url') out.format = 'uri'
-      }
-    }
-    return out
-  }
-  if (s instanceof z.ZodNumber) {
-    const def = s._def
-    const out = { type: 'number' }
-    if (def.checks) {
-      for (const check of def.checks) {
-        if (check.kind === 'min') out.minimum = check.value
-        if (check.kind === 'max') out.maximum = check.value
-        if (check.kind === 'int') out.type = 'integer'
-      }
-    }
-    return out
-  }
-  if (s instanceof z.ZodBoolean) return { type: 'boolean' }
-  if (s instanceof z.ZodEnum) return { type: 'string', enum: [...s._def.values] }
-  if (s instanceof z.ZodNativeEnum) return { type: 'string', enum: Object.values(s._def.values) }
-  if (s instanceof z.ZodArray) {
-    return { type: 'array', items: toOpenApi(s._def.type) }
-  }
-  if (s instanceof z.ZodUnion) {
-    return { oneOf: s._def.options.map(toOpenApi) }
-  }
-  if (s instanceof z.ZodObject) {
-    const shape = s._def.shape()
-    const properties = {}
-    const required = []
-    for (const [key, value] of Object.entries(shape)) {
-      properties[key] = toOpenApi(value)
-      const isOptional =
-        value instanceof z.ZodOptional ||
-        value instanceof z.ZodNullable ||
-        value instanceof z.ZodDefault
-      if (!isOptional) required.push(key)
-    }
-    const out = { type: 'object', properties }
-    if (required.length > 0) out.required = required
-    return out
-  }
-  return {}
+  const out = z.toJSONSchema(schema, {
+    target: 'openapi-3.0',
+    io: 'input',
+    unrepresentable: 'any',
+  })
+  delete out.$schema
+  return out
 }
 
 const SCHEMAS = {

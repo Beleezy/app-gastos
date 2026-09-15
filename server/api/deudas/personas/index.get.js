@@ -3,11 +3,14 @@ import { personasEntidades, deudas } from '../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../utils/fechaLocal.js'
 import { eq, and, sql, isNull } from 'drizzle-orm'
+import { validateQuery } from '../../../utils/validate.js'
+import { personasListQuerySchema } from '~/shared/schemas/deudas.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
-  const query = getQuery(event)
-  const tipo = query.tipo // 'me_deben' | 'yo_debo' | undefined (all)
+  // `tipo` iba crudo a un `eq()` contra el enum: `?tipo=basura` era un 500
+  // con la consulta dentro. Y este listado se carga en cada visita a /deudas.
+  const { tipo } = validateQuery(event, personasListQuerySchema) // me_deben | yo_debo | undefined
   const { fecha: hoy } = await getFechaHoraLocalUsuario(usuarioId)
 
   setHeader(event, 'Cache-Control', 'private, max-age=60, stale-while-revalidate=300')

@@ -200,7 +200,7 @@ async function seleccionar(item) {
   }
   try {
     await fetchAhorrosMes(item.mes, item.anio)
-  } catch (e) {}
+  } catch {}
 }
 
 function cerrar() {

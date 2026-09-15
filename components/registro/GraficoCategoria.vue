@@ -327,12 +327,6 @@ const datosEfectivos = computed(() => {
   }))
 })
 
-const mesSeleccionadoLabel = computed(() => {
-  if (mesSeleccionado.value === 'actual') return `${MESES[props.mesActual - 1]} ${props.anioActual}`
-  const obj = mesesDisponiblesGrafico.value.find((m) => m.key === mesSeleccionado.value)
-  return obj ? `${MESES[obj.mes - 1]} ${obj.anio}` : ''
-})
-
 const DIAS_SEMANA_CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 const seleccionada = ref(null)

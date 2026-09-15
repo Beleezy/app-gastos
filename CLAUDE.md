@@ -74,7 +74,7 @@ Schemas Zod en [compartido.js](shared/schemas/compartido.js); sus límites espej
 
 Tablas: `usuarios` (espejo de auth.users, + perfiles gestionados con contacto), `intenciones_registro`, `categorias`, `planes_mensuales` (UNIQUE usuario+mes+año), `gastos_planificados`, `gastos` (vínculo 1:1 opcional a planificado), `gastos_futuros`/`_detalles`/`_opciones`, `personas_entidades`, `deudas`, `pagos_deuda`, `configuraciones` (1:1 usuario), `auditoria_vinculos`, `vinculos_checkpoints`, `solicitudes_vinculo`, `ingresos`, `medios_ahorro`, `ahorros`, `metas_ahorro`, `plantillas_mes`, `uso_llm`, `llm_cache`, `google_calendar_conexiones`, `presupuestos_categoria`, `compartido_conexiones`/`compartido_categorias`/`compartido_avisos`, `idempotency_keys`.
 
-Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — filtrar con `isNull()` en TODA query de lectura.
+Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — filtrar con `isNull()` en TODA query de lectura, también en las que alimentan un espejo, un snapshot o un merge. Y la cascada respeta el soft-delete: borrar un planificado manda su gasto vinculado a la papelera (`deleted_at`), no lo destruye.
 
 ### Migraciones — REGLAS CRÍTICAS
 
@@ -88,8 +88,9 @@ Soft-delete (`deleted_at`) en gastos, deudas, pagos y personas_entidades — fil
 - **Por qué salieron del build (septiembre 2026).** `vercel.json` llevaba `buildCommand: npm run db:apply && npm run build` desde `fbcf263`. El build **sí** recibía la cadena de conexión; lo que fallaba era `db:apply`, atascado en el `VALIDATE` de `0020` por dos filas negativas en `gastos`. El `&&` cortaba y no se publicó nada durante 51 días y 43 deploys. Con las migraciones fuera del build, un fallo de datos ya no puede impedir un despliegue.
 - Y al revés, el motivo más fuerte: **un build de _preview_ migraba producción**. Los deploys de rama corren el mismo `buildCommand` con el mismo `DATABASE_URL`, así que cualquier PR aplicaba sus migraciones a la BD real antes de ser revisado — de hecho fue el preview de `0019a` el que destrabó la cadena, no el workflow. Ahora solo `main` migra, y solo desde [migrate.yml](.github/workflows/migrate.yml).
 - `apply-migrations.mjs` acepta alias de la variable (`POSTGRES_URL_NON_POOLING`, `POSTGRES_URL`, `NUXT_DATABASE_URL`, `SUPABASE_DB_URL`) y avisa con detalle si no encuentra ninguna.
-- Un prefijo numérico = una migración; ante conflicto usar sufijo letra (`0005a_...`). No editar migraciones ya aplicadas — crear una nueva.
+- Un prefijo numérico = una migración; ante conflicto usar sufijo letra (`0005a_...`). No editar migraciones ya aplicadas — crear una nueva. La última es `0035`.
 - Al añadir una columna crítica, actualizar las columnas centinela de [health.get.js](server/api/health.get.js) (check de drift → 503).
+- **Al quitar una tabla, quitar también los triggers y funciones que la nombran.** `0027` eliminó `etiquetas_asign` y dejó vivos dos triggers (`etq_asign_limpiar_gasto`, `etq_asign_limpiar_planif`) cuya función hacía `DELETE FROM etiquetas_asign`: cada `DELETE` de un gasto planificado respondía 500 con `relation "etiquetas_asign" does not exist`, y ningún test lo tocaba porque nadie borraba planificados en la suite. Lo limpia [0035_triggers_huerfanos_etiquetas.sql](server/database/migrations/0035_triggers_huerfanos_etiquetas.sql) y `health.get.js` lleva `SENTINEL_TRIGGERS_AUSENTES`: si reaparecen, 503 por drift. Un `DROP TABLE` sin `CASCADE` no avisa de los triggers de OTRAS tablas que la referencian desde una función.
 
 ---
 
@@ -231,6 +232,55 @@ helper que la haga.
   tres rondas: 16 respuestas 500 con la consulta y sus parámetros dentro,
   dos de ellas ante CUALQUIER cuerpo, `{}` incluido. El barrido está en el
   historial de la ronda 4; repetirlo cuesta un minuto.
+- **Los ids de los schemas son uuid, no `union([string, number])`.** El
+  viejo `idSchema` aceptaba números y strings cualesquiera "por
+  compatibilidad": un `categoriaId: 1` pasaba la validación y reventaba en
+  Postgres con un 500. Ahora `uuidSchema`/`uuidRequerido`
+  ([common.js](shared/schemas/common.js)) son la única forma; los
+  `assertCategoriasPropias`/`assertMediosPropios` además rechazan con 400
+  lo que no sea uuid antes de consultar.
+- **Editar o revertir un pago es la misma clase de bug que registrarlo.**
+  Los tres handlers de `/api/deudas/pagos/[pagoId]` leían el pendiente
+  fuera de la transacción y escribían un valor absoluto. Ahora viven en
+  [pagos.service.js](server/services/pagos.service.js): deuda bloqueada
+  con `FOR UPDATE`, saldo recalculado desde la SUMA de pagos vivos con
+  `calcularSaldoDesdePagos` ([pagosMath.js](server/utils/pagosMath.js)),
+  y la reversión es soft-delete del pago (aparece en la papelera). Editar
+  `montoOriginal` de una deuda hace lo mismo.
+- **N filas con N valores: un UPDATE con `CASE`, y el `CASE` en un helper.**
+  [sqlBatch.js](server/utils/sqlBatch.js) (`caseUuidPorId`) es lo que usan
+  provision de categorías, desvincular y los espejos; un bucle con `await`
+  contra la BD no pasa revisión.
+- **"Hoy" en el cliente sale de `useFechaPeru`, que lee la zona configurada.**
+  `new Date().toISOString().split('T')[0]` es la fecha en UTC: desde las
+  19:00 en Lima es MAÑANA. El botón "Hoy" del historial, el formulario de
+  ingresos, las deudas por voz y la fecha de emisión del PDF la usaban, así
+  que el gasto caía en el día siguiente o el historial se veía vacío.
+  `useFechaPeru` estaba además fijado a `America/Lima` mientras el servidor
+  medía en `configuraciones.zonaHoraria`; ahora lee la misma configuración
+  (`useState('configuraciones')`) y cae a Lima si no cargó. Para
+  aritmética de días, `addDias`/`toIsoDate` de
+  [useDateUtils.js](composables/useDateUtils.js), nunca `toISOString`
+  sobre un `Date` local.
+- **La consola del navegador en dev también tiene que estar en cero.**
+  Una corrida E2E dejaba 244 avisos de Vue en el log del servidor y entre
+  ellos había dos bugs: `pages/registro.vue` leía `bulkDeletePayload` en la
+  plantilla sin haberlo destructurado de `useBulkGastos` ("Eliminar 0
+  gastos" siempre), y `AppHeader` envolvía el slot `subtitle` en un `<p>`
+  mientras el layout planificador le pasaba otro `<p>` — HTML inválido que
+  el navegador reestructura, así que la hidratación no cuadraba en cuatro
+  páginas. Un slot que admite bloques va en `<div>`. Los badges de
+  navegación (`SideNav`, `BottomNav`) van en `<ClientOnly>`: dependen de
+  un fetch posterior al montaje y con hidratación asíncrona el vdom del
+  cliente podía traer el `<span>` donde el servidor puso un comentario.
+  La sonda que lo encontró es un Playwright que recorre todas las rutas
+  capturando `console` (hydration + errores); cuesta un minuto.
+- **`npm run lint` corre con `--max-warnings=0`.** Había cien warnings
+  acumulados (imports muertos, `catch (e)` sin usar, props sin default) y
+  entre ellos se escondían dos que sí importaban: un `lastError` que se
+  asignaba y nunca se registraba en el log final de `/api/voz/*`, y un
+  `db:seed:test` sin argumento que insertaba en `usuarios` sin `id`. Un
+  warning nuevo rompe el job `lint` de CI.
 
 ## Capa servidor
 
@@ -266,8 +316,8 @@ Al tocar `overrides`, revalidar con `npm ci` + `npm run build` + la suite E2E co
 
 ## Testing y CI
 
-- Unit: `npm test` (Vitest, `tests/*.test.js` — lógica pura extraída de composables/utils).
-- E2E: Playwright (`e2e/`) con page objects; proyectos `smoke | api | mobile | desktop | visual`; auth bypass con `DEV_AUTH_BYPASS=1` + token; Postgres efímera en CI.
+- Unit: `npm test` (Vitest 5, `tests/*.test.js` — lógica pura extraída de composables/utils). Lint: `npm run lint` falla ante cualquier warning.
+- E2E: Playwright (`e2e/`) con page objects; proyectos `smoke | api | mobile | desktop | visual`; auth bypass con `DEV_AUTH_BYPASS=1` + token; Postgres efímera en CI. `e2e.yml` fija un `CRON_SECRET` de prueba para que [cron.api.spec.js](e2e/api/cron.api.spec.js) ejecute los cron de verdad (purgar papelera hacía DELETE físico y llevaba meses reventando sin que nadie lo llamara). Los ids que no son uuid y los cuerpos sin schema tienen su tabla en [seguridad.api.spec.js](e2e/api/seguridad.api.spec.js).
 - Workflows: `ci.yml` (unit + lint + build), `e2e.yml` (PRs y main), `e2e-visual-baseline.yml`, `migrate.yml` (migraciones de producción en cada push a `main`), `db-backup.yml` (dump semanal cifrado). Los dos últimos fallan en rojo si les falta su secret: un backup o una migración que no ocurre no puede reportarse en verde, y declaran `permissions: contents: read` porque llevan la credencial de la BD y no necesitan nada del repositorio.
 - El job `visual` de `e2e.yml` se salta solo mientras no existan baselines en `e2e/visual/<spec>.js-snapshots/`. Para generarlos, `e2e-visual-baseline.yml` los crea en el runner y **empuja una rama** con los PNG, dejando el enlace para abrir el PR en el resumen del run: a mano con `workflow_dispatch`, o **empujando a la rama `ci/generar-baselines-visuales`**. No abre el PR él mismo porque eso depende de _Settings → Actions → «Allow GitHub Actions to create and approve pull requests»_, que en este repo está desactivado; empujar una rama solo necesita `contents: write`. Ese disparador por push existe porque `workflow_dispatch` devuelve 403 a un token de GitHub App sin permiso sobre Actions, y sin él los baselines no se podían arrancar. Los PNG tienen que generarse en el runner: el renderizado de fuentes de una máquina local no coincide y el job fallaría siempre.
 
@@ -289,8 +339,8 @@ server/api/     gastos · deudas · planificador · ahorros · ingresos · futur
                 configuraciones · perfiles · metricas · papelera · voz · integraciones/google
                 acceso · superadmin · cron · dashboard · health · csp-report · errors
 server/services/  lógica de negocio (9 servicios)
-server/utils/     32 helpers (auth, rate limit, LLM, crypto, fechas, propiedad de
-                  categorías y medios de ahorro, idempotencia, ...)
+server/utils/     33 helpers (auth, rate limit, LLM, crypto, fechas, propiedad de
+                  categorías y medios de ahorro, idempotencia, sqlBatch, ...)
 server/database/  schema.js · migrations/ · seeds
 e2e/ · tests/     Playwright (+ fechaNegocio.js: el "hoy" en la zona del usuario) · Vitest
 ```

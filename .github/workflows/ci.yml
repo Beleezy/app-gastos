@@ -36,9 +36,12 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-  # Lint y formato BLOQUEANTES desde la limpieza de julio 2026 (base en 0
-  # errores; los warnings no fallan). El config de ESLint usa los globals
-  # generados por @nuxt/eslint en `nuxt prepare` (postinstall).
+  # Lint y formato BLOQUEANTES desde la limpieza de julio 2026. Desde
+  # septiembre de 2026 la base está en 0 warnings y `npm run lint` corre con
+  # `--max-warnings=0`: un warning nuevo (import muerto, variable sin usar)
+  # rompe el job, que es lo único que evita volver a acumular cien. El config
+  # de ESLint usa los globals generados por @nuxt/eslint en `nuxt prepare`
+  # (postinstall).
   #
   # Requiere Node >= 21 (ver nota de node-version arriba): en Node 20 este
   # job muere con `TypeError: Object.groupBy is not a function` antes de

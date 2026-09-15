@@ -791,7 +791,6 @@ const { currencySymbol, formatMonto } = useCurrency()
 // `formatFecha` vivía aquí duplicado, con el mismo resultado que el de
 // useFormatters y su propio array de meses inline.
 const { formatFecha } = useFormatters()
-const { formatRelativo } = useFechaRelativa()
 
 function confirmarSaldar(deuda) {
   deudaParaAccion.value = deuda

@@ -131,31 +131,3 @@ export async function detectarDuplicados({ usuarioId, candidatos }) {
 
   return matchDuplicados(candidatos, existentes)
 }
-
-/**
- * Devuelve un gasto por id, validando ownership.
- * @returns gasto enriquecido o null si no existe / no pertenece al usuario.
- */
-export async function obtenerGastoPropio({ usuarioId, gastoId }) {
-  const [gasto] = await db
-    .select()
-    .from(gastos)
-    .where(and(eq(gastos.id, gastoId), eq(gastos.usuarioId, usuarioId), isNull(gastos.deletedAt)))
-    .limit(1)
-
-  if (!gasto) return null
-
-  const [cat] = await db
-    .select()
-    .from(categorias)
-    .where(eq(categorias.id, gasto.categoriaId))
-    .limit(1)
-
-  return {
-    ...gasto,
-    monto: parseFloat(gasto.monto),
-    categoriaNombre: cat?.nombre,
-    categoriaIcono: cat?.icono,
-    categoriaColor: cat?.color,
-  }
-}

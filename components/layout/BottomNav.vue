@@ -41,11 +41,13 @@
             />
           </div>
           <!-- Badge -->
-          <span
-            v-if="getBadge(item.to) > 0"
-            class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[0.6875rem] font-bold flex items-center justify-center leading-none"
-            >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span
-          >
+          <ClientOnly>
+            <span
+              v-if="getBadge(item.to) > 0"
+              class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[0.6875rem] font-bold flex items-center justify-center leading-none"
+              >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span
+            >
+          </ClientOnly>
         </div>
 
         <!-- 0.68rem: con texto grande (root 18px) "Planificador" se cortaba a text-xs -->

@@ -23,7 +23,7 @@ describe('gastoCreateSchema', () => {
       concepto: 'Pan',
       monto: 5,
       fecha: '2026-04-28',
-      categoriaId: 1,
+      categoriaId: '550e8400-e29b-41d4-a716-446655440000',
     })
     expect(r.success).toBe(true)
   })
@@ -146,7 +146,11 @@ describe('pagoCreateSchema', () => {
   it('exige todos los campos', () => {
     expect(pagoCreateSchema.safeParse({}).success).toBe(false)
     expect(
-      pagoCreateSchema.safeParse({ deudaId: 1, monto: 10, fechaPago: '2026-04-28' }).success,
+      pagoCreateSchema.safeParse({
+        deudaId: '550e8400-e29b-41d4-a716-446655440000',
+        monto: 10,
+        fechaPago: '2026-04-28',
+      }).success,
     ).toBe(true)
   })
 })

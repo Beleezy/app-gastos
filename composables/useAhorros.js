@@ -18,13 +18,14 @@ export function useAhorros() {
   const isLoading = ref(false)
   const error = ref(null)
 
-  const mesActual = useState('ahorros-mes', () => new Date().getMonth() + 1)
-  const anioActual = useState('ahorros-anio', () => new Date().getFullYear())
+  const { partesHoy } = useFechaPeru()
+  const mesActual = useState('ahorros-mes', () => partesHoy().mes)
+  const anioActual = useState('ahorros-anio', () => partesHoy().anio)
 
   const nombreMes = computed(() => MESES[mesActual.value - 1] || '')
   const esHoy = computed(() => {
-    const now = new Date()
-    return mesActual.value === now.getMonth() + 1 && anioActual.value === now.getFullYear()
+    const hoy = partesHoy()
+    return mesActual.value === hoy.mes && anioActual.value === hoy.anio
   })
 
   async function fetchAhorros(force = false) {

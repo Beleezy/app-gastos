@@ -6,72 +6,26 @@ import {
   gastosFuturosOpciones,
   gastos,
   gastosPlanificados,
-  planesMensuales,
-  configuraciones,
 } from '../../../../../../database/schema.js'
 import { getUsuarioFromEvent } from '../../../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../../../utils/fechaLocal.js'
 import { fetchFutureExpenseById } from '../../../../../../utils/gastosFuturos.js'
+import { obtenerOCrearPlan } from '../../../../../../utils/recurrente.js'
 import { getUuidParam } from '../../../../../../utils/params.js'
-
-function parseAmount(value) {
-  if (value === null || value === undefined || value === '') return null
-  const n = Number(value)
-  if (!Number.isFinite(n) || n <= 0) return null
-  return Math.round((n + Number.EPSILON) * 100) / 100
-}
-
-async function obtenerOCrearPlan(tx, usuarioId, mes, anio) {
-  const [existing] = await tx
-    .select()
-    .from(planesMensuales)
-    .where(
-      and(
-        eq(planesMensuales.usuarioId, usuarioId),
-        eq(planesMensuales.mes, mes),
-        eq(planesMensuales.anio, anio),
-      ),
-    )
-    .limit(1)
-
-  if (existing) return existing
-
-  const [config] = await tx
-    .select({ presupuestoMensualDefault: configuraciones.presupuestoMensualDefault })
-    .from(configuraciones)
-    .where(eq(configuraciones.usuarioId, usuarioId))
-    .limit(1)
-
-  const presupuesto = config?.presupuestoMensualDefault || '0'
-
-  const [nuevo] = await tx
-    .insert(planesMensuales)
-    .values({ usuarioId, mes, anio, montoPresupuesto: presupuesto })
-    .returning()
-
-  return nuevo
-}
+import { validateBody } from '../../../../../../utils/validate.js'
+import { decisionFuturoSchema } from '~/shared/schemas/planificador.js'
 
 export default defineEventHandler(async (event) => {
   const proyectoId = getUuidParam(event, 'id', { recurso: 'Proyecto' })
   const detalleId = getUuidParam(event, 'detalleId', { recurso: 'Detalle' })
-  const body = await readBody(event)
   const usuarioId = await getUsuarioFromEvent(event)
 
-  const tipo = body?.tipo
-  if (!['planificar', 'comprar'].includes(tipo)) {
-    throw createError({ statusCode: 400, message: 'Tipo de decision invalido' })
-  }
-
-  const opcionId = body?.opcionId
-  if (!opcionId) {
-    throw createError({ statusCode: 400, message: 'Debes elegir una opcion' })
-  }
-
-  const monto = parseAmount(body?.monto)
-  if (monto === null) {
-    throw createError({ statusCode: 400, message: 'El monto debe ser mayor a 0' })
-  }
+  // `opcionId` iba crudo a un `eq()` contra uuid y `fecha` a una columna
+  // date: "abc" y "el martes" eran un 500 con la consulta dentro.
+  const body = await validateBody(event, decisionFuturoSchema)
+  const { tipo, opcionId } = body
+  const monto = Math.round((body.monto + Number.EPSILON) * 100) / 100
+  const notas = body.notas?.trim() || null
 
   const [proyecto] = await db
     .select()
@@ -122,8 +76,7 @@ export default defineEventHandler(async (event) => {
 
     if (tipo === 'comprar') {
       const { fecha: fechaLocal, hora: horaLocal } = await getFechaHoraLocalUsuario(usuarioId)
-      const fecha = body?.fecha || fechaLocal
-      const hora = horaLocal
+      const fecha = body.fecha || fechaLocal
 
       const [creado] = await tx
         .insert(gastos)
@@ -133,25 +86,20 @@ export default defineEventHandler(async (event) => {
           concepto,
           monto: String(monto),
           fecha,
-          hora,
+          hora: horaLocal,
           metodoRegistro: 'manual',
-          notas: body?.notas || null,
+          notas,
         })
         .returning({ id: gastos.id })
       gastoId = creado.id
     } else {
-      const fechaProbable = body?.fecha
-      if (!fechaProbable) {
-        throw createError({ statusCode: 400, message: 'La fecha probable es obligatoria' })
-      }
-      const [anioStr, mesStr] = fechaProbable.split('-')
-      const mes = parseInt(mesStr, 10)
-      const anio = parseInt(anioStr, 10)
-      if (!mes || !anio) {
-        throw createError({ statusCode: 400, message: 'Fecha invalida' })
-      }
+      // El schema garantiza la fecha para 'planificar'.
+      const fechaProbable = body.fecha
+      const [anio, mes] = fechaProbable.split('-').map(Number)
 
-      const plan = await obtenerOCrearPlan(tx, usuarioId, mes, anio)
+      // El mismo helper que usa el planificador: tolera el plan creado en
+      // paralelo por otra petición en vez de reventar por el UNIQUE.
+      const plan = await obtenerOCrearPlan(usuarioId, mes, anio, tx)
 
       const [creado] = await tx
         .insert(gastosPlanificados)
@@ -161,7 +109,7 @@ export default defineEventHandler(async (event) => {
           concepto,
           montoEstimado: String(monto),
           fechaProbablePago: fechaProbable,
-          notas: body?.notas || null,
+          notas,
         })
         .returning({ id: gastosPlanificados.id })
       gastoPlanificadoId = creado.id

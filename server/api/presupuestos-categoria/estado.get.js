@@ -2,7 +2,7 @@ import { db } from '../../utils/db.js'
 import { presupuestosCategoria, categorias, gastos } from '../../database/schema.js'
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
-import { eq, and, between, isNull, sql } from 'drizzle-orm'
+import { eq, and, sql } from 'drizzle-orm'
 import { validateQuery } from '../../utils/validate.js'
 import { mesAnioQuerySchema } from '~/shared/schemas/common.js'
 

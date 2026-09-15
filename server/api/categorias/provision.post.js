@@ -9,6 +9,7 @@ import {
 import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { eq, and, inArray } from 'drizzle-orm'
 import { categoriasPredefinidasGlobales } from '../../utils/categorias.js'
+import { caseUuidPorId } from '../../utils/sqlBatch.js'
 
 export default defineEventHandler(async (event) => {
   const usuarioId = await getUsuarioFromEvent(event)
@@ -37,65 +38,73 @@ export default defineEventHandler(async (event) => {
     return { provisioned: false, categories: [] }
   }
 
-  // Clonar predefinidas como categorías del usuario
-  const clonadas = await db
-    .insert(categorias)
-    .values(
-      predefinidas.map((c) => ({
-        usuarioId,
-        nombre: c.nombre,
-        icono: c.icono,
-        color: c.color,
-        esPredefinida: false,
-      })),
-    )
-    .returning()
+  // Clonar predefinidas como categorías del usuario y migrar en el mismo
+  // acto sus gastos, planificados y futuros. Antes eran tres bucles con un
+  // UPDATE por categoría (~33 round trips) y sin transacción: un fallo a
+  // mitad dejaba las categorías clonadas y la mitad de los gastos apuntando
+  // a las globales. Ahora son un INSERT y tres UPDATE con CASE.
+  const clonadas = await db.transaction(async (tx) => {
+    const clonadas = await tx
+      .insert(categorias)
+      .values(
+        predefinidas.map((c) => ({
+          usuarioId,
+          nombre: c.nombre,
+          icono: c.icono,
+          color: c.color,
+          esPredefinida: false,
+        })),
+      )
+      .returning()
 
-  // Construir mapa de IDs viejas -> nuevas
-  const idMap = {}
-  for (const vieja of predefinidas) {
-    const nueva = clonadas.find((n) => n.nombre === vieja.nombre)
-    if (nueva) idMap[vieja.id] = nueva.id
-  }
+    // Mapa de ids viejas -> nuevas, por nombre.
+    const nuevaPorNombre = new Map(clonadas.map((n) => [n.nombre, n.id]))
+    const pares = predefinidas
+      .map((vieja) => [vieja.id, nuevaPorNombre.get(vieja.nombre)])
+      .filter(([, nueva]) => nueva)
 
-  // Migrar gastos del usuario a las nuevas categorías
-  const oldIds = Object.keys(idMap)
-  if (oldIds.length > 0) {
-    for (const [oldId, newId] of Object.entries(idMap)) {
-      await db
+    if (pares.length > 0) {
+      const oldIds = pares.map(([vieja]) => vieja)
+
+      await tx
         .update(gastos)
-        .set({ categoriaId: newId })
-        .where(and(eq(gastos.usuarioId, usuarioId), eq(gastos.categoriaId, oldId)))
-    }
+        .set({ categoriaId: caseUuidPorId(gastos.categoriaId, pares) })
+        .where(and(eq(gastos.usuarioId, usuarioId), inArray(gastos.categoriaId, oldIds)))
 
-    // Migrar gastos_planificados: necesitamos los planes del usuario
-    const userPlanIds = await db
-      .select({ id: planesMensuales.id })
-      .from(planesMensuales)
-      .where(eq(planesMensuales.usuarioId, usuarioId))
+      // gastos_planificados no tiene usuario_id: se llega por el plan.
+      const userPlanIds = await tx
+        .select({ id: planesMensuales.id })
+        .from(planesMensuales)
+        .where(eq(planesMensuales.usuarioId, usuarioId))
 
-    if (userPlanIds.length > 0) {
-      const planIds = userPlanIds.map((p) => p.id)
-      for (const [oldId, newId] of Object.entries(idMap)) {
-        await db
+      if (userPlanIds.length > 0) {
+        await tx
           .update(gastosPlanificados)
-          .set({ categoriaId: newId })
+          .set({ categoriaId: caseUuidPorId(gastosPlanificados.categoriaId, pares) })
           .where(
             and(
-              eq(gastosPlanificados.categoriaId, oldId),
-              inArray(gastosPlanificados.planMensualId, planIds),
+              inArray(gastosPlanificados.categoriaId, oldIds),
+              inArray(
+                gastosPlanificados.planMensualId,
+                userPlanIds.map((p) => p.id),
+              ),
             ),
           )
       }
+
+      await tx
+        .update(gastosFuturos)
+        .set({
+          categoriaId: caseUuidPorId(gastosFuturos.categoriaId, pares),
+          updatedAt: new Date(),
+        })
+        .where(
+          and(eq(gastosFuturos.usuarioId, usuarioId), inArray(gastosFuturos.categoriaId, oldIds)),
+        )
     }
 
-    for (const [oldId, newId] of Object.entries(idMap)) {
-      await db
-        .update(gastosFuturos)
-        .set({ categoriaId: newId, updatedAt: new Date() })
-        .where(and(eq(gastosFuturos.usuarioId, usuarioId), eq(gastosFuturos.categoriaId, oldId)))
-    }
-  }
+    return clonadas
+  })
 
   return { provisioned: true, categories: clonadas }
 })

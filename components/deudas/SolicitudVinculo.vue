@@ -129,7 +129,7 @@ async function enviar() {
     form.email = ''
     form.mensaje = ''
     emit('enviada')
-  } catch (e) {
+  } catch {
     // error ya se muestra via vinculos.error
   }
 }
@@ -137,7 +137,7 @@ async function enviar() {
 async function cancelar(id) {
   try {
     await vinculos.cancelarSolicitud(id)
-  } catch (e) {
+  } catch {
     // error ya se muestra
   }
 }
