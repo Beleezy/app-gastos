@@ -262,6 +262,19 @@ helper que la haga.
   aritmética de días, `addDias`/`toIsoDate` de
   [useDateUtils.js](composables/useDateUtils.js), nunca `toISOString`
   sobre un `Date` local.
+- **La consola del navegador en dev también tiene que estar en cero.**
+  Una corrida E2E dejaba 244 avisos de Vue en el log del servidor y entre
+  ellos había dos bugs: `pages/registro.vue` leía `bulkDeletePayload` en la
+  plantilla sin haberlo destructurado de `useBulkGastos` ("Eliminar 0
+  gastos" siempre), y `AppHeader` envolvía el slot `subtitle` en un `<p>`
+  mientras el layout planificador le pasaba otro `<p>` — HTML inválido que
+  el navegador reestructura, así que la hidratación no cuadraba en cuatro
+  páginas. Un slot que admite bloques va en `<div>`. Los badges de
+  navegación (`SideNav`, `BottomNav`) van en `<ClientOnly>`: dependen de
+  un fetch posterior al montaje y con hidratación asíncrona el vdom del
+  cliente podía traer el `<span>` donde el servidor puso un comentario.
+  La sonda que lo encontró es un Playwright que recorre todas las rutas
+  capturando `console` (hydration + errores); cuesta un minuto.
 - **`npm run lint` corre con `--max-warnings=0`.** Había cien warnings
   acumulados (imports muertos, `catch (e)` sin usar, props sin default) y
   entre ellos se escondían dos que sí importaban: un `lastError` que se

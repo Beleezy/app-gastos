@@ -77,11 +77,13 @@
         ></span>
         <div class="relative shrink-0">
           <component :is="item.icon" class="w-5 h-5" />
-          <span
-            v-if="getBadge(item.to) > 0"
-            class="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-red-500 text-white text-[0.6875rem] font-bold flex items-center justify-center leading-none"
-            >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span
-          >
+          <ClientOnly>
+            <span
+              v-if="getBadge(item.to) > 0"
+              class="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-red-500 text-white text-[0.6875rem] font-bold flex items-center justify-center leading-none"
+              >{{ getBadge(item.to) > 99 ? '99+' : getBadge(item.to) }}</span
+            >
+          </ClientOnly>
         </div>
         <span v-if="!collapsed" class="text-sm flex-1 truncate">{{ item.label }}</span>
       </NuxtLink>

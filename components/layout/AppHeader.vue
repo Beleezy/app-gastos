@@ -40,12 +40,15 @@
           <!-- Badge (optional) -->
           <slot name="badge" />
         </div>
-        <p
+        <!-- <div> y no <p>: el slot admite contenido de bloque (el layout
+             planificador pasa un <p>) y <p> dentro de <p> es HTML inválido —
+             el navegador cerraba el exterior y la hidratación no cuadraba. -->
+        <div
           v-if="$slots.subtitle"
           class="text-[0.6875rem] text-theme-text-muted leading-none mt-0.5 truncate"
         >
           <slot name="subtitle" />
-        </p>
+        </div>
       </div>
 
       <!-- Right-side actions -->

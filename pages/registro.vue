@@ -704,6 +704,7 @@ function confirmarEliminar(gasto) {
 // forma permanente— no los cubría ningún test.
 const {
   showBulkDeleteConfirm,
+  bulkDeletePayload,
   bulkDeleteLoading,
   textoBulkEliminar: mensajeBulkEliminar,
   onBulkDeleteSolicitado,
