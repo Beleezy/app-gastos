@@ -17,15 +17,21 @@ import { addDias } from './useDateUtils'
  */
 const ZONA_DEFAULT = 'America/Lima'
 
-function zonaConfigurada() {
+// El ref se resuelve UNA vez, al crear el composable (en setup, donde
+// `useState` tiene instancia de Nuxt), y se lee perezosamente en cada
+// llamada: resolverlo dentro de `ahora()` fallaba en silencio desde un
+// handler de click —sin instancia— y caía a Lima ignorando la zona guardada.
+function refConfiguraciones() {
   try {
-    const cfg = useState('configuraciones')
-    const tz = cfg?.value?.zonaHoraria
-    if (typeof tz === 'string' && tz.trim()) return tz
+    return useState('configuraciones')
   } catch {
-    // fuera del contexto de Nuxt (tests, scripts)
+    return null // fuera del contexto de Nuxt (tests, scripts)
   }
-  return ZONA_DEFAULT
+}
+
+function zonaConfigurada(cfg) {
+  const tz = cfg?.value?.zonaHoraria
+  return typeof tz === 'string' && tz.trim() ? tz : ZONA_DEFAULT
 }
 
 function partesEnZona(timeZone, now) {
@@ -41,11 +47,13 @@ function partesEnZona(timeZone, now) {
 }
 
 export function useFechaPeru() {
+  const cfg = refConfiguraciones()
+
   function ahora() {
     const now = new Date()
     let parts
     try {
-      parts = partesEnZona(zonaConfigurada(), now)
+      parts = partesEnZona(zonaConfigurada(cfg), now)
     } catch {
       // zona guardada que este runtime no conoce
       parts = partesEnZona(ZONA_DEFAULT, now)

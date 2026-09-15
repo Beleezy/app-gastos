@@ -26,11 +26,10 @@ import { esUuid } from './params.js'
 
 // Un id que no es UUID no puede existir, y pasárselo a Postgres revienta la
 // query con un 500 que además filtra el error del driver. Se descarta antes.
-//
-// La regla ya no vive aquí: se generalizó a `server/utils/params.js`, de
-// donde la toman ahora los 47 endpoints con `[id]` del resto de módulos.
-// Se re-exporta para no tocar a quien la importa desde este guard.
-export { esUuid }
+// La regla vive en `server/utils/params.js` (`esUuid`), de donde la toman
+// los endpoints con `[id]` de todos los módulos. No se re-exporta desde
+// aquí: Nitro auto-importa `server/utils/**` y dos módulos exportando el
+// mismo nombre hacen que uno se ignore con un aviso en cada arranque.
 
 /**
  * Columnas de `gastos` que un receptor puede ver. Whitelist explícita a
