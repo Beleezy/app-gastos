@@ -54,172 +54,224 @@
       ></div>
     </div>
 
-    <div v-else-if="datosEfectivos.length === 0" class="flex flex-col items-center py-8">
-      <div class="w-14 h-14 rounded-full bg-theme-card flex items-center justify-center mb-3">
-        <span class="text-xl opacity-50">📊</span>
-      </div>
-      <p class="text-sm text-theme-text-sec">No hay datos para graficar</p>
-    </div>
+    <!-- Mismo formato que el gráfico del planificador: una tarjeta con el
+         donut compacto, la leyenda en filas y el detalle debajo. Antes cada
+         categoría era una tarjeta con borde propio y un desplegable dentro,
+         que pesaba mucho más de lo que aporta. -->
+    <div v-else class="bg-theme-card rounded-2xl p-4">
+      <h3 class="text-sm font-semibold text-theme-text mb-4">Distribución por categoría</h3>
 
-    <div v-else>
-      <!-- Donut chart -->
-      <div class="flex justify-center mb-5">
-        <div class="relative w-44 h-44">
+      <div v-if="datosEfectivos.length === 0" role="status" class="text-center py-6">
+        <p class="text-theme-text-sec text-sm">Sin datos para mostrar</p>
+      </div>
+
+      <div v-else class="flex flex-col items-center gap-4">
+        <!-- Donut. Los segmentos NO son focusables: el anillo de foco del
+             navegador se dibuja sobre la caja del <circle>, o sea un
+             rectángulo alrededor de todo el donut — el «cuadro blanco» que
+             aparecía al seleccionar. Quien navegue con teclado usa los
+             botones de la leyenda, que hacen exactamente lo mismo. -->
+        <div class="relative w-32 h-32 shrink-0">
           <svg
-            v-if="datosEfectivos.length > 0"
-            viewBox="0 0 100 100"
+            viewBox="0 0 36 36"
             class="w-full h-full -rotate-90"
             role="img"
             :aria-label="`Gráfico de gastos por categoría. ${datosEfectivos.length} ${datosEfectivos.length === 1 ? 'categoría' : 'categorías'}. Total ${currencySymbol} ${formatMonto(totalGeneral)}`"
           >
             <circle
-              v-for="(seg, i) in segmentos"
-              :key="i"
-              cx="50"
-              cy="50"
-              r="38"
+              v-for="seg in segmentos"
+              :key="seg.nombre"
+              cx="18"
+              cy="18"
+              r="14"
               fill="none"
               :stroke="seg.color"
-              :stroke-width="seleccionada && seleccionada === seg.nombre ? 14 : 12"
-              :stroke-dasharray="seg.dash"
-              :stroke-dashoffset="seg.offset"
-              stroke-linecap="round"
+              :stroke-width="seleccionada === seg.nombre ? 5 : 4"
+              pathLength="100"
+              :stroke-dasharray="seg.dasharray"
+              :stroke-dashoffset="seg.dashoffset"
+              stroke-linecap="butt"
+              class="cursor-pointer transition-all duration-400"
               :opacity="seleccionada && seleccionada !== seg.nombre ? 0.2 : 1"
-              class="transition-all duration-400 cursor-pointer"
-              :aria-label="`${seg.nombre}: ${currencySymbol} ${formatMonto(seg.total || 0)}`"
-              tabindex="0"
               @click="toggleSeleccion(seg.nombre)"
-              @keydown.enter.space.prevent="toggleSeleccion(seg.nombre)"
             />
           </svg>
-          <!-- Center text -->
+          <!-- Texto del centro -->
           <div
-            class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none px-5 text-center"
+            class="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-3"
           >
             <template v-if="seleccionada">
-              <p class="text-xs text-theme-text-sec truncate max-w-full leading-tight">
+              <span class="text-[0.6875rem] text-theme-text-sec leading-tight truncate max-w-full">
                 {{ seleccionada }}
-              </p>
-              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">
-                {{ currencySymbol }}&nbsp;{{ formatMonto(totalSeleccionada) }}
-              </p>
-              <p class="text-[0.6875rem] text-theme-text-sec">
+              </span>
+              <span class="text-xs font-bold text-theme-text leading-tight">
                 {{ porcentajeSeleccionada.toFixed(1) }}%
-              </p>
+              </span>
+              <span
+                class="text-theme-text-muted leading-tight tabular-nums"
+                :class="tamanoCentro(montoSeleccionadaTexto)"
+              >
+                {{ montoSeleccionadaTexto }}
+              </span>
             </template>
             <template v-else>
-              <p class="text-xs text-theme-text-sec leading-tight">Gastado</p>
-              <p class="text-base font-bold text-theme-text leading-tight tabular-nums">
-                {{ currencySymbol }}&nbsp;{{ formatMonto(totalGeneral) }}
-              </p>
-              <p
+              <span class="text-xs text-theme-text-sec leading-tight">Gastado</span>
+              <span
+                class="font-bold text-theme-text leading-tight tabular-nums"
+                :class="tamanoCentro(totalGeneralTexto)"
+              >
+                {{ totalGeneralTexto }}
+              </span>
+              <span
                 v-if="presupuesto > 0"
-                class="text-[0.6875rem] leading-tight"
+                class="text-[0.625rem] leading-tight tabular-nums"
                 :class="totalGeneral <= presupuesto ? 'text-emerald-400' : 'text-red-400'"
               >
                 de {{ currencySymbol }}&nbsp;{{ formatMonto(presupuesto) }}
-              </p>
+              </span>
             </template>
           </div>
         </div>
-      </div>
 
-      <!-- Hint -->
-      <p v-if="seleccionada" class="text-center text-[0.6875rem] text-theme-text-muted -mt-3 mb-4">
-        Toca de nuevo para quitar el filtro
-      </p>
+        <p v-if="seleccionada" class="text-center text-[0.6875rem] text-theme-text-muted -mt-2">
+          Toca de nuevo para quitar el filtro
+        </p>
 
-      <!-- Category breakdown -->
-      <div class="space-y-2">
-        <div
-          v-for="cat in datosEfectivos"
-          :key="cat.nombre"
-          class="rounded-xl border overflow-hidden transition-all duration-300"
-          :class="[
-            seleccionada && seleccionada !== cat.nombre
-              ? 'bg-theme-card border-theme-border opacity-40'
-              : 'bg-theme-card border-theme-border opacity-100',
-          ]"
-        >
-          <!-- Category header (clickable) -->
+        <!-- Leyenda -->
+        <div class="space-y-2 w-full">
           <button
-            class="w-full px-3 py-2.5 text-left transition-colors"
-            :class="expandida === cat.nombre ? 'bg-theme-border-md' : 'hover:bg-theme-border-md'"
-            @click="toggleExpansion(cat.nombre)"
+            v-for="cat in datosEfectivos"
+            :key="cat.nombre"
+            class="w-full flex flex-col gap-1 px-2 py-1.5 rounded-lg transition-all duration-200 text-left"
+            :class="[
+              seleccionada === cat.nombre ? 'bg-theme-border-md' : 'hover:bg-theme-border-md',
+              seleccionada && seleccionada !== cat.nombre ? 'opacity-40' : 'opacity-100',
+            ]"
+            @click="toggleSeleccion(cat.nombre)"
           >
-            <div class="flex items-center justify-between mb-1.5">
-              <div class="flex items-center gap-2">
-                <div
-                  class="w-3 h-3 rounded-full shrink-0"
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <span
+                  class="w-2.5 h-2.5 rounded-sm shrink-0"
                   :style="{ backgroundColor: cat.color }"
+                ></span>
+                <span class="text-xs text-theme-text-muted truncate">{{ cat.nombre }}</span>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-[0.6875rem] text-theme-text-sec tabular-nums">
+                  {{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}
+                </span>
+                <span
+                  class="text-xs font-semibold w-11 text-right tabular-nums"
+                  :style="{ color: cat.color }"
+                >
+                  {{ cat.porcentaje.toFixed(1) }}%
+                </span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1.5 w-full">
+              <div class="flex-1 h-1 bg-theme-input rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :style="{ width: cat.porcentaje + '%', backgroundColor: cat.color }"
                 ></div>
-                <span class="text-sm text-theme-text font-medium">{{ cat.nombre }}</span>
-                <span class="text-xs text-theme-text-muted"
-                  >{{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}</span
-                >
               </div>
-              <div class="flex items-center gap-2">
-                <span class="text-sm font-semibold text-theme-text"
-                  >{{ currencySymbol }}&nbsp;{{ formatMonto(cat.total) }}</span
-                >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-3.5 h-3.5 text-theme-text-muted transition-transform duration-200"
-                  :class="{ 'rotate-180': expandida === cat.nombre }"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
+              <span class="text-[0.6875rem] text-theme-text-muted shrink-0">
+                {{ cat.cantidad }} {{ cat.cantidad === 1 ? 'gasto' : 'gastos' }}
+              </span>
             </div>
-            <!-- Progress bar -->
-            <div class="w-full h-1.5 bg-theme-border-md rounded-full overflow-hidden">
-              <div
-                class="h-full rounded-full transition-all duration-500"
-                :style="{ width: cat.porcentaje + '%', backgroundColor: cat.color }"
-              ></div>
-            </div>
-            <p class="text-[0.6875rem] text-theme-text-muted mt-1 text-right">
-              {{ cat.porcentaje.toFixed(1) }}%
-            </p>
           </button>
-
-          <!-- Expanded: expense detail list -->
-          <Transition name="expand">
-            <div v-if="expandida === cat.nombre" class="border-t border-theme-border">
-              <div
-                v-for="gasto in gastosDeCategoria(cat.nombre)"
-                :key="gasto.id"
-                class="flex items-center justify-between px-3 py-2 border-b border-theme-border last:border-b-0"
-              >
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm text-theme-text-sec truncate">{{ gasto.concepto }}</p>
-                  <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-[0.6875rem] text-theme-text-muted">{{
-                      formatFechaCorta(gasto.fecha)
-                    }}</span>
-                    <span v-if="gasto.hora" class="text-[0.6875rem] text-theme-text-muted">{{
-                      formatHora(gasto.hora)
-                    }}</span>
-                    <span
-                      v-if="getMetodoRegistroBadgeLabel(gasto)"
-                      class="text-[0.625rem] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
-                      >{{ getMetodoRegistroBadgeLabel(gasto) }}</span
-                    >
-                  </div>
-                </div>
-                <span class="text-sm font-medium text-theme-text shrink-0 ml-3"
-                  >{{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}</span
-                >
-              </div>
-            </div>
-          </Transition>
         </div>
       </div>
+
+      <!-- Resumen de la categoría activa -->
+      <Transition name="tooltip-slide">
+        <div
+          v-if="categoriaActiva"
+          class="mt-3 px-3 py-2 rounded-xl border"
+          :style="{
+            backgroundColor: categoriaActiva.color + '18',
+            borderColor: categoriaActiva.color + '40',
+          }"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-xs font-medium text-theme-text truncate">
+              {{ categoriaActiva.nombre }}
+            </span>
+            <button
+              class="tap-target text-theme-text-sec hover:text-theme-text text-xs shrink-0"
+              aria-label="Quitar el filtro de categoría"
+              @click="toggleSeleccion(categoriaActiva.nombre)"
+            >
+              ✕
+            </button>
+          </div>
+          <div class="flex items-center gap-4 mt-1">
+            <div>
+              <p class="text-[0.6875rem] text-theme-text-sec">Gastado</p>
+              <p class="text-sm font-bold text-theme-text tabular-nums">
+                {{ currencySymbol }}&nbsp;{{ formatMonto(categoriaActiva.total) }}
+              </p>
+            </div>
+            <div>
+              <p class="text-[0.6875rem] text-theme-text-sec">Gastos</p>
+              <p class="text-sm font-bold text-theme-text tabular-nums">
+                {{ categoriaActiva.cantidad }}
+              </p>
+            </div>
+            <div>
+              <p class="text-[0.6875rem] text-theme-text-sec">Del total</p>
+              <p class="text-sm font-bold tabular-nums" :style="{ color: categoriaActiva.color }">
+                {{ categoriaActiva.porcentaje.toFixed(1) }}%
+              </p>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
+
+    <!-- Gastos de la categoría activa, fuera de la tarjeta para ganar ancho -->
+    <Transition name="tooltip-slide">
+      <div v-if="categoriaActiva && gastosDeCategoriaActiva.length > 0" class="mt-3">
+        <div class="px-1 mb-2 flex items-center gap-2">
+          <span
+            class="w-2 h-2 rounded-full shrink-0"
+            :style="{ backgroundColor: categoriaActiva.color }"
+          ></span>
+          <p class="text-[0.6875rem] font-semibold text-theme-text-sec uppercase tracking-wider">
+            Gastos de {{ categoriaActiva.nombre }} ({{ gastosDeCategoriaActiva.length }})
+          </p>
+        </div>
+        <div class="space-y-2">
+          <div
+            v-for="gasto in gastosDeCategoriaActiva"
+            :key="gasto.id"
+            class="bg-theme-card rounded-xl px-3 py-2.5 flex items-center justify-between gap-3"
+          >
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-theme-text truncate">{{ gasto.concepto }}</p>
+              <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span class="text-[0.6875rem] text-theme-text-muted">
+                  {{ formatFechaCorta(gasto.fecha) }}
+                </span>
+                <span v-if="gasto.hora" class="text-[0.6875rem] text-theme-text-muted">
+                  {{ formatHora(gasto.hora) }}
+                </span>
+                <span
+                  v-if="getMetodoRegistroBadgeLabel(gasto)"
+                  class="text-[0.625rem] bg-theme-accent-bg text-theme-accent px-1 py-0.5 rounded-full"
+                >
+                  {{ getMetodoRegistroBadgeLabel(gasto) }}
+                </span>
+              </div>
+            </div>
+            <span class="text-sm font-semibold text-theme-text shrink-0 tabular-nums">
+              {{ currencySymbol }}&nbsp;{{ formatMonto(gasto.monto) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -251,7 +303,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:categoriaSeleccionada'])
 
-const { currencySymbol, formatMonto } = useCurrency()
+const { currencySymbol, formatMonto, formatMontoConSimbolo } = useCurrency()
 
 const mesSeleccionado = ref('actual') // 'actual' o 'YYYY-M'
 const isLoadingMes = ref(false)
@@ -318,9 +370,33 @@ const datosEfectivos = computed(() => {
 const DIAS_SEMANA_CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 const seleccionada = ref(null)
-const expandida = ref(null)
 
 const totalGeneral = computed(() => datosEfectivos.value.reduce((sum, c) => sum + c.total, 0))
+
+// El hueco del donut son ~76 px útiles. Un total de siete cifras no cabe y,
+// como no tiene por dónde partirse, se sale del anillo (el mismo problema que
+// el resumen del mes, documentado en CLAUDE.md). Encoger conserva los
+// dígitos; recortar perdería la cifra que se viene a mirar.
+function tamanoCentro(texto) {
+  const n = texto.length
+  if (n >= 16) return 'text-[0.5625rem]'
+  if (n >= 13) return 'text-[0.625rem]'
+  if (n >= 11) return 'text-xs'
+  return 'text-sm'
+}
+
+const totalGeneralTexto = computed(() => formatMontoConSimbolo(totalGeneral.value))
+const montoSeleccionadaTexto = computed(() => formatMontoConSimbolo(totalSeleccionada.value))
+
+const categoriaActiva = computed(() =>
+  seleccionada.value
+    ? datosEfectivos.value.find((c) => c.nombre === seleccionada.value) || null
+    : null,
+)
+
+const gastosDeCategoriaActiva = computed(() =>
+  categoriaActiva.value ? gastosDeCategoria(categoriaActiva.value.nombre) : [],
+)
 
 const totalSeleccionada = computed(() => {
   if (!seleccionada.value) return totalGeneral.value
@@ -364,16 +440,6 @@ function toggleSeleccion(nombre) {
   emitCategoriaChange(seleccionada.value)
 }
 
-function toggleExpansion(nombre) {
-  expandida.value = expandida.value === nombre ? null : nombre
-  if (expandida.value) {
-    seleccionada.value = nombre
-  } else {
-    seleccionada.value = null
-  }
-  emitCategoriaChange(seleccionada.value)
-}
-
 function gastosDeCategoria(categoriaNombre) {
   return gastosEfectivos.value
     .filter((g) => (g.categoriaNombre || 'Otros') === categoriaNombre)
@@ -384,26 +450,23 @@ function gastosDeCategoria(categoriaNombre) {
     })
 }
 
-const CIRCUNFERENCIA = 2 * Math.PI * 38
-
+// `pathLength="100"` deja el dasharray directamente en porcentaje, que es lo
+// que ya tenemos calculado — el mismo cálculo que usa el gráfico del
+// planificador (`datosGrafico` en usePlanificador.js).
 const segmentos = computed(() => {
-  const segs = []
   let acumulado = 0
-  const gap = datosEfectivos.value.length > 1 ? 1.5 : 0
-
-  for (const cat of datosEfectivos.value) {
-    const porcion = (cat.porcentaje / 100) * CIRCUNFERENCIA
-    const porcionConGap = Math.max(porcion - gap, 0.5)
-    segs.push({
+  return datosEfectivos.value.map((cat) => {
+    const porcentaje = cat.porcentaje
+    const dashoffset = -acumulado
+    acumulado += porcentaje
+    return {
       nombre: cat.nombre,
       color: cat.color,
       total: cat.total,
-      dash: `${porcionConGap} ${CIRCUNFERENCIA - porcionConGap}`,
-      offset: -acumulado,
-    })
-    acumulado += porcion
-  }
-  return segs
+      dasharray: `${porcentaje} ${100 - porcentaje}`,
+      dashoffset,
+    }
+  })
 })
 
 function formatFechaCorta(fechaStr) {
@@ -424,22 +487,14 @@ function formatHora(hora) {
 </script>
 
 <style scoped>
-.expand-enter-active {
-  transition: all 0.25s ease-out;
-  overflow: hidden;
+/* Misma transición que el gráfico del planificador. */
+.tooltip-slide-enter-active,
+.tooltip-slide-leave-active {
+  transition: all 0.2s ease;
 }
-.expand-leave-active {
-  transition: all 0.2s ease-in;
-  overflow: hidden;
-}
-.expand-enter-from,
-.expand-leave-to {
+.tooltip-slide-enter-from,
+.tooltip-slide-leave-to {
   opacity: 0;
-  max-height: 0;
-}
-.expand-enter-to,
-.expand-leave-from {
-  opacity: 1;
-  max-height: 1000px;
+  transform: translateY(-4px);
 }
 </style>
