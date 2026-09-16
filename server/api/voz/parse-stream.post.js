@@ -21,7 +21,6 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { vozParseBodySchema } from '~/shared/schemas/gastos.js'
 import {
-  parseModelList,
   getValidModels,
   selectBestModel,
   getFallbackModels,
@@ -30,6 +29,7 @@ import {
 } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { listarModelosActivos, registrarExito, registrarFallo } from '../../utils/modelosLlm.js'
 import {
   sanitizeLlmInput,
   sanitizeForSystemPrompt,
@@ -117,9 +117,7 @@ Reglas:
 - Para "ayer", "el martes", "hace dos días", usa estas referencias exactas: ${referenciaDias}.
 - Concepto máx 50 caracteres. Monto decimal positivo.`
 
-  const configuredModels = parseModelList(
-    runtimeConfig.geminiModel || 'gemini-3.1-flash-lite-preview',
-  )
+  const configuredModels = await listarModelosActivos({ runtimeConfig })
   const validModels = await getValidModels(configuredModels, apiKey)
   const primaryModel = selectBestModel(validModels, runtimeConfig)
 
@@ -200,11 +198,14 @@ Reglas:
         }
 
         parsedFinal = validados
+        registrarExito(currentModel).catch(() => {})
         break outer
       } catch (e) {
         lastError = e.message
       }
     }
+    // Solo se llega aquí si el modelo agotó sus intentos sin `break outer`.
+    registrarFallo(currentModel, lastError).catch(() => {})
   }
 
   if (parsedFinal) {

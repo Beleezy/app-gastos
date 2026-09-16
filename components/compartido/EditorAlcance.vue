@@ -9,6 +9,32 @@
 
       <CompartidoSelectorCategorias v-model="categorias" :categorias="listaCategorias" />
 
+      <!-- Perfiles de familia (0038): solo aparece si el emisor gestiona
+           alguno. Sin marcar ninguno se comparte solo la cuenta principal. -->
+      <fieldset v-if="perfiles.length" data-testid="compartido-perfiles">
+        <legend class="block text-sm font-medium text-theme-text-muted mb-1.5">
+          Incluir también los gastos de
+        </legend>
+        <p class="text-[0.6875rem] text-theme-text-muted mb-2">
+          Por defecto solo se comparten tus gastos. Marca los perfiles de tu familia cuyos gastos
+          también quieres que vea {{ nombre }}.
+        </p>
+        <label
+          v-for="p in perfiles"
+          :key="p.id"
+          class="flex items-center gap-3 py-2 tap-target cursor-pointer"
+        >
+          <input
+            v-model="perfilesIncluidos"
+            type="checkbox"
+            :value="p.id"
+            class="w-5 h-5 accent-theme-accent"
+            :data-testid="`compartido-perfil-${p.id}`"
+          />
+          <span class="text-sm text-theme-text">{{ p.nombre }}</span>
+        </label>
+      </fieldset>
+
       <fieldset>
         <legend class="block text-sm font-medium text-theme-text-muted mb-1.5">
           Cuánto detalle ve
@@ -91,6 +117,8 @@ const NIVELES = [
 
 const { guardarAlcance } = useCompartido()
 const { categorias: listaCategorias, fetchCategorias } = useCategorias()
+const { perfiles, fetchPerfiles } = usePerfiles()
+const perfilesIncluidos = ref((props.conexion.perfiles || []).map((p) => p.id))
 const toast = useToast()
 
 const categorias = ref(
@@ -116,10 +144,16 @@ const resumenActual = computed(() => {
       ? 'Solo los gastos que marques uno por uno.'
       : 'Nada: no hay rubros compartidos ni gastos marcados.'
   }
-  return `${rubros.join(', ')} — ${nivel}.`
+  const familia = props.conexion.perfiles?.length
+    ? ` Incluye los gastos de ${props.conexion.perfiles.map((p) => p.nombre).join(', ')}.`
+    : ''
+  return `${rubros.join(', ')} — ${nivel}.${familia}`
 })
 
-onMounted(() => fetchCategorias())
+onMounted(() => {
+  fetchCategorias()
+  fetchPerfiles().catch(() => {})
+})
 
 async function guardar() {
   guardando.value = true
@@ -129,6 +163,7 @@ async function guardar() {
       nivelDetalle: nivelDetalle.value,
       incluirMarcados: incluirMarcados.value,
       pausada: pausada.value,
+      perfiles: perfilesIncluidos.value,
     })
     toast.success('Listo, se avisó del cambio')
     emit('guardado')

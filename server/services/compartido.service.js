@@ -9,8 +9,13 @@ import {
   compartidoConexiones,
   categorias,
   usuarios,
+  compartidoPerfiles,
 } from '../database/schema.js'
-import { cargarConexionDeLaQueEsParte, cargarCategoriasCompartidas } from '../utils/compartido.js'
+import {
+  cargarConexionDeLaQueEsParte,
+  cargarCategoriasCompartidas,
+  cargarPerfilesIncluidosPorConexiones,
+} from '../utils/compartido.js'
 import { assertCategoriasPropias } from '../utils/categorias.js'
 // Reusado, no duplicado: el nombre a mostrar sale de configuraciones.nombre
 // con fallback a usuarios.nombre, igual que en los vínculos de deudas.
@@ -99,6 +104,7 @@ export async function listarConexiones({ usuarioId }) {
   }
 
   const noLeidos = ids.length ? await contarNoLeidosPorConexion(ids, usuarioId) : new Map()
+  const perfilesPor = await cargarPerfilesIncluidosPorConexiones(ids)
 
   const compartoCon = []
   const meComparten = []
@@ -108,6 +114,9 @@ export async function listarConexiones({ usuarioId }) {
     const categoriasConexion = porConexion.get(conexion.id) || []
     const base = aDto(conexion, {
       categorias: categoriasConexion,
+      // Perfiles de familia del emisor cuyos gastos entran en la conexión.
+      // El receptor también los ve: sabe de quién es lo que mira.
+      perfiles: perfilesPor.get(conexion.id) || [],
       avisosNoLeidos: noLeidos.get(conexion.id) || 0,
     })
 
@@ -388,8 +397,44 @@ export async function actualizarAlcance({ conexionId, usuarioId, body }) {
     }
   }
 
+  // Perfiles de familia (0038): reemplazo completo del conjunto, como las
+  // categorías. Solo perfiles gestionados por el emisor; cualquier otro id
+  // es 400, no 404: no es un recurso que se busca, es un valor inválido.
+  let perfilesNuevos = null
+  if (body.perfiles !== undefined) {
+    const ids = [...new Set(body.perfiles)]
+    const propios = ids.length
+      ? await db
+          .select({ id: usuarios.id, nombre: usuarios.nombre })
+          .from(usuarios)
+          .where(and(inArray(usuarios.id, ids), eq(usuarios.gestionadoPorId, usuarioId)))
+      : []
+    if (propios.length !== ids.length) {
+      throw error(400, 'Alguno de los perfiles no es de tu familia')
+    }
+    const previos = (await cargarPerfilesIncluidosPorConexiones([conexionId])).get(conexionId) || []
+    const antes = new Set(previos.map((p) => p.id))
+    const despues = new Set(ids)
+    const quitados = previos.filter((p) => !despues.has(p.id))
+    const agregados = propios.filter((p) => !antes.has(p.id))
+    if (quitados.length) {
+      eventos.push(`Dejó de incluir los gastos de: ${quitados.map((p) => p.nombre).join(', ')}`)
+    }
+    if (agregados.length) {
+      eventos.push(`Empezó a incluir los gastos de: ${agregados.map((p) => p.nombre).join(', ')}`)
+    }
+    perfilesNuevos = ids
+  }
   await db.transaction(async (tx) => {
     await tx.update(compartidoConexiones).set(set).where(eq(compartidoConexiones.id, conexionId))
+    if (perfilesNuevos !== null) {
+      await tx.delete(compartidoPerfiles).where(eq(compartidoPerfiles.conexionId, conexionId))
+      if (perfilesNuevos.length) {
+        await tx
+          .insert(compartidoPerfiles)
+          .values(perfilesNuevos.map((perfilId) => ({ conexionId, perfilId })))
+      }
+    }
 
     if (body.categorias !== undefined) {
       // Reemplazo completo del conjunto: idempotente y sin endpoints de
@@ -418,6 +463,7 @@ export async function actualizarAlcance({ conexionId, usuarioId, body }) {
   return aDto(actualizada, {
     receptorEmail: actualizada.receptorEmail,
     categorias: await cargarCategoriasCompartidas(conexionId),
+    perfiles: (await cargarPerfilesIncluidosPorConexiones([conexionId])).get(conexionId) || [],
   })
 }
 

@@ -14,6 +14,7 @@ import {
   index,
   uniqueIndex,
   jsonb,
+  primaryKey,
 } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
@@ -371,6 +372,9 @@ export const configuraciones = pgTable('configuraciones', {
   vistaRegistroSemana: boolean('vista_registro_semana').default(false).notNull(),
   tamanoLetra: varchar('tamano_letra', { length: 20 }).default('normal').notNull(),
   modoDaltonico: boolean('modo_daltonico').default(false).notNull(),
+  // Modo simple (0037): menos opciones y controles más grandes. Viaja con la
+  // cuenta, no con el dispositivo.
+  modoSimple: boolean('modo_simple').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -845,5 +849,61 @@ export const compartidoAvisos = pgTable(
     index('compartido_avisos_no_leidos_idx')
       .on(table.conexionId)
       .where(sql`${table.leidoAt} IS NULL`),
+  ],
+)
+
+// ── Catálogo de modelos de IA (0036) ─────────────────────────────────────
+// Sustituye a la lista fija de GEMINI_MODEL. Lo alimenta el descubrimiento
+// (ListModels de Google) y lo mantiene el superadmin; un modelo que falla
+// `LLM_MODELO_MAX_FALLOS` veces seguidas se apaga solo (desactivado_auto).
+// Ver server/utils/modelosLlm.js.
+export const modelosLlm = pgTable(
+  'modelos_llm',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    nombre: varchar('nombre', { length: 120 }).notNull(),
+    proveedor: varchar('proveedor', { length: 30 }).default('gemini').notNull(),
+    activo: boolean('activo').default(true).notNull(),
+    // Menor = se prueba antes.
+    prioridad: integer('prioridad').default(500).notNull(),
+    // 'entorno' | 'descubierto' | 'manual'
+    origen: varchar('origen', { length: 20 }).default('manual').notNull(),
+    soportaImagen: boolean('soporta_imagen').default(true).notNull(),
+    version: varchar('version', { length: 60 }),
+    descripcion: text('descripcion'),
+    fallosConsecutivos: integer('fallos_consecutivos').default(0).notNull(),
+    desactivadoAuto: boolean('desactivado_auto').default(false).notNull(),
+    ultimoError: text('ultimo_error'),
+    ultimoFalloAt: timestamp('ultimo_fallo_at'),
+    ultimoExitoAt: timestamp('ultimo_exito_at'),
+    descubiertoAt: timestamp('descubierto_at'),
+    vistoEnGoogleAt: timestamp('visto_en_google_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('modelos_llm_nombre_uq').on(table.nombre),
+    index('modelos_llm_activos_idx').on(table.activo, table.prioridad),
+  ],
+)
+
+// ── Compartido: perfiles gestionados incluidos en una conexión (0038) ────
+// Sin filas, la conexión comparte solo los gastos de la cuenta real del
+// emisor (comportamiento original). Cascada desde usuarios: borrar el
+// perfil lo quita de todas las conexiones.
+export const compartidoPerfiles = pgTable(
+  'compartido_perfiles',
+  {
+    conexionId: uuid('conexion_id')
+      .references(() => compartidoConexiones.id, { onDelete: 'cascade' })
+      .notNull(),
+    perfilId: uuid('perfil_id')
+      .references(() => usuarios.id, { onDelete: 'cascade' })
+      .notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.conexionId, table.perfilId] }),
+    index('compartido_perfiles_perfil_idx').on(table.perfilId),
   ],
 )

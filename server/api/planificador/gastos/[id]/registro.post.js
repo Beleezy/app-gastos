@@ -6,7 +6,7 @@ import {
   categorias,
   ahorros,
 } from '../../../../database/schema.js'
-import { getUsuarioFromEvent } from '../../../../utils/getUsuario.js'
+import { getUsuarioFromEvent, registradoPorDe } from '../../../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../../../utils/fechaLocal.js'
 import { eq, and } from 'drizzle-orm'
 import { syncUpdated } from '../../../../utils/gcalAutoSync.js'
@@ -73,6 +73,7 @@ export default defineEventHandler(async (event) => {
         .insert(gastos)
         .values({
           usuarioId,
+          registradoPorId: registradoPorDe(event, usuarioId),
           categoriaId: gastoPlanificado.categoriaId,
           gastoPlanificadoId: gastoPlanificado.id,
           concepto: gastoPlanificado.concepto,

@@ -4,7 +4,6 @@ import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
 import { validateBody } from '../../utils/validate.js'
 import { vozParseImageBodySchema } from '~/shared/schemas/gastos.js'
 import {
-  parseModelList,
   getValidModels,
   selectBestModel,
   getFallbackModels,
@@ -13,6 +12,7 @@ import {
 } from '../../utils/geminiModels.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { logger } from '../../utils/logger.js'
+import { listarModelosActivos, registrarExito, registrarFallo } from '../../utils/modelosLlm.js'
 import { sanitizeForSystemPrompt } from '../../utils/llmSafety.js'
 import { assertImagePayload } from '../../utils/imageMagic.js'
 import { trackUsoLlm, assertCuotaMensual } from '../../utils/usoLlm.js'
@@ -103,7 +103,7 @@ Reglas:
   const { mimeType, base64: imageBase64 } = assertImagePayload(body.image)
 
   // Model selection (same logic as voice parse)
-  const configuredModels = parseModelList(runtimeConfig.geminiModel || 'gemini-2.5-flash')
+  const configuredModels = await listarModelosActivos({ runtimeConfig, imagen: true })
   const validModels = await getValidModels(configuredModels, apiKey)
 
   // Seleccionar el modelo con capacidad disponible (no a 1 del límite RPM/RPD)
@@ -252,6 +252,7 @@ Reglas:
           continue
         }
 
+        registrarExito(currentModel).catch(() => {})
         return {
           gastos: parsed.gastos,
           totalComprobante,
@@ -268,6 +269,9 @@ Reglas:
     logger.warn(`Modelo ${currentModel} falló tras ${MAX_RETRIES} intentos`, {
       model: currentModel,
     })
+    // Cuenta contra el modelo salvo cuota (429) o clave (403): al llegar al
+    // umbral se apaga solo (server/utils/modelosLlm.js).
+    registrarFallo(currentModel, lastError).catch(() => {})
   }
 
   logger.error('Todos los modelos fallaron (image)', { lastError })

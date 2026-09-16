@@ -467,6 +467,37 @@
                   />
                 </button>
               </label>
+              <!-- Modo simple: menos opciones y controles más grandes. -->
+              <label
+                class="flex items-center justify-between py-2 cursor-pointer select-none"
+                data-testid="cfg-modo-simple"
+              >
+                <div class="flex items-center gap-2 min-w-0">
+                  <span class="text-lg" aria-hidden="true">🧭</span>
+                  <div>
+                    <span class="text-sm text-theme-text font-medium">Modo simple</span>
+                    <p class="text-[0.6875rem] text-theme-text-sec leading-tight">
+                      Menos opciones, botones grandes y solo lo esencial: anotar gastos, ver deudas
+                      e ingresos.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  :aria-checked="form.modoSimple"
+                  aria-label="Modo simple"
+                  class="relative inline-flex h-6 w-11 items-center rounded-full after:absolute after:-inset-y-2.5 after:-inset-x-2 after:content-[''] transition-colors duration-200 focus:outline-none shrink-0 ml-3"
+                  :class="form.modoSimple ? 'bg-blue-500' : 'bg-theme-border-md'"
+                  data-testid="cfg-modo-simple-toggle"
+                  @click="form.modoSimple = !form.modoSimple"
+                >
+                  <span
+                    class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200"
+                    :class="form.modoSimple ? 'translate-x-6' : 'translate-x-1'"
+                  />
+                </button>
+              </label>
             </div>
           </div>
         </details>
@@ -704,6 +735,7 @@
            streaming LLM nunca llegó a cablearse a la UI. Los gates con
            useFeatureFlag siguen respondiendo a sus defaults. -->
       <ConfiguracionesSuperadminPanel />
+      <ConfiguracionesModelosIa />
 
       <!-- App info -->
       <div class="text-center pt-4 pb-8">
@@ -746,6 +778,7 @@ const form = reactive({
   vistaRegistroSemana: false,
   tamanoLetra: 'normal',
   modoDaltonico: false,
+  modoSimple: false,
 })
 
 const originalValues = ref({})
@@ -765,7 +798,8 @@ const hasChanges = computed(() => {
     form.vistaRegistroDia !== originalValues.value.vistaRegistroDia ||
     form.vistaRegistroSemana !== originalValues.value.vistaRegistroSemana ||
     form.tamanoLetra !== originalValues.value.tamanoLetra ||
-    form.modoDaltonico !== originalValues.value.modoDaltonico
+    form.modoDaltonico !== originalValues.value.modoDaltonico ||
+    form.modoSimple !== originalValues.value.modoSimple
   )
 })
 
@@ -782,6 +816,7 @@ function loadFromConfig() {
   form.vistaRegistroSemana = config.value.vistaRegistroSemana === true
   form.tamanoLetra = config.value.tamanoLetra || 'normal'
   form.modoDaltonico = config.value.modoDaltonico === true
+  form.modoSimple = config.value.modoSimple === true
   setFontSize(form.tamanoLetra)
   setColorblindMode(form.modoDaltonico)
   originalValues.value = { ...form }
@@ -802,6 +837,7 @@ async function guardar() {
       vistaRegistroSemana: form.vistaRegistroSemana,
       tamanoLetra: form.tamanoLetra,
       modoDaltonico: form.modoDaltonico,
+      modoSimple: form.modoSimple,
     })
     originalValues.value = { ...form }
     toastMsg.value = 'Configuracion guardada'

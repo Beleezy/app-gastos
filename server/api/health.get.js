@@ -24,6 +24,9 @@ const SENTINEL_COLUMNS = [
   ['idempotency_keys', 'clave'], // 0034_idempotency_keys
   ['gastos', 'visibilidad'], // 0033_compartido
   ['personas_entidades', 'deleted_at'], // 0032_personas_soft_delete
+  ['modelos_llm', 'nombre'], // 0036
+  ['configuraciones', 'modo_simple'], // 0037
+  ['compartido_perfiles', 'perfil_id'], // 0038
 ]
 
 // Triggers que NO deben existir. 0027 borró las tablas de etiquetas y dejó

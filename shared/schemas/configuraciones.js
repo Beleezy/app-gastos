@@ -54,6 +54,7 @@ export const configuracionUpdateSchema = z
     vistaRegistroSemana: z.boolean(),
     tamanoLetra: z.enum(['normal', 'grande']),
     modoDaltonico: z.boolean(),
+    modoSimple: z.boolean(),
   })
   .partial()
   .refine((v) => Object.keys(v).length > 0, 'Sin cambios')

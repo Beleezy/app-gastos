@@ -36,16 +36,17 @@ Críticas (la app no arranca correctamente sin estas):
 
 Recomendadas (algunas features quedan deshabilitadas si faltan):
 
-| Variable                    | Para qué sirve                                                                                                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GEMINI_API_KEY`            | Endpoints de voz/foto (`/api/voz/parse*`).                                                                                                                                  |
-| `GEMINI_MODEL`              | Lista de modelos separados por `;` (fallback). Default `gemini-3.1-flash-lite-preview;gemini-2.5-flash`.                                                                    |
-| `GEMINI_MAX_RETRIES`        | Reintentos por modelo. Default `3`.                                                                                                                                         |
-| `GEMINI_RATE_LIMITS`        | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`.                                                                                                                    |
-| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza.                                                                                      |
-| `LLM_CACHE_TTL_SECONDS`     | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h).                                                                                                    |
-| `CRON_SECRET`               | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM, papelera e idempotencias). En la suite E2E se fija uno de prueba para ejercitarlos. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas.                                                                                                                                      |
+| Variable                    | Para qué sirve                                                                                                                                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GEMINI_API_KEY`            | Endpoints de voz/foto (`/api/voz/parse*`).                                                                                                                                                                                        |
+| `GEMINI_MODEL`              | Lista de modelos separados por `;`. Solo siembra la tabla `modelos_llm` la primera vez y sirve de respaldo si la BD no responde: el catálogo vivo se mantiene desde Configuraciones (superadmin) y con el descubrimiento semanal. |
+| `GEMINI_MAX_RETRIES`        | Reintentos por modelo. Default `3`.                                                                                                                                                                                               |
+| `GEMINI_RATE_LIMITS`        | Cuotas por modelo (RPM/RPD), formato `modelo=RPM/RPD;…`.                                                                                                                                                                          |
+| `LLM_QUOTA_MENSUAL_USUARIO` | Tope mensual de peticiones IA por usuario. Default `500`. Lanza 429 cuando se alcanza.                                                                                                                                            |
+| `LLM_CACHE_TTL_SECONDS`     | TTL del caché de respuestas LLM por hash de input. Default `21600` (6h).                                                                                                                                                          |
+| `CRON_SECRET`               | Secreto compartido para endpoints `/api/cron/*` (expirar solicitudes, purgar caché LLM, papelera e idempotencias). En la suite E2E se fija uno de prueba para ejercitarlos.                                                       |
+| `LLM_MODELO_MAX_FALLOS`     | Fallos consecutivos (por causa del modelo, no por cuota) tras los que un modelo del catálogo `modelos_llm` se apaga solo. Default `3`. El superadmin lo reactiva desde Configuraciones o lo hace el descubrimiento semanal.       |
+| `SUPABASE_SERVICE_ROLE_KEY` | Operaciones server-side privilegiadas.                                                                                                                                                                                            |
 
 El plugin `server/plugins/01.assert-env.js` valida estas al arrancar y loguea WARN/ERROR si falta alguna.
 

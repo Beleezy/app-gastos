@@ -687,3 +687,27 @@ html.light {
     min-width: 44px;
   }
 }
+
+/* ── Modo simple (configuraciones.modo_simple) ──────────────────────────
+   Se activa con la clase `modo-simple` en <html> (composables/useModoSimple.js).
+   Letra y controles más grandes; lo avanzado se oculta desde los componentes
+   con `v-if="!modoSimple"`, no desde aquí. Pensado para 380 px de ancho. */
+html.modo-simple {
+  font-size: 17px;
+}
+html.modo-simple .tap-target,
+html.modo-simple button,
+html.modo-simple [role='button'],
+html.modo-simple a.tap-target {
+  min-height: 48px;
+}
+html.modo-simple input:not([type='checkbox']):not([type='radio']),
+html.modo-simple select,
+html.modo-simple textarea {
+  min-height: 48px;
+  font-size: 1rem;
+}
+html.modo-simple .texto-simple-grande {
+  font-size: 1.25rem;
+  line-height: 1.3;
+}

@@ -35,11 +35,23 @@ const tempUsers = [
     nombre: 'Usuario Demo 2',
     email: 'demo2@test.local',
   },
+  // Superadmin de pruebas: requireSuperadmin mira usuarios.rol, y el bypass
+  // E2E crea las filas con rol 'usuario'. Los specs de /api/superadmin/*
+  // mandan este id en x-dev-user-id.
+  {
+    id: '00000000-0000-0000-0000-000000000103',
+    nombre: 'Superadmin E2E',
+    email: 'superadmin@test.local',
+    rol: 'superadmin',
+  },
 ]
 
 try {
   for (const user of tempUsers) {
-    await db.insert(usuarios).values(user).onConflictDoNothing()
+    await db
+      .insert(usuarios)
+      .values(user)
+      .onConflictDoUpdate({ target: usuarios.id, set: { rol: user.rol || 'usuario' } })
   }
   console.log(
     '✅ Usuarios temporales listos:',

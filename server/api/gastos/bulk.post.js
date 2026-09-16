@@ -1,6 +1,6 @@
 import { db } from '../../utils/db.js'
 import { gastos, categorias } from '../../database/schema.js'
-import { getUsuarioFromEvent } from '../../utils/getUsuario.js'
+import { getUsuarioFromEvent, registradoPorDe } from '../../utils/getUsuario.js'
 import { getFechaHoraLocalUsuario } from '../../utils/fechaLocal.js'
 import { rateLimits } from '../../utils/rateLimit.js'
 import { conIdempotencia } from '../../utils/idempotency.js'
@@ -41,8 +41,10 @@ export default defineEventHandler(async (event) => {
         ? 'foto'
         : 'voz'
 
+    const registradoPorId = registradoPorDe(event, usuarioId)
     const valores = body.gastos.map((g) => ({
       usuarioId,
+      registradoPorId,
       categoriaId: g.categoriaId,
       concepto: g.concepto?.trim() || 'Gasto no especificado',
       monto: String(g.monto || 0),
