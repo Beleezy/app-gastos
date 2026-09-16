@@ -29,7 +29,7 @@
           </span>
           <div class="flex items-center gap-1">
             <button
-              class="w-7 h-7 rounded-lg bg-theme-input/60 border border-theme-border flex items-center justify-center text-theme-text-muted active:bg-theme-border-md active:scale-95 transition-all"
+              class="tap-target w-7 h-7 rounded-lg bg-theme-input/60 border border-theme-border flex items-center justify-center text-theme-text-muted active:bg-theme-border-md active:scale-95 transition-all"
               aria-label="Mes anterior"
               @click="$emit('prev')"
             >
@@ -45,7 +45,7 @@
               </svg>
             </button>
             <button
-              class="w-7 h-7 rounded-lg bg-theme-input/60 border border-theme-border flex items-center justify-center text-theme-text-muted active:bg-theme-border-md active:scale-95 transition-all"
+              class="tap-target w-7 h-7 rounded-lg bg-theme-input/60 border border-theme-border flex items-center justify-center text-theme-text-muted active:bg-theme-border-md active:scale-95 transition-all"
               :class="disableNext ? 'opacity-40 cursor-not-allowed' : ''"
               :disabled="disableNext"
               aria-label="Mes siguiente"

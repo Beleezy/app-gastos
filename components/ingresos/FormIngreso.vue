@@ -54,7 +54,7 @@
           v-for="o in ORIGENES"
           :key="o.value"
           type="button"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+          class="inline-flex min-h-[2.75rem] items-center px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
           :class="
             form.origen === o.value
               ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/40'

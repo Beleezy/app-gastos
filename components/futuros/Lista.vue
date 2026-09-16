@@ -49,16 +49,17 @@
       </button>
     </div>
 
-    <!-- Filtros por prioridad y estado (pr-4: el último chip no se corta al borde) -->
-    <div
-      class="mb-4 flex items-center gap-2 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r"
-    >
+    <!-- Filtros por prioridad y estado. Envuelven en vez de desplazarse: con
+         el contador al lado de cada etiqueta los cuatro pasaban de 431 px en
+         una pantalla de 370 y «Decididos» quedaba fuera sin que nada lo
+         indicara. -->
+    <div class="mb-4 flex flex-wrap items-center gap-1.5">
       <button
         v-for="f in filtrosProyecto"
         :key="f.value"
         :data-testid="`futuros-filtro-${f.value}`"
         :aria-pressed="filtroActual === f.value"
-        class="shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors"
+        class="shrink-0 inline-flex min-h-[2.25rem] items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium transition-colors"
         :class="[
           filtroActual === f.value
             ? f.accent || 'bg-violet-500 text-white'

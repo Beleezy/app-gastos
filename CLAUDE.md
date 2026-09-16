@@ -341,6 +341,43 @@ helper que la haga.
   líneas hay que usar los rects de un `Range` sobre el contenido: dividir
   alto entre `line-height` da falsos positivos con los emoji, que dibujan
   una caja más alta que el texto.
+- **Un número largo sin dónde partirse se dibuja ENCIMA de lo que tiene al
+  lado.** En el resumen de /registro el total en `text-3xl` y la columna de
+  la derecha (meta, % y restante) se repartían el ancho; con siete cifras el
+  total no cabía y, como «1,324,616.39» no tiene espacios ni se recorta,
+  se pintaba superpuesto a la otra columna: dos números ilegibles. No
+  desborda la página ni recorta nada, así que ninguna medida de ancho lo ve
+  — hay que comparar las cajas de los dos. El tamaño de fuente sale de la
+  longitud del importe formateado (`tamanoMonto` en
+  [ResumenMesRegistro.vue](components/registro/ResumenMesRegistro.vue)):
+  encogerlo conserva todos los dígitos, truncar perdería justo el dato que
+  se viene a mirar.
+- **El área táctil no es la caja del control.** `.tap-target` (main.css)
+  monta un `::after` de 44×44 que amplía la zona sensible sin tocar el
+  diseño, así que medir `getBoundingClientRect` da por pequeños controles
+  que se tocan perfectamente. Se mide con `elementFromPoint` alrededor del
+  centro: es lo que hace un dedo. Con esa medida, de 66 controles
+  «pequeños» solo 19 lo eran de verdad. Los que sí lo estaban eran los
+  compartidos —la barra de perfil (32 px, en todas las páginas) y el
+  selector de mes (28-30 px)—, que se arreglan una vez y valen para toda la
+  app; para los iconos de una barra apretada, `.tap-target` en vez de
+  agrandar la caja. Al medir hay que centrar el control primero: pegado al
+  borde o bajo la cabecera pegajosa la lectura es del scroll, no del
+  tamaño.
+- **Una fila de filtros que se desplaza 30 px no parece un carrusel, parece
+  un fallo de dibujo.** «Saldados» en /deudas y «Decididos» en /futuros
+  quedaban fuera de pantalla a 370 px dentro de un `overflow-x-auto`: no
+  desborda la página, así que la comprobación de ancho los daba por buenos,
+  y nadie arrastra una fila a la que le sobra tan poco — el filtro
+  simplemente no existía. Ahora envuelven (`flex-wrap`). Un carrusel se
+  justifica cuando el contenido es claramente más largo que la pantalla y
+  se ve que sigue; para cuatro chips, no.
+- **Las cuatro rejillas de categoría llevan el mismo `text-[0.6875rem]`.**
+  `FormGastoManual` se había quedado heredando `text-xs`, y ese píxel de
+  más hacía que «Entretenimiento» no cupiera en su celda de 370 px y
+  `break-words` lo partiera a mitad de palabra: «Entretenimient / o». Las
+  otras tres (planificado, registrar pago y ahorro) ya usaban el tamaño
+  menor.
 - **`npm run lint` corre con `--max-warnings=0`.** Había cien warnings
   acumulados (imports muertos, `catch (e)` sin usar, props sin default) y
   entre ellos se escondían dos que sí importaban: un `lastError` que se

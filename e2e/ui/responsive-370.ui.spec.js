@@ -1,7 +1,8 @@
 // La app tiene que caber en 370 px de ancho, que es el borde bajo de los
-// móviles que usa la gente (el objetivo declarado son 360–412 px).
+// móviles que usa la gente (el objetivo declarado son 370–412 px).
 //
-// Dos comprobaciones, porque fallan de formas distintas:
+// Cuatro comprobaciones, porque fallan de formas distintas y cada una es
+// invisible para las demás:
 //
 //  1. Desborde horizontal de la página. Es el fallo duro: aparece una barra
 //     lateral y el contenido se va fuera de la pantalla.
@@ -10,6 +11,15 @@
 //     comprobación lo daba por bueno. Es lo que pasaba con el selector de
 //     mes del gráfico de categorías: «Actual + 3 meses + desplegable» eran
 //     cinco controles y los tres meses se partían en dos líneas.
+//  3. Filas de filtros que esconden su último chip. Tampoco desbordan —el
+//     contenedor se desplaza en horizontal— y por eso pasaban: «Saldados» en
+//     /deudas y «Decididos» en /futuros quedaban fuera de pantalla sin nada
+//     que lo indicara, así que el filtro simplemente no existía para quien
+//     no adivinara que esa fila se arrastra.
+//  4. Objetivos táctiles por debajo de 44 px. Se mide el área REAL con
+//     elementFromPoint, no la caja: la utilidad `.tap-target` del proyecto
+//     extiende la zona sensible con un pseudoelemento sin tocar el diseño,
+//     así que medir el rect da por pequeño lo que se toca perfectamente.
 //
 // La segunda mide líneas de texto, no píxeles: un botón cuya etiqueta cabe
 // en una línea en 412 px y se parte en 370 px es exactamente el síntoma.
@@ -72,6 +82,26 @@ const CONTROLES_PARTIDOS = () => {
   return [...new Set(fuera)]
 }
 
+// Nada interactivo puede quedar fuera de pantalla por la derecha. Un
+// contenedor que se desplaza en horizontal esconde sus últimos hijos sin
+// desbordar la página, y a 370 px eso se lee como un fallo de dibujo, no
+// como un carrusel: nadie arrastra una fila a la que solo le sobran 30 px.
+const CONTROLES_FUERA_DE_PANTALLA = (ancho) => {
+  const fuera = []
+  for (const el of document.querySelectorAll('button, a[href], [role="tab"]')) {
+    const s = getComputedStyle(el)
+    if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') continue
+    const r = el.getBoundingClientRect()
+    if (r.width < 2 || r.height < 2) continue
+    if (s.position === 'fixed') continue
+    if (r.right > ancho + 1 || r.left < -1) {
+      const txt = (el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 30)
+      fuera.push(`«${txt}» ${Math.round(r.left)}..${Math.round(r.right)}`)
+    }
+  }
+  return [...new Set(fuera)]
+}
+
 for (const ruta of RUTAS) {
   test(`${ruta} cabe en ${ANCHO} px`, async ({ page }) => {
     await page.goto(ruta, { waitUntil: 'networkidle' })
@@ -85,8 +115,82 @@ for (const ruta of RUTAS) {
 
     const partidos = await page.evaluate(CONTROLES_PARTIDOS)
     expect(partidos, `${ruta}: controles con el texto partido en dos líneas`).toEqual([])
+
+    const fuera = await page.evaluate(CONTROLES_FUERA_DE_PANTALLA, ANCHO)
+    expect(fuera, `${ruta}: controles fuera de pantalla`).toEqual([])
   })
 }
+
+// Área táctil REAL de un control: hasta dónde, alrededor de su centro, un
+// toque sigue activándolo. No es su caja — `.tap-target` (main.css) monta un
+// ::after de 44×44 que amplía la zona sensible sin cambiar el diseño, y
+// elementFromPoint devuelve al dueño del pseudoelemento. Medir el rect daba
+// por pequeños controles que se tocan bien y escondía los que no.
+const ALTO_TACTIL = (minimo) => {
+  const alto = []
+  const alcanza = (el, x, y) => {
+    if (x < 1 || y < 1 || x > innerWidth - 1 || y > innerHeight - 1) return false
+    const hit = document.elementFromPoint(x, y)
+    return !!hit && (hit === el || el.contains(hit) || hit.contains(el))
+  }
+  for (const el of document.querySelectorAll('button, a[href], [role="tab"], [role="switch"]')) {
+    const s = getComputedStyle(el)
+    if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') continue
+    if (s.pointerEvents === 'none') continue
+    if (el.tagName === 'A' && el.closest('p, li')) continue // enlace dentro de un texto
+    el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' })
+    const r = el.getBoundingClientRect()
+    if (r.width < 2 || r.height < 2) continue
+    if (r.top < 0 || r.bottom > innerHeight) continue // no cabe entero: no medible
+    const cx = Math.round(r.left + r.width / 2)
+    const cy = Math.round(r.top + r.height / 2)
+    if (!alcanza(el, cx, cy)) continue // tapado por un overlay o colapsado
+    let arriba = 0
+    while (arriba < minimo && alcanza(el, cx, cy - arriba - 1)) arriba++
+    let abajo = 0
+    while (abajo < minimo && alcanza(el, cx, cy + abajo + 1)) abajo++
+    const total = 1 + arriba + abajo
+    if (total < minimo) {
+      const txt = (el.innerText || el.getAttribute('aria-label') || '').trim().slice(0, 28)
+      alto.push(`«${txt}» ${total}px`)
+    }
+  }
+  return [...new Set(alto)]
+}
+
+// 44 px es el mínimo de WCAG y el que declara el proyecto. Se tolera 42
+// porque la medición pierde hasta dos píxeles por redondeo cuando el centro
+// del control cae entre píxeles: `.tap-target` da exactamente 44 y se leía 41.
+const MIN_TACTIL = 42
+
+for (const ruta of ['/', '/registro', '/planificador', '/deudas', '/futuros']) {
+  test(`${ruta}: los controles se pueden tocar`, async ({ page }) => {
+    await page.goto(ruta, { waitUntil: 'networkidle' })
+    await page.waitForTimeout(500)
+    const pequenos = await page.evaluate(ALTO_TACTIL, MIN_TACTIL)
+    expect(pequenos, `${ruta}: controles con menos de ${MIN_TACTIL}px de alto táctil`).toEqual([])
+  })
+}
+
+test('el total gastado no se dibuja encima de su presupuesto', async ({ page }) => {
+  // Con siete cifras el importe no cabía junto a la columna de la derecha y,
+  // como no tiene por dónde partirse ni se recorta, se pintaba ENCIMA: dos
+  // números superpuestos. No desborda nada, así que solo se ve comparando
+  // las cajas de los dos.
+  await page.goto('/registro', { waitUntil: 'networkidle' })
+  const resumen = page.getByTestId('resumen-mes-registro')
+  await expect(resumen).toBeVisible({ timeout: 20000 })
+  const solapan = await resumen.evaluate((raiz) => {
+    const monto = raiz.querySelector('[data-testid="resumen-mes-total"]')
+    const meta = raiz.querySelector('[data-testid="resumen-mes-meta"]')
+    if (!monto || !meta) return 'faltan los marcadores del resumen'
+    const a = monto.getBoundingClientRect()
+    const b = meta.getBoundingClientRect()
+    const cruce = Math.min(a.right, b.right) - Math.max(a.left, b.left)
+    return cruce > 1 ? `se cruzan ${Math.round(cruce)}px` : null
+  })
+  expect(solapan, 'el total y el presupuesto se superponen').toBeNull()
+})
 
 test('las pestañas del planificador se ven enteras', async ({ page }) => {
   await page.goto('/planificador', { waitUntil: 'networkidle' })

@@ -74,7 +74,7 @@
               formatCurrency(totalDiaSeleccionado)
             }}</span>
             <button
-              class="w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
+              class="tap-target w-7 h-7 rounded-full bg-theme-border-md flex items-center justify-center text-theme-text-muted hover:text-theme-text transition-colors"
               aria-label="Cerrar detalle"
               @click="fechaSeleccionada = null"
             >
