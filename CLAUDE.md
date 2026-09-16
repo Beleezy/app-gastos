@@ -306,6 +306,41 @@ helper que la haga.
   lo verifica a 380 px con un usuario propio (activarlo en el usuario
   compartido cambiaría la navegación de los demás specs en paralelo) y
   comprueba que ninguna de las dos versiones desborda.
+- **El ref que alimenta `useOverlayBack` tiene que ser el que resetea el
+  cierre del overlay.** Los tres sitios que borran un gasto planificado
+  (lista, calendario y gráfico del planificador) registraban el overlay
+  sobre `gastoParaEliminar !== null` y ADEMÁS renderizaban
+  `SharedConfirmDialog`, que ya gestiona su propio botón atrás y su propio
+  bloqueo de scroll. Cancelar apagaba el booleano del diálogo pero no el
+  gasto elegido: el overlay del padre no se liberaba nunca, el contador de
+  [useModalLayer.js](composables/useModalLayer.js) no bajaba a cero y el
+  `position: fixed` que ese contador pone en el `body` se quedaba puesto —
+  tras cancelar un borrado la página ya no hacía scroll ni respondía. El
+  arreglo no es acordarse de limpiar, es que no haya dos verdades que
+  puedan discrepar:
+  [useConfirmarEliminarPlanificado.js](composables/useConfirmarEliminarPlanificado.js)
+  guarda un solo `modo` ('simple' | 'recurrente' | null) y expone los dos
+  booleanos como computados CON SETTER, así que apagar cualquiera cierra
+  todo. Un `watch` sobre los dos booleanos no sirve: si se abre y se cierra
+  en el mismo tick, el valor vuelve al de partida y Vue no lo considera un
+  cambio (lo fija `tests/confirmarEliminarPlanificado.test.js`). Y un
+  diálogo que ya se gestiona solo NO lleva un segundo `useOverlayBack` del
+  padre.
+- **370 px es el ancho mínimo, y el desborde no es el único síntoma.** Un
+  desborde horizontal se ve enseguida; lo que no se ve midiendo el
+  documento es una fila de controles que no cabe, porque flexbox los
+  encoge y el texto salta a dos líneas sin desbordar nada. Así estaba el
+  selector de mes del gráfico de categorías: «Actual + 3 meses +
+  desplegable» eran cinco controles y los tres meses se partían. Ahora son
+  dos meses (`MESES_RAPIDOS`) con etiqueta corta —el año solo cuando no es
+  el que se está viendo, `mesesAnteriores` en
+  [constants.js](utils/constants.js)— y la barra de pestañas del
+  planificador esconde los iconos por debajo de 400 px para que su cuarta
+  sección quepa entera. [responsive-370.ui.spec.js](e2e/ui/responsive-370.ui.spec.js)
+  fija las dos cosas en todas las rutas y en los overlays. Para contar
+  líneas hay que usar los rects de un `Range` sobre el contenido: dividir
+  alto entre `line-height` da falsos positivos con los emoji, que dibujan
+  una caja más alta que el texto.
 - **`npm run lint` corre con `--max-warnings=0`.** Había cien warnings
   acumulados (imports muertos, `catch (e)` sin usar, props sin default) y
   entre ellos se escondían dos que sí importaban: un `lastError` que se
@@ -329,7 +364,7 @@ helper que la haga.
 - **Fetch autenticado:** siempre `useApiFetch()` (plugin [fetch.js](plugins/fetch.js) inyecta token Supabase).
 - **UI compartida:** `components/shared/` — `BaseBottomSheet`, `ConfirmDialog`, `MonthSelector`, `SkeletonLoader`, `ToastNotification`, `VirtualList`, `Money`, `EmptyState`, `Chip`, FABs. Modales con focus trap + `aria-modal` integrados; botón atrás cierra modal ([useModalLayer.js](composables/useModalLayer.js) + [useModalBack.js](composables/useModalBack.js)).
 - **Offline/PWA:** cola de sincronización ([useSyncQueue.js](composables/useSyncQueue.js) + [SyncQueueBadge.vue](components/layout/SyncQueueBadge.vue)), banner offline, update prompt opt-in ([usePwaUpdate.js](composables/usePwaUpdate.js)); runtime caching SWR/NetworkFirst en `nuxt.config.ts`.
-- **UX móvil:** 360–412 px, tap targets ≥ 44 px (`.tap-target`), haptics, pull-to-refresh, swipe de mes, long-press, drag & drop. Onboarding: [TourOverlay.vue](components/onboarding/TourOverlay.vue).
+- **UX móvil:** 370–412 px (370 es el mínimo soportado y lo vigila [responsive-370.ui.spec.js](e2e/ui/responsive-370.ui.spec.js)), tap targets ≥ 44 px (`.tap-target`), haptics, pull-to-refresh, swipe de mes, long-press, drag & drop. Onboarding: [TourOverlay.vue](components/onboarding/TourOverlay.vue).
 - **Temas:** [useTheme.js](composables/useTheme.js) — dark/light + acentos + daltónico + tamaño letra; script inline en head aplica clases pre-hidratación (no tocar sin entender el flicker que evita).
 - **Formato:** [useFormatters.js](composables/useFormatters.js)/[useCurrency.js](composables/useCurrency.js) respetan locale y `moneda_preferida`. Fechas de negocio en zona del usuario: [useFechaPeru.js](composables/useFechaPeru.js), [dateLocal.js](server/utils/dateLocal.js).
 - **Exportación:** Excel ([useExportExcel.js](composables/useExportExcel.js), exceljs), PDF (jspdf, `useDeudaPdf`/`useHistorialPdf`), CSV. Libs pesadas via `await import()` (chunks separados).

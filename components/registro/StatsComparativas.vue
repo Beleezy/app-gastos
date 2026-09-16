@@ -59,7 +59,7 @@
           <button
             v-for="m in mesesRecientes"
             :key="m.key"
-            class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+            class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
             :class="
               m.key === mesComparar
                 ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
@@ -67,7 +67,7 @@
             "
             @click="seleccionarMes(m)"
           >
-            {{ m.label }}
+            {{ m.labelCorto }}
           </button>
           <!-- Select para meses anteriores -->
           <select
@@ -385,7 +385,11 @@
 </template>
 
 <script setup>
-import { MESES } from '~/utils/constants'
+import { MESES, mesesAnteriores } from '~/utils/constants'
+
+// Botones de acceso rápido a meses anteriores. Dos es lo que cabe a 370 px
+// junto al botón del mes en curso y el desplegable del resto.
+const MESES_RAPIDOS = 2
 
 // `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
 // el token de Supabase, añade el cache-buster del perfil activo y traduce
@@ -405,30 +409,13 @@ const { currencySymbol, formatMonto } = useCurrency()
 const vista = ref('comparar')
 
 // ─── Lista de meses disponibles (últimos 24 meses, excluyendo el actual) ─
-const mesesDisponibles = computed(() => {
-  const lista = []
-  let m = props.mesActual
-  let a = props.anioActual
-  for (let i = 0; i < 24; i++) {
-    m--
-    if (m === 0) {
-      m = 12
-      a--
-    }
-    lista.push({
-      key: `${a}-${m}`,
-      mes: m,
-      anio: a,
-      label: `${MESES[m - 1].slice(0, 3)} ${a}`,
-    })
-  }
-  return lista
-})
+const mesesDisponibles = computed(() => mesesAnteriores(props.mesActual, props.anioActual))
 
-// Últimos 3 meses como botones rápidos
-const mesesRecientes = computed(() => mesesDisponibles.value.slice(0, 3))
+// Dos botones rápidos, no tres: a 370 px la fila no cabía y el desplegable
+// quedaba cortado contra el borde.
+const mesesRecientes = computed(() => mesesDisponibles.value.slice(0, MESES_RAPIDOS))
 // El resto como opciones del select
-const mesesAntiguos = computed(() => mesesDisponibles.value.slice(3))
+const mesesAntiguos = computed(() => mesesDisponibles.value.slice(MESES_RAPIDOS))
 
 // Mes comparar seleccionado (por defecto: mes anterior)
 const mesComparar = ref('')

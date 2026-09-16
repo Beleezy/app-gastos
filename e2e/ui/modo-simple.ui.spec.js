@@ -2,7 +2,8 @@
 //
 // Usa un usuario propio: activar el modo en el usuario compartido de la
 // suite cambiaría la navegación de los demás specs que corren en paralelo.
-// Además comprueba que NINGUNA de las dos versiones desborda a 380 px.
+// Además comprueba que NINGUNA de las dos versiones desborda a 370 px, que
+// es el ancho mínimo que soporta la app.
 
 import { test, expect } from '@playwright/test'
 
@@ -15,7 +16,7 @@ const USUARIO = {
 
 test.use({
   extraHTTPHeaders: USUARIO,
-  viewport: { width: 380, height: 780 },
+  viewport: { width: 370, height: 780 },
   storageState: {
     cookies: [],
     origins: [
@@ -41,7 +42,12 @@ async function sinDesborde(page, ruta) {
   expect(scroll, `${ruta} desborda: ${scroll} > ${cliente}`).toBeLessThanOrEqual(cliente)
 }
 
-test.describe('Modo simple a 380 px', () => {
+// En serie: los dos tests encienden y apagan el modo en LA MISMA cuenta, y
+// con `fullyParallel` se pisaban (uno lo activaba mientras el otro esperaba
+// verlo apagado).
+test.describe.configure({ mode: 'serial' })
+
+test.describe('Modo simple a 370 px', () => {
   test.afterAll(async ({ request }) => {
     await request.put('/api/configuraciones', { data: { modoSimple: false } })
   })
@@ -73,7 +79,7 @@ test.describe('Modo simple a 380 px', () => {
     await expect(page).toHaveURL(/\/registro/)
   })
 
-  test('desactivado: la versión normal tampoco desborda a 380 px', async ({ page, request }) => {
+  test('desactivado: la versión normal tampoco desborda a 370 px', async ({ page, request }) => {
     await request.put('/api/configuraciones', { data: { modoSimple: false } })
     await page.goto('/', { waitUntil: 'networkidle' })
     await expect(page.getByTestId('nav-tab-planificador')).toBeVisible({ timeout: 15000 })

@@ -18,7 +18,7 @@
         <button
           v-for="m in mesesRecientesGrafico"
           :key="m.key"
-          class="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
+          class="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border"
           :class="
             m.key === mesSeleccionado
               ? 'bg-theme-accent-bg text-theme-accent border-theme-accent'
@@ -26,7 +26,7 @@
           "
           @click="seleccionarMesGrafico(m.key)"
         >
-          {{ m.label }}
+          {{ m.labelCorto }}
         </button>
         <select
           class="px-2 py-1.5 rounded-lg text-xs font-medium border bg-theme-card text-theme-text-muted border-theme-border outline-none cursor-pointer appearance-none"
@@ -227,7 +227,11 @@
 import { getMetodoRegistroBadgeLabel } from '~/utils/metodoRegistro'
 
 // ─── Filtro de mes ──────────────────────────────────────────
-import { MESES } from '~/utils/constants'
+import { mesesAnteriores } from '~/utils/constants'
+
+// Botones de acceso rápido a meses anteriores. Dos es lo que cabe a 370 px
+// junto al botón del mes en curso y el desplegable del resto.
+const MESES_RAPIDOS = 2
 
 // `apiFetch` y no `$fetch`: el plugin plugins/fetch.js es el que inyecta
 // el token de Supabase, añade el cache-buster del perfil activo y traduce
@@ -253,28 +257,12 @@ const mesSeleccionado = ref('actual') // 'actual' o 'YYYY-M'
 const isLoadingMes = ref(false)
 const gastosOtroMes = ref([])
 
-const mesesDisponiblesGrafico = computed(() => {
-  const lista = []
-  let m = props.mesActual
-  let a = props.anioActual
-  for (let i = 0; i < 24; i++) {
-    m--
-    if (m === 0) {
-      m = 12
-      a--
-    }
-    lista.push({
-      key: `${a}-${m}`,
-      mes: m,
-      anio: a,
-      label: `${MESES[m - 1].slice(0, 3)} ${a}`,
-    })
-  }
-  return lista
-})
+const mesesDisponiblesGrafico = computed(() => mesesAnteriores(props.mesActual, props.anioActual))
 
-const mesesRecientesGrafico = computed(() => mesesDisponiblesGrafico.value.slice(0, 3))
-const mesesAntiguosGrafico = computed(() => mesesDisponiblesGrafico.value.slice(3))
+// Dos botones, no tres: a 370 px «Actual + 3 meses + desplegable» son cinco
+// controles en una fila y el texto de los meses se partía en dos líneas.
+const mesesRecientesGrafico = computed(() => mesesDisponiblesGrafico.value.slice(0, MESES_RAPIDOS))
+const mesesAntiguosGrafico = computed(() => mesesDisponiblesGrafico.value.slice(MESES_RAPIDOS))
 
 const mesGraficoEsAntiguo = computed(() =>
   mesesAntiguosGrafico.value.some((m) => m.key === mesSeleccionado.value),
