@@ -15,6 +15,7 @@
 // en una línea en 412 px y se parte en 370 px es exactamente el síntoma.
 
 import { test, expect } from '@playwright/test'
+import { crearGastoPlanificado, cleanupGastosPlanificados } from '../helpers/db.js'
 
 const ANCHO = 370
 
@@ -124,14 +125,34 @@ test('el selector de mes del gráfico de categorías cabe en una fila', async ({
 
 // Los formularios y hojas viven fuera del flujo de la página, así que un
 // desborde suyo no aparece al medir la ruta: hay que abrirlos.
+//
+// `preparar` existe porque no todos los disparadores están siempre en
+// pantalla: el de borrar un planificado cuelga de una fila, y en una base
+// recién sembrada el mes en curso no tiene ninguna. Sin eso el test no
+// fallaba: no encontraba el botón.
 const OVERLAYS = [
-  ['/registro', 'btn-registro-manual', 'formulario de gasto manual'],
-  ['/deudas', 'btn-fusionar-duplicados', 'hoja de fusionar duplicados'],
-  ['/planificador', 'btn-eliminar-planificado', 'confirmación de borrado'],
+  { ruta: '/registro', testid: 'btn-registro-manual', nombre: 'formulario de gasto manual' },
+  { ruta: '/deudas', testid: 'btn-fusionar-duplicados', nombre: 'hoja de fusionar duplicados' },
+  {
+    ruta: '/planificador',
+    testid: 'btn-eliminar-planificado',
+    nombre: 'confirmación de borrado',
+    preparar: (request) => crearGastoPlanificado(request, 'Ancho 370'),
+  },
 ]
 
-for (const [ruta, testid, nombre] of OVERLAYS) {
-  test(`${nombre} cabe en ${ANCHO} px`, async ({ page }) => {
+const creadosParaOverlays = []
+
+test.afterAll(async ({ request }) => {
+  await cleanupGastosPlanificados(request, creadosParaOverlays.splice(0))
+})
+
+for (const { ruta, testid, nombre, preparar } of OVERLAYS) {
+  test(`${nombre} cabe en ${ANCHO} px`, async ({ page, request }) => {
+    const creado = preparar ? await preparar(request) : null
+    if (preparar) test.skip(!creado, `No se pudo preparar ${nombre}`)
+    if (creado) creadosParaOverlays.push(creado)
+
     await page.goto(ruta, { waitUntil: 'networkidle' })
     const disparador = page.getByTestId(testid).first()
     await expect(disparador).toBeVisible({ timeout: 20000 })

@@ -11,6 +11,7 @@
 // desplazarse después de cancelar?
 
 import { test, expect } from '../fixtures/index.js'
+import { crearGastoPlanificado, cleanupGastosPlanificados } from '../helpers/db.js'
 
 const estadoBody = (page) =>
   page.evaluate(() => ({
@@ -21,12 +22,39 @@ const estadoBody = (page) =>
 async function haceScroll(page) {
   await page.evaluate(() => window.scrollTo(0, 0))
   await page.waitForTimeout(150)
+  // Sin contenido que sobre, `scrollY` se queda en 0 aunque la página esté
+  // perfectamente usable y la medición no diría nada. Se comprueba aparte
+  // para que un cambio de layout falle explicando por qué.
+  const desborda = await page.evaluate(
+    () => document.documentElement.scrollHeight > window.innerHeight + 40,
+  )
+  expect(desborda, 'la página no desborda: el scroll no mide nada').toBe(true)
   await page.mouse.wheel(0, 500)
   await page.waitForTimeout(350)
   return page.evaluate(() => window.scrollY)
 }
 
 test.describe('Planificador — cancelar un borrado', () => {
+  // Viewport propio y bajo: el síntoma es «no se puede hacer scroll», así que
+  // la página tiene que desbordar. Con la base recién sembrada el planificador
+  // trae una sola fila y a 900 px de alto no desborda — el test medía 0 y
+  // fallaba por falta de contenido, no por el bug. El bloqueo no depende del
+  // tamaño de pantalla; la altura sí decide si es medible.
+  test.use({ viewport: { width: 390, height: 560 } })
+
+  let creados = []
+
+  test.beforeEach(async ({ request }) => {
+    const id = await crearGastoPlanificado(request, 'Borrar UI')
+    test.skip(!id, 'No se pudo crear un gasto planificado')
+    creados.push(id)
+  })
+
+  test.afterAll(async ({ request }) => {
+    await cleanupGastosPlanificados(request, creados)
+    creados = []
+  })
+
   test('tras cancelar, la página sigue usándose', async ({ page }) => {
     await page.goto('/planificador', { waitUntil: 'networkidle' })
 
