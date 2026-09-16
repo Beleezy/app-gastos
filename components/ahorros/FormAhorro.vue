@@ -38,7 +38,7 @@
       <div class="flex items-center justify-between mb-1.5">
         <label class="text-sm font-medium text-theme-text-muted">Medio de ahorro</label>
         <button
-          class="text-[0.6875rem] text-theme-accent font-medium hover:underline"
+          class="inline-flex min-h-[2.75rem] items-center text-[0.6875rem] text-theme-accent font-medium hover:underline"
           @click="$emit('gestionar-medios')"
         >
           Gestionar medios

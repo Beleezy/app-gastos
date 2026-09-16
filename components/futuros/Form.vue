@@ -110,15 +110,18 @@
       </div>
 
       <div v-if="!modoEdicion" class="space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
+        <!-- El texto de la izquierda crece y el botón encoge: sin `min-w-0`
+             en uno y `shrink-0` en el otro, a 370 px «+ Detalle» se partía en
+             dos líneas. -->
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0 flex-1">
             <p class="text-sm font-medium text-theme-text">Detalles</p>
             <p class="text-xs text-theme-text-sec">
               Toca un detalle para expandirlo y editar sus opciones.
             </p>
           </div>
           <button
-            class="rounded-full bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-400 transition-colors hover:bg-violet-500/20"
+            class="inline-flex min-h-[2.75rem] shrink-0 items-center whitespace-nowrap rounded-full bg-violet-500/10 px-3 py-1.5 text-xs font-medium text-violet-400 transition-colors hover:bg-violet-500/20"
             @click="agregarDetalle"
           >
             + Detalle

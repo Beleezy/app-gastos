@@ -1,6 +1,7 @@
 <template>
   <div
     class="relative bg-gradient-to-br from-theme-card/80 to-theme-card/60 rounded-2xl border border-theme-border px-4 py-3.5 overflow-hidden"
+    data-testid="resumen-mes-registro"
   >
     <div
       class="absolute -top-10 -right-10 w-36 h-36 rounded-full blur-3xl pointer-events-none transition-colors duration-500"
@@ -22,15 +23,19 @@
           Gastado
         </p>
         <p
-          class="text-3xl font-bold leading-none tabular-nums"
-          :class="excedido ? 'text-red-400' : 'text-gradient-blue'"
+          class="font-bold leading-none tabular-nums"
+          :class="[excedido ? 'text-red-400' : 'text-gradient-blue', tamanoMonto]"
+          data-testid="resumen-mes-total"
         >
-          {{ formatMonto(totalMes) }}
+          {{ montoTexto }}
         </p>
       </div>
 
       <!-- Lado derecho: meta / % / restante -->
-      <div class="flex flex-col items-end justify-start text-right shrink-0 pt-0.5">
+      <div
+        class="flex flex-col items-end justify-start text-right shrink-0 pt-0.5"
+        data-testid="resumen-mes-meta"
+      >
         <p v-if="presupuesto > 0" class="text-[0.7rem] text-theme-text-sec leading-tight">
           de {{ formatMonto(presupuesto) }}
         </p>
@@ -333,6 +338,22 @@ const calc = computed(() =>
     diasMes: props.diasDelMes,
   }),
 )
+
+// El importe manda sobre su tamaño. A 370 px un total de siete cifras no
+// cabía junto a la columna de la derecha (meta, % y restante) y, como no
+// tiene por dónde partirse ni se recorta, se dibujaba ENCIMA de ella: dos
+// números superpuestos, ilegibles los dos. No desbordaba la página, así que
+// ninguna medida de ancho lo veía. Encoger la fuente conserva todos los
+// dígitos; truncar perdería justo el dato que se viene a mirar.
+const montoTexto = computed(() => formatMonto(props.totalMes))
+
+const tamanoMonto = computed(() => {
+  const n = montoTexto.value.length
+  if (n >= 13) return 'text-lg'
+  if (n >= 11) return 'text-xl'
+  if (n >= 9) return 'text-2xl'
+  return 'text-3xl'
+})
 
 const porcentaje = computed(() => calc.value.porcentaje)
 const saldo = computed(() => props.presupuesto - props.totalMes)

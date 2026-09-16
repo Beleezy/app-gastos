@@ -8,9 +8,12 @@
         : 'bg-theme-card/90 border-theme-border text-theme-text-sec'
     "
   >
+    <!-- min-h de 44 px: es el control que abre el cambio de perfil y sale en
+         todas las páginas, así que es el que más se toca por error. Con py-2
+         medía 32 px de alto. -->
     <button
       type="button"
-      class="w-full flex items-center gap-2 px-4 py-2 text-xs"
+      class="w-full flex min-h-[2.75rem] items-center gap-2 px-4 py-2 text-xs"
       :aria-expanded="abierto"
       @click="abierto = !abierto"
     >

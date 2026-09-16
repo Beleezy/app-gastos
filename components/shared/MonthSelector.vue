@@ -22,8 +22,10 @@
     </button>
 
     <div class="text-center">
+      <!-- El mes es el control central de casi todas las pantallas; con solo
+           la altura de su línea de texto quedaba en 28-30 px. -->
       <button
-        class="text-lg font-bold text-theme-text hover:text-theme-accent transition-colors"
+        class="inline-flex min-h-[2.75rem] items-center justify-center px-2 text-lg font-bold text-theme-text hover:text-theme-accent transition-colors"
         data-testid="mes-actual"
         :disabled="esActual"
         @click="$emit('goToCurrent')"

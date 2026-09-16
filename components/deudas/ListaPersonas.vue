@@ -89,14 +89,16 @@
 
     <DeudasFusionDuplicados v-model="showFusion" @fusionado="onFusionado" />
 
-    <!-- Filtros de estado (pr-4: el último chip no queda cortado al borde) -->
-    <div
-      class="flex items-center gap-2 mb-4 overflow-x-auto pb-1 pr-8 scrollbar-hide scroll-fade-r"
-    >
+    <!-- Filtros de estado. Envuelven, no se desplazan: a 370 px los cuatro
+         chips pasaban de largo 37 px y «Saldados» quedaba cortado contra el
+         borde. Un carrusel al que le sobra tan poco no parece un carrusel —
+         parece un fallo de dibujo, y nadie lo desplaza para descubrir el
+         filtro que falta. Envolviendo se ven los cuatro siempre. -->
+    <div class="flex flex-wrap items-center gap-1.5 mb-4">
       <button
         v-for="f in filtrosEstado"
         :key="f.value"
-        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
+        class="shrink-0 px-2.5 py-1.5 min-h-[2.25rem] rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
         :class="[
           filtroEstado === f.value
             ? f.value === 'vencidas'

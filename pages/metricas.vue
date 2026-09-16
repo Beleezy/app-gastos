@@ -181,7 +181,7 @@
           <button
             v-if="mesesVacios.length && !mostrarVacios"
             type="button"
-            class="w-full px-3 py-2.5 text-left text-[0.6875rem] text-theme-text-muted hover:text-theme-text-sec transition-colors"
+            class="flex min-h-[2.75rem] w-full items-center px-3 py-2.5 text-left text-[0.6875rem] text-theme-text-muted hover:text-theme-text-sec transition-colors"
             @click="mostrarVacios = true"
           >
             {{ mesesVacios.length }} mes{{ mesesVacios.length === 1 ? '' : 'es' }} sin actividad —

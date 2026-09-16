@@ -139,9 +139,13 @@
           @click="elegirCategoria(cat.id)"
         >
           <span class="text-base">{{ cat.icono || '📦' }}</span>
-          <!-- 2 líneas sin guiones: "Entreteni-miento" se leía mal con texto grande -->
+          <!-- 2 líneas sin guiones: "Entreteni-miento" se leía mal con texto
+               grande. El tamaño es el mismo que en las otras tres rejillas de
+               categoría (planificado, pago y ahorro): esta se había quedado en
+               `text-xs`, y ese píxel de más partía «Entretenimiento» a mitad
+               de palabra —«Entretenimient / o»— en una celda de 370 px. -->
           <span
-            class="line-clamp-2 break-words hyphens-none leading-tight w-full text-center"
+            class="text-[0.6875rem] line-clamp-2 break-words hyphens-none leading-tight w-full text-center"
             :class="form.categoriaId === cat.id ? 'text-theme-accent' : 'text-theme-text-muted'"
             >{{ cat.nombre }}</span
           >

@@ -109,7 +109,7 @@
       <button
         data-testid="futuros-expandir"
         :aria-expanded="expandido"
-        class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] text-theme-text-sec transition-colors hover:text-theme-text"
+        class="inline-flex min-h-[2.75rem] flex-1 items-center justify-center gap-1.5 rounded-full bg-theme-input px-3 py-1.5 text-[0.6875rem] text-theme-text-sec transition-colors hover:text-theme-text"
         @click="$emit('toggle-expandir')"
       >
         <svg
