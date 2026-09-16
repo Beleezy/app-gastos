@@ -564,10 +564,7 @@
       v-if="showModalRecurrente && gastoParaEliminar"
       class="fixed inset-0 z-50 flex items-center justify-center px-6"
     >
-      <div
-        class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm"
-        @click="((gastoParaEliminar = null), (showModalRecurrente = false))"
-      ></div>
+      <div class="absolute inset-0 bg-theme-bg/80 backdrop-blur-sm" @click="cancelarEliminar"></div>
       <div
         class="relative bg-theme-card rounded-2xl p-5 w-full max-w-sm border border-theme-border"
       >
@@ -597,7 +594,7 @@
           </button>
           <button
             class="w-full py-2.5 rounded-xl text-theme-text-sec text-sm font-medium hover:text-theme-text-sec transition-colors"
-            @click="((gastoParaEliminar = null), (showModalRecurrente = false))"
+            @click="cancelarEliminar"
           >
             Cancelar
           </button>
@@ -816,25 +813,17 @@ function formatFecha(fecha) {
   return `${dia} de ${meses[d.getMonth()]}, ${d.getFullYear()}`
 }
 
-const gastoParaEliminar = ref(null)
-const showConfirmSimple = ref(false)
-const showModalRecurrente = ref(false)
-const isEliminarOpen = computed(() => gastoParaEliminar.value !== null)
-useOverlayBack(isEliminarOpen, () => {
-  gastoParaEliminar.value = null
-  showConfirmSimple.value = false
-  showModalRecurrente.value = false
-})
-
-// Punto de entrada: siempre pide confirmación
-function pedirConfirmarEliminar(gasto) {
-  gastoParaEliminar.value = gasto
-  if (gasto.esRecurrente && gasto.recurrenteGrupoId) {
-    showModalRecurrente.value = true
-  } else {
-    showConfirmSimple.value = true
-  }
-}
+// El flujo de borrado (diálogo simple + modal de recurrente) vive en el
+// composable: los tres sitios que borran planificados lo compartían copiado,
+// y los tres arrastraban el mismo fallo al cancelar.
+const {
+  gastoParaEliminar,
+  showConfirmSimple,
+  showModalRecurrente,
+  pedirConfirmarEliminar,
+  cancelarEliminar,
+  tomarGastoYCerrar,
+} = useConfirmarEliminarPlanificado()
 
 // Para compatibilidad con swipe (mantiene el comportamiento anterior)
 function eliminarGasto(gasto) {
@@ -842,10 +831,8 @@ function eliminarGasto(gasto) {
 }
 
 function ejecutarEliminarSimple() {
-  const gasto = gastoParaEliminar.value
+  const gasto = tomarGastoYCerrar()
   if (!gasto) return
-  showConfirmSimple.value = false
-  gastoParaEliminar.value = null
   const handle = softDeleteGastoPlaneado(gasto.id, 5000)
   if (!handle) return
   toastShow({
@@ -862,10 +849,8 @@ function ejecutarEliminarSimple() {
 }
 
 async function confirmarEliminar(incluirFuturos) {
-  const gasto = gastoParaEliminar.value
+  const gasto = tomarGastoYCerrar()
   if (!gasto) return
-  showModalRecurrente.value = false
-  gastoParaEliminar.value = null
   await deleteGastoPlaneado(gasto.id, incluirFuturos)
 }
 

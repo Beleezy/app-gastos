@@ -68,6 +68,37 @@ export async function primeraCategoriaId(request) {
 }
 
 /**
+ * Crea un gasto planificado en el plan del MES EN CURSO y devuelve su id
+ * (null si no se pudo). `db:seed:test` siembra planes de febrero a abril, así
+ * que en una base recién creada —cada job de CI levanta la suya— el mes actual
+ * está vacío: un test que necesite una fila del planificador tiene que
+ * crearla, no confiar en la semilla. En local pasaba por accidente, porque la
+ * base arrastraba datos de corridas anteriores.
+ */
+export async function crearGastoPlanificado(request, concepto = 'E2E planificado') {
+  const categoriaId = await primeraCategoriaId(request)
+  if (!categoriaId) return null
+  const hoy = fechaHoyLima()
+  const [anio, mes] = hoy.split('-')
+  // GET /api/planificador crea el plan del mes si no existe.
+  const plan = await request.get(`/api/planificador?mes=${Number(mes)}&anio=${anio}`)
+  if (!plan.ok()) return null
+  const planMensualId = (await plan.json())?.plan?.id
+  if (!planMensualId) return null
+  const r = await request.post('/api/planificador/gastos', {
+    data: {
+      planMensualId,
+      categoriaId,
+      concepto: `${concepto} ${Date.now()}`,
+      montoEstimado: 12,
+      fechaProbablePago: hoy,
+    },
+  })
+  if (!r.ok()) return null
+  return (await r.json())?.id || null
+}
+
+/**
  * Fecha "hoy" en Lima/PE (UTC-5) en formato YYYY-MM-DD. Equivalente al
  * `fechaHoy()` que usa el frontend (useFechaPeru) — usar para que los gastos
  * creados via API en tests coincidan con la fecha que renderea el historial.

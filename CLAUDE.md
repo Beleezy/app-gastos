@@ -306,6 +306,41 @@ helper que la haga.
   lo verifica a 380 px con un usuario propio (activarlo en el usuario
   compartido cambiaría la navegación de los demás specs en paralelo) y
   comprueba que ninguna de las dos versiones desborda.
+- **El ref que alimenta `useOverlayBack` tiene que ser el que resetea el
+  cierre del overlay.** Los tres sitios que borran un gasto planificado
+  (lista, calendario y gráfico del planificador) registraban el overlay
+  sobre `gastoParaEliminar !== null` y ADEMÁS renderizaban
+  `SharedConfirmDialog`, que ya gestiona su propio botón atrás y su propio
+  bloqueo de scroll. Cancelar apagaba el booleano del diálogo pero no el
+  gasto elegido: el overlay del padre no se liberaba nunca, el contador de
+  [useModalLayer.js](composables/useModalLayer.js) no bajaba a cero y el
+  `position: fixed` que ese contador pone en el `body` se quedaba puesto —
+  tras cancelar un borrado la página ya no hacía scroll ni respondía. El
+  arreglo no es acordarse de limpiar, es que no haya dos verdades que
+  puedan discrepar:
+  [useConfirmarEliminarPlanificado.js](composables/useConfirmarEliminarPlanificado.js)
+  guarda un solo `modo` ('simple' | 'recurrente' | null) y expone los dos
+  booleanos como computados CON SETTER, así que apagar cualquiera cierra
+  todo. Un `watch` sobre los dos booleanos no sirve: si se abre y se cierra
+  en el mismo tick, el valor vuelve al de partida y Vue no lo considera un
+  cambio (lo fija `tests/confirmarEliminarPlanificado.test.js`). Y un
+  diálogo que ya se gestiona solo NO lleva un segundo `useOverlayBack` del
+  padre.
+- **370 px es el ancho mínimo, y el desborde no es el único síntoma.** Un
+  desborde horizontal se ve enseguida; lo que no se ve midiendo el
+  documento es una fila de controles que no cabe, porque flexbox los
+  encoge y el texto salta a dos líneas sin desbordar nada. Así estaba el
+  selector de mes del gráfico de categorías: «Actual + 3 meses +
+  desplegable» eran cinco controles y los tres meses se partían. Ahora son
+  dos meses (`MESES_RAPIDOS`) con etiqueta corta —el año solo cuando no es
+  el que se está viendo, `mesesAnteriores` en
+  [constants.js](utils/constants.js)— y la barra de pestañas del
+  planificador esconde los iconos por debajo de 400 px para que su cuarta
+  sección quepa entera. [responsive-370.ui.spec.js](e2e/ui/responsive-370.ui.spec.js)
+  fija las dos cosas en todas las rutas y en los overlays. Para contar
+  líneas hay que usar los rects de un `Range` sobre el contenido: dividir
+  alto entre `line-height` da falsos positivos con los emoji, que dibujan
+  una caja más alta que el texto.
 - **`npm run lint` corre con `--max-warnings=0`.** Había cien warnings
   acumulados (imports muertos, `catch (e)` sin usar, props sin default) y
   entre ellos se escondían dos que sí importaban: un `lastError` que se
@@ -329,7 +364,7 @@ helper que la haga.
 - **Fetch autenticado:** siempre `useApiFetch()` (plugin [fetch.js](plugins/fetch.js) inyecta token Supabase).
 - **UI compartida:** `components/shared/` — `BaseBottomSheet`, `ConfirmDialog`, `MonthSelector`, `SkeletonLoader`, `ToastNotification`, `VirtualList`, `Money`, `EmptyState`, `Chip`, FABs. Modales con focus trap + `aria-modal` integrados; botón atrás cierra modal ([useModalLayer.js](composables/useModalLayer.js) + [useModalBack.js](composables/useModalBack.js)).
 - **Offline/PWA:** cola de sincronización ([useSyncQueue.js](composables/useSyncQueue.js) + [SyncQueueBadge.vue](components/layout/SyncQueueBadge.vue)), banner offline, update prompt opt-in ([usePwaUpdate.js](composables/usePwaUpdate.js)); runtime caching SWR/NetworkFirst en `nuxt.config.ts`.
-- **UX móvil:** 360–412 px, tap targets ≥ 44 px (`.tap-target`), haptics, pull-to-refresh, swipe de mes, long-press, drag & drop. Onboarding: [TourOverlay.vue](components/onboarding/TourOverlay.vue).
+- **UX móvil:** 370–412 px (370 es el mínimo soportado y lo vigila [responsive-370.ui.spec.js](e2e/ui/responsive-370.ui.spec.js)), tap targets ≥ 44 px (`.tap-target`), haptics, pull-to-refresh, swipe de mes, long-press, drag & drop. Onboarding: [TourOverlay.vue](components/onboarding/TourOverlay.vue).
 - **Temas:** [useTheme.js](composables/useTheme.js) — dark/light + acentos + daltónico + tamaño letra; script inline en head aplica clases pre-hidratación (no tocar sin entender el flicker que evita).
 - **Formato:** [useFormatters.js](composables/useFormatters.js)/[useCurrency.js](composables/useCurrency.js) respetan locale y `moneda_preferida`. Fechas de negocio en zona del usuario: [useFechaPeru.js](composables/useFechaPeru.js), [dateLocal.js](server/utils/dateLocal.js).
 - **Exportación:** Excel ([useExportExcel.js](composables/useExportExcel.js), exceljs), PDF (jspdf, `useDeudaPdf`/`useHistorialPdf`), CSV. Libs pesadas via `await import()` (chunks separados).
@@ -348,9 +383,10 @@ Al tocar `overrides`, revalidar con `npm ci` + `npm run build` + la suite E2E co
 ## Testing y CI
 
 - Unit: `npm test` (Vitest 5, `tests/*.test.js` — lógica pura extraída de composables/utils). Lint: `npm run lint` falla ante cualquier warning.
-- E2E: Playwright (`e2e/`) con page objects; proyectos `smoke | api | mobile | desktop | visual`; auth bypass con `DEV_AUTH_BYPASS=1` + token; Postgres efímera en CI. `e2e.yml` fija un `CRON_SECRET` de prueba para que [cron.api.spec.js](e2e/api/cron.api.spec.js) ejecute los cron de verdad (purgar papelera hacía DELETE físico y llevaba meses reventando sin que nadie lo llamara). Los ids que no son uuid y los cuerpos sin schema tienen su tabla en [seguridad.api.spec.js](e2e/api/seguridad.api.spec.js).
+- E2E: Playwright (`e2e/`) con page objects; proyectos `smoke | api | mobile | desktop | visual`; auth bypass con `DEV_AUTH_BYPASS=1` + token; Postgres efímera en CI. **La semilla no cubre el mes en curso**: `db:seed:test` crea planes de febrero a abril, así que en la base de CI —nueva en cada job— el planificador del mes actual está vacío y los botones que cuelgan de una fila no existen. Un test que necesite una fila la crea (`crearGastoPlanificado` en [helpers/db.js](e2e/helpers/db.js)) y la limpia. En local el mismo test pasa por accidente, porque la base arrastra datos de corridas anteriores — el síntoma es un `getByTestId` que solo falla en CI. `e2e.yml` fija un `CRON_SECRET` de prueba para que [cron.api.spec.js](e2e/api/cron.api.spec.js) ejecute los cron de verdad (purgar papelera hacía DELETE físico y llevaba meses reventando sin que nadie lo llamara). Los ids que no son uuid y los cuerpos sin schema tienen su tabla en [seguridad.api.spec.js](e2e/api/seguridad.api.spec.js).
 - Workflows: `ci.yml` (unit + lint + build), `e2e.yml` (PRs y main), `e2e-visual-baseline.yml`, `migrate.yml` (migraciones de producción en cada push a `main`), `db-backup.yml` (dump semanal cifrado). Los dos últimos fallan en rojo si les falta su secret: un backup o una migración que no ocurre no puede reportarse en verde, y declaran `permissions: contents: read` porque llevan la credencial de la BD y no necesitan nada del repositorio.
 - El job `visual` de `e2e.yml` se salta solo mientras no existan baselines en `e2e/visual/<spec>.js-snapshots/`. Para generarlos, `e2e-visual-baseline.yml` los crea en el runner y **empuja una rama** con los PNG, dejando el enlace para abrir el PR en el resumen del run: a mano con `workflow_dispatch`, o **empujando a la rama `ci/generar-baselines-visuales`**. No abre el PR él mismo porque eso depende de _Settings → Actions → «Allow GitHub Actions to create and approve pull requests»_, que en este repo está desactivado; empujar una rama solo necesita `contents: write`. Ese disparador por push existe porque `workflow_dispatch` devuelve 403 a un token de GitHub App sin permiso sobre Actions, y sin él los baselines no se podían arrancar. Los PNG tienen que generarse en el runner: el renderizado de fuentes de una máquina local no coincide y el job fallaría siempre.
+- **El `visual` no corre en los PRs, solo en push a `main`** (`if: github.event_name != 'pull_request'`), así que un PR con cambios de UI se mergea en verde y los baselines revientan DESPUÉS, en main. Al tocar layout hay que refrescarlos ANTES de mergear: empujar la rama de trabajo a `ci/generar-baselines-visuales` (el workflow genera contra la rama empujada, no contra main) y llevarse los PNG a la rama del PR. Comparar en local no sirve de árbitro: los snapshots retratan además los DATOS, así que una base con filas acumuladas de corridas anteriores da diferencias del 6–7 % que no son del cambio.
 
 ## Estructura
 

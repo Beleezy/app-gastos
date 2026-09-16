@@ -27,6 +27,14 @@ on:
   # porque workflow_dispatch no está al alcance de todos los actores —un token
   # de GitHub App sin permiso sobre Actions recibe 403— y sin baselines el job
   # `visual` de e2e.yml se salta para siempre, que es lo que llevaba pasando.
+  #
+  # Se genera contra la rama EMPUJADA, no contra main: el caso de uso de este
+  # workflow es refrescar los baselines después de tocar la UI, y esos cambios
+  # todavía no están en main. Cuando el checkout era fijo a main, la única vía
+  # al alcance de un token sin permiso sobre Actions producía los baselines de
+  # la UI vieja — verdes al generarlos e inútiles al mergear. Para refrescarlos
+  # desde una rama de trabajo: empujar esa rama a
+  # `ci/generar-baselines-visuales` y llevarse los PNG resultantes.
   push:
     branches: ['ci/generar-baselines-visuales']
 
@@ -71,7 +79,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.branch || 'main' }}
+          # Con workflow_dispatch manda el input (default main); por push,
+          # la rama empujada.
+          ref: ${{ inputs.branch || github.ref_name }}
           fetch-depth: 0
 
       - name: Setup Node
@@ -152,7 +162,7 @@ jobs:
         if: steps.changes.outputs.any == 'true'
         env:
           RAMA: chore/visual-baselines-${{ github.run_id }}
-          BASE: ${{ inputs.branch || 'main' }}
+          BASE: ${{ inputs.branch || github.ref_name }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'

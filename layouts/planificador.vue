@@ -37,7 +37,7 @@
           >
             <NuxtLink
               to="/planificador?seccion=mensual"
-              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
               :class="
                 activeTab === 'mensual'
                   ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
@@ -46,7 +46,7 @@
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-3.5 h-3.5 shrink-0"
+                class="hidden min-[400px]:block w-3.5 h-3.5 shrink-0"
                 viewBox="0 0 24 24"
                 fill="currentColor"
               >
@@ -58,7 +58,7 @@
             </NuxtLink>
             <NuxtLink
               to="/futuros"
-              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
               :class="
                 activeTab === 'futuros'
                   ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
@@ -67,7 +67,7 @@
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-3.5 h-3.5 shrink-0"
+                class="hidden min-[400px]:block w-3.5 h-3.5 shrink-0"
                 :class="activeTab === 'futuros' ? '' : 'text-violet-400'"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -81,7 +81,7 @@
             </NuxtLink>
             <NuxtLink
               to="/ahorros"
-              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
               :class="
                 activeTab === 'ahorros'
                   ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
@@ -90,7 +90,7 @@
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-3.5 h-3.5 shrink-0"
+                class="hidden min-[400px]:block w-3.5 h-3.5 shrink-0"
                 :class="activeTab === 'ahorros' ? '' : 'text-emerald-400'"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -108,7 +108,7 @@
             <NuxtLink
               to="/compartido"
               data-testid="tab-compartido"
-              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
+              class="flex flex-1 justify-center items-center gap-1.5 rounded-xl px-1.5 min-[400px]:px-2 py-2 text-xs font-semibold transition-all whitespace-nowrap shrink-0"
               :class="
                 activeTab === 'compartido'
                   ? 'bg-theme-accent text-theme-on-accent shadow-md shadow-theme-accent/20'
@@ -117,7 +117,7 @@
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                class="w-3.5 h-3.5 shrink-0"
+                class="hidden min-[400px]:block w-3.5 h-3.5 shrink-0"
                 :class="activeTab === 'compartido' ? '' : 'text-sky-400'"
                 fill="none"
                 viewBox="0 0 24 24"

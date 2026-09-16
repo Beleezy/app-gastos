@@ -585,34 +585,21 @@ async function marcarPagadoRapido(gasto) {
   }
 }
 
-const gastoParaEliminar = ref(null)
-const showConfirmSimple = ref(false)
-const showModalRecurrente = ref(false)
-const isEliminarOpen = computed(() => gastoParaEliminar.value !== null)
-useOverlayBack(isEliminarOpen, () => {
-  cancelarEliminar()
-})
-
-function cancelarEliminar() {
-  gastoParaEliminar.value = null
-  showConfirmSimple.value = false
-  showModalRecurrente.value = false
-}
-
-function pedirConfirmarEliminar(gasto) {
-  gastoParaEliminar.value = gasto
-  if (gasto.esRecurrente && gasto.recurrenteGrupoId) {
-    showModalRecurrente.value = true
-  } else {
-    showConfirmSimple.value = true
-  }
-}
+// El flujo de borrado (diálogo simple + modal de recurrente) vive en el
+// composable: los tres sitios que borran planificados lo compartían copiado,
+// y los tres arrastraban el mismo fallo al cancelar.
+const {
+  gastoParaEliminar,
+  showConfirmSimple,
+  showModalRecurrente,
+  pedirConfirmarEliminar,
+  cancelarEliminar,
+  tomarGastoYCerrar,
+} = useConfirmarEliminarPlanificado()
 
 function ejecutarEliminarSimple() {
-  const gasto = gastoParaEliminar.value
+  const gasto = tomarGastoYCerrar()
   if (!gasto) return
-  showConfirmSimple.value = false
-  gastoParaEliminar.value = null
   const handle = softDeleteGastoPlaneado(gasto.id, 5000)
   if (!handle) return
   toastShow({
@@ -629,10 +616,8 @@ function ejecutarEliminarSimple() {
 }
 
 async function confirmarEliminarRecurrente(incluirFuturos) {
-  const gasto = gastoParaEliminar.value
+  const gasto = tomarGastoYCerrar()
   if (!gasto) return
-  showModalRecurrente.value = false
-  gastoParaEliminar.value = null
   await deleteGastoPlaneado(gasto.id, incluirFuturos)
 }
 </script>
